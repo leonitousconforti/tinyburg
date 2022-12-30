@@ -1,0 +1,115 @@
+{
+    "name": "Node.js & TypeScript",
+    "image": "mcr.microsoft.com/devcontainers/typescript-node:16-bullseye",
+
+    // Features to add to the dev container. More info: https://containers.dev/implementors/features.
+    "features": {
+        "ghcr.io/devcontainers/features/docker-from-docker:1": {},
+        "ghcr.io/devcontainers/features/git:1": {},
+        "ghcr.io/devcontainers/features/git-lfs:1": {},
+        "ghcr.io/devcontainers/features/github-cli:1": {},
+        "ghcr.io/devcontainers-contrib/features/digitalocean-cli:1": {},
+        "ghcr.io/devcontainers/features/python:1": {},
+        "ghcr.io/devcontainers/features/go:1": {}
+    },
+
+    // Configure tool-specific properties.
+    "customizations": {
+        // Configure properties specific to VS Code.
+        "vscode": {
+            // Add the IDs of extensions you want installed when the container is created.
+            "extensions": [
+                "dbaeumer.vscode-eslint",
+                "kisstkondoros.vscode-codemetrics",
+                "visualstudioexptteam.vscodeintellicode",
+                "esbenp.prettier-vscode",
+                "editorconfig.editorconfig",
+                "streetsidesoftware.code-spell-checker",
+                "peterj.proto",
+                "ms-azuretools.vscode-docker",
+                "VisualStudioExptTeam.vscodeintellicode",
+                "icsharpcode.ilspy-vscode",
+                "shd101wyy.markdown-preview-enhanced",
+                "ms-python.python",
+                "stxr.iconfont-preview",
+                "redhat.ansible"
+            ],
+            "settings": {
+                "editor.defaultFormatter": "esbenp.prettier-vscode",
+                "editor.bracketPairColorization.enabled": true,
+                "codemetrics.basics.DecorationModeEnabled": false,
+                "codemetrics.basics.OverviewRulerModeEnabled": false,
+                "cSpell.enabled": true,
+                "editor.formatOnPaste": true,
+                "editor.formatOnSave": true,
+                "[typescript]": {
+                    "editor.defaultFormatter": "esbenp.prettier-vscode"
+                },
+                "[json]": {
+                    "editor.defaultFormatter": "esbenp.prettier-vscode"
+                },
+                "[javascript]": {
+                    "editor.defaultFormatter": "esbenp.prettier-vscode"
+                },
+                "[jsonc]": {
+                    "editor.defaultFormatter": "esbenp.prettier-vscode"
+                },
+                "files.associations": { "*.json": "jsonc", "package.json": "json" },
+                "cSpell.enableFiletypes": [
+                    "dockercompose",
+                    "dockerfile",
+                    "editorconfig",
+                    "markdown-math",
+                    "markdown_latex_combined",
+                    "shellscript"
+                ],
+                "cSpell.words": [
+                    "adbkey",
+                    "anims",
+                    "authproxy",
+                    "bitbook",
+                    "Bitizen",
+                    "bitizens",
+                    "buxcost",
+                    "Conforti",
+                    "corlib",
+                    "emittery",
+                    "esbuild",
+                    "fastify",
+                    "Formbody",
+                    "frida",
+                    "Grayscaled",
+                    "hostable",
+                    "klass",
+                    "leonitousconforti",
+                    "mediapath",
+                    "mediatype",
+                    "Nimblebit",
+                    "Pino",
+                    "prodimgs",
+                    "proto",
+                    "protobuf",
+                    "proxied",
+                    "Proxying",
+                    "rushall",
+                    "rushstack",
+                    "stockall",
+                    "structs",
+                    "Thresholded",
+                    "tinyburg",
+                    "tinytower",
+                    "Upscaled"
+                ]
+            }
+        }
+    },
+
+    // Use 'forwardPorts' to make a list of ports inside the container available locally.
+    // "forwardPorts": [],
+
+    // Use 'postCreateCommand' to run commands after the container is created.
+    "postCreateCommand": "npm install -g pnpm npm-check-updates @microsoft/rush @rushstack/heft",
+
+    // Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
+    "remoteUser": "node"
+}

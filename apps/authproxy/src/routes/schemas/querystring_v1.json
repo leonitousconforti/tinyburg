@@ -1,0 +1,10 @@
+{
+    "title": "Querystring Schema",
+    "type": "object",
+    "properties": {
+        "hash": { "type": "string" },
+        "endpoint": { "type": "string" }
+    },
+    "additionalProperties": false,
+    "required": ["hash", "endpoint"]
+}

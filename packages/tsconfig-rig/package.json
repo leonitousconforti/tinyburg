@@ -1,0 +1,11 @@
+{
+    "private": true,
+    "name": "@tinyburg/tsconfig-rig",
+    "version": "0.0.1",
+    "files": [
+        "./profiles/*"
+    ],
+    "devDependencies": {
+        "@tsconfig/node18-strictest-esm": "~1.0.1"
+    }
+}

@@ -1,0 +1,62 @@
+{
+    "private": true,
+    "name": "@tinyburg/authproxy",
+    "version": "0.0.1",
+    "description": "auth server for the tinyburg library",
+    "license": "MIT",
+    "author": "Leo Conforti <leo@leoconforti.us> (https://leoconforti.us)",
+    "homepage": "https://github.com/leonitousconforti/tinyburg/tree/authproxy",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/leonitousconforti/tinyburg.git"
+    },
+    "type": "module",
+    "main": "dist/proxy.js",
+    "scripts": {
+        "build": "compile-schemas && tsc",
+        "compile-schemas": "json2ts -i routes/schemas -o routes/types --style.tabWidth 4",
+        "dev": "ts-node proxy.ts",
+        "docker:build": "docker build -t ghcr.io/leonitousconforti/tinyburg/authproxy:latest .",
+        "docker:publish": "docker push ghcr.io/leonitousconforti/tinyburg/authproxy:latest",
+        "lint": "eslint .",
+        "start": "yarn node dist/proxy.js",
+        "test": "lint && test:start-services && test:run && test:stop-services",
+        "test:run": "tap tests/*_spec.ts --ts --timeout=270 --no-check-coverage --jobs=1",
+        "test:start-services": "docker-compose up -d redis_cache postgres_db",
+        "test:stop-services": "docker-compose stop redis_cache postgres_db"
+    },
+    "dependencies": {
+        "@fastify/error": "~3.1.0",
+        "@fastify/formbody": "~7.4.0",
+        "@fastify/rate-limit": "~7.6.0",
+        "@fastify/under-pressure": "~8.2.0",
+        "@tinyburg/core": "workspace:*",
+        "fastify": "~4.10.2",
+        "fastify-graceful-shutdown": "~3.4.0",
+        "fastify-plugin": "~4.4.0",
+        "got": "~12.5.3",
+        "ioredis": "~5.2.4",
+        "pg": "~8.8.0",
+        "uuid": "~9.0.0"
+    },
+    "devDependencies": {
+        "@rushstack/eslint-config": "~3.1.1",
+        "@rushstack/heft": "~0.48.8",
+        "@tsconfig/node18-strictest-esm": "~1.0.1",
+        "@types/chai": "~4.3.4",
+        "@types/ioredis": "~4.28.10",
+        "@types/mocha": "~10.0.1",
+        "@types/node": "~18.11.11",
+        "@types/tap": "~15.0.7",
+        "@types/uuid": "~9.0.0",
+        "@typescript-eslint/parser": "~5.45.1",
+        "chai": "~4.3.7",
+        "eslint": "~8.29.0",
+        "json-schema-to-typescript": "~11.0.2",
+        "mocha": "~10.1.0",
+        "tap": "~16.3.2",
+        "ts-node": "~10.9.1",
+        "typescript": "~4.9.3",
+        "@rushstack/heft-node-rig": "~1.11.9"
+    }
+}

@@ -1,0 +1,66 @@
+{
+    "name": "@tinyburg/insight",
+    "version": "0.0.1-alpha",
+    "description": "Provides insight into the TinyTower game using frida agents",
+    "keywords": [
+        "tinyburg",
+        "nimblebit",
+        "TinyTower",
+        "Tiny Tower"
+    ],
+    "license": "MIT",
+    "author": "Leo Conforti <leo@leoconforti.us> (https://leoconforti.us)",
+    "type": "module",
+    "exports": {
+        ".": {
+            "types": "./dist/src/index.d.ts",
+            "import": "./dist/src/index.js"
+        },
+        "./bootstrap-agent": {
+            "types": "./dist/src/bootstrap-agent.d.ts",
+            "import": "./dist/src/bootstrap-agent.js"
+        },
+        "./shared/*": {
+            "types": "./dist/src/shared/*.d.ts",
+            "import": "./dist/src/shared/*.js"
+        }
+    },
+    "main": "dist/src/index.js",
+    "files": [
+        "dist/"
+    ],
+    "scripts": {
+        "build": "tsc -p ./tsconfig.agents.json && heft build --clean",
+        "lint": "eslint .",
+        "run-js-example": "rushx build && node dist/examples/js/index.js",
+        "run-ts-example": "ts-node --esm examples/ts/index.ts",
+        "test": "ts-node --esm test/test.ts"
+    },
+    "dependencies": {
+        "@swc/core": "~1.3.24",
+        "debug": "~4.3.4",
+        "emittery": "~1.0.1",
+        "esbuild": "~0.16.1",
+        "frida": "~16.0.7",
+        "frida-compile": "~16.1.4",
+        "frida-il2cpp-bridge": "~0.7.13",
+        "prettier": "~2.8.1"
+    },
+    "devDependencies": {
+        "@rushstack/eslint-config": "~3.1.1",
+        "@rushstack/heft": "~0.48.8",
+        "@tinyburg/tsconfig-rig": "workspace:*",
+        "@types/frida-gum": "~18.3.0",
+        "@types/node": "~18.11.11",
+        "@types/prettier": "~2.7.1",
+        "eslint": "~8.29.0",
+        "eslint-config-prettier": "~8.5.0",
+        "eslint-plugin-prettier": "~4.2.1",
+        "eslint-plugin-unicorn": "~45.0.2",
+        "ts-node": "~10.9.1",
+        "typescript": "~4.9.3"
+    },
+    "engines": {
+        "node": ">=14.16"
+    }
+}

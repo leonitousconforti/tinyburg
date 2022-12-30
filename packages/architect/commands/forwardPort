@@ -1,0 +1,1 @@
+$ANDROID_HOME/platform-tools/adb forward tcp:27042 tcp:%d

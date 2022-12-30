@@ -1,0 +1,38 @@
+{
+    "$schema": "https://json.schemastore.org/tsconfig",
+    "extends": "@tsconfig/node18-strictest-esm/tsconfig.json",
+    "compilerOptions": {
+        "checkJs": false,
+        "module": "esnext",
+        "moduleResolution": "NodeNext",
+        "exactOptionalPropertyTypes": false,
+
+        // Added
+        "noUncheckedIndexedAccess": false,
+        "types": ["node"],
+        "noEmit": true,
+        "noImplicitAny": true,
+        "strictNullChecks": true,
+        "strictFunctionTypes": true,
+        "strictPropertyInitialization": true,
+        "noImplicitThis": true,
+        "useUnknownInCatchVariables": true,
+        "resolveJsonModule": true,
+        "experimentalDecorators": true,
+        "forceConsistentCasingInFileNames": true,
+        "emitDecoratorMetadata": true,
+        "esModuleInterop": true
+    },
+    "files": [],
+    "include": [],
+    "references": [
+        {
+            "path": "./tsconfig.test.json",
+            "declarationMap": true
+        },
+        {
+            "path": "./tsconfig.lib.json",
+            "declarationMap": true
+        }
+    ]
+}

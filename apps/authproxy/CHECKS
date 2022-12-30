@@ -1,0 +1,5 @@
+WAIT=15
+TIMEOUT=5
+ATTEMPTS=3
+
+/status    ok

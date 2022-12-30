@@ -1,0 +1,19 @@
+{
+    "nimblebitHost": "https://sync.nimblebit.com",
+    "secretSalt": null,
+    "authenticated": false,
+    "proxy": {
+        "useProxy": true,
+        "address": "https://authproxy.tinyburg.app",
+        "api_key": null
+    },
+    "burnBot": {
+        "playerId": "9GTYN",
+        "playerSs": "89f9b90b-4e1e-4b48-af56-df39da7b17a7"
+    },
+    "player": {
+        "playerId": "ASD12",
+        "playerSs": "00000000-1234-5678-9123-000000000000",
+        "playerEmail": "you@example.com"
+    }
+}

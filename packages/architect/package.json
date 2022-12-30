@@ -1,0 +1,41 @@
+{
+    "name": "@tinyburg/architect",
+    "version": "0.0.1-alpha",
+    "private": false,
+    "description": "Architects a TinyTower instance in an android emulator",
+    "type": "module",
+    "scripts": {
+        "build": "heft build --clean",
+        "lint": "eslint ."
+    },
+    "dependencies": {
+        "commander": "~9.4.1",
+        "dockerode": "~3.3.4",
+        "frida": "~16.0.7",
+        "ssh2": "~1.11.0",
+        "terminal-image": "~2.0.0"
+    },
+    "devDependencies": {
+        "@rushstack/eslint-config": "~3.1.1",
+        "@rushstack/heft": "~0.48.8",
+        "@tinyburg/tsconfig-rig": "workspace:*",
+        "@types/node": "~18.11.11",
+        "@types/ssh2": "~1.11.6",
+        "@typescript-eslint/eslint-plugin": "~5.46.1",
+        "@typescript-eslint/parser": "~5.45.1",
+        "eslint": "~8.29.0",
+        "eslint-config-prettier": "~8.5.0",
+        "eslint-plugin-editorconfig": "~4.0.2",
+        "eslint-plugin-node": "~11.1.0",
+        "eslint-plugin-prettier": "~4.2.1",
+        "eslint-plugin-promise": "~6.1.1",
+        "eslint-plugin-unicorn": "~45.0.2",
+        "prettier": "~2.8.1",
+        "prettier-plugin-jsdoc": "~0.4.2",
+        "ts-node": "~10.9.1",
+        "typescript": "~4.9.3"
+    },
+    "engines": {
+        "node": ">=16.18.0"
+    }
+}

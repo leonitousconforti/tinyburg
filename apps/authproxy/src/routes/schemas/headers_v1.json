@@ -1,0 +1,9 @@
+{
+    "title": "Headers Schema",
+    "type": "object",
+    "properties": {
+        "Authorization": { "type": "string" },
+        "do-connecting-ip": { "type": "string" }
+    },
+    "additionalProperties": false
+}

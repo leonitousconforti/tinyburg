@@ -1,0 +1,29 @@
+{
+    "name": "@tinyburg/cli",
+    "version": "0.0.1",
+    "description": "CLI for TinyTower using @tinyburg/core",
+    "license": "MIT",
+    "type": "module",
+    "author": "Leo Conforti <leo@leoconforti.us> (https://leoconforti.us)",
+    "keywords": [
+        "TinyTower",
+        "Tiny Tower",
+        "Nimblebit"
+    ],
+    "scripts": {},
+    "devDependencies": {
+        "@types/diff": "~5.0.2",
+        "@types/node": "~18.11.11",
+        "@types/prompts": "~2.4.2",
+        "@types/yargs": "~17.0.17",
+        "eslint": "~8.29.0",
+        "typescript": "~4.9.3"
+    },
+    "dependencies": {
+        "diff": "~5.1.0",
+        "find-up": "~6.3.0",
+        "prompts": "~2.4.2",
+        "yargs": "~17.6.2",
+        "@tinyburg/core": "workspace:*"
+    }
+}

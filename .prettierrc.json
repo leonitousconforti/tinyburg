@@ -1,0 +1,13 @@
+{
+    "editorconfig": true,
+
+    "semi": true,
+    "singleQuote": false,
+    "trailingComma": "es5",
+
+    "plugins": [
+        "./common/autoinstallers/rush-prettier/node_modules/prettier-plugin-packagejson",
+        "./common/autoinstallers/rush-prettier/node_modules/prettier-plugin-jsdoc"
+    ],
+    "jsdocPrintWidth": 80
+}

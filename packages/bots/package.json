@@ -1,0 +1,8 @@
+{
+    "name": "@tinyburg/bots",
+    "version": "0.0.1",
+    "description": "",
+    "license": "MIT",
+    "type": "module",
+    "author": "Leo Conforti <leo@leoconforti.us> (https://leoconforti.us)"
+}

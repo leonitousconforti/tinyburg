@@ -1,0 +1,4 @@
+/dist
+
+# Env files with secrets
+/tinyburgrc.json

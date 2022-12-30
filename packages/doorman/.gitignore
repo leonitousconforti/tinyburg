@@ -1,0 +1,17 @@
+/dist
+
+# Generated assets
+/assets/*
+!/assets/extract.py
+!/assets/requirements.txt
+
+# Generated protobuf types
+/proto/android-grpc.tar.gz
+/proto/generated/
+
+# Generated templates
+/templates/png
+/templates/raw
+/templates/metadata
+/templates/game.*
+/templates/silkscreen.*

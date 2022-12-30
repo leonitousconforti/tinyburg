@@ -1,0 +1,5 @@
+{
+    "extension": ["ts"],
+    "node-option": ["experimental-specifier-resolution=node", "loader=ts-node/esm", "no-warnings"],
+    "require": "chai/register-expect"
+}

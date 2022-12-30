@@ -1,0 +1,12 @@
+{
+    "extends": "@tinyburg/tsconfig-rig/profile/default/config/tsconfig.json",
+    "compilerOptions": {
+        "moduleResolution": "nodeNext",
+        "lib": ["es2022"],
+        "outDir": "./dist",
+        "noEmit": false,
+        "declaration": true,
+        "sourceMap": true
+    },
+    "include": ["./index.ts"]
+}

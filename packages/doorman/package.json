@@ -1,0 +1,67 @@
+{
+    "name": "@tinyburg/doorman",
+    "version": "0.0.1-alpha",
+    "description": "Your friendly TinyTower doorman. Helps you with tasks such as moving bitizens up your elevator, restocking floors, building floors, rebuilding, and much more",
+    "keywords": [
+        "Tiny Tower",
+        "TinyTower"
+    ],
+    "license": "MIT",
+    "author": "Leo Conforti <leo@leoconforti.us> (https://leoconforti.us)",
+    "type": "module",
+    "main": "dist/src/main.js",
+    "files": [
+        "dist/"
+    ],
+    "scripts": {
+        "build": "heft build --clean",
+        "clean:all": "rushx clean:protobuf-types && rushx clean:templates && rushx clean:tests && rushx clean:build",
+        "clean:build": "rimraf ./dist",
+        "clean:protobuf-types": "rimraf ./proto/generated",
+        "clean:templates": "rimraf ./templates/metadata ./templates/raw ./templates/png",
+        "clean:tests": "rimraf ./coverage",
+        "generate:protobuf-types": "proto-loader-gen-types --outDir=./proto/generated --includeComments --grpcLib=@grpc/grpc-js ./proto/emulator_controller.proto",
+        "generate:templates": "ts-node --esm ./templates/generate-sprites.ts && ts-node --esm ./templates/generate-font-characters.ts && ts-node --esm ./templates/generate-typings.ts",
+        "lint": "eslint .",
+        "test": "TS_NODE_PROJECT=./tsconfig.test.json c8 mocha \"test/**/*.spec.ts\""
+    },
+    "dependencies": {
+        "@grpc/grpc-js": "~1.8.0",
+        "@grpc/proto-loader": "~0.7.4",
+        "@tinyburg/core": "workspace:*",
+        "debug": "~4.3.4",
+        "emittery": "~1.0.1",
+        "semver": "~7.3.8",
+        "supports-color": "~9.3.0",
+        "terminal-image": "~2.0.0"
+    },
+    "devDependencies": {
+        "@rushstack/eslint-config": "~3.1.1",
+        "@rushstack/heft": "~0.48.8",
+        "@tsconfig/node18-strictest-esm": "~1.0.1",
+        "@types/chai": "~4.3.4",
+        "@types/debug": "~4.1.7",
+        "@types/mocha": "~10.0.1",
+        "@types/node": "~18.11.11",
+        "@types/prettier": "~2.7.1",
+        "@types/semver": "~7.3.13",
+        "@types/sharp": "~0.31.0",
+        "@typescript-eslint/parser": "~5.45.1",
+        "c8": "~7.12.0",
+        "chai": "~4.3.7",
+        "eslint": "~8.29.0",
+        "mocha": "~10.1.0",
+        "prettier": "~2.8.1",
+        "rimraf": "~3.0.2",
+        "ts-node": "~10.9.1",
+        "typescript": "~4.9.3",
+        "sharp": "~0.31.2",
+        "jimp": "~0.16.2",
+        "@types/jimp": "~0.2.28",
+        "blessed": "~0.1.81",
+        "@types/blessed": "~0.1.19",
+        "node-mouse": "~0.0.2",
+        "terminal-kit": "~3.0.0",
+        "@types/terminal-kit": "~2.5.1"
+    }
+}

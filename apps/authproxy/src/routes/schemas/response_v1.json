@@ -1,0 +1,10 @@
+{
+    "title": "Response Schema",
+    "type": "object",
+    "response": {
+        "200": {
+            "type": "object"
+        }
+    },
+    "additionalProperties": true
+}

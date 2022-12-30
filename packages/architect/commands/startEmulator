@@ -1,0 +1,1 @@
+$ANDROID_HOME/emulator/emulator @%s -ports %d,%d -grpc %d %s &

@@ -1,0 +1,28 @@
+{
+    "$schema": "https://developer.microsoft.com/json-schemas/heft/heft.schema.json",
+    "eventActions": [
+        {
+            "actionKind": "deleteGlobs",
+            "heftEvent": "clean",
+            "actionId": "defaultClean",
+            "globsToDelete": ["dist"]
+        },
+        {
+            "actionKind": "copyFiles",
+            "heftEvent": "bundle",
+            "actionId": "copyAgentsAndHelpers",
+            "copyOperations": [
+                {
+                    "sourceFolder": "src",
+                    "destinationFolders": ["dist/src"],
+                    "includeGlobs": ["agents/*.ts", "helpers/*.ts"]
+                },
+                {
+                    "sourceFolder": "examples",
+                    "destinationFolders": ["dist/examples"],
+                    "includeGlobs": ["*/agent.*"]
+                }
+            ]
+        }
+    ]
+}

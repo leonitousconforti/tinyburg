@@ -1,0 +1,14 @@
+{
+    "$schema": "https://json.schemastore.org/tsconfig",
+    "extends": "./tsconfig.json",
+    "compilerOptions": {
+        "types": ["node"],
+        "lib": ["es2022"],
+        "outDir": "./dist",
+        "noEmit": false,
+        "declaration": true,
+        "sourceMap": true
+    },
+    "include": ["src/**/*.ts", "test/**/*.ts", "examples/*/index.*", "examples/*/shared.*"],
+    "exclude": ["src/agents/**/*.ts", "src/helpers/**/*.ts", "src/shared/base-frida-agent.ts"]
+}

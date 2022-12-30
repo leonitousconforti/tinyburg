@@ -1,0 +1,21 @@
+{
+    "extends": "@tinyburg/tsconfig-rig/profile/default/config/tsconfig.json",
+    "files": [],
+    "include": [],
+    "references": [
+        {
+            "path": "./tsconfig.agents.json",
+            "declarationMap": true
+        },
+        {
+            "path": "./tsconfig.lib.json",
+            "declarationMap": true
+        }
+    ],
+    "compilerOptions": {
+        "allowJs": true,
+        "checkJs": true,
+        "emitDecoratorMetadata": true,
+        "experimentalDecorators": true
+    }
+}

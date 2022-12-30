@@ -1,0 +1,12 @@
+{
+    "extends": "@tinyburg/tsconfig-rig/profile/default/config/tsconfig.json",
+    "compilerOptions": {
+        "module": "esnext",
+        "moduleResolution": "NodeNext",
+        "outDir": "./dist",
+        "noEmit": false,
+        "declaration": true,
+        "sourceMap": true
+    },
+    "include": ["./src/*.ts", "./bin/*.ts", "./commands/*.ts"]
+}
