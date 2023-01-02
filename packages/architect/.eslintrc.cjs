@@ -9,12 +9,10 @@ module.exports = {
         "plugin:unicorn/recommended",
     ],
     plugins: ["prettier", "unicorn"],
-
     env: {
         node: true,
         es2022: true,
     },
-    parser: "@typescript-eslint/parser",
     parserOptions: {
         tsconfigRootDir: __dirname,
         project: ["./tsconfig.json"],
@@ -23,9 +21,6 @@ module.exports = {
     },
     rules: {
         indent: ["error", 4, { SwitchCase: 1 }],
-        "linebreak-style": ["error", "unix"],
-        quotes: ["error", "double"],
-        semi: ["error", "always"],
     },
-    ignorePatterns: ["dist/", ".eslintrc.cjs"],
+    ignorePatterns: ["dist/"],
 };

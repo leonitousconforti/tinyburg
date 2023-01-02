@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import { Command, Option } from "commander";
 
 import { SshEmulator } from "../src/ssh.js";
@@ -6,7 +8,7 @@ import { DockerEmulator } from "../src/docker.js";
 import info from "../package.json" assert { type: "json" };
 
 const description: string =
-    "Architect is responsible for designing an environment for TinyTower to run in. Wether for testing or just for fun, you can use architect to bring up an instance of the game in a local or remote emulator and connect to it.";
+    "Architect is an app for designing an environment to run TinyTower in. Wether for testing or just for fun, you can use architect to bring up an instance of the game in a local or remote emulator and connect to it.";
 
 const program: Command = new Command();
 program.name("tinyburg-architect").description(description).version(info.version);
@@ -23,12 +25,12 @@ const fridaServerPortOption: Option = new Option("--frida-server-port [number]")
 const targetFpsOption: Option = new Option("-f, --target-fps [number]", "target fps for the game to run at");
 const displayOption: Option = new Option("-d, --display [boolean]", "attempt to render the game in the terminal");
 
-// Three bases commands
+// Three base commands
 const sshBase: Command = program.command("ssh");
 const localBase: Command = program.command("local");
 const dockerBase: Command = program.command("docker");
 
-// Helpers to make certain commands
+// Helpers to help make certain commands
 const makeCreateCommand = (): Command => new Command("create").addOption(nameOption);
 const makeDownCommand = (): Command => new Command("down").addOption(nameOption);
 const makeDestroyCommand = (): Command => new Command("destroy").addOption(nameOption);
@@ -75,7 +77,7 @@ const localCreate: Command = makeCreateCommand()
 const localUp: Command = makeUpCommand()
     .description("asdf")
     .action(async ({ name, ...rest }) => {
-        await new LocalEmulator(name).up(rest);
+        await new LocalEmulator(name, rest).up();
     });
 
 const localDown: Command = makeDownCommand()

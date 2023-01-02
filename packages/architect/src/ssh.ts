@@ -1,4 +1,5 @@
 import "ssh2";
+import type frida from "frida";
 
 import { Emulator } from "./emulator.js";
 
@@ -19,10 +20,12 @@ export class SshEmulator extends Emulator {
     }
 
     public up(): Promise<{
-        processPid: number;
         fridaServerAddress: string;
         emulatorGrpcControlAddress: string;
         emulatorAdbAddress: string;
+        installApk: (apkLocation: string) => Promise<void>;
+        launchGame: () => Promise<{ processPid: number; device: frida.Device }>;
+        stopGame: () => Promise<void>;
     }> {
         throw new Error("Method not implemented.");
     }

@@ -1,4 +1,5 @@
 import "dockerode";
+import type frida from "frida";
 
 import { Emulator } from "./emulator.js";
 
@@ -9,7 +10,6 @@ import { Emulator } from "./emulator.js";
  * and the required docker plugins are included.
  */
 export class DockerEmulator extends Emulator {
-    private _gpu: string | undefined;
     private readonly _address: string;
 
     /**
@@ -24,15 +24,10 @@ export class DockerEmulator extends Emulator {
     public constructor(name: string, address: string) {
         super(name);
         this._address = address;
-        this._gpu = undefined;
     }
 
     public getAddress(): string {
         return this._address;
-    }
-
-    public useGpu(gpu: string): void {
-        this._gpu = gpu;
     }
 
     /**
@@ -50,10 +45,12 @@ export class DockerEmulator extends Emulator {
      * container when it is started.
      */
     public up(): Promise<{
-        processPid: number;
         fridaServerAddress: string;
         emulatorGrpcControlAddress: string;
         emulatorAdbAddress: string;
+        installApk: (apkLocation: string) => Promise<void>;
+        launchGame: () => Promise<{ processPid: number; device: frida.Device }>;
+        stopGame: () => Promise<void>;
     }> {
         throw new Error("Method not implemented.");
     }
