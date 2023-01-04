@@ -1,12 +1,16 @@
 import type { IAgent } from "./shared/agent-main-export.js";
 
 import frida from "frida";
+import Debug from "debug";
 import prettier from "prettier";
 
 import { swcCompiler } from "./compilers/swc.js";
 import { fridaCompiler } from "./compilers/frida.js";
 import { esbuildCompiler } from "./compilers/esbuild.js";
 
+const logger: Debug.Debugger = Debug.debug("tinyburg:insight");
+
+// Options for all bootstrapping operations
 interface IBootstrapOptions {
     messageHandler: frida.ScriptMessageHandler | undefined;
     compiler: "frida" | "esbuild" | "swc";
@@ -70,7 +74,7 @@ export const bootstrapAgent = async <T extends IAgent>(
     // Attach to an android device and spawn the TinyTower app
     const pid: number = await device.spawn("com.nimblebit.tinytower");
     const session: frida.Session = await device.attach(pid);
-    console.log(`Attached to process: ${session.pid} on device: ${device.name}`);
+    logger("Attached to process: %d on device: %s", session.pid, device.name);
 
     // Compile time and create script
     const compiler = options?.compiler || "swc";
@@ -100,38 +104,36 @@ export const bootstrapAgent = async <T extends IAgent>(
             }
         };
     script.message.connect(_messageHandler);
-    console.log("Attached message handler to script");
+    logger("Attached message handler to script");
 
     // Load script and resume app
     await script.load();
     await device.resume(pid);
-    console.log("Loaded script and resumed process on device");
-    console.log(script.exports);
+    logger("Loaded script and resumed process on device");
+    logger(script.exports);
 
     // Closure that accepts arguments to pass to the agents main function and runs it
     const runAgent = async function (
         ..._arguments: Parameters<T["rpcTypes"]["main"]>
     ): Promise<Awaited<ReturnType<T["rpcTypes"]["main"]>>> {
         // Call script and format data
-        console.log("Now calling main...");
+        logger("Now calling main...");
         try {
             const main: T["rpcTypes"]["main"] = script.exports["main"]!;
 
             let data = await main(..._arguments);
             if (agent.rpcTypes.mainProducesSourceCode && typeof data === "string") {
                 data = prettier.format(data, prettierOptions);
-            } else if (typeof data === "string") {
-                console.log("Perhaps you forgot to set mainProducesSourceCode");
             }
 
             // Cleanup 15 seconds after receiving data
-            console.log("Finished. Will unload script, teardown session, and kill process during the next 15 seconds");
+            logger("Finished. Will unload script, teardown session, and kill process during the next 15 seconds");
             setTimeout(async () => await cleanupAgent({ device, session, script, pid }), 10_000);
             await new Promise((resolve) => setTimeout(resolve, 15_000));
 
             return data as Awaited<ReturnType<T["rpcTypes"]["main"]>>;
         } catch (error: unknown) {
-            console.log("Somethings not right, shutting down and cleaning up");
+            logger("Somethings not right, shutting down and cleaning up");
             await cleanupAgent({ device, session, script, pid });
             throw error;
         }

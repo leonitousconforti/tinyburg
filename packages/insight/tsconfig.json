@@ -11,11 +11,5 @@
             "path": "./tsconfig.lib.json",
             "declarationMap": true
         }
-    ],
-    "compilerOptions": {
-        "allowJs": true,
-        "checkJs": true,
-        "emitDecoratorMetadata": true,
-        "experimentalDecorators": true
-    }
+    ]
 }

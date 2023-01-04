@@ -9,6 +9,6 @@
         "declaration": true,
         "sourceMap": true
     },
-    "include": ["src/**/*.ts", "test/**/*.ts", "examples/*/index.*", "examples/*/shared.*"],
+    "include": ["src/**/*.ts", "test/**/*.ts", "examples/ts/index.*", "examples/ts/shared.*"],
     "exclude": ["src/agents/**/*.ts", "src/helpers/**/*.ts", "src/shared/base-frida-agent.ts"]
 }
