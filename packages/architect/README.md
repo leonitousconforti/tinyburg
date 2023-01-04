@@ -1,6 +1,6 @@
 # @tinyburg/architect
 
-Architect is a tool for creating/designing an environment for TinyTower to run in. Other tinyburg packages that rely on an instance of the game, wether for testing purposes or to extract information, will use architect to bring up an instance of the game and connect to it. This removes the barrier of needing a real rooted android device to test.
+Architect is a tool for creating/designing an environment for TinyTower to run in. Other tinyburg packages that rely on an instance of the game, wether for testing purposes or to extract information, will use architect to bring up an instance of the game and connect to it. This removes the barrier of needing a real rooted android device to test certain things.
 
 # How?
 

@@ -83,8 +83,8 @@ export class LocalEmulator extends Emulator {
 
     /**
      * Brings down an emulator on the local machine. Can be resumed by calling
-     * up again. Does not destroy any data. The user is responsible for calling
-     * stopGame before calling down.
+     * up again. Does not destroy any data, just stops the emulator process. The
+     * user is responsible for calling stopGame before calling down.
      */
     public async down(): Promise<void> {
         logger("Bringing down emulator %s", this.name);
@@ -97,8 +97,8 @@ export class LocalEmulator extends Emulator {
 
     /**
      * Brings up an emulator on the local machine and exposes functions to the
-     * user to manage the emulator. All params are optional and have default
-     * values that will work if you are only running one emulator per machine.
+     * user to manage the emulator. Does not create emulator, just starts the
+     * emulator process.
      */
     public async up(): Promise<{
         fridaServerAddress: string;
@@ -168,8 +168,14 @@ export class LocalEmulator extends Emulator {
         const formatted = util.format(script, ...commandArguments);
 
         return new Promise((resolve, reject) => {
-            const proc = cp.spawn(formatted, {
-                shell: true,
+            const proc = cp.spawn(formatted, { shell: true });
+
+            proc.stdout.on("data", (data) => {
+                console.log(data);
+            });
+
+            proc.stderr.on("data", (data) => {
+                console.log(data);
             });
 
             proc.on("error", (error) => {
