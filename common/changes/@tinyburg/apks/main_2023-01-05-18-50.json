@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@tinyburg/apks",
+      "comment": "change version",
+      "type": "none"
+    }
+  ],
+  "packageName": "@tinyburg/apks"
+}
