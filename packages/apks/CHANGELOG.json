@@ -1,0 +1,17 @@
+{
+  "name": "@tinyburg/apks",
+  "entries": [
+    {
+      "version": "0.0.1",
+      "tag": "@tinyburg/apks_v0.0.1",
+      "date": "Thu, 05 Jan 2023 20:01:59 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Initial release"
+          }
+        ]
+      }
+    }
+  ]
+}
