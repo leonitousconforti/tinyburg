@@ -1,7 +1,7 @@
 {
     "name": "@tinyburg/apks",
     "version": "0.0.1",
-    "description": "TinyTower apks downloaded from different sources, ready to be consumed by other tools",
+    "description": "TinyTower apks downloaded from different sources, ready to be consumed by other tinyburg tools",
     "homepage": "https://github.com/leonitousconforti/tinyburg",
     "repository": {
         "type": "git",
