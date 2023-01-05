@@ -16,7 +16,7 @@
     "scripts": {
         "build": "heft build --clean",
         "lint": "eslint .",
-        "test": "c8 mocha ./test.ts"
+        "test": "c8 -o /tmp mocha ./test.ts"
     },
     "dependencies": {
         "debug": "~4.3.4"
