@@ -1,0 +1,17 @@
+{
+  "name": "@tinyburg/apks",
+  "entries": [
+    {
+      "version": "0.0.1",
+      "tag": "@tinyburg/apks_v0.0.1",
+      "date": "Thu, 05 Jan 2023 18:40:11 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "change visibility from private to public, prepare to publish"
+          }
+        ]
+      }
+    }
+  ]
+}

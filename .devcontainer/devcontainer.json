@@ -13,6 +13,11 @@
         "ghcr.io/devcontainers/features/go:1": {}
     },
 
+    // Mount my .npmrc file for publishing packages
+    "mounts": [
+        "source=${localEnv:HOME}${localEnv:USERPROFILE}/.npmrc,target=/home/node/.npmrc,type=bind,consistency=cached"
+    ],
+
     // Configure tool-specific properties.
     "customizations": {
         // Configure properties specific to VS Code.
