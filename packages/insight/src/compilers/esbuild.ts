@@ -1,9 +1,9 @@
 import path from "node:url";
 import { build, BuildOptions } from "esbuild";
 
-export const esbuildCompiler = async (agentLocation: string): Promise<string> => {
+export const esbuildCompiler = async (agentLocation: string, watchMode: boolean = false): Promise<string> => {
     // Create build options for agents
-    const tsconfig = path.fileURLToPath(new URL("../../tsconfig.agents.json", import.meta.url));
+    const tsconfig = path.fileURLToPath(new URL("../tsconfig.agents.json", import.meta.url));
     const buildOptions: BuildOptions = {
         entryPoints: [agentLocation],
         tsconfig,
@@ -11,6 +11,7 @@ export const esbuildCompiler = async (agentLocation: string): Promise<string> =>
         write: false,
         minify: true,
         sourcemap: "inline",
+        watch: watchMode,
     };
     console.log(`Generated esbuild options ${JSON.stringify(buildOptions)}`);
 

@@ -521,16 +521,21 @@
             "shouldPublish": true
         },
         {
+            "packageName": "@tinyburg/explorer",
+            "projectFolder": "packages/explorer",
+            "shouldPublish": true
+        },
+        {
             "packageName": "@tinyburg/insight",
             "projectFolder": "packages/insight",
-            "shouldPublish": false
+            "shouldPublish": true
         },
 
         // Rigs
         {
             "packageName": "@tinyburg/tsconfig-rig",
             "projectFolder": "packages/tsconfig-rig",
-            "shouldPublish": false
+            "shouldPublish": true
         },
 
         // Apps
@@ -558,13 +563,6 @@
             "packageName": "@tinyburg/repl.it-demo",
             "projectFolder": "apps/repl.it",
             "shouldPublish": true
-        },
-
-        // Testing environment
-        {
-            "packageName": "@tinyburg/playground",
-            "projectFolder": "packages/playground",
-            "shouldPublish": false
         }
     ]
 }

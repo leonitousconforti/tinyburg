@@ -1,4 +1,10 @@
-export const swcCompiler = async (agentLocation: string): Promise<string> => {
-    console.log(agentLocation);
+import Debug from "Debug";
+// import swc from "@swc/core";
+
+const logger: Debug.Debugger = Debug.debug("tinyburg:insight:swc-compiler");
+
+export const swcCompiler = async (agentLocation: string, watchMode: boolean = false): Promise<string> => {
+    logger(agentLocation);
+    logger(watchMode);
     return "";
 };

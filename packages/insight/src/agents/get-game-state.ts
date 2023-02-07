@@ -1,4 +1,4 @@
-import { TinyTowerFridaAgent } from "../shared/base-frida-agent.js";
+import { TinyTowerFridaAgent } from "./base-frida-agent.js";
 
 export class GetGameState extends TinyTowerFridaAgent<GetGameState> {
     public loadDependencies() {

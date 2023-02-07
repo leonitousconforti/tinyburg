@@ -1,7 +1,7 @@
 import "frida-il2cpp-bridge";
 
-import type { IToggleMusicStatusAgentExports } from "./shared.js";
-import { TinyTowerFridaAgent } from "../../src/shared/base-frida-agent.js";
+import type { ISetMusicEnabledAgentExports } from "./shared.js";
+import { TinyTowerFridaAgent } from "../../src/agents/base-frida-agent.js";
 
 /**
  * This agent showcases how to set information in the game. In this case, it
@@ -36,7 +36,7 @@ export class SetMusicStatusAgent extends TinyTowerFridaAgent<SetMusicStatusAgent
  * it. The start method takes care of everything from retrying dependency
  * loading to calling the retrieve data method.
  */
-const rpcExports: IToggleMusicStatusAgentExports = {
+const rpcExports: ISetMusicEnabledAgentExports = {
     main: async (musicEnabled: boolean) => {
         const instance = await new SetMusicStatusAgent(musicEnabled).start();
         return instance.data;

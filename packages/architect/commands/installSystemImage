@@ -1,1 +1,0 @@
-$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --channel=0 --install "system-images;android-31;default;arm64-v8a"

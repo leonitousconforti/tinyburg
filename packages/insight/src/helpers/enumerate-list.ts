@@ -10,7 +10,7 @@ export const enumerateList = function* <T extends Il2Cpp.Field.Type>(
     // but I don't want it to tare down the entire script; I would prefer that the frida
     // script kept going. So a log and return will do here.
     if (!isEnumerable(list)) {
-        console.error(`Can not enumerate over 'list' ${list.class.namespace}.${list.class.name}`);
+        send(`Can not enumerate over 'list' ${list.class.namespace}.${list.class.name}`);
         return;
     }
 

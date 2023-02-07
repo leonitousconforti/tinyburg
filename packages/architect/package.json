@@ -1,7 +1,7 @@
 {
     "name": "@tinyburg/architect",
-    "version": "0.0.1-alpha",
-    "description": "Architects a TinyTower instance in an android emulator or on a remote device",
+    "version": "0.0.1",
+    "description": "Creates a TinyTower instance in an android emulator on a local or remote docker host",
     "keywords": [
         "tinyburg",
         "nimblebit",
@@ -17,50 +17,32 @@
     "license": "MIT",
     "author": "Leo Conforti <leo@leoconforti.us> (https://leoconforti.us)",
     "type": "module",
-    "exports": {
-        ".": {
-            "types": "./dist/src/index.d.ts",
-            "import": "./dist/src/index.js"
-        },
-        "./local": {
-            "types": "./dist/src/local.d.ts",
-            "import": "./dist/src/local.js"
-        },
-        "./ssh": {
-            "types": "./dist/src/ssh.d.ts",
-            "import": "./dist/src/ssh.js"
-        },
-        "./docker": {
-            "types": "./dist/src/docker.d.ts",
-            "import": "./dist/src/docker.js"
-        }
-    },
     "main": "dist/src/index.js",
     "bin": {
         "tinyburg-architect": "./dist/bin/cli.js"
     },
-    "files": [
-        "dist/",
-        "device.xml"
-    ],
     "scripts": {
         "build": "heft build --clean",
-        "lint": "eslint ."
+        "docker:build": "docker build emulator -t tinyburg/architect:emulator-9322596_sysimg-31-aosp-x64_frida-16.0.8",
+        "docker:push": "docker push tinyburg/architect:emulator-9322596_sysimg-31-aosp-x64_frida-16.0.8",
+        "lint": "eslint .",
+        "terraform:init": "cd infrastructure && terraform init",
+        "terraform:plan": "cd infrastructure && terraform plan",
+        "terraform:provision": "cd infrastructure && terraform apply"
     },
     "dependencies": {
         "commander": "~9.4.1",
         "debug": "~4.3.4",
         "dockerode": "~3.3.4",
-        "frida": "~16.0.7",
-        "ssh2": "~1.11.0"
+        "frida": "~16.0.7"
     },
     "devDependencies": {
         "@rushstack/eslint-config": "~3.1.1",
         "@rushstack/heft": "~0.48.8",
         "@tinyburg/tsconfig-rig": "workspace:*",
         "@types/debug": "~4.1.7",
+        "@types/dockerode": "~3.3.14",
         "@types/node": "~18.11.11",
-        "@types/ssh2": "~1.11.6",
         "eslint": "~8.29.0",
         "eslint-config-prettier": "~8.5.0",
         "eslint-plugin-prettier": "~4.2.1",

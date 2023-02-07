@@ -1,7 +1,7 @@
 import "frida-il2cpp-bridge";
 
-import type { IsMusicEnabledAgentExports } from "./shared.js";
-import { TinyTowerFridaAgent } from "../../src/shared/base-frida-agent.js";
+import type { IIsMusicEnabledAgentExports } from "./shared.js";
+import { TinyTowerFridaAgent } from "../../src/agents/base-frida-agent.js";
 
 /**
  * This agent showcases how to retrieve information from the game. In this case,
@@ -28,7 +28,7 @@ export class IsMusicEnabledAgent extends TinyTowerFridaAgent<IsMusicEnabledAgent
  * it. The start method takes care of everything from retrying dependency
  * loading to calling the retrieve data method.
  */
-const rpcExports: IsMusicEnabledAgentExports = {
+const rpcExports: IIsMusicEnabledAgentExports = {
     main: async () => {
         const instance = await new IsMusicEnabledAgent().start();
         return instance.data;

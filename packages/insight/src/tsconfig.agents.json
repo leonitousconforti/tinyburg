@@ -1,0 +1,10 @@
+{
+    "$schema": "https://json.schemastore.org/tsconfig",
+    "extends": "../tsconfig.base.json",
+    "compilerOptions": {
+        "types": ["frida-gum"],
+        "composite": true
+    },
+    "include": ["./agents/**/*.ts", "./helpers/**/*.ts"],
+    "references": [{ "path": "./tsconfig.src.json" }]
+}

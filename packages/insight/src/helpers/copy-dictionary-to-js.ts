@@ -15,7 +15,7 @@ export function copyDictionaryToJs<TKey extends Il2Cpp.String | number, TValue e
         if (key instanceof Il2Cpp.String && key.content) {
             dictionary[key.content] = value;
         } else if (key instanceof Il2Cpp.String) {
-            console.log("Not copying key+value to dictionary because the key is not a string");
+            send("Not copying key+value to dictionary because the key is not a string");
         } else {
             dictionary[key as unknown as number] = value;
         }

@@ -70,12 +70,12 @@ export const AlertAgents = {
 };
 
 // eslint-disable-next-line @rushstack/typedef-var
-export const AllAgents = { ...GetterAgents, ...SetterAgents } as const;
+export const AllAgents = { ...GetterAgents, ...SetterAgents, ...AlertAgents } as const;
 
 export {
-    bootstrapAgent,
     cleanupAgent,
-    bootstrapAgentOnRemote,
+    bootstrapAgent,
     bootstrapAgentOverUsb,
+    bootstrapAgentOnRemote,
     bootstrapAgent as default,
 } from "./bootstrap-agent.js";

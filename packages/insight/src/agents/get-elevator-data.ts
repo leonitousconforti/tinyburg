@@ -3,7 +3,7 @@ import "frida-il2cpp-bridge";
 import type { IElevatorAgentExports } from "../shared/elevator-agent-exports.js";
 
 import { readObject } from "../helpers/read.js";
-import { TinyTowerFridaAgent } from "../shared/base-frida-agent.js";
+import { TinyTowerFridaAgent } from "./base-frida-agent.js";
 import { copyArrayToJs } from "../helpers/copy-array-to-js.js";
 import { copyDictionaryToJs } from "../helpers/copy-dictionary-to-js.js";
 

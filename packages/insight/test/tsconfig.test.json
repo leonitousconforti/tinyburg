@@ -1,0 +1,10 @@
+{
+    "$schema": "https://json.schemastore.org/tsconfig",
+    "extends": "../tsconfig.base.json",
+    "compilerOptions": {
+        "types": ["node", "heft-jest"],
+        "composite": true
+    },
+    "include": ["./**/*.ts"],
+    "references": [{ "path": "../src/tsconfig.src.json" }]
+}

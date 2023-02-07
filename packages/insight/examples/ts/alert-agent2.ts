@@ -1,8 +1,8 @@
 import "frida-il2cpp-bridge";
 import Emittery from "emittery";
 
-import { TinyTowerFridaAgent } from "../../src/shared/base-frida-agent.js";
-import type { ISubscribeToMusicStatusAgent2, ISubscribeToMusicStatusAgent2Events } from "./shared.js";
+import { TinyTowerFridaAgent } from "../../src/agents/base-frida-agent.js";
+import type { ISubscribeToMusicStatusAgent2Exports, ISubscribeToMusicStatusAgent2Events } from "./shared.js";
 
 /**
  * This agent showcases how to subscribe to information changes in the game. In
@@ -42,7 +42,7 @@ export class SubscribeToMusicStatusAgent2 extends TinyTowerFridaAgent<SubscribeT
  * it. The start method takes care of everything from retrying dependency
  * loading to calling the retrieve data method.
  */
-const rpcExports: ISubscribeToMusicStatusAgent2 = {
+const rpcExports: ISubscribeToMusicStatusAgent2Exports = {
     main: async () => {
         const instance = await new SubscribeToMusicStatusAgent2().start();
         return instance.emittery;

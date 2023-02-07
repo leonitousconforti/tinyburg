@@ -2,7 +2,7 @@ import "frida-il2cpp-bridge";
 
 import type { ITargetFpsAgentExports } from "../shared/target-fps-agent-exports.js";
 
-import { TinyTowerFridaAgent } from "../shared/base-frida-agent.js";
+import { TinyTowerFridaAgent } from "./base-frida-agent.js";
 
 export class SetTargetFps extends TinyTowerFridaAgent<SetTargetFps> {
     private readonly _fps: number;

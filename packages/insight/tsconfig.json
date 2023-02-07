@@ -1,15 +1,12 @@
 {
-    "extends": "@tinyburg/tsconfig-rig/profile/default/config/tsconfig.json",
+    "extends": "./tsconfig.base.json",
     "files": [],
     "include": [],
     "references": [
-        {
-            "path": "./tsconfig.agents.json",
-            "declarationMap": true
-        },
-        {
-            "path": "./tsconfig.lib.json",
-            "declarationMap": true
-        }
+        { "path": "./src/tsconfig.src.json" },
+        { "path": "./src/tsconfig.agents.json" },
+        { "path": "./test/tsconfig.test.json" },
+        { "path": "./examples/tsconfig.examples-src.json" },
+        { "path": "./examples/tsconfig.examples-agents.json" }
     ]
 }

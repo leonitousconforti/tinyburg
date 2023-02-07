@@ -78,8 +78,8 @@ export const readObject = (object: Il2Cpp.Object): boolean | number | string | u
         }
 
         default: {
-            console.warn(`Could not read object ${object.class.name} of typeEnum ${object.class.type.typeEnum}`);
-            console.warn("Consider adding an entry in the readObject method to extract this type");
+            send(`Could not read object ${object.class.name} of typeEnum ${object.class.type.typeEnum}`);
+            send("Consider adding an entry in the readObject method to extract this type");
             return undefined;
         }
     }
@@ -145,8 +145,8 @@ export const readField = (field: Il2Cpp.Field): string | number | boolean | unde
         }
 
         default: {
-            console.warn(`Could not read field ${field.type} of typeEnum ${field.type.typeEnum}`);
-            console.warn("Consider adding an entry in the readField method to extract this type");
+            send(`Could not read field ${field.type} of typeEnum ${field.type.typeEnum}`);
+            send("Consider adding an entry in the readField method to extract this type");
             return undefined;
         }
     }

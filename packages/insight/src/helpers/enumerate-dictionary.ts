@@ -11,7 +11,7 @@ export const enumerateDictionary = function* <
     // but I don't want it to tare down the entire script; I would prefer that the frida
     // script kept going. So a log and return will do here.
     if (!isEnumerable(dictionary)) {
-        console.error(`Can not enumerate over 'dictionary' ${dictionary.class.namespace}.${dictionary.class.name}`);
+        send(`Can not enumerate over 'dictionary' ${dictionary.class.namespace}.${dictionary.class.name}`);
         return;
     }
 

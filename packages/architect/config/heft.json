@@ -6,19 +6,6 @@
             "heftEvent": "clean",
             "actionId": "defaultClean",
             "globsToDelete": ["dist"]
-        },
-        {
-            "actionKind": "copyFiles",
-            "heftEvent": "bundle",
-            "actionId": "copyCommandsAndVendor",
-            "copyOperations": [
-                {
-                    "sourceFolder": ".",
-                    "destinationFolders": ["dist"],
-                    "includeGlobs": ["commands/*", "vendor/*"],
-                    "excludeGlobs": ["commands/*.ts", "vendor/*.apk", "vendor/*.xz"]
-                }
-            ]
         }
     ]
 }

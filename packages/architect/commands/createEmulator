@@ -1,1 +1,0 @@
-$ANDROID_HOME/cmdline-tools/latest/bin/avdmanager create avd --package "system-images;android-31;default;arm64-v8a" --device TinyTowerArchitect --name %s %s

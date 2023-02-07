@@ -4,7 +4,7 @@ import type { IBitbookAgentExports } from "../shared/bitbook-agent-exports.js";
 
 import { readObject } from "../helpers/read.js";
 import { readEnumFields } from "../helpers/get-enum-fields.js";
-import { TinyTowerFridaAgent } from "../shared/base-frida-agent.js";
+import { TinyTowerFridaAgent } from "./base-frida-agent.js";
 import { copyDictionaryToJs } from "../helpers/copy-dictionary-to-js.js";
 
 export class GetBitbookData extends TinyTowerFridaAgent<GetBitbookData> {

@@ -2,7 +2,7 @@ import "frida-il2cpp-bridge";
 
 import type { ITowerCredentialsAgentExports } from "../shared/tower-credentials-agent-exports.js";
 
-import { TinyTowerFridaAgent } from "../shared/base-frida-agent.js";
+import { TinyTowerFridaAgent } from "./base-frida-agent.js";
 
 export class SetTowerCredentials extends TinyTowerFridaAgent<SetTowerCredentials> {
     private readonly _playerId: string;

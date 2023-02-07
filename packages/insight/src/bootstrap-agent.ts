@@ -10,10 +10,16 @@ import { esbuildCompiler } from "./compilers/esbuild.js";
 
 const logger: Debug.Debugger = Debug.debug("tinyburg:insight");
 
-// Options for all bootstrapping operations
+/** Options for all bootstrapping operations. */
 interface IBootstrapOptions {
-    messageHandler: frida.ScriptMessageHandler | undefined;
+    /** Recompile and reload the script when changes are detected */
+    watchMode?: boolean | undefined;
+
+    /** Which compiler to use */
     compiler: "frida" | "esbuild" | "swc";
+
+    /** Message handler function to receive messages sent over frida gum's ipc */
+    messageHandler?: frida.ScriptMessageHandler | undefined;
 }
 
 // Find editorconfig and prettier formatting files
@@ -46,18 +52,19 @@ export const cleanupAgent = async ({
 
 /**
  * Bootstraps an agent onto a device. First it spawns the game process, then it
- * compiles the agent using the selected compiler and attaches your message
- * handler if you provided one. The default message handler just logs everything
- * to the console. Next it loads the script into memory and resumes the game
+ * compiles the agent using the selected compiler and attaches the message
+ * handler if one was provided. The default message handler logs errors to the
+ * console. Next it loads the script into the game process and resumes the game
  * process. Finally, a runAgent function is returned (along with some other
- * frida elements) which can be called with the arguments to your agents main.
+ * frida components) which can be called with the arguments to your agents
+ * main.
  *
  * @param agent - The agent to bootstrap
  * @param device - The device to bootstrap the agent onto
  * @param options - Provide a message handler or select a different compiler
  *   than the default one
  * @returns - The frida components (device, session, script, and process pid) as
- *   well as a runAgent function that takes any arguments required by your agent
+ *   well as a runAgent function that takes any arguments required by the agent
  *   and runs it
  */
 export const bootstrapAgent = async <T extends IAgent>(
@@ -69,8 +76,12 @@ export const bootstrapAgent = async <T extends IAgent>(
     session: frida.Session;
     script: frida.Script;
     pid: number;
-    runAgent: (..._arguments: Parameters<T["rpcTypes"]["main"]>) => Promise<Awaited<ReturnType<T["rpcTypes"]["main"]>>>;
+    runAgentMain: (
+        ..._arguments: Parameters<T["rpcTypes"]["main"]>
+    ) => Promise<Awaited<ReturnType<T["rpcTypes"]["main"]>>>;
 }> => {
+    logger("Starting bootstrapping of agent '%s'", agent.agentFile);
+
     // Attach to an android device and spawn the TinyTower app
     const pid: number = await device.spawn("com.nimblebit.tinytower");
     const session: frida.Session = await device.attach(pid);
@@ -81,15 +92,15 @@ export const bootstrapAgent = async <T extends IAgent>(
     let source: string;
     switch (compiler) {
         case "esbuild": {
-            source = await esbuildCompiler(agent.agentFile);
+            source = await esbuildCompiler(agent.agentFile, options?.watchMode);
             break;
         }
         case "frida": {
-            source = await fridaCompiler(agent.agentFile);
+            source = await fridaCompiler(agent.agentFile, options?.watchMode);
             break;
         }
         case "swc": {
-            source = await swcCompiler(agent.agentFile);
+            source = await swcCompiler(agent.agentFile, options?.watchMode);
             break;
         }
     }
@@ -110,14 +121,13 @@ export const bootstrapAgent = async <T extends IAgent>(
     await script.load();
     await device.resume(pid);
     logger("Loaded script and resumed process on device");
-    logger(script.exports);
 
     // Closure that accepts arguments to pass to the agents main function and runs it
-    const runAgent = async function (
+    const runAgentMain = async function (
         ..._arguments: Parameters<T["rpcTypes"]["main"]>
     ): Promise<Awaited<ReturnType<T["rpcTypes"]["main"]>>> {
         // Call script and format data
-        logger("Now calling main...");
+        logger("Now calling agent main...");
         try {
             const main: T["rpcTypes"]["main"] = script.exports["main"]!;
 
@@ -126,11 +136,10 @@ export const bootstrapAgent = async <T extends IAgent>(
                 data = prettier.format(data, prettierOptions);
             }
 
-            // Cleanup 15 seconds after receiving data
+            // Cleanup 10-15 seconds after receiving data
             logger("Finished. Will unload script, teardown session, and kill process during the next 15 seconds");
-            setTimeout(async () => await cleanupAgent({ device, session, script, pid }), 10_000);
-            await new Promise((resolve) => setTimeout(resolve, 15_000));
-
+            await new Promise((resolve) => setTimeout(resolve, 10_000));
+            await cleanupAgent({ device, session, script, pid });
             return data as Awaited<ReturnType<T["rpcTypes"]["main"]>>;
         } catch (error: unknown) {
             logger("Somethings not right, shutting down and cleaning up");
@@ -139,15 +148,24 @@ export const bootstrapAgent = async <T extends IAgent>(
         }
     };
 
-    return { device, session, script, pid, runAgent };
+    return { device, session, script, pid, runAgentMain };
 };
 
 /**
- * Asdf.
+ * Bootstraps an agent onto a connected usb device. First it spawns the game
+ * process, then it compiles the agent using the selected compiler and attaches
+ * the message handler if one was provided. The default message handler logs
+ * errors to the console. Next it loads the script into the game process and
+ * resumes the game process. Finally, a runAgent function is returned (along
+ * with some other frida components) which can be called with the arguments to
+ * your agents main.
  *
- * @param agent - 1
- * @param messageHandler - 2
- * @returns - 3
+ * @param agent - The agent to bootstrap
+ * @param options - Provide a message handler or select a different compiler
+ *   than the default one
+ * @returns - The frida components (device, session, script, and process pid) as
+ *   well as a runAgent function that takes any arguments required by the agent
+ *   and runs it
  */
 export const bootstrapAgentOverUsb = async <T extends IAgent>(
     agent: T,
@@ -158,16 +176,25 @@ export const bootstrapAgentOverUsb = async <T extends IAgent>(
 };
 
 /**
- * Asdf.
+ * Bootstraps an agent onto a remote device with frida server installed. First
+ * it spawns the game process, then it compiles the agent using the selected
+ * compiler and attaches the message handler if one was provided. The default
+ * message handler logs errors to the console. Next it loads the script into the
+ * game process and resumes the game process. Finally, a runAgent function is
+ * returned (along with some other frida components) which can be called with
+ * the arguments to your agents main.
  *
- * @param address - 1
- * @param agent - 2
- * @param messageHandler - 3
- * @returns - 4
+ * @param agent - The agent to bootstrap
+ * @param address - The frida server address
+ * @param options - Provide a message handler or select a different compiler
+ *   than the default one
+ * @returns - The frida components (device, session, script, and process pid) as
+ *   well as a runAgent function that takes any arguments required by the agent
+ *   and runs it
  */
 export const bootstrapAgentOnRemote = async <T extends IAgent>(
-    address: string,
     agent: T,
+    address: string,
     options?: IBootstrapOptions
 ): ReturnType<typeof bootstrapAgent<T>> => {
     const deviceManager = frida.getDeviceManager();

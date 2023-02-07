@@ -45,11 +45,11 @@ export type TinyTowerApkVersion = typeof TinyTowerApkVersions[number];
 
 const logger: Debug.Debugger = Debug.debug("tinyburg:apks");
 
-export const loadVersion = (version: TinyTowerApkVersion, source: TinyTowerApkSource = "apkpure"): string => {
+export const loadApk = (version: TinyTowerApkVersion, source: TinyTowerApkSource): string => {
     logger("Loading version %s from %s downloads", version, source);
     return fileURLToPath(new URL(`downloads/${source}/v${version}.apk`, import.meta.url));
 };
 
-export default loadVersion;
-export const loadFromApkpure = (version: TinyTowerApkVersion): string => loadVersion(version, "apkpure");
-export const loadFromApkmirror = (version: TinyTowerApkVersion): string => loadVersion(version, "apkmirror");
+export default loadApk;
+export const loadApkFromApkpure = (version: TinyTowerApkVersion): string => loadApk(version, "apkpure");
+export const loadApkFromApkmirror = (version: TinyTowerApkVersion): string => loadApk(version, "apkmirror");

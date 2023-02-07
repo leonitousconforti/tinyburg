@@ -4,14 +4,11 @@
 import type {
     IIsMusicEnabledAgentExports,
     ISetMusicEnabledAgentExports,
-    ISubscribeToMusicStatusAgent1,
-    ISubscribeToMusicStatusAgent2,
+    ISubscribeToMusicStatusAgent1Exports,
+    ISubscribeToMusicStatusAgent2Exports,
 } from "./shared.js";
 
-// import type { IAgent } from "@tinyburg/insight/shared/agent-main.-export.js";
 import type { IAgent } from "../../src/shared/agent-main-export.js";
-
-// import { bootstrapAgentOverUsb, cleanupAgent } from "@tinyburg/insight"
 import { bootstrapAgentOverUsb, cleanupAgent } from "../../src/index.js";
 
 import { fileURLToPath } from "node:url";
@@ -28,28 +25,28 @@ const setterAgent = {
 
 const alertAgent1 = {
     agentFile: fileURLToPath(new URL("alert-agent1.js", import.meta.url)),
-    rpcTypes: {} as unknown as ISubscribeToMusicStatusAgent1,
+    rpcTypes: {} as unknown as ISubscribeToMusicStatusAgent1Exports,
 } satisfies IAgent;
 
 const alertAgent2 = {
     agentFile: fileURLToPath(new URL("alert-agent1.js", import.meta.url)),
-    rpcTypes: {} as unknown as ISubscribeToMusicStatusAgent2,
+    rpcTypes: {} as unknown as ISubscribeToMusicStatusAgent2Exports,
 } satisfies IAgent;
 
 const result1 = await bootstrapAgentOverUsb(getterAgent);
-const data1 = await result1.runAgent();
+const data1 = await result1.runAgentMain();
 console.log(`isMusicEnabled: ${data1.musicEnabled}`);
 
 const result2 = await bootstrapAgentOverUsb(setterAgent);
-const data2 = await result2.runAgent(!data1.musicEnabled);
+const data2 = await result2.runAgentMain(!data1.musicEnabled);
 console.log(`isMusicEnabled: ${data2.musicEnabled}`);
 
 const result3 = await bootstrapAgentOverUsb(alertAgent1);
-const callback3 = (musicStatus: boolean): void => console.log(`isMusicEnabled: ${musicStatus}`);
-const data3 = await result3.runAgent(callback3);
+const callback3 = (musicStatus: boolean) => console.log(`isMusicEnabled: ${musicStatus}`);
+await result3.runAgentMain(callback3);
 setTimeout(() => cleanupAgent(result3), 20_000);
 
 const result4 = await bootstrapAgentOverUsb(alertAgent2);
-const data4 = await result4.runAgent();
+const data4 = await result4.runAgentMain();
 data4.on("musicStatusChanged", (musicStatus) => console.log(`isMusicEnabled: ${musicStatus}`));
 setTimeout(() => cleanupAgent(result4), 20_000);

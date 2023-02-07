@@ -9,6 +9,7 @@
      */
     // "copyFromCacheMode": "copy",
 
-    "project": "./tsconfig.lib.json",
+    "project": "./tsconfig.json",
+    "buildProjectReferences": true,
     "disableTslint": true
 }

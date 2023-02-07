@@ -1,0 +1,12 @@
+{
+    "$schema": "https://json.schemastore.org/tsconfig",
+    "extends": "../tsconfig.base.json",
+    "compilerOptions": {
+        "allowJs": true,
+        "checkJs": true,
+        "types": ["node", "frida-gum"],
+        "composite": true
+    },
+    "include": ["./**/*agent*.ts", "./**/*agent*.js"],
+    "references": [{ "path": "./tsconfig.examples-src.json" }, { "path": "../src/tsconfig.agents.json" }]
+}

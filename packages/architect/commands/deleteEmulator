@@ -1,1 +1,0 @@
-$ANDROID_HOME/cmdline-tools/latest/bin/avdmanager delete avd --name %s
