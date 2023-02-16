@@ -29,6 +29,10 @@
 
 </div>
 
+## note
+
+some of this information is outdated since I have moved this project to a monorepo. I just haven't updated it yet
+
 ## About Tinyburg
 
 Tinyburg is a JavaScript library/API built for the mobile game Tiny Tower by [Nimblebit](http://nimblebit.com/ "Nimblebit"). The initial desire for creating this library came from wanting to build an application that automatically entered me into the raffle every hour. While I am aware that you could achieve some of the same results by running Tiny Tower on your computer with an emulator like blue stacks and writing a simple script to make your mouse enter the raffle every hour, that really wasn't as exciting/what I really wanted to do. Some notable projects I found on GitHub that take this approach include [Cydia--Script-TinyTowerBot](https://github.com/egold555/Cydia--Script-TinyTowerBot), [TinyClicker](https://github.com/filadog/TinyClicker),
