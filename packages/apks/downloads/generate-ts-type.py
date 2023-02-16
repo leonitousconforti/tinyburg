@@ -1,21 +1,21 @@
 #!/usr/bin/env python3
 
 import os
+import re
 import functools
 
 
-def getVersions(root = os.path.dirname(__file__), versions = []):
-    for root, dirs, files in os.walk(root):
+regex = re.compile(r"([\d]+.[\d]+.[\d]+)", re.RegexFlag.MULTILINE)
+
+
+def getVersions(root):
+    versions = []
+
+    for _root, _dirs, files in os.walk(root):
         for file_name in files:
-            if (not file_name.startswith("v")):
-                continue
-
-            version = file_name[1:-4]
-            if (version not in versions):
-                versions.append(version)
-
-        for dir in dirs:
-            getVersions(dir, versions)
+            version = re.search(regex, file_name)
+            if (version is not None and version[1] not in versions):
+                versions.append(version[1])
 
     return versions
 
@@ -50,8 +50,12 @@ def compareVersions(version1, version2):
     return 0
 
 
-versions = getVersions()
-versions.sort(key=functools.cmp_to_key(compareVersions))
-allVersions = ", ".join(map(lambda version: "\"" + version + "\"", versions))
-print("export const TinyTowerApkVersions = [" + allVersions + "] as const;")
-print("export type TinyTowerApkVersion = typeof TinyTowerApkVersions[number];")
+apkpureVersions = getVersions(os.path.join(os.path.dirname(__file__), "apkpure"))
+apkpureVersions.sort(key=functools.cmp_to_key(compareVersions))
+allApkpureVersions = ", ".join(map(lambda version: "\"" + version + "\"", apkpureVersions))
+print("export const ApkpureVersions = [" + allApkpureVersions + "] as const;\n")
+
+apkmirrorVersions = getVersions(os.path.join(os.path.dirname(__file__), "apkmirror"))
+apkmirrorVersions.sort(key=functools.cmp_to_key(compareVersions))
+allApkmirrorVersions = ", ".join(map(lambda version: "\"" + version + "\"", apkmirrorVersions))
+print("export const ApkmirrorVersions = [" + allApkmirrorVersions + "] as const;\n")
