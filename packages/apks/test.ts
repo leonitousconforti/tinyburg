@@ -40,6 +40,7 @@ describe("Should load all apks from apkpure", async () => {
 
 it("Should load all apks from all sources at least once", async () => {
     const files = TinyTowerApkSources.map((source) => fs.readdir(new URL(`downloads/${source}`, import.meta.url)));
-    const count = (await Promise.all(files)).flat().length - TinyTowerApkSources.length;
+    const countPromises = await Promise.all(files);
+    const count = countPromises.flat().length - TinyTowerApkSources.length;
     expect(count).to.equal(ApkmirrorVersions.length + ApkpureVersions.length, `Should load all ${count} version`);
 });
