@@ -17,24 +17,23 @@
     "license": "MIT",
     "author": "Leo Conforti <leo@leoconforti.us> (https://leoconforti.us)",
     "type": "module",
-    "main": "dist/src/index.js",
-    "bin": {
-        "tinyburg-architect": "./dist/bin/cli.js"
-    },
+    "main": "dist/index.js",
+    "files": [
+        "dist/",
+        "emulator/"
+    ],
     "scripts": {
         "build": "heft build --clean",
-        "docker:build": "docker build emulator -t tinyburg/architect:emulator-9322596_sysimg-31-aosp-x64_frida-16.0.8",
-        "docker:push": "docker push tinyburg/architect:emulator-9322596_sysimg-31-aosp-x64_frida-16.0.8",
+        "docker:build": "docker build ./emulator -t tinyburg/architect:emulator-9322596_sysimg-31-google-apis-x64_frida-16.0.8",
+        "docker:run": "docker run --rm --device /dev/kvm --publish 5554:5554/tcp --publish 5555:5555/tcp --publish 8554:8554/tcp --publish 27042:27042/tcp -it tinyburg/architect:emulator-9322596_sysimg-31-google-apis-x64_frida-16.0.8",
         "lint": "eslint .",
         "terraform:init": "cd infrastructure && terraform init",
         "terraform:plan": "cd infrastructure && terraform plan",
         "terraform:provision": "cd infrastructure && terraform apply"
     },
     "dependencies": {
-        "commander": "~9.4.1",
         "debug": "~4.3.4",
-        "dockerode": "~3.3.4",
-        "frida": "~16.0.7"
+        "dockerode": "~3.3.4"
     },
     "devDependencies": {
         "@rushstack/eslint-config": "~3.1.1",

@@ -1,11 +1,4 @@
 /dist
-
 /infrastructure/*tfstate*
 /infrastructure/.terraform
 /infrastructure/.terraform.*
-
-/emulator/x86_64-31_r03.zip
-/emulator/emulator-linux_x64-9322596.zip
-/emulator/platform-tools_r29.0.5-linux.zip
-/emulator/frida-server-16.0.2-android-arm64.xz
-/emulator/frida-server-16.0.2-android-x86_64.xz

@@ -12,12 +12,11 @@ pactl list || exit 1
 
 # Start the emulator
 /android/sdk/emulator/emulator -avd Pixel2 -no-window -ports 5554,5555 -grpc 8554 -skip-adb-auth -wipe-data -no-boot-anim -gpu swiftshader_indirect -qemu -append panic=1 &
-sleep 10m
+sleep 2m
 
 # Configure emulator for frida
 /android/sdk/platform-tools/adb wait-for-device
 /android/sdk/platform-tools/adb root
-/android/sdk/platform-tools/adb install -r /android/apks/TinyTowerApk.apk
 /android/sdk/platform-tools/adb push /android/frida/frida-server /data/local/tmp/frida-server
 /android/sdk/platform-tools/adb shell "chmod 755 /data/local/tmp/frida-server"
 /android/sdk/platform-tools/adb shell "/data/local/tmp/frida-server &"

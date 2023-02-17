@@ -1,9 +1,5 @@
-# docker build . -t tinyburg/architect:emulator-9322596_sysimg-31-google-apis-x64_frida-16.0.8
-# docker run --device /dev/kvm --publish 5554:5554/tcp --publish 5555:5555/tcp --publish 8554:8554/tcp --publish 27042:27042/tcp -it tinyburg/architect:emulator-9322596_sysimg-31-google-apis-x64_frida-16.0.8
-
 FROM alpine:latest as dependency-preparer
 RUN apk add --update openssl wget unzip xz
-
 WORKDIR /tmp
 RUN wget https://dl.google.com/android/repository/emulator-linux_x64-9322596.zip && \
     wget https://dl.google.com/android/repository/platform-tools_r29.0.5-linux.zip && \
@@ -36,8 +32,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 ENV ANDROID_SDK_ROOT /android/sdk
 ENV ANDROID_AVD_HOME /android/avd-home
-RUN mkdir -p /android/apks && \
-    mkdir -p /android/frida && \
+RUN mkdir -p /android/frida && \
     mkdir -p /android/avd-home && \
     mkdir -p /android/sdk/emulator/ && \
     mkdir -p /android/sdk/platforms/ && \
@@ -52,7 +47,6 @@ COPY --from=dependency-preparer /tmp/frida-server-16.0.8-android-x86_64 /android
 COPY avd/ /android/avd-home
 COPY launch-emulator.sh /android/sdk/
 COPY default.pulse-audio /etc/pulse/default.pa
-COPY TinyTowerApk.apk /android/apks/TinyTowerApk.apk
 
 RUN gpasswd -a root audio && \
     chmod +x /android/sdk/platform-tools/adb && \
