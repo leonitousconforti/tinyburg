@@ -1,6 +1,7 @@
 {
     "name": "@tinyburg/tsconfig-rig",
     "version": "0.0.1",
+    "private": true,
     "files": [
         "./profiles/*"
     ],
