@@ -8,5 +8,8 @@ export interface IMission extends _IMission {
 }
 
 // Blocks for parsing a mission
-const bitizenMissionBlock = { m_bzn: ["bitizen", bitizenBlocks, undefined, "object"], __type: (): IMission => ({} as IMission) } as const;
+const bitizenMissionBlock = {
+    m_bzn: ["bitizen", bitizenBlocks, undefined, "object"],
+    __type: (): IMission => ({} as IMission),
+} as const;
 export const missionBlocks = insertIntoBlocks(_missionBlocks, undefined, bitizenMissionBlock);

@@ -6,8 +6,8 @@ import { defaultHeaders } from "../contact-server.js";
 import { jsDateToTicks } from "../parsing-structs/time-helpers.js";
 
 // Debug logger, will default to using this if no other logger is supplied.
-const loggingNamespace = "tinyburg:endpoints:bitbook_cloud_feed";
-const debug = new DebugLogger(loggingNamespace);
+const loggingNamespace: string = "tinyburg:endpoints:bitbook_cloud_feed";
+const debug: ILogger = new DebugLogger(loggingNamespace);
 
 // Nimblebit api cloud bitbook post response type.
 export interface ICloudBitbookPost {
@@ -20,7 +20,7 @@ export interface ICloudBitbookPost {
 }
 
 // Nimblebit api cloud bitbook post url.
-export const bitbookPostCloudFeedEndpoint = "https://s3.amazonaws.com/NBStatic/TTUnityCloudBBPost.json";
+export const bitbookPostCloudFeedEndpoint: string = "https://s3.amazonaws.com/NBStatic/TTUnityCloudBBPost.json";
 
 // Pulls from the cloud gift feed.
 export const pullBitbookPostCloudFeed = async (logger: ILogger = debug): Promise<ICloudBitbookPost> => {

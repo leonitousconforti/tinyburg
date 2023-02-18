@@ -49,5 +49,6 @@ const PMissionHistoryBlocks = { __type: (): INimblebitJsonSave => ({} as INimble
 const blocksWithMissionHistory = insertIntoBlocks(blocksWithHouse, "Pbhst", PMissionHistoryBlocks);
 
 // Export the new blocks as immutable
-const immutableBlock: { [P in keyof typeof blocksWithMissionHistory]: typeof blocksWithMissionHistory[P] } = blocksWithMissionHistory;
+const immutableBlock: { [P in keyof typeof blocksWithMissionHistory]: typeof blocksWithMissionHistory[P] } =
+    blocksWithMissionHistory;
 export const blocks = immutableBlock;

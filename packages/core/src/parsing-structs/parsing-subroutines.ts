@@ -10,11 +10,10 @@ const debug = new DebugLogger(loggingNamespace);
 
 // Sub-routine for recursive parsing of layered blocks (this is a recursive function)
 export const parsingSubRoutine = function <T extends GenericBlocks, U extends GenericJsonSave<T>>(
-    NimblebitSave: DecompressedSave,
+    nimblebitSave: DecompressedSave,
     blocksToUse: T,
     log: ILogger = debug
 ): U {
-    const logTag = { loggingNamespace };
     const nimblebitJsonSave: U = {} as U;
 
     // For all the keys in the blocks to use
@@ -23,10 +22,10 @@ export const parsingSubRoutine = function <T extends GenericBlocks, U extends Ge
         if (blockKey.slice(0, 2) === "__" || typeof blockValue === "function") continue;
 
         // Determine if the decompressed save even has this block to parse
-        const saveHasBlock = hasBlock(NimblebitSave, blockKey);
+        const saveHasBlock = hasBlock(nimblebitSave, blockKey);
         if (!saveHasBlock) {
             // If the block is not in this save
-            log.debug(logTag, "Save does not have block %s", blockKey);
+            log.debug("Save does not have block %s", blockKey);
 
             if (typeof blockValue === "string") nimblebitJsonSave[blockValue as keyof U] = undefined as never;
             else if (Array.isArray(blockValue)) nimblebitJsonSave[blockValue[0] as keyof U] = undefined as never;
@@ -34,10 +33,8 @@ export const parsingSubRoutine = function <T extends GenericBlocks, U extends Ge
         }
 
         // Otherwise, the save has the block
-        log.debug(logTag, "Save has block %s", blockValue);
-
-        // eslint-disable-next-line unicorn/no-null
-        const dataFromBlock = getBlock(NimblebitSave, blockKey) || null;
+        log.debug("Save has block %s", blockValue);
+        const dataFromBlock = getBlock(nimblebitSave, blockKey) || null;
 
         // If the block is not complicated, i.e coins or just one thing
         if (typeof blockValue === "string") {
@@ -47,8 +44,7 @@ export const parsingSubRoutine = function <T extends GenericBlocks, U extends Ge
 
         // Check for null
         if (dataFromBlock === null) {
-            log.debug(logTag, "Save data for key %s is null", blockKey);
-            // eslint-disable-next-line unicorn/no-null
+            log.debug("Save data for key %s is null", blockKey);
             nimblebitJsonSave[blockValue[0] as keyof U] = null as never;
             continue;
         }
@@ -103,11 +99,10 @@ export const parsingSubRoutine = function <T extends GenericBlocks, U extends Ge
 
 // Sub-routine for recursive concatenation of layered blocks
 export const concatenationSubRoutine = function <T extends GenericBlocks, U extends GenericJsonSave<T>>(
-    JsonSave: U,
+    jsonSave: U,
     blocksToUse: T,
     log: ILogger = debug
 ): DecompressedSave {
-    const logTag = { loggingNamespace };
     let nimblebitSave = "";
 
     // For all the keys in the blocks array
@@ -117,7 +112,7 @@ export const concatenationSubRoutine = function <T extends GenericBlocks, U exte
 
         // If it is a simple block, i.e the value in the blocks array is not a
         if (typeof blockValue === "string") {
-            nimblebitSave += blockString(blockKey, JsonSave[blockValue as keyof U] as unknown as string | number);
+            nimblebitSave += blockString(blockKey, jsonSave[blockValue as keyof U] as unknown as string | number);
             continue;
         }
 
@@ -129,23 +124,23 @@ export const concatenationSubRoutine = function <T extends GenericBlocks, U exte
         let layeredBlockData = "";
 
         // If the value does not exist in the json, continue
-        if (JsonSave[nameOfBlock] === undefined) {
-            log.debug(logTag, "Save does not have key %s", blockKey);
+        if (jsonSave[nameOfBlock] === undefined) {
+            log.debug("Save does not have key %s", blockKey);
             continue;
         }
 
         // If the output format was an object and the next blocks are an array
         // then join the properties of the object by the separator
         else if (blockOutputFormat === "object" && Array.isArray(nextBlocksToUse)) {
-            layeredBlockData = Object.values(JsonSave[nameOfBlock]!).join(separator);
+            layeredBlockData = Object.values(jsonSave[nameOfBlock]!).join(separator);
         }
 
         // If the output format was an object and the next blocks are not an array
         // then recurse the json again.
         else if (blockOutputFormat === "object" && !Array.isArray(nextBlocksToUse)) {
-            log.debug(logTag, "%s", JSON.stringify(JsonSave[nameOfBlock]));
+            log.debug("%s", JSON.stringify(jsonSave[nameOfBlock]));
             layeredBlockData = concatenationSubRoutine(
-                JsonSave[nameOfBlock],
+                jsonSave[nameOfBlock],
                 nextBlocksToUse as GenericBlocks
             ).toString();
         }
@@ -156,7 +151,7 @@ export const concatenationSubRoutine = function <T extends GenericBlocks, U exte
         // by the simple blockString above, however, their blockOutputFormat is both
         // object so these types will never make it into this if statement
         else if (blockOutputFormat === "array" && Array.isArray(nextBlocksToUse)) {
-            layeredBlockData = (JsonSave[nameOfBlock] as unknown as unknown[]).join(separator);
+            layeredBlockData = (jsonSave[nameOfBlock] as unknown as unknown[]).join(separator);
         }
 
         // If the output format was an array and the next blocks are not an array
@@ -164,7 +159,7 @@ export const concatenationSubRoutine = function <T extends GenericBlocks, U exte
         // is because the array type is unknown when passing it to the
         // concatenation subroutine function
         else if (blockOutputFormat === "array" && !Array.isArray(nextBlocksToUse)) {
-            const array = JsonSave[nameOfBlock] as unknown as unknown[];
+            const array = jsonSave[nameOfBlock] as unknown as unknown[];
 
             for (const item of array) {
                 const nb: GenericBlocks = nextBlocksToUse as GenericBlocks;

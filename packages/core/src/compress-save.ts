@@ -5,8 +5,8 @@ import { deflateSync } from "node:zlib";
 import { DebugLogger } from "./logger.js";
 
 // Debug logger
-const loggingNamespace = "tinyburg:compress_save";
-const debug = new DebugLogger(loggingNamespace);
+const loggingNamespace: string = "tinyburg:compress_save";
+const debug: ILogger = new DebugLogger(loggingNamespace);
 
 export const compressSave = (input: DecompressedSave, log: ILogger = debug): string => {
     // Deflate the input, then convert it to base64

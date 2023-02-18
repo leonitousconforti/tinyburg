@@ -1,6 +1,6 @@
 import type { ITTConfig } from "../tt-config.js";
 import type { IGift } from "../parsing-structs/gift.js";
-import type { INimblebitResponse, SuccessFoundNotFound } from "./nimblebit-response.js";
+import type { INimblebitResponse, ISuccessFoundNotFound } from "./nimblebit-response.js";
 
 import { sendItem } from "./send-item.js";
 import { extract } from "../modify-save.js";
@@ -12,10 +12,11 @@ import { isValidPlayerId } from "../validation/is-valid-player-id.js";
 import { getNetworkRequest, serverEndpoints } from "../contact-server.js";
 
 // Debug logger (will default to using this if no other logger is supplied).
-const loggingNamespace = "tinyburg:endpoints:visits";
-const debug = new DebugLogger(loggingNamespace);
+const loggingNamespace: string = "tinyburg:endpoints:visits";
+const debug: ILogger = new DebugLogger(loggingNamespace);
 
 // Visit player function params.
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type VisitPlayerParameters = {
     friend: string;
 };
@@ -26,15 +27,11 @@ export interface IVisitFriend extends INimblebitResponse {
 }
 
 // Nimblebit api get visits response type.
-export interface IVisits extends SuccessFoundNotFound, Omit<INimblebitResponse, "success"> {
-    /**
-     * List of gifts that have been sent to you.
-     */
+export interface IVisits extends ISuccessFoundNotFound, Omit<INimblebitResponse, "success"> {
+    /** List of gifts that have been sent to you. */
     gifts: IGift[];
 
-    /**
-     * The total number of gifts received.
-     */
+    /** The total number of gifts received. */
     total: number;
 }
 
@@ -45,7 +42,7 @@ export const visitFriend = async (
     logger: ILogger = debug
 ): Promise<IVisitFriend> => {
     // Setup logging
-    const passLogger = logger != debug ? logger : undefined;
+    const passLogger = logger === debug ? undefined : logger;
     logger.info("Visiting %s...", friend);
 
     // Player must be authenticated
@@ -69,13 +66,12 @@ export const visitFriend = async (
 // Returns a list of players who has visited you that you have not received.
 export const getVisits = async (config: ITTConfig, logger: ILogger = debug): Promise<IVisits> => {
     // Setup logging
-    const passLogger = logger != debug ? logger : undefined;
-    const logTag = { forPlayer: config.player.playerId, loggingNamespace };
-    logger.info(logTag, "Fetching visit...");
+    const passLogger = logger === debug ? undefined : logger;
+    logger.info("Fetching visit...");
 
     // Player must be authenticated
     if (!config.authenticated) {
-        return logger.fatal(logTag, new Error("Player not authenticated"));
+        return logger.fatal(new Error("Player not authenticated"));
     }
 
     // The get visits request follows the same authentication process as most other endpoints. The endpoint
@@ -91,14 +87,14 @@ export const getVisits = async (config: ITTConfig, logger: ILogger = debug): Pro
 
     // Bad response
     if (serverResponse.error) {
-        return logger.fatal(logTag, new Error(`Authentication error: ${serverResponse.error}`));
+        return logger.fatal(new Error(`Authentication error: ${serverResponse.error}`));
     }
 
     // Good response
     if (serverResponse.success === "Found") {
-        logger.info(logTag, "Success, you have %s visits waiting!", serverResponse.total);
+        logger.info("Success, you have %s visits waiting!", serverResponse.total);
         return serverResponse;
     }
 
-    return logger.fatal(logTag, new Error("Bad server response"));
+    return logger.fatal(new Error("Bad server response"));
 };

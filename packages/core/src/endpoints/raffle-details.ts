@@ -3,8 +3,8 @@ import { defaultHeaders } from "../contact-server.js";
 import { DebugLogger, ILogger } from "../logger.js";
 
 // Debug logger (will default to using this if no other logger is supplied)
-const loggingNamespace = "tinyburg:endpoints:raffle_details";
-const debug = new DebugLogger(loggingNamespace);
+const loggingNamespace: string = "tinyburg:endpoints:raffle_details";
+const debug: ILogger = new DebugLogger(loggingNamespace);
 
 // Nimblebit api raffle details response type.
 export interface IRaffleDetails {
@@ -15,7 +15,7 @@ export interface IRaffleDetails {
 }
 
 // Nimblebit api raffle details url.
-export const raffleDetailsEndpoint = "https://s3.amazonaws.com/NBStatic/sync/tt/currentRaffle.json";
+export const raffleDetailsEndpoint: string = "https://s3.amazonaws.com/NBStatic/sync/tt/currentRaffle.json";
 
 // Obtains information about the current raffle drawing.
 export const raffleDetails = async (logger: ILogger = debug): Promise<IRaffleDetails> => {

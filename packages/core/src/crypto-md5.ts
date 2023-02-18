@@ -4,7 +4,7 @@ import { createHash } from "node:crypto";
 import { NoopLogger } from "./logger.js";
 
 // Noop logger
-const noop = new NoopLogger();
+const noop: ILogger = new NoopLogger();
 
 export const cryptoMD5 = (input: string, logger: ILogger = noop): string => {
     const hash = createHash("md5").update(input).digest("hex");

@@ -4,16 +4,16 @@ import type { DecompressedSave } from "./decompress-save.js";
 import type { IPushSnapshot } from "./endpoints/snapshots.js";
 import type { INimblebitJsonSave } from "./parsing-structs/blocks.js";
 
-import * as fs from "node:fs/promises";
+import fs from "node:fs/promises";
 import { DebugLogger } from "./logger.js";
 import { compressSave } from "./compress-save.js";
 import { parseSaveToJson } from "./save-parser.js";
-import { downloadSave } from "./endpoints/download-save.js";
 import { pushSnapshot } from "./endpoints/snapshots.js";
+import { downloadSave } from "./endpoints/download-save.js";
 
 // Debug logger
-const loggingNamespace = "tinyburg:backups";
-const debug = new DebugLogger(loggingNamespace);
+const loggingNamespace: string = "tinyburg:backups";
+const debug: ILogger = new DebugLogger(loggingNamespace);
 
 export enum BackupType {
     JSON = "Json",
@@ -21,6 +21,7 @@ export enum BackupType {
     DECOMPRESSED = "decompressed",
 }
 
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type BackupParameters = {
     config: ITTConfig;
     logger?: ILogger;
@@ -33,13 +34,12 @@ export type LocalBackupParameters = {
 
 export const snapshotBackup = async ({ config, logger = debug }: BackupParameters): Promise<IPushSnapshot> => {
     // Setup logging
-    const passLogger = logger != debug ? logger : undefined;
-    const logTag = { forPlayer: config.player.playerId, loggingNamespace };
-    logger.info(logTag, "Starting snapshot backup process for player: %s", config.player.playerId);
+    const passLogger = logger === debug ? undefined : logger;
+    logger.info("Starting snapshot backup process for player: %s", config.player.playerId);
 
     // Player must be authenticated
     if (!config.authenticated) {
-        return logger.fatal(logTag, new Error("Player not authenticated"));
+        return logger.fatal(new Error("Player not authenticated"));
     }
 
     // Download to current tower data and then upload it as a snapshot
@@ -54,10 +54,8 @@ export const localBackup = async ({
     logger = debug,
 }: LocalBackupParameters): Promise<boolean> => {
     // Setup logging
-    const passLogger = logger != debug ? logger : undefined;
-    const logTag = { forPlayer: config.player.playerId, loggingNamespace };
+    const passLogger = logger === debug ? undefined : logger;
     logger.info(
-        logTag,
         "Starting local backup process with type: %s, to: %s, for player: %s",
         type,
         location,
@@ -66,7 +64,7 @@ export const localBackup = async ({
 
     // Player must be authenticated
     if (!config.authenticated) {
-        return logger.fatal(logTag, new Error("Player not authenticated"));
+        return logger.fatal(new Error("Player not authenticated"));
     }
 
     // Download the current tower data and get it ready to format
@@ -94,46 +92,29 @@ export async function applicationLevelBackup<
         : INimblebitJsonSave
 >({ config, type, logger = debug }: BackupParameters & { type: T }): Promise<U> {
     // Setup logging
-    const passLogger = logger != debug ? logger : undefined;
-    const logTag = { forPlayer: config.player.playerId, loggingNamespace };
-    logger.info(
-        logTag,
-        "Starting application backup process with type: %s for player: %s",
-        type,
-        config.player.playerId
-    );
+    const passLogger = logger === debug ? undefined : logger;
+    logger.info("Starting application backup process with type: %s for player: %s", type, config.player.playerId);
 
     // Player must be authenticated
     if (!config.authenticated) {
-        return logger.fatal(logTag, new Error("Player not authenticated"));
+        return logger.fatal(new Error("Player not authenticated"));
     }
 
     // Download the current tower data and get it ready to format
     const saveData = await downloadSave(config, passLogger);
 
     switch (type) {
-        case BackupType.COMPRESSED:
+        case BackupType.COMPRESSED: {
             return compressSave(saveData, passLogger) as U;
-        case BackupType.DECOMPRESSED:
+        }
+        case BackupType.DECOMPRESSED: {
             return saveData.toString() as U;
-        case BackupType.JSON:
+        }
+        case BackupType.JSON: {
             return parseSaveToJson(saveData, false, passLogger) as Promise<U>;
-        default:
+        }
+        default: {
             throw new Error("Invalid backup type");
+        }
     }
 }
-
-// Factory functions
-export const applicationLevelBackupFactory = (logger?: ILogger) => {
-    return <
-        T extends BackupType,
-        U extends T extends BackupType.COMPRESSED
-            ? string
-            : T extends BackupType.DECOMPRESSED
-            ? DecompressedSave
-            : INimblebitJsonSave
-    >({
-        config,
-        type,
-    }: BackupParameters & { type: T }): Promise<U> => applicationLevelBackup({ config, type, logger });
-};

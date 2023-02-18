@@ -1,4 +1,8 @@
-import { IBitizen as _IBitizen, bitizenAttributesBlocks as _bitizenAttributesBlocks, bitizenBlocks as _bitizenBlocks } from "../v3.15.4/bitizen.js";
+import {
+    IBitizen as _IBitizen,
+    bitizenBlocks as _bitizenBlocks,
+    bitizenAttributesBlocks as _bitizenAttributesBlocks,
+} from "../v3.15.4/bitizen.js";
 
 // Typescript type for a parsed bitizen
 export interface IBitizen extends _IBitizen {
@@ -20,5 +24,6 @@ export const bitizenAttributesBlocks = bitizenAttributeBlocksWithIdk;
 const mutableBitizenBlocks = _bitizenBlocks as unknown as BitizenBlocks4_0_0;
 
 // Export new blocks for parsing a bitizen as immutable
-const immutableBlock: { [P in keyof typeof mutableBitizenBlocks]: typeof mutableBitizenBlocks[P] } = mutableBitizenBlocks;
+const immutableBlock: { [P in keyof typeof mutableBitizenBlocks]: typeof mutableBitizenBlocks[P] } =
+    mutableBitizenBlocks;
 export const bitizenBlocks = immutableBlock;

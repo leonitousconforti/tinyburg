@@ -6,8 +6,8 @@ import { DebugLogger, ILogger } from "../logger.js";
 import { serverEndpoints, getNetworkRequest } from "../contact-server.js";
 
 // Debug logger (will default to using this if no other logger is supplied).
-const loggingNamespace = "tinyburg:endpoints:raffle";
-const debug = new DebugLogger(loggingNamespace);
+const loggingNamespace: string = "tinyburg:endpoints:raffle";
+const debug: ILogger = new DebugLogger(loggingNamespace);
 
 // Nimblebit api entered raffle response type.
 export interface IEnteredRaffle extends INimblebitResponse {
@@ -16,16 +16,14 @@ export interface IEnteredRaffle extends INimblebitResponse {
 
 // Tinyburg enter raffle and enter multi raffle return type.
 export interface IEnterRaffle extends IEnteredRaffle {
-    /**
-     * How many minutes until the next available entry time.
-     */
+    /** How many minutes until the next available entry time. */
     nextEntryTime: number;
 }
 
 // Enters a player into the current hourly raffle drawing.
 export const enterRaffle = async (config: ITTConfig, logger: ILogger = debug): Promise<IEnterRaffle> => {
     // Setup logging
-    const passLogger = logger != debug ? logger : undefined;
+    const passLogger = logger === debug ? undefined : logger;
     logger.info("Entering raffle for player %s...", config.player.playerId);
 
     // Player must be authenticated
@@ -62,7 +60,7 @@ export const enterRaffle = async (config: ITTConfig, logger: ILogger = debug): P
 // Enters a player into the multi raffle (next 8 raffles).
 export const enterMultiRaffle = async (config: ITTConfig, logger: ILogger = debug): Promise<IEnterRaffle> => {
     // Setup logging
-    const passLogger = logger != debug ? logger : undefined;
+    const passLogger = logger === debug ? undefined : logger;
     logger.info("Entering multi-raffle for player %s...", config.player.playerId);
 
     // Player must be authenticated
@@ -99,7 +97,7 @@ export const enterMultiRaffle = async (config: ITTConfig, logger: ILogger = debu
 // Checks if a player is entered in the current raffle drawing.
 export const checkEnteredRaffle = async (config: ITTConfig, logger: ILogger = debug): Promise<boolean> => {
     // Setup logging
-    const passLogger = logger != debug ? logger : undefined;
+    const passLogger = logger === debug ? undefined : logger;
     logger.info("Checking if player %s is entered in current raffle drawing...", config.player.playerId);
 
     // Player must be authenticated

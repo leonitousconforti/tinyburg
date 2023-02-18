@@ -5,8 +5,8 @@ import { DebugLogger, ILogger } from "../logger.js";
 import { serverEndpoints, getNetworkRequest } from "../contact-server.js";
 
 // Debug logger (will default to using this if no other logger is supplied).
-const loggingNamespace = "tinyburg:endpoints:new-user";
-const debug = new DebugLogger(loggingNamespace);
+const loggingNamespace: string = "tinyburg:endpoints:new-user";
+const debug: ILogger = new DebugLogger(loggingNamespace);
 
 // Nimblebit api new user response type.
 export interface INewUser {
@@ -18,7 +18,7 @@ export interface INewUser {
 // Request a new user from nimblebit's servers.
 export const newUser = async (config: ITTConfig, logger: ILogger = debug): Promise<INewUser> => {
     // Setup logging
-    const passLogger = logger != debug ? logger : undefined;
+    const passLogger = logger === debug ? undefined : logger;
     logger.info("Contacting Nimblebit server for TinyTower new user creation...");
 
     // The new user request does not follow the same authentication process as most other endpoints.

@@ -4,8 +4,8 @@ import { DebugLogger } from "./logger.js";
 import { randomFillSync } from "node:crypto";
 
 // Debug logger
-const loggingNamespace = "tinyburg:crypto_salt";
-const debug = new DebugLogger(loggingNamespace);
+const loggingNamespace: string = "tinyburg:crypto_salt";
+const debug: ILogger = new DebugLogger(loggingNamespace);
 
 export const cryptoSalt = (log: ILogger = debug): number => {
     const a = new Int32Array(1);

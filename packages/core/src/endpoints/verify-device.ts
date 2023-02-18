@@ -6,47 +6,34 @@ import { DebugLogger, ILogger } from "../logger.js";
 import { serverEndpoints, defaultHeaders } from "../contact-server.js";
 
 // Debug logger (will default to using this if no other logger is supplied).
-const loggingNamespace = "tinyburg:endpoints:register_email";
-const debug = new DebugLogger(loggingNamespace);
+const loggingNamespace: string = "tinyburg:endpoints:register_email";
+const debug: ILogger = new DebugLogger(loggingNamespace);
 
 // Verify device function params.
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type VerifyDeviceParameters = {
-    /**
-     * The 4 digit verification code sent to you in an email from Nimblebit.
-     */
+    /** The 4 digit verification code sent to you in an email from Nimblebit. */
     verificationCode: string;
 };
 
 // Nimblebit api verify device response type.
 export interface IVerifyDevice extends INimblebitResponse {
-    /**
-     * PlayerId of the player signing in.
-     */
+    /** PlayerId of the player signing in. */
     player_id: string;
 
-    /**
-     * PlayerSs of the player signing in.
-     */
+    /** PlayerSs of the player signing in. */
     player_ss: string;
 
-    /**
-     * PlayerEmail of the player signing in.
-     */
+    /** PlayerEmail of the player signing in. */
     player_email: string;
 
-    /**
-     * Profile photo of the player signing in (always empty).
-     */
+    /** Profile photo of the player signing in (always empty). */
     player_photo?: string;
 
-    /**
-     * Nickname of the player signing in (always empty).
-     */
+    /** Nickname of the player signing in (always empty). */
     player_nickname?: string;
 
-    /**
-     * On success, this endpoint responds with "NewDevice".
-     */
+    /** On success, this endpoint responds with "NewDevice". */
     success?: "NewDevice";
 }
 
@@ -79,8 +66,10 @@ export const verifyDevice = async (
 
     // Good response
     if (serverResponse.success === "NewDevice") {
+        // https://eslint.org/docs/latest/rules/require-atomic-updates
+        if (!config.authenticated) config.authenticated = true;
         config.player.playerSs = serverResponse.player_ss;
-        config.authenticated = true;
+
         logger.info("Device verification success, playerSs is %s", serverResponse.player_ss);
         logger.info("updated config to: %O", config);
         logger.info("player fully authenticated, consider saving the config to the filesystem");

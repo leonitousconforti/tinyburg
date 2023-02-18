@@ -11,7 +11,13 @@ export type ParsingBlocksType = typeof blocks;
 export type ParsingBlocksKey = keyof ParsingBlocksType;
 export type ParsingBlocksValue = ParsingBlocksType[ParsingBlocksKey];
 
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type GenericBlocks = {
-    [k: string]: string | (() => unknown) | readonly [string, readonly unknown[] | GenericBlocks, "|" | "," | undefined, "object" | "array"];
+    [k: string]:
+        | string
+        | (() => unknown)
+        | readonly [string, readonly unknown[] | GenericBlocks, "|" | "," | undefined, "object" | "array"];
 };
-export type GenericJsonSave<T extends GenericBlocks> = T["__type"] extends () => unknown ? ReturnType<T["__type"]> : unknown;
+export type GenericJsonSave<T extends GenericBlocks> = T["__type"] extends () => unknown
+    ? ReturnType<T["__type"]>
+    : unknown;

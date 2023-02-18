@@ -1,7 +1,7 @@
 import type { ITTConfig } from "../tt-config.js";
 import type { IDownloadSave } from "./download-save.js";
 import type { INimblebitJsonSave } from "../parsing-structs/blocks.js";
-import type { INimblebitResponse, IUserMetaDescribed, SuccessFoundNotFound } from "./nimblebit-response.js";
+import type { INimblebitResponse, IUserMetaDescribed, ISuccessFoundNotFound } from "./nimblebit-response.js";
 
 import { cryptoMD5 } from "../crypto-md5.js";
 import { cryptoSalt } from "../crypto-salt.js";
@@ -11,53 +11,47 @@ import { DecompressedSave, decompressSave } from "../decompress-save.js";
 import { getNetworkRequest, postNetworkRequest, serverEndpoints } from "../contact-server.js";
 
 // Debug logger (will default to using this if no other logger is supplied).
-const loggingNamespace = "tinyburg:endpoints:snapshots";
-const debug = new DebugLogger(loggingNamespace);
+const loggingNamespace: string = "tinyburg:endpoints:snapshots";
+const debug: ILogger = new DebugLogger(loggingNamespace);
 
 // Pull snapshot function params.
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type PullSnapshotParameters = {
-    /**
-     * The id of the snapshot to pull
-     */
+    /** The id of the snapshot to pull */
     snapshotId: number;
 };
 
 // Push snapshot function params.
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type PushSnapshotParameters = {
     /**
-     * The save data to upload, can be either a decompressed save or a json save.
+     * The save data to upload, can be either a decompressed save or a json
+     * save.
      */
     saveData: DecompressedSave | INimblebitJsonSave;
 
-    /**
-     * The language your game is in, defaults to "en-us".
-     */
+    /** The language your game is in, defaults to "en-us". */
     language?: string;
 
-    /**
-     * The platform you are playing on.
-     */
+    /** The platform you are playing on. */
     platform?: "IOS" | "Android";
 };
 
 // Nimblebit api retrieve snapshot response type.
-export interface IRetrieveSnapshotList extends SuccessFoundNotFound, Omit<INimblebitResponse, "success"> {
+export interface IRetrieveSnapshotList extends ISuccessFoundNotFound, Omit<INimblebitResponse, "success"> {
     saves: [
         {
             /**
-             * Save version that this snapshot was from. Save versions are integer numbers
-             * starting at 0 and incrementing by 1 for each following version.
+             * Save version that this snapshot was from. Save versions are
+             * integer numbers starting at 0 and incrementing by 1 for each
+             * following version.
              */
             id: number;
 
-            /**
-             * The time that this rebuild/snapshot was created at.
-             */
+            /** The time that this rebuild/snapshot was created at. */
             created: number;
 
-            /**
-             * Meta data for the player at the time this snapshot was taken.
-             */
+            /** Meta data for the player at the time this snapshot was taken. */
             meta: IUserMetaDescribed;
         }
     ];
@@ -65,9 +59,7 @@ export interface IRetrieveSnapshotList extends SuccessFoundNotFound, Omit<INimbl
 
 // Nimblebit api pull snapshots response type.
 export interface IPullSnapshot extends IDownloadSave {
-    /**
-     * Character? (a.k.a doorman or avatar?) not entirely sure.
-     */
+    /** Character? (a.k.a doorman or avatar?) not entirely sure. */
     c: number;
 }
 
@@ -82,7 +74,7 @@ export const retrieveSnapshotList = async (
     logger: ILogger = debug
 ): Promise<IRetrieveSnapshotList> => {
     // Setup logging
-    const passLogger = logger != debug ? logger : undefined;
+    const passLogger = logger === debug ? undefined : logger;
     logger.info("Pulling snapshot list for player: %s", config.player.playerId);
 
     // Player must be authenticated
@@ -122,7 +114,7 @@ export const pushSnapshot = async (
     logger: ILogger = debug
 ): Promise<IPushSnapshot> => {
     // Setup logging
-    const passLogger = logger != debug ? logger : undefined;
+    const passLogger = logger === debug ? undefined : logger;
     logger.info("Pulling snapshot list for player: %s", config.player.playerId);
 
     // Player must be authenticated
@@ -171,7 +163,7 @@ export const pullSnapshot = async (
     logger: ILogger = debug
 ): Promise<DecompressedSave> => {
     // Setup logging
-    const passLogger = logger != debug ? logger : undefined;
+    const passLogger = logger === debug ? undefined : logger;
     logger.info("Pulling snapshot: %s", snapshotId);
 
     // Player must be authenticated
@@ -230,13 +222,14 @@ export const pullSnapshot = async (
 };
 
 // Compute validation hash function params.
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type PullSnapshotValidationHashParameters = {
     playerId: string;
     salt: number;
     saveVersion: number;
     saveData: string;
-    playerSs?: string;
-    secretSalt?: string;
+    playerSs: string | undefined;
+    secretSalt: string | undefined;
 };
 
 // Compute the validation hash and confirm that it matches what Nimblebit's api sent. The
@@ -245,7 +238,7 @@ export const computePullSnapshotValidationHash = (
     { playerId, salt, saveVersion, saveData, playerSs, secretSalt }: PullSnapshotValidationHashParameters,
     logger: ILogger = debug
 ): string => {
-    const passLogger = logger != debug ? logger : undefined;
+    const passLogger = logger === debug ? undefined : logger;
 
     logger.info("Computing validation hash with parameters %o", {
         playerId,

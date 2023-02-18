@@ -1,13 +1,14 @@
 import deepExtend from "deep-extend";
 
 // Closures
+import { createConfigClosure } from "./closures/config.js";
 import { createLoggerClosure } from "./closures/logger.js";
 import { loggerConfigClosure } from "./closures/logger-config.js";
 
 // Validation functions
 import { isValidPlayerId } from "./validation/is-valid-player-id.js";
 
-// Library structures
+// Library configs
 import { ITTConfig, defaultConfig } from "./tt-config.js";
 
 // Library methods to expose
@@ -43,19 +44,19 @@ import {
     pullSnapshot,
     computePullSnapshotValidationHash,
 } from "./endpoints/snapshots.js";
-import { uploadSave, generateUploadMetadata } from "./endpoints/upload-save.js";
+import { uploadSave } from "./endpoints/upload-save.js";
 import { verifyDevice } from "./endpoints/verify-device.js";
 import { getVisits, visitFriend } from "./endpoints/visits.js";
 
 // Debug logger
 import { DebugLogger, ILogger } from "./logger.js";
-import { createConfigClosure } from "./closures/config.js";
-const debug = new DebugLogger("tinyburg:core");
+const debug: ILogger = new DebugLogger("tinyburg:core");
 
-export const fromConfig = async (_config: ITTConfig, logger: ILogger = debug) => {
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+export const fromConfig = (partialConfig: ITTConfig, logger: ILogger = debug) => {
     // Extend the values in the default config with the values in the config provided
     // Needs to be a deep extend, not userConfig = Object.assign(defaultConfig, userConfig);
-    const config: ITTConfig = deepExtend(defaultConfig, _config);
+    const config: ITTConfig = deepExtend(defaultConfig, partialConfig);
 
     // Not enough data provided, or data was in the wrong format
     if (!config.player.playerEmail && !config.player.playerSs) {
@@ -151,6 +152,7 @@ export const fromConfig = async (_config: ITTConfig, logger: ILogger = debug) =>
     };
 };
 
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export const fromPlayerId = (playerId: string, playerEmail?: string, playerSs?: string, log: ILogger = debug) => {
     return fromConfig(
         {
@@ -160,7 +162,7 @@ export const fromPlayerId = (playerId: string, playerEmail?: string, playerSs?: 
                 playerEmail,
             },
         } as unknown as ITTConfig,
-        log != debug ? log : undefined
+        log === debug ? undefined : log
     );
 };
 

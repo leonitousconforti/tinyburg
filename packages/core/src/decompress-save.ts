@@ -4,8 +4,8 @@ import { inflateSync } from "node:zlib";
 import { DebugLogger } from "./logger.js";
 
 // Debug logger
-const loggingNamespace = "tinyburg:decompress_save";
-const debug = new DebugLogger(loggingNamespace);
+const loggingNamespace: string = "tinyburg:decompress_save";
+const debug: ILogger = new DebugLogger(loggingNamespace);
 
 // Got this from: https://github.com/Microsoft/TypeScript/issues/202#issuecomment-811246768 because
 // I want stricter type checking for the decompressedSave type which was just a string.
@@ -13,9 +13,11 @@ const debug = new DebugLogger(loggingNamespace);
 declare class OpaqueString<T extends string> extends String {
     /** This helps typescript distinguish different opaque string types. */
     protected readonly __opaqueString: T;
-    /** This object is already a string, but calling this makes method
-     * makes typescript recognize it as such. */
-    toString(): string;
+    /**
+     * This object is already a string, but calling this makes method makes
+     * typescript recognize it as such.
+     */
+    public toString(): string;
 }
 
 // Decompressed save type, (its just a string) but now we can do better type checking for other functions

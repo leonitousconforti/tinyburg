@@ -11,24 +11,19 @@ import { serverEndpoints, postNetworkRequest } from "../contact-server.js";
 import { concatenationSubRoutine } from "../parsing-structs/parsing-subroutines.js";
 
 // Debug logger (will default to using this if no other logger is supplied).
-const loggingNamespace = "tinyburg:endpoints:send_item";
-const debug = new DebugLogger(loggingNamespace);
+const loggingNamespace: string = "tinyburg:endpoints:send_item";
+const debug: ILogger = new DebugLogger(loggingNamespace);
 
 // Send item function params
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type SendItemParameters = {
-    /**
-     * Type of the item to send.
-     */
+    /** Type of the item to send. */
     itemType: SyncItemType;
 
-    /**
-     * Friend/cloud id of the player to send the item to.
-     */
+    /** Friend/cloud id of the player to send the item to. */
     sendTo: string;
 
-    /**
-     * Item to send. Either as a decompressed save or as a json save.
-     */
+    /** Item to send. Either as a decompressed save or as a json save. */
     item: DecompressedSave | INimblebitJsonSave;
 };
 
@@ -46,7 +41,7 @@ export const sendItem = async (
     logger: ILogger = debug
 ): Promise<ISendItem> => {
     // Setup logging
-    const passLogger = logger != debug ? logger : undefined;
+    const passLogger = logger === debug ? undefined : logger;
     logger.info("Sending item(%s) to %s...", itemType.toString(), sendTo);
 
     // Player must be authenticated
@@ -67,7 +62,7 @@ export const sendItem = async (
 
     // Convert the item to a string if needed
     let itemString: DecompressedSave = item as DecompressedSave;
-    if (typeof item != "string") {
+    if (typeof item !== "string") {
         itemString = concatenationSubRoutine(item as INimblebitJsonSave, blocks);
     }
 
@@ -79,13 +74,13 @@ export const sendItem = async (
     // salt is a random 32bit signed integer, [-2147483648 to 2147483647]
     // and hash is the md5 hash of tt/{itemType}/{sendFromId}/{sendTo}/{salt} + {itemStr} + {sendFromSs} + {secretSalt}
     const salt = cryptoSalt(passLogger);
-    const hash = `tt/${itemType.toString()}/${sendFrom.id}/${sendTo}/${salt}/${itemString.toString()}/${sendFrom.ss}`;
+    const hash = `tt/${itemType.toString()}/${sendFrom.id}/${sendTo}/${salt}${itemString.toString()}${sendFrom.ss}`;
     const endpoint = serverEndpoints.send_item + itemType.toString() + "/" + sendFrom.id + "/" + sendTo + "/" + salt;
     const serverResponse = await postNetworkRequest<ISendItem>({
         config,
         endpoint,
         hash,
-        postData: { itemString },
+        postData: { itemStr: itemString },
         log: passLogger,
     });
 

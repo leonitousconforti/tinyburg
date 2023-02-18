@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-empty-function */
+/* eslint-disable @typescript-eslint/naming-convention */
 
 import Debug from "debug";
 import { format } from "node:util";
@@ -30,11 +31,11 @@ export class NoopLogger implements ILogger {
         return object instanceof Error ? Promise.reject(object) : Promise.reject(error);
     };
 
-    public error: ILogFunction = (obj: unknown, ...args: unknown[]) => {};
-    public warn: ILogFunction = (obj: unknown, ...args: unknown[]) => {};
-    public info: ILogFunction = (obj: unknown, ...args: unknown[]) => {};
-    public debug: ILogFunction = (obj: unknown, ...args: unknown[]) => {};
-    public trace: ILogFunction = (obj: unknown, ...args: unknown[]) => {};
+    public error: ILogFunction = (_object: unknown, ..._arguments_: unknown[]) => {};
+    public warn: ILogFunction = (_object: unknown, ..._arguments_: unknown[]) => {};
+    public info: ILogFunction = (_object: unknown, ..._arguments_: unknown[]) => {};
+    public debug: ILogFunction = (_object: unknown, ..._arguments_: unknown[]) => {};
+    public trace: ILogFunction = (_object: unknown, ..._arguments_: unknown[]) => {};
 }
 
 // Logger class to store messages from all modules
@@ -49,11 +50,11 @@ export class ArrayLogger implements ILogger {
         return this._messages;
     }
 
-    #log = (object: unknown, ...args: unknown[]): void => {
+    private log = (object: unknown, ...arguments_: unknown[]): void => {
         if (typeof object === "object") {
-            this._messages.push(format(args.shift() || "", ...args));
+            this._messages.push(format(arguments_.shift() || "", ...arguments_));
         } else {
-            this._messages.push(format(object, ...args));
+            this._messages.push(format(object, ...arguments_));
         }
     };
 
@@ -66,11 +67,11 @@ export class ArrayLogger implements ILogger {
             return Promise.reject(error as Error);
         }
     };
-    public error: ILogFunction = (object: unknown, ...args: unknown[]) => this.#log(object, ...args);
-    public warn: ILogFunction = (object: unknown, ...args: unknown[]) => this.#log(object, ...args);
-    public info: ILogFunction = (object: unknown, ...args: unknown[]) => this.#log(object, ...args);
-    public debug: ILogFunction = (object: unknown, ...args: unknown[]) => this.#log(object, ...args);
-    public trace: ILogFunction = (object: unknown, ...args: unknown[]) => this.#log(object, ...args);
+    public error: ILogFunction = (object: unknown, ...arguments_: unknown[]) => this.log(object, ...arguments_);
+    public warn: ILogFunction = (object: unknown, ...arguments_: unknown[]) => this.log(object, ...arguments_);
+    public info: ILogFunction = (object: unknown, ...arguments_: unknown[]) => this.log(object, ...arguments_);
+    public debug: ILogFunction = (object: unknown, ...arguments_: unknown[]) => this.log(object, ...arguments_);
+    public trace: ILogFunction = (object: unknown, ...arguments_: unknown[]) => this.log(object, ...arguments_);
 }
 
 // Simple logger implemented with Debug
@@ -81,11 +82,11 @@ export class DebugLogger implements ILogger {
         this._debugInstance = Debug(namespace);
     }
 
-    private _log(object: unknown, ...args: unknown[]): void {
+    private _log(object: unknown, ...arguments_: unknown[]): void {
         if (typeof object === "object") {
-            this._debugInstance(args.shift() || "", ...(args || []));
+            this._debugInstance(arguments_.shift() || "", ...(arguments_ || []));
         } else {
-            this._debugInstance(object, ...args);
+            this._debugInstance(object, ...arguments_);
         }
     }
 
@@ -98,40 +99,9 @@ export class DebugLogger implements ILogger {
             return Promise.reject(error as Error);
         }
     };
-    public error: ILogFunction = (object: unknown, ...args: unknown[]) => this._log(object, ...args);
-    public warn: ILogFunction = (object: unknown, ...args: unknown[]) => this._log(object, ...args);
-    public info: ILogFunction = (object: unknown, ...args: unknown[]) => this._log(object, ...args);
-    public debug: ILogFunction = (object: unknown, ...args: unknown[]) => this._log(object, ...args);
-    public trace: ILogFunction = (object: unknown, ...args: unknown[]) => this._log(object, ...args);
-}
-
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-import type { Logger as _PinoLogger, pino as Pino } from "pino";
-
-let pino: Pino;
-try {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    pino = await import("pino");
-    // eslint-disable-next-line no-empty
-} catch {}
-
-// Logger implemented with Pino
-export class PinoLogger implements ILogger {
-    private readonly _pino: Pino;
-
-    public constructor(pinoInstance: _PinoLogger) {
-        this._pino = pinoInstance || pino();
-    }
-
-    public fatal: ILogAndThrowFunction = (object: unknown, ...args: unknown[]) => {
-        this._pino.error(object, ...args);
-        return object instanceof Error ? Promise.reject(object) : Promise.reject(args.shift());
-    };
-    public error: ILogFunction = (object: unknown, ...args: unknown[]) => this._pino.error(object, ...args);
-    public warn: ILogFunction = (object: unknown, ...args: unknown[]) => this._pino.warn(object, ...args);
-    public info: ILogFunction = (object: unknown, ...args: unknown[]) => this._pino.info(object, ...args);
-    public debug: ILogFunction = (object: unknown, ...args: unknown[]) => this._pino.debug(object, ...args);
-    public trace: ILogFunction = (object: unknown, ...args: unknown[]) => this._pino.trace(object, ...args);
+    public error: ILogFunction = (object: unknown, ...arguments_: unknown[]) => this._log(object, ...arguments_);
+    public warn: ILogFunction = (object: unknown, ...arguments_: unknown[]) => this._log(object, ...arguments_);
+    public info: ILogFunction = (object: unknown, ...arguments_: unknown[]) => this._log(object, ...arguments_);
+    public debug: ILogFunction = (object: unknown, ...arguments_: unknown[]) => this._log(object, ...arguments_);
+    public trace: ILogFunction = (object: unknown, ...arguments_: unknown[]) => this._log(object, ...arguments_);
 }

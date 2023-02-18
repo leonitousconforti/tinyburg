@@ -1,5 +1,5 @@
 import type { ITTConfig } from "../tt-config.js";
-import type { INimblebitResponse, IUserMetaDescribed, SuccessFoundNotFound } from "./nimblebit-response.js";
+import type { INimblebitResponse, IUserMetaDescribed, ISuccessFoundNotFound } from "./nimblebit-response.js";
 
 import { cryptoMD5 } from "../crypto-md5.js";
 import { cryptoSalt } from "../crypto-salt.js";
@@ -13,14 +13,12 @@ import { DecompressedSave, decompressSave } from "../decompress-save.js";
 import { serverEndpoints, postNetworkRequest, getNetworkRequest } from "../contact-server.js";
 
 // Debug logger (will default to using this if no other logger is supplied).
-const loggingNamespace = "tinyburg:endpoints:friends";
-const debug = new DebugLogger(loggingNamespace);
+const loggingNamespace: string = "tinyburg:endpoints:friends";
+const debug: ILogger = new DebugLogger(loggingNamespace);
 
 // Pull friend anything (meta, tower, or snapshots) function params.
 export interface IPullFriendParameters {
-    /**
-     * Friend cloud id
-     */
+    /** Friend cloud id */
     friendId: string;
 }
 
@@ -32,7 +30,7 @@ export type AddFriendParameters = {
 
 // Nimblebit api pull friend meta data response type.
 export interface IFriendMeta<FriendCode extends string>
-    extends SuccessFoundNotFound,
+    extends ISuccessFoundNotFound,
         Omit<INimblebitResponse, "success"> {
     meta: {
         [friendCode in FriendCode]: IUserMetaDescribed;
@@ -42,36 +40,31 @@ export interface IFriendMeta<FriendCode extends string>
 // Nimblebit api pull friend tower data response type.
 export interface IFriendTower extends IDownloadSave {
     /**
-     * Validation hash from the server to make sure that the data arrived correctly, computed
-     * as: md5(playerId + player_id + salt + id + data + playerSs + secretSalt). The client should
-     * compute the same hash client-side using the downloaded data and confirm that they match.
+     * Validation hash from the server to make sure that the data arrived
+     * correctly, computed as: md5(playerId + player_id + salt + id + data +
+     * playerSs + secretSalt). The client should compute the same hash
+     * client-side using the downloaded data and confirm that they match.
      */
     h: string;
 
-    /**
-     * Which friend this cloud save is for.
-     */
+    /** Which friend this cloud save is for. */
     player_id: string;
 }
 
 // Nimblebit api pull friend snapshots response type.
-export interface IFriendSnapshotList extends SuccessFoundNotFound, Omit<INimblebitResponse, "success"> {
+export interface IFriendSnapshotList extends ISuccessFoundNotFound, Omit<INimblebitResponse, "success"> {
     saves: [
         {
             /**
-             * Save version. Save versions are integer numbers starting at 0 and incrementing by 1
-             * for each following version.
+             * Save version. Save versions are integer numbers starting at 0 and
+             * incrementing by 1 for each following version.
              */
             id: number;
 
-            /**
-             * The time that this rebuild/snapshot was created at.
-             */
+            /** The time that this rebuild/snapshot was created at. */
             created: number;
 
-            /**
-             * Meta data for the player at the time this snapshot was taken
-             */
+            /** Meta data for the player at the time this snapshot was taken */
             meta: IUserMetaDescribed;
         }
     ];
@@ -85,7 +78,7 @@ export const addFriend = async (
     logger: ILogger = debug
 ): Promise<IUploadSave> => {
     // Setup logging
-    const passLogger = logger !== debug ? logger : undefined;
+    const passLogger = logger === debug ? undefined : logger;
     logger.info("Adding friend: %s...", friendId);
 
     // Player must be authenticated
@@ -122,7 +115,7 @@ export const pullFriendMeta = async function <FriendId extends string>(
     logger: ILogger = debug
 ): Promise<IFriendMeta<FriendId>> {
     // Setup logging
-    const passLogger = logger !== debug ? logger : undefined;
+    const passLogger = logger === debug ? undefined : logger;
     logger.info("Retrieving metadata for friend: %s...", friendId);
 
     // Player doesn't have to be authenticated
@@ -182,7 +175,7 @@ export const retrieveFriendSnapshotList = async (
     logger: ILogger = debug
 ): Promise<IFriendSnapshotList> => {
     // Setup logging
-    const passLogger = logger !== debug ? logger : undefined;
+    const passLogger = logger === debug ? undefined : logger;
     logger.info("Pulling snapshots for friend: %s...", friendId);
 
     // Player doesn't have to be authenticated
@@ -233,7 +226,7 @@ export const pullFriendTower = async (
     logger: ILogger = debug
 ): Promise<DecompressedSave> => {
     // Setup logging
-    const passLogger = logger !== debug ? logger : undefined;
+    const passLogger = logger === debug ? undefined : logger;
     logger.info("Pulling tower for friend: %s", friendId);
 
     // Player doesn't have to be authenticated
@@ -308,8 +301,8 @@ export interface IPullFriendTowerValidationHashParameters {
     salt: number;
     saveVersion: number;
     saveData: string;
-    playerSs?: string;
-    secretSalt?: string;
+    playerSs: string | undefined;
+    secretSalt: string | undefined;
 }
 
 // Compute the validation hash and confirm that it matches what Nimblebit's api sent. The
@@ -318,10 +311,9 @@ export const computePullFriendTowerValidationHash = (
     { playerId, friendId, salt, saveVersion, saveData, playerSs, secretSalt }: IPullFriendTowerValidationHashParameters,
     logger: ILogger = debug
 ): string => {
-    const logTag = { forPlayer: playerId, loggingNamespace };
-    const passLogger = logger !== debug ? logger : undefined;
+    const passLogger = logger === debug ? undefined : logger;
 
-    logger.info(logTag, "Computing validation hash with parameters %o", {
+    logger.info("Computing validation hash with parameters %o", {
         playerId,
         friendId,
         salt,

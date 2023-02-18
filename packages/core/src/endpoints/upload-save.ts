@@ -12,8 +12,8 @@ import { parseSaveToJson, concatJsonToBlock } from "../save-parser.js";
 import { serverEndpoints, postNetworkRequest } from "../contact-server.js";
 
 // Debug logger (will default to using this if no other logger is supplied).
-const loggingNamespace = "tinyburg:endpoints:upload_save";
-const debug = new DebugLogger(loggingNamespace);
+const loggingNamespace: string = "tinyburg:endpoints:upload_save";
+const debug: ILogger = new DebugLogger(loggingNamespace);
 
 // Upload save function params.
 export type UploadSaveParameters = {
@@ -21,54 +21,47 @@ export type UploadSaveParameters = {
 } & Omit<GenerateUploadMetadataParameters, "requestFloorId">;
 
 // Generate upload metadata function params.
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type GenerateUploadMetadataParameters = {
-    /**
-     * Save data to upload, either as a decompressed save or a json save.
-     */
+    /** Save data to upload, either as a decompressed save or a json save. */
     saveData: DecompressedSave | INimblebitJsonSave;
 
     /**
-     * Save version to put in the meta data, leave empty if you are
-     * generating meta data for a snapshot.
+     * Save version to put in the meta data, leave empty if you are generating
+     * meta data for a snapshot.
      */
-    version?: number;
+    version?: number | undefined;
 
-    /**
-     * The language your game is in, defaults to "en-us".
-     */
-    language?: string;
+    /** The language your game is in, defaults to "en-us". */
+    language?: string | undefined;
 
-    /**
-     * The platform you are playing on.
-     */
-    platform?: "IOS" | "Android";
+    /** The platform you are playing on. */
+    platform?: "IOS" | "Android" | undefined;
 
-    /**
-     * If you are requesting bitizens for a particular floor.
-     */
-    requestFloorId?: number;
+    /** If you are requesting bitizens for a particular floor. */
+    requestFloorId?: number | undefined;
 };
 
 // Nimblebit api upload save response type.
 export interface IUploadSave extends INimblebitResponse {
     /**
-     * The hash of the saved data, should use on client side but are not currently.
+     * The hash of the saved data, should use on client side but are not
+     * currently.
      */
     h: string;
 
-    /**
-     * Which save version the data was saved as.
-     */
+    /** Which save version the data was saved as. */
     id: string;
 
     /**
-     * Either the request was a success and the data was
-     * saved, or it failed and the data was not saved.
+     * Either the request was a success and the data was saved, or it failed and
+     * the data was not saved.
      */
     success?: "Saved" | "NotSaved";
 }
 
 // Generates the meta data necessary when uploading save data either for pushing to the cloud or pushing a snapshot.
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export const generateUploadMetadata = async ({
     saveData,
     version,
@@ -102,7 +95,7 @@ export const generateUploadMetadata = async ({
         level: (jsonSaveData.stories || []).length,
         reqFID: requestFloorId || -1,
         mg: jsonSaveData.maxGold || 0,
-        vip: jsonSaveData.vipTrialEnd !== undefined ? 1 : 0,
+        vip: jsonSaveData.vipTrialEnd === undefined ? 0 : 1,
 
         p: platform,
         l: language,
@@ -121,7 +114,7 @@ export const uploadSave = async (
     logger: ILogger = debug
 ): Promise<IUploadSave> => {
     // Setup logging
-    const passLogger = logger != debug ? logger : undefined;
+    const passLogger = logger === debug ? undefined : logger;
     logger.info("Uploading save data for version: %d", version);
 
     // Player must be authenticated
@@ -182,10 +175,10 @@ export const uploadSave = async (
 };
 
 // Message to prompt the user to make sure they are ready to push data
-export const readyMessage =
+export const readyMessage: string =
     "Are you sure you are ready to push you save data? (make sure you have to app closed to prevent conflicts)";
 
 // Error messages
-export const NotReady = "Not ready to push save data, please try again when you are ready";
-export const NoForcePushNoTerminal =
+export const NotReady: string = "Not ready to push save data, please try again when you are ready";
+export const NoForcePushNoTerminal: string =
     "Refusing to push save data because the forcePush flag was not set and process.stdout is not a tty so we could not confirm the push";

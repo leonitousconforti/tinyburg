@@ -9,9 +9,10 @@ export interface INimblebitJsonSave {
     bux: number;
 
     /**
-     * Goes up by the number of floors that you have delivered bitizens from the elevator
+     * Goes up by the number of floors that you have delivered bitizens from the
+     * elevator
      *
-     * i.e you deliver a bitizen to floor 7, goes up by +7
+     * I.e you deliver a bitizen to floor 7, goes up by +7
      */
     Ppig: string;
     Pplim: string;

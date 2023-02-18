@@ -13,7 +13,7 @@ export type BitbookPostBlocks4_0_0 = Omit<typeof mutableBitizenBlocks, "bb_bzn">
 };
 
 // Update the blocks for parsing a bitbook post
-const mutableBitizenBlocks = <Mutable<typeof _bitbookPostBlocks>>_bitbookPostBlocks;
+const mutableBitizenBlocks = _bitbookPostBlocks as Mutable<typeof _bitbookPostBlocks>;
 mutableBitizenBlocks.bb_bzn = ["bitizen", bitizenBlocks, undefined, "object"] as any;
 mutableBitizenBlocks.__type = (): IBitbookPost => ({} as IBitbookPost);
 

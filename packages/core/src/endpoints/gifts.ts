@@ -1,33 +1,27 @@
 import type { ITTConfig } from "../tt-config.js";
 import type { IGift } from "../parsing-structs/gift.js";
-import type { INimblebitResponse, SuccessFoundNotFound } from "./nimblebit-response.js";
+import type { INimblebitResponse, ISuccessFoundNotFound } from "./nimblebit-response.js";
 
 import { cryptoSalt } from "../crypto-salt.js";
 import { DebugLogger, ILogger } from "../logger.js";
 import { serverEndpoints, getNetworkRequest } from "../contact-server.js";
 
 // Debug logger (will default to using this if no other logger is supplied).
-const loggingNamespace = "tinyburg:endpoints:gifts";
-const debug = new DebugLogger(loggingNamespace);
+const loggingNamespace: string = "tinyburg:endpoints:gifts";
+const debug: ILogger = new DebugLogger(loggingNamespace);
 
 // Receive gift function params.
 export interface IReceiveGiftParameters {
-    /**
-     * The gift to mark as received.
-     */
+    /** The gift to mark as received. */
     gift: IGift;
 }
 
 // Nimblebit api get gifts response type.
-export interface IGifts extends SuccessFoundNotFound, Omit<INimblebitResponse, "success"> {
-    /**
-     * List of gifts that have been sent to you.
-     */
+export interface IGifts extends ISuccessFoundNotFound, Omit<INimblebitResponse, "success"> {
+    /** List of gifts that have been sent to you. */
     gifts: IGift[];
 
-    /**
-     * The total number of gifts received.
-     */
+    /** The total number of gifts received. */
     total: number;
 }
 
@@ -39,7 +33,7 @@ export interface IReceiveGift extends INimblebitResponse {
 // Retrieves all the gifts waiting for you.
 export const getGifts = async (config: ITTConfig, logger: ILogger = debug): Promise<IGifts> => {
     // Setup logging
-    const passLogger = logger !== debug ? logger : undefined;
+    const passLogger = logger === debug ? undefined : logger;
     logger.info("Retrieving gifts for player: %s", config.player.playerId);
 
     // Player must be authenticated
@@ -79,7 +73,7 @@ export const receiveGift = async (
     logger: ILogger = debug
 ): Promise<IReceiveGift> => {
     // Setup logging
-    const passLogger = logger !== debug ? logger : undefined;
+    const passLogger = logger === debug ? undefined : logger;
     logger.info("Marking gift: %s as received", gift.gift_id);
 
     // Player must be authenticated

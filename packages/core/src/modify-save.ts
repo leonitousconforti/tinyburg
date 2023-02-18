@@ -6,8 +6,8 @@ import { blocks, GenericBlocks, GenericJsonSave, INimblebitJsonSave } from "./pa
 import type { DecompressedSave } from "./decompress-save.js";
 
 // Debug logger
-const loggingNamespace = "tinyburg:modify_save";
-const debug = new DebugLogger(loggingNamespace);
+const loggingNamespace: string = "tinyburg:modify_save";
+const debug: ILogger = new DebugLogger(loggingNamespace);
 
 // Parses a block to typed data
 export const parseDataToType = function <T extends GenericBlocks, U extends GenericJsonSave<T>>(
@@ -16,7 +16,7 @@ export const parseDataToType = function <T extends GenericBlocks, U extends Gene
     logger: ILogger = debug
 ): U {
     logger.debug("Parsing %s to type %s", data, parsingType);
-    return parsingSubRoutine(data as DecompressedSave, parsingType, logger != debug ? logger : undefined);
+    return parsingSubRoutine(data as DecompressedSave, parsingType, logger === debug ? undefined : logger);
 };
 
 // Converts typed data to a block
@@ -26,7 +26,7 @@ export const typedDataToBlock = function <T extends GenericBlocks, U extends Gen
     logger: ILogger = debug
 ): DecompressedSave {
     logger.debug("Converting typed data %o to blockStr", data);
-    return concatenationSubRoutine(data, parsingBlocks, logger != debug ? logger : undefined);
+    return concatenationSubRoutine(data, parsingBlocks, logger === debug ? undefined : logger);
 };
 
 // Extracts a given value from a downloaded save and returns it in string representation.
@@ -36,8 +36,8 @@ export const extract = async function <
     T extends INimblebitJsonSave | DecompressedSave,
     U extends keyof INimblebitJsonSave,
     V extends T extends INimblebitJsonSave ? INimblebitJsonSave[U] : DecompressedSave
->(saveData: T, key: U, forceLoadStructs = false, logger: ILogger = debug): Promise<V> {
-    const passLogger = logger != debug ? logger : undefined;
+>(saveData: T, key: U, forceLoadStructs: boolean = false, logger: ILogger = debug): Promise<V> {
+    const passLogger = logger === debug ? undefined : logger;
     logger.debug("Extracting key %s from data %o", key, saveData);
 
     // Check incoming types
@@ -68,8 +68,8 @@ export const modifySave = async function <
     V extends U extends keyof INimblebitJsonSave
         ? INimblebitJsonSave[U]
         : { [W in keyof U]: U[W] extends keyof INimblebitJsonSave ? INimblebitJsonSave[U[W]] : never }
->(saveDataToModify: T, keys: U, values: V, forceLoadStructs = false, logger: ILogger = debug): Promise<T> {
-    const passLogger = logger != debug ? logger : undefined;
+>(saveDataToModify: T, keys: U, values: V, forceLoadStructs: boolean = false, logger: ILogger = debug): Promise<T> {
+    const passLogger = logger === debug ? undefined : logger;
 
     // Check incoming types
     const incomingSaveDataAsStrings = typeof saveDataToModify === "string";

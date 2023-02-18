@@ -1,8 +1,8 @@
 import type { ILogger } from "../logger.js";
 
-export function createLoggerClosure<HeadArgs extends readonly any[], ReturnType extends unknown>(
-    func: (...args: [...HeadArgs, ILogger | undefined]) => ReturnType,
+export function createLoggerClosure<HeadArguments extends readonly any[], ReturnType extends unknown>(
+    function_: (...arguments_: [...HeadArguments, ILogger | undefined]) => ReturnType,
     logger?: ILogger
-): (...args: HeadArgs) => ReturnType {
-    return (...args: HeadArgs) => func(...args, logger);
+): (...arguments_: HeadArguments) => ReturnType {
+    return (...arguments_: HeadArguments) => function_(...arguments_, logger);
 }

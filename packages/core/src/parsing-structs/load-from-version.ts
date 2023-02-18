@@ -23,8 +23,7 @@ export interface IStructs {
 
 // Attempts to load the struct from a particular version
 export const loadFromVersion = async (version: string, force = false, log: ILogger = debug): Promise<IStructs> => {
-    const logTag = { loggingNamespace };
-    log.debug(logTag, "Attempting to load structs for version: %s", version);
+    log.debug("Attempting to load structs for version: %s", version);
 
     // Filter the folders in this directory for ones that match the version
     const folders = await fs.readdir(new URL(".", import.meta.url), { withFileTypes: true });
@@ -38,7 +37,7 @@ export const loadFromVersion = async (version: string, force = false, log: ILogg
 
     // Attempt to load the modules if the version exists
     if (versionFolder) {
-        log.debug(logTag, "Found structs for version: %s!", version);
+        log.debug("Found structs for version: %s!", version);
 
         const { bitbookPostBlocks } = await import(`./${versionFolder}/bitbook-posts.js`);
         const { bitizenBlocks } = await import(`./${versionFolder}/bitizen.js`);
@@ -46,7 +45,7 @@ export const loadFromVersion = async (version: string, force = false, log: ILogg
         const { floorBlocks } = await import(`./${versionFolder}/floor.js`);
         const { missionBlocks } = await import(`./${versionFolder}/mission.js`);
 
-        log.debug(logTag, "Loaded structs, %O", {
+        log.debug("Loaded structs, %O", {
             bitbookPostBlocks,
             bitizenBlocks,
             blocks,
@@ -70,7 +69,6 @@ export const loadFromVersion = async (version: string, force = false, log: ILogg
         const minor = Number.isNaN(parsedVersion?.minor) ? "undefined" : parsedVersion?.minor;
         const patch = Number.isNaN(parsedVersion?.patch) ? "undefined" : parsedVersion?.patch;
         log.debug(
-            logTag,
             "No structs exist for this version, searching for structs with major %s, minor %s, patch <=%s",
             major,
             minor,
@@ -84,7 +82,7 @@ export const loadFromVersion = async (version: string, force = false, log: ILogg
 
         // If there exists a version folder less than the requested versions patch
         if (sorted.length > 0) {
-            log.debug(logTag, "loading struct from version %s", sorted[0]);
+            log.debug("loading struct from version %s", sorted[0]);
 
             const { bitbookPostBlocks } = await import(`./${sorted[0]}/bitbook-posts.js`);
             const { bitizenBlocks } = await import(`./${sorted[0]}/bitizen.js`);
@@ -92,7 +90,7 @@ export const loadFromVersion = async (version: string, force = false, log: ILogg
             const { floorBlocks } = await import(`./${sorted[0]}/floor.js`);
             const { missionBlocks } = await import(`./${sorted[0]}/mission.js`);
 
-            log.debug(logTag, "Loaded structs, %O", {
+            log.debug("Loaded structs, %O", {
                 bitbookPostBlocks,
                 bitizenBlocks,
                 blocks,
@@ -109,13 +107,12 @@ export const loadFromVersion = async (version: string, force = false, log: ILogg
             };
         }
 
-        log.debug(logTag, "No structs could be found for same major same minor version");
+        log.debug("No structs could be found for same major same minor version");
     }
 
     // Not force loading and process.stdout is not a terminal, so throw an error
     if (!force && !process.stdout.isTTY) {
         return log.fatal(
-            logTag,
             new Error(
                 "Refusing to load structs because the force flag was not set and process.stdout is not a tty so we could not confirm using the default structs"
             )
@@ -132,14 +129,13 @@ export const loadFromVersion = async (version: string, force = false, log: ILogg
 
         if (!confirmation) {
             return log.fatal(
-                logTag,
                 new Error("Could not load any structs for your version, please use a supported version of TinyTower")
             );
         }
     }
 
     // Otherwise return the default, most recent, version
-    log.debug(logTag, "Could not find structs for version: %s, defaulting to the symlinked structs", version);
+    log.debug("Could not find structs for version: %s, defaulting to the symlinked structs", version);
 
     return {
         bitbookPostBlocks: bitbookPostBlocks,

@@ -4,11 +4,12 @@ import type { ITTConfig } from "./tt-config.js";
 import { DebugLogger, ILogger } from "./logger.js";
 
 // Debug logger
-const loggingNamespace = "tinyburg:contact_server";
-const debug = new DebugLogger(loggingNamespace);
+const loggingNamespace: string = "tinyburg:contact_server";
+const debug: ILogger = new DebugLogger(loggingNamespace);
 
 // Tiny tower server endpoints
 /* eslint-disable @typescript-eslint/naming-convention */
+// eslint-disable-next-line @rushstack/typedef-var
 export const serverEndpoints = {
     new_user: "/register/tt/",
     verify_device: "/verify_device/tt/",
@@ -44,7 +45,7 @@ interface INetworkRequestParameters {
     method: Method;
     config: ITTConfig;
     endpoint: string;
-    log?: ILogger;
+    log: ILogger | undefined;
     postData?: Record<string, unknown>;
 }
 
@@ -57,23 +58,11 @@ const networkRequest = async <T>({
     postData,
     log = debug,
 }: INetworkRequestParameters): Promise<T> => {
-    const logTag = { loggingNamespace, forPlayer: config.player.playerId, endpoint, hash, method, postData };
     const request = { headers: defaultHeaders, method, form: method === "POST" ? postData : undefined };
 
     // Check proxy settings and make the appropriate request
     let serverResponse;
-    if (!config.proxy.useProxy) {
-        // Update the hash
-        hash = cryptoMD5(hash + config.secretSalt);
-
-        // Append hash to endpoint
-        endpoint += "/" + hash;
-
-        // Make request to nimblebit's server
-        log.debug(logTag, "Starting new http request to: %s%s", config.nimblebitHost, endpoint);
-        const nimblebitUrl = new URL(endpoint, config.nimblebitHost);
-        serverResponse = await got(nimblebitUrl, request).json<T>();
-    } else {
+    if (config.proxy.useProxy) {
         // Create proxy endpoint
         const proxyUrl = new URL(config.proxy.address);
         proxyUrl.searchParams.set("hash", hash);
@@ -81,16 +70,28 @@ const networkRequest = async <T>({
 
         // Add the api key to the request headers if it exists
         if (config.proxy.api_key) {
+            // eslint-disable-next-line dot-notation
             request.headers["Authorization"] = `Bearer ${config.proxy.api_key}`;
         }
 
         // Make the request to the authproxy's servers
-        log.debug(logTag, "Starting new http request to %s", proxyUrl.href);
+        log.debug("Starting new http request to %s", proxyUrl.href);
         serverResponse = await got(proxyUrl, request).json<T>();
+    } else {
+        // Update the hash
+        hash = cryptoMD5(hash + config.secretSalt);
+
+        // Append hash to endpoint
+        endpoint += "/" + hash;
+
+        // Make request to nimblebit's server
+        log.debug("Starting new http request to: %s%s", config.nimblebitHost, endpoint);
+        const nimblebitUrl = new URL(endpoint, config.nimblebitHost);
+        serverResponse = await got(nimblebitUrl, request).json<T>();
     }
 
     // Log the response
-    log.debug(logTag, "Http request finished, data: %s", serverResponse);
+    log.debug("Http request finished, data: %s", serverResponse);
     return serverResponse;
 };
 
@@ -99,7 +100,7 @@ export interface IGetNetworkRequestParameters {
     config: ITTConfig;
     endpoint: string;
     hash: string;
-    log?: ILogger;
+    log: ILogger | undefined;
 }
 
 // Post network request function params

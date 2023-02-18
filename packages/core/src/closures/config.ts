@@ -1,8 +1,8 @@
 import type { ITTConfig } from "../tt-config.js";
 
-export function createConfigClosure<TailArgs extends readonly any[], ReturnType extends unknown>(
-    func: (...args: [ITTConfig, ...TailArgs]) => ReturnType,
+export function createConfigClosure<TailArguments extends readonly any[], ReturnType extends unknown>(
+    function_: (...arguments_: [ITTConfig, ...TailArguments]) => ReturnType,
     config: ITTConfig
-): (...args: TailArgs) => ReturnType {
-    return (...args: TailArgs) => func(config, ...args);
+): (...arguments_: TailArguments) => ReturnType {
+    return (...arguments_: TailArguments) => function_(config, ...arguments_);
 }

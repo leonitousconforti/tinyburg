@@ -6,8 +6,8 @@ import { DebugLogger, ILogger } from "../logger.js";
 import { serverEndpoints, postNetworkRequest } from "../contact-server.js";
 
 // Debug logger (will default to using this if no other logger is supplied).
-const loggingNamespace = "tinyburg:endpoints:register-email";
-const debug = new DebugLogger(loggingNamespace);
+const loggingNamespace: string = "tinyburg:endpoints:register-email";
+const debug: ILogger = new DebugLogger(loggingNamespace);
 
 // Nimblebit api register email response type.
 export interface IRegisterEmail extends INimblebitResponse {
@@ -17,7 +17,7 @@ export interface IRegisterEmail extends INimblebitResponse {
 // Requests that nimblebit send a verification code to your cloud sync email address.
 export const registerEmail = async (config: ITTConfig, logger: ILogger = debug): Promise<IRegisterEmail> => {
     // Setup logging
-    const passLogger = logger != debug ? logger : undefined;
+    const passLogger = logger === debug ? undefined : logger;
     logger.info("Starting register email workflow");
 
     // Validate the user email
