@@ -18,6 +18,7 @@
     "author": "Leo Conforti <leo@leoconforti.us> (https://leoconforti.us)",
     "type": "module",
     "main": "index.js",
+    "types": "index.d.ts",
     "engines": {
         "node": ">=14.16"
     }
