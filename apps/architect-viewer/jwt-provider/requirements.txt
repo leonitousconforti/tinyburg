@@ -1,0 +1,7 @@
+pyjwt
+flask
+flask-cors
+absl-py
+Flask-HTTPAuth==4.4.0
+Werkzeug
+JWCrypto

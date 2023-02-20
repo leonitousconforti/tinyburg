@@ -1,0 +1,42 @@
+version: "3.8"
+services:
+    envoy:
+        image: architect_viewer_envoy:latest
+        build:
+            context: ./envoy
+            dockerfile: Dockerfile
+        networks:
+            - envoymesh
+        expose:
+            - "8080"
+            - "8081"
+        ports:
+            - "8080:8080"
+            - "8081:0881"
+
+    jwt_signer:
+        image: emulator_jwt_signer:latest
+        build:
+            context: ./jwt-provider
+            dockerfile: Dockerfile
+        networks:
+            envoymesh:
+                aliases:
+                    - jwt_signer
+        expose:
+            - "8080"
+
+    frontend:
+        image: architect_viewer_frontend:latest
+        build:
+            context: .
+            dockerfile: Dockerfile
+        networks:
+            envoymesh:
+                aliases:
+                    - frontend
+        expose:
+            - "8080"
+
+networks:
+    envoymesh: {}
