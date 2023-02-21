@@ -32,7 +32,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 ENV ANDROID_SDK_ROOT /android/sdk
 ENV ANDROID_AVD_HOME /android/avd-home
-RUN mkdir -p /android/frida && \
+RUN mkdir -p /android/apks && \
+    mkdir -p /android/frida && \
     mkdir -p /android/avd-home && \
     mkdir -p /android/sdk/emulator/ && \
     mkdir -p /android/sdk/platforms/ && \
