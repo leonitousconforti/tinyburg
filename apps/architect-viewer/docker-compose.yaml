@@ -14,6 +14,25 @@ services:
             - "8080:8080"
             - "8081:8081"
 
+    emulator:
+        image: architect_viewer_emulator:latest
+        build:
+            context: ./../../packages/architect/emulator
+            dockerfile: Dockerfile
+        devices: [/dev/kvm]
+        shm_size: 128M
+        networks:
+            envoymesh:
+                aliases:
+                    - emulator
+        expose:
+            - "5554"
+            - "5555"
+            - "8554"
+            - "27042"
+        ports:
+            - "8554:8554"
+
     jwt_signer:
         image: emulator_jwt_signer:latest
         build:

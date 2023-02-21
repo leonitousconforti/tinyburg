@@ -1,5 +1,5 @@
 /build
-/proto/generated
+/src/generated
 
 /envoy/*.jwks
 /jwt-provider/*.jwks

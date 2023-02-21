@@ -7,10 +7,9 @@
         "esModuleInterop": true,
         "allowSyntheticDefaultImports": true,
         "moduleResolution": "node",
-        "resolveJsonModule": true,
         "isolatedModules": true,
+        "allowJs": true,
         "noEmit": true,
-        "exactOptionalPropertyTypes": false,
         "jsx": "react-jsx"
     },
     "include": ["./src/**/*.ts", "./src/**/*.tsx"]
