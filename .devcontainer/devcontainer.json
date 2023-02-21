@@ -35,9 +35,11 @@
                 "DavidAnson.vscode-markdownlint",
                 "eamodio.gitlens",
                 "zxh404.vscode-proto3",
-                "GitHub.vscode-pull-request-github"
+                "GitHub.vscode-pull-request-github",
+                "mutantdino.resourcemonitor"
             ],
             "settings": {
+                "remote.localPortHost": "allInterfaces",
                 "cSpell.enabled": true,
                 "editor.formatOnSave": true,
                 "editor.formatOnPaste": true,
@@ -84,6 +86,7 @@
                     "corlib",
                     "dockerode",
                     "emittery",
+                    "envoymesh",
                     "esbuild",
                     "fastify",
                     "Formbody",
@@ -96,7 +99,11 @@
                     "mediapath",
                     "mediatype",
                     "Nimblebit",
+                    "npmjs",
+                    "nonbrowser",
+                    "noreply",
                     "Pino",
+                    "pnpmfile",
                     "prodimgs",
                     "proto",
                     "protobuf",
