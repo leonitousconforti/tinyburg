@@ -1,6 +1,2 @@
 /build
 /src/generated
-
-/envoy/*.jwks
-/jwt-provider/*.jwks
-/jwt-provider/passwd

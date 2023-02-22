@@ -1,40 +1,32 @@
 version: "3.8"
 services:
     envoy:
-        image: architect_viewer_envoy:latest
+        image: architect_envoy:latest
         build:
             context: ./envoy
             dockerfile: Dockerfile
         networks:
             - envoymesh
-        expose:
-            - "8080"
-            - "8081"
+        extra_hosts:
+            - "host.docker.internal:host-gateway"
         ports:
             - "8080:8080"
             - "8081:8081"
 
     emulator:
-        image: architect_viewer_emulator:latest
-        build:
-            context: ./../../packages/architect/emulator
-            dockerfile: Dockerfile
-        devices: [/dev/kvm]
+        image: architect_emulator:latest
         shm_size: 128M
+        devices: [/dev/kvm]
+        build:
+            context: ./emulator
+            dockerfile: Dockerfile
         networks:
             envoymesh:
                 aliases:
                     - emulator
-        expose:
-            - "5554"
-            - "5555"
-            - "8554"
-            - "27042"
-        ports:
-            - "8554:8554"
 
     jwt_signer:
-        image: emulator_jwt_signer:latest
+        image: architect_jwt_signer:latest
         build:
             context: ./jwt-provider
             dockerfile: Dockerfile
@@ -42,20 +34,16 @@ services:
             envoymesh:
                 aliases:
                     - jwt_signer
-        expose:
-            - "8080"
 
     frontend:
-        image: architect_viewer_frontend:latest
+        image: architect_frontend:latest
         build:
-            context: .
+            context: ./node_modules/@tinyburg/architect-viewer/
             dockerfile: Dockerfile
         networks:
             envoymesh:
                 aliases:
                     - frontend
-        expose:
-            - "8080"
 
 networks:
     envoymesh: {}
