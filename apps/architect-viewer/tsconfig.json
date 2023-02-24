@@ -4,13 +4,18 @@
         "module": "esnext",
         "target": "ES5",
         "lib": ["dom", "dom.iterable", "esnext"],
+        "moduleResolution": "node",
+
+        // React settings
         "esModuleInterop": true,
         "allowSyntheticDefaultImports": true,
-        "moduleResolution": "node",
         "isolatedModules": true,
         "allowJs": true,
         "noEmit": true,
-        "jsx": "react-jsx"
+        "jsx": "react-jsx",
+
+        // Protobuf-ts settings (needed for the generated ts sources)
+        "noUncheckedIndexedAccess": false
     },
     "include": ["./src/**/*.ts", "./src/**/*.tsx"]
 }

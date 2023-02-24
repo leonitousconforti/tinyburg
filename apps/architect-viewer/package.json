@@ -2,14 +2,30 @@
     "name": "@tinyburg/architect-viewer",
     "version": "0.0.1",
     "private": true,
+    "description": "Stream and interact with a remote tinytower instance through the browser",
+    "keywords": [
+        "tinyburg",
+        "nimblebit",
+        "TinyTower",
+        "Tiny Tower"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/leonitousconforti/tinyburg.git",
+        "directory": "apps/architect-viewer"
+    },
+    "license": "MIT",
+    "author": "Leo Conforti <leo@leoconforti.us> (https://leoconforti.us)",
     "type": "module",
+    "files": [
+        "build/"
+    ],
     "scripts": {
         "build": "react-scripts build",
         "clean-types": "rimraf src/generated/*",
         "eject": "react-scripts eject",
-        "gen-types": "protoc -I ./proto --ts_out ./src/generated --ts_opt optimize_code_size ./proto/emulator_controller.proto",
-        "start": "react-scripts start",
-        "test": "react-scripts test"
+        "gen-types": "protoc -I ./proto --ts_out ./src/generated --ts_opt optimize_code_size ./proto/emulator_controller.proto ./proto/rtc_service.proto",
+        "start": "react-scripts start"
     },
     "browserslist": {
         "production": [

@@ -1,18 +1,31 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useMemo } from "react";
+import { GrpcWebFetchTransport } from "@protobuf-ts/grpcweb-transport";
 
 import Login from "./components/Login";
-import LogcatView from "./components/LogcatView";
+import WebRtcView from "./components/WebRtcView";
 import { TokenAuthService } from "./service/Auth";
+import { RtcClient } from "./generated/rtc_service.client";
+// import { EmulatorControllerClient } from "./generated/emulator_controller.client";
 
 const EMULATOR_GRPC = window.location.protocol + "//" + window.location.hostname + ":" + window.location.port;
 const AUTH_ENDPOINT = EMULATOR_GRPC + "/token";
 
-function useAuth() {
-    const authRef = useRef<TokenAuthService>();
-    if (!authRef.current) {
-        authRef.current = new TokenAuthService(AUTH_ENDPOINT);
-    }
-    return authRef.current;
+const useAuth = () => useMemo(() => new TokenAuthService(AUTH_ENDPOINT), []);
+
+// function useEmulatorClient(auth: TokenAuthService) {
+//     const transport = new GrpcWebFetchTransport({
+//         baseUrl: EMULATOR_GRPC,
+//         meta: auth.authHeader() as Record<string, string>,
+//     });
+//     return new EmulatorControllerClient(transport);
+// }
+
+function useRtcClient(auth: TokenAuthService) {
+    const transport = new GrpcWebFetchTransport({
+        baseUrl: EMULATOR_GRPC,
+        meta: auth.authHeader() as Record<string, string>,
+    });
+    return new RtcClient(transport);
 }
 
 const App: React.FunctionComponent<{}> = () => {
@@ -21,7 +34,7 @@ const App: React.FunctionComponent<{}> = () => {
     const auth = useAuth();
     auth.on("authorized", (authorized) => setAuthorized(authorized));
 
-    return <div>{authorized ? <LogcatView uri={EMULATOR_GRPC} auth={auth} /> : <Login auth={auth} />}</div>;
+    return <div>{authorized ? <WebRtcView rtcClient={useRtcClient(auth)} /> : <Login auth={auth} />}</div>;
 };
 
 export default App;

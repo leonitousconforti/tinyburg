@@ -29,12 +29,7 @@ export class TokenAuthService extends EventEmitter {
         });
     };
 
-    public unauthorized = () => {
-        this.token = undefined;
-        this.emit("authorized", false);
-    };
-
-    public authorized = () => {
+    public isAuthorized = () => {
         return this.token !== undefined;
     };
 

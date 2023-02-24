@@ -5,17 +5,16 @@ import ListItem from "@material-ui/core/ListItem";
 import ListItemText from "@material-ui/core/ListItemText";
 
 import Logcat from "../service/Logcat";
-import type { TokenAuthService } from "../service/Auth";
+import type { IEmulatorControllerClient } from "../generated/emulator_controller.client";
 
 export interface LogcatViewProps {
-    uri: string;
     maxHistory?: number;
-    auth: TokenAuthService;
+    emulator: IEmulatorControllerClient;
 }
 
-export const LogcatView: React.FunctionComponent<LogcatViewProps> = ({ auth, uri, maxHistory = 100 }) => {
+export const LogcatView: React.FunctionComponent<LogcatViewProps> = ({ emulator, maxHistory = 100 }) => {
     useEffect(() => {
-        const logcat = new Logcat(uri, auth);
+        const logcat = new Logcat(emulator);
         logcat.on("data", onLogcat);
         logcat.on("end", (error) => console.log(error));
     }, []);
