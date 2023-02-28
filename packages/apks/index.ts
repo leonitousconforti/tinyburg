@@ -1,6 +1,7 @@
-import Debug from "debug";
 import fs from "node:fs/promises";
 import { fileURLToPath } from "node:url";
+
+import Debug from "debug";
 
 // prettier-ignore
 // eslint-disable-next-line @rushstack/typedef-var
@@ -14,7 +15,7 @@ export type ApkmirrorVersion = typeof ApkmirrorVersions[number];
 
 // prettier-ignore
 // eslint-disable-next-line @rushstack/typedef-var
-export const PatchedVersions = ["apkpure-3.15.0-with-frida-gadget"] as const;
+export const PatchedVersions = ["apkpure-4.14.0-with-frida-gadget"] as const;
 export type PatchedVersion = typeof PatchedVersions[number];
 
 // eslint-disable-next-line @rushstack/typedef-var

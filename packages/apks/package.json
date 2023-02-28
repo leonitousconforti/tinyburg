@@ -3,6 +3,12 @@
     "version": "0.0.1",
     "private": true,
     "description": "TinyTower apks downloaded from different sources, ready to be consumed by other tinyburg tools",
+    "keywords": [
+        "tinyburg",
+        "nimblebit",
+        "TinyTower",
+        "Tiny Tower"
+    ],
     "homepage": "https://github.com/leonitousconforti/tinyburg",
     "repository": {
         "type": "git",

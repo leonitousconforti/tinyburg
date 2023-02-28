@@ -1,7 +1,11 @@
 #!/usr/bin/env python3
 
 
-"""https://fadeevab.com/frida-gadget-injection-on-android-no-root-2-methods/#method-1-inject-a-libfrida-gadget-so-as-a-dependency-to-a-native-library-jni-inside-of-apk"""
+"""
+This script patches an apk to add the frida gadget library
+
+https://fadeevab.com/frida-gadget-injection-on-android-no-root-2-methods
+"""
 
 
 import os
@@ -13,23 +17,22 @@ import tempfile
 
 import lief
 
-apktool_location = os.path.join(
-    os.path.dirname(__file__), "..", "vendor", "apktool_2.7.0.jar"
-)
-uber_apk_signer_location = os.path.join(
-    os.path.dirname(__file__), "..", "vendor", "uber-apk-signer-1.3.0.jar"
-)
-frida_gadget_location = os.path.join(
-    os.path.dirname(__file__),
-    "..",
-    "vendor",
-    "frida-gadget-16.0.10-android-arm64.so",
-)
+downloads_directory = os.path.dirname(__file__)
+vendor_directory = os.path.join(downloads_directory, "..", "vendor")
 
+apktool = os.path.join(vendor_directory, "apktool_2.7.0.jar")
+uber_apk_signer = os.path.join(vendor_directory, "uber-apk-signer-1.3.0.jar")
+frida_gadget = os.path.join(vendor_directory, "frida-gadget-16.0.10-android-arm64.so")
 
 if len(sys.argv) is not 2:
     print("Must give location of apk to patch")
     exit(1)
+
+source_regex = re.compile(r"(apkpure|apkmirror)", re.RegexFlag.MULTILINE)
+version_regex = re.compile(r"([\d]+.[\d]+.[\d-]+)", re.RegexFlag.MULTILINE)
+source = re.search(source_regex, sys.argv[1])[1]
+version = re.search(version_regex, sys.argv[1])[1]
+output_file_name = f"{source}-{version}-with-frida-gadget"
 
 
 # Do all our work in a temp folder
@@ -41,7 +44,7 @@ with tempfile.TemporaryDirectory() as temp_directory_name:
         [
             "java",
             "-jar",
-            f"{apktool_location}",
+            f"{apktool}",
             "d",
             "-f",
             "--no-res",
@@ -55,7 +58,7 @@ with tempfile.TemporaryDirectory() as temp_directory_name:
 
     # cp frida-gadget-12.8.8-android-arm64.so target/lib/arm64-v8a/libfrida-gadget.so
     shutil.copyfile(
-        frida_gadget_location,
+        frida_gadget,
         os.path.join(temp_directory_name, "lib", "arm64-v8a", "libfrida-gadget.so"),
     )
 
@@ -65,7 +68,14 @@ with tempfile.TemporaryDirectory() as temp_directory_name:
     native_library.write(lib_main)
 
     # readelf -d target/lib/arm64-v8a/libfromapk.so
-    subprocess.run(["readelf", "-d", lib_main])
+    subprocess.run(
+        [
+            "readelf",
+            "-d",
+            lib_main,
+        ],
+        check=True,
+    )
 
     # apktool b target
     apktool_output = os.path.join(temp_directory_name, "dist", "apktool_build.apk")
@@ -73,7 +83,7 @@ with tempfile.TemporaryDirectory() as temp_directory_name:
         [
             "java",
             "-jar",
-            f"{apktool_location}",
+            f"{apktool}",
             "b",
             "--output",
             f"{apktool_output}",
@@ -90,7 +100,7 @@ with tempfile.TemporaryDirectory() as temp_directory_name:
         [
             "java",
             "-jar",
-            f"{uber_apk_signer_location}",
+            f"{uber_apk_signer}",
             "--apks",
             f"{apktool_output}",
         ],
@@ -98,12 +108,6 @@ with tempfile.TemporaryDirectory() as temp_directory_name:
     )
 
     # cp target/dist/apktool_build-aligned-debugSigned.apk ./finished.apk
-    source_regex = re.compile(r"(apkpure|apkmirror)", re.RegexFlag.MULTILINE)
-    version_regex = re.compile(r"([\d]+.[\d]+.[\d-]+)", re.RegexFlag.MULTILINE)
-    source = re.search(source_regex, sys.argv[1])[1]
-    version = re.search(version_regex, sys.argv[1])[1]
-    output_file_name = f"{source}-{version}-with-frida-gadget"
-
     shutil.copyfile(
         uber_apk_signer_output,
         os.path.join(os.path.dirname(__file__), "patched", f"{output_file_name}.apk"),
