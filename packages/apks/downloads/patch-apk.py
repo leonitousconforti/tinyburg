@@ -24,7 +24,7 @@ apktool = os.path.join(vendor_directory, "apktool_2.7.0.jar")
 uber_apk_signer = os.path.join(vendor_directory, "uber-apk-signer-1.3.0.jar")
 frida_gadget = os.path.join(vendor_directory, "frida-gadget-16.0.10-android-arm64.so")
 
-if len(sys.argv) is not 2:
+if len(sys.argv) != 2:
     print("Must give location of apk to patch")
     exit(1)
 
@@ -62,6 +62,7 @@ with tempfile.TemporaryDirectory() as temp_directory_name:
         os.path.join(temp_directory_name, "lib", "arm64-v8a", "libfrida-gadget.so"),
     )
 
+    # Inject frida gadget library
     lib_main = os.path.join(temp_directory_name, "lib", "arm64-v8a", "libmain.so")
     native_library = lief.parse(lib_main)
     native_library.add_library("libfrida-gadget.so")
