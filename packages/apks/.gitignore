@@ -1,3 +1,4 @@
 /dist
+/certs
 /vendor
 /downloads/**/*.apk

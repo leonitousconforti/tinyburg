@@ -2,8 +2,10 @@ import { expect } from "chai";
 import fs from "node:fs/promises";
 
 import {
+    loadPatchedApk,
     loadApkFromApkpure,
     loadApkFromApkmirror,
+    PatchedVersions,
     ApkpureVersions,
     ApkmirrorVersions,
     TinyTowerApkSources,
@@ -38,9 +40,25 @@ describe("Should load all apks from apkpure", async () => {
     }
 });
 
-it("Should load all apks from all sources at least once", async () => {
-    const files = TinyTowerApkSources.map((source) => fs.readdir(new URL(`downloads/${source}`, import.meta.url)));
+describe("Should load all the patched apks", async () => {
+    for (const version of PatchedVersions) {
+        it(`Should load version ${version}`, async () => {
+            const fileLocation = await loadPatchedApk(version);
+            const apkDoesExist = await checkFileExists(fileLocation);
+            expect(apkDoesExist).to.equal(true, `Have patched apk for version ${version}`);
+        });
+    }
+});
+
+describe("Should load all apks from all sources at least once", async () => {
+    const files = [...TinyTowerApkSources, "patched"].map((source) =>
+        fs.readdir(new URL(`downloads/${source}`, import.meta.url))
+    );
+
     const countPromises = await Promise.all(files);
-    const count = countPromises.flat().length - TinyTowerApkSources.length;
-    expect(count).to.equal(ApkmirrorVersions.length + ApkpureVersions.length, `Should load all ${count} version`);
+    const count = countPromises.flat().length - [...TinyTowerApkSources, "patched"].length;
+
+    it(`Should load all ${count} version`, async () => {
+        expect(count).to.equal(ApkmirrorVersions.length + ApkpureVersions.length + PatchedVersions.length);
+    });
 });
