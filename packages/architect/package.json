@@ -20,7 +20,9 @@
     "main": "dist/index.js",
     "files": [
         "dist/",
-        "emulator/"
+        "emulator/",
+        "jwt-provider",
+        "envoy"
     ],
     "scripts": {
         "build": "heft build --clean",

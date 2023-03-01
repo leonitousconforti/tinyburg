@@ -11,4 +11,4 @@ pactl list || exit 1
 /android/sdk/platform-tools/adb start-server
 
 # Start the emulator
-/android/sdk/emulator/emulator -avd Pixel2 -no-window -ports 5554,5555 -grpc 8554 -skip-adb-auth -wipe-data -no-boot-anim -gpu swiftshader_indirect -qemu -append panic=1
+/android/sdk/emulator/emulator -avd Pixel2 -no-window -ports 5554,5555 -grpc 8554 -skip-adb-auth -wipe-data -no-boot-anim -gpu swiftshader_indirect -turncfg 'printf {"iceServers":[{"urls":["stun:stun.l.google.com:19302"]}]}' -qemu -append panic=1

@@ -1,22 +1,27 @@
-import json
-import getpass
 import binascii
+import getpass
+import json
 
-from jwcrypto import jwk
 from absl import app, flags, logging
+from jwcrypto import jwk
 from werkzeug.security import generate_password_hash
 
 FLAGS = flags.FLAGS
 
-flags.DEFINE_list("pairs", [getpass.getuser() + "@localhost", "hello"],
-                  "List of user name password pairs. user1,passwd1,user2,passwd2,...")
-flags.DEFINE_string("passwords", "passwd",
-                    "File with json dictionary of users -> password hash")
-flags.DEFINE_string("jwks", "jwt_secrets",
-                    "File name with generated  JWKS secrets.")
+flags.DEFINE_list(
+    "pairs",
+    [getpass.getuser() + "@localhost", "hello"],
+    "List of user name password pairs. user1,passwd1,user2,passwd2,...",
+)
+flags.DEFINE_string(
+    "passwords", "passwd", "File with json dictionary of users -> password hash"
+)
+flags.DEFINE_string("jwks", "jwt_secrets", "File name with generated  JWKS secrets.")
 
 flags.register_validator(
-    "pairs", lambda value: len(value) % 2 == 0, message="--pairs must have an even number of user,password pairs"
+    "pairs",
+    lambda value: len(value) % 2 == 0,
+    message="--pairs must have an even number of user,password pairs",
 )
 
 
@@ -45,7 +50,7 @@ def main(argv):
     keys = jwk.JWK.generate(kty="RSA", size=2048)
 
     # Python 2 does signed crc32, unlike Python 3
-    kid = hex(binascii.crc32(keys.export_public().encode('utf-8')) & 0xFFFFFFFF)
+    kid = hex(binascii.crc32(keys.export_public().encode("utf-8")) & 0xFFFFFFFF)
 
     public = json.loads(keys.export_public())
     private = json.loads(keys.export_private())
@@ -54,10 +59,10 @@ def main(argv):
     public_jwks = {"keys": [public]}
     private_jwks = {"keys": [private]}
 
-    with open(FLAGS.jwks + '_pub.jwks', 'w') as f:
+    with open(FLAGS.jwks + "_pub.jwks", "w") as f:
         f.write(json.dumps(public_jwks, indent=2))
 
-    with open(FLAGS.jwks + '_priv.jwks', 'w') as f:
+    with open(FLAGS.jwks + "_priv.jwks", "w") as f:
         f.write(json.dumps(private_jwks, indent=2))
 
 
