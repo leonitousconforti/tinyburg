@@ -12,7 +12,9 @@ thinking about also tracking major events and be able to load the versions for t
 # Use the patch apk python script to insert frida gadget into any apk
 ./downloads/patch-apk.py "./downloads/apkpure/Tiny Tower_ 8 Bit Retro Tycoon_4.14.0_Apkpure.apk"
 
-# After downloading any apk into the apkpure or apkmirror download folders, you should regenerate the typescript types for this package using the gen-ts-type python script
+# After downloading any apk into the apkpure or apkmirror download folders,
+# you should regenerate the typescript types for this package using the
+# gen-ts-type python script
 ./downloads/gen-ts-types.py
 ```
 
