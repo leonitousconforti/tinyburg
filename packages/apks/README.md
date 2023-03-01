@@ -5,3 +5,37 @@ an internal package that stores all versions of TinyTower that I want tinyburg t
 ## Future
 
 thinking about also tracking major events and be able to load the versions for that event using this library too (like loading the version for the 2022 christmas event ect)
+
+## Example usage
+
+```bash
+# Use the patch apk python script to insert frida gadget into any apk
+./downloads/patch-apk.py "./downloads/apkpure/Tiny Tower_ 8 Bit Retro Tycoon_4.14.0_Apkpure.apk"
+
+# After downloading any apk into the apkpure or apkmirror download folders, you should regenerate the typescript types for this package using the gen-ts-type python script
+./downloads/gen-ts-types.py
+```
+
+then to load any of the apks for use in a different typescript package
+
+```js
+// These are equivalent
+import loadApk from "@tinyburg/apks";
+import { loadApk } from "@tinyburg/apks";
+
+// Or to load from a specific download source
+import { loadPatchedApk } from "@tinyburg/apks";
+import { loadApkFromApkpure } from "@tinyburg/apks";
+import { loadApkFromApkmirror } from "@tinyburg/apks";
+
+const apk = loadApk("apkpure", "4.14.0")
+const apk1 = loadApkFromApkpure("4.14.0");
+const apk2 = loadApkFromApkmirror("4.14.0");
+const apk3 = loadPatchedApk("apkpure-4.14.0-with-frida-gadget");
+```
+
+Otherwise, you can push any patched apk straight to an emulator the connect with
+
+```bash
+frida -U --attach-name Gadget
+```
