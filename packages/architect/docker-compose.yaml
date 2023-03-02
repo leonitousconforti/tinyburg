@@ -14,7 +14,7 @@ services:
             - "8081:8081"
 
     emulator:
-        image: architect_emulator:latest
+        image: tinyburg/architect:emulator-9322596_sysimg-31-google-apis-x64_frida-16.0.8
         shm_size: 128M
         devices: [/dev/kvm]
         build:
