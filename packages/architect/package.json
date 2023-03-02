@@ -35,7 +35,6 @@
         "@tinyburg/architect-viewer": "workspace:*",
         "debug": "~4.3.4",
         "dockerode": "~3.3.4",
-        "dockerode-compose": "~1.3.2",
         "tar-fs": "~2.1.1"
     },
     "devDependencies": {
