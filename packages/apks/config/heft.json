@@ -1,5 +1,6 @@
 {
     "$schema": "https://developer.microsoft.com/json-schemas/heft/heft.schema.json",
+    "heftPlugins": [{ "plugin": "@rushstack/heft-jest-plugin" }],
     "eventActions": [
         {
             "actionKind": "deleteGlobs",
@@ -8,17 +9,16 @@
             "globsToDelete": ["dist"]
         },
         {
-            "actionKind": "copyFiles",
-            "heftEvent": "bundle",
-            "actionId": "copyDownloads",
-            "copyOperations": [
-                {
-                    "sourceFolder": ".",
-                    "destinationFolders": ["dist"],
-                    "includeGlobs": ["downloads/**/*"],
-                    "hardlink": true
-                }
-            ]
+            "actionKind": "runScript",
+            "heftEvent": "pre-compile",
+            "actionId": "generateTsTypes",
+            "scriptPath": "downloads/generate-ts-types.cjs"
+        },
+        {
+            "actionKind": "deleteGlobs",
+            "heftEvent": "post-build",
+            "actionId": "cleanUnnecessaryTempFiles",
+            "globsToDelete": ["temp"]
         }
     ]
 }

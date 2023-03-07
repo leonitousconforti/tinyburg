@@ -13,9 +13,11 @@ thinking about also tracking major events and be able to load the versions for t
 ./downloads/patch-apk.py "./downloads/apkpure/Tiny Tower_ 8 Bit Retro Tycoon_4.14.0_Apkpure.apk"
 
 # After downloading any apk into the apkpure or apkmirror download folders,
-# you should regenerate the typescript types for this package using the
-# gen-ts-type python script
-./downloads/gen-ts-types.py
+# you should re-build this package
+rushx build
+
+# or
+rush build --only @tinyburg/apks
 ```
 
 then to load any of the apks for use in a different typescript package

@@ -1,13 +1,13 @@
 {
     "extends": "@tinyburg/tsconfig-rig/profile/default/config/tsconfig.json",
     "compilerOptions": {
-        "types": ["node", "mocha"],
         "module": "esnext",
         "moduleResolution": "NodeNext",
+        "types": ["node", "heft-jest"],
         "outDir": "./dist",
         "noEmit": false,
-        "declaration": true,
-        "sourceMap": true
+        "sourceMap": true,
+        "declaration": true
     },
-    "include": ["./index.ts", "./test.ts"]
+    "include": ["src/**/*.ts"]
 }
