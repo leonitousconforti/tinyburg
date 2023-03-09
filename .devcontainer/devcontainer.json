@@ -5,10 +5,13 @@
     "features": {
         "ghcr.io/dhoeric/features/act:1": {},
         "ghcr.io/devcontainers/features/git:1": {},
+        "ghcr.io/devcontainers/features/java:1": {},
+        "ghcr.io/devcontainers/features/rust:1": {},
         "ghcr.io/devcontainers/features/python:1": {},
         "ghcr.io/devcontainers/features/git-lfs:1": {},
         "ghcr.io/devcontainers/features/terraform:1": {},
         "ghcr.io/devcontainers/features/github-cli:1": {},
+        "ghcr.io/devcontainers-contrib/features/deno:1": {},
         "ghcr.io/devcontainers/features/common-utils:2": {},
         "ghcr.io/frntn/devcontainers-features/gitleaks:1": {},
         "ghcr.io/devcontainers-contrib/features/digitalocean-cli:1": {},
@@ -25,7 +28,6 @@
                 "editorconfig.editorconfig",
                 "streetsidesoftware.code-spell-checker",
                 "ms-azuretools.vscode-docker",
-                "VisualStudioExptTeam.vscodeintellicode",
                 "icsharpcode.ilspy-vscode",
                 "shd101wyy.markdown-preview-enhanced",
                 "ms-python.python",
@@ -36,7 +38,8 @@
                 "eamodio.gitlens",
                 "zxh404.vscode-proto3",
                 "GitHub.vscode-pull-request-github",
-                "mutantdino.resourcemonitor"
+                "mutantdino.resourcemonitor",
+                "ms-python.black-formatter"
             ],
             "settings": {
                 "remote.localPortHost": "allInterfaces",
@@ -46,19 +49,33 @@
                 "editor.bracketPairColorization.enabled": true,
                 "codemetrics.basics.DecorationModeEnabled": false,
                 "codemetrics.basics.OverviewRulerModeEnabled": false,
-                "editor.defaultFormatter": "esbenp.prettier-vscode",
                 "[typescript]": {
                     "editor.defaultFormatter": "esbenp.prettier-vscode"
                 },
-                "[json]": {
+                "[typescriptreact]": {
                     "editor.defaultFormatter": "esbenp.prettier-vscode"
                 },
                 "[javascript]": {
                     "editor.defaultFormatter": "esbenp.prettier-vscode"
                 },
+                "[javascriptreact]": {
+                    "editor.defaultFormatter": "esbenp.prettier-vscode"
+                },
+                "[json]": {
+                    "editor.defaultFormatter": "esbenp.prettier-vscode"
+                },
                 "[jsonc]": {
                     "editor.defaultFormatter": "esbenp.prettier-vscode"
                 },
+                "[python]": {
+                    "editor.wordBasedSuggestions": false,
+                    "editor.defaultFormatter": "ms-python.black-formatter",
+                    "editor.codeActionsOnSave": {
+                        "source.organizeImports": true
+                    }
+                },
+                "python.formatting.provider": "black",
+                "isort.args": ["--profile", "black"],
                 "files.associations": { "*.json": "jsonc", "package.json": "json", "cloudinit.conf": "plaintext" },
                 "cSpell.enableFiletypes": [
                     "dockercompose",
