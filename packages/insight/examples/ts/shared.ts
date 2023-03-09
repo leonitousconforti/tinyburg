@@ -1,10 +1,9 @@
 import type Emittery from "emittery";
 
-// import type { TAgentMain } from "@tinyburg/insight/shared/agent-main-exports"
 import type { TAgentMain } from "../../src/shared/agent-main-export.js";
 
 export interface IYourAgentExports {
-    main: TAgentMain<[], {}>;
+    main: TAgentMain<[], { version: string }>;
 }
 
 export interface IIsMusicEnabledAgentExports {

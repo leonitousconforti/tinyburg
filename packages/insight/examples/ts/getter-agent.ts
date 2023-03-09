@@ -24,7 +24,7 @@ export class IsMusicEnabledAgent extends TinyTowerFridaAgent<IsMusicEnabledAgent
 /**
  * Defines the public interface of this agent, i.e what methods and properties
  * will be available over the frida rpc channel. In this case, only a main
- * function is exposed, which will create a new instance of the agent and start
+ * function is exposed, which will create a new instance of the agent and starts
  * it. The start method takes care of everything from retrying dependency
  * loading to calling the retrieve data method.
  */

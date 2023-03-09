@@ -5,7 +5,8 @@
         "allowJs": true,
         "checkJs": true,
         "types": ["node"],
-        "composite": true
+        "composite": true,
+        "importsNotUsedAsValues": "preserve"
     },
     "include": ["./**/*.ts", "./**/*.js"],
     "exclude": ["./**/*agent*.ts", "./**/*agent*.js"],

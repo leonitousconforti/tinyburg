@@ -8,6 +8,12 @@
         "TinyTower",
         "Tiny Tower"
     ],
+    "homepage": "https://github.com/leonitousconforti/tinyburg",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/leonitousconforti/tinyburg.git",
+        "directory": "packages/insight"
+    },
     "license": "MIT",
     "author": "Leo Conforti <leo@leoconforti.us> (https://leoconforti.us)",
     "type": "module",
@@ -58,6 +64,9 @@
         "@rushstack/eslint-config": "~3.1.1",
         "@rushstack/heft": "~0.48.8",
         "@rushstack/heft-jest-plugin": "~0.4.2",
+        "@tinyburg/apks": "workspace:*",
+        "@tinyburg/architect": "workspace:*",
+        "@tinyburg/tsconfig-rig": "workspace:*",
         "@tsconfig/node18-strictest-esm": "~1.0.1",
         "@types/debug": "~4.1.7",
         "@types/frida-gum": "~18.3.0",
@@ -68,8 +77,8 @@
         "eslint-config-prettier": "~8.5.0",
         "eslint-plugin-prettier": "~4.2.1",
         "eslint-plugin-unicorn": "~45.0.2",
-        "typescript": "~4.9.3",
-        "ts-node": "~10.9.1"
+        "ts-node": "~10.9.1",
+        "typescript": "~4.9.3"
     },
     "engines": {
         "node": ">=14.16"

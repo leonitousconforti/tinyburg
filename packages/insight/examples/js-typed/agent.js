@@ -1,7 +1,17 @@
+/**
+ * This will automatically be imported when you import TinyTowerFridaAgent, but
+ * in the case where you do not want to use the base agent, you will need to
+ * have this import explicitly.
+ */
+import "frida-il2cpp-bridge";
+
 import { TinyTowerFridaAgent } from "../../src/agents/base-frida-agent.js";
 
 /**
- * Asdf
+ * All agents are expected to inherit from TinyTowerFridaAgent and implement the
+ * two abstract methods from that class, loadDependencies and retrieveData.
+ * TinyTowerFridaAgent is also a generic class so you must pass a type parameter
+ * (this assists with the type checking)
  *
  * @extends TinyTowerFridaAgent<YourAgent>
  */
@@ -27,11 +37,12 @@ export class YourAgent extends TinyTowerFridaAgent {
 /**
  * Main entry point exported for when this file is compiled as a frida agent.
  *
- * @type
+ * @type {import("./shared.js").IYourAgentExports}
  */
 const rpcExports = {
     main: async () => {
         const instance = await new YourAgent().start();
+        return instance.data;
     },
 };
 

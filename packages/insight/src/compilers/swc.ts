@@ -1,4 +1,4 @@
-import Debug from "Debug";
+import Debug from "debug";
 // import swc from "@swc/core";
 
 const logger: Debug.Debugger = Debug.debug("tinyburg:insight:swc-compiler");
