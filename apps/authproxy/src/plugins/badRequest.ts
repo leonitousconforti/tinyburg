@@ -2,8 +2,6 @@ import type { FastifyReply } from "fastify";
 
 import fp from "fastify-plugin";
 
-type a = typeof fp;
-
 // The use of fastify-plugin is required to be able
 // to export the decorators to the outer scope
 export default fp(async (fastify) => {

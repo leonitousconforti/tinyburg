@@ -8,7 +8,7 @@ import UnderPressure, {
 
 const UnderPressureError = fe("FST_UNDER_PRESSURE", "Service Unavailable", 503);
 
-export const buildUnderPressureConfig = (): UnderPressure.default.UnderPressureOptions => ({
+export const buildUnderPressureConfig = (): UnderPressure.UnderPressureOptions => ({
     // 750ms of delay
     maxEventLoopDelay: 750,
 
