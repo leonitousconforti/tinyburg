@@ -2,15 +2,30 @@
     "name": "@tinyburg/cli",
     "version": "0.0.1",
     "description": "CLI for TinyTower using @tinyburg/core",
-    "license": "MIT",
-    "type": "module",
-    "author": "Leo Conforti <leo@leoconforti.us> (https://leoconforti.us)",
     "keywords": [
+        "tinyburg",
+        "nimblebit",
         "TinyTower",
-        "Tiny Tower",
-        "Nimblebit"
+        "Tiny Tower"
     ],
+    "homepage": "https://github.com/leonitousconforti/tinyburg",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/leonitousconforti/tinyburg.git",
+        "directory": "packages/bots"
+    },
+    "license": "MIT",
+    "author": "Leo Conforti <leo@leoconforti.us> (https://leoconforti.us)",
+    "type": "module",
+    "main": "index.js",
     "scripts": {},
+    "dependencies": {
+        "@tinyburg/core": "workspace:*",
+        "diff": "~5.1.0",
+        "find-up": "~6.3.0",
+        "prompts": "~2.4.2",
+        "yargs": "~17.6.2"
+    },
     "devDependencies": {
         "@types/diff": "~5.0.2",
         "@types/node": "~18.11.11",
@@ -19,11 +34,7 @@
         "eslint": "~8.29.0",
         "typescript": "~4.9.3"
     },
-    "dependencies": {
-        "diff": "~5.1.0",
-        "find-up": "~6.3.0",
-        "prompts": "~2.4.2",
-        "yargs": "~17.6.2",
-        "@tinyburg/core": "workspace:*"
+    "engines": {
+        "node": ">=14.16"
     }
 }
