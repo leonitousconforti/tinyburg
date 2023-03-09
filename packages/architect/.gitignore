@@ -4,6 +4,6 @@
 /infrastructure/.terraform
 /infrastructure/.terraform.*
 
-/envoy/*.jwks
-/jwt-provider/*.jwks
-/jwt-provider/passwd
+/envoy/jwt_secrets_pub.json
+/jwt-provider/credentials.json
+/jwt-provider/jwt_secrets_priv.json

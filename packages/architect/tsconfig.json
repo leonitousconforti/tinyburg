@@ -5,8 +5,8 @@
         "moduleResolution": "NodeNext",
         "outDir": "./dist",
         "noEmit": false,
-        "declaration": true,
-        "sourceMap": true
+        "sourceMap": true,
+        "declaration": true
     },
     "include": ["./src/**/*.ts"]
 }

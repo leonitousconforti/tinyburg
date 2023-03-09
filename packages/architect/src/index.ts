@@ -16,7 +16,7 @@ export const architect = async (): Promise<{
 
     const context = new URL("../emulator", import.meta.url);
     const dockerode: Dockerode = new Dockerode({ socketPath: "/var/run/docker.sock" });
-    const tag = "tinyburg/architect:emulator-9322596_sysimg-31-google-apis-x64_frida-16.0.8";
+    const tag = "tinyburg/architect:emulator-9322596_sysimg-31-google-apis-x64_frida-16.0.10";
 
     // Build a docker container
     logger("Building docker image from context %s, will tag image as %s when finished", context.toString(), tag);
@@ -72,6 +72,7 @@ export const architect = async (): Promise<{
         await new Promise((resolve) => setTimeout(resolve, 30_000));
         result = await container.inspect();
     }
+    await new Promise((resolve) => setTimeout(resolve, 30_000));
 
     // Install any apk
     const installApk = async (apk: string): Promise<void> => {
@@ -79,13 +80,21 @@ export const architect = async (): Promise<{
         const tarball = tar.pack(path.dirname(apk), { entries: [path.basename(apk)] });
         await container.putArchive(tarball, { path: "/android/apks/" });
         const exec = await container.exec({
-            Cmd: ["/android/sdk/platform-tools/adb", "install", "-r", `/android/apks/${path.basename(apk)}`],
+            Cmd: [
+                "/android/sdk/platform-tools/adb",
+                "install",
+                "-r", // Replace existing application (if present)
+                "-t", // Allow test packages
+                "-g", // Allow downgrade
+                "-d", // Grant all runtime permissions
+                `/android/apks/${path.basename(apk)}`,
+            ],
         });
         await exec.start({});
-        logger("Done install apk");
+        logger("Done installing apk");
     };
 
-    // Launch game
+    // https://stackoverflow.com/questions/4567904/how-to-start-an-application-using-android-adb-tools
     const launchGame = async (): Promise<void> => {
         logger("Launching game");
         const exec = await container.exec({

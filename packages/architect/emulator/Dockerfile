@@ -4,15 +4,15 @@ WORKDIR /tmp
 RUN wget https://dl.google.com/android/repository/emulator-linux_x64-9322596.zip && \
     wget https://dl.google.com/android/repository/platform-tools_r29.0.5-linux.zip && \
     wget https://dl.google.com/android/repository/sys-img/google_apis/x86_64-31_r11.zip && \
-    wget https://github.com/frida/frida/releases/download/16.0.8/frida-server-16.0.8-android-x86_64.xz && \
+    wget https://github.com/frida/frida/releases/download/16.0.10/frida-server-16.0.10-android-x86_64.xz && \
     unzip -u -o x86_64-31_r11.zip -d sysimg && \
     unzip -u -o emulator-linux_x64-9322596.zip && \
     unzip -u -o platform-tools_r29.0.5-linux.zip && \
-    xz --decompress frida-server-16.0.8-android-x86_64.xz && \
+    xz --decompress frida-server-16.0.10-android-x86_64.xz && \
     rm -f x86_64-31_r11.zip && \
     rm -f emulator-linux_x64-9322596.zip && \
     rm -f platform-tools_r29.0.5-linux.zip && \
-    rm -f frida-server-16.0.8-android-x86_64.xz
+    rm -f frida-server-16.0.10-android-x86_64.xz
 
 FROM nvidia/opengl:1.2-glvnd-runtime-ubuntu20.04
 ENV NVIDIA_DRIVER_CAPABILITIES ${NVIDIA_DRIVER_CAPABILITIES},display
@@ -43,7 +43,7 @@ RUN mkdir -p /android/apks && \
 COPY --from=dependency-preparer /tmp/emulator/ /android/sdk/emulator/
 COPY --from=dependency-preparer /tmp/platform-tools/ /android/sdk/platform-tools/
 COPY --from=dependency-preparer /tmp/sysimg/ /android/sdk/system-images/android/default/
-COPY --from=dependency-preparer /tmp/frida-server-16.0.8-android-x86_64 /android/frida/frida-server
+COPY --from=dependency-preparer /tmp/frida-server-16.0.10-android-x86_64 /android/frida/frida-server
 
 COPY avd/ /android/avd-home
 COPY launch-emulator.sh /android/sdk/
@@ -65,7 +65,7 @@ HEALTHCHECK --interval=30s \
 LABEL android-sdk.emulator.version="9322596" \
     android-sdk.platform-tools.version="29.0.5" \
     android-sdk.system-image.version="sys-31-google-apis-64" \
-    frida-server.version="16.0.8-android-x86_64" \
+    frida-server.version="16.0.10-android-x86_64" \
     org.opencontainers.image.source="https://github.com/leonitousconforti/tinyburg" \
     org.opencontainers.image.description="Runs TinyTower on an android emulator in a docker image. Exposes the emulator console, adb, grpc, and frida server endpoints without any protections" \
     org.opencontainers.image.licenses="MIT"

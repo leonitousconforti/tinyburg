@@ -20,16 +20,14 @@
     "main": "dist/index.js",
     "files": [
         "dist/",
+        "envoy/",
         "emulator/",
-        "jwt-provider",
-        "envoy"
+        "jwt-provider/"
     ],
     "scripts": {
-        "build": "heft build --clean",
-        "docker:build": "docker build ./emulator -t tinyburg/architect:emulator-9322596_sysimg-31-google-apis-x64_frida-16.0.8",
-        "docker:run": "docker run --rm --device /dev/kvm --publish 5554:5554/tcp --publish 5555:5555/tcp --publish 8554:8554/tcp --publish 27042:27042/tcp -it tinyburg/architect:emulator-9322596_sysimg-31-google-apis-x64_frida-16.0.8",
-        "lint": "eslint .",
-        "test": "ts-node --esm ./src/test.ts"
+        "build": "heft test --clean",
+        "docker:build": "docker build ./emulator -t tinyburg/architect:emulator-9322596_sysimg-31-google-apis-x64_frida-16.0.10",
+        "docker:run": "docker run --rm --device /dev/kvm --publish 5554:5554/tcp --publish 5555:5555/tcp --publish 8554:8554/tcp --publish 27042:27042/tcp -it tinyburg/architect:emulator-9322596_sysimg-31-google-apis-x64_frida-16.0.10"
     },
     "dependencies": {
         "@tinyburg/architect-viewer": "workspace:*",

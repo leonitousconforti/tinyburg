@@ -6,6 +6,12 @@
             "heftEvent": "clean",
             "actionId": "defaultClean",
             "globsToDelete": ["dist"]
+        },
+        {
+            "actionKind": "deleteGlobs",
+            "heftEvent": "post-build",
+            "actionId": "cleanUnnecessaryTempFiles",
+            "globsToDelete": ["temp"]
         }
     ]
 }

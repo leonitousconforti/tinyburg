@@ -1,70 +1,36 @@
-import binascii
-import getpass
-import json
+#!/usr/bin/env python3
 
-from absl import app, flags, logging
+import json
+import binascii
 from jwcrypto import jwk
 from werkzeug.security import generate_password_hash
 
-FLAGS = flags.FLAGS
 
-flags.DEFINE_list(
-    "pairs",
-    [getpass.getuser() + "@localhost", "hello"],
-    "List of user name password pairs. user1,passwd1,user2,passwd2,...",
-)
-flags.DEFINE_string(
-    "passwords", "passwd", "File with json dictionary of users -> password hash"
-)
-flags.DEFINE_string("jwks", "jwt_secrets", "File name with generated  JWKS secrets.")
+unsalted_credentials = [("username", "password")]
 
-flags.register_validator(
-    "pairs",
-    lambda value: len(value) % 2 == 0,
-    message="--pairs must have an even number of user,password pairs",
-)
+credentials_file = open("credentials.json", "w")
+public_keys_file = open("jwt_secrets_pub.json", "w")
+private_keys_file = open("jwt_secrets_priv.json", "w")
 
+# Create salted credentials
+salted_credentials = {}
+for pair in unsalted_credentials:
+    salted_credentials[pair[0]] = generate_password_hash(pair[1])
 
-def pairwise(iterable):
-    "s -> (s0, s1), (s2, s3), (s4, s5), ..."
-    a = iter(iterable)
-    return zip(a, a)
+# Create the jwks secrets and export them
+keys = jwk.JWK.generate(kty="RSA", size=2048)
+kid = hex(binascii.crc32(keys.export_public().encode("utf-8")) & 0xFFFFFFFF)
+public = json.loads(keys.export_public())
+private = json.loads(keys.export_private())
+public["kid"] = kid
+private["kid"] = kid
 
+# Write everything to files
+public_keys_file.write(json.dumps(public, indent=4))
+private_keys_file.write(json.dumps(private, indent=4))
+credentials_file.write(json.dumps(salted_credentials))
 
-def main(argv):
-    if len(argv) > 1:
-        raise app.UsageError("Too many command-line arguments.")
-
-    # Create salted passwords
-    unsalted = pairwise(FLAGS.pairs)
-    salted = {}
-    for pair in unsalted:
-        logging.info("%s : %s", pair[0], pair[1])
-        salted[pair[0]] = generate_password_hash(pair[1])
-
-    # And write them to a file
-    with open(FLAGS.passwords, "w") as f:
-        f.write(json.dumps(salted))
-
-    # Create the jwks secrets and export them
-    keys = jwk.JWK.generate(kty="RSA", size=2048)
-
-    # Python 2 does signed crc32, unlike Python 3
-    kid = hex(binascii.crc32(keys.export_public().encode("utf-8")) & 0xFFFFFFFF)
-
-    public = json.loads(keys.export_public())
-    private = json.loads(keys.export_private())
-    public["kid"] = kid
-    private["kid"] = kid
-    public_jwks = {"keys": [public]}
-    private_jwks = {"keys": [private]}
-
-    with open(FLAGS.jwks + "_pub.jwks", "w") as f:
-        f.write(json.dumps(public_jwks, indent=2))
-
-    with open(FLAGS.jwks + "_priv.jwks", "w") as f:
-        f.write(json.dumps(private_jwks, indent=2))
-
-
-if __name__ == "__main__":
-    app.run(main)
+# Close files
+credentials_file.close()
+public_keys_file.close()
+private_keys_file.close()
