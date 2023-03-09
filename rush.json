@@ -530,11 +530,6 @@
             "projectFolder": "packages/insight",
             "shouldPublish": true
         },
-        {
-            "packageName": "@tinyburg/playground",
-            "projectFolder": "packages/playground",
-            "shouldPublish": false
-        },
 
         // Rigs
         {
