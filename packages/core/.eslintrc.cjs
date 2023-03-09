@@ -38,11 +38,11 @@ module.exports = {
             },
         },
         {
-            files: ["src/parsing-structs/**/*.ts"],
+            files: ["src/data/**/*.ts", "src/parsing-structs/**/*.ts"],
             rules: {
                 "@rushstack/typedef-var": "off",
             },
         },
     ],
-    ignorePatterns: ["dist/", "src/data/*.ts"],
+    ignorePatterns: ["dist/"],
 };

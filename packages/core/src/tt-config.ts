@@ -1,3 +1,5 @@
+import { getRandomBurnerBot } from "@tinyburg/bots";
+
 export interface ITTConfig {
     nimblebitHost: string;
     secretSalt?: string;
@@ -28,10 +30,7 @@ export const defaultConfig: ITTConfig = {
         useProxy: false,
         address: "https://authproxy.tinyburg.app",
     },
-    burnBot: {
-        playerId: "9GTYN",
-        playerSs: "89f9b90b-4e1e-4b48-af56-df39da7b17a7",
-    },
+    burnBot: getRandomBurnerBot(),
     player: {
         playerId: "",
     },

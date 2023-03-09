@@ -50,6 +50,7 @@
         "update-common-data": "ts-node --esm bin/update-common-data.ts"
     },
     "dependencies": {
+        "@tinyburg/bots": "workspace:*",
         "debug": "~4.3.4",
         "deep-extend": "~0.6.0",
         "got": "~12.5.3",
@@ -60,6 +61,9 @@
     "devDependencies": {
         "@rushstack/eslint-config": "~3.1.1",
         "@rushstack/heft": "~0.48.8",
+        "@tinyburg/apks": "workspace:*",
+        "@tinyburg/architect": "workspace:*",
+        "@tinyburg/architect-viewer": "workspace:*",
         "@tinyburg/insight": "workspace:*",
         "@tinyburg/tsconfig-rig": "workspace:*",
         "@types/debug": "~4.1.7",
