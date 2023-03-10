@@ -11,7 +11,7 @@
         "ghcr.io/devcontainers/features/git-lfs:1": {},
         "ghcr.io/devcontainers/features/terraform:1": {},
         "ghcr.io/devcontainers/features/github-cli:1": {},
-        "ghcr.io/devcontainers-contrib/features/deno:1": {},
+//         "ghcr.io/devcontainers-contrib/features/deno:1": {},
         "ghcr.io/devcontainers/features/common-utils:2": {},
         "ghcr.io/frntn/devcontainers-features/gitleaks:1": {},
         "ghcr.io/devcontainers-contrib/features/digitalocean-cli:1": {},
