@@ -18,6 +18,8 @@ services:
         build:
             context: ./emulator
             dockerfile: Dockerfile
+        ports:
+            - "27042:27042"
         networks:
             envoymesh:
                 aliases:
