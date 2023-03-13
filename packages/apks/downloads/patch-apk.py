@@ -22,8 +22,8 @@ vendor_dir = os.path.join(downloads_dir, "..", "vendor")
 
 apktool = os.path.join(vendor_dir, "apktool_2.7.0.jar")
 uber_apk_signer = os.path.join(vendor_dir, "uber-apk-signer-1.3.0.jar")
-frida_gadget_arm64 = os.path.join(vendor_dir, "frida-gadget-16.0.10-android-arm64.so")
-frida_gadget_x86_64 = os.path.join(vendor_dir, "frida-gadget-16.0.10-android-x86_64.so")
+frida_gadget_arm64 = os.path.join(vendor_dir, "frida-gadget-16.0.11-android-arm64.so")
+frida_gadget_x86_64 = os.path.join(vendor_dir, "frida-gadget-16.0.11-android-x86_64.so")
 
 
 @click.command()
