@@ -6,7 +6,9 @@ import { TinyTowerFridaAgent } from "../../src/agents/base-frida-agent.js";
  * This agent showcases how to set information in the game. In this case, it
  * will toggle the music setting in the settings menu.
  */
+// @ts-ignore
 export class SetMusicStatusAgent extends TinyTowerFridaAgent {
+    // @ts-ignore
     constructor(musicEnabled, loadDependenciesMaxRetries, loadDependenciesWaitMs) {
         super(loadDependenciesMaxRetries, loadDependenciesWaitMs);
         this._musicEnabled = musicEnabled;
@@ -29,6 +31,7 @@ export class SetMusicStatusAgent extends TinyTowerFridaAgent {
 }
 
 const rpcExports = {
+    // @ts-ignore
     main: async (musicEnabled) => {
         const instance = await new SetMusicStatusAgent(musicEnabled).start();
         return instance.data;

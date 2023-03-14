@@ -13,6 +13,7 @@ import { TinyTowerFridaAgent } from "../../src/agents/base-frida-agent.js";
  * modified. Then we can pass that alert through frida rpc channel to the
  * node.js side
  */
+// @ts-ignore
 export class SubscribeToMusicStatusAgent2 extends TinyTowerFridaAgent {
     emittery = new Emittery();
 

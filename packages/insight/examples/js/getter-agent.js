@@ -6,6 +6,7 @@ import { TinyTowerFridaAgent } from "../../src/agents/base-frida-agent.js";
  * This agent showcases how to retrieve information from the game. In this case,
  * it will retrieve if the music setting in the settings menu is enabled.
  */
+// @ts-ignore
 export class IsMusicEnabledAgent extends TinyTowerFridaAgent {
     loadDependencies() {
         const csharpAssembly = Il2Cpp.Domain.assembly("Assembly-CSharp");

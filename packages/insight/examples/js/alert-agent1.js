@@ -14,6 +14,7 @@ import { TinyTowerFridaAgent } from "../../src/agents/base-frida-agent.js";
  */
 // @ts-ignore
 export class SubscribeToMusicStatusAgent1 extends TinyTowerFridaAgent {
+    // @ts-ignore
     constructor(onAccessCallback, loadDependenciesMaxRetries, loadDependenciesWaitMs) {
         super(loadDependenciesMaxRetries, loadDependenciesWaitMs);
         this._notificationCallback = onAccessCallback;
@@ -43,6 +44,7 @@ export class SubscribeToMusicStatusAgent1 extends TinyTowerFridaAgent {
  * loading to calling the retrieve data method.
  */
 const rpcExports = {
+    // @ts-ignore
     main: async (notificationCallback) => {
         await new SubscribeToMusicStatusAgent1(notificationCallback).start();
     },

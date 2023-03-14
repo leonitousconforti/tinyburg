@@ -112,6 +112,8 @@ export const bootstrapAgent = async <T extends IAgent>(
         function onMessage(message: frida.Message) {
             if (message.type === "error") {
                 console.error(message.description);
+            } else {
+                console.log(message.payload);
             }
         };
     script.message.connect(_messageHandler);

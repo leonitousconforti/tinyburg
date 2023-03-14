@@ -93,8 +93,12 @@ export abstract class TinyTowerFridaAgent<T extends ITinyTowerFridaAgent> {
      * calls the retrieveData method.
      */
     public async start(): Promise<this> {
+        send("here2");
+
         // Wrap all this in an Il2cpp.perform
         await Il2Cpp.perform(async () => {
+            send("here3");
+
             // Try to load the dependencies
             this.dependencies = await this._waitForDependencies(
                 this.loadDependencies,

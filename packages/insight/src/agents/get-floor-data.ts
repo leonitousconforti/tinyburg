@@ -1,6 +1,6 @@
 import "frida-il2cpp-bridge";
 
-import type { IFloorAgentExports } from "../shared/floor-agent-exports";
+import type { IFloorAgentExports } from "../shared/floor-agent-exports.js";
 
 import { readObject } from "../helpers/read.js";
 import { TinyTowerFridaAgent } from "./base-frida-agent.js";

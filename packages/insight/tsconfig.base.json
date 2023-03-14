@@ -1,20 +1,18 @@
 {
-    "extends": "@tsconfig/node18-strictest-esm/tsconfig.json",
+    "extends": "@tinyburg/tsconfig-rig/profile/default/config/tsconfig.json",
     "compilerOptions": {
+        "module": "esnext",
+        "moduleResolution": "NodeNext",
+        "outDir": "./dist",
+        "noEmit": false,
+        "sourceMap": true,
+        "declaration": true,
+
+        // For project references
         "types": [],
         "rootDir": ".",
-        "outDir": "./dist",
-
-        "pretty": true,
-        "lib": ["es2022"],
-        "target": "es2022",
-        "module": "es2022",
-        "moduleResolution": "node",
-
-        "declaration": true,
-        "declarationMap": true,
-        "sourceMap": true,
         "composite": true,
-        "noEmitOnError": true
+        "noEmitOnError": true,
+        "declarationMap": true
     }
 }

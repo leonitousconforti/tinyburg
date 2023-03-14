@@ -1,6 +1,6 @@
 import "frida-il2cpp-bridge";
 
-import type { IBitizenAgentExports } from "../shared/bitizen-agent-exports";
+import type { IBitizenAgentExports } from "../shared/bitizen-agent-exports.js";
 
 import { TinyTowerFridaAgent } from "./base-frida-agent.js";
 import { colorToObject } from "../helpers/color-to-object.js";
