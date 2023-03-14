@@ -1,6 +1,7 @@
 {
     "name": "Node.js & TypeScript",
     "image": "mcr.microsoft.com/devcontainers/typescript-node:18-bullseye",
+    "runArgs": ["--add-host=host.docker.internal:host-gateway"],
 
     "features": {
         "ghcr.io/dhoeric/features/act:1": {},
