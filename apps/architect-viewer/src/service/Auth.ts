@@ -1,39 +1,39 @@
-import axios from "axios";
-import { EventEmitter } from "events";
+import { Buffer } from "buffer";
 
-export class TokenAuthService extends EventEmitter {
+export class TokenAuthService {
     private readonly authUri: string;
+    private readonly onAuthorized: (authorized: boolean) => void;
+
     private token: string | undefined;
 
-    constructor(authUri: string) {
-        super();
+    constructor(authUri: string, onAuthorized: (authorized: boolean) => void) {
         this.authUri = authUri;
+        this.onAuthorized = onAuthorized;
     }
 
-    public login = async (email: string, password: string) => {
-        const response = await axios.get(this.authUri, {
-            auth: {
-                username: email,
-                password: password,
+    public login = async (username: string, password: string) => {
+        const response = await fetch(this.authUri, {
+            headers: {
+                Authorization: `Basic ${Buffer.from(username + ":" + password).toString("base64")}`,
             },
         });
-        this.token = "Bearer " + response.data;
-        this.emit("authorized", true);
+
+        if (!response.ok) {
+            throw new Error(response.statusText);
+        }
+
+        this.token = await response.text();
+        this.onAuthorized(true);
     };
 
     public logout = () => {
-        return new Promise((resolve) => {
-            this.token = undefined;
-            resolve(undefined);
-            this.emit("authorized", false);
-        });
+        this.token = undefined;
+        this.onAuthorized(false);
     };
 
-    public isAuthorized = () => {
-        return this.token !== undefined;
-    };
-
-    public authHeader = () => {
-        return { Authorization: this.token };
+    public getAuthHeader = () => {
+        return { Authorization: `Bearer ${this.token}` };
     };
 }
+
+export default TokenAuthService;

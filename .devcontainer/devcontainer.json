@@ -104,6 +104,7 @@
                     "cloudinit",
                     "Conforti",
                     "corlib",
+                    "coturn",
                     "dockerode",
                     "emittery",
                     "envoymesh",
@@ -114,8 +115,10 @@
                     "gplaydl",
                     "Grayscaled",
                     "hostable",
+                    "Jsep",
                     "klass",
                     "leonitousconforti",
+                    "logcat",
                     "mediapath",
                     "mediatype",
                     "Nimblebit",
@@ -142,5 +145,6 @@
         }
     },
 
+    "appPort": ["3000:3000"],
     "postCreateCommand": "npm install -g pnpm @microsoft/rush"
 }

@@ -1,7 +1,8 @@
 import fs from "node:fs/promises";
-import loadApk from "@tinyburg/apks";
-import architect from "@tinyburg/architect";
-import { bootstrapAgentOnRemote, cleanupAgent, GetterAgents } from "@tinyburg/insight";
+
+// import { architect } from "@tinyburg/architect";
+// import { loadApkFromApkpure } from "@tinyburg/apks";
+import { bootstrapAgentOnRemote, GetterAgents } from "@tinyburg/insight";
 
 // Banner to put at the top of every data file
 const sourceCodeBanner: string = `/**
@@ -16,43 +17,49 @@ const sourceCodeBanner: string = `/**
 `;
 
 // Create a container to extract information from
-const apk: string = await loadApk("patched", "apkpure-4.14.0-with-frida-gadget");
-const { container, installApk, launchGame } = await architect();
-await installApk(apk);
-await launchGame();
+// const apk: string = await loadApkFromApkpure("3.15.4");
+// const { installApk } = await architect();
+// await installApk(apk);
+// await new Promise((resolve) => setTimeout(resolve, 100_000));
 
 // To know where to put the generated source code
 // eslint-disable-next-line @rushstack/typedef-var
 const AgentOutputFileMap = {
     "../src/data/bitbook-posts.ts": GetterAgents.BitbookAgent,
-    "../src/data/bitizen.ts": GetterAgents.BitizenAgent,
-    "../src/data/costumes.ts": GetterAgents.CostumeAgent,
-    "../src/data/elevators.ts": GetterAgents.ElevatorAgent,
-    "../src/data/floors.ts": GetterAgents.FloorAgent,
-    "../src/data/missions.ts": GetterAgents.MissionAgent,
-    "../src/data/pets.ts": GetterAgents.PetAgent,
-    "../src/data/roofs.ts": GetterAgents.RoofAgent,
+    // "../src/data/bitizen.ts": GetterAgents.BitizenAgent,
+    // "../src/data/costumes.ts": GetterAgents.CostumeAgent,
+    // "../src/data/elevators.ts": GetterAgents.ElevatorAgent,
+    // "../src/data/floors.ts": GetterAgents.FloorAgent,
+    // "../src/data/missions.ts": GetterAgents.MissionAgent,
+    // "../src/data/pets.ts": GetterAgents.PetAgent,
+    // "../src/data/roofs.ts": GetterAgents.RoofAgent,
 } as const;
 
 for (const [outputDestination, agent] of Object.entries(AgentOutputFileMap)) {
-    console.log(`* Running agent: ${agent}`);
-    const { runAgentMain, ...deviceStuff } = await bootstrapAgentOnRemote(agent, "172.17.0.1:27042");
+    console.log(`* Running agent: ${agent.agentFile}`);
+    const { runAgentMain } = await bootstrapAgentOnRemote(agent, "host.docker.internal:27042", {
+        compiler: "esbuild",
+    });
 
     const result: string = await runAgentMain();
+    console.log("there");
     const version: string | undefined = result.match(/TinyTower version: ([\d.]+)/gm)?.[0];
+    console.log("here");
     const cleanedSource: string = result.replace(/\/\/ TinyTower version: ([\d.]+)/gm, "");
+    console.log("there");
 
     const formattedBanner: string = sourceCodeBanner
         .replace("__filename", GetterAgents.BitbookAgent.agentFile)
         .replace("__date", new Date().toUTCString())
         .replace("__version", version?.split(":")[1]!.trim() || "unknown");
+    console.log("here");
 
-    const outputPath = new URL(outputDestination, import.meta.url);
+    const outputPath: URL = new URL(outputDestination, import.meta.url);
+    console.log("there");
     await fs.writeFile(outputPath, formattedBanner + cleanedSource);
-    await cleanupAgent(deviceStuff);
     console.log(`* Done running agent: ${agent}`);
     console.log("---------------------------");
 }
 
-await container.stop();
-await container.remove();
+// await container.stop();
+// await container.remove();

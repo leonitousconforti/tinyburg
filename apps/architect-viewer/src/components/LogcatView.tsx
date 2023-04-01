@@ -9,30 +9,26 @@ import type { IEmulatorControllerClient } from "../generated/emulator_controller
 
 export interface LogcatViewProps {
     maxHistory?: number;
-    emulator: IEmulatorControllerClient;
+    emulatorClient: IEmulatorControllerClient;
 }
 
-export const LogcatView: React.FunctionComponent<LogcatViewProps> = ({ emulator, maxHistory = 100 }) => {
-    useEffect(() => {
-        const logcat = new Logcat(emulator);
-        logcat.on("data", onLogcat);
-        logcat.on("end", (error) => console.log(error));
-    }, []);
-
+export const LogcatView: React.FunctionComponent<LogcatViewProps> = ({ emulatorClient, maxHistory = 100 }) => {
     const [lines, setLines] = useState<string[]>([]);
 
-    const onLogcat = (logline: string) => {
-        let buffer = logline.split("\n").concat(lines);
+    const onMessages = (logLines: string[]) => {
+        let buffer = logLines.concat(lines);
         const sliceAt = buffer.length - maxHistory;
-        if (sliceAt > 0) {
-            buffer = buffer.slice(0, sliceAt);
-        }
+        if (sliceAt > 0) buffer = buffer.slice(0, sliceAt);
         setLines(buffer);
     };
 
-    const asItems = (loglines: string[]) => {
+    useEffect(() => {
+        new Logcat(emulatorClient, onMessages);
+    }, [emulatorClient]);
+
+    const asItems = (logLines: string[]) => {
         let i = 0;
-        return loglines.map((line) => (
+        return logLines.map((line) => (
             <ListItem key={i++}>
                 <ListItemText primary={line} />
             </ListItem>

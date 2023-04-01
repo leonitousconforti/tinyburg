@@ -45,8 +45,7 @@
     },
     "main": "dist/tinyburg.js",
     "scripts": {
-        "build": "heft build --clean",
-        "lint": "eslint .",
+        "build": "heft test --clean",
         "update-common-data": "ts-node --esm bin/update-common-data.ts"
     },
     "dependencies": {
@@ -63,7 +62,6 @@
         "@rushstack/heft": "~0.48.8",
         "@tinyburg/apks": "workspace:*",
         "@tinyburg/architect": "workspace:*",
-        "@tinyburg/architect-viewer": "workspace:*",
         "@tinyburg/insight": "workspace:*",
         "@tinyburg/tsconfig-rig": "workspace:*",
         "@types/debug": "~4.1.7",

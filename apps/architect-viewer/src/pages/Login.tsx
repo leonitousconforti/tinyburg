@@ -14,7 +14,7 @@ import IconButton from "@material-ui/core/IconButton";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import { Theme, WithStyles, withStyles, createStyles } from "@material-ui/core/styles";
 
-import Copyright from "./Copyright";
+import Copyright from "../components/Copyright";
 import type { TokenAuthService } from "../service/Auth";
 
 const styles = (theme: Theme) =>

@@ -26,14 +26,15 @@
     ],
     "scripts": {
         "build": "heft test --clean",
-        "docker:build": "docker build ./emulator -t tinyburg/architect:emulator-9322596_sysimg-31-google-apis-x64_frida-16.0.10",
-        "docker:run": "docker run --rm --device /dev/kvm --publish 5554:5554/tcp --publish 5555:5555/tcp --publish 8554:8554/tcp --publish 27042:27042/tcp -it tinyburg/architect:emulator-9322596_sysimg-31-google-apis-x64_frida-16.0.10"
+        "docker:build": "docker build ./emulator -t tinyburg/architect:emulator-9536276_sys-30-google-apis-x64-r11_frida-16.0.11",
+        "docker:run": "docker run --rm --device /dev/kvm --publish 5554:5554/tcp --publish 5555:5555/tcp --publish 8554:8554/tcp --publish 27042:27042/tcp -it tinyburg/architect:emulator-9536276_sys-30-google-apis-x64-r11_frida-16.0.11"
     },
     "dependencies": {
         "@tinyburg/architect-viewer": "workspace:*",
         "debug": "~4.3.4",
         "dockerode": "~3.3.4",
-        "tar-fs": "~2.1.1"
+        "tar-fs": "~2.1.1",
+        "dockerode-compose": "~1.3.2"
     },
     "devDependencies": {
         "@rushstack/eslint-config": "~3.1.1",

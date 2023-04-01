@@ -4,66 +4,91 @@ import path from "node:path";
 import tar from "tar-fs";
 import Debug from "debug";
 import Dockerode from "dockerode";
+import DockerodeCompose from "dockerode-compose";
 
 const logger: Debug.Debugger = Debug.debug("tinyburg:architect");
 
-export const architect = async (): Promise<{
+export const architect = async (
+    options:
+        | {
+              withAdditionalServices: boolean;
+              dockerConnectionOptions: Dockerode.DockerOptions | undefined;
+          }
+        | undefined
+): Promise<{
     container: Dockerode.Container;
     launchGame: () => Promise<void>;
     installApk: (apk: string) => Promise<void>;
 }> => {
-    logger("Attaching to docker socket @ /var/run/docker.sock");
-
-    const context = new URL("../emulator", import.meta.url);
-    const dockerode: Dockerode = new Dockerode({ socketPath: "/var/run/docker.sock" });
-    const tag = "tinyburg/architect:emulator-9322596_sysimg-31-google-apis-x64_frida-16.0.10";
-
-    // Build a docker container
-    logger("Building docker image from context %s, will tag image as %s when finished", context.toString(), tag);
-    logger("Subsequent calls should be much faster as this image will be cached");
-    const buildStream: NodeJS.ReadableStream = await dockerode.buildImage(
-        {
-            context: url.fileURLToPath(context),
-            src: [
-                "Dockerfile",
-                "default.pulse-audio",
-                "launch-emulator.sh",
-                "avd/Pixel2.ini",
-                "avd/Pixel2.avd/config.ini",
-            ],
-        },
-        { t: tag }
+    const dockerode: Dockerode = new Dockerode(
+        options?.dockerConnectionOptions || { socketPath: "/var/run/docker.sock" }
     );
+    const dockerodeCompose: DockerodeCompose = new DockerodeCompose(
+        dockerode,
+        url.fileURLToPath(new URL("../docker-compose.yaml", import.meta.url)),
+        "architect"
+    );
+    const tag = "tinyburg/architect:emulator-9536276_sys-30-google-apis-x64-r11_frida-16.0.11";
 
-    // Wait for build to finish
-    await new Promise((resolve, reject) => {
-        dockerode.modem.followProgress(buildStream, (error, response) => (error ? reject(error) : resolve(response)));
-    });
+    // Try to find an already running container
+    let container: Dockerode.Container;
+    logger("Searching for already started container with image %s...", tag);
+    const runningContainers = await dockerode.listContainers();
+    const runningContainer = runningContainers.find((container) => container.Image === tag);
 
-    // Create a container
-    logger("Creating container from image with kvm acceleration enabled");
-    const container = await dockerode.createContainer({
-        Image: tag,
-        HostConfig: {
-            Devices: [
-                {
-                    CgroupPermissions: "mrw",
-                    PathInContainer: "/dev/kvm",
-                    PathOnHost: "/dev/kvm",
-                },
-            ],
-            PortBindings: {
-                "5554/tcp": [{ HostPort: "5554" }],
-                "5555/tcp": [{ HostPort: "5555" }],
-                "8554/tcp": [{ HostPort: "8554" }],
-                "27042/tcp": [{ HostPort: "27042" }],
+    if (runningContainer) {
+        container = dockerode.getContainer(runningContainer.Id);
+    } else {
+        // Build a new docker container
+        const context = new URL("../emulator", import.meta.url);
+        logger("Building docker image from context %s, will tag image as %s when finished", context.toString(), tag);
+        logger("Subsequent calls should be much faster as this image will be cached");
+        const buildStream: NodeJS.ReadableStream = await dockerode.buildImage(
+            {
+                context: url.fileURLToPath(context),
+                src: [
+                    "Dockerfile",
+                    "default.pulse-audio",
+                    "launch-emulator.sh",
+                    "avd/Pixel2.ini",
+                    "avd/Pixel2.avd/config.ini",
+                ],
             },
-        },
-    });
+            { t: tag }
+        );
 
-    // Start the container
-    logger("Starting container %s", container.id);
-    await container.start();
+        // Wait for build to finish
+        await new Promise((resolve, reject) => {
+            dockerode.modem.followProgress(buildStream, (error, response) =>
+                error ? reject(error) : resolve(response)
+            );
+        });
+
+        // Create a container
+        logger("Creating container from image with kvm acceleration enabled");
+        container = await dockerode.createContainer({
+            Image: tag,
+            HostConfig: {
+                Devices: [
+                    {
+                        CgroupPermissions: "mrw",
+                        PathInContainer: "/dev/kvm",
+                        PathOnHost: "/dev/kvm",
+                    },
+                ],
+                PortBindings: {
+                    "5554/tcp": [{ HostPort: "5554" }],
+                    "5555/tcp": [{ HostPort: "5555" }],
+                    "8554/tcp": [{ HostPort: "8554" }],
+                    "27042/tcp": [{ HostPort: "27042" }],
+                },
+            },
+        });
+
+        // Start the container
+        logger("Starting container %s", container.id);
+        await container.start();
+    }
 
     // Wait for container to become healthy
     logger("Waiting for container %s to become healthy...", container.id);
@@ -72,7 +97,6 @@ export const architect = async (): Promise<{
         await new Promise((resolve) => setTimeout(resolve, 30_000));
         result = await container.inspect();
     }
-    await new Promise((resolve) => setTimeout(resolve, 30_000));
 
     // Install any apk
     const installApk = async (apk: string): Promise<void> => {

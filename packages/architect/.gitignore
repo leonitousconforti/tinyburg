@@ -1,5 +1,8 @@
 /dist
 
+emulator/avd/Pixel2.avd/
+!emulator/avd/Pixel2.avd/config.ini
+
 /infrastructure/*tfstate*
 /infrastructure/.terraform
 /infrastructure/.terraform.*

@@ -7,6 +7,8 @@ services:
             dockerfile: Dockerfile
         networks:
             - envoymesh
+        extra_hosts:
+            - "host.docker.internal:host-gateway"
         ports:
             - "8080:8080"
             - "8081:8081"
@@ -15,6 +17,13 @@ services:
         image: tinyburg/architect:emulator-9322596_sysimg-31-google-apis-x64_frida-16.0.10
         shm_size: 128M
         devices: [/dev/kvm]
+        deploy:
+            resources:
+                limits:
+                    cpus: "2"
+                    memory: 5G
+        environment:
+            - TURN=$HOSTNAME
         build:
             context: ./emulator
             dockerfile: Dockerfile
@@ -44,6 +53,10 @@ services:
             envoymesh:
                 aliases:
                     - frontend
+
+    coturn_server:
+        image: coturn/coturn:alpine
+        network_mode: "host"
 
 networks:
     envoymesh: {}

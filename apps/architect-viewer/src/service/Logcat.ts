@@ -1,40 +1,34 @@
-import EventEmitter from "events";
-
-import { LogMessage } from "../generated/emulator_controller";
+import type { ServerStreamingCall } from "@protobuf-ts/runtime-rpc";
 import type { IEmulatorControllerClient } from "../generated/emulator_controller.client";
 
-class Logcat extends EventEmitter {
-    private readonly timerId: NodeJS.Timer;
-    private readonly emulator: IEmulatorControllerClient;
+import { LogMessage } from "../generated/emulator_controller";
+
+export class Logcat {
+    private readonly emulatorClient: IEmulatorControllerClient;
+    private readonly onLogcatMessages: (logcatMessages: string[]) => void;
 
     private offset: bigint = BigInt(0);
+    private stream: ServerStreamingCall<LogMessage, LogMessage> | undefined;
 
-    public constructor(emulator: IEmulatorControllerClient, pollIntervalMs: number = 1000) {
-        super();
-        this.emulator = emulator;
-        this.timerId = setInterval(this.pollStream, pollIntervalMs);
+    public constructor(
+        emulatorClient: IEmulatorControllerClient,
+        onLogcatMessages: (logcatMessages: string[]) => void
+    ) {
+        this.emulatorClient = emulatorClient;
+        this.onLogcatMessages = onLogcatMessages;
     }
 
-    private pollStream = async () => {
-        const request = LogMessage.create();
-        request.start = this.offset;
-        try {
-            const data2 = await this.emulator.getStatus({}).response;
-            console.log(data2);
-
-            const data = await this.emulator.getLogcat(request).response;
-            if (data.next > this.offset) {
-                this.offset = data.next;
-                this.emit("data", data.contents);
-            }
-        } catch (error) {
-            this.stop(error);
+    public startStream = async () => {
+        const request = LogMessage.create({ start: this.offset });
+        this.stream = this.emulatorClient.streamLogcat(request);
+        for await (const logMessages of this.stream.responses) {
+            this.offset = logMessages.next;
+            this.onLogcatMessages(logMessages.contents.split("\n"));
         }
     };
 
-    private stop = (reason: unknown) => {
-        this.emit("end", reason);
-        clearInterval(this.timerId);
+    public stopStream = async () => {
+        await this.stream?.trailers;
     };
 }
 

@@ -14,6 +14,9 @@
         "url": "https://github.com/leonitousconforti/tinyburg.git",
         "directory": "packages/bots"
     },
+    "scripts": {
+        "build": ""
+    },
     "license": "MIT",
     "author": "Leo Conforti <leo@leoconforti.us> (https://leoconforti.us)",
     "type": "module",

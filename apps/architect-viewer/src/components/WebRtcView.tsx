@@ -1,39 +1,43 @@
-import type { IRtcClient } from "../generated/rtc_service.client";
-
-import JsepProtocol from "../service/Jsep2";
 import React, { useEffect, useRef } from "react";
 
-export interface WebRtcViewProps {
-    rtcClient: IRtcClient;
+import type JsepProtocol from "../service/Jsep";
+
+interface WebRtcViewProps {
+    muted: boolean;
+    volume: number;
+    jsep: JsepProtocol;
 }
 
-export const WebRtcView: React.FunctionComponent<WebRtcViewProps> = ({ rtcClient }) => {
-    const video = useRef<HTMLVideoElement>(undefined!);
+export const WebRtcView: React.FunctionComponent<WebRtcViewProps> = ({ jsep, muted, volume = 1.0 }) => {
+    const video = useRef<HTMLVideoElement>(null);
 
     const onTrack = (track: MediaStreamTrack) => {
         console.log(track);
-        if (!video.current.srcObject) {
-            video.current.srcObject = new MediaStream();
-        }
+        if (!video.current) return;
+        if (!video.current?.srcObject) video.current.srcObject = new MediaStream();
         (video.current.srcObject as MediaStream).addTrack(track);
     };
 
     useEffect(() => {
-        const jsep = new JsepProtocol(rtcClient);
-        jsep.startStream();
-        jsep.on("connected", onTrack);
-        jsep.on("disconnected", () => console.log("here"));
-    }, []);
+        console.log("here");
+        jsep.startStream(onTrack);
+    }, [jsep]);
+
+    useEffect(() => {
+        if (!video.current) return;
+        video.current.volume = volume;
+    }, [volume]);
 
     return (
         <video
             autoPlay
+            muted={muted}
             ref={video}
             style={{
-                display: "block",
-                position: "relative",
                 width: "100%",
                 height: "100%",
+                display: "block",
+                position: "relative",
                 objectFit: "contain",
                 objectPosition: "center",
             }}

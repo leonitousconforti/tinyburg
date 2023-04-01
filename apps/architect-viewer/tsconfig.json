@@ -1,9 +1,9 @@
 {
     "extends": "@tinyburg/tsconfig-rig/profile/default/config/tsconfig.json",
     "compilerOptions": {
-        "module": "esnext",
         "target": "ES5",
         "lib": ["dom", "dom.iterable", "esnext"],
+        "module": "esnext",
         "moduleResolution": "node",
 
         // React settings
