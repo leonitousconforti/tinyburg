@@ -1,18 +1,15 @@
 {
     "name": "Node.js & TypeScript",
     "image": "mcr.microsoft.com/devcontainers/typescript-node:18-bullseye",
-    "runArgs": ["--add-host=host.docker.internal:host-gateway"],
 
     "features": {
         "ghcr.io/dhoeric/features/act:1": {},
         "ghcr.io/devcontainers/features/git:1": {},
-        "ghcr.io/devcontainers/features/java:1": {},
         "ghcr.io/devcontainers/features/rust:1": {},
         "ghcr.io/devcontainers/features/python:1": {},
         "ghcr.io/devcontainers/features/git-lfs:1": {},
         "ghcr.io/devcontainers/features/terraform:1": {},
         "ghcr.io/devcontainers/features/github-cli:1": {},
-        "ghcr.io/devcontainers-contrib/features/deno:1": {},
         "ghcr.io/devcontainers/features/common-utils:2": {},
         "ghcr.io/devcontainers-contrib/features/digitalocean-cli:1": {},
         "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {},
@@ -35,7 +32,6 @@
                 "shd101wyy.markdown-preview-enhanced",
                 "ms-python.python",
                 "stxr.iconfont-preview",
-                "redhat.ansible",
                 "HashiCorp.terraform",
                 "DavidAnson.vscode-markdownlint",
                 "eamodio.gitlens",
@@ -146,5 +142,5 @@
     },
 
     "appPort": ["3000:3000"],
-    "postCreateCommand": "npm install -g pnpm @microsoft/rush"
+    "postCreateCommand": "npm install -g pnpm @microsoft/rush && rush update-autoinstaller --name rush-prettier"
 }

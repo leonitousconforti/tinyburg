@@ -34,29 +34,28 @@
         "fastify": "~4.10.2",
         "fastify-graceful-shutdown": "~3.4.0",
         "fastify-plugin": "~4.4.0",
-        "got": "~12.5.3",
+        "got": "~12.6.0",
         "ioredis": "~5.2.4",
         "pg": "~8.8.0",
         "uuid": "~9.0.0"
     },
     "devDependencies": {
-        "@rushstack/eslint-config": "~3.1.1",
-        "@rushstack/heft": "~0.48.8",
-        "@rushstack/heft-node-rig": "~1.11.9",
+        "@rushstack/eslint-config": "~3.2.0",
+        "@rushstack/heft": "~0.50.4",
         "@tsconfig/node18-strictest-esm": "~1.0.1",
         "@types/chai": "~4.3.4",
         "@types/ioredis": "~4.28.10",
         "@types/mocha": "~10.0.1",
-        "@types/node": "~18.11.11",
+        "@types/node": "~20.1.2",
         "@types/tap": "~15.0.7",
         "@types/uuid": "~9.0.0",
         "@typescript-eslint/parser": "~5.45.1",
         "chai": "~4.3.7",
-        "eslint": "~8.29.0",
+        "eslint": "~8.40.0",
         "json-schema-to-typescript": "~11.0.2",
         "mocha": "~10.1.0",
         "tap": "~16.3.2",
         "ts-node": "~10.9.1",
-        "typescript": "~4.9.3"
+        "typescript": "~5.0.4"
     }
 }

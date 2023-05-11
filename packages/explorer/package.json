@@ -24,19 +24,21 @@
         "debug": "~4.3.4"
     },
     "devDependencies": {
-        "@rushstack/eslint-config": "~3.1.1",
-        "@rushstack/heft": "~0.48.8",
+        "@rushstack/eslint-config": "~3.2.0",
+        "@rushstack/heft": "~0.50.4",
         "@tinyburg/apks": "workspace:*",
         "@tinyburg/architect": "workspace:*",
         "@tinyburg/tsconfig-rig": "workspace:*",
         "@types/debug": "~4.1.7",
         "@types/frida-gum": "~18.3.0",
-        "@types/node": "~18.11.11",
-        "eslint": "~8.29.0",
-        "eslint-config-prettier": "~8.5.0",
+        "@types/node": "~20.1.2",
+        "eslint": "~8.40.0",
+        "eslint-config-prettier": "~8.8.0",
         "eslint-plugin-prettier": "~4.2.1",
-        "eslint-plugin-unicorn": "~45.0.2",
-        "typescript": "~4.9.3"
+        "eslint-plugin-unicorn": "~47.0.0",
+        "typescript": "~5.0.4",
+                "prettier": "~2.8.8"
+
     },
     "engines": {
         "node": ">=14.16"
