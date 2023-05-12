@@ -23,7 +23,7 @@ export class SetTowerCredentials extends TinyTowerFridaAgent<SetTowerCredentials
     }
 
     public loadDependencies() {
-        const csharpAssembly = Il2Cpp.Domain.assembly("Assembly-CSharp");
+        const csharpAssembly = Il2Cpp.domain.assembly("Assembly-CSharp");
         const NBSyncClass = csharpAssembly.image.class("NBSync");
         const PlayerIdField = NBSyncClass.field<Il2Cpp.String>("playerID");
         const PlayerSsField = NBSyncClass.field<Il2Cpp.String>("playerSalt");
@@ -44,9 +44,9 @@ export class SetTowerCredentials extends TinyTowerFridaAgent<SetTowerCredentials
 
     public retrieveData() {
         this.dependencies.SwitchRegisteredPlaterMethod.invoke(
-            Il2Cpp.String.from(this._playerId),
-            Il2Cpp.String.from(this._playerSs),
-            Il2Cpp.String.from(this._playerEmail),
+            Il2Cpp.string(this._playerId),
+            Il2Cpp.string(this._playerSs),
+            Il2Cpp.string(this._playerEmail),
             true
         );
 

@@ -9,7 +9,7 @@ import { copyDictionaryToJs } from "../helpers/copy-dictionary-to-js.js";
 
 export class GetBitbookData extends TinyTowerFridaAgent<GetBitbookData> {
     public loadDependencies() {
-        const csharpAssembly = Il2Cpp.Domain.assembly("Assembly-CSharp");
+        const csharpAssembly = Il2Cpp.domain.assembly("Assembly-CSharp");
         const AppUtilClass = csharpAssembly.image.class("AppUtil");
         const BBEventTypeClass = csharpAssembly.image.class("BBEventType");
         const PostMediaTypeClass = csharpAssembly.image.class("PostMediaType");
@@ -65,8 +65,8 @@ export class GetBitbookData extends TinyTowerFridaAgent<GetBitbookData> {
 
         // Source code for the posts array
         const postsSourceString = JSON.stringify(this.data.posts)
-            .replace(/"event":\s*"(\w+)"/gm, "event: BBEventType.$1")
-            .replace(/"mediatype":\s*"(\w+)"/gm, "mediatype: PostMediaType.$1");
+            .replaceAll(/"event":\s*"(\w+)"/gm, "event: BBEventType.$1")
+            .replaceAll(/"mediatype":\s*"(\w+)"/gm, "mediatype: PostMediaType.$1");
         const postsSourceTs = `export const posts = ${postsSourceString} as const;\n`;
         const postSourceTS = "export type Post = typeof posts[number];\n";
 

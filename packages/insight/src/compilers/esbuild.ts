@@ -1,5 +1,7 @@
+import type { BuildOptions } from "esbuild";
+
 import path from "node:url";
-import { build, BuildOptions } from "esbuild";
+import { build } from "esbuild";
 
 export const esbuildCompiler = async (agentLocation: string, watchMode: boolean = false): Promise<string> => {
     // Create build options for agents
@@ -11,7 +13,6 @@ export const esbuildCompiler = async (agentLocation: string, watchMode: boolean 
         write: false,
         minify: true,
         sourcemap: "inline",
-        watch: watchMode,
     };
     console.log(`Generated esbuild options ${JSON.stringify(buildOptions)}`);
 

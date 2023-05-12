@@ -9,7 +9,7 @@ import { TinyTowerFridaAgent } from "../../src/agents/base-frida-agent.js";
 // @ts-ignore
 export class IsMusicEnabledAgent extends TinyTowerFridaAgent {
     loadDependencies() {
-        const csharpAssembly = Il2Cpp.Domain.assembly("Assembly-CSharp");
+        const csharpAssembly = Il2Cpp.domain.assembly("Assembly-CSharp");
         const VPlayerClass = csharpAssembly.image.class("VPlayer");
 
         /** @type {Il2Cpp.Field<boolean>} */

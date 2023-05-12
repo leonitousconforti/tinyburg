@@ -9,6 +9,7 @@
         "build": ""
     },
     "devDependencies": {
+        "@tsconfig/esm": "~1.0.3",
         "@tsconfig/node18": "~2.0.0",
         "@tsconfig/strictest": "~2.0.1"
     }
