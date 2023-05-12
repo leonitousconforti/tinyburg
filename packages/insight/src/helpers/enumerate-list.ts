@@ -16,7 +16,7 @@ export const enumerateList = function* <T extends Il2Cpp.Field.Type>(
 
     // Will use the System.Array class to check if this list is a primitive array type. If
     // it is then we can not box the enumerator because it is for a primitive array type.
-    const systemArrayClass = Il2Cpp.corlib.class("System.Array");
+    const systemArrayClass = Il2Cpp.Image.corlib.class("System.Array");
 
     // Check if this list is a primitive array
     const isPrimitiveArray = list.class.isSubclassOf(systemArrayClass, true);

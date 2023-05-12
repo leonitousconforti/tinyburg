@@ -9,9 +9,14 @@ module.exports = {
         "plugin:unicorn/recommended",
     ],
     plugins: ["prettier", "unicorn"],
+    env: {
+        node: true,
+        es2022: true,
+    },
     parserOptions: {
         tsconfigRootDir: __dirname,
         project: ["./tsconfig.json", "./tsconfig.base.json"],
+        ecmaVersion: 2022,
         sourceType: "module",
     },
     rules: {

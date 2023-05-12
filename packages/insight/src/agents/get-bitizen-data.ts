@@ -8,7 +8,7 @@ import { copyArrayToJs } from "../helpers/copy-array-to-js.js";
 
 export class GetBitizenData extends TinyTowerFridaAgent<GetBitizenData> {
     public loadDependencies() {
-        const csharpAssembly = Il2Cpp.domain.assembly("Assembly-CSharp");
+        const csharpAssembly = Il2Cpp.Domain.assembly("Assembly-CSharp");
         const AppUtilClass = csharpAssembly.image.class("AppUtil");
         const VBitizenClass = csharpAssembly.image.class("VBitizen");
         const maleNamesArray = VBitizenClass.field<Il2Cpp.Array>("maleNames").value.object;

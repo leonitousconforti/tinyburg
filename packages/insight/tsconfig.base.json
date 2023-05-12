@@ -7,7 +7,6 @@
         "noEmit": false,
         "sourceMap": true,
         "declaration": true,
-        "inlineSources": true,
 
         // For project references
         "types": [],

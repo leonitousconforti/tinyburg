@@ -9,7 +9,7 @@ import { copyDictionaryToJs } from "../helpers/copy-dictionary-to-js.js";
 
 export class GetElevatorData extends TinyTowerFridaAgent<GetElevatorData> {
     public loadDependencies() {
-        const csharpAssembly = Il2Cpp.domain.assembly("Assembly-CSharp");
+        const csharpAssembly = Il2Cpp.Domain.assembly("Assembly-CSharp");
         const AppUtilClass = csharpAssembly.image.class("AppUtil");
         const VElevatorDataClass = csharpAssembly.image.class("VElevatorData");
         const elevatorsArray = VElevatorDataClass.field<Il2Cpp.Array>("info").value.object;

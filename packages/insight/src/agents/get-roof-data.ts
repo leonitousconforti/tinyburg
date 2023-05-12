@@ -9,7 +9,7 @@ import { copyDictionaryToJs } from "../helpers/copy-dictionary-to-js.js";
 
 export class GetRoofData extends TinyTowerFridaAgent<GetRoofData> {
     public loadDependencies() {
-        const csharpAssembly = Il2Cpp.domain.assembly("Assembly-CSharp");
+        const csharpAssembly = Il2Cpp.Domain.assembly("Assembly-CSharp");
         const AppUtilClass = csharpAssembly.image.class("AppUtil");
         const VRoofDataClass = csharpAssembly.image.class("VRoofData");
         const roofsArray = VRoofDataClass.field<Il2Cpp.Array>("info").value.object;

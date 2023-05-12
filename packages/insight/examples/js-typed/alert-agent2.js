@@ -24,7 +24,7 @@ export class SubscribeToMusicStatusAgent2 extends TinyTowerFridaAgent {
     emittery = new Emittery();
 
     loadDependencies() {
-        const csharpAssembly = Il2Cpp.domain.assembly("Assembly-CSharp");
+        const csharpAssembly = Il2Cpp.Domain.assembly("Assembly-CSharp");
         const VPlayerClass = csharpAssembly.image.class("VPlayer");
 
         /** @type {Il2Cpp.Field<boolean>} */

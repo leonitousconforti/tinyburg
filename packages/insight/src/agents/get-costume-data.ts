@@ -8,7 +8,7 @@ import { copyDictionaryToJs } from "../helpers/copy-dictionary-to-js.js";
 
 export class GetCostumeData extends TinyTowerFridaAgent<GetCostumeData> {
     public loadDependencies() {
-        const csharpAssembly = Il2Cpp.domain.assembly("Assembly-CSharp");
+        const csharpAssembly = Il2Cpp.Domain.assembly("Assembly-CSharp");
         const AppUtilClass = csharpAssembly.image.class("AppUtil");
         const CostumeClass = csharpAssembly.image.class("VCostume");
         const VCostumeTableClass = csharpAssembly.image.class("VCostumeTable");

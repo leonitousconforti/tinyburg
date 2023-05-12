@@ -13,7 +13,7 @@ export class SetTargetFps extends TinyTowerFridaAgent<SetTargetFps> {
     }
 
     public loadDependencies() {
-        const csharpAssembly = Il2Cpp.domain.assembly("Assembly-CSharp");
+        const csharpAssembly = Il2Cpp.Domain.assembly("Assembly-CSharp");
         const ApplicationClass = csharpAssembly.image.class("Application");
         const setTargetFpsMethod = ApplicationClass.method<void>("set_targetFrameRate", 1);
 

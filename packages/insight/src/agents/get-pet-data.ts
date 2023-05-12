@@ -8,7 +8,7 @@ import { copyDictionaryToJs } from "../helpers/copy-dictionary-to-js.js";
 
 export class GetPetData extends TinyTowerFridaAgent<GetPetData> {
     public loadDependencies() {
-        const csharpAssembly = Il2Cpp.domain.assembly("Assembly-CSharp");
+        const csharpAssembly = Il2Cpp.Domain.assembly("Assembly-CSharp");
         const AppUtilClass = csharpAssembly.image.class("AppUtil");
         const VPetClass = csharpAssembly.image.class("VPet");
         const VPetDefinitions = VPetClass.field<Il2Cpp.Object>("definitions").value;

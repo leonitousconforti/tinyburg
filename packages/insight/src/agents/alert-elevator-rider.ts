@@ -4,7 +4,7 @@ import { TinyTowerFridaAgent } from "./base-frida-agent.js";
 
 export class AlertElevatorRide extends TinyTowerFridaAgent<AlertElevatorRide> {
     public loadDependencies() {
-        const csharpAssembly = Il2Cpp.domain.assembly("Assembly-CSharp");
+        const csharpAssembly = Il2Cpp.Domain.assembly("Assembly-CSharp");
         return { csharpAssembly };
     }
 

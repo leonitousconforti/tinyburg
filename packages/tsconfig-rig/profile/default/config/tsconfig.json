@@ -1,37 +1,8 @@
 {
     "$schema": "https://json.schemastore.org/tsconfig",
-
-    // Can add once https://github.com/microsoft/rushstack/pull/4103 is merged
-    // "extends": ["@tsconfig/strictest/tsconfig.json", "@tsconfig/node18/tsconfig.json", "@tsconfig/esm/tsconfig.json"],
-
+    "extends": ["@tsconfig/strictest/tsconfig", "@tsconfig/node18/tsconfig"],
     "compilerOptions": {
-        // Custom
         "pretty": true,
-        "noEmit": true,
-
-        // https://github.com/tsconfig/bases/blob/main/bases/node18.json
-        "lib": ["es2022"],
-        "target": "es2022",
-        "skipLibCheck": true,
-        "esModuleInterop": true,
-        "moduleResolution": "node",
-        "forceConsistentCasingInFileNames": true,
-
-        // https://github.com/tsconfig/bases/blob/main/bases/strictest.json
-        "strict": true,
-        "allowUnusedLabels": false,
-        "allowUnreachableCode": false,
-        "exactOptionalPropertyTypes": true,
-        "noFallthroughCasesInSwitch": true,
-        "noImplicitOverride": true,
-        "noImplicitReturns": true,
-        "noPropertyAccessFromIndexSignature": true,
-        "noUncheckedIndexedAccess": true,
-        "noUnusedLocals": true,
-        "noUnusedParameters": true,
-
-        // https://github.com/tsconfig/bases/blob/main/bases/esm.json
-        "module": "es2022",
-        "verbatimModuleSyntax": true
+        "noEmit": true
     }
 }
