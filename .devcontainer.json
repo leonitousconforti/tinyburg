@@ -41,20 +41,29 @@
                 "ms-python.black-formatter"
             ],
             "settings": {
+                "remote.localPortHost": "allInterfaces",
                 "cSpell.enabled": true,
                 "editor.formatOnSave": true,
                 "editor.formatOnPaste": true,
                 "editor.bracketPairColorization.enabled": true,
                 "codemetrics.basics.DecorationModeEnabled": false,
                 "codemetrics.basics.OverviewRulerModeEnabled": false,
-                "editor.defaultFormatter": "EditorConfig.EditorConfig",
-                "[typescript][typescriptreact]": {
+                "[typescript]": {
                     "editor.defaultFormatter": "esbenp.prettier-vscode"
                 },
-                "[javascript][javascriptreact]": {
+                "[typescriptreact]": {
                     "editor.defaultFormatter": "esbenp.prettier-vscode"
                 },
-                "[json][jsonc]": {
+                "[javascript]": {
+                    "editor.defaultFormatter": "esbenp.prettier-vscode"
+                },
+                "[javascriptreact]": {
+                    "editor.defaultFormatter": "esbenp.prettier-vscode"
+                },
+                "[json]": {
+                    "editor.defaultFormatter": "esbenp.prettier-vscode"
+                },
+                "[jsonc]": {
                     "editor.defaultFormatter": "esbenp.prettier-vscode"
                 },
                 "[python]": {
