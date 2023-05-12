@@ -471,11 +471,9 @@ importers:
 
   ../../packages/tsconfig-rig:
     specifiers:
-      '@tsconfig/node18': ~2.0.0
-      '@tsconfig/strictest': ~2.0.1
+      '@tsconfig/node18-strictest-esm': ~1.0.1
     devDependencies:
-      '@tsconfig/node18': 2.0.0
-      '@tsconfig/strictest': 2.0.1
+      '@tsconfig/node18-strictest-esm': 1.0.1
 
 packages:
 
@@ -3115,14 +3113,6 @@ packages:
 
   /@tsconfig/node18-strictest-esm/1.0.1:
     resolution: {integrity: sha512-cHzmAqw7CMbyqROWeBgVhard3F2V6zxOSJnQ4E6SJWruXD5ypuP9/QKekwBdfXQ4oUTaizIICKIwb+v3v33t0w==}
-    dev: true
-
-  /@tsconfig/node18/2.0.0:
-    resolution: {integrity: sha512-uI/B0ShkiEwTk036pncXucVlj4y11EW6mycQvCEzC1PkR2TBvdQZ5Wf96dp+XXWAc70FEDfvwTqanoaDpP6rPw==}
-    dev: true
-
-  /@tsconfig/strictest/2.0.1:
-    resolution: {integrity: sha512-7JHHCbyCsGUxLd0pDbp24yz3zjxw2t673W5oAP6HCEdr/UUhaRhYd3SSnUsGCk+VnPVJVA4mXROzbhI+nyIk+w==}
     dev: true
 
   /@types/argparse/1.0.38:
