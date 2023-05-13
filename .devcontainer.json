@@ -49,22 +49,14 @@
                 "editor.bracketPairColorization.enabled": true,
                 "codemetrics.basics.DecorationModeEnabled": false,
                 "codemetrics.basics.OverviewRulerModeEnabled": false,
-                "[typescript]": {
+                "editor.defaultFormatter": "EditorConfig.EditorConfig",
+                "[typescript][typescriptreact]": {
                     "editor.defaultFormatter": "esbenp.prettier-vscode"
                 },
-                "[typescriptreact]": {
+                "[javascript][javascriptreact]": {
                     "editor.defaultFormatter": "esbenp.prettier-vscode"
                 },
-                "[javascript]": {
-                    "editor.defaultFormatter": "esbenp.prettier-vscode"
-                },
-                "[javascriptreact]": {
-                    "editor.defaultFormatter": "esbenp.prettier-vscode"
-                },
-                "[json]": {
-                    "editor.defaultFormatter": "esbenp.prettier-vscode"
-                },
-                "[jsonc]": {
+                "[json][jsonc]": {
                     "editor.defaultFormatter": "esbenp.prettier-vscode"
                 },
                 "[python]": {
