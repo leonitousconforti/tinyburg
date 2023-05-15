@@ -135,5 +135,5 @@
     },
 
     "appPort": ["3000:3000"],
-    "postCreateCommand": "npm install -g pnpm @microsoft/rush && rush update && rush update-autoinstaller --name rush-prettier"
+    "postCreateCommand": "/bin/bash ./setup.sh"
 }
