@@ -9,6 +9,8 @@
         "build": ""
     },
     "devDependencies": {
-        "@tsconfig/node18-strictest-esm": "~1.0.1"
+        "@tsconfig/esm": "~1.0.3",
+        "@tsconfig/node18": "~2.0.1",
+        "@tsconfig/strictest": "~2.0.1"
     }
 }
