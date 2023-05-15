@@ -24,8 +24,8 @@
         "build": "react-scripts build",
         "clean-types": "rimraf src/generated/*",
         "eject": "react-scripts eject",
-        "serve": "serve -s build",
         "gen-types": "protoc -I ./proto --ts_out ./src/generated --ts_opt optimize_code_size ./proto/emulator_controller.proto ./proto/rtc_service.proto",
+        "serve": "serve -s build",
         "start": "react-scripts start"
     },
     "browserslist": {
@@ -50,12 +50,12 @@
         "@protobuf-ts/runtime": "~2.8.2",
         "@protobuf-ts/runtime-rpc": "~2.8.2",
         "buffer": "~6.0.3",
+        "byte-base64": "~1.1.0",
         "react": "~18.2.0",
         "react-dom": "~18.2.0",
         "react-is": "~18.2.0",
         "react-resize-detector": "~8.0.4",
-        "web-vitals": "~3.1.1",
-        "byte-base64": "~1.1.0"
+        "web-vitals": "~3.1.1"
     },
     "devDependencies": {
         "@babel/core": "~7.21.0",
@@ -69,7 +69,7 @@
         "@types/react-dom": "~18.0.10",
         "react-scripts": "~5.0.1",
         "rimraf": "~3.0.2",
-        "typescript": "~4.9.3",
-        "serve": "~14.2.0"
+        "serve": "~14.2.0",
+        "typescript": "~4.9.5"
     }
 }
