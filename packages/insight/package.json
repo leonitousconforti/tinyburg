@@ -50,32 +50,32 @@
         "run-ts-example": "rushx build && node dist/examples/ts/index.js"
     },
     "dependencies": {
-        "@swc/core": "~1.3.24",
+        "@swc/core": "~1.3.58",
         "debug": "~4.3.4",
         "emittery": "~1.0.1",
-        "esbuild": "~0.16.1",
-        "frida": "~16.0.7",
-        "frida-compile": "~16.1.4",
-        "frida-il2cpp-bridge": "~0.7.13",
-        "prettier": "~2.8.1"
+        "esbuild": "~0.17.19",
+        "frida": "~16.0.19",
+        "frida-compile": "~16.2.1",
+        "frida-il2cpp-bridge": "~0.8.1",
+        "prettier": "~2.8.8"
     },
     "devDependencies": {
-        "@rushstack/eslint-config": "~3.1.1",
-        "@rushstack/heft": "~0.48.8",
-        "@rushstack/heft-jest-plugin": "~0.4.2",
+        "@rushstack/eslint-config": "~3.2.0",
+        "@rushstack/heft": "~0.50.5",
+        "@rushstack/heft-jest-plugin": "~0.5.11",
         "@tinyburg/apks": "workspace:*",
         "@tinyburg/architect": "workspace:*",
         "@tinyburg/tsconfig-rig": "workspace:*",
         "@types/debug": "~4.1.7",
-        "@types/frida-gum": "~18.3.0",
+        "@types/frida-gum": "~18.3.2",
         "@types/heft-jest": "~1.0.3",
-        "@types/node": "~18.11.11",
-        "@types/prettier": "~2.7.1",
-        "eslint": "~8.29.0",
-        "eslint-config-prettier": "~8.5.0",
+        "@types/node": "~20.1.7",
+        "@types/prettier": "~2.7.2",
+        "eslint": "~8.40.0",
+        "eslint-config-prettier": "~8.8.0",
         "eslint-plugin-prettier": "~4.2.1",
-        "eslint-plugin-unicorn": "~45.0.2",
-        "typescript": "~4.9.5"
+        "eslint-plugin-unicorn": "~47.0.0",
+        "typescript": "~5.0.4"
     },
     "engines": {
         "node": ">=14.16"

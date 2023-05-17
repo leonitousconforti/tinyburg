@@ -9,7 +9,7 @@ import { copyDictionaryToJs } from "../helpers/copy-dictionary-to-js.js";
 
 export class GetFloorData extends TinyTowerFridaAgent<GetFloorData> {
     public loadDependencies() {
-        const csharpAssembly = Il2Cpp.Domain.assembly("Assembly-CSharp");
+        const csharpAssembly = Il2Cpp.domain.assembly("Assembly-CSharp");
         const AppUtilClass = csharpAssembly.image.class("AppUtil");
         const FloorTypeClass = csharpAssembly.image.class("FloorType");
         const VFloorDataClass = csharpAssembly.image.class("VFloorData");
@@ -84,7 +84,7 @@ export class GetFloorData extends TinyTowerFridaAgent<GetFloorData> {
         const floorTypeSourceTS = `export enum FloorType {${floorTypeEnumFieldsSource}}\n`;
 
         // Source code for the floors array and type
-        const floorsSourceString = JSON.stringify(this.data.floors).replace(
+        const floorsSourceString = JSON.stringify(this.data.floors).replaceAll(
             /"type":\s*"(\w+)"/gm,
             "type: FloorType.$1"
         );

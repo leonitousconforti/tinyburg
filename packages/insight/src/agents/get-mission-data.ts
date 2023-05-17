@@ -9,7 +9,7 @@ import { copyDictionaryToJs } from "../helpers/copy-dictionary-to-js.js";
 
 export class GetMissionData extends TinyTowerFridaAgent<GetMissionData> {
     public loadDependencies() {
-        const csharpAssembly = Il2Cpp.Domain.assembly("Assembly-CSharp");
+        const csharpAssembly = Il2Cpp.domain.assembly("Assembly-CSharp");
         const AppUtilClass = csharpAssembly.image.class("AppUtil");
         const VMissionClass = csharpAssembly.image.class("VMission");
         const MissionTypeClass = csharpAssembly.image.class("MissionType");
@@ -86,8 +86,8 @@ export class GetMissionData extends TinyTowerFridaAgent<GetMissionData> {
         // eslint-disable-next-line unicorn/consistent-function-scoping
         const formatMissionSource = (name: string, data: { [k: string]: unknown }) =>
             `export const ${name} = ${JSON.stringify(data)} as const;`
-                .replace(/"floorType":\s*"(\w+)"/gm, "floorType: FloorType.$1")
-                .replace(/"mType":\s*"(\w+)"/gm, "missionType: MissionType.$1");
+                .replaceAll(/"floorType":\s*"(\w+)"/gm, "floorType: FloorType.$1")
+                .replaceAll(/"mType":\s*"(\w+)"/gm, "missionType: MissionType.$1");
 
         // Source code for the missions
         const tutorialMissionsSourceTs = formatMissionSource("tutorialMissions", this.data.tutorialMissions);
