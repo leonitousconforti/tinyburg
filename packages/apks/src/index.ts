@@ -9,7 +9,7 @@ import Debug from "debug";
 
 // eslint-disable-next-line @rushstack/typedef-var
 export const TinyTowerApkSources = ["apkpure", "apkmirror"] as const;
-export type TinyTowerApkSource = typeof TinyTowerApkSources[number];
+export type TinyTowerApkSource = (typeof TinyTowerApkSources)[number];
 export type TinyTowerApkVersion = ApkpureVersion & ApkmirrorVersion;
 
 const logger: Debug.Debugger = Debug.debug("tinyburg:apks");
