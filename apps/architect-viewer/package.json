@@ -21,7 +21,7 @@
         "build/"
     ],
     "scripts": {
-        "build": "react-scripts build",
+        "build": "",
         "clean-types": "rimraf src/generated/*",
         "eject": "react-scripts eject",
         "gen-types": "protoc -I ./proto --ts_out ./src/generated --ts_opt optimize_code_size ./proto/emulator_controller.proto ./proto/rtc_service.proto",
@@ -43,9 +43,6 @@
     "dependencies": {
         "@emotion/react": "~11.10.6",
         "@emotion/styled": "~11.10.6",
-        "@material-ui/core": "~4.12.4",
-        "@material-ui/icons": "~4.11.3",
-        "@material-ui/lab": "~4.0.0-alpha.61",
         "@protobuf-ts/grpcweb-transport": "~2.8.2",
         "@protobuf-ts/runtime": "~2.8.2",
         "@protobuf-ts/runtime-rpc": "~2.8.2",
@@ -64,12 +61,11 @@
         "@protobuf-ts/plugin": "~2.8.2",
         "@protobuf-ts/protoc": "~2.8.2",
         "@tinyburg/tsconfig-rig": "workspace:*",
-        "@types/node": "~18.11.11",
+        "@types/node": "~20.1.7",
         "@types/react": "~18.0.28",
         "@types/react-dom": "~18.0.10",
-        "react-scripts": "~5.0.1",
         "rimraf": "~3.0.2",
         "serve": "~14.2.0",
-        "typescript": "~4.9.5"
+        "typescript": "~5.0.4"
     }
 }

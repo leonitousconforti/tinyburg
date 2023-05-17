@@ -544,11 +544,11 @@
             "projectFolder": "apps/architect-viewer",
             "shouldPublish": false
         },
-        {
-            "packageName": "@tinyburg/authproxy",
-            "projectFolder": "apps/authproxy",
-            "shouldPublish": false
-        },
+        // {
+        //     "packageName": "@tinyburg/authproxy",
+        //     "projectFolder": "apps/authproxy",
+        //     "shouldPublish": false
+        // },
         {
             "packageName": "@tinyburg/backend",
             "projectFolder": "apps/backend",
