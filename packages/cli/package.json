@@ -24,15 +24,16 @@
         "diff": "~5.1.0",
         "find-up": "~6.3.0",
         "prompts": "~2.4.2",
-        "yargs": "~17.6.2"
+        "yargs": "~17.7.2"
     },
     "devDependencies": {
-        "@types/diff": "~5.0.2",
-        "@types/node": "~18.11.11",
-        "@types/prompts": "~2.4.2",
-        "@types/yargs": "~17.0.17",
-        "eslint": "~8.29.0",
-        "typescript": "~4.9.5"
+        "@tinyburg/tsconfig-rig": "workspace:*",
+        "@types/diff": "~5.0.3",
+        "@types/node": "~20.1.7",
+        "@types/prompts": "~2.4.4",
+        "@types/yargs": "~17.0.24",
+        "eslint": "~8.40.0",
+        "typescript": "~5.0.4"
     },
     "engines": {
         "node": ">=14.16"

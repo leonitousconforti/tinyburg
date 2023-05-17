@@ -1,36 +1,14 @@
 {
-    "$schema": "https://json.schemastore.org/tsconfig",
+    "extends": "@tinyburg/tsconfig-rig/profile/default/config/tsconfig.json",
     "compilerOptions": {
-        // https://github.com/tsconfig/bases/blob/main/bases/node18-strictest-esm.combined.json
-        "lib": ["es2022"],
+        "outDir": "./dist",
         "module": "esnext",
-        "target": "es2022",
-        "strict": true,
-        "esModuleInterop": true,
-        "forceConsistentCasingInFileNames": true,
-        "moduleResolution": "node",
-        "allowUnusedLabels": false,
-        "allowUnreachableCode": false,
-        "exactOptionalPropertyTypes": true,
-        "noFallthroughCasesInSwitch": true,
-        "noImplicitOverride": true,
-        "noImplicitReturns": true,
-        "noPropertyAccessFromIndexSignature": true,
-        "noUncheckedIndexedAccess": true,
-        "noUnusedLocals": true,
-        "noUnusedParameters": true,
-        "importsNotUsedAsValues": "error",
-
-        // Added
+        "moduleResolution": "NodeNext",
         "types": ["node"],
-        "noImplicitAny": true,
-        "strictNullChecks": true,
-        "strictFunctionTypes": true,
-        "strictPropertyInitialization": true,
-        "noImplicitThis": true,
-        "resolveJsonModule": true,
-        "useUnknownInCatchVariables": true,
-        "experimentalDecorators": true
+
+        "noEmit": false,
+        "sourceMap": true,
+        "declaration": true
     },
     "include": ["bin/**/*.ts"]
 }
