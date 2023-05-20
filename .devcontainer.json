@@ -1,16 +1,20 @@
 {
     "name": "Node.js & TypeScript",
-    "image": "mcr.microsoft.com/devcontainers/typescript-node:18-bullseye",
+    "image": "mcr.microsoft.com/devcontainers/base:bullseye",
 
     "features": {
-        "ghcr.io/dhoeric/features/act:1": {},
         "ghcr.io/devcontainers/features/git:1": {},
+        "ghcr.io/devcontainers/features/node:1": {},
         "ghcr.io/devcontainers/features/rust:1": {},
         "ghcr.io/devcontainers/features/python:1": {},
         "ghcr.io/devcontainers/features/git-lfs:1": {},
         "ghcr.io/devcontainers/features/terraform:1": {},
         "ghcr.io/devcontainers/features/github-cli:1": {},
+        "ghcr.io/devcontainers-contrib/features/act:1": {},
         "ghcr.io/devcontainers/features/common-utils:2": {},
+        "ghcr.io/devcontainers-contrib/features/black:2": {},
+        "ghcr.io/devcontainers-contrib/features/mitmproxy:2": {},
+        "ghcr.io/devcontainers-contrib/features/actionlint:1": {},
         "ghcr.io/devcontainers-contrib/features/digitalocean-cli:1": {},
         "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {},
         "ghcr.io/frntn/devcontainers-features/gitleaks:1": {
@@ -42,7 +46,6 @@
                 "ms-python.black-formatter"
             ],
             "settings": {
-                "remote.localPortHost": "allInterfaces",
                 "cSpell.enabled": true,
                 "editor.formatOnSave": true,
                 "editor.formatOnPaste": true,
