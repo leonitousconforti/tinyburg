@@ -44,10 +44,10 @@ describe("Should load all the patched apks", () => {
     }
 });
 
-const files = [...TinyTowerApkSources, "patched"].map((source) =>
+const filePromises = [...TinyTowerApkSources, "patched"].map((source) =>
     fs.readdir(new URL(`../downloads/${source}`, import.meta.url))
 );
-const countPromises = await Promise.all(files);
+const countPromises = await Promise.all(filePromises);
 const count = countPromises.flat().length - [...TinyTowerApkSources, "patched"].length;
 describe("Should load all apks from all sources at least once", () => {
     it(`Should load all ${count} versions`, async () => {
