@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+set -e
 echo "🚀 Setting up tinyburg devcontainer..."
 
 echo "📦 Installing Rush and Pnpm dependencies..."
