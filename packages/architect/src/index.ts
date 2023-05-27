@@ -11,7 +11,7 @@ const logger: Debug.Debugger = Debug.debug("tinyburg:architect");
 export const architect = async (
     options:
         | {
-              withAdditionalServices: boolean;
+              withAdditionalServices: boolean | undefined;
               dockerConnectionOptions: Dockerode.DockerOptions | undefined;
           }
         | undefined

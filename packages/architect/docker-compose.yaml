@@ -7,8 +7,6 @@ services:
             dockerfile: Dockerfile
         networks:
             - envoymesh
-        extra_hosts:
-            - "host.docker.internal:host-gateway"
         ports:
             - "8080:8080"
             - "8081:8081"
@@ -28,6 +26,9 @@ services:
             context: ./emulator
             dockerfile: Dockerfile
         ports:
+            - "5554:5554"
+            - "5555:5555"
+            - "8554:8554"
             - "27042:27042"
         networks:
             envoymesh:

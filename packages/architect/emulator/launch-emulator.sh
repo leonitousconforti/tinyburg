@@ -1,8 +1,5 @@
 #!/usr/bin/env bash
 
-echo $TURN
-exit 1
-
 # Remove any previous lock files left over
 rm -f /tmp/pulse-socket
 rm -f /android/avd-home/Pixel2.avd/*.lock
