@@ -4,18 +4,18 @@ WORKDIR /tmp
 
 # https://developer.android.com/studio/emulator_archive
 # https://developer.android.com/studio/releases/platform-tools
-RUN wget https://dl.google.com/android/repository/emulator-linux_x64-9536276.zip && \
+RUN wget https://dl.google.com/android/repository/emulator-linux_x64-10086546.zip && \
     wget https://dl.google.com/android/repository/platform-tools_r34.0.1-linux.zip && \
-    wget https://dl.google.com/android/repository/sys-img/google_apis/x86_64-30_r11.zip && \
-    wget https://github.com/frida/frida/releases/download/16.0.11/frida-server-16.0.11-android-x86_64.xz && \
-    unzip -u -o x86_64-30_r11.zip -d sysimg && \
-    unzip -u -o emulator-linux_x64-9536276.zip && \
+    wget https://dl.google.com/android/repository/sys-img/google_apis/x86_64-30_r12.zip && \
+    wget https://github.com/frida/frida/releases/download/16.0.19/frida-server-16.0.19-android-x86_64.xz && \
+    unzip -u -o x86_64-30_r12.zip -d sysimg && \
+    unzip -u -o emulator-linux_x64-10086546.zip && \
     unzip -u -o platform-tools_r34.0.1-linux.zip && \
-    xz --decompress frida-server-16.0.11-android-x86_64.xz && \
-    rm -f x86_64-30_r11.zip && \
-    rm -f emulator-linux_x64-9536276.zip && \
+    xz --decompress frida-server-16.0.19-android-x86_64.xz && \
+    rm -f x86_64-30_r12.zip && \
+    rm -f emulator-linux_x64-10086546.zip && \
     rm -f platform-tools_r34.0.1-linux.zip && \
-    rm -f frida-server-16.0.11-android-x86_64.xz
+    rm -f frida-server-16.0.19-android-x86_64.xz
 
 FROM nvidia/opengl:1.2-glvnd-runtime-ubuntu20.04
 ENV NVIDIA_DRIVER_CAPABILITIES ${NVIDIA_DRIVER_CAPABILITIES},display
@@ -46,7 +46,7 @@ RUN mkdir -p /android/apks/ && \
 COPY --from=dependency-preparer /tmp/emulator/ /android/sdk/emulator/
 COPY --from=dependency-preparer /tmp/platform-tools/ /android/sdk/platform-tools/
 COPY --from=dependency-preparer /tmp/sysimg/ /android/sdk/system-images/android/default/
-COPY --from=dependency-preparer /tmp/frida-server-16.0.11-android-x86_64 /android/frida/frida-server
+COPY --from=dependency-preparer /tmp/frida-server-16.0.19-android-x86_64 /android/frida/frida-server
 
 ADD avd/ /android/avd-home
 COPY pull-data.sh /android/sdk/
@@ -66,10 +66,10 @@ HEALTHCHECK --interval=10s \
     --retries=3 \
     CMD /android/sdk/platform-tools/adb shell getprop dev.bootcomplete | grep "1"
 
-LABEL android-sdk.emulator.version="9536276" \
+LABEL android-sdk.emulator.version="10086546" \
     android-sdk.platform-tools.version="34.0.1" \
-    frida-server.version="16.0.11-android-x86_64" \
-    android-sdk.system-image.version="sys-30-google-apis-x64-r11" \
+    frida-server.version="16.0.19-android-x86_64" \
+    android-sdk.system-image.version="sys-30-google-apis-x64-r12" \
     org.opencontainers.image.licenses="MIT" \
     org.opencontainers.image.source="https://github.com/leonitousconforti/tinyburg" \
     org.opencontainers.image.description="Runs TinyTower on an android emulator in a docker image. Exposes the emulator console, adb, grpc, and frida server endpoints without any protections"

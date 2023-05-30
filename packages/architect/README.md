@@ -21,11 +21,11 @@ Architect leverages the android studio emulator from the android sdk. Why not us
 
 ## Why only docker?
 
-My initial idea included support for running on any system, local or via ssh. But doing that made the project turn into a nodejs wrapper for a bunch of shell commands and the functionality wasn't honestly needed. This package will mostly be used by other packages in their test suites, and so puting restriction on where this can run was perfectly fine by me. If I really wanted to, I could always just change a url and have the test suites for those packages point to a different emulator temporarily, either locally or on the network, that I would manually bring up with android studio. In the end, it just made more sense to limit where architect can run.
+My initial idea included support for running on any system, local or via ssh. But doing that made the project turn into a nodejs wrapper for a bunch of shell commands and the functionality wasn't honestly needed. This package will mostly be used by other packages in their test suites, and so putting restriction on where this can run was perfectly fine by me. If I really wanted to, I could always just change a url and have the test suites for those packages point to a different emulator temporarily, either locally or on the network, that I would manually bring up with android studio. In the end, it just made more sense to limit where architect can run.
 
 ## Future
 
-Speed up container start time. Right now it takes around 3mins for the container to be healthy, which is a bit to long in my opinion.
+Speed up container start time. Right now it takes around 2mins for the container to be healthy, which is a bit to long in my opinion.
 
 ## Inspiration for this
 

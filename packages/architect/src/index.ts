@@ -28,7 +28,7 @@ export const architect = async (
         url.fileURLToPath(new URL("../docker-compose.yaml", import.meta.url)),
         "architect"
     );
-    const tag = "tinyburg/architect:emulator-9536276_sys-30-google-apis-x64-r11_frida-16.0.11";
+    const tag = "tinyburg/architect:emulator-10086546_sys-30-google-apis-x64-r12_frida-16.0.19";
 
     // Try to find an already running container
     let container: Dockerode.Container;

@@ -12,7 +12,7 @@ services:
             - "8081:8081"
 
     emulator:
-        image: tinyburg/architect:emulator-9322596_sysimg-31-google-apis-x64_frida-16.0.10
+        image: tinyburg/architect:emulator-10086546_sys-30-google-apis-x64-r12_frida-16.0.19
         shm_size: 128M
         devices: [/dev/kvm]
         deploy:
@@ -20,8 +20,6 @@ services:
                 limits:
                     cpus: "2"
                     memory: 5G
-        environment:
-            - TURN=$HOSTNAME
         build:
             context: ./emulator
             dockerfile: Dockerfile
@@ -54,10 +52,6 @@ services:
             envoymesh:
                 aliases:
                     - frontend
-
-    coturn_server:
-        image: coturn/coturn:alpine
-        network_mode: "host"
 
 networks:
     envoymesh: {}
