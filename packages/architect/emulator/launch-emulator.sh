@@ -8,7 +8,6 @@ rm -f /android/avd-home/Pixel2.avd/*.lock
 mkdir -p /root/.config/pulse
 export PULSE_SERVER=unix:/tmp/pulse-socket
 pulseaudio -D --log-time=1 --log-target=newfile:/tmp/pulseverbose.log --log-time=1 --exit-idle-time=-1
-pactl list || exit 1
 
 # Start the adb server and the emulator
 /android/sdk/platform-tools/adb start-server
