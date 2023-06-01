@@ -550,16 +550,6 @@
             "shouldPublish": false
         },
         {
-            "packageName": "@tinyburg/backend",
-            "projectFolder": "apps/backend",
-            "shouldPublish": false
-        },
-        {
-            "packageName": "@tinyburg/frontend",
-            "projectFolder": "apps/frontend",
-            "shouldPublish": false
-        },
-        {
             "packageName": "@tinyburg/models",
             "projectFolder": "apps/models",
             "shouldPublish": false
@@ -567,6 +557,16 @@
         {
             "packageName": "@tinyburg/repl.it-demo",
             "projectFolder": "apps/repl.it",
+            "shouldPublish": false
+        },
+        {
+            "packageName": "@tinyburg/trading-backend",
+            "projectFolder": "apps/trading-backend",
+            "shouldPublish": false
+        },
+        {
+            "packageName": "@tinyburg/trading-frontend",
+            "projectFolder": "apps/trading-frontend",
             "shouldPublish": false
         }
     ]

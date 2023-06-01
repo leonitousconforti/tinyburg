@@ -20,6 +20,9 @@
     "files": [
         "dist/src/"
     ],
+    "scripts": {
+        "build": ""
+    },
     "dependencies": {
         "debug": "~4.3.4"
     },

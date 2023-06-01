@@ -177,16 +177,16 @@ importers:
       ts-node: 10.9.1_wanalbxtsppgcqemtlzr6bzfo4
       typescript: 5.0.4
 
-  ../../apps/backend:
-    specifiers: {}
-
-  ../../apps/frontend:
-    specifiers: {}
-
   ../../apps/models:
     specifiers: {}
 
   ../../apps/repl.it:
+    specifiers: {}
+
+  ../../apps/trading-backend:
+    specifiers: {}
+
+  ../../apps/trading-frontend:
     specifiers: {}
 
   ../../packages/apks:

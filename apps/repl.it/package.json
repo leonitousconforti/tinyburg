@@ -1,5 +1,8 @@
 {
     "name": "@tinyburg/repl.it-demo",
     "version": "0.0.1-alpha",
-    "private": true
+    "private": true,
+    "scripts": {
+        "build": ""
+    }
 }
