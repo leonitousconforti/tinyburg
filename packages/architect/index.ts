@@ -25,7 +25,7 @@ export const architect = async (
     );
     const dockerodeCompose: DockerodeCompose = new DockerodeCompose(
         dockerode,
-        url.fileURLToPath(new URL("../docker-compose.yaml", import.meta.url)),
+        url.fileURLToPath(new URL("docker-compose.yaml", import.meta.url)),
         "architect"
     );
     const tag = "tinyburg/architect:emulator-10086546_sys-30-google-apis-x64-r12_frida-16.0.19";
@@ -40,7 +40,7 @@ export const architect = async (
         container = dockerode.getContainer(runningContainer.Id);
     } else {
         // Build a new docker container
-        const context = new URL("../emulator", import.meta.url);
+        const context = new URL("emulator", import.meta.url);
         logger("Building docker image from context %s, will tag image as %s when finished", context.toString(), tag);
         logger("Subsequent calls should be much faster as this image will be cached");
         const buildStream: NodeJS.ReadableStream = await dockerode.buildImage(
