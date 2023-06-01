@@ -6,5 +6,4 @@ COPY ./public ./public
 
 EXPOSE 8080
 ENV NODE_ENV production
-RUN npm install webpack webpack-cli webpack-dev-server
-CMD ["npx", "webpack", "serve"]
+CMD ["npx", "serve", "build", "--listen", "8080"]

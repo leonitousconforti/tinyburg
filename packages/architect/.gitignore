@@ -1,7 +1,9 @@
 /dist
+/protobuf/generated/*
+!/protobuf/generated/.gitkeep
 
-emulator/avd/Pixel2.avd/*
-!emulator/avd/Pixel2.avd/config.ini
+/emulator/avd/Pixel2.avd/*
+!/emulator/avd/Pixel2.avd/config.ini
 
 /infrastructure/*tfstate*
 /infrastructure/.terraform

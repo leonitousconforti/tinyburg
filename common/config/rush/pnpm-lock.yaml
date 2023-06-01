@@ -19,8 +19,6 @@ importers:
       '@mui/material': ~5.13.1
       '@mui/system': ~5.13.2
       '@protobuf-ts/grpcweb-transport': ~2.9.0
-      '@protobuf-ts/plugin': ~2.9.0
-      '@protobuf-ts/protoc': ~2.9.0
       '@protobuf-ts/runtime': ~2.9.0
       '@protobuf-ts/runtime-rpc': ~2.9.0
       '@rushstack/eslint-config': 3.3.0
@@ -51,7 +49,6 @@ importers:
       prettier: ~2.8.8
       react: ~18.2.0
       react-dom: ~18.2.0
-      rimraf: ~5.0.1
       sass-loader: ~13.3.1
       serve: ~14.2.0
       style-loader: ~3.3.3
@@ -79,8 +76,6 @@ importers:
       '@babel/preset-react': 7.22.3_@babel+core@7.22.1
       '@emotion/react': 11.11.0_i2bxsyfskhzbpjanbovidbfj7u
       '@emotion/styled': 11.11.0_efnsujvwehy5in7hodous2swsa
-      '@protobuf-ts/plugin': 2.9.0
-      '@protobuf-ts/protoc': 2.9.0
       '@rushstack/eslint-config': 3.3.0_7ploys55nlrvgzaet23aqtwjea
       '@rushstack/heft': 0.50.7_@types+node@20.2.5
       '@rushstack/heft-jest-plugin': 0.5.13_5xgjyqux2jasbivxrzbvafu7da
@@ -106,7 +101,6 @@ importers:
       postcss: 8.4.24
       postcss-loader: 7.3.2_2puq7s2xj7a7qwpqg76gbwi5mm
       prettier: 2.8.8
-      rimraf: 5.0.1
       sass-loader: 13.3.1_xf7pyk6wxnr4qv4ks2d5yjcasm
       serve: 14.2.0
       style-loader: 3.3.3_webpack@5.80.0
@@ -232,10 +226,11 @@ importers:
 
   ../../packages/architect:
     specifiers:
+      '@protobuf-ts/plugin': ~2.9.0
+      '@protobuf-ts/protoc': ~2.9.0
       '@rushstack/eslint-config': 3.3.0
       '@rushstack/heft': 0.50.7
       '@tinyburg/apks': workspace:*
-      '@tinyburg/architect-viewer': workspace:*
       '@tinyburg/tsconfig-rig': workspace:*
       '@types/debug': ~4.1.8
       '@types/docker-modem': ~3.0.2
@@ -250,16 +245,18 @@ importers:
       eslint-plugin-prettier: ~4.2.1
       eslint-plugin-unicorn: ~47.0.0
       prettier: ~2.8.8
+      rimraf: ~5.0.1
       tar-fs: ~2.1.1
       ts-node: ~10.9.1
       typescript: ~5.1.3
     dependencies:
-      '@tinyburg/architect-viewer': link:../../apps/architect-viewer
       debug: 4.3.4
       dockerode: 3.3.5
       dockerode-compose: 1.3.3
       tar-fs: 2.1.1
     devDependencies:
+      '@protobuf-ts/plugin': 2.9.0
+      '@protobuf-ts/protoc': 2.9.0
       '@rushstack/eslint-config': 3.3.0_7ploys55nlrvgzaet23aqtwjea
       '@rushstack/heft': 0.50.7_@types+node@20.2.5
       '@tinyburg/apks': link:../apks
@@ -274,6 +271,7 @@ importers:
       eslint-plugin-prettier: 4.2.1_xcqkel4mpum3npntysob2xmn54
       eslint-plugin-unicorn: 47.0.0_eslint@8.41.0
       prettier: 2.8.8
+      rimraf: 5.0.1
       ts-node: 10.9.1_damrkshojdiumlcmdowz44ss6u
       typescript: 5.1.3
 
