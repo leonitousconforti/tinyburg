@@ -20,15 +20,15 @@ for pair in unsalted_credentials:
 # Create the jwks secrets and export them
 keys = jwk.JWK.generate(kty="RSA", size=2048)
 kid = hex(binascii.crc32(keys.export_public().encode("utf-8")) & 0xFFFFFFFF)
-public = json.loads(keys.export_public())
-private = json.loads(keys.export_private())
+public = keys.export_public(as_dict=True)
+private = keys.export_private(as_dict=True)
 public["kid"] = kid
 private["kid"] = kid
 
 # Write everything to files
-public_keys_file.write(json.dumps(public, indent=4))
 private_keys_file.write(json.dumps(private, indent=4))
 credentials_file.write(json.dumps(salted_credentials))
+public_keys_file.write(json.dumps({"keys": [public]}, indent=4))
 
 # Close files
 credentials_file.close()
