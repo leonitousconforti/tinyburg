@@ -1,7 +1,7 @@
 {
     "extends": "@tinyburg/tsconfig-rig/profile/default/config/tsconfig.json",
     "compilerOptions": {
-        "target": "ES5",
+        "target": "ES6",
         "module": "esnext",
         "moduleResolution": "node",
         "lib": ["dom", "dom.iterable", "esnext"],

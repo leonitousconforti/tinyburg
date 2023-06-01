@@ -1,6 +1,10 @@
 FROM node:16-alpine
+
 WORKDIR /app
 COPY ./build ./build
-ENV NODE_ENV production
+COPY ./public ./public
+
 EXPOSE 8080
-CMD ["npx", "serve", "build", "--listen", "8080"]
+ENV NODE_ENV production
+RUN npm install webpack webpack-cli webpack-dev-server
+CMD ["npx", "webpack", "serve"]

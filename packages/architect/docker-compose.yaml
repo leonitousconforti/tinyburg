@@ -1,57 +1,57 @@
 version: "3.8"
 services:
-    envoy:
-        image: architect_envoy:latest
-        build:
-            context: ./envoy
-            dockerfile: Dockerfile
-        networks:
-            - envoymesh
-        ports:
-            - "8080:8080"
-            - "8081:8081"
+  envoy:
+    image: architect_envoy:latest
+    build:
+      context: ./envoy
+      dockerfile: Dockerfile
+    networks:
+      - envoymesh
+    ports:
+      - "8080:8080"
+      - "8081:8081"
 
-    emulator:
-        image: tinyburg/architect:emulator-10086546_sys-30-google-apis-x64-r12_frida-16.0.19
-        shm_size: 128M
-        devices: [/dev/kvm]
-        deploy:
-            resources:
-                limits:
-                    cpus: "2"
-                    memory: 5G
-        build:
-            context: ./emulator
-            dockerfile: Dockerfile
-        ports:
-            - "5554:5554"
-            - "5555:5555"
-            - "8554:8554"
-            - "27042:27042"
-        networks:
-            envoymesh:
-                aliases:
-                    - emulator
+  emulator:
+    image: tinyburg/architect:emulator-10086546_sys-30-google-apis-x64-r12_frida-16.0.19
+    shm_size: 128M
+    devices: [/dev/kvm]
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory: 5G
+    build:
+      context: ./emulator
+      dockerfile: Dockerfile
+    ports:
+      - "5554:5554"
+      - "5555:5555"
+      - "8554:8554"
+      - "27042:27042"
+    networks:
+      envoymesh:
+        aliases:
+          - emulator
 
-    jwt_signer:
-        image: architect_jwt_signer:latest
-        build:
-            context: ./jwt-provider
-            dockerfile: Dockerfile
-        networks:
-            envoymesh:
-                aliases:
-                    - jwt_signer
+  jwt_signer:
+    image: architect_jwt_signer:latest
+    build:
+      context: ./jwt-provider
+      dockerfile: Dockerfile
+    networks:
+      envoymesh:
+        aliases:
+          - jwt_signer
 
-    frontend:
-        image: architect_frontend:latest
-        build:
-            context: ./node_modules/@tinyburg/architect-viewer/
-            dockerfile: Dockerfile
-        networks:
-            envoymesh:
-                aliases:
-                    - frontend
+  frontend:
+    image: architect_frontend:latest
+    build:
+      context: ./node_modules/@tinyburg/architect-viewer/
+      dockerfile: Dockerfile
+    networks:
+      envoymesh:
+        aliases:
+          - frontend
 
 networks:
   envoymesh: {}

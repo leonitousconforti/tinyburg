@@ -1,5 +1,4 @@
 declare module "dockerode-compose" {
-    // https://stackoverflow.com/questions/39040108/import-class-in-definition-file-d-ts
     type Dockerode = import("dockerode");
 
     export default class DockerodeCompose {

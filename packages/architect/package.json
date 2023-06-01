@@ -20,6 +20,7 @@
     "main": "dist/index.js",
     "files": [
         "dist/",
+        "proto/",
         "envoy/",
         "emulator/",
         "jwt-provider/"

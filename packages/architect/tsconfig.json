@@ -10,5 +10,5 @@
         "sourceMap": true,
         "declaration": true
     },
-    "include": ["src/**/*.ts"]
+    "include": ["index.ts", "dockerode-compose.d.ts"]
 }

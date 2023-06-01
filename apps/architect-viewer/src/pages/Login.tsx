@@ -1,5 +1,8 @@
 import type { TokenAuthService } from "../services/Auth.js";
 
+import React, { useState } from "react";
+import Copyright from "../components/Copyright.js";
+
 import {
     Box,
     Avatar,
@@ -12,9 +15,6 @@ import {
     CssBaseline,
 } from "@mui/material";
 import { Close as CloseIcon, LockOutlined as LockOutlinedIcon } from "@mui/icons-material";
-
-import React, { useState } from "react";
-import Copyright from "../components/Copyright.js";
 
 interface ILoginProps {
     auth: TokenAuthService;
@@ -94,7 +94,13 @@ const Login: React.FunctionComponent<ILoginProps> = ({ auth }) => {
                             if (event.key === "Enter") login().catch(() => setDisplayErrorSnack(true));
                         }}
                     />
-                    <Button fullWidth variant="contained" color="primary" sx={{ mt: 3, mb: 2 }} onClick={() => login()}>
+                    <Button
+                        fullWidth
+                        variant="contained"
+                        color="primary"
+                        sx={{ mt: 3, mb: 2 }}
+                        onClick={() => login().catch(() => setDisplayErrorSnack(true))}
+                    >
                         Sign In
                     </Button>
                 </Box>

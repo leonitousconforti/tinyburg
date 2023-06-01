@@ -22,9 +22,9 @@ module.exports = {
     },
     rules: {
         indent: ["error", 4, { SwitchCase: 1 }],
-        "unicorn/prevent-abbreviations": "off",
         "unicorn/no-nested-ternary": "off",
         "unicorn/prefer-node-protocol": "off",
+        "unicorn/prevent-abbreviations": "off",
         "unicorn/filename-case": [
             "error",
             {
