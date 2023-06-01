@@ -1,6 +1,5 @@
 version: "3.9"
 services:
-  # Main web service
   web:
     image: ghcr.io/leonitousconforti/tinyburg/authproxy
     build: .

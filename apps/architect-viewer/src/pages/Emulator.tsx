@@ -1,80 +1,37 @@
+import type { TokenAuthService } from "../services/Auth.js";
+import type { IRtcClient } from "../generated/rtc_service.client.js";
+import type { IEmulatorControllerClient } from "../generated/emulator_controller.client.js";
+
+import {
+    Image as ImageIcon,
+    VolumeUp,
+    ExitToApp,
+    VolumeDown,
+    LocationOn as LocationOnIcon,
+    OndemandVideo as OndemandVideoIcon,
+} from "@mui/icons-material";
+import { Alert, Box, Grid, Slider, AppBar, Toolbar, Snackbar, Container, IconButton, Typography } from "@mui/material";
+
 import React, { useState } from "react";
+import JsepProtocol from "../services/Jsep.js";
+import Copyright from "../components/Copyright.js";
+import WebRtcView from "../components/WebRtcView.js";
+import LogcatView from "../components/LogcatView.js";
+import WithMouseKeyHandler from "../components/InteractiveLayer.js";
 
-import Alert from "@material-ui/lab/Alert";
-import ImageIcon from "@material-ui/icons/Image";
-import VolumeUp from "@material-ui/icons/VolumeUp";
-import ExitToApp from "@material-ui/icons/ExitToApp";
-import VolumeDown from "@material-ui/icons/VolumeDown";
-import LocationOnIcon from "@material-ui/icons/LocationOn";
-import OndemandVideoIcon from "@material-ui/icons/OndemandVideo";
-
-import Box from "@material-ui/core/Box";
-import Grid from "@material-ui/core/Grid";
-import Slider from "@material-ui/core/Slider";
-import AppBar from "@material-ui/core/AppBar";
-import Toolbar from "@material-ui/core/Toolbar";
-import Snackbar from "@material-ui/core/Snackbar";
-import Container from "@material-ui/core/Container";
-import IconButton from "@material-ui/core/IconButton";
-import Typography from "@material-ui/core/Typography";
-import { Theme, WithStyles, withStyles, createStyles } from "@material-ui/core/styles";
-
-import JsepProtocol from "../service/Jsep";
-import Copyright from "../components/Copyright";
-import WebRtcView from "../components/WebRtcView";
-import LogcatView from "../components/LogcatView";
-import WithMouseKeyHandler from "../components/InteractiveLayer";
-import type { TokenAuthService } from "../service/Auth";
-import type { IRtcClient } from "../generated/rtc_service.client";
-import type { IEmulatorControllerClient } from "../generated/emulator_controller.client";
-
-const styles = (theme: Theme) =>
-    createStyles({
-        root: {
-            flexGrow: 1,
-        },
-        menuButton: {
-            marginRight: theme.spacing(2),
-        },
-        title: {
-            flexGrow: 1,
-        },
-        nofocusborder: {
-            outline: "none !important;",
-        },
-        paper: {
-            marginTop: theme.spacing(4),
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-        },
-    });
-
-const WhiteSlider = withStyles({
-    thumb: {
-        color: "white",
-    },
-    track: {
-        color: "white",
-    },
-    rail: {
-        color: "white",
-    },
-})(Slider);
-
-interface EmulatorProps extends WithStyles<typeof styles> {
+interface IEmulatorProps {
     rtcClient: IRtcClient;
     auth: TokenAuthService;
     emulatorClient: IEmulatorControllerClient;
 }
 
-export const Emulator: React.FunctionComponent<EmulatorProps> = ({ classes, auth, emulatorClient, rtcClient }) => {
+export const Emulator: React.FunctionComponent<IEmulatorProps> = ({ auth, emulatorClient, rtcClient }) => {
     const [volume, setVolume] = useState(0);
-    const [errorMessage, _setErrorMessage] = useState("");
+    const [errorMessage, setErrorMessage] = useState("");
     const [displayErrorSnack, setDisplayErrorSnack] = useState(false);
-    const [_gps, setGps] = useState<{ latitude: number; longitude: number }>({ latitude: 0, longitude: 0 });
+    const [gps, setGps] = useState<{ latitude: number; longitude: number }>({ latitude: 0, longitude: 0 });
 
-    const updateLocation = () => {
+    const updateLocation = (): void => {
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition((location) => {
                 setGps({ latitude: location.coords.latitude, longitude: location.coords.longitude });
@@ -83,13 +40,12 @@ export const Emulator: React.FunctionComponent<EmulatorProps> = ({ classes, auth
     };
 
     const jsep = new JsepProtocol(rtcClient);
-    console.log("here2");
 
     return (
-        <div className={classes.root}>
+        <div>
             <AppBar position="static">
                 <Toolbar>
-                    <Typography variant="h6" className={classes.title}>
+                    <Typography variant="h6" sx={{ flexGrow: 1 }}>
                         Using emulator view: webrtc
                     </Typography>
 
@@ -99,11 +55,11 @@ export const Emulator: React.FunctionComponent<EmulatorProps> = ({ classes, auth
                                 <VolumeDown />
                             </Grid>
                             <Grid item xs>
-                                <WhiteSlider
+                                <Slider
                                     value={volume}
-                                    onChange={(_, newVolume) => setVolume(newVolume as number)}
-                                    min={0.0}
-                                    max={1.0}
+                                    onChange={(_event, newVolume) => setVolume(newVolume as number)}
+                                    min={0}
+                                    max={1}
                                     step={0.01}
                                     aria-labelledby="continuous-slider"
                                 />
@@ -114,8 +70,6 @@ export const Emulator: React.FunctionComponent<EmulatorProps> = ({ classes, auth
                         </Grid>
                     </Box>
 
-                    {/* <div className={classes.grow} /> */}
-                    {/* <div className={classes.sectionDesktop}> */}
                     <div>
                         <IconButton aria-label="Get current location" color="inherit" onClick={() => updateLocation}>
                             <LocationOnIcon />
@@ -133,12 +87,12 @@ export const Emulator: React.FunctionComponent<EmulatorProps> = ({ classes, auth
                 </Toolbar>
             </AppBar>
 
-            <div className={classes.paper}>
+            <div>
                 <Grid container spacing={3}>
                     <Grid item xs={12} sm={6}>
                         <Container maxWidth="sm">
                             <WithMouseKeyHandler jsep={jsep} emulatorClient={emulatorClient}>
-                                <WebRtcView jsep={jsep} muted={true} volume={1.0} />
+                                <WebRtcView jsep={jsep} muted={true} volume={1} />
                             </WithMouseKeyHandler>
                             <p>State: testing </p>
                         </Container>
@@ -160,4 +114,4 @@ export const Emulator: React.FunctionComponent<EmulatorProps> = ({ classes, auth
     );
 };
 
-export default withStyles(styles)(Emulator);
+export default Emulator;

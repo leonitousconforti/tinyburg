@@ -1,0 +1,22 @@
+{
+    "$schema": "https://developer.microsoft.com/json-schemas/heft/heft.schema.json",
+    "eventActions": [
+        {
+            "actionKind": "deleteGlobs",
+            "heftEvent": "clean",
+            "actionId": "defaultClean",
+            "globsToDelete": ["build"]
+        },
+        {
+            "actionKind": "deleteGlobs",
+            "heftEvent": "post-build",
+            "actionId": "cleanUnnecessaryTempFiles",
+            "globsToDelete": ["temp"]
+        }
+    ],
+    "heftPlugins": [
+        { "plugin": "@rushstack/heft-webpack5-plugin" },
+        { "plugin": "@rushstack/heft-jest-plugin" },
+        { "plugin": "@rushstack/heft-sass-plugin" }
+    ]
+}

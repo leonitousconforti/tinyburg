@@ -1,17 +1,18 @@
-import React, { useEffect, useRef } from "react";
+import type React from "react";
+import type JsepProtocol from "../services/Jsep.js";
 
-import type JsepProtocol from "../service/Jsep";
+import { useEffect, useRef } from "react";
 
-interface WebRtcViewProps {
+interface IWebRtcViewProps {
     muted: boolean;
     volume: number;
     jsep: JsepProtocol;
 }
 
-export const WebRtcView: React.FunctionComponent<WebRtcViewProps> = ({ jsep, muted, volume = 1.0 }) => {
+export const WebRtcView: React.FunctionComponent<IWebRtcViewProps> = ({ jsep, muted, volume = 1 }) => {
     const video = useRef<HTMLVideoElement>(null);
 
-    const onTrack = (track: MediaStreamTrack) => {
+    const onTrack = (track: MediaStreamTrack): void => {
         console.log(track);
         if (!video.current) return;
         if (!video.current?.srcObject) video.current.srcObject = new MediaStream();
@@ -19,8 +20,7 @@ export const WebRtcView: React.FunctionComponent<WebRtcViewProps> = ({ jsep, mut
     };
 
     useEffect(() => {
-        console.log("here");
-        jsep.startStream(onTrack);
+        jsep.startStream(onTrack).catch((error) => console.error(error));
     }, [jsep]);
 
     useEffect(() => {

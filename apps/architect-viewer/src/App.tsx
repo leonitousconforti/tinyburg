@@ -1,26 +1,28 @@
-import React, { useState, useMemo } from "react";
+import type React from "react";
+
+import { useState, useMemo } from "react";
 import { GrpcWebFetchTransport } from "@protobuf-ts/grpcweb-transport";
 
-import Login from "./pages/Login";
-import Emulator from "./pages/Emulator";
-import AuthService from "./service/Auth";
-import { RtcClient } from "./generated/rtc_service.client";
-import { EmulatorControllerClient } from "./generated/emulator_controller.client";
+import Login from "./pages/Login.js";
+import Emulator from "./pages/Emulator.js";
+import AuthService from "./services/Auth.js";
+import { RtcClient } from "./generated/rtc_service.client.js";
+import { EmulatorControllerClient } from "./generated/emulator_controller.client.js";
 
-const EMULATOR_GRPC = `${window.location.protocol}//${window.location.hostname}:${window.location.port}`;
-const AUTH_ENDPOINT = EMULATOR_GRPC + "/token";
+const EMULATOR_GRPC: string = `${window.location.protocol}//${window.location.hostname}:${window.location.port}`;
+const AUTH_ENDPOINT: string = EMULATOR_GRPC + "/token";
 
-const useAuth = (AUTH_ENDPOINT: string, onAuthorized: (authorized: boolean) => void) =>
-    useMemo(() => new AuthService(AUTH_ENDPOINT, onAuthorized), []);
+const useAuth = (authEndpoint: string, onAuthorized: (authorized: boolean) => void): AuthService =>
+    useMemo(() => new AuthService(authEndpoint, onAuthorized), [authEndpoint, onAuthorized]);
 
 const App: React.FunctionComponent<{}> = () => {
     const [authorized, setAuthorized] = useState(false);
     const auth = useAuth(AUTH_ENDPOINT, (authorized) => setAuthorized(authorized));
 
-    const makeTransport = () =>
+    const makeTransport = (): GrpcWebFetchTransport =>
         new GrpcWebFetchTransport({
             baseUrl: EMULATOR_GRPC,
-            meta: auth.getAuthHeader() as Record<string, string>,
+            meta: auth.getAuthHeader(),
         });
 
     return (

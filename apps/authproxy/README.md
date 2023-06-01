@@ -1,14 +1,12 @@
-# Proxy server used to set authentication headers
+# @tinyburg/authproxy
 
-[![authproxy build](https://github.com/leonitousconforti/tinyburg/actions/workflows/build.yml/badge.svg?branch=authproxy)](https://github.com/leonitousconforti/tinyburg/actions/workflows/build.yml)
+You can use this proxy server to set the proper authentication headers for you. **IMPORTANT: this server will not function properly if you run it on your own.**
 
-You can use this proxy server to set the proper authentication headers for you. **IMPORTANT: this server will not function properly if you run it on your own, you need the .env file.**
-
-## Notes:
+## Notes
 
 1. The proxy is rate-limited, you will only be able to send 5 requests every 2 mins by default
 2. You must set the "useProxy" flag in the tinyburg library if you wish to enable the auth proxy
-3. This proxy will deny requests for certain scopes. It will not process any enter raffle, new user, or upload save requests
+3. This proxy will deny requests for certain scopes. For examples, it will not process any enter raffle, new user, or upload save requests
 
 <br>
 

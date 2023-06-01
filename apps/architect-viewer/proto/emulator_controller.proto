@@ -72,16 +72,10 @@ service EmulatorController {
     rpc setBattery(BatteryState) returns (google.protobuf.Empty) {}
     rpc getBattery(google.protobuf.Empty) returns (BatteryState) {}
 
-    // Set the state of the gps, gps support will only work
-    // properly if:
-    //
-    // - no location ui is active. That is the emulator
-    //   is launched in headless mode (-no-window) or the location
-    //   ui is disabled (-no-location-ui).
-    // - the passiveUpdate is set to false. Setting this to false
-    //   will disable/break the LocationUI.
-    //
-    // Keep in mind that android usually only samples the gps at 1 hz.
+    // Set the state of the gps.
+    // Note: Setting the gps position will not be reflected in the user
+    // interface. Keep in mind that android usually only samples the gps at 1
+    // hz.
     rpc setGps(GpsState) returns (google.protobuf.Empty) {}
 
     // Gets the latest gps state as delivered by the setGps call, or location ui
@@ -101,12 +95,16 @@ service EmulatorController {
     // by touch events.
     rpc sendTouch(TouchEvent) returns (google.protobuf.Empty) {}
     rpc sendMouse(MouseEvent) returns (google.protobuf.Empty) {}
+    rpc injectWheel(stream WheelEvent) returns (google.protobuf.Empty) {}
 
     // Make a phone call.
     rpc sendPhone(PhoneCall) returns (PhoneResponse) {}
 
     // Sends an sms message to the emulator.
     rpc sendSms(SmsMessage) returns (PhoneResponse) {}
+
+    // Sends an sms message to the emulator.
+    rpc setPhoneNumber(PhoneNumber) returns (PhoneResponse) {}
 
     // Retrieve the status of the emulator. This will contain general
     // hardware information, and whether the device has booted or not.
@@ -235,9 +233,11 @@ service EmulatorController {
     // RotationRadian is relative to the camera's current orientation.
     rpc rotateVirtualSceneCamera(RotationRadian)
             returns (google.protobuf.Empty) {}
+
     // Velocity is absolute
     rpc setVirtualSceneCameraVelocity(Velocity)
             returns (google.protobuf.Empty) {}
+
     // Set foldable posture
     rpc setPosture(Posture) returns (google.protobuf.Empty) {}
 
@@ -269,30 +269,38 @@ message VmRunState {
         // The emulator is in an unknown state. You cannot transition to this
         // state.
         UNKNOWN = 0;
+
         // Guest is actively running. You can transition to this state from the
         // paused state.
         RUNNING = 1;
+
         // Guest is paused to load a snapshot. You cannot transition to this
         // state.
         RESTORE_VM = 2;
+
         // Guest has been paused. Transitioning to this state will pause the
         // emulator the guest will not be consuming any cpu cycles.
         PAUSED = 3;
+
         // Guest is paused to take or export a snapshot. You cannot
         // transition to this state.
         SAVE_VM = 4;
+
         // System shutdown, note that it is similar to power off. It tries to
         // set the system status and notify guest. The system is likely going to
         // disappear soon and do proper cleanup of resources, possibly taking
         // a snapshot. This is the same behavior as closing the emulator by
         // clicking the X (close) in the user interface.
         SHUTDOWN = 5;
+
         // Immediately terminate the emulator. No resource cleanup will take
         // place. There is a good change to corrupt the system.
         TERMINATE = 7;
+
         // Will cause the emulator to reset. This is not a state you can
         // observe.
         RESET = 9;
+
         // Guest experienced some error state, you cannot transition to this
         // state.
         INTERNAL_ERROR = 10;
@@ -367,6 +375,7 @@ message PhysicalModelValue {
         // Wrist tilt gesture (1 = gaze, 0 = ungaze)
         WRIST_TILT = 19;
     }
+
     PhysicalType target = 1;
 
     // [Output Only]
@@ -392,27 +401,36 @@ message SensorValue {
         // on all three physical axes (x, y, and z), including the force of
         // gravity.
         ACCELERATION = 0;
+
         // Measures a device's rate of rotation in rad/s around each of the
         // three physical axes (x, y, and z).
         GYROSCOPE = 1;
+
         // Measures the ambient geomagnetic field for all three physical axes
         // (x, y, z) in μT.
         MAGNETIC_FIELD = 2;
+
         // Measures degrees of rotation that a device makes around all three
         // physical axes (x, y, z)
         ORIENTATION = 3;
+
         // Measures the temperature of the device in degrees Celsius (°C).
         TEMPERATURE = 4;
+
         // Measures the proximity of an object in cm relative to the view screen
         // of a device. This sensor is typically used to determine whether a
         // handset is being held up to a person's ear.
         PROXIMITY = 5;
+
         // Measures the ambient light level (illumination) in lx.
         LIGHT = 6;
+
         // Measures the ambient air pressure in hPa or mbar.
         PRESSURE = 7;
+
         // Measures the relative ambient humidity in percent (%).
         HUMIDITY = 8;
+
         MAGNETIC_FIELD_UNCALIBRATED = 9;
         GYROSCOPE_UNCALIBRATED = 10;
 
@@ -422,11 +440,15 @@ message SensorValue {
 
         // Measures the heart rate in bpm.
         HEART_RATE = 14;
+
         // Measures the ambient RGBC light intensity.
         // Values are in order (Red, Green, Blue, Clear).
         RGBC_LIGHT = 15;
+
         // WIRST_TILT (16) is skipped; clients should use get/setPhysicalModel()
         // instead.
+        // Measures acceleration force and provides bias data.
+        ACCELERATION_UNCALIBRATED = 17;
     }
 
     // Type of sensor
@@ -470,11 +492,13 @@ message DisplayMode {
 message LogMessage {
     // [Output Only] The contents of the log output.
     string contents = 1;
+
     // The starting byte position of the output that was returned. This
     // should match the start parameter sent with the request. If the serial
     // console output exceeds the size of the buffer, older output will be
     // overwritten by newer content and the start values will be mismatched.
     int64 start = 2;
+
     //[Output Only] The position of the next byte of content from the serial
     // console output. Use this value in the next request as the start
     // parameter.
@@ -552,7 +576,7 @@ message VmConfiguration {
         // https://docs.microsoft.com/en-us/virtualization/api/
         WHPX = 5;
 
-        GVM = 6;
+        AEHD = 6;
     }
 
     VmHypervisorType hypervisorType = 1;
@@ -666,6 +690,21 @@ message MouseEvent {
     // The display device where the mouse event occurred.
     // Omitting or using the value 0 indicates the main display.
     int32 display = 4;
+}
+
+message WheelEvent {
+    // The value indicating how much the mouse wheel is rotated. Scaled so that
+    // 120 equals to 1 wheel click. (120 is chosen as a multiplier often used to
+    // represent wheel movements less than 1 wheel click. e.g.
+    // https://doc.qt.io/qt-5/qwheelevent.html#angleDelta) Positive delta value
+    // is assigned to dx when the top of wheel is moved to left. Similarly
+    // positive delta value is assigned to dy when the top of wheel is moved
+    // away from the user.
+    int32 dx = 1;
+    int32 dy = 2;
+    // The display device where the mouse event occurred.
+    // Omitting or using the value 0 indicates the main display.
+    int32 display = 3;
 }
 
 // KeyboardEvent objects describe a user interaction with the keyboard; each
@@ -1044,12 +1083,14 @@ message AudioFormat {
         // packets. The client does not have to throttle and can push packets at
         // will. This can result in the client falling behind.
         MODE_UNSPECIFIED = 0;
+
         // Audio packets will be delivered in real time (when possible). The
         // audio queue will be overwritten with incoming data if data is made
         // available. This means the client needs to control timing properly, or
         // packets will get overwritten.
         MODE_REAL_TIME = 1;  //
     }
+
     // Sampling rate to use, defaulting to 44100 if this is not set.
     // Note, that android devices typically will not use a sampling
     // rate higher than 48kHz. See
@@ -1180,6 +1221,7 @@ message DisplayConfiguration {
     // The id can be used to get or stream a screenshot.
     uint32 display = 5;
 }
+
 // Provides information about all the displays that can be attached
 // to the emulator. The emulator will always have at least one display.
 //
@@ -1219,7 +1261,33 @@ message Notification {
         // Keep adding more for other event types
     }
 
-    EventType event = 1;
+    // Deprecated, use the type below to get detailed information
+    // regarding the event.
+    EventType event = 1 [deprecated = true];
+
+    // Detailed notification information.
+    oneof type {
+        CameraNotification cameraNotification = 2;
+        DisplayConfigurationsChangedNotification
+                displayConfigurationsChangedNotification = 3;
+    }
+}
+
+// Fired when the virtual scene camera is activated or deactivated and also in
+// response to the streamNotification call.
+message CameraNotification {
+    // Indicates whether the camera app was activated or deactivated.
+    bool active = 1;
+
+    // The display the camera app is associated with.
+    int32 display = 2;
+}
+
+// Fired when an update to a display event has been fired through the extended
+// ui. This does not fire events when the display is changed through the console
+// or the gRPC endpoint.
+message DisplayConfigurationsChangedNotification {
+    DisplayConfigurations displayConfigurations = 1;
 }
 
 message RotationRadian {
@@ -1247,4 +1315,13 @@ message Posture {
         POSTURE_MAX = 6;
     }
     PostureValue value = 3;
+}
+
+message PhoneNumber {
+    //
+    // The phone number should be a valid GSM-formatted number as specified by
+    // 3GPP 23.040 Sec 9.1.2.5.
+    //
+    // For example: +3106225412 or (650) 555-1221
+    string number = 1;
 }

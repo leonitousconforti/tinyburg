@@ -2,17 +2,17 @@
     "extends": "@tinyburg/tsconfig-rig/profile/default/config/tsconfig.json",
     "compilerOptions": {
         "target": "ES5",
-        "lib": ["dom", "dom.iterable", "esnext"],
         "module": "esnext",
         "moduleResolution": "node",
+        "lib": ["dom", "dom.iterable", "esnext"],
+        "noEmit": false,
+        "outDir": "./build",
 
         // React settings
-        "esModuleInterop": true,
-        "allowSyntheticDefaultImports": true,
-        "isolatedModules": true,
-        "allowJs": true,
-        "noEmit": true,
         "jsx": "react-jsx",
+        "esModuleInterop": true,
+        "isolatedModules": true,
+        "allowSyntheticDefaultImports": true,
 
         // Protobuf-ts settings (needed for the generated ts sources)
         "noUncheckedIndexedAccess": false

@@ -1,9 +1,9 @@
 import type React from "react";
 
-import Link from "@material-ui/core/Link";
-import Typography from "@material-ui/core/Typography";
+import { Link } from "@mui/material";
+import { Typography } from "@mui/material";
 
-export const Copyright: React.FunctionComponent<{}> = ({}) => {
+export const Copyright: React.FunctionComponent = () => {
     return (
         <Typography variant="body2" color="textSecondary" align="center">
             {"Copyright © "}

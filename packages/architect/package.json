@@ -37,8 +37,8 @@
         "tar-fs": "~2.1.1"
     },
     "devDependencies": {
-        "@rushstack/eslint-config": "~3.3.0",
-        "@rushstack/heft": "~0.50.7",
+        "@rushstack/eslint-config": "3.3.0",
+        "@rushstack/heft": "0.50.7",
         "@tinyburg/apks": "workspace:*",
         "@tinyburg/tsconfig-rig": "workspace:*",
         "@types/debug": "~4.1.8",

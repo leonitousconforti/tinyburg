@@ -1,22 +1,23 @@
-import React, { useEffect, useState } from "react";
+import type React from "react";
+import type { IEmulatorControllerClient } from "../generated/emulator_controller.client.js";
 
-import List from "@material-ui/core/List";
-import ListItem from "@material-ui/core/ListItem";
-import ListItemText from "@material-ui/core/ListItemText";
+import { List } from "@mui/material";
+import { ListItem } from "@mui/material";
+import { ListItemText } from "@mui/material";
 
-import Logcat from "../service/Logcat";
-import type { IEmulatorControllerClient } from "../generated/emulator_controller.client";
+import Logcat from "../services/Logcat.js";
+import { useEffect, useState } from "react";
 
-export interface LogcatViewProps {
+export interface ILogcatViewProps {
     maxHistory?: number;
     emulatorClient: IEmulatorControllerClient;
 }
 
-export const LogcatView: React.FunctionComponent<LogcatViewProps> = ({ emulatorClient, maxHistory = 100 }) => {
+export const LogcatView: React.FunctionComponent<ILogcatViewProps> = ({ emulatorClient, maxHistory = 100 }) => {
     const [lines, setLines] = useState<string[]>([]);
 
-    const onMessages = (logLines: string[]) => {
-        let buffer = logLines.concat(lines);
+    const onMessages = (logLines: string[]): void => {
+        let buffer = [...logLines, ...lines];
         const sliceAt = buffer.length - maxHistory;
         if (sliceAt > 0) buffer = buffer.slice(0, sliceAt);
         setLines(buffer);
@@ -26,7 +27,8 @@ export const LogcatView: React.FunctionComponent<LogcatViewProps> = ({ emulatorC
         new Logcat(emulatorClient, onMessages);
     }, [emulatorClient]);
 
-    const asItems = (logLines: string[]) => {
+    // eslint-disable-next-line unicorn/consistent-function-scoping
+    const asItems = (logLines: string[]): JSX.Element[] => {
         let i = 0;
         return logLines.map((line) => (
             <ListItem key={i++}>

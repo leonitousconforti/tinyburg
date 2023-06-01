@@ -1,64 +1,44 @@
+import type { TokenAuthService } from "../services/Auth.js";
+
+import {
+    Box,
+    Avatar,
+    Button,
+    Snackbar,
+    Container,
+    TextField,
+    Typography,
+    IconButton,
+    CssBaseline,
+} from "@mui/material";
+import { Close as CloseIcon, LockOutlined as LockOutlinedIcon } from "@mui/icons-material";
+
 import React, { useState } from "react";
+import Copyright from "../components/Copyright.js";
 
-import CloseIcon from "@material-ui/icons/Close";
-import LockOutlinedIcon from "@material-ui/icons/LockOutlined";
-
-import Box from "@material-ui/core/Box/Box";
-import Avatar from "@material-ui/core/Avatar";
-import Button from "@material-ui/core/Button";
-import Snackbar from "@material-ui/core/Snackbar";
-import Container from "@material-ui/core/Container";
-import TextField from "@material-ui/core/TextField";
-import Typography from "@material-ui/core/Typography";
-import IconButton from "@material-ui/core/IconButton";
-import CssBaseline from "@material-ui/core/CssBaseline";
-import { Theme, WithStyles, withStyles, createStyles } from "@material-ui/core/styles";
-
-import Copyright from "../components/Copyright";
-import type { TokenAuthService } from "../service/Auth";
-
-const styles = (theme: Theme) =>
-    createStyles({
-        "@global": {
-            body: {
-                backgroundColor: theme.palette.common.white,
-            },
-        },
-        paper: {
-            marginTop: theme.spacing(8),
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-        },
-        avatar: {
-            margin: theme.spacing(1),
-            backgroundColor: theme.palette.secondary.main,
-        },
-        form: {
-            width: "100%",
-            marginTop: theme.spacing(1),
-        },
-        submit: {
-            margin: theme.spacing(3, 0, 2),
-        },
-    });
-
-interface LoginProps extends WithStyles<typeof styles> {
+interface ILoginProps {
     auth: TokenAuthService;
 }
 
-const Login: React.FunctionComponent<LoginProps> = ({ classes, auth }) => {
+const Login: React.FunctionComponent<ILoginProps> = ({ auth }) => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [displayErrorSnack, setDisplayErrorSnack] = useState(false);
 
-    const login = () => auth.login(email, password).catch(() => setDisplayErrorSnack(true));
+    const login = (): Promise<void> => auth.login(email, password);
 
     return (
         <Container component="main" maxWidth="xs">
             <CssBaseline />
-            <div className={classes.paper}>
-                <Avatar className={classes.avatar}>
+            <Box
+                sx={{
+                    marginTop: 8,
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                }}
+            >
+                <Avatar sx={{ m: 1, bgcolor: "secondary.main" }}>
                     <LockOutlinedIcon />
                 </Avatar>
                 <Typography component="h1" variant="h5">
@@ -84,7 +64,7 @@ const Login: React.FunctionComponent<LoginProps> = ({ classes, auth }) => {
                         </IconButton>,
                     ]}
                 />
-                <form className={classes.form} noValidate>
+                <Box component="form" noValidate sx={{ width: "100%", mt: 1 }}>
                     <TextField
                         variant="outlined"
                         margin="normal"
@@ -111,20 +91,14 @@ const Login: React.FunctionComponent<LoginProps> = ({ classes, auth }) => {
                         value={password}
                         onChange={(event) => setPassword(event.target.value)}
                         onKeyDown={(event) => {
-                            if (event.key === "Enter") login();
+                            if (event.key === "Enter") login().catch(() => setDisplayErrorSnack(true));
                         }}
                     />
-                    <Button
-                        fullWidth
-                        variant="contained"
-                        color="primary"
-                        className={classes.submit}
-                        onClick={() => login()}
-                    >
+                    <Button fullWidth variant="contained" color="primary" sx={{ mt: 3, mb: 2 }} onClick={() => login()}>
                         Sign In
                     </Button>
-                </form>
-            </div>
+                </Box>
+            </Box>
             <Box mt={8}>
                 <Copyright />
             </Box>
@@ -132,4 +106,4 @@ const Login: React.FunctionComponent<LoginProps> = ({ classes, auth }) => {
     );
 };
 
-export default withStyles(styles)(Login);
+export default Login;

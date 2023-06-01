@@ -54,4 +54,4 @@ services:
                     - frontend
 
 networks:
-    envoymesh: {}
+  envoymesh: {}
