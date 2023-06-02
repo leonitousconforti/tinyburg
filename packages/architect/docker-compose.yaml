@@ -1,4 +1,4 @@
-version: "3.8"
+version: "3"
 services:
   envoy:
     image: architect_envoy:latest
@@ -38,16 +38,20 @@ services:
     build:
       context: ./jwt-provider
       dockerfile: Dockerfile
+    ports:
+      - "8082:8080"
     networks:
       envoymesh:
         aliases:
           - jwt_signer
 
   frontend:
-    image: architect_frontend:latest
+    image: architect_frontend_instructions:latest
     build:
-      context: ./node_modules/@tinyburg/architect-viewer/
+      context: ./frontend-placeholder
       dockerfile: Dockerfile
+    ports:
+      - "8083:8080"
     networks:
       envoymesh:
         aliases:

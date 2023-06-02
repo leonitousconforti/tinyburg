@@ -36,9 +36,28 @@ export const architect = async (
     const runningContainers = await dockerode.listContainers();
     const runningContainer = runningContainers.find((container) => container.Image === tag);
 
+    // Try to find a running container first
     if (runningContainer) {
+        logger("Found an existing docker container that will be reused");
+        if (options?.withAdditionalServices) {
+            logger("Not starting additional services because an existing container was found");
+            logger("If you really do want to start architect with additional services, you should stop this container");
+        }
         container = dockerode.getContainer(runningContainer.Id);
-    } else {
+    }
+
+    // Otherwise, if we want to start all the additional services
+    // bring everything up using docker compose
+    else if (options?.withAdditionalServices) {
+        logger("Starting architect with additional services using docker compose");
+        const result = await dockerodeCompose.up();
+        console.log(result.services);
+        throw new Error("a");
+    }
+
+    // Otherwise we just need to start a single architect container
+    // with no additional services needed
+    else {
         // Build a new docker container
         const context = new URL("emulator", import.meta.url);
         logger("Building docker image from context %s, will tag image as %s when finished", context.toString(), tag);
