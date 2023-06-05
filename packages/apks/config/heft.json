@@ -1,24 +1,40 @@
 {
     "$schema": "https://developer.microsoft.com/json-schemas/heft/heft.schema.json",
-    "heftPlugins": [{ "plugin": "@rushstack/heft-jest-plugin" }],
-    "eventActions": [
-        {
-            "actionKind": "deleteGlobs",
-            "heftEvent": "clean",
-            "actionId": "defaultClean",
-            "globsToDelete": ["dist"]
+    "phasesByName": {
+        "build": {
+            "cleanFiles": [{ "sourcePath": "dist" }],
+            "tasksByName": {
+                "generate-types": {
+                    "taskEvent": {
+                        "eventKind": "runScript",
+                        "options": {
+                            "scriptPath": "downloads/generate-ts-types.cjs"
+                        }
+                    }
+                },
+                "typescript": {
+                    "taskDependencies": ["generate-types"],
+                    "taskPlugin": {
+                        "pluginPackage": "@rushstack/heft-typescript-plugin"
+                    }
+                },
+                "lint": {
+                    "taskDependencies": ["typescript"],
+                    "taskPlugin": {
+                        "pluginPackage": "@rushstack/heft-lint-plugin"
+                    }
+                }
+            }
         },
-        {
-            "actionKind": "runScript",
-            "heftEvent": "pre-compile",
-            "actionId": "generateTsTypes",
-            "scriptPath": "downloads/generate-ts-types.cjs"
-        },
-        {
-            "actionKind": "deleteGlobs",
-            "heftEvent": "post-build",
-            "actionId": "cleanUnnecessaryTempFiles",
-            "globsToDelete": ["temp"]
+        "test": {
+            "phaseDependencies": ["build"],
+            "tasksByName": {
+                "jest": {
+                    "taskPlugin": {
+                        "pluginPackage": "@rushstack/heft-jest-plugin"
+                    }
+                }
+            }
         }
-    ]
+    }
 }

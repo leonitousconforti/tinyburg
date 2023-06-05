@@ -17,7 +17,7 @@ thinking about also tracking major events and be able to load the versions for t
 rushx build
 
 # or
-rush build --only @tinyburg/apks
+rush build --to @tinyburg/apks
 ```
 
 then to load any of the apks for use in a different typescript package
