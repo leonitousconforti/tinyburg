@@ -72,6 +72,19 @@
                 "python.formatting.provider": "black",
                 "isort.args": ["--profile", "black"],
                 "files.associations": { "*.json": "jsonc", "package.json": "json", "cloudinit.conf": "plaintext" },
+                "files.exclude": {
+                    "**/.git": true,
+                    "**/.svn": true,
+                    "**/.hg": true,
+                    "**/CVS": true,
+                    "**/.DS_Store": true,
+                    "**/Thumbs.db": true,
+                    "**/.cache": true,
+                    "**/.heft": true,
+                    "**/.rush": true,
+                    "**/temp": true,
+                    "**/rush-logs": true
+                },
                 "cSpell.enableFiletypes": [
                     "dockercompose",
                     "dockerfile",
