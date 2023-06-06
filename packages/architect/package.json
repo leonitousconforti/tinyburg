@@ -20,18 +20,22 @@
     "main": "dist/index.js",
     "files": [
         "dist/",
-        "proto/",
         "envoy/",
         "emulator/",
-        "jwt-provider/"
+        "protobuf/",
+        "jwt-provider/",
+        "infrastructure/",
+        "frontend-placeholder/",
+        "docker-compose.yaml"
     ],
     "scripts": {
         "build": "heft build --clean",
         "docker:build": "docker build ./emulator -t tinyburg/architect:emulator-10086546_sys-30-google-apis-x64-r12_frida-16.0.19",
         "docker:run": "docker run --rm --device /dev/kvm --publish 5554:5554/tcp --publish 5555:5555/tcp --publish 8554:8554/tcp --publish 27042:27042/tcp -it tinyburg/architect:emulator-10086546_sys-30-google-apis-x64-r12_frida-16.0.19",
-        "protobuf:clean": "rimraf protobuf/generated/*",
-        "protobuf:gen": "protoc -I ./protobuf --ts_out ./protobuf/generated --ts_opt optimize_code_size ./protobuf/emulator_controller.proto ./protobuf/rtc_service.proto",
-        "test": "heft test --clean"
+        "protobuf:build": "rushx protobuf:clean && rushx protobuf:gen-ts && rushx protobuf:compile",
+        "protobuf:clean": "rimraf protobuf/generated/* && rimraf protobuf/compiled/*",
+        "protobuf:compile": "tsc --project ./protobuf/tsconfig.protobuf.json",
+        "protobuf:gen-ts": "protoc -I ./protobuf --ts_out ./protobuf/generated --ts_opt optimize_code_size ./protobuf/emulator_controller.proto ./protobuf/rtc_service.proto"
     },
     "dependencies": {
         "debug": "~4.3.4",
@@ -42,8 +46,12 @@
     "devDependencies": {
         "@protobuf-ts/plugin": "~2.9.0",
         "@protobuf-ts/protoc": "~2.9.0",
+        "@protobuf-ts/runtime": "~2.9.0",
+        "@protobuf-ts/runtime-rpc": "~2.9.0",
         "@rushstack/eslint-config": "3.3.0",
-        "@rushstack/heft": "0.50.7",
+        "@rushstack/heft": "0.51.0",
+        "@rushstack/heft-lint-plugin": "~0.1.1",
+        "@rushstack/heft-typescript-plugin": "~0.1.1",
         "@tinyburg/apks": "workspace:*",
         "@tinyburg/tsconfig-rig": "workspace:*",
         "@types/debug": "~4.1.8",
@@ -51,13 +59,12 @@
         "@types/dockerode": "~3.3.18",
         "@types/node": "~20.2.5",
         "@types/tar-fs": "~2.0.1",
-        "eslint": "~8.41.0",
+        "eslint": "~8.42.0",
         "eslint-config-prettier": "~8.8.0",
         "eslint-plugin-prettier": "~4.2.1",
         "eslint-plugin-unicorn": "~47.0.0",
         "prettier": "~2.8.8",
         "rimraf": "~5.0.1",
-        "ts-node": "~10.9.1",
         "typescript": "~5.1.3"
     },
     "engines": {

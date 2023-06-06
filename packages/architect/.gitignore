@@ -1,6 +1,9 @@
 /dist
+
 /protobuf/generated/*
 !/protobuf/generated/.gitkeep
+/protobuf/compiled/*
+!/protobuf/compiled/.gitkeep
 
 /emulator/avd/Pixel2.avd/*
 !/emulator/avd/Pixel2.avd/config.ini
