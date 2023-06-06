@@ -14,6 +14,14 @@
                     "taskPlugin": {
                         "pluginPackage": "@rushstack/heft-lint-plugin"
                     }
+                },
+                "gen-protobuf-and-fix-imports": {
+                    "taskEvent": {
+                        "eventKind": "runScript",
+                        "options": {
+                            "scriptPath": "protobuf/gen-and-fix-imports.cjs"
+                        }
+                    }
                 }
             }
         }
