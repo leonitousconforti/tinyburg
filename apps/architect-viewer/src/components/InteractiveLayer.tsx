@@ -1,5 +1,5 @@
 import type JsepProtocol from "../services/Jsep.js";
-import type { IEmulatorControllerClient } from "../generated/emulator_controller.client.js";
+import type { IEmulatorControllerClient } from "@tinyburg/architect/protobuf/emulator_controller.client.js";
 
 import {
     Touch,
@@ -7,7 +7,7 @@ import {
     TouchEvent,
     KeyboardEvent,
     KeyboardEvent_KeyEventType,
-} from "../generated/emulator_controller.js";
+} from "@tinyburg/architect/protobuf/emulator_controller.js";
 import React, { useState, useRef, useEffect, useCallback } from "react";
 
 interface IWithMouseKeyHandlerProps extends React.PropsWithChildren {
@@ -37,7 +37,7 @@ export const WithMouseKeyHandler: React.FunctionComponent<IWithMouseKeyHandlerPr
         mouseDown: false,
     });
 
-    const getScreenSize = useCallback(async (): Promise<void> => {
+    const getScreenSize = useCallback(async () => {
         const status = await emulatorClient.getStatus({}).response;
         const lcdHeight = status.hardwareConfig?.entry[34];
         const lcdWidth = status.hardwareConfig?.entry[95];
@@ -95,7 +95,6 @@ export const WithMouseKeyHandler: React.FunctionComponent<IWithMouseKeyHandlerPr
         sendMouseCoordinates();
     };
 
-    // eslint-disable-next-line unicorn/consistent-function-scoping
     const scaleAxis = (value: number, minIn: number, maxIn: number): number => {
         const minOut = 0; // EV_ABS_MIN
         const maxOut = 2 ** 15 - 1; // EV_ABS_MAX

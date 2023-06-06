@@ -1,5 +1,5 @@
 import type React from "react";
-import type { IEmulatorControllerClient } from "../generated/emulator_controller.client.js";
+import type { IEmulatorControllerClient } from "@tinyburg/architect/protobuf/emulator_controller.client.js";
 
 import { List } from "@mui/material";
 import { ListItem } from "@mui/material";
@@ -27,7 +27,6 @@ export const LogcatView: React.FunctionComponent<ILogcatViewProps> = ({ emulator
         new Logcat(emulatorClient, onMessages);
     }, [emulatorClient]);
 
-    // eslint-disable-next-line unicorn/consistent-function-scoping
     const asItems = (logLines: string[]): JSX.Element[] => {
         let i = 0;
         return logLines.map((line) => (

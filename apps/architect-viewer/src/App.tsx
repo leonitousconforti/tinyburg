@@ -6,8 +6,8 @@ import { GrpcWebFetchTransport } from "@protobuf-ts/grpcweb-transport";
 import Login from "./pages/Login.js";
 import Emulator from "./pages/Emulator.js";
 import AuthService from "./services/Auth.js";
-import { RtcClient } from "./generated/rtc_service.client.js";
-import { EmulatorControllerClient } from "./generated/emulator_controller.client.js";
+import { RtcClient } from "@tinyburg/architect/protobuf/rtc_service.client.js";
+import { EmulatorControllerClient } from "@tinyburg/architect/protobuf/emulator_controller.client.js";
 
 const EMULATOR_GRPC: string = `${window.location.protocol}//${window.location.hostname}:${window.location.port}`;
 const AUTH_ENDPOINT: string = EMULATOR_GRPC + "/token";

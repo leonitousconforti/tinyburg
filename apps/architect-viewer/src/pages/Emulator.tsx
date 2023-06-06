@@ -1,6 +1,6 @@
 import type { TokenAuthService } from "../services/Auth.js";
-import type { IRtcClient } from "../generated/rtc_service.client.js";
-import type { IEmulatorControllerClient } from "../generated/emulator_controller.client.js";
+import type { IRtcClient } from "@tinyburg/architect/protobuf/rtc_service.client.js";
+import type { IEmulatorControllerClient } from "@tinyburg/architect/protobuf/emulator_controller.client.js";
 
 import {
     Image as ImageIcon,

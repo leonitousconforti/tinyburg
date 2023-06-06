@@ -1,21 +1,18 @@
 {
     "extends": "@tinyburg/tsconfig-rig/profile/default/config/tsconfig.json",
     "compilerOptions": {
-        "target": "ES6",
+        "target": "es6",
         "module": "esnext",
-        "moduleResolution": "node",
+        "moduleResolution": "NodeNext",
         "lib": ["dom", "dom.iterable", "esnext"],
         "noEmit": false,
-        "outDir": "./build",
+        "outDir": "./dist",
 
         // React settings
         "jsx": "react-jsx",
         "esModuleInterop": true,
         "isolatedModules": true,
-        "allowSyntheticDefaultImports": true,
-
-        // Protobuf-ts settings (needed for the generated ts sources)
-        "noUncheckedIndexedAccess": false
+        "allowSyntheticDefaultImports": true
     },
     "include": ["./src/**/*.ts", "./src/**/*.tsx"]
 }

@@ -1,7 +1,7 @@
 import type { ServerStreamingCall, RpcMetadata } from "@protobuf-ts/runtime-rpc";
-import type { IEmulatorControllerClient } from "../generated/emulator_controller.client.js";
+import type { IEmulatorControllerClient } from "@tinyburg/architect/protobuf/emulator_controller.client.js";
 
-import { LogMessage } from "../generated/emulator_controller.js";
+import { LogMessage } from "@tinyburg/architect/protobuf/emulator_controller.js";
 
 export class Logcat {
     private readonly _emulatorClient: IEmulatorControllerClient;

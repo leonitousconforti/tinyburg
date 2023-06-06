@@ -1,8 +1,6 @@
 "use strict";
 
 const path = require("path");
-const sass = require("node-sass");
-const Autoprefixer = require("autoprefixer");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 
 function createWebpackConfig({ production }) {
@@ -14,44 +12,18 @@ function createWebpackConfig({ production }) {
         module: {
             rules: [
                 {
-                    test: /\.(scss|sass|css)$/,
-                    exclude: /node_modules/,
-                    use: [
-                        "style-loader",
-                        {
-                            loader: "css-loader",
-                            options: {
-                                importLoaders: 2,
-                                modules: true,
-                            },
-                        },
-                        {
-                            loader: "postcss-loader",
-                            options: {
-                                postcssOptions: {
-                                    plugins: [new Autoprefixer()],
-                                },
-                            },
-                        },
-                        {
-                            loader: "sass-loader",
-                            options: {
-                                implementation: sass,
-                                sassOptions: {
-                                    includePaths: [path.resolve(__dirname, "node_modules")],
-                                },
-                            },
-                        },
-                    ],
+                    test: /\.css$/,
+                    use: [require.resolve("style-loader"), require.resolve("css-loader")],
                 },
                 {
-                    test: /\.(svg|png|jpe?g|gif)$/i,
-                    loader: "file-loader",
+                    test: /\.js$/,
+                    enforce: "pre",
+                    use: ["source-map-loader"],
                 },
             ],
         },
         entry: {
-            app: path.join(__dirname, "build", "index.js"),
+            app: path.join(__dirname, "dist", "index.js"),
             vendor: ["react", "react-dom"],
         },
         output: {
@@ -59,8 +31,11 @@ function createWebpackConfig({ production }) {
             filename: "[name]_[contenthash].js",
         },
         performance: {
-            maxEntrypointSize: 250000,
             maxAssetSize: 250000,
+            maxEntrypointSize: 250000,
+        },
+        devServer: {
+            port: 8084,
         },
         devtool: production ? undefined : "source-map",
         plugins: [
@@ -68,12 +43,6 @@ function createWebpackConfig({ production }) {
                 template: "public/index.html",
             }),
         ],
-        devServer: {
-            static: {
-                directory: path.join(__dirname, "public"),
-            },
-            compress: true,
-        },
     };
 
     return webpackConfig;

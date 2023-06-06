@@ -1,9 +1,9 @@
-import type { RtcId } from "../generated/rtc_service.js";
-import type { IRtcClient } from "../generated/rtc_service.client.js";
+import type { RtcId } from "@tinyburg/architect/protobuf/rtc_service.js";
+import type { IRtcClient } from "@tinyburg/architect/protobuf/rtc_service.client.js";
 import type { ServerStreamingCall } from "@protobuf-ts/runtime-rpc";
 
-import { JsepMsg } from "../generated/rtc_service.js";
-import { KeyboardEvent, MouseEvent, TouchEvent } from "../generated/emulator_controller.js";
+import { JsepMsg } from "@tinyburg/architect/protobuf/rtc_service.js";
+import { KeyboardEvent, MouseEvent, TouchEvent } from "@tinyburg/architect/protobuf/emulator_controller.js";
 
 export default class JsepProtocol {
     private readonly _rtcClient: IRtcClient;

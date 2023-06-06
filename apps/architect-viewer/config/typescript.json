@@ -1,6 +1,5 @@
 {
     "$schema": "https://developer.microsoft.com/json-schemas/heft/typescript.schema.json",
-    "emitFolderNameForTests": "./build",
     "staticAssetsToCopy": {
         "fileExtensions": [".sass", ".scss", ".css", ".svg"]
     }

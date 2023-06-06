@@ -2,8 +2,12 @@
     "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/rush-project.schema.json",
     "operationSettings": [
         {
-            "operationName": "build",
-            "outputFolderNames": ["build"]
+            "operationName": "_phase:build",
+            "outputFolderNames": ["build", "dist"]
+        },
+        {
+            "operationName": "_phase:test",
+            "outputFolderNames": ["temp/coverage", "temp/jest-reports"]
         }
     ]
 }
