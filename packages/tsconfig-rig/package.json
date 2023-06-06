@@ -5,9 +5,6 @@
     "files": [
         "./profiles/*"
     ],
-    "scripts": {
-        "build": ""
-    },
     "devDependencies": {
         "@tsconfig/esm": "~1.0.3",
         "@tsconfig/node18": "~2.0.1",
