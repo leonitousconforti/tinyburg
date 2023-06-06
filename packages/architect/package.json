@@ -33,10 +33,8 @@
         "build": "heft build --clean",
         "docker:build": "docker build ./emulator -t tinyburg/architect:emulator-10086546_sys-30-google-apis-x64-r12_frida-16.0.19",
         "docker:run": "docker run --rm --device /dev/kvm --publish 5554:5554/tcp --publish 5555:5555/tcp --publish 8554:8554/tcp --publish 27042:27042/tcp -it tinyburg/architect:emulator-10086546_sys-30-google-apis-x64-r12_frida-16.0.19",
-        "protobuf:build": "rushx protobuf:clean && rushx protobuf:gen-ts && rushx protobuf:compile",
-        "protobuf:clean": "rimraf protobuf/generated/* && rimraf protobuf/compiled/*",
-        "protobuf:compile": "tsc --project ./protobuf/tsconfig.protobuf.json",
-        "protobuf:gen-ts": "protoc -I ./protobuf --ts_out ./protobuf/generated --ts_opt optimize_code_size ./protobuf/emulator_controller.proto ./protobuf/rtc_service.proto"
+        "protobuf:clean": "rimraf --glob protobuf/**/*.js && rimraf --glob protobuf/**/*.d.ts",
+        "protobuf:gen": "protoc -I ./protobuf --ts_out ./protobuf --ts_opt optimize_code_size --ts_opt output_javascript ./protobuf/emulator_controller.proto ./protobuf/rtc_service.proto"
     },
     "dependencies": {
         "debug": "~4.3.4",
