@@ -5,7 +5,6 @@
             "cleanFiles": [{ "sourcePath": "dist" }],
             "tasksByName": {
                 "typescript": {
-                    "taskDependencies": ["generate-types"],
                     "taskPlugin": {
                         "pluginPackage": "@rushstack/heft-typescript-plugin"
                     }

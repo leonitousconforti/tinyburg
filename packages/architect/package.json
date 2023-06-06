@@ -29,6 +29,7 @@
         "docker-compose.yaml"
     ],
     "scripts": {
+        "_phase:build": "heft run --only build -- --clean",
         "build": "heft build --clean",
         "docker:build": "docker build ./emulator -t tinyburg/architect:emulator-10086546_sys-30-google-apis-x64-r12_frida-16.0.19",
         "docker:run": "docker run --rm --device /dev/kvm --publish 5554:5554/tcp --publish 5555:5555/tcp --publish 8554:8554/tcp --publish 27042:27042/tcp -it tinyburg/architect:emulator-10086546_sys-30-google-apis-x64-r12_frida-16.0.19",
