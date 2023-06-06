@@ -43,7 +43,8 @@
                 "zxh404.vscode-proto3",
                 "GitHub.vscode-pull-request-github",
                 "mutantdino.resourcemonitor",
-                "ms-python.black-formatter"
+                "ms-python.black-formatter",
+                "zxh404.vscode-proto3"
             ],
             "settings": {
                 "cSpell.enabled": true,
