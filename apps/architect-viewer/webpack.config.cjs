@@ -36,6 +36,10 @@ function createWebpackConfig({ production }) {
         },
         devServer: {
             port: 8084,
+            compress: true,
+            static: {
+                directory: path.join(__dirname, "public"),
+            },
         },
         devtool: production ? undefined : "source-map",
         plugins: [
