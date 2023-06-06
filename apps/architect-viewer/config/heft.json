@@ -16,7 +16,7 @@
                     }
                 },
                 "webpack": {
-                    "taskDependencies": ["lint"],
+                    "taskDependencies": ["typescript"],
                     "taskPlugin": {
                         "pluginPackage": "@rushstack/heft-webpack5-plugin",
                         "options": {
