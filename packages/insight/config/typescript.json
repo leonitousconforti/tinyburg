@@ -1,6 +1,5 @@
 {
     "$schema": "https://developer.microsoft.com/json-schemas/heft/typescript.schema.json",
     "project": "./tsconfig.json",
-    "buildProjectReferences": true,
-    "emitFolderNameForTests": "dist"
+    "buildProjectReferences": true
 }

@@ -44,6 +44,7 @@
         "dist/src/"
     ],
     "scripts": {
+        "_phase:build": "heft run --only build -- --clean",
         "build": "heft test --clean",
         "run-js-example": "rushx build && node dist/examples/js/index.js",
         "run-js-typed-example": "rushx build && node dist/examples/js-typed/index.js",
@@ -55,14 +56,16 @@
         "emittery": "~1.0.1",
         "esbuild": "~0.17.19",
         "frida": "~16.0.19",
-        "frida-compile": "~16.2.1",
+        "frida-compile": "~16.2.2",
         "frida-il2cpp-bridge": "~0.8.1",
         "prettier": "~2.8.8"
     },
     "devDependencies": {
         "@rushstack/eslint-config": "3.3.0",
-        "@rushstack/heft": "0.50.7",
-        "@rushstack/heft-jest-plugin": "0.5.13",
+        "@rushstack/heft": "0.51.0",
+        "@rushstack/heft-jest-plugin": "0.7.0",
+        "@rushstack/heft-lint-plugin": "~0.1.1",
+        "@rushstack/heft-typescript-plugin": "~0.1.1",
         "@tinyburg/apks": "workspace:*",
         "@tinyburg/architect": "workspace:*",
         "@tinyburg/tsconfig-rig": "workspace:*",
@@ -71,7 +74,7 @@
         "@types/heft-jest": "1.0.3",
         "@types/node": "~20.2.5",
         "@types/prettier": "~2.7.2",
-        "eslint": "~8.41.0",
+        "eslint": "~8.42.0",
         "eslint-config-prettier": "~8.8.0",
         "eslint-plugin-prettier": "~4.2.1",
         "eslint-plugin-unicorn": "~47.0.0",

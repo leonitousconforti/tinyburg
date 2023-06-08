@@ -1,28 +1,49 @@
 {
     "$schema": "https://developer.microsoft.com/json-schemas/heft/heft.schema.json",
-    "heftPlugins": [{ "plugin": "@rushstack/heft-jest-plugin" }],
-    "eventActions": [
-        {
-            "actionKind": "deleteGlobs",
-            "heftEvent": "clean",
-            "actionId": "defaultClean",
-            "globsToDelete": ["dist"]
+    "phasesByName": {
+        "build": {
+            "cleanFiles": [{ "sourcePath": "dist" }],
+            "tasksByName": {
+                "typescript": {
+                    "taskPlugin": {
+                        "pluginPackage": "@rushstack/heft-typescript-plugin"
+                    }
+                },
+                "copy-tsconfig": {
+                    "taskDependencies": ["typescript"],
+                    "taskEvent": {
+                        "eventKind": "copyFiles",
+                        "options": {
+                            "copyOperations": [
+                                {
+                                    "destinationFolders": ["dist/"],
+                                    "includeGlobs": [
+                                        "src/tsconfig.agents.json",
+                                        "src/tsconfig.src.json",
+                                        "tsconfig.base.json"
+                                    ]
+                                }
+                            ]
+                        }
+                    }
+                },
+                "lint": {
+                    "taskDependencies": ["copy-tsconfig"],
+                    "taskPlugin": {
+                        "pluginPackage": "@rushstack/heft-lint-plugin"
+                    }
+                }
+            }
         },
-        {
-            "actionKind": "copyFiles",
-            "heftEvent": "post-build",
-            "actionId": "copyNeededTsconfig",
-            "copyOperations": [{
-                "sourceFolder": ".",
-                "destinationFolders": ["dist/"],
-                "includeGlobs": ["src/tsconfig.agents.json", "src/tsconfig.src.json", "tsconfig.base.json"]
-            }]
-        },
-        {
-            "actionKind": "deleteGlobs",
-            "heftEvent": "post-build",
-            "actionId": "cleanUnnecessaryTempFiles",
-            "globsToDelete": ["temp"]
+        "test": {
+            "phaseDependencies": ["build"],
+            "tasksByName": {
+                "jest": {
+                    "taskPlugin": {
+                        "pluginPackage": "@rushstack/heft-jest-plugin"
+                    }
+                }
+            }
         }
-    ]
+    }
 }
