@@ -46,7 +46,7 @@
     "main": "dist/tinyburg.js",
     "scripts": {
         "build": "heft test --clean",
-        "update-common-data": "ts-node --esm bin/update-common-data.ts"
+        "update-common-data": "DEBUG=tinyburg:* ts-node --esm bin/update-common-data.ts"
     },
     "dependencies": {
         "@tinyburg/bots": "workspace:*",
@@ -59,7 +59,7 @@
     },
     "devDependencies": {
         "@rushstack/eslint-config": "3.3.0",
-        "@rushstack/heft": "0.50.7",
+        "@rushstack/heft": "0.51.0",
         "@tinyburg/apks": "workspace:*",
         "@tinyburg/architect": "workspace:*",
         "@tinyburg/insight": "workspace:*",
@@ -69,10 +69,9 @@
         "@types/node": "~20.2.5",
         "@types/prompts": "~2.4.4",
         "@types/semver": "~7.5.0",
-        "eslint": "~8.41.0",
+        "eslint": "~8.42.0",
         "eslint-config-prettier": "~8.8.0",
         "eslint-plugin-prettier": "~4.2.1",
-        "eslint-plugin-unicorn": "~47.0.0",
         "prettier": "~2.8.8",
         "ts-node": "~10.9.1",
         "typescript": "~5.1.3"
