@@ -84,7 +84,6 @@ export class GetBitbookData extends TinyTowerFridaAgent<GetBitbookData> {
 // Main entry point exported for when this file is compiled as a frida agent
 const rpcExports: IBitbookAgentExports = {
     main: async () => {
-        send("here");
         const instance = await new GetBitbookData().start();
         return instance.transformToSourceCode();
     },
