@@ -1,5 +1,21 @@
 import "frida-il2cpp-bridge";
 
+// fix for https://github.com/vfsfitvnm/frida-il2cpp-bridge/issues/264#issuecomment-1490798519
+(globalThis as any).Module = new Proxy(Module, {
+    cache: {},
+
+    get(target: typeof Module, property: string | symbol, _): any {
+        const patchedFindExportByName = (moduleName: string | null, exportName: string) => {
+            if (moduleName === null) {
+                return Reflect.get(target, property)(moduleName, exportName);
+            }
+            this.cache[moduleName] ??= (Module as any).enumerateExports(moduleName);
+            return this.cache[moduleName]!.find((_: ModuleExportDetails) => _.name === exportName)?.address;
+        };
+        return property === "findExportByName" ? patchedFindExportByName : Reflect.get(target, property);
+    },
+} as ProxyHandler<typeof Module> & { cache: Record<string, ModuleExportDetails[]> });
+
 /**
  * A dependency can be either an entire c# assembly, a single class, a
  * static/non-static object in a class, a field on a class or a method on a
@@ -60,7 +76,7 @@ export abstract class TinyTowerFridaAgent<T extends ITinyTowerFridaAgent> {
      */
     public data: ReturnType<T["retrieveData"]>;
 
-    public constructor(loadDependenciesMaxRetries: number = 5, loadDependenciesWaitMs: number = 2000) {
+    public constructor(loadDependenciesMaxRetries: number = 5, loadDependenciesWaitMs: number = 20_000) {
         this._loadDependenciesWaitMs = loadDependenciesWaitMs;
         this._loadDependenciesMaxRetries = loadDependenciesMaxRetries;
         this.data = {} as ReturnType<T["retrieveData"]>;
@@ -93,12 +109,8 @@ export abstract class TinyTowerFridaAgent<T extends ITinyTowerFridaAgent> {
      * calls the retrieveData method.
      */
     public async start(): Promise<this> {
-        send("here2");
-
         // Wrap all this in an Il2cpp.perform
         await Il2Cpp.perform(async () => {
-            send("here3");
-
             // Try to load the dependencies
             this.dependencies = await this._waitForDependencies(
                 this.loadDependencies,
