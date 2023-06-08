@@ -54,13 +54,7 @@
                 "codemetrics.basics.DecorationModeEnabled": false,
                 "codemetrics.basics.OverviewRulerModeEnabled": false,
                 "editor.defaultFormatter": "EditorConfig.EditorConfig",
-                "[typescript][typescriptreact]": {
-                    "editor.defaultFormatter": "esbenp.prettier-vscode"
-                },
-                "[javascript][javascriptreact]": {
-                    "editor.defaultFormatter": "esbenp.prettier-vscode"
-                },
-                "[json][jsonc]": {
+                "[typescript][typescriptreact][javascript][javascriptreact][json][jsonc]": {
                     "editor.defaultFormatter": "esbenp.prettier-vscode"
                 },
                 "[python]": {
