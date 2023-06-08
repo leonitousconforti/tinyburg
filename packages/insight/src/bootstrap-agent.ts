@@ -84,7 +84,7 @@ export const bootstrapAgent = async <T extends IAgent>(
 
     // Attach to an android device and spawn the TinyTower app
     const pid: number = await device.spawn("com.nimblebit.tinytower");
-    const session: frida.Session = await device.attach(pid);
+    const session: frida.Session = await device.attach(pid, { realm: frida.Realm.Emulated });
     logger("Attached to process: %d on device: %s", session.pid, device.name);
 
     // Compile time and create script
@@ -134,7 +134,7 @@ export const bootstrapAgent = async <T extends IAgent>(
             const main: T["rpcTypes"]["main"] = script.exports["main"]!;
 
             let data = await main(..._arguments);
-            if (agent.rpcTypes.mainProducesSourceCode && typeof data === "string") {
+            if (script.exports["mainProducesSourceCode"] && typeof data === "string") {
                 data = prettier.format(data, prettierOptions);
             }
 
