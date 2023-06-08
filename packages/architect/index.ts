@@ -48,7 +48,7 @@ export const architect = async (options?: {
         logger("Starting architect with additional services using docker compose");
         const result = await dockerodeCompose.up();
         console.log(result.services);
-        throw new Error("a");
+        throw new Error("Not implemented fully yet");
     }
 
     // Otherwise we just need to start a single architect container
@@ -56,21 +56,10 @@ export const architect = async (options?: {
     else {
         // Build a new docker container
         const context = new URL("emulator", import.meta.url);
+        const tarStream = tar.pack(url.fileURLToPath(context));
         logger("Building docker image from context %s, will tag image as %s when finished", context.toString(), tag);
         logger("Subsequent calls should be much faster as this image will be cached");
-        const buildStream: NodeJS.ReadableStream = await dockerode.buildImage(
-            {
-                context: url.fileURLToPath(context),
-                src: [
-                    "Dockerfile",
-                    "default.pulse-audio",
-                    "launch-emulator.sh",
-                    "avd/Pixel2.ini",
-                    "avd/Pixel2.avd/config.ini",
-                ],
-            },
-            { t: tag }
-        );
+        const buildStream: NodeJS.ReadableStream = await dockerode.buildImage(tarStream, { t: tag });
 
         // Wait for build to finish
         await new Promise((resolve, reject) => {
