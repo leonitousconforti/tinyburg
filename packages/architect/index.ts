@@ -101,6 +101,7 @@ export const architect = async (options?: {
         await new Promise((resolve) => setTimeout(resolve, 30_000));
         result = await container.inspect();
     }
+    logger("Container is healthy, you can start interacting with it now!");
 
     // Install any apk
     const installApk = async (apk: string): Promise<void> => {
