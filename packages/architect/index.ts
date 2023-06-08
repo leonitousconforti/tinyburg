@@ -8,14 +8,10 @@ import DockerodeCompose from "dockerode-compose";
 
 const logger: Debug.Debugger = Debug.debug("tinyburg:architect");
 
-export const architect = async (
-    options:
-        | {
-              withAdditionalServices: boolean | undefined;
-              dockerConnectionOptions: Dockerode.DockerOptions | undefined;
-          }
-        | undefined
-): Promise<{
+export const architect = async (options?: {
+    withAdditionalServices: boolean | undefined;
+    dockerConnectionOptions: Dockerode.DockerOptions | undefined;
+}): Promise<{
     container: Dockerode.Container;
     launchGame: () => Promise<void>;
     installApk: (apk: string) => Promise<void>;
