@@ -16,6 +16,7 @@ export class ExplorerAgent extends TinyTowerFridaAgent<ExplorerAgent> {
 // eslint-disable-next-line @typescript-eslint/no-floating-promises, unicorn/prefer-top-level-await
 (async function main() {
     send("here1");
-    await new ExplorerAgent().start();
+    const agent = await new ExplorerAgent().start();
+    send(agent.data.TTVersion);
     send("here2");
 })();
