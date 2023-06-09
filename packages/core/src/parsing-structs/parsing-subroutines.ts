@@ -1,7 +1,8 @@
+import type { ILogger } from "../logger.js";
 import type { DecompressedSave } from "../decompress-save.js";
 import type { GenericBlocks, GenericJsonSave } from "./blocks.js";
 
-import { DebugLogger, ILogger } from "../logger.js";
+import { DebugLogger } from "../logger.js";
 import { blockString, getBlock, hasBlock } from "../save-parser.js";
 
 // Debug logger
@@ -34,6 +35,7 @@ export const parsingSubRoutine = function <T extends GenericBlocks, U extends Ge
 
         // Otherwise, the save has the block
         log.debug("Save has block %s", blockValue);
+        // eslint-disable-next-line unicorn/no-null
         const dataFromBlock = getBlock(nimblebitSave, blockKey) || null;
 
         // If the block is not complicated, i.e coins or just one thing
@@ -45,6 +47,7 @@ export const parsingSubRoutine = function <T extends GenericBlocks, U extends Ge
         // Check for null
         if (dataFromBlock === null) {
             log.debug("Save data for key %s is null", blockKey);
+            // eslint-disable-next-line unicorn/no-null
             nimblebitJsonSave[blockValue[0] as keyof U] = null as never;
             continue;
         }

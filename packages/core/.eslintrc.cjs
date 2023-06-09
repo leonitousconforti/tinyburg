@@ -5,10 +5,10 @@ module.exports = {
     extends: [
         "@rushstack/eslint-config/profile/node",
         "@rushstack/eslint-config/mixins/tsdoc",
-        "plugin:prettier/recommended",
         "plugin:unicorn/recommended",
+        "plugin:prettier/recommended",
     ],
-    plugins: ["prettier", "unicorn"],
+    plugins: ["unicorn", "prettier"],
     env: {
         node: true,
         es2022: true,
@@ -18,9 +18,6 @@ module.exports = {
         project: ["./tsconfig.json"],
         ecmaVersion: 2022,
         sourceType: "module",
-    },
-    rules: {
-        indent: ["error", 4, { SwitchCase: 1 }],
     },
     overrides: [
         {

@@ -9,16 +9,16 @@ import { loggerConfigClosure } from "./closures/logger-config.js";
 import { isValidPlayerId } from "./validation/is-valid-player-id.js";
 
 // Library configs
-import { ITTConfig, defaultConfig } from "./tt-config.js";
+import { type ITTConfig, defaultConfig } from "./tt-config.js";
 
 // Library methods to expose
 import { saveConfig } from "./save-config.js";
 import { loadSecrets } from "./load-secrets.js";
 import { compressSave } from "./compress-save.js";
-import { decompressSave } from "./decompress-save.js";
-import { concatJsonToBlock, parseSaveToJson, appendToBlock } from "./save-parser.js";
 import { safeModifySave } from "./modify-save.js";
+import { decompressSave } from "./decompress-save.js";
 import { whichSaveIsBetter, makeSaveBetterThan } from "./compare-saves.js";
+import { concatJsonToBlock, parseSaveToJson, appendToBlock } from "./save-parser.js";
 
 // Endpoint methods to expose (sorted by their filenames)
 import { pullBitbookPostCloudFeed } from "./endpoints/bitbook-cloud-feed.js";
@@ -49,7 +49,7 @@ import { verifyDevice } from "./endpoints/verify-device.js";
 import { getVisits, visitFriend } from "./endpoints/visits.js";
 
 // Debug logger
-import { DebugLogger, ILogger } from "./logger.js";
+import { DebugLogger, type ILogger } from "./logger.js";
 const debug: ILogger = new DebugLogger("tinyburg:core");
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type

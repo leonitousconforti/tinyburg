@@ -1,4 +1,4 @@
-import { bitizenBlocks, IBitizen } from "./bitizen.js";
+import { bitizenBlocks, type IBitizen } from "./bitizen.js";
 
 // Typescript type for a parsed bitbook post.
 export interface IBitbookPost {

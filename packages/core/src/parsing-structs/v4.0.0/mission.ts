@@ -1,6 +1,9 @@
-import { bitizenBlocks, IBitizen } from "./bitizen.js";
+import type { IBitizen } from "./bitizen.js";
+import type { IMission as _IMission } from "../v3.15.4/mission.js";
+
+import { bitizenBlocks } from "./bitizen.js";
 import { insertIntoBlocks } from "../insert-into-blocks.js";
-import { IMission as _IMission, missionBlocks as _missionBlocks } from "../v3.15.4/mission.js";
+import { missionBlocks as _missionBlocks } from "../v3.15.4/mission.js";
 
 // Typescript type for a parsed mission
 export interface IMission extends _IMission {

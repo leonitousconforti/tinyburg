@@ -1,4 +1,4 @@
-import { INimblebitJsonSave as _INimblebitJsonSave, blocks as _blocks } from "./v4.0.0/blocks.js";
+import { type INimblebitJsonSave as _INimblebitJsonSave, blocks as _blocks } from "./v4.0.0/blocks.js";
 
 // Typescript type for a parsed nimblebit save
 export interface INimblebitJsonSave extends _INimblebitJsonSave {}

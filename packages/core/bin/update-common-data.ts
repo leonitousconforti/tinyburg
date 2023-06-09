@@ -23,6 +23,7 @@ const sourceCodeBanner: string = `/**
 // await new Promise((resolve) => setTimeout(resolve, 100_000));
 
 // To know where to put the generated source code
+// eslint-disable-next-line @rushstack/typedef-var
 const AgentOutputFileMap = {
     // "../src/data/bitbook-posts.ts": GetterAgents.BitbookAgent,
     "../src/data/bitizen.ts": GetterAgents.BitizenAgent,
@@ -42,7 +43,7 @@ for (const [outputDestination, agent] of Object.entries(AgentOutputFileMap)) {
 
     const result: string = await runAgentMain();
     const version: string | undefined = result.match(/TinyTower version: ([\d.]+)/gm)?.[0];
-    const cleanedSource: string = result.replace(/\/\/ TinyTower version: ([\d.]+)/gm, "");
+    const cleanedSource: string = result.replaceAll(/\/\/ TinyTower version: ([\d.]+)/gm, "");
 
     const formattedBanner: string = sourceCodeBanner
         .replace("__filename", agent.agentFile)

@@ -1,11 +1,12 @@
 import type { ILogger } from "../logger.js";
 import type { ITTConfig } from "../tt-config.js";
+import type { DecompressedSave } from "../decompress-save.js";
 import type { INimblebitResponse, ISuccessFoundNotFound } from "./nimblebit-response.js";
 
 import { DebugLogger } from "../logger.js";
 import { cryptoMD5 } from "../crypto-md5.js";
 import { cryptoSalt } from "../crypto-salt.js";
-import { DecompressedSave, decompressSave } from "../decompress-save.js";
+import { decompressSave } from "../decompress-save.js";
 import { serverEndpoints, getNetworkRequest } from "../contact-server.js";
 
 // Debug logger, will default to using this if no other logger is supplied.

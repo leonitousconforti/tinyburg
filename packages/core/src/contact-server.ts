@@ -1,7 +1,10 @@
-import got, { Headers, Method } from "got";
-import { cryptoMD5 } from "./crypto-md5.js";
+import type { ILogger } from "./logger.js";
+import type { Headers, Method } from "got";
 import type { ITTConfig } from "./tt-config.js";
-import { DebugLogger, ILogger } from "./logger.js";
+
+import got from "got";
+import { DebugLogger } from "./logger.js";
+import { cryptoMD5 } from "./crypto-md5.js";
 
 // Debug logger
 const loggingNamespace: string = "tinyburg:contact_server";

@@ -1,9 +1,11 @@
-import { DebugLogger, ILogger } from "./logger.js";
+import type { ILogger } from "./logger.js";
+import type { DecompressedSave } from "./decompress-save.js";
+import type { GenericBlocks, GenericJsonSave, INimblebitJsonSave } from "./parsing-structs/blocks.js";
+
+import { DebugLogger } from "./logger.js";
+import { blocks } from "./parsing-structs/blocks.js";
 import { parseSaveToJson, concatJsonToBlock } from "./save-parser.js";
 import { concatenationSubRoutine, parsingSubRoutine } from "./parsing-structs/parsing-subroutines.js";
-import { blocks, GenericBlocks, GenericJsonSave, INimblebitJsonSave } from "./parsing-structs/blocks.js";
-
-import type { DecompressedSave } from "./decompress-save.js";
 
 // Debug logger
 const loggingNamespace: string = "tinyburg:modify_save";

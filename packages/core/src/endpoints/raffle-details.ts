@@ -1,6 +1,8 @@
+import type { ILogger } from "../logger.js";
+
 import got from "got";
+import { DebugLogger } from "../logger.js";
 import { defaultHeaders } from "../contact-server.js";
-import { DebugLogger, ILogger } from "../logger.js";
 
 // Debug logger (will default to using this if no other logger is supplied)
 const loggingNamespace: string = "tinyburg:endpoints:raffle_details";

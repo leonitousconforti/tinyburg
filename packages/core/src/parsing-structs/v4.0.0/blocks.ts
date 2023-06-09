@@ -1,7 +1,11 @@
-import { IMission, missionBlocks } from "./mission.js";
+import type { IMission } from "./mission.js";
+import type { IBitizen, BitizenBlocks4_0_0 } from "./bitizen.js";
+import type { INimblebitJsonSave as _INimblebitJsonSave } from "../v3.15.4/blocks.js";
+
+import { missionBlocks } from "./mission.js";
 import { insertIntoBlocks } from "../insert-into-blocks.js";
-import { bitizenBlocks, IBitizen, BitizenBlocks4_0_0 } from "./bitizen.js";
-import { INimblebitJsonSave as _INimblebitJsonSave, blocks as _blocks } from "../v3.15.4/blocks.js";
+import { bitizenBlocks } from "./bitizen.js";
+import { blocks as _blocks } from "../v3.15.4/blocks.js";
 
 // Typescript type for a parsed nimblebit save
 export interface INimblebitJsonSave extends _INimblebitJsonSave {
@@ -19,6 +23,7 @@ export interface INimblebitJsonSave extends _INimblebitJsonSave {
 }
 
 // New blocks type
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export type Blocks4_0_0 = Omit<typeof _blocks, "Pdrmn" | "Pbits" | "Pmiss"> & {
     Pdrmn: ["doorman", BitizenBlocks4_0_0, undefined, "object"];
     Pbits: ["bzns", BitizenBlocks4_0_0, "|", "array"];
@@ -49,6 +54,6 @@ const PMissionHistoryBlocks = { __type: (): INimblebitJsonSave => ({} as INimble
 const blocksWithMissionHistory = insertIntoBlocks(blocksWithHouse, "Pbhst", PMissionHistoryBlocks);
 
 // Export the new blocks as immutable
-const immutableBlock: { [P in keyof typeof blocksWithMissionHistory]: typeof blocksWithMissionHistory[P] } =
+const immutableBlock: { [P in keyof typeof blocksWithMissionHistory]: (typeof blocksWithMissionHistory)[P] } =
     blocksWithMissionHistory;
 export const blocks = immutableBlock;

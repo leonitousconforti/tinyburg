@@ -1,12 +1,13 @@
+import type { ILogger } from "../logger.js";
 import type { ITTConfig } from "../tt-config.js";
 import type { IGift } from "../parsing-structs/gift.js";
 import type { INimblebitResponse, ISuccessFoundNotFound } from "./nimblebit-response.js";
 
 import { sendItem } from "./send-item.js";
+import { DebugLogger } from "../logger.js";
 import { extract } from "../modify-save.js";
 import { cryptoSalt } from "../crypto-salt.js";
 import { downloadSave } from "./download-save.js";
-import { DebugLogger, ILogger } from "../logger.js";
 import { SyncItemType } from "../parsing-structs/sync-item.js";
 import { isValidPlayerId } from "../validation/is-valid-player-id.js";
 import { getNetworkRequest, serverEndpoints } from "../contact-server.js";

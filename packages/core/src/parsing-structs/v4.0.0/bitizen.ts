@@ -1,5 +1,5 @@
 import {
-    IBitizen as _IBitizen,
+    type IBitizen as _IBitizen,
     bitizenBlocks as _bitizenBlocks,
     bitizenAttributesBlocks as _bitizenAttributesBlocks,
 } from "../v3.15.4/bitizen.js";
@@ -10,6 +10,7 @@ export interface IBitizen extends _IBitizen {
 }
 
 // New bitizen blocks type
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export type BitizenBlocks4_0_0 = Omit<typeof _bitizenBlocks, "BA"> & {
     BA: ["attributes", typeof bitizenAttributesBlocks, ",", "object"];
 };
@@ -24,6 +25,6 @@ export const bitizenAttributesBlocks = bitizenAttributeBlocksWithIdk;
 const mutableBitizenBlocks = _bitizenBlocks as unknown as BitizenBlocks4_0_0;
 
 // Export new blocks for parsing a bitizen as immutable
-const immutableBlock: { [P in keyof typeof mutableBitizenBlocks]: typeof mutableBitizenBlocks[P] } =
+const immutableBlock: { [P in keyof typeof mutableBitizenBlocks]: (typeof mutableBitizenBlocks)[P] } =
     mutableBitizenBlocks;
 export const bitizenBlocks = immutableBlock;

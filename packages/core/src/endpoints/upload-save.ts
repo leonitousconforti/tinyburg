@@ -1,13 +1,14 @@
+import type { ILogger } from "../logger.js";
 import type { ITTConfig } from "../tt-config.js";
 import type { DecompressedSave } from "../decompress-save.js";
 import type { INimblebitResponse } from "./nimblebit-response.js";
 import type { INimblebitJsonSave } from "../parsing-structs/blocks.js";
 
 import prompts from "prompts";
+import { DebugLogger } from "../logger.js";
 import { extract } from "../modify-save.js";
 import { cryptoSalt } from "../crypto-salt.js";
 import { compressSave } from "../compress-save.js";
-import { DebugLogger, ILogger } from "../logger.js";
 import { parseSaveToJson, concatJsonToBlock } from "../save-parser.js";
 import { serverEndpoints, postNetworkRequest } from "../contact-server.js";
 

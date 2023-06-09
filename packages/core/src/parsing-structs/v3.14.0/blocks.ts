@@ -1,7 +1,7 @@
-import { floorBlocks, IFloor } from "./floor.js";
-import { IMission, missionBlocks } from "./mission.js";
-import { bitizenBlocks, IBitizen } from "./bitizen.js";
-import { bitbookPostBlocks, IBitbookPost } from "./bitbook-posts.js";
+import { floorBlocks, type IFloor } from "./floor.js";
+import { missionBlocks, type IMission } from "./mission.js";
+import { bitizenBlocks, type IBitizen } from "./bitizen.js";
+import { bitbookPostBlocks, type IBitbookPost } from "./bitbook-posts.js";
 
 // Typescript type for a parsed nimblebit save
 export interface INimblebitJsonSave {

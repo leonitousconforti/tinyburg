@@ -1,7 +1,8 @@
+import type { ILogger } from "../logger.js";
 import type { ITTConfig } from "../tt-config.js";
 
+import { DebugLogger } from "../logger.js";
 import { cryptoSalt } from "../crypto-salt.js";
-import { DebugLogger, ILogger } from "../logger.js";
 import { serverEndpoints, getNetworkRequest } from "../contact-server.js";
 
 // Debug logger (will default to using this if no other logger is supplied).

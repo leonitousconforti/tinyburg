@@ -1,9 +1,10 @@
-import { DebugLogger, ILogger } from "./logger.js";
-import { loadFromVersion } from "./parsing-structs/load-from-version.js";
-import { parsingSubRoutine, concatenationSubRoutine } from "./parsing-structs/parsing-subroutines.js";
-
+import type { ILogger } from "./logger.js";
 import type { DecompressedSave } from "./decompress-save.js";
 import type { INimblebitJsonSave } from "./parsing-structs/blocks.js";
+
+import { DebugLogger } from "./logger.js";
+import { loadFromVersion } from "./parsing-structs/load-from-version.js";
+import { parsingSubRoutine, concatenationSubRoutine } from "./parsing-structs/parsing-subroutines.js";
 
 // Debug logger
 const loggingNamespace: string = "tinyburg:save_parser";
@@ -46,14 +47,15 @@ export const concatJsonToBlock = async (
 };
 
 // Appends data to a decompressed save so it has the proper type
-export const appendToBlock = (...arguments_: (string | DecompressedSave)[]): DecompressedSave => {
-    return arguments_.join("") as unknown as DecompressedSave;
+export const appendToBlock = (...parts: (string | DecompressedSave)[]): DecompressedSave => {
+    return parts.join("") as unknown as DecompressedSave;
 };
 
 export const getBlock = (
     saveData: DecompressedSave,
     key: unknown,
     log: ILogger = debug
+    // eslint-disable-next-line @rushstack/no-new-null
 ): string | null | undefined | false => {
     log.debug("Attempting to fetch block %s", key);
     const separator = "[" + key + "]";
@@ -61,6 +63,7 @@ export const getBlock = (
 
     if (array.length >= 3) {
         if (array[1] === "") {
+            // eslint-disable-next-line unicorn/no-null
             return null;
         }
 

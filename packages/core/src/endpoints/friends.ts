@@ -1,15 +1,19 @@
+import type { ILogger } from "../logger.js";
 import type { ITTConfig } from "../tt-config.js";
+import type { IUploadSave } from "./upload-save.js";
+import type { IDownloadSave } from "./download-save.js";
+import type { DecompressedSave } from "../decompress-save.js";
 import type { INimblebitResponse, IUserMetaDescribed, ISuccessFoundNotFound } from "./nimblebit-response.js";
 
+import { DebugLogger } from "../logger.js";
 import { cryptoMD5 } from "../crypto-md5.js";
+import { uploadSave } from "./upload-save.js";
 import { cryptoSalt } from "../crypto-salt.js";
-import { DebugLogger, ILogger } from "../logger.js";
+import { downloadSave } from "./download-save.js";
 import { parseSaveToJson } from "../save-parser.js";
-import { IUploadSave, uploadSave } from "./upload-save.js";
+import { decompressSave } from "../decompress-save.js";
 import { checkForNewerSave } from "./check-for-newer-save.js";
-import { downloadSave, IDownloadSave } from "./download-save.js";
 import { isValidPlayerId } from "../validation/is-valid-player-id.js";
-import { DecompressedSave, decompressSave } from "../decompress-save.js";
 import { serverEndpoints, postNetworkRequest, getNetworkRequest } from "../contact-server.js";
 
 // Debug logger (will default to using this if no other logger is supplied).

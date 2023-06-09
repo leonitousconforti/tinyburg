@@ -1,11 +1,13 @@
+import type { ILogger } from "../logger.js";
+
 import semver from "semver";
 import prompts from "prompts";
 import { blocks } from "./blocks.js";
 import * as fs from "node:fs/promises";
 import { floorBlocks } from "./floor.js";
+import { DebugLogger } from "../logger.js";
 import { missionBlocks } from "./mission.js";
 import { bitizenBlocks } from "./bitizen.js";
-import { DebugLogger, ILogger } from "../logger.js";
 import { bitbookPostBlocks } from "./bitbook-posts.js";
 
 // Debug logger
