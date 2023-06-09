@@ -1,5 +1,5 @@
 {
     "extends": "@rushstack/heft-jest-plugin/includes/jest-shared.config.json",
-    "roots": ["<rootDir>/dist/test"],
-    "testMatch": ["<rootDir>/dist/test/**/*.test.js"]
+    "roots": ["<rootDir>/dist"],
+    "testMatch": ["<rootDir>/dist/**/*.test.js"]
 }

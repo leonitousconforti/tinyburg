@@ -28,11 +28,11 @@
         "debug": "~4.3.4"
     },
     "devDependencies": {
-        "@rushstack/eslint-config": "3.3.0",
-        "@rushstack/heft": "0.51.0",
-        "@rushstack/heft-jest-plugin": "0.7.0",
-        "@rushstack/heft-lint-plugin": "~0.1.1",
-        "@rushstack/heft-typescript-plugin": "~0.1.1",
+        "@rushstack/eslint-config": "3.3.1",
+        "@rushstack/heft": "0.53.0",
+        "@rushstack/heft-jest-plugin": "0.7.5",
+        "@rushstack/heft-lint-plugin": "~0.1.5",
+        "@rushstack/heft-typescript-plugin": "~0.1.5",
         "@tinyburg/tsconfig-rig": "workspace:*",
         "@types/debug": "~4.1.8",
         "@types/heft-jest": "1.0.3",

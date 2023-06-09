@@ -1,12 +1,13 @@
 {
-    "$schema": "https://developer.microsoft.com/json-schemas/heft/heft.schema.json",
+    "$schema": "https://developer.microsoft.com/json-schemas/heft/v0/heft.schema.json",
     "phasesByName": {
         "build": {
             "cleanFiles": [{ "sourcePath": "dist" }],
             "tasksByName": {
                 "generate-types": {
-                    "taskEvent": {
-                        "eventKind": "runScript",
+                    "taskPlugin": {
+                        "pluginPackage": "@rushstack/heft",
+                        "pluginName": "run-script-plugin",
                         "options": {
                             "scriptPath": "downloads/generate-ts-types.cjs"
                         }

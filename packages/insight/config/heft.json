@@ -1,5 +1,5 @@
 {
-    "$schema": "https://developer.microsoft.com/json-schemas/heft/heft.schema.json",
+    "$schema": "https://developer.microsoft.com/json-schemas/heft/v0/heft.schema.json",
     "phasesByName": {
         "build": {
             "cleanFiles": [{ "sourcePath": "dist" }],
@@ -11,8 +11,9 @@
                 },
                 "copy-tsconfig": {
                     "taskDependencies": ["typescript"],
-                    "taskEvent": {
-                        "eventKind": "copyFiles",
+                    "taskPlugin": {
+                        "pluginPackage": "@rushstack/heft",
+                        "pluginName": "copy-files-plugin",
                         "options": {
                             "copyOperations": [
                                 {
@@ -28,7 +29,7 @@
                     }
                 },
                 "lint": {
-                    "taskDependencies": ["copy-tsconfig"],
+                    "taskDependencies": ["typescript"],
                     "taskPlugin": {
                         "pluginPackage": "@rushstack/heft-lint-plugin"
                     }
