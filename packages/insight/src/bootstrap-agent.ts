@@ -122,6 +122,7 @@ export const bootstrapAgent = async <T extends IAgent>(
     logger("Loaded script and resumed process on device");
 
     // Closure that accepts arguments to pass to the agents main function and runs it
+    /* eslint-disable @typescript-eslint/naming-convention, dot-notation */
     const runAgentMain = async function (
         ...arguments_: Parameters<T["rpcTypes"]["main"]>
     ): Promise<Awaited<ReturnType<T["rpcTypes"]["main"]>>> {
@@ -148,6 +149,7 @@ export const bootstrapAgent = async <T extends IAgent>(
             throw error;
         }
     };
+    /* eslint-enable @typescript-eslint/naming-convention, dot-notation */
 
     return { device, session, script, pid, runAgentMain };
 };
