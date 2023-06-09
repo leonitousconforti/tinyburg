@@ -15,7 +15,7 @@
         // https://github.com/tsconfig/bases/blob/main/bases/node18.json
         "lib": ["es2022"],
         "target": "es2022",
-        "moduleResolution": "node",
+        "moduleResolution": "NodeNext",
 
         // https://github.com/tsconfig/bases/blob/main/bases/strictest.json
         "strict": true,
