@@ -1,0 +1,12 @@
+{
+    "extends": "@tinyburg/tsconfig-rig/profile/default/config/tsconfig.json",
+    "compilerOptions": {
+        "noEmit": true,
+        "module": "esnext",
+        "types": ["frida-gum"],
+
+        // Hopefully can change this soon
+        "moduleResolution": "node"
+    },
+    "include": ["agent.ts"]
+}
