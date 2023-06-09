@@ -23,39 +23,33 @@ const sourceCodeBanner: string = `/**
 // await new Promise((resolve) => setTimeout(resolve, 100_000));
 
 // To know where to put the generated source code
-// eslint-disable-next-line @rushstack/typedef-var
 const AgentOutputFileMap = {
-    "../src/data/bitbook-posts.ts": GetterAgents.BitbookAgent,
-    // "../src/data/bitizen.ts": GetterAgents.BitizenAgent,
-    // "../src/data/costumes.ts": GetterAgents.CostumeAgent,
-    // "../src/data/elevators.ts": GetterAgents.ElevatorAgent,
-    // "../src/data/floors.ts": GetterAgents.FloorAgent,
+    // "../src/data/bitbook-posts.ts": GetterAgents.BitbookAgent,
+    "../src/data/bitizen.ts": GetterAgents.BitizenAgent,
+    "../src/data/costumes.ts": GetterAgents.CostumeAgent,
+    "../src/data/elevators.ts": GetterAgents.ElevatorAgent,
+    "../src/data/floors.ts": GetterAgents.FloorAgent,
     // "../src/data/missions.ts": GetterAgents.MissionAgent,
-    // "../src/data/pets.ts": GetterAgents.PetAgent,
-    // "../src/data/roofs.ts": GetterAgents.RoofAgent,
+    "../src/data/pets.ts": GetterAgents.PetAgent,
+    "../src/data/roofs.ts": GetterAgents.RoofAgent,
 } as const;
 
 for (const [outputDestination, agent] of Object.entries(AgentOutputFileMap)) {
     console.log(`* Running agent: ${agent.agentFile}`);
-    const { runAgentMain } = await bootstrapAgentOnRemote(agent, "host.docker.internal:27042", {
+    const { runAgentMain } = await bootstrapAgentOnRemote(agent, "192.168.1.138:27043", {
         compiler: "esbuild",
     });
 
     const result: string = await runAgentMain();
-    console.log("there");
     const version: string | undefined = result.match(/TinyTower version: ([\d.]+)/gm)?.[0];
-    console.log("here");
     const cleanedSource: string = result.replace(/\/\/ TinyTower version: ([\d.]+)/gm, "");
-    console.log("there");
 
     const formattedBanner: string = sourceCodeBanner
-        .replace("__filename", GetterAgents.BitbookAgent.agentFile)
+        .replace("__filename", agent.agentFile)
         .replace("__date", new Date().toUTCString())
         .replace("__version", version?.split(":")[1]!.trim() || "unknown");
-    console.log("here");
 
     const outputPath: URL = new URL(outputDestination, import.meta.url);
-    console.log("there");
     await fs.writeFile(outputPath, formattedBanner + cleanedSource);
     console.log(`* Done running agent: ${agent}`);
     console.log("---------------------------");
