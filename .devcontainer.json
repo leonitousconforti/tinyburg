@@ -54,6 +54,7 @@
                 "codemetrics.basics.DecorationModeEnabled": false,
                 "codemetrics.basics.OverviewRulerModeEnabled": false,
                 "editor.defaultFormatter": "EditorConfig.EditorConfig",
+                "prettier.prettierPath": "./common/autoinstallers/rush-prettier/node_modules/prettier",
                 "[typescript][typescriptreact][javascript][javascriptreact][json][jsonc]": {
                     "editor.defaultFormatter": "esbenp.prettier-vscode"
                 },
