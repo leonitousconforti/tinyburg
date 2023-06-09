@@ -41,11 +41,12 @@
     },
     "main": "dist/src/index.js",
     "files": [
-        "dist/src/"
+        "dist/src/",
+        "dist/tsconfig.base.json"
     ],
     "scripts": {
         "_phase:build": "heft run --only build -- --clean",
-        "build": "heft test --clean",
+        "build": "heft build --clean",
         "run-js-example": "rushx build && node dist/examples/js/index.js",
         "run-js-typed-example": "rushx build && node dist/examples/js-typed/index.js",
         "run-ts-example": "rushx build && node dist/examples/ts/index.js"

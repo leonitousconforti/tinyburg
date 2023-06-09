@@ -1,20 +1,22 @@
 import "frida-il2cpp-bridge";
 
-// fix for https://github.com/vfsfitvnm/frida-il2cpp-bridge/issues/264#issuecomment-1490798519
+// Fix for https://github.com/vfsfitvnm/frida-il2cpp-bridge/issues/264#issuecomment-1490798519
+/* eslint-disable @typescript-eslint/no-explicit-any */
 (globalThis as any).Module = new Proxy(Module, {
     cache: {},
 
-    get(target: typeof Module, property: string | symbol, _): any {
+    get(target: typeof Module, property: string | symbol): NativePointer | undefined {
         const patchedFindExportByName = (moduleName: string | null, exportName: string) => {
             if (moduleName === null) {
                 return Reflect.get(target, property)(moduleName, exportName);
             }
             this.cache[moduleName] ??= (Module as any).enumerateExports(moduleName);
-            return this.cache[moduleName]!.find((_: ModuleExportDetails) => _.name === exportName)?.address;
+            return this.cache[moduleName]!.find((module: ModuleExportDetails) => module.name === exportName)?.address;
         };
         return property === "findExportByName" ? patchedFindExportByName : Reflect.get(target, property);
     },
 } as ProxyHandler<typeof Module> & { cache: Record<string, ModuleExportDetails[]> });
+/* eslint-enable @typescript-eslint/no-explicit-any */
 
 /**
  * A dependency can be either an entire c# assembly, a single class, a
@@ -76,7 +78,7 @@ export abstract class TinyTowerFridaAgent<T extends ITinyTowerFridaAgent> {
      */
     public data: ReturnType<T["retrieveData"]>;
 
-    public constructor(loadDependenciesMaxRetries: number = 5, loadDependenciesWaitMs: number = 20_000) {
+    public constructor(loadDependenciesMaxRetries: number = 5, loadDependenciesWaitMs: number = 7000) {
         this._loadDependenciesWaitMs = loadDependenciesWaitMs;
         this._loadDependenciesMaxRetries = loadDependenciesMaxRetries;
         this.data = {} as ReturnType<T["retrieveData"]>;
@@ -120,7 +122,7 @@ export abstract class TinyTowerFridaAgent<T extends ITinyTowerFridaAgent> {
 
             // Invoke the retrieveData method
             this.data = this.retrieveData();
-        });
+        }, "bind");
 
         return this;
     }

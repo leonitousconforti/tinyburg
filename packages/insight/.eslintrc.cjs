@@ -5,10 +5,10 @@ module.exports = {
     extends: [
         "@rushstack/eslint-config/profile/node",
         "@rushstack/eslint-config/mixins/tsdoc",
-        "plugin:prettier/recommended",
         "plugin:unicorn/recommended",
+        "plugin:prettier/recommended",
     ],
-    plugins: ["prettier", "unicorn"],
+    plugins: ["unicorn", "prettier"],
     env: {
         node: true,
         es2022: true,

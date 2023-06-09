@@ -12,9 +12,6 @@ const logger: Debug.Debugger = Debug.debug("tinyburg:insight");
 
 /** Options for all bootstrapping operations. */
 interface IBootstrapOptions {
-    /** Recompile and reload the script when changes are detected */
-    watchMode?: boolean | undefined;
-
     /** Which compiler to use */
     compiler: "frida" | "esbuild" | "swc";
 
@@ -92,15 +89,15 @@ export const bootstrapAgent = async <T extends IAgent>(
     let source: string;
     switch (compiler) {
         case "esbuild": {
-            source = await esbuildCompiler(agent.agentFile, options?.watchMode);
+            source = await esbuildCompiler(agent.agentFile);
             break;
         }
         case "frida": {
-            source = await fridaCompiler(agent.agentFile, options?.watchMode);
+            source = await fridaCompiler(agent.agentFile);
             break;
         }
         case "swc": {
-            source = await swcCompiler(agent.agentFile, options?.watchMode);
+            source = await swcCompiler(agent.agentFile);
             break;
         }
     }
@@ -126,15 +123,17 @@ export const bootstrapAgent = async <T extends IAgent>(
 
     // Closure that accepts arguments to pass to the agents main function and runs it
     const runAgentMain = async function (
-        ..._arguments: Parameters<T["rpcTypes"]["main"]>
+        ...arguments_: Parameters<T["rpcTypes"]["main"]>
     ): Promise<Awaited<ReturnType<T["rpcTypes"]["main"]>>> {
         // Call script and format data
         logger("Now calling agent main...");
         try {
             const main: T["rpcTypes"]["main"] = script.exports["main"]!;
 
-            let data = await main(..._arguments);
+            let data = await main(...arguments_);
+            logger("Main returned with no errors");
             if (script.exports["mainProducesSourceCode"] && typeof data === "string") {
+                logger("Formatting returned source code");
                 data = prettier.format(data, prettierOptions);
             }
 

@@ -1,5 +1,3 @@
 {
-    "extends": "@rushstack/heft-jest-plugin/includes/jest-shared.config.json",
-    "extensionsToTreatAsEsm": [".ts"],
-    "resolver": "ts-jest-resolver"
+    "extends": "@rushstack/heft-jest-plugin/includes/jest-shared.config.json"
 }

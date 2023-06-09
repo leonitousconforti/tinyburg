@@ -35,8 +35,10 @@ export class SubscribeToMusicStatusAgent1 extends TinyTowerFridaAgent<SubscribeT
     public retrieveData() {
         const memoryRange = { base: this.dependencies.musicEnabledField.handle, size: 1 };
         const callbacks = {
-            onAccess: (_details: MemoryAccessDetails) =>
-                this._notificationCallback(this.dependencies.musicEnabledField.value),
+            onAccess: (details: MemoryAccessDetails) => {
+                send(details);
+                this._notificationCallback(this.dependencies.musicEnabledField.value);
+            },
         };
         MemoryAccessMonitor.enable(memoryRange, callbacks);
     }

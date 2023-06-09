@@ -3,8 +3,7 @@ import Debug from "debug";
 
 const logger: Debug.Debugger = Debug.debug("tinyburg:insight:swc-compiler");
 
-export const swcCompiler = async (agentLocation: string, watchMode: boolean = false): Promise<string> => {
+export const swcCompiler = async (agentLocation: string): Promise<string> => {
     logger(agentLocation);
-    logger(watchMode);
     return "";
 };

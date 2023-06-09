@@ -3,7 +3,7 @@ import type { BuildOptions } from "esbuild";
 import path from "node:url";
 import { build } from "esbuild";
 
-export const esbuildCompiler = async (agentLocation: string, _watchMode: boolean = false): Promise<string> => {
+export const esbuildCompiler = async (agentLocation: string): Promise<string> => {
     // Create build options for agents
     const tsconfig = path.fileURLToPath(new URL("../tsconfig.agents.json", import.meta.url));
     const buildOptions: BuildOptions = {

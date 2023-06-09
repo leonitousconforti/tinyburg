@@ -8,66 +8,59 @@ import { isEnumerable, isList, isDSO } from "./is-enumerable.js";
 // For whatever reason, if I use Il2Cpp.Type.Enum.Boolean or some other type in the switch statement esbuild will build the
 // agent but will throw a runtime error that if can not read property 'Boolean' of undefined.
 
-export const readObject = (object: Il2Cpp.Object): boolean | number | string | undefined | unknown[] => {
+export const readObject = (
+    object: Il2Cpp.Object
+): boolean | number | string | NativePointer | unknown[] | undefined => {
     switch (object.class.type.typeEnum) {
-        // Boolean
-        case 2: {
+        case Il2Cpp.Type.enum.void: {
+            return undefined;
+        }
+
+        case Il2Cpp.Type.enum.boolean: {
             return Boolean(object);
         }
 
-        // Char
-        case 3: {
+        case Il2Cpp.Type.enum.nativePointer:
+        case Il2Cpp.Type.enum.unsignedNativePointer: {
+            return object.handle.readPointer();
+        }
+
+        case Il2Cpp.Type.enum.byte:
+        case Il2Cpp.Type.enum.char:
+        case Il2Cpp.Type.enum.short:
+        case Il2Cpp.Type.enum.int:
+        case Il2Cpp.Type.enum.long:
+        case Il2Cpp.Type.enum.unsignedByte:
+        case Il2Cpp.Type.enum.unsignedShort:
+        case Il2Cpp.Type.enum.unsignedInt:
+        case Il2Cpp.Type.enum.unsignedLong: {
             return Number(object);
         }
 
-        // Number variants
-        case 4:
-        case 5:
-        case 6:
-        case 7:
-        case 8:
-        case 9:
-        case 10:
-        case 11:
-        case 12:
-        case 13: {
-            return Number(object);
-        }
-
-        // String
-        case 14: {
+        case Il2Cpp.Type.enum.double:
+        case Il2Cpp.Type.enum.float:
+        case Il2Cpp.Type.enum.string: {
             const string = String(object);
             if (string === "") return "__Empty String__";
             return string;
         }
 
-        // Array
-        case 20: {
-            return copyArrayToJs<Il2Cpp.Object>(object).map((value) => readObject(value));
-        }
-
-        // SingleDimensionalZeroLowerBoundArray
-        case 27: {
-            return copyArrayToJs<Il2Cpp.Object>(object).map((value) => readObject(value));
-        }
-
-        // ValueType
-        case 17: {
+        case Il2Cpp.Type.enum.valueType: {
             return (object as unknown as Il2Cpp.ValueType).toString();
         }
 
-        // GenericInstance
-        // RequiredModifier
-        case 29:
-        case 21: {
+        case Il2Cpp.Type.enum.array: {
+            return copyArrayToJs<Il2Cpp.Object>(object).map((value) => readObject(value));
+        }
+
+        case Il2Cpp.Type.enum.genericInstance: {
             if (isEnumerable(object) && isList(object)) {
                 return copyArrayToJs<Il2Cpp.Object>(object).map((value) => readObject(value));
             }
             return undefined;
         }
 
-        // Class
-        case 18: {
+        case Il2Cpp.Type.enum.class: {
             if (isEnumerable(object) && isDSO(object)) {
                 const entries = Object.entries(copyDictionaryToJs<Il2Cpp.String, Il2Cpp.Object>(object)).map(
                     ([property, value]) => [property, readObject(value)]
