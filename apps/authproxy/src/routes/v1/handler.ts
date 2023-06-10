@@ -1,17 +1,21 @@
-import got from "got";
-import * as crypto from "crypto";
-import { secretSalt } from "../../constants.js";
-import type { Request, Reply } from "../types/api_v1";
-import type { INimblebitResponse } from "../types/NimblebitResponse.js";
-import { serverEndpoints as scopes } from "tinyburg/contact-server.js";
+import type { Request, Reply } from "../types/api_v1.js";
+import type { IDownloadSave } from "@tinyburg/core/endpoints/download-save";
+import type { INimblebitResponse } from "@tinyburg/core/endpoints/nimblebit-response";
+import type { ICheckForNewerSave } from "@tinyburg/core/endpoints/check-for-newer-save";
 
-// Handles the request by proxing to nimblebit's server
-export const handler = async function (request: Request, reply: Reply) {
+import got from "got";
+import { secretSalt } from "../../constants.js";
+import { serverEndpoints } from "@tinyburg/core/contact-server";
+import { computeDownloadSaveValidationHash } from "@tinyburg/core/endpoints/download-save";
+import { computeCheckForNewerSaveValidationHash } from "@tinyburg/core/endpoints/check-for-newer-save";
+
+// Handles the request by proxying to nimblebit's server
+export const handler = async function (request: Request, reply: Reply): Promise<void> {
     request.log.debug({ req: request }, "handler hook fired");
-    const { playerId, salt, playerSs } = request.nimblebitData;
+    const { playerId, salt, playerSs, finalUrl, endpoint } = request.nimblebitData;
 
     // Make the request
-    const nimblebitResponse = await got<INimblebitResponse>(request.nimblebitData.finalUrl, {
+    const nimblebitResponse = await got<INimblebitResponse>(finalUrl, {
         responseType: "json",
         method: request.method === "GET" ? "GET" : "POST",
         form: request.method === "POST" ? (request.body as Record<string, unknown>) : undefined,
@@ -19,26 +23,29 @@ export const handler = async function (request: Request, reply: Reply) {
     request.log.info({ nimblebitResponse, req: request }, "Nimblebit request sent");
 
     // Check for special endpoints that need a proxied hash as well - current save version
-    if (request.nimblebitData.endpoint === scopes.check_for_newer_save) {
-        const hashString = playerId + salt + nimblebitResponse.body.id + playerSs;
-        nimblebitResponse.body.proxiedHash = crypto
-            .createHash("md5")
-            .update(hashString)
-            .update(secretSalt)
-            .digest("hex");
+    if (endpoint === serverEndpoints.check_for_newer_save) {
+        nimblebitResponse.body.proxiedHash = computeCheckForNewerSaveValidationHash({
+            playerId,
+            playerSs,
+            salt,
+            secretSalt,
+            saveVersionAtNimblebit: (nimblebitResponse.body as ICheckForNewerSave).id,
+        });
     }
 
     // Check for special endpoints that need a proxied hash as well - download save
-    if (request.nimblebitData.endpoint === scopes.pull_save) {
-        const hashString = playerId + salt + nimblebitResponse.body.id + nimblebitResponse.body.data + playerSs;
-        nimblebitResponse.body.proxiedHash = crypto
-            .createHash("md5")
-            .update(hashString)
-            .update(secretSalt)
-            .digest("hex");
+    if (endpoint === serverEndpoints.pull_save) {
+        nimblebitResponse.body.proxiedHash = computeDownloadSaveValidationHash({
+            playerId,
+            playerSs,
+            salt,
+            secretSalt,
+            saveVersionAtNimblebit: (nimblebitResponse.body as IDownloadSave).id,
+            saveData: (nimblebitResponse.body as IDownloadSave).data,
+        });
     }
 
     // Return the response with proper status code
-    reply.status(nimblebitResponse.statusCode).send(JSON.stringify(nimblebitResponse.body));
+    await reply.status(nimblebitResponse.statusCode).send(JSON.stringify(nimblebitResponse.body));
     request.log.debug({ req: request }, "handler hook finished");
 };

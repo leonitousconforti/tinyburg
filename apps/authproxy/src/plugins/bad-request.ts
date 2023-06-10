@@ -2,8 +2,6 @@ import type { FastifyReply } from "fastify";
 
 import fp from "fastify-plugin";
 
-// The use of fastify-plugin is required to be able
-// to export the decorators to the outer scope
 export default fp(async (fastify) => {
     // Decorator to call the badRequest function
     fastify.decorateReply("badRequest", function (this: FastifyReply, error: string) {
@@ -12,6 +10,7 @@ export default fp(async (fastify) => {
 });
 
 // When using .decorate you have to specify added properties for Typescript
+/* eslint-disable @typescript-eslint/naming-convention */
 declare module "fastify" {
     export interface FastifyReply {
         badRequest(error: string): void;

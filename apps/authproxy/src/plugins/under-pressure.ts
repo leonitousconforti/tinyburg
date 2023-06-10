@@ -6,6 +6,7 @@ import UnderPressure, {
     TYPE_RSS_BYTES,
 } from "@fastify/under-pressure";
 
+// eslint-disable-next-line @rushstack/typedef-var
 const UnderPressureError = fe("FST_UNDER_PRESSURE", "Service Unavailable", 503);
 
 export const buildUnderPressureConfig = (): UnderPressure.UnderPressureOptions => ({
@@ -13,11 +14,11 @@ export const buildUnderPressureConfig = (): UnderPressure.UnderPressureOptions =
     maxEventLoopDelay: 750,
 
     // 200MB for rss, 75MB for the heap
-    maxHeapUsedBytes: 75000000,
-    maxRssBytes: 200000000,
+    maxHeapUsedBytes: 75_000_000,
+    maxRssBytes: 200_000_000,
 
-    // 95% event loop utilization
-    maxEventLoopUtilization: 0.95,
+    // 98% event loop utilization
+    maxEventLoopUtilization: 0.98,
 
     // Expose the status route with a metrics object
     exposeStatusRoute: {
@@ -25,33 +26,39 @@ export const buildUnderPressureConfig = (): UnderPressure.UnderPressureOptions =
             metrics: {
                 type: "object",
                 properties: {
-                    eventLoopDelay: { type: "number" },
                     rssBytes: { type: "number" },
                     heapUsed: { type: "number" },
+                    eventLoopDelay: { type: "number" },
                     eventLoopUtilized: { type: "number" },
                 },
             },
         },
-
-        // Status url and set log messages to debug
         url: "/status",
         routeOpts: {
             logLevel: "debug",
         },
     },
 
-    pressureHandler: (request, reply, type, value) => {
-        if (type === TYPE_HEAP_USED_BYTES) {
-            request.log.warn(`Too many heap bytes used: ${value}bytes`);
-        } else if (type === TYPE_RSS_BYTES) {
-            request.log.warn(`Too many rss bytes used: ${value}bytes`);
-        } else if (type === TYPE_EVENT_LOOP_DELAY) {
-            request.log.warn(`Event loop taking too long: ${value}ms`);
-        } else if (type === TYPE_EVENT_LOOP_UTILIZATION) {
-            request.log.warn(`Event loop exceeded 95% utilization: ${value}%`);
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    pressureHandler: async (request, _reply, type, value) => {
+        switch (type) {
+            case TYPE_HEAP_USED_BYTES: {
+                request.log.warn(`Too many heap bytes used: ${value}bytes`);
+                break;
+            }
+            case TYPE_RSS_BYTES: {
+                request.log.warn(`Too many rss bytes used: ${value}bytes`);
+                break;
+            }
+            case TYPE_EVENT_LOOP_DELAY: {
+                request.log.warn(`Event loop taking too long: ${value}ms`);
+                break;
+            }
+            case TYPE_EVENT_LOOP_UTILIZATION: {
+                request.log.warn(`Event loop exceeded 98% utilization: ${value}%`);
+                break;
+            }
         }
-
-        reply.status(503).header("Retry-After", "10");
         throw new UnderPressureError();
     },
 

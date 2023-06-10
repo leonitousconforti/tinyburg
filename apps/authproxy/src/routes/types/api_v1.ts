@@ -1,5 +1,7 @@
+import "./request.js";
+
 import type { FastifyReply, FastifyRequest } from "fastify";
-import type { IncomingMessage, Server, ServerResponse } from "http";
+import type { IncomingMessage, Server, ServerResponse } from "node:http";
 
 import type { HeadersSchema } from "./headers_v1.js";
 import type { QuerystringSchema } from "./querystring_v1.js";

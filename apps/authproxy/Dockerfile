@@ -8,7 +8,4 @@ WORKDIR /app
 COPY . .
 RUN yarn install && yarn build
 EXPOSE 5000
-
-# This command saves ~100MB of ram over 'yarn start' which is quite significant when the DigitalOcean
-# droplet only has 1GB. This reduces the authproxy memory footprint from 180MB to just 90MB
-CMD [ "node", "-r",  "./.pnp.cjs", "./dist/proxy.js" ]
+CMD [ "node", "./dist/proxy.js" ]

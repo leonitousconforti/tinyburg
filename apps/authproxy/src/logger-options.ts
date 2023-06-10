@@ -13,7 +13,6 @@ const loggerOptions: FastifyLoggerOptions = {
     redact: ["req.headers.authorization"],
     serializers: {
         res(reply) {
-            // The default
             return {
                 statusCode: reply.statusCode,
             };
@@ -25,8 +24,7 @@ const loggerOptions: FastifyLoggerOptions = {
                 headers: request.headers,
                 hostname: request.hostname,
                 remoteAddress: request.ip,
-                remotePort: request.socket.remotePort,
-                clientIp: request.clientIP,
+                remotePort: request.socket.remotePort!,
                 nimblebitData: request.nimblebitData,
             };
         },

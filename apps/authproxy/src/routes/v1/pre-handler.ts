@@ -1,10 +1,11 @@
-import * as crypto from "crypto";
-import { secretSalt } from "../../constants.js";
 import type { Request, Reply } from "../types/api_v1.js";
-import { hasScopePermission } from "../../auth/scopePermission.js";
+
+import { secretSalt } from "../../constants.js";
+import { cryptoMD5 } from "@tinyburg/core/crypto-md5";
+import { hasScopePermission } from "../../auth/scope-permission.js";
 
 // Pre-handler hook to parse query params
-export const preHandler = async function (request: Request, reply: Reply) {
+export const preHandler = async function (request: Request, reply: Reply): Promise<void> {
     request.log.debug({ req: request }, "perHandler hook fired");
 
     // Parse query params
@@ -19,9 +20,9 @@ export const preHandler = async function (request: Request, reply: Reply) {
     }
 
     // Parse playerId, playerSs, and salt from the hash
-    const playerId = hashSplit[1];
-    const playerSs = hashSplit[2].slice(-36);
-    const salt = hashSplit[2].replace(playerSs, "").match(/^-?\d+/gim);
+    const playerId = hashSplit[1]!;
+    const playerSs = hashSplit[2]!.slice(-36);
+    const salt = hashSplit[2]!.replace(playerSs, "").match(/^-?\d+/gim);
     request.log.info({ playerId, playerSs }, "Parsed playerId + playerSs");
 
     // Check that the salt param is a 32bit signed integer
@@ -41,7 +42,7 @@ export const preHandler = async function (request: Request, reply: Reply) {
 
     // Check the scope
     request.log.info({ req: request }, "Checking scope permissions");
-    if (hasScopePermission(request.apiKey, nimblebitEndpoint)) {
+    if (hasScopePermission(request.apiKey, nimblebitEndpoint as any)) {
         const finalHash = crypto.createHash("md5").update(hash).update(secretSalt).digest("hex");
         const finalUrl = "https://sync.nimblebit.com" + endpoint + "/" + finalHash;
 

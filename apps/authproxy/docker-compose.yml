@@ -1,7 +1,7 @@
-version: "3.9"
+version: "3"
 services:
   web:
-    image: ghcr.io/leonitousconforti/tinyburg/authproxy
+    image: "tinyburg/authproxy:latest"
     build: .
     ports:
       - "5000:5000"

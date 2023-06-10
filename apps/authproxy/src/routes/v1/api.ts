@@ -1,27 +1,27 @@
 import fp from "fastify-plugin";
-import type { RouteOptions } from "../types/RouteOptions.js";
 
 // Import handlers
 import { handler } from "./handler.js";
-import { onRequest } from "./onRequest.js";
-import { preHandler } from "./preHandler.js";
+import { onRequest } from "./on-request.js";
+import { preHandler } from "./pre-handler.js";
 
 // Import json schemas
-import HeadersSchema from "./../schemas/headers_v1.json";
-import ResponseSchema from "./../schemas/response_v1.json";
-import QuerystringSchema from "./../schemas/querystring_v1.json";
+import HeadersSchema from "../schemas/headers_v1.json" assert { type: "json" };
+import ResponseSchema from "../schemas/response_v1.json" assert { type: "json" };
+import QuerystringSchema from "../schemas/querystring_v1.json" assert { type: "json" };
 
 // Import the generated interfaces
 import type { HeadersSchema as HeadersSchemaInterface } from "../types/headers_v1.js";
 import type { QuerystringSchema as QuerystringSchemaInterface } from "../types/querystring_v1.js";
 
 // Fastify routing for api v1
-const api_v1 = fp.default<RouteOptions>(async (fastify, opts): Promise<void> => {
+// eslint-disable-next-line @rushstack/typedef-var
+const api_v1 = fp<{ url: string }>(async (fastify, options): Promise<void> => {
     fastify.route<{
         Querystring: QuerystringSchemaInterface;
         Headers: HeadersSchemaInterface;
     }>({
-        url: opts.url || "/v1",
+        url: options.url || "/v1",
         method: ["GET", "POST"],
 
         // Request and reply schema
@@ -39,10 +39,10 @@ const api_v1 = fp.default<RouteOptions>(async (fastify, opts): Promise<void> => 
 
     // Add decorators if necessary
     if (!fastify.hasRequestDecorator("apiKey")) {
-        fastify.decorateRequest("apiKey", null);
+        fastify.decorateRequest("apiKey", undefined);
     }
     if (!fastify.hasRequestDecorator("nimblebitData")) {
-        fastify.decorateRequest("nimblebitData", null);
+        fastify.decorateRequest("nimblebitData", undefined);
     }
 });
 

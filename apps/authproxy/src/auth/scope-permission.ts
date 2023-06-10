@@ -1,5 +1,5 @@
-import type { ApiKey } from "../entity/ApiKey.js";
-import { serverEndpoints } from "@tinyburg/core/contact-server.js";
+import type { ApiKey } from "../entity/api-key.js";
+import { serverEndpoints } from "@tinyburg/core/contact-server";
 
 export type Scope = keyof typeof serverEndpoints;
 export const defaultAllowedScopes: Scope[] = [
@@ -17,10 +17,9 @@ export const defaultAllowedScopes: Scope[] = [
 
 export const hasScopePermission = (
     apiKey: ApiKey | undefined,
-    nimblebitEndpoint: typeof serverEndpoints[Scope]
+    nimblebitEndpoint: (typeof serverEndpoints)[Scope]
 ): boolean => {
-    return defaultAllowedScopes
-        .concat(apiKey?.privilegedScopes || [])
-        .map((scope) => serverEndpoints[scope])
+    return [...defaultAllowedScopes, ...(apiKey?.privilegedScopes || [])]
+        .map((scope: Scope) => serverEndpoints[scope])
         .includes(nimblebitEndpoint);
 };

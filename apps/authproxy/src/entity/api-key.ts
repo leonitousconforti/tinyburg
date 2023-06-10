@@ -1,4 +1,6 @@
-import type { Scope } from "../auth/scopePermission.js";
+import "reflect-metadata";
+
+import type { Scope } from "../auth/scope-permission.js";
 
 import { v4 as uuidv4 } from "uuid";
 import { Entity, PrimaryGeneratedColumn, Column, BaseEntity, Generated, CreateDateColumn } from "typeorm";
@@ -6,33 +8,33 @@ import { Entity, PrimaryGeneratedColumn, Column, BaseEntity, Generated, CreateDa
 @Entity()
 export class ApiKey extends BaseEntity {
     @PrimaryGeneratedColumn("uuid")
-    id: string;
+    public id: string;
 
     @CreateDateColumn()
-    createdAt: Date;
+    public createdAt: Date;
 
     @Column({ default: "default" })
-    name: string;
+    public name: string;
 
     @Column({ default: false })
-    seen: boolean;
+    public seen: boolean;
 
     @Column("int", { default: 5, width: 3 })
-    rateLimitPerWindow: number;
+    public rateLimitPerWindow: number;
 
     @Column("text", { array: true, default: [] })
-    privilegedScopes: Scope[];
+    public privilegedScopes: Scope[];
 
     @Column("timestamptz", { nullable: true })
-    lastUsed: Date | null;
+    public lastUsed: Date | undefined;
 
     @Column("uuid", { unique: true, nullable: false })
     @Generated("uuid")
-    apiKey: string;
+    public apiKey: string;
 
-    async roll(): Promise<string> {
+    public async roll(): Promise<string> {
         this.apiKey = uuidv4();
-        this.lastUsed = null;
+        this.lastUsed = undefined;
         await this.save();
         return this.apiKey;
     }
