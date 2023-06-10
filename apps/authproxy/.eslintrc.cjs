@@ -27,14 +27,15 @@ module.exports = {
         {
             files: ["src/proxy.ts"],
             rules: {
-                "dot-notation": "off",
                 "@rushstack/typedef-var": "off",
                 "@typescript-eslint/naming-convention": "off",
             },
         },
     ],
     rules: {
+        "dot-notation": "off",
         "unicorn/no-useless-undefined": "off",
+        "require-atomic-updates": ["error", { allowProperties: true }],
     },
     ignorePatterns: ["dist/"],
 };

@@ -20,6 +20,7 @@
     "type": "module",
     "main": "dist/proxy.js",
     "scripts": {
+        "_phase:build": "heft run --only build -- --clean",
         "build": "heft build --clean",
         "compile-schemas": "json2ts -i src/routes/schemas -o src/routes/types --style.tabWidth 4",
         "docker:build": "docker build -t tinyburg/authproxy:latest .",
@@ -44,11 +45,9 @@
     "devDependencies": {
         "@rushstack/eslint-config": "3.3.1",
         "@rushstack/heft": "0.53.0",
-        "@rushstack/heft-jest-plugin": "0.7.5",
         "@rushstack/heft-lint-plugin": "~0.1.5",
         "@rushstack/heft-typescript-plugin": "~0.1.5",
         "@tinyburg/tsconfig-rig": "workspace:*",
-        "@types/heft-jest": "1.0.3",
         "@types/node": "~20.2.5",
         "@types/uuid": "~9.0.1",
         "eslint": "~8.42.0",

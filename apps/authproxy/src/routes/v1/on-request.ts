@@ -10,8 +10,12 @@ export const onRequest = async function (request: Request): Promise<void> {
 
     // Set the api key id
     const key = request.headers.authorization?.replace("Bearer ", "").trim();
-    const apiKeyObject = await ApiKey.findOne({ where: { apiKey: key } });
-    request.apiKey = apiKeyObject;
+    if (key) {
+        const apiKeyObject = await ApiKey.findOne({ where: { apiKey: key } });
+        request.apiKey = apiKeyObject || undefined;
+    } else {
+        request.apiKey = undefined;
+    }
 
     // Reset the nimblebit data
     request.nimblebitData = {} as INimblebitData;

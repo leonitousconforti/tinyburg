@@ -1,22 +1,16 @@
 import type { FastifyLoggerOptions } from "fastify";
 
-// According to the docs you can pass the redact option but its not
-// in the TypeScript types so... Just gonna patch it in myself
-declare module "fastify" {
-    interface FastifyLoggerOptions {
-        redact: string[] | undefined;
-    }
-}
-
-const loggerOptions: FastifyLoggerOptions = {
+const loggerOptions: FastifyLoggerOptions & { redact: string[] } = {
     level: "trace",
     redact: ["req.headers.authorization"],
     serializers: {
+        // eslint-disable-next-line @typescript-eslint/typedef
         res(reply) {
             return {
                 statusCode: reply.statusCode,
             };
         },
+        // eslint-disable-next-line @typescript-eslint/typedef
         req(request) {
             return {
                 method: request.method,

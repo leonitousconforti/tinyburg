@@ -1,7 +1,9 @@
 import type { Request, Reply } from "../types/api_v1.js";
+import type { Scope } from "../../auth/scope-permission.js";
 
+import crypto from "node:crypto";
 import { secretSalt } from "../../constants.js";
-import { cryptoMD5 } from "@tinyburg/core/crypto-md5";
+import { serverEndpoints } from "@tinyburg/core/contact-server";
 import { hasScopePermission } from "../../auth/scope-permission.js";
 
 // Pre-handler hook to parse query params
@@ -22,18 +24,15 @@ export const preHandler = async function (request: Request, reply: Reply): Promi
     // Parse playerId, playerSs, and salt from the hash
     const playerId = hashSplit[1]!;
     const playerSs = hashSplit[2]!.slice(-36);
-    const salt = hashSplit[2]!.replace(playerSs, "").match(/^-?\d+/gim);
+    const salt = hashSplit[2]!.replace(playerSs, "").match(/^-?\d+/gim)?.[0];
     request.log.info({ playerId, playerSs }, "Parsed playerId + playerSs");
 
     // Check that the salt param is a 32bit signed integer
-    // https://stackoverflow.com/questions/2282452/determine-if-conversion-from-string-to-32-bit-integer-will-overflow
     request.log.info("Testing salt...");
-    if (!salt || parseInt(salt[0]) >> 0 != parseInt(salt[0])) {
+    if (!salt || Number.parseInt(salt) < 0 || Number.parseInt(salt) > 1) {
         return reply.badRequest("Salt param was not a valid 32bit signed integer");
     }
-
-    // salt passed
-    const saltNumber = parseInt(salt[0]);
+    const saltNumber = Number.parseInt(salt);
     request.log.info({ req: request, saltNumber }, "Salt was a 32-bit signed integer");
 
     // Parse the nimblebit url from the endpoint by removing the salt and playerId
@@ -42,7 +41,7 @@ export const preHandler = async function (request: Request, reply: Reply): Promi
 
     // Check the scope
     request.log.info({ req: request }, "Checking scope permissions");
-    if (hasScopePermission(request.apiKey, nimblebitEndpoint as any)) {
+    if (hasScopePermission(request.apiKey, nimblebitEndpoint as (typeof serverEndpoints)[Scope])) {
         const finalHash = crypto.createHash("md5").update(hash).update(secretSalt).digest("hex");
         const finalUrl = "https://sync.nimblebit.com" + endpoint + "/" + finalHash;
 
