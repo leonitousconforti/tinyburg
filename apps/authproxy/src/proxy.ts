@@ -1,10 +1,10 @@
 import { Redis } from "ioredis";
 import { fastify } from "fastify";
 import { DataSource } from "typeorm";
-import fastifyFormbody from "@fastify/formbody";
+import closeWithGrace from "close-with-grace";
 import fastifyRateLimit from "@fastify/rate-limit";
-import underPressure from "@fastify/under-pressure";
-import gracefulShutdown from "fastify-graceful-shutdown";
+import { fastifyFormbody } from "@fastify/formbody";
+import { fastifyUnderPressure } from "@fastify/under-pressure";
 
 import api_v1 from "./routes/v1/api.js";
 import version from "./routes/version.js";
@@ -19,9 +19,8 @@ const app = fastify({ logger: loggerOptions, trustProxy: true, ignoreTrailingSla
 const redis = new Redis(process.env["REDIS_URL"]!, { connectTimeout: 500, maxRetriesPerRequest: 1 });
 
 // Fastify plugins
-await app.register(fastifyFormbody.default);
-await app.register(gracefulShutdown.default);
-await app.register(underPressure.default, buildUnderPressureConfig());
+await app.register(fastifyFormbody);
+await app.register(fastifyUnderPressure, buildUnderPressureConfig());
 await app.register(fastifyRateLimit.default, buildRateLimitConfig(redis));
 
 // My plugins
@@ -45,7 +44,9 @@ const postgres = await new DataSource({
 await app.listen({ port: Number.parseInt(process.env["PORT"] || "5000", 10), host: "0.0.0.0" });
 await app.after();
 
-app.gracefulShutdown(async (_code, next) => {
+closeWithGrace({ delay: 500 }, async ({ err }) => {
+    if (err) {
+        console.error(err);
+    }
     await postgres.destroy();
-    next();
 });
