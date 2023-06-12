@@ -11,3 +11,7 @@ COPY --from=dependency-preparer /workspace/tinyburg /workspace/tinyburg
 RUN node /workspace/tinyburg/create-links.js create
 EXPOSE 5000
 CMD ["node", "/workspace/tinyburg/apps/authproxy/dist/proxy.js"]
+
+LABEL org.opencontainers.image.licenses="MIT" \
+    org.opencontainers.image.source="https://github.com/leonitousconforti/tinyburg" \
+    org.opencontainers.image.description="Auth server for the tinyburg library"

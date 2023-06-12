@@ -1,7 +1,7 @@
 version: "3"
 services:
   web:
-    image: "tinyburg/authproxy:latest"
+    image: "ghcr.io/leonitousconforti/tinyburg/authproxy:latest"
     restart: unless-stopped
     build: .
     ports:
