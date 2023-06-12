@@ -20,15 +20,11 @@
     "main": "index.js",
     "dependencies": {
         "@tinyburg/core": "workspace:*",
-        "diff": "~5.1.0",
         "find-up": "~6.3.0",
-        "prompts": "~2.4.2",
         "yargs": "~17.7.2"
     },
     "devDependencies": {
-        "@types/diff": "~5.0.3",
         "@types/node": "~20.2.5",
-        "@types/prompts": "~2.4.4",
         "@types/yargs": "~17.0.24"
     },
     "engines": {

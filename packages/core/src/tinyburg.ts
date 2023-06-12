@@ -1,7 +1,6 @@
 import deepExtend from "deep-extend";
 
 // Closures
-import { createConfigClosure } from "./closures/config.js";
 import { createLoggerClosure } from "./closures/logger.js";
 import { loggerConfigClosure } from "./closures/logger-config.js";
 
@@ -13,7 +12,6 @@ import { type ITTConfig, defaultConfig } from "./tt-config.js";
 
 // Library methods to expose
 import { saveConfig } from "./save-config.js";
-import { loadSecrets } from "./load-secrets.js";
 import { compressSave } from "./compress-save.js";
 import { safeModifySave } from "./modify-save.js";
 import { decompressSave } from "./decompress-save.js";
@@ -65,21 +63,8 @@ export const fromConfig = (partialConfig: ITTConfig, logger: ILogger = debug) =>
 
     // Try to load secrets - no need to exit on failure, just report to the user
     if (!config.secretSalt) {
-        try {
-            logger.debug("Attempting to load secrets...");
-            loadSecrets(config, "./../tinyburg-keys.json");
-        } catch {
-            logger.warn("No secret key present in config and could not load secrets from local file!");
-            logger.warn(
-                "Use either the provided proxy to set the authentication headers or load the secrets later at runtime"
-            );
-
-            // Should we be using the proxy for setting the required authentication headers?
-            if (!config.proxy.useProxy) {
-                config.proxy.useProxy = true;
-                logger.warn("Automatically enabled the proxy setting as no secrets have been properly loaded yet");
-            }
-        }
+        config.proxy.useProxy = true;
+        logger.warn("Automatically enabled the authproxy settings");
     }
 
     // Validate the player id
@@ -91,12 +76,11 @@ export const fromConfig = (partialConfig: ITTConfig, logger: ILogger = debug) =>
     if (config.player.playerSs) {
         config.authenticated = true;
     }
-    logger.info("Tinyburg client started with config: %O", config);
 
+    logger.info("Tinyburg client started with config: %O", config);
     return {
         config,
         logger,
-        loadSecrets: createConfigClosure(loadSecrets, config),
         saveConfig: (fileName: string) => saveConfig({ config, fileName }),
 
         // Validation methods

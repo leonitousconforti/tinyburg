@@ -19,31 +19,31 @@
     "type": "module",
     "exports": {
         ".": {
-            "types": "./dist/tinyburg.d.ts",
-            "import": "./dist/tinyburg.js"
+            "types": "./dist/src/tinyburg.d.ts",
+            "import": "./dist/src/tinyburg.js"
         },
         "./data/*": {
-            "types": "./dist/data/*.d.ts",
-            "import": "./dist/data/*.js"
+            "types": "./dist/src/data/*.d.ts",
+            "import": "./dist/src/data/*.js"
         },
         "./endpoints/*": {
-            "types": "./dist/endpoints/*.d.ts",
-            "import": "./dist/endpoints/*.js"
+            "types": "./dist/src/endpoints/*.d.ts",
+            "import": "./dist/src/endpoints/*.js"
         },
         "./validation/*": {
-            "types": "./dist/validation/*.d.ts",
-            "import": "./dist/validation/*.js"
+            "types": "./dist/src/validation/*.d.ts",
+            "import": "./dist/src/validation/*.js"
         },
         "./parsing-structs/*": {
-            "types": "./dist/parsing-structs/*.d.ts",
-            "import": "./dist/parsing-structs/*.js"
+            "types": "./dist/src/parsing-structs/*.d.ts",
+            "import": "./dist/src/parsing-structs/*.js"
         },
         "./*": {
-            "types": "./dist/*.d.ts",
-            "import": "./dist/*.js"
+            "types": "./dist/src/*.d.ts",
+            "import": "./dist/src/*.js"
         }
     },
-    "main": "dist/tinyburg.js",
+    "main": "dist/src/tinyburg.js",
     "files": [
         "dist/src"
     ],
