@@ -37,7 +37,7 @@ const postgres = await new DataSource({
     type: "postgres",
     logging: false,
     synchronize: true,
-    url: process.env["DATABASE_URL"]!.replace("?sslmode=require", ""),
+    url: process.env["DATABASE_URL"]!,
     entities: [ApiKey],
 }).initialize();
 
