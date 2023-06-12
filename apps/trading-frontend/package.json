@@ -1,8 +1,0 @@
-{
-    "name": "@tinyburg/trading-frontend",
-    "version": "0.0.1-alpha",
-    "private": true,
-    "scripts": {
-        "build": ""
-    }
-}

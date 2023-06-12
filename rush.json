@@ -539,19 +539,14 @@
         },
 
         // Apps
-        {
-            "packageName": "@tinyburg/architect-viewer",
-            "projectFolder": "apps/architect-viewer",
-            "shouldPublish": false
-        },
+        // {
+        //     "packageName": "@tinyburg/architect-viewer",
+        //     "projectFolder": "apps/architect-viewer",
+        //     "shouldPublish": false
+        // },
         {
             "packageName": "@tinyburg/authproxy",
             "projectFolder": "apps/authproxy",
-            "shouldPublish": false
-        },
-        {
-            "packageName": "@tinyburg/models",
-            "projectFolder": "apps/models",
             "shouldPublish": false
         },
         {
@@ -560,13 +555,8 @@
             "shouldPublish": false
         },
         {
-            "packageName": "@tinyburg/trading-backend",
-            "projectFolder": "apps/trading-backend",
-            "shouldPublish": false
-        },
-        {
-            "packageName": "@tinyburg/trading-frontend",
-            "projectFolder": "apps/trading-frontend",
+            "packageName": "@tinyburg/trading-site",
+            "projectFolder": "apps/trading-site",
             "shouldPublish": false
         }
     ]
