@@ -5,7 +5,7 @@ import type { ICheckForNewerSave } from "@tinyburg/core/endpoints/check-for-newe
 
 import got from "got";
 import { secretSalt } from "../../constants.js";
-import { serverEndpoints } from "@tinyburg/core/contact-server";
+import { serverEndpoints, defaultHeaders } from "@tinyburg/core/contact-server";
 import { computeDownloadSaveValidationHash } from "@tinyburg/core/endpoints/download-save";
 import { computeCheckForNewerSaveValidationHash } from "@tinyburg/core/endpoints/check-for-newer-save";
 
@@ -17,6 +17,7 @@ export const handler = async function (request: Request, reply: Reply): Promise<
     // Make the request
     const nimblebitResponse = await got<INimblebitResponse>(finalUrl, {
         responseType: "json",
+        headers: defaultHeaders,
         method: request.method === "GET" ? "GET" : "POST",
         form: request.method === "POST" ? (request.body as Record<string, unknown>) : undefined,
     });
