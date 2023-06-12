@@ -60,9 +60,7 @@ export const fromConfig = (partialConfig: ITTConfig, logger: ILogger = debug) =>
 
     // Not enough data provided, or data was in the wrong format
     if (!config.player.playerEmail && !config.player.playerSs) {
-        return logger.fatal(
-            new Error("Bad arguments provided. Need either the playerEmail or playerSalt to properly initialize")
-        );
+        throw new Error("Bad arguments provided. Need either the playerEmail or playerSalt to properly initialize");
     }
 
     // Try to load secrets - no need to exit on failure, just report to the user
@@ -86,7 +84,7 @@ export const fromConfig = (partialConfig: ITTConfig, logger: ILogger = debug) =>
 
     // Validate the player id
     if (!isValidPlayerId(config.player.playerId)) {
-        return logger.fatal(new Error("Invalid playerId, fix the config and restart"));
+        throw new Error("Invalid playerId, fix the config and restart");
     }
 
     // Set the authenticated flag
