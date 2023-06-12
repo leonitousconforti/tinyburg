@@ -2,25 +2,29 @@ version: "3"
 services:
   web:
     image: "tinyburg/authproxy:latest"
+    restart: unless-stopped
     build: .
     ports:
       - "5000:5000"
     depends_on:
       - redis_cache
       - postgres_db
-    environment:
-      - REDIS_URL=redis://redis_cache:6379
-      - DATABASE_URL=postgres://postgres:password@postgres_db:5432/authproxy?sslmode=disable
     env_file: .env
+    environment:
+      - PORT=5000
+      - REDIS_URL=redis://redis_cache:6379
+      - DATABASE_URL=postgres://postgres:password@postgres_db:5432/authproxy
+    networks:
+      - authproxy_mesh
 
   # Redis cache
   redis_cache:
     image: "redis:latest"
     restart: unless-stopped
-    ports:
-      - "6379:6379"
     volumes:
       - redis-dumps:/data/
+    networks:
+      - authproxy_mesh
 
   # Postgres database
   postgres_db:
@@ -28,14 +32,14 @@ services:
     restart: unless-stopped
     volumes:
       - postgres-data:/var/lib/postgresql/data/
+    networks:
+      - authproxy_mesh
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=password
       - POSTGRES_DB=authproxy
-    ports:
-      - "5432:5432"
 
-  # pgweb App
+  # pgweb app
   pgweb_app:
     image: sosedoff/pgweb:latest
     restart: unless-stopped
@@ -44,7 +48,9 @@ services:
     depends_on:
       - postgres_db
     environment:
-      - DATABASE_URL=postgres://postgres:password@postgres_db:5432/authproxy?sslmode=disable
+      - PGWEB_DATABASE_URL=postgres://postgres:password@postgres_db:5432/authproxy?sslmode=disable
+    networks:
+      - authproxy_mesh
 
   # redis insights
   redis_insight:
@@ -56,8 +62,13 @@ services:
       - redis_cache
     volumes:
       - redis-insights:/db
+    networks:
+      - authproxy_mesh
 
 volumes:
   postgres-data:
   redis-dumps:
   redis-insights:
+
+networks:
+  authproxy_mesh: {}

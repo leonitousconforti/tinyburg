@@ -70,14 +70,14 @@ export const buildRateLimitConfig = (redis: Redis): RateLimitPluginOptions => ({
             return {
                 statusCode: 403,
                 error: "Forbidden",
-                message: `You can not access this service as you have sent too many requests that exceed your rate limit. Your IP: ${request.ip}`,
+                message: `You can not access this service as you have sent too many requests that exceed your rate limit. Your IP: ${request.ip} and Limit: ${context.max}`,
             };
         }
 
         return {
             statusCode: 429,
             error: "Too Many Requests",
-            message: `You hit the rate limit, Slow down please! You can retry in ${context.after}`,
+            message: `You hit the rate limit, please slow down! You can retry in ${context.after}`,
         };
     },
 });

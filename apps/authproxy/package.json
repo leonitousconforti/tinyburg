@@ -19,12 +19,13 @@
     "author": "Leo Conforti <leo@leoconforti.us> (https://leoconforti.us)",
     "type": "module",
     "main": "dist/proxy.js",
+    "files": [
+        "dist"
+    ],
     "scripts": {
         "_phase:build": "heft run --only build -- --clean",
         "build": "heft build --clean",
-        "compile-schemas": "json2ts -i src/routes/schemas -o src/routes/types --style.tabWidth 4",
-        "docker:build": "docker build -t tinyburg/authproxy:latest .",
-        "docker:run": "docker run tinyburg/authproxy:latest"
+        "compile-schemas": "json2ts -i src/routes/schemas -o src/routes/types --style.tabWidth 4"
     },
     "dependencies": {
         "@fastify/error": "~3.2.0",
