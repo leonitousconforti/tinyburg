@@ -550,6 +550,11 @@
             "shouldPublish": false
         },
         {
+            "packageName": "@tinyburg/discord-bot",
+            "projectFolder": "apps/discord-bot",
+            "shouldPublish": false
+        },
+        {
             "packageName": "@tinyburg/repl.it-demo",
             "projectFolder": "apps/repl.it-demo",
             "shouldPublish": false
