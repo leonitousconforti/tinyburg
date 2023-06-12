@@ -1,23 +1,49 @@
 {
-    "$schema": "https://developer.microsoft.com/json-schemas/heft/heft.schema.json",
-    "eventActions": [
-        {
-            "actionKind": "deleteGlobs",
-            "heftEvent": "clean",
-            "actionId": "defaultClean",
-            "globsToDelete": ["dist", "temp"]
-        },
-        {
-            "actionKind": "copyFiles",
-            "heftEvent": "bundle",
-            "actionId": "copyTemplates",
-            "copyOperations": [
-                {
-                    "sourceFolder": "templates",
-                    "destinationFolders": ["dist"],
-                    "includeGlobs": ["png/**/*.*", "raw/**/*.*", "metadata/**/*.*"]
+    "$schema": "https://developer.microsoft.com/json-schemas/heft/v0/heft.schema.json",
+    "phasesByName": {
+        "build": {
+            "cleanFiles": [{ "sourcePath": "dist" }],
+            "tasksByName": {
+                // "copy-templates": {
+                //     "taskPlugin": {
+                //         "pluginPackage": "@rushstack/heft",
+                //         "pluginName": "copy-files-plugin",
+                //         "options": {
+                //             "copyOperations": [
+                //                 {
+                //                     "destinationFolders": ["dist"],
+                //                     "includeGlobs": [
+                //                         "templates/png/**/*.*",
+                //                         "templates/raw/**/*.*",
+                //                         "templates/metadata/**/*.*"
+                //                     ]
+                //                 }
+                //             ]
+                //         }
+                //     }
+                // },
+                "typescript": {
+                    "taskPlugin": {
+                        "pluginPackage": "@rushstack/heft-typescript-plugin"
+                    }
+                },
+                "lint": {
+                    "taskDependencies": ["typescript"],
+                    "taskPlugin": {
+                        "pluginPackage": "@rushstack/heft-lint-plugin"
+                    }
                 }
-            ]
+            }
+        },
+        "test": {
+            "phaseDependencies": ["build"],
+            "tasksByName": {
+                "jest": {
+                    "taskPlugin": {
+                        "pluginPackage": "@rushstack/heft-jest-plugin"
+                    }
+                }
+            }
         }
-    ]
+    }
 }

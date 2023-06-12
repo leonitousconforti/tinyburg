@@ -1,11 +1,11 @@
-/* eslint-disable quotes */
-/* eslint-disable @rushstack/typedef-var */
+import type { Image } from "./image.js";
+import type { Match } from "./template-matching.js";
 
-import { Image, ImageType } from "./image.js";
+import { ImageType } from "./image.js";
 import { dropChannel } from "./drop-channel.js";
 import { upscaleImage } from "./upscale-image.js";
 import { loadCharTemplates } from "./load-template.js";
-import { Match, matchTemplate } from "./template-matching.js";
+import { matchTemplate } from "./template-matching.js";
 
 export type DetectionLibrary = { character: string; template: Image; mask?: Image }[];
 export const numericalImagesDictionary = await loadCharTemplates("0", "1", "2", "3", "4", "5", "6", "7", "8", "9");

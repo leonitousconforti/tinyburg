@@ -2,24 +2,22 @@
 require("@rushstack/eslint-config/patch/modern-module-resolution");
 
 module.exports = {
-    extends: ["@rushstack/eslint-config/profile/node"],
+    extends: [
+        "@rushstack/eslint-config/profile/node",
+        "@rushstack/eslint-config/mixins/tsdoc",
+        "plugin:unicorn/recommended",
+        "plugin:prettier/recommended",
+    ],
+    plugins: ["unicorn", "prettier"],
     env: {
         node: true,
         es2022: true,
     },
-    parser: "@typescript-eslint/parser",
     parserOptions: {
         tsconfigRootDir: __dirname,
-        project: ["./tsconfig.*.json", "./tsconfig.json"],
+        project: ["./tsconfig.json"],
         ecmaVersion: 2022,
         sourceType: "module",
-    },
-    rules: {
-        indent: ["error", 4, { SwitchCase: 1 }],
-        "linebreak-style": ["error", "unix"],
-        quotes: ["error", "double"],
-        semi: ["error", "always"],
-        "@typescript-eslint/explicit-function-return-type": "off",
     },
     overrides: [
         {
@@ -29,5 +27,5 @@ module.exports = {
             },
         },
     ],
-    ignorePatterns: ["dist/", "proto/generated/", ".eslintrc.cjs"],
+    ignorePatterns: ["dist/"],
 };

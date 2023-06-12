@@ -1,36 +1,20 @@
 {
-    "$schema": "https://json.schemastore.org/tsconfig",
-    "extends": "@tsconfig/node18-strictest-esm/tsconfig.json",
+    "extends": "@tinyburg/tsconfig-rig/profile/default/config/tsconfig.json",
     "compilerOptions": {
-        "checkJs": false,
+        "outDir": "./dist",
         "module": "esnext",
         "moduleResolution": "NodeNext",
-        "exactOptionalPropertyTypes": false,
-
-        // Added
-        "noUncheckedIndexedAccess": false,
         "types": ["node"],
-        "noEmit": true,
-        "noImplicitAny": true,
-        "strictNullChecks": true,
-        "strictFunctionTypes": true,
-        "strictPropertyInitialization": true,
-        "noImplicitThis": true,
-        "useUnknownInCatchVariables": true,
+
+        "noEmit": false,
+        "sourceMap": true,
+        "declaration": true,
+
+        // Temporary?
         "resolveJsonModule": true,
         "experimentalDecorators": true,
-        "emitDecoratorMetadata": true
+        "emitDecoratorMetadata": true,
+        "noUncheckedIndexedAccess": false
     },
-    "files": [],
-    "include": [],
-    "references": [
-        {
-            "path": "./tsconfig.test.json",
-            "declarationMap": true
-        },
-        {
-            "path": "./tsconfig.lib.json",
-            "declarationMap": true
-        }
-    ]
+    "include": ["src/**/*.ts", "templates/**/*.ts"]
 }

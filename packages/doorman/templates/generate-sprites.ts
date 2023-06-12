@@ -14,7 +14,7 @@ for (const folder of ["./png", "./raw", "./metadata"]) {
 }
 
 // For each sprite entry, get its region
-for (const [spriteName, spriteJsonData] of Object.entries(sprites.sprites)) {
+for (const [spriteName, spriteJsonData] of Object.entries(sprites.frames)) {
     const frame = spriteJsonData.frame;
     const region = {
         top: frame.y,

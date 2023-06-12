@@ -1,5 +1,7 @@
+import type { Image } from "./image.js";
+
 import assert from "node:assert";
-import { Image, ImageType } from "./image.js";
+import { ImageType } from "./image.js";
 
 // A match is comprised of a position and similarity score [0, 1] for a match
 export type Match = {

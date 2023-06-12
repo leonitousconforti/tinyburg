@@ -11,7 +11,7 @@ import silkscreen from "./silkscreen.json" assert { type: "json" };
 const needToEscape = new Set(["\\", '"']);
 
 // Get all the names
-const spriteNames = Object.keys(sprites.sprites).map((name) => `"${name.slice(0, name.lastIndexOf("."))}"`);
+const spriteNames = Object.keys(sprites.frames).map((name) => `"${name.slice(0, name.lastIndexOf("."))}"`);
 const characterNames = silkscreen.silkscreen.map((char) => `"char_${char.char_id}"`);
 const characters = silkscreen.silkscreen
     .map((char) => String.fromCodePoint(char.char_id))
