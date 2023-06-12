@@ -28,8 +28,8 @@ export const preHandler = async function (request: Request, reply: Reply): Promi
     request.log.info({ playerId, playerSs }, "Parsed playerId + playerSs");
 
     // Check that the salt param is a 32bit signed integer
-    request.log.info("Testing salt...");
-    if (!salt || Number.parseInt(salt) < 0 || Number.parseInt(salt) > 1) {
+    request.log.info({ salt }, "Testing salt...");
+    if (!salt || Number.parseInt(salt) < -2_147_483_648 || Number.parseInt(salt) > 2_147_483_647) {
         return reply.badRequest("Salt param was not a valid 32bit signed integer");
     }
     const saltNumber = Number.parseInt(salt);
