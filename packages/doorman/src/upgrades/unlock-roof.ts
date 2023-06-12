@@ -1,7 +1,7 @@
 import type { IUpgrade } from "./base-upgrade.js";
 import type { Roof } from "@tinyburg/core/data/roofs";
 import type { Image } from "../image-operations/image.js";
-import type { EmulatorControllerClient } from "../../proto/generated//android/emulation/control/EmulatorController.js";
+import { EmulatorControllerClient } from "@tinyburg/architect/protobuf/emulator_controller.client.js";
 
 import Debug from "debug";
 import { roofs } from "@tinyburg/core/data/roofs";

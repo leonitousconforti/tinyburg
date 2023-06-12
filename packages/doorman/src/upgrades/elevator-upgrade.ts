@@ -1,9 +1,9 @@
+import type { IUpgrade } from "./base-upgrade.js";
+
 import Debug from "debug";
 import { NeedsVersion } from "../decorators/needs-version.js";
 import { GlobalGameStateHolder } from "../global-game-state.js";
 import { EnterLog, ExitLog } from "../decorators/invocation-logs.js";
-
-import type { IUpgrade } from "./base-upgrade.js";
 
 const debug: Debug.Debugger = Debug("doorman:upgrades:elevator-upgrade");
 

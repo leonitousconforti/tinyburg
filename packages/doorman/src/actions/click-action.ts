@@ -1,13 +1,14 @@
-import { GameScreen, GlobalGameStateHolder } from "../global-game-state.js";
-import type { EmulatorControllerClient } from "../../proto/generated/android/emulation/control/EmulatorController.js";
+import type { Image } from "../image-operations/image.js";
+import type { EmulatorControllerClient } from "@tinyburg/architect/protobuf/emulator_controller.client.js";
 
 import { click } from "../grpc/send-touch.js";
 import { BaseAction } from "./base-action.js";
+import { ImageType } from "../image-operations/image.js";
 import { getScreenshot } from "../grpc/get-screenshots.js";
-import { Image, ImageType } from "../image-operations/image.js";
 import { dropChannel } from "../image-operations/drop-channel.js";
 import { upscaleImage } from "../image-operations/upscale-image.js";
 import { matchTemplate } from "../image-operations/template-matching.js";
+import { GameScreen, GlobalGameStateHolder } from "../global-game-state.js";
 import { calculateResourceScale } from "../utils/calculate-resource-scale.js";
 
 export abstract class ClickAction extends BaseAction {

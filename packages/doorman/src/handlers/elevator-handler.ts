@@ -2,7 +2,7 @@ import type { Touch } from "../grpc/send-touch.js";
 import type { Image } from "../image-operations/image.js";
 import type { ITriggerLocation } from "./base-handler.js";
 import type { ICropRegion } from "../image-operations/crop-image.js";
-import type { EmulatorControllerClient } from "../../proto/generated//android/emulation/control/EmulatorController.js";
+import { EmulatorControllerClient } from "@tinyburg/architect/protobuf/emulator_controller.client.js";
 
 import { BaseHandler } from "./base-handler.js";
 import { sendTouches } from "../grpc/send-touch.js";
@@ -13,6 +13,7 @@ import { negateImage } from "../image-operations/negate-image.js";
 import { dropChannel } from "../image-operations/drop-channel.js";
 import { upscaleImage } from "../image-operations/upscale-image.js";
 import { matchTemplate } from "../image-operations/template-matching.js";
+import { calculateResourceScale } from "../utils/calculate-resource-scale.js";
 import { loadTemplateByName, loadCharTemplates } from "../image-operations/load-template.js";
 import { detectSequence, numericalImagesDictionary, prepDictionaryToLibrary } from "../image-operations/ocr.js";
 
@@ -26,7 +27,7 @@ export class ElevatorHandler extends BaseHandler<ITriggerLocation> {
     private _templateTriggerImage: Image;
 
     public constructor() {
-        super();
+        super("Default Elevator Ride Handler");
         const dropChannelResult = dropChannel(note_ride1, ImageType.RGB, 4);
         this._templateTriggerImage = dropChannelResult.modifiedSourceImage;
         this._templateTriggerMask = negateImage(dropChannelResult.droppedChannelImage);
@@ -34,7 +35,7 @@ export class ElevatorHandler extends BaseHandler<ITriggerLocation> {
 
     public async detectTrigger(screenshot: Image): Promise<ITriggerLocation | undefined> {
         // Scale the template image to the proper size based on the source image
-        const resourceScale = this.getResourceScale(screenshot.width, screenshot.height);
+        const resourceScale = calculateResourceScale(screenshot.width, screenshot.height);
         const templateTriggerUpscaled = upscaleImage(this._templateTriggerImage, resourceScale);
         const templateMaskUpscaled = upscaleImage(this._templateTriggerMask, resourceScale);
 
@@ -57,12 +58,12 @@ export class ElevatorHandler extends BaseHandler<ITriggerLocation> {
         return undefined;
     }
 
-    public async performTask(
+    public async generateActionsList(
         emulatorClient: EmulatorControllerClient,
         initialScreenshot: Image,
         triggerData: ITriggerLocation
     ) {
-        const resourceScale = this.getResourceScale(initialScreenshot.width, initialScreenshot.height);
+        const resourceScale = calculateResourceScale(initialScreenshot.width, initialScreenshot.height);
 
         // Press the elevator note
         const baseElevatorNoteTouch = {

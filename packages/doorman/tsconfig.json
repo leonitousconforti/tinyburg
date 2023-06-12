@@ -12,9 +12,10 @@
 
         // Temporary?
         "resolveJsonModule": true,
-        "experimentalDecorators": true,
         "emitDecoratorMetadata": true,
-        "noUncheckedIndexedAccess": false
+        "experimentalDecorators": true,
+        "noUncheckedIndexedAccess": false,
+        "exactOptionalPropertyTypes": false
     },
-    "include": ["src/**/*.ts", "templates/**/*.ts"]
+    "include": ["src/**/*.ts", "templates/**/*.ts", "playground.ts"]
 }

@@ -1,11 +1,11 @@
 import type { Image } from "../image-operations/image.js";
 import type { FloorType } from "@tinyburg/core/data/floors";
-import type { EmulatorControllerClient } from "../../proto/generated/android/emulation/control/EmulatorController.js";
 
 import Debug from "debug";
 import { BaseHandler } from "../handlers/base-handler.js";
 import { GlobalGameStateHolder } from "../global-game-state.js";
 import { loadTemplateByName } from "../image-operations/load-template.js";
+import { EmulatorControllerClient } from "@tinyburg/architect/protobuf/emulator_controller.client.js";
 
 const debug: Debug.Debugger = Debug("doorman:handlers:build-floor");
 

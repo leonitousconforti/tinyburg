@@ -1,4 +1,4 @@
-import type { EmulatorControllerClient } from "../../../../../proto/generated/android/emulation/control/EmulatorController.js";
+import type { EmulatorControllerClient } from "@tinyburg/architect/protobuf/emulator_controller.client.js";
 
 import { CloseHud } from "../../close.js";
 import { GameScreen } from "../../../../global-game-state.js";

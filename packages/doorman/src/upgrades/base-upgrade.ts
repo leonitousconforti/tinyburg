@@ -1,5 +1,6 @@
 import type { Debugger } from "debug";
-import type { EmulatorControllerClient } from "../../proto/generated//android/emulation/control/EmulatorController.js";
+
+import { EmulatorControllerClient } from "@tinyburg/architect/protobuf/emulator_controller.client.js";
 
 export interface IUpgrade {
     readonly logger: Debugger;

@@ -2,7 +2,6 @@ import type { IUpgrade } from "./upgrades/base-upgrade.js";
 import type { BaseAction } from "./actions/base-action.js";
 import type { IGlobalGameState } from "./global-game-state.js";
 import type { BaseHandler, IHandlerName } from "./handlers/base-handler.js";
-import type { EmulatorControllerClient } from "../proto/generated/android/emulation/control/EmulatorController.js";
 
 import Emittery from "emittery";
 import { getScreenshot } from "./grpc/get-screenshots.js";
@@ -10,6 +9,7 @@ import { ElevatorHandler } from "./handlers/elevator-handler.js";
 import { BitbookPostHandler } from "./handlers/bitbook-handler.js";
 import { RestockHandler, StockMode } from "./handlers/restock-handler.js";
 import { createEmulatorControllerClient } from "./grpc/emulator-controller-client.js";
+import { EmulatorControllerClient } from "@tinyburg/architect/protobuf/emulator_controller.client.js";
 
 export class Doorman extends Emittery<
     {
@@ -76,3 +76,5 @@ export class Doorman extends Emittery<
         return [new BitbookPostHandler(), new ElevatorHandler(), new RestockHandler(StockMode.STOCK_ALL)];
     }
 }
+
+export default Doorman;

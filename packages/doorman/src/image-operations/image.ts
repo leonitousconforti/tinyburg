@@ -2,7 +2,7 @@ export type Image = {
     width: number;
     height: number;
     channels: 1 | 2 | 3 | 4;
-    pixels: Buffer;
+    pixels: Buffer | Uint8Array;
     format: ImageType;
 };
 

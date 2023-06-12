@@ -1,12 +1,11 @@
 import type { Image } from "../image-operations/image.js";
 import type { BaseAction } from "../actions/base-action.js";
-import type { EmulatorControllerClient } from "../../proto/generated//android/emulation/control/EmulatorController.js";
+import { EmulatorControllerClient } from "@tinyburg/architect/protobuf/emulator_controller.client.js";
 
 interface IHandlerNames {
-    BitbookNote: "BitbookNote";
-    ElevatorRider: "ElevatorRider";
-    NewMission: "NewMission";
-    RestockDone: "RestockDone";
+    RestockDone: "Default Restocking Handler";
+    BitbookNote: "Default Bitbook Note Handler";
+    ElevatorRider: "Default Elevator Ride Handler";
 }
 export type IHandlerName = IHandlerNames[keyof IHandlerNames];
 

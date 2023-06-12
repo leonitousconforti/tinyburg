@@ -1,14 +1,10 @@
-import type { ServiceError } from "@grpc/grpc-js";
-import type { EmulatorStatus__Output } from "../../proto/generated/android/emulation/control/EmulatorStatus.js";
-import type { EmulatorControllerClient } from "../../proto/generated/android/emulation/control/EmulatorController.js";
+import type { EmulatorStatus } from "@tinyburg/architect/protobuf/emulator_controller.js";
+import type { EmulatorControllerClient } from "@tinyburg/architect/protobuf/emulator_controller.client.js";
 
 import assert from "node:assert";
 
-export const getStatus = (client: EmulatorControllerClient): Promise<EmulatorStatus__Output> =>
-    new Promise((resolve, reject) => {
-        client.getStatus({}, function (error: ServiceError | null, data: EmulatorStatus__Output | undefined) {
-            if (error) return reject(error);
-            assert(data);
-            return resolve(data);
-        });
-    });
+export const getStatus = async (client: EmulatorControllerClient): Promise<EmulatorStatus> => {
+    const data = await client.getStatus({}).response;
+    assert(data);
+    return data;
+};
