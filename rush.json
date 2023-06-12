@@ -539,11 +539,11 @@
         },
 
         // Apps
-        // {
-        //     "packageName": "@tinyburg/architect-viewer",
-        //     "projectFolder": "apps/architect-viewer",
-        //     "shouldPublish": false
-        // },
+        {
+            "packageName": "@tinyburg/architect-viewer",
+            "projectFolder": "apps/architect-viewer",
+            "shouldPublish": false
+        },
         {
             "packageName": "@tinyburg/authproxy",
             "projectFolder": "apps/authproxy",
@@ -551,7 +551,7 @@
         },
         {
             "packageName": "@tinyburg/repl.it-demo",
-            "projectFolder": "apps/repl.it",
+            "projectFolder": "apps/repl.it-demo",
             "shouldPublish": false
         },
         {
