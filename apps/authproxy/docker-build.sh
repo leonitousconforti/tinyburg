@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -e
+set -euo pipefail
 
 rush build --to @tinyburg/authproxy
 rush deploy --project @tinyburg/authproxy --create-archive /workspaces/tinyburg/apps/authproxy/deploy.zip --create-archive-only
