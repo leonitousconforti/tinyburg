@@ -15,6 +15,7 @@ const debug: ILogger = new DebugLogger(loggingNamespace);
 // eslint-disable-next-line @rushstack/typedef-var
 export const serverEndpoints = {
     new_user: "/register/tt/",
+    player_details: "/player_details/tt/",
     verify_device: "/verify_device/tt/",
     register_email: "/register_email/tt/",
     pull_save: "/sync/pull/tt/",

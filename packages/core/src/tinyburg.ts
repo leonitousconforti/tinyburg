@@ -32,6 +32,7 @@ import {
 } from "./endpoints/friends.js";
 import { getGifts, receiveGift } from "./endpoints/gifts.js";
 import { newUser } from "./endpoints/new-user.js";
+import { playerDetails } from "./endpoints/player-details.js";
 import { raffleDetails } from "./endpoints/raffle-details.js";
 import { enterRaffle, enterMultiRaffle, checkEnteredRaffle } from "./endpoints/raffle.js";
 import { registerEmail } from "./endpoints/register-email.js";
@@ -113,6 +114,7 @@ export const fromConfig = (partialConfig: ITTConfig, logger: ILogger = debug) =>
         newUser: loggerConfigClosure(newUser, [config, logger]),
         registerEmail: loggerConfigClosure(registerEmail, [config, logger]),
         verifyDevice: loggerConfigClosure(verifyDevice, [config, logger]),
+        playerDetails: loggerConfigClosure(playerDetails, [config, logger]),
         uploadSave: loggerConfigClosure(uploadSave, [config, logger]),
         checkForNewerSave: loggerConfigClosure(checkForNewerSave, [config, logger]),
         downloadSave: loggerConfigClosure(downloadSave, [config, logger]),
