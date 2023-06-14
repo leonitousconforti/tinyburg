@@ -38,13 +38,13 @@
         "@rushstack/heft-typescript-plugin": "~0.1.6",
         "@tinyburg/tsconfig-rig": "workspace:*",
         "@types/debug": "~4.1.8",
-        "@types/node": "~20.3.0",
+        "@types/node": "20.3.1",
         "@types/semver": "~7.5.0",
-        "eslint": "~8.42.0",
+        "eslint": "8.42.0",
         "prettier": "~2.8.8",
         "rimraf": "~5.0.1",
         "sharp": "~0.32.1",
         "ts-node": "~10.9.1",
-        "typescript": "~5.1.3"
+        "typescript": "5.1.3"
     }
 }

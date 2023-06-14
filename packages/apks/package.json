@@ -36,13 +36,13 @@
         "@tinyburg/tsconfig-rig": "workspace:*",
         "@types/debug": "~4.1.8",
         "@types/heft-jest": "1.0.3",
-        "@types/node": "~20.3.0",
-        "eslint": "~8.42.0",
+        "@types/node": "20.3.1",
+        "eslint": "8.42.0",
         "eslint-config-prettier": "~8.8.0",
         "eslint-plugin-prettier": "~4.2.1",
         "eslint-plugin-unicorn": "~47.0.0",
         "prettier": "~2.8.8",
-        "typescript": "~5.1.3"
+        "typescript": "5.1.3"
     },
     "engines": {
         "node": ">=16"

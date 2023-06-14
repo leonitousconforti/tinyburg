@@ -34,13 +34,13 @@
         "@rushstack/eslint-config": "3.3.1",
         "@tinyburg/tsconfig-rig": "workspace:*",
         "@types/frida-gum": "~18.3.2",
-        "eslint": "~8.42.0",
+        "eslint": "8.42.0",
         "eslint-config-prettier": "~8.8.0",
         "eslint-plugin-prettier": "~4.2.1",
         "eslint-plugin-unicorn": "~47.0.0",
         "frida-compile": "~16.2.2",
         "prettier": "~2.8.8",
-        "typescript": "~5.1.3"
+        "typescript": "5.1.3"
     },
     "engines": {
         "node": ">=14.16"
