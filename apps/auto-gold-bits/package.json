@@ -1,0 +1,12 @@
+{
+    "name": "@tinyburg/auto-gold-bits",
+    "version": "0.0.1-alpha",
+    "private": true,
+    "type": "module",
+    "dependencies": {
+        "@tinyburg/core": "workspace:*"
+    },
+    "devDependencies": {
+        "@types/node": "20.3.1"
+    }
+}

@@ -550,6 +550,11 @@
             "shouldPublish": false
         },
         {
+            "packageName": "@tinyburg/auto-gold-bits",
+            "projectFolder": "apps/auto-gold-bits",
+            "shouldPublish": false
+        },
+        {
             "packageName": "@tinyburg/discord-bot",
             "projectFolder": "apps/discord-bot",
             "shouldPublish": false
