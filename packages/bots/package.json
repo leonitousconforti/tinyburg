@@ -1,6 +1,6 @@
 {
     "name": "@tinyburg/bots",
-    "version": "0.0.1-alpha.0",
+    "version": "0.0.1-alpha.1",
     "description": "Stores some burner bots needed for authentication purposes",
     "keywords": [
         "tinyburg",
