@@ -493,7 +493,7 @@
         {
             "packageName": "@tinyburg/apks",
             "projectFolder": "packages/apks",
-            "shouldPublish": false
+            "shouldPublish": true
         },
         {
             "packageName": "@tinyburg/architect",
