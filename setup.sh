@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -e
+set -euo pipefail
 echo "🚀 Setting up tinyburg devcontainer..."
 
 echo "📦 Installing Rush and Pnpm dependencies..."
