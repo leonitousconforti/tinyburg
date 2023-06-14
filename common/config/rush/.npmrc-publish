@@ -18,5 +18,6 @@
 #
 # //registry.npmjs.org/:\_authToken=${NPM_AUTH_TOKEN}
 #
-@leonitousconforti:registry=https://npm.pkg.github.com/
-//npm.pkg.github.com/:\_authToken=${NPM_AUTH_TOKEN}
+registry=https://registry.npmjs.org/
+always-auth=true
+//npm.pkg.github.com/:_authToken=${NPM_AUTH_TOKEN}
