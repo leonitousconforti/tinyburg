@@ -1,5 +1,4 @@
-import type { TokenAuthService } from "../services/Auth.js";
-
+import { Buffer } from "buffer";
 import React, { useState } from "react";
 import Copyright from "../components/Copyright.js";
 
@@ -17,15 +16,34 @@ import {
 import { Close as CloseIcon, LockOutlined as LockOutlinedIcon } from "@mui/icons-material";
 
 interface ILoginProps {
-    auth: TokenAuthService;
+    onAuthorized: (
+        emulatorEndpoint: string,
+        authorizationHeader: { readonly Authorization: `Bearer ${string}` }
+    ) => void;
 }
 
-const Login: React.FunctionComponent<ILoginProps> = ({ auth }) => {
-    const [email, setEmail] = useState("");
+const Login: React.FunctionComponent<ILoginProps> = ({ onAuthorized }) => {
+    const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [displayErrorSnack, setDisplayErrorSnack] = useState(false);
+    const [emulatorEndpoint, setEmulatorEndpoint] = useState(
+        `${window.location.protocol}//${window.location.hostname}:${window.location.port}`
+    );
 
-    const login = (): Promise<void> => auth.login(email, password);
+    const tryLogin = async (): Promise<{ readonly Authorization: `Bearer ${string}` }> => {
+        const response = await fetch(`${emulatorEndpoint}/token`, {
+            headers: {
+                Authorization: `Basic ${Buffer.from(username + ":" + password).toString("base64")}`,
+            },
+        });
+        if (!response.ok) {
+            throw new Error(response.statusText);
+        }
+        const token = await response.text();
+        const authorizationHeader = { Authorization: `Bearer ${token}` } as const;
+        onAuthorized(emulatorEndpoint, authorizationHeader);
+        return authorizationHeader;
+    };
 
     return (
         <Container component="main" maxWidth="xs">
@@ -38,7 +56,7 @@ const Login: React.FunctionComponent<ILoginProps> = ({ auth }) => {
                     alignItems: "center",
                 }}
             >
-                <Avatar sx={{ m: 1, bgcolor: "secondary.main" }}>
+                <Avatar sx={{ m: 1, bgcolor: "primary" }}>
                     <LockOutlinedIcon />
                 </Avatar>
                 <Typography component="h1" variant="h5">
@@ -71,35 +89,46 @@ const Login: React.FunctionComponent<ILoginProps> = ({ auth }) => {
                         required
                         fullWidth
                         id="email"
-                        label="Email Address"
+                        label="Username"
                         name="email"
                         autoComplete="email"
                         autoFocus
-                        value={email}
-                        onChange={(event) => setEmail(event.target.value)}
+                        value={username}
+                        onChange={(event) => setUsername(event.target.value)}
                     />
                     <TextField
                         variant="outlined"
                         margin="normal"
                         required
                         fullWidth
-                        name="password"
-                        label="Password"
-                        type="password"
                         id="password"
+                        label="Password"
+                        name="password"
+                        type="password"
                         autoComplete="current-password"
                         value={password}
                         onChange={(event) => setPassword(event.target.value)}
                         onKeyDown={(event) => {
-                            if (event.key === "Enter") login().catch(() => setDisplayErrorSnack(true));
+                            if (event.key === "Enter") tryLogin().catch(() => setDisplayErrorSnack(true));
                         }}
+                    />
+                    <TextField
+                        variant="outlined"
+                        margin="normal"
+                        required
+                        fullWidth
+                        id="Emulator-endpoint"
+                        label="Emulator endpoint"
+                        name="Emulator endpoint"
+                        value={emulatorEndpoint}
+                        onChange={(event) => setEmulatorEndpoint(event.target.value)}
                     />
                     <Button
                         fullWidth
                         variant="contained"
                         color="primary"
                         sx={{ mt: 3, mb: 2 }}
-                        onClick={() => login().catch(() => setDisplayErrorSnack(true))}
+                        onClick={() => tryLogin().catch(() => setDisplayErrorSnack(true))}
                     >
                         Sign In
                     </Button>

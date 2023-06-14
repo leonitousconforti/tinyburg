@@ -1,4 +1,3 @@
-import type React from "react";
 import type { IEmulatorControllerClient } from "@tinyburg/architect/protobuf/emulator_controller.client.js";
 
 import { List } from "@mui/material";
@@ -6,7 +5,7 @@ import { ListItem } from "@mui/material";
 import { ListItemText } from "@mui/material";
 
 import Logcat from "../services/Logcat.js";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 export interface ILogcatViewProps {
     maxHistory?: number;
@@ -24,7 +23,7 @@ export const LogcatView: React.FunctionComponent<ILogcatViewProps> = ({ emulator
     };
 
     useEffect(() => {
-        new Logcat(emulatorClient, onMessages);
+        new Logcat(emulatorClient, onMessages).startStream().catch((error) => console.error(error));
     }, [emulatorClient]);
 
     const asItems = (logLines: string[]): JSX.Element[] => {

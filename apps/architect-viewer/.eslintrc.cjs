@@ -14,5 +14,6 @@ module.exports = {
         ecmaVersion: 2022,
         sourceType: "module",
     },
+    rules: { "react/jsx-no-bind": "off" },
     ignorePatterns: ["build/", "dist/", "webpack.config.cjs", ".eslintrc.cjs"],
 };
