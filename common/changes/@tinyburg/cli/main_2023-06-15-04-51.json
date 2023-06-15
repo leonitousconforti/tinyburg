@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@tinyburg/cli",
+      "comment": "",
+      "type": "none"
+    }
+  ],
+  "packageName": "@tinyburg/cli"
+}
