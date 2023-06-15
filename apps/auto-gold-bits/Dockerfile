@@ -7,7 +7,7 @@ FROM node:18-slim
 ENV NODE_ENV="production"
 COPY --from=dependency-preparer /workspace/tinyburg /workspace/tinyburg
 RUN node /workspace/tinyburg/create-links.js create
-CMD ["node", "/workspace/tinyburg/apps/authproxy/dist/proxy.js"]
+CMD ["node", "/workspace/tinyburg/apps/auto-gold-bits/index.js"]
 
 LABEL org.opencontainers.image.licenses="MIT" \
     org.opencontainers.image.source="https://github.com/leonitousconforti/tinyburg" \
