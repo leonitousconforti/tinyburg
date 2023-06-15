@@ -13,8 +13,8 @@ import { parseDataToType, typedDataToBlock } from "@tinyburg/core/modify-save";
 // Create the bot
 const bitFarm = tinyburg.fromPlayerId(
     process.env.BIT_FARM_PLAYER_ID,
-    process.env.BIT_FARM_PLAYER_SS,
-    process.env.BIT_FARM_PLAYER_EMAIL
+    process.env.BIT_FARM_PLAYER_EMAIL,
+    process.env.BIT_FARM_PLAYER_SS
 );
 bitFarm.config.proxy.useProxy = true;
 bitFarm.config.proxy.api_key = process.env.TINYBURG_AUTHPROXY_API_KEY;
@@ -81,5 +81,5 @@ async function processGifts() {
 
 // Schedule the process gifts function
 let processGiftsIntervalMinutes = Number.parseInt(process.env.PROCESS_GIFTS_INTERVAL_MINUTES) || 5;
-setInterval(() => processGifts, 1000 * 60 * processGiftsIntervalMinutes);
+setInterval(processGifts, 1000 * 60 * processGiftsIntervalMinutes);
 bitFarm.logger.info("Auto gold bit farm is running! Will process bits every %d mins", processGiftsIntervalMinutes);
