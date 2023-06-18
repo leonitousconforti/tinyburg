@@ -1,4 +1,4 @@
 // eslint-disable-next-line @rushstack/typedef-var
-export const ApkpureVersions = [] as const;
+export const ApkpureVersions = ["4.21.1"] as const;
 
 export type ApkpureVersion = (typeof ApkpureVersions)[number];

@@ -2,7 +2,13 @@ const path = require("node:path");
 const fs = require("node:fs/promises");
 const prettier = require("prettier");
 
-const generateVersion = async (source, formatFunction = (apk) => apk.match(/\d+.\d+.\d+/gm)[0]) => {
+/**
+ * Generates a Typescript version type for the list of apks in a folder
+ *
+ * @param {string} source
+ * @param {(apk: string) => string} formatFunction
+ */
+const generateVersion = async (source, formatFunction = (apk) => apk.match(/\d+.\d+.\d+/gm)?.[0] || "unknown") => {
     const allFiles = await fs.readdir(path.join(__dirname, source));
     const apks = allFiles.filter((file) => file.endsWith(".apk"));
     const formattedApkNames = apks.map((apk) => formatFunction(apk));
@@ -14,7 +20,7 @@ const generateVersion = async (source, formatFunction = (apk) => apk.match(/\d+.
     const capitalizedSource = source.charAt(0).toUpperCase() + source.slice(1);
     const disableEslintError = "// eslint-disable-next-line @rushstack/typedef-var\n";
     const typescriptVersions = `export const ${capitalizedSource}Versions = [${joinedString}] as const;\n\n`;
-    const typescriptType = `export type ${capitalizedSource}Version = typeof ${capitalizedSource}Versions[number];\n`;
+    const typescriptType = `export type ${capitalizedSource}Version = (typeof ${capitalizedSource}Versions)[number];\n`;
     const typescriptSource = disableEslintError + typescriptVersions + typescriptType;
 
     const prettierOptions = {
