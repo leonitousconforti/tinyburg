@@ -11,7 +11,7 @@ rush install
 rush update-autoinstaller --name rush-prettier
 
 echo "🏗️ Building all packages..."
-rush build
+rush retest
 
 echo "✅ Devcontainer setup complete!"
 echo "🙏 Thank you for contributing to Tinyburg!"
