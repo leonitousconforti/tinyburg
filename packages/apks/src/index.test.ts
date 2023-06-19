@@ -55,15 +55,15 @@ describe("Should load all the patched apks", () => {
     }
 });
 
-const { latestVersionName: latestApkpureVersion, updateDate: apkpureUpdateDate } = await getApkpureDetails();
-const { latestVersionName: latestApkmirrorVersion, updateDate: apkmirrorUpdateDate } = await getApkmirrorDetails();
+const { latestVersion: latestApkpureVersion, updatedDate: apkpureUpdatedDate } = await getApkpureDetails();
+const { latestVersion: latestApkmirrorVersion, updatedDate: apkmirrorUpdatedDate } = await getApkmirrorDetails();
 describe("Should have the latest apk downloaded", () => {
-    it(`Apkpure downloads folder should contain version=${latestApkpureVersion}, published on ${apkpureUpdateDate}`, async () => {
+    it(`Apkpure downloads folder should contain version=${latestApkpureVersion}, published on ${apkpureUpdatedDate}`, async () => {
         const apkpureDownloads = new URL("../downloads/apkpure", import.meta.url);
         const versionDoesExist = await checkForApkWithVersionInFolder(apkpureDownloads, latestApkpureVersion);
         expect(versionDoesExist).toBeTruthy();
     });
-    it(`Apkmirror downloads folder should contain version=${latestApkmirrorVersion}, published on ${apkmirrorUpdateDate}`, async () => {
+    it(`Apkmirror downloads folder should contain version=${latestApkmirrorVersion}, published on ${apkmirrorUpdatedDate}`, async () => {
         const apkmirrorDownloads = new URL("../downloads/apkmirror", import.meta.url);
         const versionDoesExist = await checkForApkWithVersionInFolder(apkmirrorDownloads, latestApkmirrorVersion);
         expect(versionDoesExist).toBeTruthy();
