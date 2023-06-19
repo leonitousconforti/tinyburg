@@ -1,9 +1,10 @@
 import fs from "node:fs/promises";
-import puppeteer from "puppeteer";
 
 import { PatchedVersions } from "./patched.type.js";
 import { ApkpureVersions } from "./apkpure.type.js";
 import { ApkmirrorVersions } from "./apkmirror.type.js";
+import { getApkpureDetails } from "./apkpure.puppeteer.js";
+import { getApkmirrorDetails } from "./apkmirror.puppeteer.js";
 import { loadPatchedApk, loadApkFromApkpure, loadApkFromApkmirror, TinyTowerApkSources } from "./index.js";
 
 const checkFileExists = async (path: string): Promise<boolean> => {
@@ -54,31 +55,25 @@ describe("Should load all the patched apks", () => {
     }
 });
 
-const browser = await puppeteer.launch({ headless: "new", executablePath: "/usr/bin/chromium" });
-const page = await browser.newPage();
-await page.goto("https://m.apkpure.com/tiny-tower-8-bit-retro-tycoon/com.nimblebit.tinytower");
-const detailBanner = await page.$(".detail_banner");
-const updateDate = await detailBanner?.$eval(".date", (n) => n.textContent);
-const latestVersion = await detailBanner?.$eval(".details_sdk span", (n) => n.textContent);
-await browser.close();
+const { latestVersionName: latestApkpureVersion, updateDate: apkpureUpdateDate } = await getApkpureDetails();
+const { latestVersionName: latestApkmirrorVersion, updateDate: apkmirrorUpdateDate } = await getApkmirrorDetails();
 describe("Should have the latest apk downloaded", () => {
-    it(`Apkpure downloads folder should contain version=${latestVersion}, published on ${updateDate}`, async () => {
+    it(`Apkpure downloads folder should contain version=${latestApkpureVersion}, published on ${apkpureUpdateDate}`, async () => {
         const apkpureDownloads = new URL("../downloads/apkpure", import.meta.url);
-        const versionDoesExist = await checkForApkWithVersionInFolder(apkpureDownloads, latestVersion);
+        const versionDoesExist = await checkForApkWithVersionInFolder(apkpureDownloads, latestApkpureVersion);
         expect(versionDoesExist).toBeTruthy();
     });
-    it(`Apkmirror downloads folder should contain version=${latestVersion}, published on ${updateDate}`, async () => {
+    it(`Apkmirror downloads folder should contain version=${latestApkmirrorVersion}, published on ${apkmirrorUpdateDate}`, async () => {
         const apkmirrorDownloads = new URL("../downloads/apkmirror", import.meta.url);
-        const versionDoesExist = await checkForApkWithVersionInFolder(apkmirrorDownloads, latestVersion);
+        const versionDoesExist = await checkForApkWithVersionInFolder(apkmirrorDownloads, latestApkmirrorVersion);
         expect(versionDoesExist).toBeTruthy();
     });
 });
 
-const filePromises = [...TinyTowerApkSources, "patched"].map((source) =>
-    fs.readdir(new URL(`../downloads/${source}`, import.meta.url))
-);
+const allSource = [...TinyTowerApkSources, "patched"];
+const filePromises = allSource.map((source) => fs.readdir(new URL(`../downloads/${source}`, import.meta.url)));
 const countPromises = await Promise.all(filePromises);
-const count = countPromises.flat().length - [...TinyTowerApkSources, "patched"].length;
+const count = countPromises.flat().length - allSource.length;
 describe("Should load all apks from all sources at least once", () => {
     it(`Should load all ${count} versions`, async () => {
         expect(count).toEqual(ApkmirrorVersions.length + ApkpureVersions.length + PatchedVersions.length);
