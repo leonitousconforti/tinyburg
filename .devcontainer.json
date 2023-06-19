@@ -8,7 +8,7 @@
         "ghcr.io/devcontainers/features/rust:1": {},
         "ghcr.io/devcontainers/features/python:1": {},
         "ghcr.io/devcontainers/features/git-lfs:1": {},
-        "ghcr.io/devcontainers/features/terraform:1": {},
+        // "ghcr.io/devcontainers/features/terraform:1": {},
         "ghcr.io/devcontainers/features/github-cli:1": {},
         "ghcr.io/devcontainers-contrib/features/act:1": {},
         "ghcr.io/devcontainers/features/common-utils:2": {},
@@ -19,6 +19,9 @@
         "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {},
         "ghcr.io/frntn/devcontainers-features/gitleaks:1": {
             "version": "v8.16.0"
+        },
+        "ghcr.io/devcontainers-contrib/features/apt-get-packages:1": {
+            "packages": "chromium"
         }
     },
 
@@ -146,6 +149,8 @@
         }
     },
 
+    "remoteEnv": { "PUPPETEER_EXECUTABLE_PATH": "/usr/bin/chromium" },
+    "containerEnv": { "PUPPETEER_EXECUTABLE_PATH": "/usr/bin/chromium" },
     "appPort": ["3000:3000"],
     "postCreateCommand": "/bin/bash ./setup.sh"
 }
