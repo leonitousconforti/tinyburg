@@ -1,6 +1,6 @@
 # @tinyburg/apks
 
-an internal package that stores all versions of TinyTower that I want tinyburg to support, ready to be consumed by other tools such as @tinyburg/architect or @tinyburg/insight. There are downloaded apks from apkpure and apkmirror and they will never be uploaded to github because they are so large. I was going to get apks from gplaydl as well but the github issues recently seem to suggest that it is broken so I did not try it. This internal tool also supports patching the apks with frida-gadget and any mitm proxy certificates in case root is not available in the environment where TinyTower is going to be running or you want to analyze TinyTower web traffic.
+an internal package that stores all versions of TinyTower that I want tinyburg to support, ready to be consumed by other tools such as @tinyburg/architect or @tinyburg/insight. It can store downloaded apks from apkpure and apkmirror but they will never be uploaded to github because they are so large. I was going to get apks from gplaydl as well but the github issues recently seem to suggest that it is broken so I did not try it. This internal tool also supports patching the apks with frida-gadget and any mitm proxy certificates in case root is not available in the environment where TinyTower is going to be running or you want to analyze TinyTower web traffic.
 
 ## Future
 
@@ -14,10 +14,7 @@ thinking about also tracking major events and be able to load the versions for t
 
 # After downloading any apk into the apkpure or apkmirror download folders,
 # you should re-build this package
-rushx build
-
-# or
-rush build --to @tinyburg/apks
+rush test --to @tinyburg/apks
 ```
 
 then to load any of the apks for use in a different typescript package
@@ -27,7 +24,7 @@ then to load any of the apks for use in a different typescript package
 import loadApk from "@tinyburg/apks";
 import { loadApk } from "@tinyburg/apks";
 
-// Or to load from a specific download source
+// Or load from a specific download source
 import { loadPatchedApk } from "@tinyburg/apks";
 import { loadApkFromApkpure } from "@tinyburg/apks";
 import { loadApkFromApkmirror } from "@tinyburg/apks";
@@ -36,10 +33,4 @@ const apk = loadApk("apkpure", "4.14.0")
 const apk1 = loadApkFromApkpure("4.14.0");
 const apk2 = loadApkFromApkmirror("4.14.0");
 const apk3 = loadPatchedApk("apkpure-4.14.0-with-frida-gadget");
-```
-
-Otherwise, you can push any patched apk straight to an emulator the connect with
-
-```bash
-frida -U --attach-name Gadget
 ```
