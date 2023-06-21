@@ -8,7 +8,7 @@
         "ghcr.io/devcontainers/features/rust:1": {},
         "ghcr.io/devcontainers/features/python:1": {},
         "ghcr.io/devcontainers/features/git-lfs:1": {},
-        // "ghcr.io/devcontainers/features/terraform:1": {},
+        "ghcr.io/devcontainers/features/terraform:1": {},
         "ghcr.io/devcontainers/features/github-cli:1": {},
         "ghcr.io/devcontainers-contrib/features/act:1": {},
         "ghcr.io/devcontainers/features/common-utils:2": {},
