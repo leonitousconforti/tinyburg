@@ -18,6 +18,9 @@
     "author": "Leo Conforti <leo@leoconforti.us> (https://leoconforti.us)",
     "type": "module",
     "main": "dist/index.js",
+    "bin": {
+        "architect": "./dist/cli.js"
+    },
     "files": [
         "dist/",
         "envoy/",
@@ -32,18 +35,18 @@
         "_phase:build": "heft run --only build -- --clean",
         "_phase:test": "NODE_OPTIONS=\"--experimental-vm-modules --no-warnings\" heft run --only test -- --clean",
         "build": "NODE_OPTIONS=\"--experimental-vm-modules --no-warnings\" heft test --clean",
-        "docker:build-emulator-linux-x86_64": "docker build ./emulator --file emulator/linux-x86_64.Dockerfile --tag ghcr.io/leonitousconforti/tinyburg/architect-linux-x86_64:emulator-10086546_sys-30-google-apis-x64-r12_frida-16.0.19",
-        "docker:build-emulator-macos-arm64": "docker build ./emulator --file emulator/macos-arm64.Dockerfile --platform linux/arm64/v8 --tag ghcr.io/leonitousconforti/tinyburg/architect-macos-arm64:emulator-10086546_sys-30-google-apis-arm64-r12_frida-16.0.19",
-        "docker:run-emulator-linux-x86_64": "docker run --rm --device /dev/kvm --publish 5554:5554/tcp --publish 5555:5555/tcp --publish 8554:8554/tcp --publish 27042:27042/tcp -it ghcr.io/leonitousconforti/tinyburg/architect-linux-x86_64:emulator-10086546_sys-30-google-apis-x64-r12_frida-16.0.19",
-        "docker:run-emulator-macos-arm64": "docker run --rm --platform linux/arm64/v8 --publish 5554:5554/tcp --publish 5555:5555/tcp --publish 8554:8554/tcp --publish 27042:27042/tcp -it ghcr.io/leonitousconforti/tinyburg/architect-macos-arm64:emulator-10086546_sys-30-google-apis-arm64-r12_frida-16.0.19",
+        "docker:build": "docker build ./emulator --platform linux/x86_64 --tag ghcr.io/leonitousconforti/tinyburg/architect:emulator-10086546_sys-30-google-apis-x64-r12_frida-16.0.19",
+        "docker:run": "docker run --rm --platform linux/x86_64 --device /dev/kvm --publish 5554:5554/tcp --publish 5555:5555/tcp --publish 8554:8554/tcp --publish 27042:27042/tcp -it ghcr.io/leonitousconforti/tinyburg/architect:emulator-10086546_sys-30-google-apis-x64-r12_frida-16.0.19",
         "protobuf:clean": "rimraf --glob protobuf/**/*.js && rimraf --glob protobuf/**/*.d.ts",
         "protobuf:gen": "protoc -I ./protobuf --ts_out ./protobuf --ts_opt optimize_code_size --ts_opt output_javascript --ts_opt eslint_disable ./protobuf/emulator_controller.proto ./protobuf/rtc_service.proto"
     },
     "dependencies": {
         "debug": "~4.3.4",
+        "docker-modem": "~3.0.8",
         "dockerode": "~3.3.5",
         "dockerode-compose": "~1.3.3",
-        "tar-fs": "~2.1.1"
+        "tar-fs": "~2.1.1",
+        "yargs": "~17.7.2"
     },
     "devDependencies": {
         "@protobuf-ts/plugin": "~2.9.0",
@@ -62,13 +65,16 @@
         "@types/dockerode": "~3.3.18",
         "@types/heft-jest": "1.0.3",
         "@types/node": "20.3.1",
+        "@types/ssh2": "~1.11.11",
         "@types/tar-fs": "~2.0.1",
+        "@types/yargs": "~17.0.24",
         "eslint": "8.42.0",
         "eslint-config-prettier": "~8.8.0",
         "eslint-plugin-prettier": "~4.2.1",
         "eslint-plugin-unicorn": "~47.0.0",
         "prettier": "~2.8.8",
         "rimraf": "~5.0.1",
+        "ssh2": "~1.14.0",
         "typescript": "5.1.3"
     },
     "engines": {
