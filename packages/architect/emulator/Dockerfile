@@ -49,12 +49,10 @@ COPY --from=dependency-preparer /tmp/sysimg/ /android/sdk/system-images/android/
 COPY --from=dependency-preparer /tmp/frida-server-16.0.19-android-x86_64 /android/frida/frida-server
 
 ADD avd/ /android/avd-home
-COPY pull-data.sh /android/sdk/
 COPY launch-emulator.sh /android/sdk/
 COPY default.pulse-audio /etc/pulse/default.pa
 
 RUN gpasswd -a root audio && \
-    chmod +x /android/sdk/pull-data.sh && \
     chmod +x /android/sdk/launch-emulator.sh && \
     chmod +x /android/sdk/platform-tools/adb
 
