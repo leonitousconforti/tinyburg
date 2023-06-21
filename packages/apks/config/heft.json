@@ -20,7 +20,7 @@
                     }
                 },
                 "lint": {
-                    "taskDependencies": ["generate-types"],
+                    "taskDependencies": ["typescript"],
                     "taskPlugin": {
                         "pluginPackage": "@rushstack/heft-lint-plugin"
                     }
