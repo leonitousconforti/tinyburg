@@ -25,6 +25,16 @@
                     }
                 }
             }
+        },
+        "test": {
+            "phaseDependencies": ["build"],
+            "tasksByName": {
+                "jest": {
+                    "taskPlugin": {
+                        "pluginPackage": "@rushstack/heft-jest-plugin"
+                    }
+                }
+            }
         }
     }
 }

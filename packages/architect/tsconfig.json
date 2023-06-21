@@ -4,11 +4,11 @@
         "outDir": "./dist",
         "module": "esnext",
         "moduleResolution": "NodeNext",
-        "types": ["node"],
+        "types": ["node", "heft-jest"],
 
         "noEmit": false,
         "sourceMap": true,
         "declaration": true
     },
-    "include": ["index.ts", "dockerode-compose.d.ts"]
+    "include": ["index.ts", "index.test.ts", "dockerode-compose.d.ts"]
 }
