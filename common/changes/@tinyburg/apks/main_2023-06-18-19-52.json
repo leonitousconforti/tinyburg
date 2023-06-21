@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@tinyburg/apks",
+      "comment": "check for most recent tinytower version in tests",
+      "type": "none"
+    }
+  ],
+  "packageName": "@tinyburg/apks"
+}
