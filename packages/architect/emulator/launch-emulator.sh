@@ -12,6 +12,8 @@ pulseaudio -D --log-time=1 --log-target=newfile:/tmp/pulseverbose.log --log-time
 # Start the adb server and the emulator
 /android/sdk/platform-tools/adb start-server
 /android/sdk/emulator/emulator -avd Pixel2 -no-window -ports 5554,5555 -grpc 8554 -gpu swiftshader_indirect -qemu -append panic=1 &
+/android/sdk/platform-tools/adb wait-for-device
+while [ "`/android/sdk/platform-tools/adb shell getprop sys.boot_completed | tr -d '\r' `" != "1" ] ; do sleep 1; done
 
 # Listeners, needed because adb does not bind to all interfaces
 # so just forwarding the port through docker does not work
