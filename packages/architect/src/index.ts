@@ -4,13 +4,14 @@ import path from "node:path";
 import tar from "tar-fs";
 import Debug from "debug";
 import Dockerode from "dockerode";
+import DockerModem from "docker-modem";
 import DockerodeCompose from "dockerode-compose";
 
 const logger: Debug.Debugger = Debug.debug("tinyburg:architect");
 
 export const architect = async (options?: {
     withAdditionalServices: boolean | undefined;
-    dockerConnectionOptions: Dockerode.DockerOptions | undefined;
+    dockerConnectionOptions: (Dockerode.DockerOptions & { modem: DockerModem }) | undefined;
 }): Promise<{
     container: Dockerode.Container;
     launchGame: () => Promise<void>;
@@ -21,10 +22,11 @@ export const architect = async (options?: {
     );
     const dockerodeCompose: DockerodeCompose = new DockerodeCompose(
         dockerode,
-        url.fileURLToPath(new URL("docker-compose.yaml", import.meta.url)),
+        url.fileURLToPath(new URL("../docker-compose.yaml", import.meta.url)),
         "architect"
     );
-    const tag = "tinyburg/architect:emulator-10086546_sys-30-google-apis-x64-r12_frida-16.0.19";
+    const tag =
+        "ghcr.io/leonitousconforti/tinyburg/architect:emulator-10086546_sys-30-google-apis-x64-r12_frida-16.0.19";
 
     // Try to find an already running container
     let container: Dockerode.Container;
@@ -55,7 +57,7 @@ export const architect = async (options?: {
     // with no additional services needed
     else {
         // Build a new docker container
-        const context = new URL("emulator", import.meta.url);
+        const context = new URL("../emulator", import.meta.url);
         const tarStream = tar.pack(url.fileURLToPath(context));
         logger("Building docker image from context %s, will tag image as %s when finished", context.toString(), tag);
         logger("Subsequent calls should be much faster as this image will be cached");
