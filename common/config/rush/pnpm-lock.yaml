@@ -250,8 +250,11 @@ importers:
       '@types/dockerode': ~3.3.18
       '@types/heft-jest': 1.0.3
       '@types/node': 20.3.1
+      '@types/ssh2': ~1.11.11
       '@types/tar-fs': ~2.0.1
+      '@types/yargs': ~17.0.24
       debug: ~4.3.4
+      docker-modem: ~3.0.8
       dockerode: ~3.3.5
       dockerode-compose: ~1.3.3
       eslint: 8.42.0
@@ -260,13 +263,17 @@ importers:
       eslint-plugin-unicorn: ~47.0.0
       prettier: ~2.8.8
       rimraf: ~5.0.1
+      ssh2: ~1.14.0
       tar-fs: ~2.1.1
       typescript: 5.1.3
+      yargs: ~17.7.2
     dependencies:
       debug: 4.3.4
+      docker-modem: 3.0.8
       dockerode: 3.3.5
       dockerode-compose: 1.3.3
       tar-fs: 2.1.1
+      yargs: 17.7.2
     devDependencies:
       '@protobuf-ts/plugin': 2.9.0
       '@protobuf-ts/protoc': 2.9.0
@@ -284,13 +291,16 @@ importers:
       '@types/dockerode': 3.3.19
       '@types/heft-jest': 1.0.3
       '@types/node': 20.3.1
+      '@types/ssh2': 1.11.11
       '@types/tar-fs': 2.0.1
+      '@types/yargs': 17.0.24
       eslint: 8.42.0
       eslint-config-prettier: 8.8.0_eslint@8.42.0
       eslint-plugin-prettier: 4.2.1_vnriwwub2rhvoyn4ckagrc4lpi
       eslint-plugin-unicorn: 47.0.0_eslint@8.42.0
       prettier: 2.8.8
       rimraf: 5.0.1
+      ssh2: 1.14.0
       typescript: 5.1.3
 
   ../../packages/bots:
@@ -4022,7 +4032,6 @@ packages:
     resolution: {integrity: sha512-ix/FxPn0MDjeyJ7i/yoHGFt/EX6LyNbxSEhPPXODPL+KB0VPk86UYfL0lMdy+KCnv+fmvIzySwaK5COwqVbWTQ==}
     dependencies:
       safer-buffer: 2.1.2
-    dev: false
 
   /ast-types-flow/0.0.7:
     resolution: {integrity: sha512-eBvWn1lvIApYMhzQMsu9ciLfkBY499mFZlNqG+/9WR7PVlroQw0vG30cOQQbaKz3sCEc44TAOu2ykzqXSNnwag==}
@@ -4212,7 +4221,6 @@ packages:
     resolution: {integrity: sha512-qeFIXtP4MSoi6NLqO12WfqARWWuCKi2Rn/9hJLEmtB5yTNr9DqFWkJRCf2qShWzPeAMRnOgCrq0sg/KLv5ES9w==}
     dependencies:
       tweetnacl: 0.14.5
-    dev: false
 
   /big-integer/1.6.51:
     resolution: {integrity: sha512-GPEid2Y9QU1Exl1rpO9B2IPJGHPSupF5GnVIP0blYvNOMer2bTvSWs1jGOUg04hTmu67nmLsQ9TBo1puaotBHg==}
@@ -4343,7 +4351,6 @@ packages:
   /buildcheck/0.0.6:
     resolution: {integrity: sha512-8f9ZJCUXyT1M35Jx7MkBgmBMo3oHTTBIPLiY9xyL0pl3T5RwcPEY8cUHr5LBNfu/fk6c2T4DJZuVM/8ZZT2D2A==}
     engines: {node: '>=10.0.0'}
-    dev: false
     optional: true
 
   /builtin-modules/3.3.0:
@@ -4758,7 +4765,6 @@ packages:
     dependencies:
       buildcheck: 0.0.6
       nan: 2.17.0
-    dev: false
     optional: true
 
   /create-require/1.1.1:
@@ -5060,7 +5066,7 @@ packages:
       debug: 4.3.4
       readable-stream: 3.6.2
       split-ca: 1.0.1
-      ssh2: 1.13.0
+      ssh2: 1.14.0
     transitivePeerDependencies:
       - supports-color
     dev: false
@@ -8164,7 +8170,6 @@ packages:
 
   /nan/2.17.0:
     resolution: {integrity: sha512-2ZTgtl0nJsO0KQCjEpxcIr5D+Yv90plTitZt9JBfQvVJDS5seMl3FOvsh3+9CoYWXf/1l5OaZzzF6nDm4cagaQ==}
-    dev: false
     optional: true
 
   /nanoid/3.3.6:
@@ -9968,8 +9973,8 @@ packages:
     resolution: {integrity: sha512-D9cPgkvLlV3t3IzL0D0YLvGA9Ahk4PcvVwUbN0dSGr1aP0Nrt4AEnTUbuGvquEC0mA64Gqt1fzirlRs5ibXx8g==}
     dev: true
 
-  /ssh2/1.13.0:
-    resolution: {integrity: sha512-CIZBFRRY1y9mAZSqBGFE4EB4dNJad2ysT2PqO8OpkiI3UTB/gUZwE5EaN16qVyQ6s/M7EgC/iaV/MnjdlvnuzA==}
+  /ssh2/1.14.0:
+    resolution: {integrity: sha512-AqzD1UCqit8tbOKoj6ztDDi1ffJZ2rV2SwlgrVVrHPkV5vWqGJOVp5pmtj18PunkPJAuKQsnInyKV+/Nb2bUnA==}
     engines: {node: '>=10.16.0'}
     requiresBuild: true
     dependencies:
@@ -9978,7 +9983,6 @@ packages:
     optionalDependencies:
       cpu-features: 0.0.8
       nan: 2.17.0
-    dev: false
 
   /stack-utils/2.0.6:
     resolution: {integrity: sha512-XlkWvfIm6RmsWtNJx+uqtKLS8eqFbxUg0ZzLXqY0caEy9l7hruX8IpiDnjsLavoBgqCCR71TqWO8MaXYheJ3RQ==}
@@ -10494,7 +10498,6 @@ packages:
 
   /tweetnacl/0.14.5:
     resolution: {integrity: sha512-KXXFFdAbFXY4geFIwoyNK+f5Z1b7swfXABfL7HXCmoIWMKU3dmS26672A4EeQtDzLKy7SXmfBu51JolvEKwtGA==}
-    dev: false
 
   /type-check/0.3.2:
     resolution: {integrity: sha512-ZCmOJdvOWDBYJlzAoFkC+Q0+bUyEOS1ltgp1MGU03fqHG+dbi9tBFU2Rd9QKiDZFAYrhPh2JUf7rZRIuHRKtOg==}
