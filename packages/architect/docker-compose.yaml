@@ -12,7 +12,7 @@ services:
       - "8081:8081"
 
   emulator:
-    image: tinyburg/architect:emulator-10086546_sys-30-google-apis-x64-r12_frida-16.0.19
+    image: ghcr.io/leonitousconforti/tinyburg/architect:emulator-10086546_sys-30-google-apis-x64-r12_frida-16.0.19
     shm_size: 128M
     devices: [/dev/kvm]
     deploy:
