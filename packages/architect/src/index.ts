@@ -4,14 +4,13 @@ import path from "node:path";
 import tar from "tar-fs";
 import Debug from "debug";
 import Dockerode from "dockerode";
-import DockerModem from "docker-modem";
 import DockerodeCompose from "dockerode-compose";
 
 const logger: Debug.Debugger = Debug.debug("tinyburg:architect");
 
 export const architect = async (options?: {
     withAdditionalServices: boolean | undefined;
-    dockerConnectionOptions: (Dockerode.DockerOptions & { modem: DockerModem }) | undefined;
+    dockerConnectionOptions: Dockerode.DockerOptions | undefined;
 }): Promise<{
     container: Dockerode.Container;
     launchGame: () => Promise<void>;
