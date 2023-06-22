@@ -9,8 +9,10 @@ import DockerodeCompose from "dockerode-compose";
 const logger: Debug.Debugger = Debug.debug("tinyburg:architect");
 
 export const architect = async (options?: {
-    withAdditionalServices: boolean | undefined;
-    dockerConnectionOptions: Dockerode.DockerOptions | undefined;
+    withAdditionalServices?: boolean | undefined;
+    dockerConnectionOptions?:
+        | (Omit<Dockerode.DockerOptions, "sshAuthAgent"> & { sshOptions?: { agent?: string | undefined } })
+        | undefined;
 }): Promise<{
     container: Dockerode.Container;
     launchGame: () => Promise<void>;
