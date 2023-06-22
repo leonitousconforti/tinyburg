@@ -34,7 +34,7 @@
         "@rushstack/eslint-config": "3.3.2",
         "@tinyburg/tsconfig-rig": "workspace:*",
         "@types/frida-gum": "~18.3.2",
-        "eslint": "8.42.0",
+        "eslint": "8.43.0",
         "eslint-config-prettier": "~8.8.0",
         "eslint-plugin-prettier": "~4.2.1",
         "eslint-plugin-unicorn": "~47.0.0",
