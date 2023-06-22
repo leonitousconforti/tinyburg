@@ -81,7 +81,8 @@
                     "**/.cache": true,
                     "**/.heft": true,
                     "**/.rush": true,
-                    "**/temp": true,
+                    "apps/**/temp": true,
+                    "packages/**/temp": true,
                     "**/rush-logs": true
                 },
                 "cSpell.enableFiletypes": [
