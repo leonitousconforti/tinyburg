@@ -174,8 +174,6 @@
             "enableParallelism": true,
             "incremental": true
         },
-        // No need to define "rebuild", by default, it is the same as build
-        // but with incremental=false.
         {
             "commandKind": "phased",
             "name": "test",
@@ -191,6 +189,28 @@
             "phases": ["_phase:build", "_phase:test"],
             "enableParallelism": true,
             "incremental": false
+        },
+        {
+            "commandKind": "phased",
+            "name": "start",
+            "summary": "Build all projects, then watch for changes, build and test.",
+            "description": "Build all projects, then watches for changes and builds and runs tests for affected projects.",
+            "safeForSimultaneousRushProcesses": false,
+            "enableParallelism": true,
+            "incremental": true,
+            "phases": ["_phase:build"],
+            "watchOptions": {
+                "alwaysWatch": true, // Act as though `--watch` is always passed. If false, adds support for passing `--watch`.
+                "watchPhases": ["_phase:build", "_phase:test"] // During watch recompilation run both build and test for affected projects
+            }
+        },
+        {
+            "name": "prettier",
+            "commandKind": "global",
+            "summary": "Used by the pre-commit Git hook. This command invokes Prettier to reformat staged changes.",
+            "autoinstallerName": "rush-prettier",
+            "shellCommand": "pretty-quick --staged",
+            "safeForSimultaneousRushProcesses": true
         }
     ],
 
@@ -319,6 +339,13 @@
         //     }
         //   ]
         // }
+        {
+            "longName": "--production",
+            "parameterKind": "flag",
+            "description": "Perform a production build, including minification and localization steps",
+            "associatedPhases": ["_phase:build", "_phase:test"],
+            "associatedCommands": ["build", "rebuild", "test", "retest"]
+        }
     ],
 
     "phases": [
