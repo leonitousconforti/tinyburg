@@ -9,6 +9,8 @@ npm install -g pnpm @microsoft/rush vercel ts-node
 echo "📦 Installing monorepo dependencies..."
 rush install
 rush update-autoinstaller --name rush-prettier
+rush update-autoinstaller --name rush-commitlint
+rush update-autoinstaller --name rush-commitizen
 
 echo "🏗️ Building all packages..."
 rush retest
