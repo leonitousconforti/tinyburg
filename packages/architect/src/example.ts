@@ -1,5 +1,3 @@
-/* eslint-disable dot-notation */
-
 import architect from "./index.js";
 
 // You can either use something like the dockerConnectionOptions below
@@ -15,6 +13,7 @@ const { container } = await architect({
         port: 22,
         username: "root",
         sshOptions: {
+            // eslint-disable-next-line dot-notation
             agent: process.env["SSH_AUTH_SOCK"],
         },
     },
