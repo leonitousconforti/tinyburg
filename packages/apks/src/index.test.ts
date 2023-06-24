@@ -3,8 +3,8 @@ import fs from "node:fs/promises";
 import { PatchedVersions } from "./patched.type.js";
 import { ApkpureVersions } from "./apkpure.type.js";
 import { ApkmirrorVersions } from "./apkmirror.type.js";
-import { getApkpureDetails } from "./apkpure.puppeteer.js";
-import { getApkmirrorDetails } from "./apkmirror.puppeteer.js";
+import { getApkpureLatestDetails } from "./apkpure.puppeteer.js";
+import { getApkmirrorLatestDetails } from "./apkmirror.puppeteer.js";
 import { loadPatchedApk, loadApkFromApkpure, loadApkFromApkmirror, TinyTowerApkSources } from "./index.js";
 
 const checkFileExists = async (path: string): Promise<boolean> => {
@@ -55,8 +55,8 @@ describe("Should load all the patched apks", () => {
     }
 });
 
-const { latestVersion: latestApkpureVersion, updatedDate: apkpureUpdatedDate } = await getApkpureDetails();
-const { latestVersion: latestApkmirrorVersion, updatedDate: apkmirrorUpdatedDate } = await getApkmirrorDetails();
+const { latestVersion: latestApkpureVersion, updatedDate: apkpureUpdatedDate } = await getApkpureLatestDetails();
+const { latestVersion: latestApkmirrorVersion, updatedDate: apkmirrorUpdatedDate } = await getApkmirrorLatestDetails();
 describe("Should have the latest apk downloaded", () => {
     it(`Apkpure downloads folder should contain version=${latestApkpureVersion}, published on ${apkpureUpdatedDate}`, async () => {
         const apkpureDownloads = new URL("../downloads/apkpure", import.meta.url);
