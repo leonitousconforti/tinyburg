@@ -49,5 +49,5 @@ common/autoinstallers/*/.npmrc
 .gitleaks.toml
 
 # Testing things
-**/playground.ts
+**/playground*.ts
 **/TODO.txt
