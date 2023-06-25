@@ -6,7 +6,7 @@ import architect from "./index.js";
 // process.env["DOCKER_HOST"] = "ssh://root@architect02.tinyburg.app:22";
 
 const { container } = await architect({
-    withAdditionalServices: true,
+    withAdditionalServices: false,
     dockerConnectionOptions: {
         protocol: "ssh",
         host: "architect02.tinyburg.app",
