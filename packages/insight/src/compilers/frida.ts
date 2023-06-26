@@ -7,9 +7,8 @@ const logger: Debug.Debugger = Debug.debug("tinyburg:insight:frida-compiler");
 
 export const fridaCompiler = async (agentLocation: string): Promise<string> => {
     const tsSystem = getNodeSystem();
-    const projectRoot = path.fileURLToPath(new URL("../"));
+    const projectRoot = path.fileURLToPath(new URL("../", import.meta.url));
     const assets = fridaCompile.queryDefaultAssets(projectRoot, tsSystem);
-    // const tsconfig = path.fileURLToPath(new URL("../tsconfig.agents.json", import.meta.url));
 
     const buildOptions: fridaCompile.BuildOptions = {
         assets,
@@ -19,8 +18,7 @@ export const fridaCompiler = async (agentLocation: string): Promise<string> => {
         sourceMaps: "included",
         compression: "terser",
     };
-    logger("Generated frida-compile build options %O", buildOptions);
 
-    const source = fridaCompile.build(buildOptions);
-    return source;
+    logger("Generated frida-compile build options %o", buildOptions);
+    return fridaCompile.build(buildOptions);
 };

@@ -1,7 +1,10 @@
 import type { BuildOptions } from "esbuild";
 
+import Debug from "debug";
 import path from "node:url";
 import { build } from "esbuild";
+
+const logger: Debug.Debugger = Debug.debug("tinyburg:insight:esbuild-compiler");
 
 export const esbuildCompiler = async (agentLocation: string): Promise<string> => {
     // Create build options for agents
@@ -14,12 +17,11 @@ export const esbuildCompiler = async (agentLocation: string): Promise<string> =>
         minify: true,
         sourcemap: "inline",
     };
-    console.log(`Generated esbuild options ${JSON.stringify(buildOptions)}`);
+    logger(`Generated esbuild options ${JSON.stringify(buildOptions)}`);
 
     // Compile and inject the frida script
-    console.time("Compiled script");
     const source = await build(buildOptions);
     if (!source.outputFiles || !source.outputFiles[0]) throw new Error("Something went wrong when compiling the agent");
-    console.timeEnd("Compiled script");
+    logger("Compiled script");
     return source.outputFiles[0].text;
 };
