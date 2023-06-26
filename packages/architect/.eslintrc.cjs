@@ -19,5 +19,13 @@ module.exports = {
         ecmaVersion: 2022,
         sourceType: "module",
     },
+    overrides: [
+        {
+            files: ["./src/index.test.ts", "./src/stress-test.ts", "./src/example.ts"],
+            rules: {
+                "dot-notation": "off",
+            },
+        },
+    ],
     ignorePatterns: ["dist/"],
 };
