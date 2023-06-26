@@ -14,6 +14,7 @@ pulseaudio -D --log-time=1 --log-target=newfile:/tmp/pulseverbose.log --log-time
 /android/sdk/emulator/emulator -avd Pixel2 -no-window -ports 5554,5555 -grpc 8554 -gpu swiftshader_indirect -qemu -append panic=1 &
 /android/sdk/platform-tools/adb wait-for-device
 while [ "`/android/sdk/platform-tools/adb shell getprop sys.boot_completed | tr -d '\r' `" != "1" ] ; do sleep 1; done
+sleep 10s
 
 # Listeners, needed because adb does not bind to all interfaces
 # so just forwarding the port through docker does not work
@@ -25,3 +26,4 @@ socat tcp-listen:27042,reuseaddr,fork tcp:127.0.0.1:27043 &
 /android/sdk/platform-tools/adb shell "chmod 755 /data/local/tmp/frida-server"
 /android/sdk/platform-tools/adb forward tcp:27043 tcp:27042
 /android/sdk/platform-tools/adb shell "/data/local/tmp/frida-server"
+sleep 10s
