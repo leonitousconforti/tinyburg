@@ -41,9 +41,13 @@ export const architect = async (options?: {
         url.fileURLToPath(new URL("../docker-compose.yaml", import.meta.url)),
         "architect"
     );
+    logger(
+        "Connected to docker daemon %s @ %s",
+        (dockerode.modem as DockerModem.ConstructorOptions).socketPath,
+        (dockerode.modem as DockerModem.ConstructorOptions).host || "localhost"
+    );
     const tag =
         "ghcr.io/leonitousconforti/tinyburg/architect:emulator-10086546_sys-30-google-apis-x64-r12_frida-16.0.19";
-    logger("Connected to docker daemon @ %s", (dockerode.modem as DockerModem.ConstructorOptions).host);
 
     // Try to find an already running container
     let container: Dockerode.Container;
