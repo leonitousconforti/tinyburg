@@ -42,9 +42,12 @@ export const cleanupAgent = async ({
     script: frida.Script;
     pid: number;
 }): Promise<void> => {
-    await script.unload();
-    await session.detach();
-    await device.kill(pid);
+    if (!script.isDestroyed) await script.unload();
+    if (!session.isDetached) await session.detach();
+    const processes = await device.enumerateProcesses();
+    if (processes.some((process) => process.pid === pid)) {
+        await device.kill(pid);
+    }
 };
 
 /**
@@ -146,7 +149,7 @@ export const bootstrapAgent = async <T extends IAgent>(
         } catch (error: unknown) {
             logger("Somethings not right, shutting down and cleaning up");
             await cleanupAgent({ device, session, script, pid });
-            throw error;
+            throw error instanceof Error ? error : new Error(error as string);
         }
     };
     /* eslint-enable @typescript-eslint/naming-convention, dot-notation */
