@@ -77,10 +77,10 @@ export const bootstrapAgent = async <T extends IAgent>(
         ..._arguments: Parameters<T["rpcTypes"]["main"]>
     ) => Promise<Awaited<ReturnType<T["rpcTypes"]["main"]>>>;
 }> => {
-    logger("Starting bootstrapping of agent '%s'", agent.agentFile);
-
     // Attach to an android device and spawn the TinyTower app
+    logger("Starting bootstrapping of agent '%s'", agent.agentFile);
     const pid: number = await device.spawn("com.nimblebit.tinytower");
+    logger("Spawned process: %d on device: %s", pid, device.name);
     const session: frida.Session = await device.attach(pid, { realm: frida.Realm.Emulated });
     logger("Attached to process: %d on device: %s", session.pid, device.name);
 
