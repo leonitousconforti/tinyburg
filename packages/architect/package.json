@@ -38,8 +38,7 @@
         "docker:build": "docker build ./emulator --platform linux/x86_64 --tag ghcr.io/leonitousconforti/tinyburg/architect:emulator-10086546_sys-30-google-apis-x64-r12_frida-16.0.19",
         "docker:run": "docker run --rm --platform linux/x86_64 --device /dev/kvm --publish 5554:5554/tcp --publish 5555:5555/tcp --publish 8554:8554/tcp --publish 27042:27042/tcp -it ghcr.io/leonitousconforti/tinyburg/architect:emulator-10086546_sys-30-google-apis-x64-r12_frida-16.0.19",
         "protobuf:clean": "rimraf --glob protobuf/**/*.js && rimraf --glob protobuf/**/*.d.ts",
-        "protobuf:gen": "protoc -I ./protobuf --ts_out ./protobuf --ts_opt optimize_code_size --ts_opt output_javascript --ts_opt eslint_disable ./protobuf/emulator_controller.proto ./protobuf/rtc_service.proto",
-        "run-example": "ts-node --files --esm ./src/example.ts"
+        "protobuf:gen": "protoc -I ./protobuf --ts_out ./protobuf --ts_opt optimize_code_size --ts_opt output_javascript --ts_opt eslint_disable ./protobuf/emulator_controller.proto ./protobuf/rtc_service.proto"
     },
     "dependencies": {
         "debug": "~4.3.4",
@@ -72,6 +71,7 @@
         "eslint-config-prettier": "~8.8.0",
         "eslint-plugin-prettier": "~4.2.1",
         "eslint-plugin-unicorn": "~47.0.0",
+        "frida": "~16.1.0",
         "prettier": "~2.8.8",
         "rimraf": "~5.0.1",
         "ssh2": "~1.14.0",
