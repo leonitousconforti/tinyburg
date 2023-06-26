@@ -72,6 +72,7 @@
         "@tinyburg/architect": "workspace:*",
         "@tinyburg/tsconfig-rig": "workspace:*",
         "@types/debug": "~4.1.8",
+        "@types/dockerode": "~3.3.18",
         "@types/frida-gum": "~18.3.2",
         "@types/heft-jest": "1.0.3",
         "@types/node": "20.3.1",

@@ -480,6 +480,7 @@ importers:
       "@tinyburg/architect": workspace:*
       "@tinyburg/tsconfig-rig": workspace:*
       "@types/debug": ~4.1.8
+      "@types/dockerode": ~3.3.18
       "@types/frida-gum": ~18.3.2
       "@types/heft-jest": 1.0.3
       "@types/node": 20.3.1
@@ -515,6 +516,7 @@ importers:
       "@tinyburg/architect": link:../architect
       "@tinyburg/tsconfig-rig": link:../tsconfig-rig
       "@types/debug": 4.1.8
+      "@types/dockerode": 3.3.19
       "@types/frida-gum": 18.3.2
       "@types/heft-jest": 1.0.3
       "@types/node": 20.3.1
@@ -3561,7 +3563,7 @@ packages:
     resolution:
       { integrity: sha512-2et4PDvg6PVCyS7fuTc4gPoksV58bW0RwSxWKcPRcHZf0PRUGq03TKcD/rUHe3azfV6/5/biUBJw+HhCQjaP0A== }
     dependencies:
-      "@types/react": 18.2.12
+      "@types/react": 18.2.13
 
   /@types/react-is/18.2.1:
     resolution:
@@ -3576,14 +3578,6 @@ packages:
     dependencies:
       "@types/react": 18.2.13
     dev: false
-
-  /@types/react/18.2.12:
-    resolution:
-      { integrity: sha512-ndmBMLCgn38v3SntMeoJaIrO6tGHYKMEBohCUmw8HoLLQdRMOIGXfeYaBTLe2lsFaSB3MOK1VXscYFnmLtTSmw== }
-    dependencies:
-      "@types/prop-types": 15.7.5
-      "@types/scheduler": 0.16.3
-      csstype: 3.1.2
 
   /@types/react/18.2.13:
     resolution:
