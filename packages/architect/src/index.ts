@@ -147,7 +147,7 @@ export const architect = async (options?: {
     }
     logger("Everything is healthy, you can start connecting to it now!");
 
-    // Install any apk
+    // Install any apk https://developer.android.com/tools/adb
     const installApk = async (apk: string): Promise<void> => {
         logger("Installing apk %s into container %s...", apk, container.id);
         const tarball = tar.pack(path.dirname(apk), { entries: [path.basename(apk)] });
@@ -158,12 +158,13 @@ export const architect = async (options?: {
                 "install",
                 "-r", // Replace existing application (if present)
                 "-t", // Allow test packages
-                "-g", // Allow downgrade
-                "-d", // Grant all runtime permissions
+                "-g", // Grant all runtime permissions
+                "-d", // Allow downgrade
                 `/android/apks/${path.basename(apk)}`,
             ],
         });
         await exec.start({});
+        await new Promise((resolve) => setTimeout(resolve, 3000));
         logger("Done installing apk");
     };
 
