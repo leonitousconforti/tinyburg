@@ -86,7 +86,7 @@ export const downloadLatestApkmirrorApk = async (
     // Get the real/override download link
     await page.goto(pageWithAutomaticDownload);
     const overrideDownloadButton = await page.$(
-        "#post-4894567 > div.card-with-tabs > div > div > div:nth-child(1) > p:nth-child(3) > span > a"
+        "div.card-with-tabs > div > div > div:nth-child(1) > p:nth-child(3) > span > a"
     );
     if (!overrideDownloadButton) {
         await browser.close();
