@@ -1,3 +1,5 @@
+import type DockerModem from "docker-modem";
+
 import url from "node:url";
 import path from "node:path";
 
@@ -13,14 +15,26 @@ export const architect = async (options?: {
     dockerConnectionOptions?:
         | (Omit<Dockerode.DockerOptions, "sshAuthAgent"> & { sshOptions?: { agent?: string | undefined } })
         | undefined;
+    portBindings?:
+        | {
+              "5554/tcp"?: Dockerode.PortBinding[] | undefined;
+              "5555/tcp"?: Dockerode.PortBinding[] | undefined;
+              "8554/tcp"?: Dockerode.PortBinding[] | undefined;
+              "27042/tcp"?: Dockerode.PortBinding[] | undefined;
+          }
+        | undefined;
 }): Promise<{
     container: Dockerode.Container;
     launchGame: () => Promise<void>;
     installApk: (apk: string) => Promise<void>;
+    containerHost: string;
+    adbConsoleAddress: string;
+    adbAddress: string;
+    grpcAddress: string;
+    fridaAddress: string;
 }> => {
-    const dockerode: Dockerode = new Dockerode(
-        options?.dockerConnectionOptions || { socketPath: "/var/run/docker.sock" }
-    );
+    const dockerConnectionOptions = options?.dockerConnectionOptions || { socketPath: "/var/run/docker.sock" };
+    const dockerode: Dockerode = new Dockerode(dockerConnectionOptions);
     const dockerodeCompose: DockerodeCompose = new DockerodeCompose(
         dockerode,
         url.fileURLToPath(new URL("../docker-compose.yaml", import.meta.url)),
@@ -28,6 +42,7 @@ export const architect = async (options?: {
     );
     const tag =
         "ghcr.io/leonitousconforti/tinyburg/architect:emulator-10086546_sys-30-google-apis-x64-r12_frida-16.0.19";
+    logger("Connected to docker daemon @ %s", (dockerode.modem as DockerModem.ConstructorOptions).host);
 
     // Try to find an already running container
     let container: Dockerode.Container;
@@ -73,9 +88,20 @@ export const architect = async (options?: {
 
         // Create a container
         logger("Creating container from image with kvm acceleration enabled");
+        const PortBindings = Object.assign(
+            {},
+            {
+                "5554/tcp": [{ HostPort: "5554" }],
+                "5555/tcp": [{ HostPort: "5555" }],
+                "8554/tcp": [{ HostPort: "8554" }],
+                "27042/tcp": [{ HostPort: "27042" }],
+            },
+            options?.portBindings || {}
+        );
         container = await dockerode.createContainer({
             Image: tag,
             HostConfig: {
+                PortBindings,
                 Devices: [
                     {
                         CgroupPermissions: "mrw",
@@ -83,12 +109,6 @@ export const architect = async (options?: {
                         PathOnHost: "/dev/kvm",
                     },
                 ],
-                PortBindings: {
-                    "5554/tcp": [{ HostPort: "5554" }],
-                    "5555/tcp": [{ HostPort: "5555" }],
-                    "8554/tcp": [{ HostPort: "8554" }],
-                    "27042/tcp": [{ HostPort: "27042" }],
-                },
             },
         });
 
@@ -101,10 +121,12 @@ export const architect = async (options?: {
     logger("Waiting for container %s to become healthy...", container.id);
     let result = await container.inspect();
     while (result.State.Health?.Status !== "healthy") {
-        await new Promise((resolve) => setTimeout(resolve, 30_000));
+        await new Promise((resolve) => setTimeout(resolve, 1000));
         result = await container.inspect();
     }
-    logger("Container is healthy, you can start interacting with it now!");
+    logger("Container is healthy, waiting just a bit longer for frida server to start...");
+    await new Promise((resolve) => setTimeout(resolve, 20_000));
+    logger("You can start interacting with container %s now!", container.id);
 
     // Install any apk
     const installApk = async (apk: string): Promise<void> => {
@@ -144,7 +166,23 @@ export const architect = async (options?: {
         await exec.start({});
     };
 
-    return { container, installApk, launchGame };
+    const containerHost = (dockerode.modem as DockerModem.ConstructorOptions).host || "localhost";
+    const containerPortBindings = result.NetworkSettings.Ports;
+    const adbConsoleAddress = `${containerHost}:${containerPortBindings["5554/tcp"]![0]?.HostPort}`;
+    const adbAddress = `${containerHost}:${containerPortBindings["5555/tcp"]![0]?.HostPort}`;
+    const grpcAddress = `${containerHost}:${containerPortBindings["8554/tcp"]![0]?.HostPort}`;
+    const fridaAddress = `${containerHost}:${containerPortBindings["27042/tcp"]![0]?.HostPort}`;
+
+    return {
+        container,
+        installApk,
+        launchGame,
+        containerHost,
+        adbConsoleAddress,
+        adbAddress,
+        grpcAddress,
+        fridaAddress,
+    };
 };
 
 export default architect;
