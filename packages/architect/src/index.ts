@@ -168,7 +168,7 @@ export const architect = async (options?: {
             ],
         });
         await exec.start({});
-        await new Promise((resolve) => setTimeout(resolve, 3000));
+        await new Promise((resolve) => setTimeout(resolve, 10_000));
         logger("Done installing apk");
     };
 
