@@ -4,6 +4,7 @@ import url from "node:url";
 import path from "node:path";
 
 import tar from "tar-fs";
+import frida from "frida";
 import Debug from "debug";
 import Dockerode from "dockerode";
 import DockerodeCompose from "dockerode-compose";
@@ -118,15 +119,33 @@ export const architect = async (options?: {
     }
 
     // Wait for container to become healthy
-    logger("Waiting for container %s to become healthy...", container.id);
+    logger("Waiting for container to become healthy...");
     let result = await container.inspect();
     while (result.State.Health?.Status !== "healthy") {
         await new Promise((resolve) => setTimeout(resolve, 1000));
         result = await container.inspect();
     }
-    logger("Container is healthy, waiting just a bit longer for frida server to start...");
-    await new Promise((resolve) => setTimeout(resolve, 20_000));
-    logger("You can start interacting with container %s now!", container.id);
+    logger("Emulator is healthy, waiting for frida server to start...");
+
+    const containerHost = (dockerode.modem as DockerModem.ConstructorOptions).host || "localhost";
+    const containerPortBindings = result.NetworkSettings.Ports;
+    const adbConsoleAddress = `${containerHost}:${containerPortBindings["5554/tcp"]![0]?.HostPort}`;
+    const adbAddress = `${containerHost}:${containerPortBindings["5555/tcp"]![0]?.HostPort}`;
+    const grpcAddress = `${containerHost}:${containerPortBindings["8554/tcp"]![0]?.HostPort}`;
+    const fridaAddress = `${containerHost}:${containerPortBindings["27042/tcp"]![0]?.HostPort}`;
+
+    // Wait for frida server to be started
+    let processes;
+    const deviceManager = frida.getDeviceManager();
+    const device = await deviceManager.addRemoteDevice(fridaAddress);
+    while (!processes) {
+        try {
+            processes = await device.enumerateProcesses();
+        } catch {
+            await new Promise((resolve) => setTimeout(resolve, 3000));
+        }
+    }
+    logger("Everything is healthy, you can start connecting to it now!");
 
     // Install any apk
     const installApk = async (apk: string): Promise<void> => {
@@ -165,13 +184,6 @@ export const architect = async (options?: {
         });
         await exec.start({});
     };
-
-    const containerHost = (dockerode.modem as DockerModem.ConstructorOptions).host || "localhost";
-    const containerPortBindings = result.NetworkSettings.Ports;
-    const adbConsoleAddress = `${containerHost}:${containerPortBindings["5554/tcp"]![0]?.HostPort}`;
-    const adbAddress = `${containerHost}:${containerPortBindings["5555/tcp"]![0]?.HostPort}`;
-    const grpcAddress = `${containerHost}:${containerPortBindings["8554/tcp"]![0]?.HostPort}`;
-    const fridaAddress = `${containerHost}:${containerPortBindings["27042/tcp"]![0]?.HostPort}`;
 
     return {
         container,
