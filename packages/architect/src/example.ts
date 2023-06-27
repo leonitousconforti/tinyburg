@@ -5,18 +5,16 @@ import architect from "./index.js";
 // to specify anything in the docker connection options
 // process.env["DOCKER_HOST"] = "ssh://root@architect02.tinyburg.app:22";
 
-const { container } = await architect({
-    withAdditionalServices: false,
+const { emulatorContainer } = await architect({
     dockerConnectionOptions: {
         protocol: "ssh",
         host: "architect02.tinyburg.app",
         port: 22,
         username: "root",
         sshOptions: {
-            // eslint-disable-next-line dot-notation
             agent: process.env["SSH_AUTH_SOCK"],
         },
     },
 });
 
-console.log(container.id);
+console.log(emulatorContainer.id);

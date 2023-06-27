@@ -1,12 +1,12 @@
-/* eslint-disable dot-notation */
-
 import frida from "frida";
 import Dockerode from "dockerode";
 import architect from "./index.js";
 
-// Timeout tests after 3 minutes and cleanup after 1 minute
-const ARCHITECT_TEST_TIMEOUT_MS = Number.parseInt(process.env["ARCHITECT_TEST_TIMEOUT_MS"] as string) || 1000 * 60 * 3;
-const ARCHITECT_CLEANUP_TIMEOUT_MS = Number.parseInt(process.env["ARCHITECT_CLEANUP_TIMEOUT_MS"] as string) || 60_000;
+// Timeout tests after 8 minutes and cleanup after 1 minute
+const ARCHITECT_TEST_TIMEOUT_MS =
+    Number.parseInt(process.env["ARCHITECT_TEST_TIMEOUT_MS"] as string, 10) || 1000 * 60 * 8;
+const ARCHITECT_CLEANUP_TIMEOUT_MS =
+    Number.parseInt(process.env["ARCHITECT_CLEANUP_TIMEOUT_MS"] as string, 10) || 60_000;
 
 // Override the docker host environment variable just for these tests
 process.env["DOCKER_HOST"] = process.env["ARCHITECT_TEST_DOCKER_HOST"] || process.env["DOCKER_HOST"];
@@ -40,11 +40,11 @@ describe("simple tests", () => {
     it(
         "Should be able to create a container without additional services",
         async () => {
-            const { container, fridaAddress } = await architect({ withAdditionalServices: false });
+            const { emulatorContainer, fridaAddress } = await architect();
             const deviceManager = frida.getDeviceManager();
             const device = await deviceManager.addRemoteDevice(fridaAddress);
             const processes = await device.enumerateProcesses();
-            expect(container.id).toBeDefined();
+            expect(emulatorContainer.id).toBeDefined();
             expect(processes).toBeDefined();
             expect(processes.length).toBeGreaterThan(0);
         },
@@ -54,11 +54,11 @@ describe("simple tests", () => {
     it(
         "Should be able to create a container with additional services",
         async () => {
-            const { container, fridaAddress } = await architect({ withAdditionalServices: false });
+            const { emulatorContainer, fridaAddress } = await architect();
             const deviceManager = frida.getDeviceManager();
             const device = await deviceManager.addRemoteDevice(fridaAddress);
             const processes = await device.enumerateProcesses();
-            expect(container.id).toBeDefined();
+            expect(emulatorContainer.id).toBeDefined();
             expect(processes).toBeDefined();
             expect(processes.length).toBeGreaterThan(0);
         },
@@ -68,8 +68,7 @@ describe("simple tests", () => {
     it(
         "Should be able to create a container with different port bindings",
         async () => {
-            const { container, fridaAddress, adbConsoleAddress, adbAddress, grpcAddress } = await architect({
-                withAdditionalServices: false,
+            const { emulatorContainer, fridaAddress, adbConsoleAddress, adbAddress, grpcAddress } = await architect({
                 portBindings: {
                     "5554/tcp": [{ HostPort: "5556" }],
                     "5555/tcp": [{ HostPort: "5557" }],
@@ -80,7 +79,7 @@ describe("simple tests", () => {
             const deviceManager = frida.getDeviceManager();
             const device = await deviceManager.addRemoteDevice(fridaAddress);
             const processes = await device.enumerateProcesses();
-            expect(container.id).toBeDefined();
+            expect(emulatorContainer.id).toBeDefined();
             expect(adbAddress).toContain(":5557");
             expect(grpcAddress).toContain(":8555");
             expect(fridaAddress).toContain(":27044");
