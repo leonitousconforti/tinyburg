@@ -161,12 +161,13 @@ const waitForContainerToBeHealthy = async (
     waitMs: number = 3000
 ): Promise<void> => {
     const inspectResult = await container.inspect();
-    if (inspectResult.State.Health?.Status === "exited") throw new Error("Container exited prematurely");
+    if (inspectResult.State.Status === "exited") throw new Error("Container exited prematurely");
 
     // Wrap this in a try-catch because we don't want errors to bubble up
     // because there might be the opportunity to recover from these.
     try {
-        if (inspectResult.State.Health?.Status !== "healthy") throw new Error("Container is not healthy");
+        if (inspectResult.State.Health?.Status !== "healthy")
+            throw new Error(`Container is not healthy, status=${inspectResult.State.Health?.Status}`);
     } catch (error: unknown) {
         // If there are retries remaining, wait for the desired timeout and then recurse
         if (retries > 0) {
