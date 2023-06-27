@@ -157,8 +157,8 @@ const getExposedContainerEndpoints = async (
  */
 const waitForContainerToBeHealthy = async (
     container: Dockerode.Container,
-    retries: number = 30,
-    waitMs: number = 2000
+    retries: number = 40,
+    waitMs: number = 3000
 ): Promise<void> => {
     const inspectResult = await container.inspect();
     if (inspectResult.State.Health?.Status === "exited") throw new Error("Container exited prematurely");
@@ -171,7 +171,7 @@ const waitForContainerToBeHealthy = async (
         // If there are retries remaining, wait for the desired timeout and then recurse
         if (retries > 0) {
             await new Promise((resolve) => setTimeout(resolve, waitMs));
-            await waitForContainerToBeHealthy(container, retries - 1, waitMs);
+            return await waitForContainerToBeHealthy(container, retries - 1, waitMs);
         }
 
         // Otherwise, throw this error to reject the promise
@@ -207,7 +207,7 @@ const waitForFridaToBeReachable = async (
             // If there are retries remaining, wait for the desired timeout and then recurse
             if (retriesRemaining > 0) {
                 await new Promise((resolve) => setTimeout(resolve, waitMs));
-                await recursiveHelper(retriesRemaining - 1);
+                return await recursiveHelper(retriesRemaining - 1);
             }
 
             // Otherwise, throw this error to reject the promise
