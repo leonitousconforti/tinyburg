@@ -318,7 +318,7 @@ export const architect = async (options?: {
  * remote docker host that has kvm acceleration capabilities. Provides convince
  * functions for interacting with the container.
  */
-export const architectWithServices = async (
+export const architectWithAdditionalServices = async (
     dockerConnectionOptions: DockerConnectionOptions = {}
 ): Promise<Dockerode.Container> => {
     const _dockerConnectionOptions = Object.assign({ socketPath: "/var/run/docker.sock" }, dockerConnectionOptions);
