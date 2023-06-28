@@ -190,7 +190,7 @@ const waitForContainerToBeHealthy = async (
  */
 const waitForFridaToBeReachable = async (
     fridaAddress: string,
-    retries: number = 10,
+    retries: number = 40,
     waitMs: number = 3000
 ): Promise<void> => {
     const deviceManager = frida.getDeviceManager();
@@ -287,7 +287,10 @@ export const architect = async (options?: {
         installApk: (apk: string) => Promise<void>;
     } & Awaited<ReturnType<typeof getExposedContainerEndpoints>>
 > => {
-    const dockerConnectionOptions = options?.dockerConnectionOptions || { socketPath: "/var/run/docker.sock" };
+    const dockerConnectionOptions = Object.assign(
+        { socketPath: "/var/run/docker.sock" },
+        options?.dockerConnectionOptions || {}
+    );
     const dockerode: Dockerode = new Dockerode(dockerConnectionOptions);
     logger(
         "Connected to docker daemon %s @ %s",
@@ -319,9 +322,15 @@ export const architect = async (options?: {
  * functions for interacting with the container.
  */
 export const architectWithServices = async (
-    dockerConnectionOptions: DockerConnectionOptions
+    dockerConnectionOptions: DockerConnectionOptions = {}
 ): Promise<Dockerode.Container> => {
-    const dockerode: Dockerode = new Dockerode(dockerConnectionOptions || { socketPath: "/var/run/docker.sock" });
+    const _dockerConnectionOptions = Object.assign({ socketPath: "/var/run/docker.sock" }, dockerConnectionOptions);
+    const dockerode: Dockerode = new Dockerode(_dockerConnectionOptions);
+    logger(
+        "Connected to docker daemon %s @ %s",
+        _dockerConnectionOptions.socketPath,
+        (dockerode.modem as DockerModem.ConstructorOptions).host || "localhost"
+    );
     return buildFreshContainerWithServices(dockerode);
 };
 
