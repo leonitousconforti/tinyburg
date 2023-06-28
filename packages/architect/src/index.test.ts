@@ -9,7 +9,7 @@ const ARCHITECT_CLEANUP_TIMEOUT_MS =
     Number.parseInt(process.env["ARCHITECT_CLEANUP_TIMEOUT_MS"] as string, 10) || 60_000;
 
 // Override the docker host environment variable just for these tests
-process.env["DOCKER_HOST"] = process.env["ARCHITECT_TEST_DOCKER_HOST"] || process.env["DOCKER_HOST"];
+process.env["DOCKER_HOST"] = process.env["ARCHITECT_DOCKER_HOST"] || process.env["DOCKER_HOST"];
 
 describe("simple tests", () => {
     const dockerode: Dockerode = new Dockerode();

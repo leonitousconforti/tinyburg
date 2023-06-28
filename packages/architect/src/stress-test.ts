@@ -7,7 +7,7 @@ const PARALLEL_CONTAINERS_PER_RUN: number =
     Number.parseInt(process.env["ARCHITECT_STRESS_PARALLEL_CONTAINERS_PER_RUN"] as string, 10) || 3;
 
 // Override the docker host environment variable just for these tests
-process.env["DOCKER_HOST"] = process.env["ARCHITECT_TEST_DOCKER_HOST"] || process.env["DOCKER_HOST"];
+process.env["DOCKER_HOST"] = process.env["ARCHITECT_DOCKER_HOST"] || process.env["DOCKER_HOST"];
 
 for (let run_index: number = 0; run_index < TOTAL_RUN_ITERATIONS; run_index++) {
     const results: Array<Awaited<ReturnType<typeof architect>>> = await Promise.all(
@@ -15,4 +15,5 @@ for (let run_index: number = 0; run_index < TOTAL_RUN_ITERATIONS; run_index++) {
     );
     await Promise.all(results.map((result) => result.emulatorContainer.stop()));
     await Promise.all(results.map((result) => result.emulatorContainer.remove()));
+    console.log(`----------run_index=${run_index}----------`);
 }
