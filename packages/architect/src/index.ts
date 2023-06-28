@@ -190,33 +190,30 @@ const waitForContainerToBeHealthy = async (
  */
 const waitForFridaToBeReachable = async (
     fridaAddress: string,
-    retries: number = 40,
+    retries: number = 20,
     waitMs: number = 3000
 ): Promise<void> => {
-    const deviceManager = frida.getDeviceManager();
-    const device = await deviceManager.addRemoteDevice(fridaAddress);
+    // Wrap this in a try-catch because we don't want errors to bubble up
+    // because there might be the opportunity to recover from these
+    try {
+        const deviceManager = frida.getDeviceManager();
+        const device = await deviceManager.addRemoteDevice(fridaAddress);
+        const processes = await device.enumerateProcesses();
+        if (!processes) throw new Error("Frida server is not reachable");
+    } catch (error: unknown) {
+        // Remove the remote device on error because it might be in a bad state
+        const deviceManager = frida.getDeviceManager();
+        await deviceManager.removeRemoteDevice(fridaAddress);
 
-    // We create a closure so that we don't have to grab the
-    // device manager and device every time we recurse
-    const recursiveHelper = async (retriesRemaining: number): Promise<void> => {
-        // Wrap this in a try-catch because we don't want errors to bubble up
-        // because there might be the opportunity to recover from these
-        try {
-            const processes = await device.enumerateProcesses();
-            if (!processes) throw new Error("Frida server is not reachable");
-        } catch (error: unknown) {
-            // If there are retries remaining, wait for the desired timeout and then recurse
-            if (retriesRemaining > 0) {
-                await new Promise((resolve) => setTimeout(resolve, waitMs));
-                return await recursiveHelper(retriesRemaining - 1);
-            }
-
-            // Otherwise, throw this error to reject the promise
-            throw error;
+        // If there are retries remaining, wait for the desired timeout and then recurse
+        if (retries > 0) {
+            await new Promise((resolve) => setTimeout(resolve, waitMs));
+            return await waitForFridaToBeReachable(fridaAddress, retries - 1, waitMs);
         }
-    };
 
-    return recursiveHelper(retries);
+        // Otherwise, throw this error to reject the promise
+        throw error;
+    }
 };
 
 /**
