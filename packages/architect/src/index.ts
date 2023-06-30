@@ -14,6 +14,7 @@ const tag: string =
     "ghcr.io/leonitousconforti/tinyburg/architect:emulator-10086546_sys-30-google-apis-x64-r12_frida-16.0.19";
 
 // Override the docker host environment variable
+// eslint-disable-next-line dot-notation
 process.env["DOCKER_HOST"] = process.env["ARCHITECT_DOCKER_HOST"] || process.env["DOCKER_HOST"];
 
 /** The port bindings that all architect emulator containers must have. */
