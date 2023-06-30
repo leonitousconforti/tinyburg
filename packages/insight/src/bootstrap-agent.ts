@@ -88,7 +88,7 @@ export const bootstrapAgent = async <T extends IAgent>(
     logger("Attached to process: %d on device: %s", session.pid, device.name);
 
     // Compile time and create script
-    const compiler = options?.compiler || "swc";
+    const compiler = options?.compiler || "esbuild";
     let source: string;
     switch (compiler) {
         case "esbuild": {
