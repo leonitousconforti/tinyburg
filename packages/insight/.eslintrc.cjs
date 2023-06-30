@@ -29,6 +29,12 @@ module.exports = {
                 "@typescript-eslint/explicit-function-return-type": "off",
             },
         },
+        {
+            files: ["./src/playground.ts", "./test/index.test.ts"],
+            rules: {
+                "dot-notation": "off",
+            },
+        },
     ],
     ignorePatterns: ["dist/"],
 };
