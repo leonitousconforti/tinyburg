@@ -7,7 +7,7 @@ const logger: Debug.Debugger = Debug.debug("tinyburg:insight:frida-compiler");
 
 export const fridaCompiler = async (agentLocation: string): Promise<string> => {
     const tsSystem = getNodeSystem();
-    const projectRoot = path.fileURLToPath(new URL("../", import.meta.url));
+    const projectRoot = path.fileURLToPath(new URL("../../", import.meta.url));
     const assets = fridaCompile.queryDefaultAssets(projectRoot, tsSystem);
 
     const buildOptions: fridaCompile.BuildOptions = {
