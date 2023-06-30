@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import architect from "./index.js";
 
 // How many times to run the stress tests and how many containers to launch each time
