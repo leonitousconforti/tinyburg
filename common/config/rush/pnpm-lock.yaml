@@ -453,12 +453,14 @@ importers:
       eslint-config-prettier: ~8.8.0
       eslint-plugin-prettier: ~4.2.1
       eslint-plugin-unicorn: ~47.0.0
+      frida: ~16.1.0
       frida-compile: ~16.2.2
       frida-il2cpp-bridge: ~0.8.1
       prettier: ~2.8.8
       typescript: 5.1.3
     dependencies:
       "@tinyburg/insight": link:../insight
+      frida: 16.1.0
       frida-il2cpp-bridge: 0.8.3
     devDependencies:
       "@rushstack/eslint-config": 3.3.2_7yfldhli4vs6yywnkyiujhawka
@@ -530,6 +532,18 @@ importers:
       eslint-plugin-prettier: 4.2.1_zh6vkmzat4wtnmvmftdassiwyu
       eslint-plugin-unicorn: 47.0.0_eslint@8.43.0
       typescript: 5.1.3
+
+  ../../packages/integrations/architect+apks:
+    specifiers: {}
+
+  ../../packages/integrations/doorman+architect+apks:
+    specifiers: {}
+
+  ../../packages/integrations/explorer+architect+apks:
+    specifiers: {}
+
+  ../../packages/integrations/insight+architect+apks:
+    specifiers: {}
 
   ../../packages/tsconfig-rig:
     specifiers:
