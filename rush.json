@@ -41,7 +41,7 @@
      * LTS schedule: https://nodejs.org/en/about/releases/
      * LTS versions: https://nodejs.org/en/download/releases/
      */
-    "nodeSupportedVersionRange": ">=12.13.0 <13.0.0 || >=14.15.0 <15.0.0 || >=16.13.0 <17.0.0 || >=18 < 19",
+    "nodeSupportedVersionRange": ">=16.13.0 <17.0.0 || >=18 < 19",
 
     /**
      * If the version check above fails, Rush will display a message showing the current
@@ -101,7 +101,7 @@
      * and set projectFolderMaxDepth to a large number.
      */
     "projectFolderMinDepth": 2,
-    "projectFolderMaxDepth": 2,
+    "projectFolderMaxDepth": 3,
 
     /**
      * Today the npmjs.com registry enforces fairly strict naming rules for packages, but in the early
@@ -492,6 +492,28 @@
         {
             "packageName": "@tinyburg/trading-site",
             "projectFolder": "apps/trading-site",
+            "shouldPublish": false
+        },
+
+        // Integration examples
+        {
+            "packageName": "@tinyburg/architect-apks-integration",
+            "projectFolder": "packages/integrations/architect+apks",
+            "shouldPublish": false
+        },
+        {
+            "packageName": "@tinyburg/doorman-architect-apks-integration",
+            "projectFolder": "packages/integrations/doorman+architect+apks",
+            "shouldPublish": false
+        },
+        {
+            "packageName": "@tinyburg/explorer-architect-apks-integration",
+            "projectFolder": "packages/integrations/explorer+architect+apks",
+            "shouldPublish": false
+        },
+        {
+            "packageName": "@tinyburg/insight-architect-apks-integration",
+            "projectFolder": "packages/integrations/insight+architect+apks",
             "shouldPublish": false
         }
     ]
