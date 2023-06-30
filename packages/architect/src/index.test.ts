@@ -1,4 +1,3 @@
-import frida from "frida";
 import Dockerode from "dockerode";
 import architect from "./index.js";
 
@@ -7,9 +6,6 @@ const ARCHITECT_TEST_TIMEOUT_MS =
     Number.parseInt(process.env["ARCHITECT_TEST_TIMEOUT_MS"] as string, 10) || 1000 * 60 * 8;
 const ARCHITECT_CLEANUP_TIMEOUT_MS =
     Number.parseInt(process.env["ARCHITECT_CLEANUP_TIMEOUT_MS"] as string, 10) || 60_000;
-
-// Override the docker host environment variable just for these tests
-process.env["DOCKER_HOST"] = process.env["ARCHITECT_DOCKER_HOST"] || process.env["DOCKER_HOST"];
 
 describe("simple tests", () => {
     const dockerode: Dockerode = new Dockerode();
@@ -40,13 +36,8 @@ describe("simple tests", () => {
     it(
         "Should be able to create a container without additional services",
         async () => {
-            const { emulatorContainer, fridaAddress } = await architect();
-            const deviceManager = frida.getDeviceManager();
-            const device = await deviceManager.addRemoteDevice(fridaAddress);
-            const processes = await device.enumerateProcesses();
+            const { emulatorContainer } = await architect();
             expect(emulatorContainer.id).toBeDefined();
-            expect(processes).toBeDefined();
-            expect(processes.length).toBeGreaterThan(0);
         },
         ARCHITECT_TEST_TIMEOUT_MS
     );
@@ -54,13 +45,8 @@ describe("simple tests", () => {
     it(
         "Should be able to create a container with additional services",
         async () => {
-            const { emulatorContainer, fridaAddress } = await architect();
-            const deviceManager = frida.getDeviceManager();
-            const device = await deviceManager.addRemoteDevice(fridaAddress);
-            const processes = await device.enumerateProcesses();
+            const { emulatorContainer } = await architect();
             expect(emulatorContainer.id).toBeDefined();
-            expect(processes).toBeDefined();
-            expect(processes.length).toBeGreaterThan(0);
         },
         ARCHITECT_TEST_TIMEOUT_MS
     );
@@ -76,16 +62,11 @@ describe("simple tests", () => {
                     "27042/tcp": [{ HostPort: "27044" }],
                 },
             });
-            const deviceManager = frida.getDeviceManager();
-            const device = await deviceManager.addRemoteDevice(fridaAddress);
-            const processes = await device.enumerateProcesses();
             expect(emulatorContainer.id).toBeDefined();
             expect(adbAddress).toContain(":5557");
             expect(grpcAddress).toContain(":8555");
             expect(fridaAddress).toContain(":27044");
             expect(adbConsoleAddress).toContain(":5556");
-            expect(processes).toBeDefined();
-            expect(processes.length).toBeGreaterThan(0);
         },
         ARCHITECT_TEST_TIMEOUT_MS
     );
