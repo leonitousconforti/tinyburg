@@ -12,6 +12,8 @@ import type { IPetAgentExports } from "./shared/pet-agent-exports.js";
 import type { IRoofAgentExports } from "./shared/roof-agent-exports.js";
 import type { ITargetFpsAgentExports } from "./shared/target-fps-agent-exports.js";
 import type { ITowerCredentialsAgentExports } from "./shared/tower-credentials-agent-exports.js";
+import type { IBadAgentExports } from "./shared/bad-agent-exports.js";
+import type { IGoodAgentExports } from "./shared/good-agent-exports.js";
 
 // eslint-disable-next-line @rushstack/typedef-var
 export const GetterAgents = {
@@ -70,7 +72,24 @@ export const AlertAgents = {
 };
 
 // eslint-disable-next-line @rushstack/typedef-var
-export const AllAgents = { ...GetterAgents, ...SetterAgents, ...AlertAgents } as const;
+export const TestingAgents = {
+    BadAgent: {
+        agentFile: fileURLToPath(new URL("agents/bad-agent.js", import.meta.url)),
+        rpcTypes: {} as unknown as IBadAgentExports,
+    } satisfies IAgent,
+    GoodAgent: {
+        agentFile: fileURLToPath(new URL("agents/good-agent.js", import.meta.url)),
+        rpcTypes: {} as unknown as IGoodAgentExports,
+    } satisfies IAgent,
+};
+
+// eslint-disable-next-line @rushstack/typedef-var
+export const AllAgents = {
+    ...GetterAgents,
+    ...SetterAgents,
+    ...AlertAgents,
+    ...TestingAgents,
+} as const;
 
 export {
     cleanupAgent,
