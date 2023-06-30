@@ -21,7 +21,7 @@ module.exports = {
     },
     overrides: [
         {
-            files: ["./src/index.test.ts", "./src/stress-test.ts", "./src/example.ts"],
+            files: ["./src/index.test.ts", "./src/stress-test.ts"],
             rules: {
                 "dot-notation": "off",
             },
