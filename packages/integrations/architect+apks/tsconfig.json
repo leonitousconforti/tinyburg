@@ -1,0 +1,9 @@
+{
+    "extends": "@tinyburg/tsconfig-rig/profile/default/config/tsconfig.json",
+    "compilerOptions": {
+        "module": "esnext",
+        "moduleResolution": "NodeNext",
+        "noEmit": true
+    },
+    "include": ["example.ts"]
+}

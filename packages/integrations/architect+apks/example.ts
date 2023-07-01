@@ -1,11 +1,13 @@
-import architect from "./index.js";
+import loadApk from "@tinyburg/apks";
+import architect from "@tinyburg/architect";
 
 // You can either use something like the dockerConnectionOptions below
 // or just use the environment variable DOCKER_HOST and you don't have
 // to specify anything in the docker connection options
 // process.env["DOCKER_HOST"] = "ssh://root@architect02.tinyburg.app:22";
 
-const { emulatorContainer } = await architect({
+const apk: string = await loadApk("apkpure", "4.22.0");
+const { emulatorContainer, installApk } = await architect({
     reuseExistingContainers: true,
     dockerConnectionOptions: {
         protocol: "ssh",
@@ -17,5 +19,5 @@ const { emulatorContainer } = await architect({
         },
     },
 });
-
+await installApk(apk);
 console.log(emulatorContainer.id);

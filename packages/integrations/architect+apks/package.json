@@ -1,5 +1,11 @@
 {
     "name": "@tinyburg/architect-apks-integration",
-    "version": "0.0.1",
-    "private": true
+    "version": "0.0.0",
+    "private": true,
+    "type": "module",
+    "devDependencies": {
+        "@tinyburg/apks": "workspace:*",
+        "@tinyburg/architect": "workspace:*",
+        "@tinyburg/tsconfig-rig": "workspace:*"
+    }
 }
