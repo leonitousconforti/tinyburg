@@ -1,5 +1,27 @@
 {
     "name": "@tinyburg/insight-architect-apks-integration",
     "version": "0.0.0",
-    "private": true
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "_phase:build": "heft run --only build -- --clean",
+        "build": "heft build --clean"
+    },
+    "devDependencies": {
+        "@rushstack/eslint-config": "3.3.2",
+        "@rushstack/heft": "0.56.0",
+        "@rushstack/heft-lint-plugin": "~0.1.11",
+        "@rushstack/heft-typescript-plugin": "~0.1.11",
+        "@tinyburg/apks": "workspace:*",
+        "@tinyburg/architect": "workspace:*",
+        "@tinyburg/insight": "workspace:*",
+        "@tinyburg/tsconfig-rig": "workspace:*",
+        "@types/node": "20.3.1",
+        "eslint": "8.43.0",
+        "eslint-config-prettier": "~8.8.0",
+        "eslint-plugin-prettier": "~4.2.1",
+        "eslint-plugin-unicorn": "~47.0.0",
+        "prettier": "~2.8.8",
+        "typescript": "5.1.3"
+    }
 }
