@@ -6,7 +6,7 @@ import architect from "@tinyburg/architect";
 // to specify anything in the docker connection options
 // process.env["DOCKER_HOST"] = "ssh://root@architect02.tinyburg.app:22";
 
-const apk: string = await loadApk("apkpure", "4.22.0");
+const apk: string = await loadApk("apkpure", "4.23.0");
 const { emulatorContainer, installApk } = await architect({
     reuseExistingContainers: true,
     dockerConnectionOptions: {
@@ -15,6 +15,7 @@ const { emulatorContainer, installApk } = await architect({
         port: 22,
         username: "root",
         sshOptions: {
+            // eslint-disable-next-line dot-notation
             agent: process.env["SSH_AUTH_SOCK"],
         },
     },
