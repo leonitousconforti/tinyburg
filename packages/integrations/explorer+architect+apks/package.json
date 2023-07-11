@@ -1,5 +1,48 @@
 {
     "name": "@tinyburg/explorer-architect-apks-integration",
     "version": "0.0.0",
-    "private": true
+    "private": true,
+    "description": "tinyburg explorer architect apks integration",
+    "keywords": [
+        "tinyburg",
+        "nimblebit",
+        "TinyTower",
+        "Tiny Tower"
+    ],
+    "homepage": "https://github.com/leonitousconforti/tinyburg/tree/authproxy",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/leonitousconforti/tinyburg.git",
+        "directory": "apps/authproxy"
+    },
+    "license": "MIT",
+    "author": "Leo Conforti <leo@leoconforti.us> (https://leoconforti.us)",
+    "type": "module",
+    "main": "dist/example.js",
+    "files": [
+        "dist"
+    ],
+    "scripts": {
+        "_phase:build": "heft run --only build -- --clean",
+        "build": "heft build --clean"
+    },
+    "dependencies": {
+        "@tinyburg/apks": "workspace:*",
+        "@tinyburg/architect": "workspace:*",
+        "@tinyburg/explorer": "workspace:*"
+    },
+    "devDependencies": {
+        "@rushstack/eslint-config": "3.3.2",
+        "@rushstack/heft": "0.56.0",
+        "@rushstack/heft-lint-plugin": "~0.1.11",
+        "@rushstack/heft-typescript-plugin": "~0.1.11",
+        "@tinyburg/tsconfig-rig": "workspace:*",
+        "@types/node": "20.3.1",
+        "eslint": "8.43.0",
+        "eslint-config-prettier": "~8.8.0",
+        "eslint-plugin-prettier": "~4.2.1",
+        "eslint-plugin-unicorn": "~47.0.0",
+        "prettier": "~2.8.8",
+        "typescript": "5.1.3"
+    }
 }
