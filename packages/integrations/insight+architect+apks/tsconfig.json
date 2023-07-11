@@ -4,7 +4,10 @@
         "outDir": "./dist",
         "module": "esnext",
         "moduleResolution": "NodeNext",
-        "noEmit": true
+
+        "noEmit": false,
+        "sourceMap": true,
+        "declaration": true
     },
     "include": ["example.ts"]
 }
