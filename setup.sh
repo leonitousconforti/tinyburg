@@ -3,7 +3,7 @@
 set -euo pipefail
 echo "🚀 Setting up tinyburg devcontainer..."
 
-echo "📦 Installing Rush and Pnpm dependencies..."
+echo "📦 Installing Rush, Pnpm, and other global dependencies..."
 npm install -g pnpm @microsoft/rush vercel ts-node
 
 echo "📦 Installing monorepo dependencies..."
