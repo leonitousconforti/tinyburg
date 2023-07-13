@@ -1,12 +1,9 @@
 import "frida-il2cpp-bridge";
 
+import { copyListToJs } from "./copy-list-to-js.js";
 import { copyArrayToJs } from "./copy-array-to-js.js";
+import { isEnumerable, isList, isDSO } from "./is.js";
 import { copyDictionaryToJs } from "./copy-dictionary-to-js.js";
-import { isEnumerable, isList, isDSO } from "./is-enumerable.js";
-
-// typeEnum values can be found at https://github.com/vfsfitvnm/frida-il2cpp-bridge/blob/master/src/il2cpp/structs/type-enum.ts
-// For whatever reason, if I use Il2Cpp.Type.Enum.Boolean or some other type in the switch statement esbuild will build the
-// agent but will throw a runtime error that if can not read property 'Boolean' of undefined.
 
 export const readObject = (
     object: Il2Cpp.Object
@@ -50,12 +47,12 @@ export const readObject = (
         }
 
         case Il2Cpp.Type.enum.array: {
-            return copyArrayToJs<Il2Cpp.Object>(object).map((value) => readObject(value));
+            return copyArrayToJs(object as unknown as Il2Cpp.Array<Il2Cpp.Object>).map((value) => readObject(value));
         }
 
         case Il2Cpp.Type.enum.genericInstance: {
             if (isEnumerable(object) && isList(object)) {
-                return copyArrayToJs<Il2Cpp.Object>(object).map((value) => readObject(value));
+                return copyListToJs<Il2Cpp.Object>(object).map((value) => readObject(value));
             }
             return undefined;
         }
@@ -78,63 +75,41 @@ export const readObject = (
     }
 };
 
-export const readField = (field: Il2Cpp.Field): string | number | boolean | undefined | unknown[] => {
+export const readField = (field: Il2Cpp.Field): string | number | boolean | NativePointer | undefined | unknown[] => {
     switch (field.type.typeEnum) {
-        // Boolean
-        case 2: {
+        case Il2Cpp.Type.enum.void: {
+            return undefined;
+        }
+
+        case Il2Cpp.Type.enum.boolean: {
             return (field as Il2Cpp.Field<boolean>).value;
         }
 
-        // Char
-        case 3: {
+        case Il2Cpp.Type.enum.nativePointer:
+        case Il2Cpp.Type.enum.unsignedNativePointer: {
+            return (field as Il2Cpp.Field<NativePointer>).value;
+        }
+
+        case Il2Cpp.Type.enum.byte:
+        case Il2Cpp.Type.enum.char:
+        case Il2Cpp.Type.enum.short:
+        case Il2Cpp.Type.enum.int:
+        case Il2Cpp.Type.enum.long:
+        case Il2Cpp.Type.enum.unsignedByte:
+        case Il2Cpp.Type.enum.unsignedShort:
+        case Il2Cpp.Type.enum.unsignedInt:
+        case Il2Cpp.Type.enum.unsignedLong:
+        case Il2Cpp.Type.enum.double:
+        case Il2Cpp.Type.enum.float: {
             return (field as Il2Cpp.Field<number>).value;
         }
 
-        // Number variants
-        case 4:
-        case 5:
-        case 6:
-        case 7:
-        case 8:
-        case 9:
-        case 10:
-        case 11:
-        case 12:
-        case 13: {
-            return (field as Il2Cpp.Field<number>).value;
+        case Il2Cpp.Type.enum.string: {
+            return (field as Il2Cpp.Field<Il2Cpp.String>).value.content!;
         }
 
-        // String
-        case 14: {
-            if (!(field as Il2Cpp.Field<Il2Cpp.String>).value.isNull())
-                return (field as Il2Cpp.Field<Il2Cpp.String>).value.content!;
-            return undefined;
-        }
-
-        // ValueType
-        case 17: {
+        case Il2Cpp.Type.enum.valueType: {
             return (field as Il2Cpp.Field<Il2Cpp.ValueType>).value.toString();
-        }
-
-        // Class
-        case 18: {
-            if (!(field as Il2Cpp.Field<Il2Cpp.Object>).value.isNull()) {
-                const entries = (field as Il2Cpp.Field<Il2Cpp.Object>).value.class.fields.map((field) => [
-                    field.name,
-                    readField(field),
-                ]);
-                return Object.fromEntries(entries);
-            }
-            return undefined;
-        }
-
-        // GenericInstance
-        case 21: {
-            const value = (field as Il2Cpp.Field<Il2Cpp.Object>).value;
-            if (!value.isNull() && isEnumerable(value) && isDSO(value)) {
-                return copyArrayToJs<Il2Cpp.Object>(value).map((value) => readObject(value));
-            }
-            return undefined;
         }
 
         default: {

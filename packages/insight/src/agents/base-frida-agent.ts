@@ -21,15 +21,19 @@ import "frida-il2cpp-bridge";
 /**
  * A dependency can be either an entire c# assembly, a single class, a
  * static/non-static object in a class, a field on a class or a method on a
- * class. If the class has static fields that need to be initialized as well,
- * the static constructor on the class can be called by setting the
+ * class.
+ */
+export type Dependency = Il2Cpp.Assembly | Il2Cpp.Class | Il2Cpp.Object | Il2Cpp.Field | Il2Cpp.Method | Il2Cpp.Array;
+
+/**
+ * If the class has static fields that need to be initialized as well, the
+ * static constructor on the class can be called by setting the
  * callStaticConstructor in the dependencies metadata field.
  *
  * @see https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/static-constructors
  */
-export type Dependency = Il2Cpp.Assembly | Il2Cpp.Class | Il2Cpp.Object | Il2Cpp.Field | Il2Cpp.Method;
 export interface IDependenciesMeta {
-    callStaticConstructor: boolean;
+    callStaticConstructor?: boolean;
 }
 
 /**
@@ -41,7 +45,7 @@ export interface IDependenciesMeta {
  */
 export type DependencyLoader = () => { [k: string]: Dependency | { dependency: Dependency; meta: IDependenciesMeta } };
 
-/** These two methods are required for all agent */
+/** These two methods are required for all agents */
 export interface ITinyTowerFridaAgent {
     loadDependencies: DependencyLoader;
     retrieveData: () => unknown;
@@ -60,7 +64,7 @@ export abstract class TinyTowerFridaAgent<T extends ITinyTowerFridaAgent> {
 
     /**
      * Maximum number of times to retry loading the dependencies before giving
-     * up and throwing an error
+     * up and throwing an error.
      */
     private readonly _loadDependenciesMaxRetries: number;
 
@@ -78,7 +82,7 @@ export abstract class TinyTowerFridaAgent<T extends ITinyTowerFridaAgent> {
      */
     public data: ReturnType<T["retrieveData"]>;
 
-    public constructor(loadDependenciesMaxRetries: number = 5, loadDependenciesWaitMs: number = 7000) {
+    public constructor(loadDependenciesMaxRetries: number = 5, loadDependenciesWaitMs: number = 5000) {
         this._loadDependenciesWaitMs = loadDependenciesWaitMs;
         this._loadDependenciesMaxRetries = loadDependenciesMaxRetries;
         this.data = {} as ReturnType<T["retrieveData"]>;
@@ -155,13 +159,14 @@ export abstract class TinyTowerFridaAgent<T extends ITinyTowerFridaAgent> {
             const dependencies = dependencyLoader();
             const dependencyEntries = Object.entries(dependencies);
 
-            // Makes all dependencies [Dependency, IDependenciesMeta | undefined]
+            // Makes all dependencies into [Dependency, IDependenciesMeta | undefined]
             const justDependencies = dependencyEntries.map(([__name, dep]) =>
                 dep instanceof Il2Cpp.Assembly ||
                 dep instanceof Il2Cpp.Class ||
                 dep instanceof Il2Cpp.Object ||
                 dep instanceof Il2Cpp.Method ||
-                dep instanceof Il2Cpp.Field
+                dep instanceof Il2Cpp.Field ||
+                dep instanceof Il2Cpp.Array
                     ? ([dep] as const)
                     : ([dep.dependency, dep.meta] as const)
             );
