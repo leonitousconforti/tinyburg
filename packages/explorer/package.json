@@ -29,7 +29,7 @@
     "dependencies": {
         "@tinyburg/insight": "workspace:*",
         "frida": "~16.1.0",
-        "frida-il2cpp-bridge": "~0.8.1"
+        "frida-il2cpp-bridge": "~0.8.5"
     },
     "devDependencies": {
         "@rushstack/eslint-config": "3.3.2",
