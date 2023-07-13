@@ -3,6 +3,7 @@ import "frida-il2cpp-bridge";
 import type { IBitizenAgentExports } from "../shared/bitizen-agent-exports.js";
 
 import { TinyTowerFridaAgent } from "./base-frida-agent.js";
+import { copyListToJs } from "../helpers/copy-list-to-js.js";
 import { colorToObject } from "../helpers/color-to-object.js";
 import { copyArrayToJs } from "../helpers/copy-array-to-js.js";
 
@@ -11,21 +12,21 @@ export class GetBitizenData extends TinyTowerFridaAgent<GetBitizenData> {
         const csharpAssembly = Il2Cpp.domain.assembly("Assembly-CSharp");
         const AppUtilClass = csharpAssembly.image.class("AppUtil");
         const VBitizenClass = csharpAssembly.image.class("VBitizen");
-        const maleNamesArray = VBitizenClass.field<Il2Cpp.Array>("maleNames").value.object;
-        const femaleNamesArray = VBitizenClass.field<Il2Cpp.Array>("femaleNames").value.object;
-        const lastNamesArray = VBitizenClass.field<Il2Cpp.Array>("lastNames").value.object;
         const skinColorsList = VBitizenClass.field<Il2Cpp.Object>("skinColors").value;
         const hairColorsList = VBitizenClass.field<Il2Cpp.Object>("hairColors").value;
+        const maleNamesArray = VBitizenClass.field<Il2Cpp.Array<Il2Cpp.String>>("maleNames").value;
+        const femaleNamesArray = VBitizenClass.field<Il2Cpp.Array<Il2Cpp.String>>("femaleNames").value;
+        const lastNamesArray = VBitizenClass.field<Il2Cpp.Array<Il2Cpp.String>>("lastNames").value;
 
         return {
             csharpAssembly,
             AppUtilClass,
             VBitizenClass,
+            skinColorsList,
+            hairColorsList,
             maleNamesArray,
             femaleNamesArray,
             lastNamesArray,
-            skinColorsList,
-            hairColorsList,
         };
     }
 
@@ -41,23 +42,23 @@ export class GetBitizenData extends TinyTowerFridaAgent<GetBitizenData> {
         const numberBiHats = this.dependencies.VBitizenClass.tryField<number>("numBHats")?.value;
 
         // Extract all the males names, female names, and last names by enumerating over the arrays
-        const maleNames = copyArrayToJs<Il2Cpp.String>(this.dependencies.maleNamesArray).map((n) => n.toString());
-        const femaleNames = copyArrayToJs<Il2Cpp.String>(this.dependencies.femaleNamesArray).map((n) => n.toString());
-        const lastNames = copyArrayToJs<Il2Cpp.String>(this.dependencies.lastNamesArray).map((n) => n.toString());
+        const maleNames = copyArrayToJs(this.dependencies.maleNamesArray).map((name) => name.toString());
+        const femaleNames = copyArrayToJs(this.dependencies.femaleNamesArray).map((name) => name.toString());
+        const lastNames = copyArrayToJs(this.dependencies.lastNamesArray).map((name) => name.toString());
 
         // Extract all the skin colors by first enumerating over all the skin colors, then
         // enumerating over each color which is an array of three numbers; r, g, b. Finally
         // map each array of r, g, b values to an object
-        const skinColors = copyArrayToJs<Il2Cpp.Array>(this.dependencies.skinColorsList)
-            .map((il2cppArray) => copyArrayToJs<Il2Cpp.Object>(il2cppArray.object))
+        const skinColors = copyListToJs<Il2Cpp.Array<Il2Cpp.Object>>(this.dependencies.skinColorsList)
+            .map((il2cppArray) => copyArrayToJs(il2cppArray))
             .map((jsIl2cppObjectArray) => jsIl2cppObjectArray.map(Number))
             .map((jsNumberArray) => colorToObject(jsNumberArray as [number, number, number]));
 
         // Extract all the hair colors by first enumerating over all the hair colors, then
         // enumerating over each color which is an array of three numbers; r, g, b. Finally
         // map each array of r, g, b values to an object
-        const hairColors = copyArrayToJs<Il2Cpp.Array>(this.dependencies.hairColorsList)
-            .map((il2CppArray) => copyArrayToJs<Il2Cpp.Object>(il2CppArray.object))
+        const hairColors = copyListToJs<Il2Cpp.Array<Il2Cpp.Object>>(this.dependencies.hairColorsList)
+            .map((il2CppArray) => copyArrayToJs(il2CppArray))
             .map((jsIl2cppObjectArray) => jsIl2cppObjectArray.map(Number))
             .map((jsNumberArray) => colorToObject(jsNumberArray as [number, number, number]));
 
@@ -95,28 +96,25 @@ export class GetBitizenData extends TinyTowerFridaAgent<GetBitizenData> {
         const skinColorSourceTS = "export type SkinColor = typeof skinColors[number]\n";
 
         // Source code for the male names array. Male names are in all caps, but I prefer
-        // only first character capitalized. Also need to add quotation marks around all name
+        // only first character capitalized.
         const maleNamesArrayString = this.data.maleNames
-            .map((name) => name.charAt(0).toUpperCase() + name.slice(1).toLowerCase())
-            .map((name) => `"${name}"`)
+            .map((name) => name.charAt(0) + name.charAt(1).toUpperCase() + name.slice(2).toLowerCase())
             .join(", ");
         const maleNamesSourceTS = `export const maleNames = [${maleNamesArrayString}] as const;\n`;
         const maleNameSourceTS = "export type MaleName = typeof maleNames[number];\n";
 
         // Source code for the female names array. Female names are in all caps, but I prefer
-        // only first character capitalized. Also need to add quotation marks around all name
+        // only first character capitalized.
         const femaleNamesArrayString = this.data.femaleNames
-            .map((name) => name.charAt(0).toUpperCase() + name.slice(1).toLowerCase())
-            .map((name) => `"${name}"`)
+            .map((name) => name.charAt(0) + name.charAt(1).toUpperCase() + name.slice(2).toLowerCase())
             .join(", ");
         const femaleNamesSourceTS = `export const femaleNames = [${femaleNamesArrayString}] as const;\n`;
         const femaleNameSourceTS = "export type FemaleName = typeof femaleNames[number];\n";
 
         // Source code for the last names array. Lase names are in all caps, but I prefer
-        // only first character capitalized. Also need to add quotation marks around all name
+        // only first character capitalized.
         const lastNamesArrayString = this.data.lastNames
-            .map((name) => name.charAt(0).toUpperCase() + name.slice(1).toLowerCase())
-            .map((name) => `"${name}"`)
+            .map((name) => name.charAt(0) + name.charAt(1).toUpperCase() + name.slice(2).toLowerCase())
             .join(", ");
         const lastNamesSourceTS = `export const lastNames = [${lastNamesArrayString}] as const;\n`;
         const lastNameSourceTS = "export type LastName = typeof lastNames[number];\n";

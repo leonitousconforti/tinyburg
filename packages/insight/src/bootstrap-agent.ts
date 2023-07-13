@@ -9,6 +9,7 @@ import { fridaCompiler } from "./compilers/frida.js";
 import { esbuildCompiler } from "./compilers/esbuild.js";
 
 const logger: Debug.Debugger = Debug.debug("tinyburg:insight");
+const agentLogger: Debug.Debugger = Debug.debug("tinyburg:insight:agent");
 
 /** Options for all bootstrapping operations. */
 interface IBootstrapOptions {
@@ -113,7 +114,7 @@ export const bootstrapAgent = async <T extends IAgent>(
             if (message.type === "error") {
                 console.error(message.description);
             } else {
-                console.log(message.payload);
+                agentLogger(message.payload);
             }
         };
     script.message.connect(_messageHandler);

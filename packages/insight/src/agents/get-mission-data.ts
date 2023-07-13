@@ -47,18 +47,15 @@ export class GetMissionData extends TinyTowerFridaAgent<GetMissionData> {
                     ([index, data]) =>
                         [
                             index,
-                            data.class.fields.map((property) => [property.name, readField(data.field(property.name))]),
+                            ["id", "mType", "text", "charId", "floorId", "floorType", "count"].map((property) => [
+                                property,
+                                readField(data.field(property)),
+                            ]),
                         ] as const
                 )
 
                 // Reassemble the list of mission entries into an object
-                .map(([index, data]) => [index, Object.fromEntries(data)] as const)
-
-                // Remove any unwanted properties
-                .map(
-                    ([index, { populated, completed, __bitInfo, __bitInfoDSO, propStr, floorId, ...rest }]) =>
-                        [index, rest] as const
-                );
+                .map(([index, data]) => [index, Object.fromEntries(data)] as const);
 
         // Extract the missions
         const tutorialMissionEntries = extractMissionEntries(this.dependencies.tutorialMissionsDictionary);

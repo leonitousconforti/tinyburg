@@ -12,7 +12,7 @@ export class GetElevatorData extends TinyTowerFridaAgent<GetElevatorData> {
         const csharpAssembly = Il2Cpp.domain.assembly("Assembly-CSharp");
         const AppUtilClass = csharpAssembly.image.class("AppUtil");
         const VElevatorDataClass = csharpAssembly.image.class("VElevatorData");
-        const elevatorsArray = VElevatorDataClass.field<Il2Cpp.Array>("info").value.object;
+        const elevatorsArray = VElevatorDataClass.field<Il2Cpp.Array<Il2Cpp.Object>>("info").value;
         return { AppUtilClass, VElevatorDataClass, elevatorsArray };
     }
 
@@ -24,7 +24,7 @@ export class GetElevatorData extends TinyTowerFridaAgent<GetElevatorData> {
         const numberElevators = this.dependencies.VElevatorDataClass.field<number>("NUM_ELEVATORS").value;
 
         // Extract the elevators
-        const elevators = copyArrayToJs<Il2Cpp.Object>(this.dependencies.elevatorsArray)
+        const elevators = copyArrayToJs(this.dependencies.elevatorsArray)
             // Copy the elevators array over to js
             .map((elevator) => copyDictionaryToJs<Il2Cpp.String, Il2Cpp.Object>(elevator))
 

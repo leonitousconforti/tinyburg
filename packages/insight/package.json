@@ -59,7 +59,7 @@
         "esbuild": "~0.18.7",
         "frida": "~16.1.0",
         "frida-compile": "~16.2.2",
-        "frida-il2cpp-bridge": "~0.8.1",
+        "frida-il2cpp-bridge": "~0.8.5",
         "prettier": "~2.8.8"
     },
     "devDependencies": {

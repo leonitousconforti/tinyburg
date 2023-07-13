@@ -12,7 +12,7 @@ export class GetRoofData extends TinyTowerFridaAgent<GetRoofData> {
         const csharpAssembly = Il2Cpp.domain.assembly("Assembly-CSharp");
         const AppUtilClass = csharpAssembly.image.class("AppUtil");
         const VRoofDataClass = csharpAssembly.image.class("VRoofData");
-        const roofsArray = VRoofDataClass.field<Il2Cpp.Array>("info").value.object;
+        const roofsArray = VRoofDataClass.field<Il2Cpp.Array<Il2Cpp.Object>>("info").value;
         return { AppUtilClass, VRoofDataClass, roofsArray };
     }
 
@@ -26,7 +26,7 @@ export class GetRoofData extends TinyTowerFridaAgent<GetRoofData> {
         // Extract the roofs
         const roofs =
             // First copy the entire roofs array over to js
-            copyArrayToJs<Il2Cpp.Object>(this.dependencies.roofsArray)
+            copyArrayToJs(this.dependencies.roofsArray)
                 // Then each entry in the JS array is a dictionary, so map to that dictionary
                 .map((roof) => copyDictionaryToJs<Il2Cpp.String, Il2Cpp.Object>(roof))
 
