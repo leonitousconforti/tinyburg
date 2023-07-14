@@ -9,12 +9,6 @@
                         "pluginPackage": "@rushstack/heft-typescript-plugin"
                     }
                 },
-                "lint": {
-                    "taskDependencies": ["typescript1"],
-                    "taskPlugin": {
-                        "pluginPackage": "@rushstack/heft-lint-plugin"
-                    }
-                },
                 "download-latest-apks": {
                     "taskDependencies": ["typescript1"],
                     "taskPlugin": {
@@ -23,6 +17,12 @@
                         "options": {
                             "scriptPath": "downloads/download-latests.cjs"
                         }
+                    }
+                },
+                "lint": {
+                    "taskDependencies": ["typescript1"],
+                    "taskPlugin": {
+                        "pluginPackage": "@rushstack/heft-lint-plugin"
                     }
                 },
                 "generate-types": {
