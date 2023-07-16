@@ -6,13 +6,13 @@ import fs from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 
 import Debug from "debug";
+const logger: Debug.Debugger = Debug.debug("tinyburg:apks");
 
 // eslint-disable-next-line @rushstack/typedef-var
 export const TinyTowerApkSources = ["apkpure", "apkmirror"] as const;
 export type TinyTowerApkSource = (typeof TinyTowerApkSources)[number];
 export type TinyTowerApkVersion = ApkpureVersion & ApkmirrorVersion;
-
-const logger: Debug.Debugger = Debug.debug("tinyburg:apks");
+export { LatestVersion } from "./latest-version.js";
 
 export const loadApk = async <
     T extends TinyTowerApkSource | "patched",
