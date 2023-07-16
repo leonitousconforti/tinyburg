@@ -6,7 +6,7 @@
  *
  * With TinyTower version: 4.23.0
  *
- * On: Thu, 13 Jul 2023 04:56:26 GMT
+ * On: Thu, 13 Jul 2023 18:56:34 GMT
  */
 
 export const pets = {

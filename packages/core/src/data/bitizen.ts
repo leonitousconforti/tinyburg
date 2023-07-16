@@ -6,7 +6,7 @@
  *
  * With TinyTower version: 4.23.0
  *
- * On: Thu, 13 Jul 2023 04:54:05 GMT
+ * On: Thu, 13 Jul 2023 18:54:12 GMT
  */
 
 export const numberHairAccessories = 3 as const;

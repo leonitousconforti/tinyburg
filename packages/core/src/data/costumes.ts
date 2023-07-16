@@ -6,7 +6,7 @@
  *
  * With TinyTower version: 4.23.0
  *
- * On: Thu, 13 Jul 2023 04:54:32 GMT
+ * On: Thu, 13 Jul 2023 18:54:40 GMT
  */
 
 export const costumes = {
