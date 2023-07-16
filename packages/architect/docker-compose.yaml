@@ -13,7 +13,7 @@ services:
 
   emulator:
     image: ghcr.io/leonitousconforti/tinyburg/architect:emulator-10086546_sys-30-google-apis-x64-r12_frida-16.0.19
-    shm_size: 128M
+    shm_size: 128
     devices: [/dev/kvm]
     deploy:
       resources:
