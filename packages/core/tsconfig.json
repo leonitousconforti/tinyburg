@@ -9,5 +9,5 @@
         "sourceMap": true,
         "declaration": true
     },
-    "include": ["./src/**/*.ts", "./bin/**/*.ts"]
+    "include": ["./src/**/*.ts", "./test/**/*.ts"]
 }
