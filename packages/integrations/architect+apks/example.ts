@@ -11,7 +11,7 @@ const { emulatorContainer, installApk } = await architect({
     reuseExistingContainers: true,
     dockerConnectionOptions: {
         protocol: "ssh",
-        host: "architect02.tinyburg.app",
+        host: "architect.tinyburg.app",
         port: 22,
         username: "root",
         sshOptions: {
