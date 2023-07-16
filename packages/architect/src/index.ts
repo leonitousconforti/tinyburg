@@ -104,9 +104,11 @@ const buildFreshContainerWithServices = async (dockerode: Dockerode): Promise<Do
         url.fileURLToPath(new URL("../docker-compose.yaml", import.meta.url)),
         "architect"
     );
-    const result = await dockerodeCompose.up();
-    console.log(result.services);
-    throw new Error("Not implemented fully yet");
+    const compose = await dockerodeCompose.up();
+    const containers = compose.services as unknown as Dockerode.Container[];
+    const inspections = await Promise.all(containers.map((container) => container.inspect()));
+    const id = inspections.find((container) => container.Image === tag)!.Id;
+    return dockerode.getContainer(id);
 };
 
 /**
@@ -275,9 +277,11 @@ const launchGame = async (container: Dockerode.Container): Promise<void> => {
 /**
  * Allocates an emulator container on a local or remote docker host that has kvm
  * acceleration capabilities. Provides convince functions for interacting with
- * the container.
+ * the container. Additionally, has the ability to allocate all the additional
+ * services required to interact with the container from a web browser.
  */
 export const architect = async (options?: {
+    withAdditionalServices?: boolean;
     reuseExistingContainers?: boolean;
     dockerConnectionOptions?: DockerConnectionOptions;
     portBindings?: IArchitectPortBindings;
@@ -299,7 +303,9 @@ export const architect = async (options?: {
         (dockerode.modem as DockerModem.ConstructorOptions).host || "localhost"
     );
 
-    const emulatorContainer = options?.reuseExistingContainers
+    const emulatorContainer = options?.withAdditionalServices
+        ? await buildFreshContainerWithServices(dockerode)
+        : options?.reuseExistingContainers
         ? await findExistingContainer(dockerode, options?.portBindings)
         : await buildFreshContainer(dockerode, options?.portBindings);
 
@@ -314,25 +320,6 @@ export const architect = async (options?: {
         installApk: (apk: string) => installApk(emulatorContainer, apk),
         ...emulatorEndpoints,
     };
-};
-
-/**
- * Allocates an emulator container as well as all the additional services
- * required to interact with the container from a web browser on a local or
- * remote docker host that has kvm acceleration capabilities. Provides convince
- * functions for interacting with the container.
- */
-export const architectWithAdditionalServices = async (
-    dockerConnectionOptions: DockerConnectionOptions = {}
-): Promise<Dockerode.Container> => {
-    const _dockerConnectionOptions = Object.assign({ socketPath: "/var/run/docker.sock" }, dockerConnectionOptions);
-    const dockerode: Dockerode = new Dockerode(_dockerConnectionOptions);
-    logger(
-        "Connected to docker daemon %s @ %s",
-        _dockerConnectionOptions.socketPath,
-        (dockerode.modem as DockerModem.ConstructorOptions).host || "localhost"
-    );
-    return buildFreshContainerWithServices(dockerode);
 };
 
 export default architect;
