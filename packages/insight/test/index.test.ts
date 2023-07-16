@@ -2,8 +2,8 @@ import type Dockerode from "dockerode";
 
 import loadApk from "@tinyburg/apks";
 import architect from "@tinyburg/architect";
-
 import { bootstrapAgentOnRemote, AllAgents } from "../src/index.js";
+
 const GoodAgent = AllAgents["GoodAgent"];
 const BadAgent = AllAgents["BadAgent"];
 const BitbookAgent = AllAgents["BitbookAgent"];
