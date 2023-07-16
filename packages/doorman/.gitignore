@@ -4,6 +4,7 @@
 /assets/*
 !/assets/extract.py
 !/assets/requirements.txt
+!/assets/extract-and-generate.cjs
 
 # Generated templates
 /templates/png

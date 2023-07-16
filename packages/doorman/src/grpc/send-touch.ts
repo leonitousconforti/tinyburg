@@ -37,8 +37,8 @@ export const click = (
     const pressTouch: Touch = {
         x,
         y,
-        timeout,
         pressure: 1,
+        timeout: timeout || 600,
         expiration: Touch_EventExpiration.EVENT_EXPIRATION_UNSPECIFIED,
     };
     const releaseTouch: Touch = {

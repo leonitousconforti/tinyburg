@@ -17,5 +17,5 @@
         "noUncheckedIndexedAccess": false,
         "exactOptionalPropertyTypes": false
     },
-    "include": ["src/**/*.ts", "templates/**/*.ts", "playground.ts"]
+    "include": ["src/**/*.ts", "templates/**/*.ts"]
 }

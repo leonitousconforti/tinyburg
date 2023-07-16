@@ -15,15 +15,6 @@ import { matchTemplate } from "../image-operations/template-matching.js";
 import { loadTemplateByName } from "../image-operations/load-template.js";
 import { calculateResourceScale } from "../utils/calculate-resource-scale.js";
 import { alphabeticalImagesDictionary, prepDictionaryToLibrary, detectSequence } from "../image-operations/ocr.js";
-import {
-    changeToRoofsMenu,
-    click,
-    closeHud,
-    closeRoofsMenu,
-    closeUpgradesMenu,
-    openHud,
-    openUpgradesMenu,
-} from "../grpc/send-touch.js";
 
 const mv_right: Image = await loadTemplateByName("mv_right");
 const debug: Debug.Debugger = Debug("doorman:upgrades:unlock-roof");
@@ -47,9 +38,9 @@ export class UnlockRoof implements IUpgrade {
     @ExitLog(debug)
     public async doUpgrade(client: EmulatorControllerClient): Promise<void> {
         // Open the hud and navigate to the roofs upgrades menu
-        await openHud(client);
-        await openUpgradesMenu(client);
-        await changeToRoofsMenu(client);
+        // await openHud(client);
+        // await openUpgradesMenu(client);
+        // await changeToRoofsMenu(client);
 
         // Grab an initial screenshot to calculate the resource scale and find the buttons
         const initialScreenshot = await getScreenshot(client);
@@ -72,7 +63,7 @@ export class UnlockRoof implements IUpgrade {
         // eslint-disable-next-line no-constant-condition
         while (true) {
             // Go to next roof, grab a screenshot of it, crop it, and then find its name
-            await click(client, { x: moveRightButton.position.x, y: moveRightButton.position.y, timeout: 1000 });
+            // await click(client, { x: moveRightButton.position.x, y: moveRightButton.position.y, timeout: 1000 });
             const roofScreenshot = await getScreenshot(client);
             const roofScreenshotCroppedForName = cropImage(roofScreenshot, { top: 0, left: 0, width: 0, height: 0 });
             const roofSequence = detectSequence(roofScreenshotCroppedForName, alphabeticalDetectionLibrary);
@@ -89,8 +80,8 @@ export class UnlockRoof implements IUpgrade {
         }
 
         // Close the roofs upgrades menu and then then hud
-        await closeRoofsMenu(client);
-        await closeUpgradesMenu(client);
-        await closeHud(client);
+        // await closeRoofsMenu(client);
+        // await closeUpgradesMenu(client);
+        // await closeHud(client);
     }
 }

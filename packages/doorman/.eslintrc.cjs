@@ -19,13 +19,5 @@ module.exports = {
         ecmaVersion: 2022,
         sourceType: "module",
     },
-    overrides: [
-        {
-            files: ["templates/*.ts"],
-            rules: {
-                "@rushstack/typedef-var": "off",
-            },
-        },
-    ],
     ignorePatterns: ["dist/"],
 };

@@ -17,7 +17,8 @@ export class UnlockLobby implements IUpgrade {
     }
 
     public canAfford(): boolean {
-        return (floors.find(({ name }) => name === this._lobbyToBuy) as Floor).buxcost < 10;
+        // return (floors.find(({ name }) => name === this._lobbyToBuy) as Floor).buxcost < 10;
+        return false;
     }
 
     public doUpgrade(): Promise<void> {

@@ -28,10 +28,9 @@ export class Doorman extends Emittery<
         this._handlers = new Set();
         setInterval(this.poll, pollInterval);
 
-        this.on("BitbookNote", this.executeActions);
-        this.on("ElevatorRider", this.executeActions);
-        this.on("NewMission", this.executeActions);
-        this.on("RestockDone", this.executeActions);
+        this.on("Default Bitbook Note Handler", this.executeActions);
+        this.on("Default Elevator Ride Handler", this.executeActions);
+        this.on("Default Restocking Handler", this.executeActions);
     }
 
     public async poll(): Promise<void> {

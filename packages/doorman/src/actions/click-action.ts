@@ -1,6 +1,7 @@
 import type { Image } from "../image-operations/image.js";
 import type { EmulatorControllerClient } from "@tinyburg/architect/protobuf/emulator_controller.client.js";
 
+import crypto from "node:crypto";
 import { click } from "../grpc/send-touch.js";
 import { BaseAction } from "./base-action.js";
 import { ImageType } from "../image-operations/image.js";
@@ -11,23 +12,54 @@ import { matchTemplate } from "../image-operations/template-matching.js";
 import { GameScreen, GlobalGameStateHolder } from "../global-game-state.js";
 import { calculateResourceScale } from "../utils/calculate-resource-scale.js";
 
-export abstract class ClickAction extends BaseAction {
+export class ClickAction extends BaseAction {
+    private readonly _pos: { x: number; y: number; timeout?: number };
+
+    public constructor(
+        emulatorClient: EmulatorControllerClient,
+        pos: { x: number; y: number; timeout?: number },
+        fromScreen?: GameScreen,
+        toScreen?: GameScreen
+    ) {
+        super(emulatorClient, fromScreen, toScreen);
+        this._pos = pos;
+    }
+
+    public override async do(): Promise<boolean> {
+        await super.do();
+        await click(this.emulatorClient, this._pos);
+        return true;
+    }
+}
+
+export abstract class ClickActionTemplateMatching extends BaseAction {
     private readonly _template: Image;
+    private readonly _canCache: boolean;
+
+    private static readonly _templateCache: Map<string, { x: number; y: number }> = new Map();
 
     public constructor(
         emulatorClient: EmulatorControllerClient,
         template: Image,
         fromScreen?: GameScreen,
-        toScreen?: GameScreen
+        toScreen?: GameScreen,
+        canCache = false
     ) {
         super(emulatorClient, fromScreen, toScreen);
         this._template = template;
+        this._canCache = canCache;
     }
 
     public override async do(): Promise<boolean> {
         await super.do();
 
-        const dropChannelResult = dropChannel(this._template, ImageType.RGB, 4);
+        const cache_key = crypto.createHash("sha1").update(this._template.pixels).digest("hex");
+        if (this._canCache && ClickActionTemplateMatching._templateCache.has(cache_key)) {
+            await click(this.emulatorClient, ClickActionTemplateMatching._templateCache.get(cache_key)!);
+            return true;
+        }
+
+        const dropChannelResult = dropChannel(this._template, 4, ImageType.RGB);
         const templateMask = dropChannelResult.droppedChannelImage;
         const templateImage = dropChannelResult.modifiedSourceImage;
 
@@ -43,6 +75,10 @@ export abstract class ClickAction extends BaseAction {
                 GlobalGameStateHolder.getInstance().setScreen(this.fromScreen);
             }
             return false;
+        }
+
+        if (this._canCache) {
+            ClickActionTemplateMatching._templateCache.set(cache_key, matches[0].position);
         }
 
         await click(this.emulatorClient, matches[0].position);

@@ -24,14 +24,14 @@ export class RestockHandler extends BaseHandler<ITriggerLocation | undefined> {
         this._stockingMode = stockingMode;
     }
 
-    public async detectTrigger(_screenshot: Image): Promise<ITriggerLocation | undefined> {
+    public async detectTrigger(screenshot: Image): Promise<ITriggerLocation | undefined> {
         throw new Error("Method not implemented.");
     }
 
     public generateActionsList(
-        _client: EmulatorControllerClient,
-        _initialScreenshot: Image,
-        _triggerData: ITriggerLocation | undefined
+        client: EmulatorControllerClient,
+        initialScreenshot: Image,
+        triggerData: ITriggerLocation | undefined
     ): Promise<BaseAction[]> {
         throw new Error("Method not implemented.");
     }

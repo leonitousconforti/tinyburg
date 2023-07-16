@@ -1,13 +1,24 @@
 import type { Image } from "./image.js";
 
 import assert from "node:assert";
-import { ImageType } from "./image.js";
+import { ImageType, imageTypeFromChannelsForPng } from "./image.js";
 import { sourceImageGuard } from "../parameter-guards/source-image-guard.js";
 
+/**
+ * Drops a singular channel from an image. The new image will have the same
+ * width and height as the source image, but will have one less channel. A new
+ * image format can be specified, otherwise the format will be generated based
+ * on the new number of channels. If the source image only has one channel, an
+ * error will be thrown.
+ *
+ * @param sourceImage The image to drop the channel from
+ * @param dropChannel The index of the channel to drop, starting at 0
+ * @param newFormat
+ */
 export const dropChannel = (
     sourceImage: Image,
-    newFormat: ImageType,
-    dropChannel: Image["channels"]
+    dropChannel: number,
+    newFormat?: ImageType
 ): { modifiedSourceImage: Image; droppedChannelImage: Image } => {
     sourceImageGuard(sourceImage);
     assert(sourceImage.channels >= 2, "Cannot drop a channel from an image with only one channel");
@@ -24,10 +35,10 @@ export const dropChannel = (
 
     // Stores the modified source image
     const modifiedSourceImage: Image = {
-        format: newFormat,
         width: sourceImage.width,
         height: sourceImage.height,
         channels: (sourceImage.channels - 1) as Image["channels"],
+        format: newFormat || imageTypeFromChannelsForPng(sourceImage.channels - 1),
         pixels: Buffer.alloc(sourceImage.width * sourceImage.height * (sourceImage.channels - 1)),
     };
 

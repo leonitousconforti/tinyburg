@@ -4,7 +4,13 @@ import assert from "node:assert";
 import { ImageType } from "./image.js";
 import { sourceImageGuard } from "../parameter-guards/source-image-guard.js";
 
-// Converts a BGR or RGB image to grayscale
+/**
+ * Converts a BGR or RGB image to grayscale based on luminosity. The new image
+ * will have the same width and height as the source image, but will have only
+ * one channel. The new image format will be grayscale.
+ *
+ * @param sourceImage
+ */
 export const grayscaleImage = (sourceImage: Image): Image => {
     sourceImageGuard(sourceImage);
     assert(sourceImage.channels === 3, "Source image must have three channels");

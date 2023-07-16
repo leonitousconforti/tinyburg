@@ -1,21 +1,32 @@
-import type { Image, ImageType } from "./image.js";
+import { imageTypeFromChannelsForPng, type Image, type ImageType } from "./image.js";
 
 import assert from "node:assert";
 import { sourceImageGuard } from "../parameter-guards/source-image-guard.js";
 
-export const addChannel = (sourceImage: Image, channelImage: Image, newFormat: ImageType) => {
+/**
+ * Adds an image with potentially multiple channels to another image. For every
+ * pixel, it will copy the channels from the source image first, then copy the
+ * channels from the channelImage to add. The new image will have the same width
+ * and height as the source image, but will have the combined number of
+ * channels. A new image format can be specified, otherwise the format will be
+ * generated based on the combined number of channels.
+ *
+ * @param sourceImage The image to add the channel image to
+ * @param channelImage The image with the channels to add
+ * @param newFormat
+ */
+export const addChannel = (sourceImage: Image, channelImage: Image, newFormat?: ImageType) => {
     sourceImageGuard(sourceImage);
     sourceImageGuard(channelImage);
     assert(sourceImage.width === channelImage.width, "Source and new channel images must be the same width");
     assert(sourceImage.height === channelImage.height, "Source and new channel images must be the same height");
-    assert(sourceImage.channels + channelImage.channels <= 4, "Too many channels, can not add another channel");
 
     // Create the combined image
     const combinedImage: Image = {
-        format: newFormat,
         width: sourceImage.width,
         height: sourceImage.height,
-        channels: (sourceImage.channels + channelImage.channels) as 2 | 3 | 4,
+        channels: sourceImage.channels + channelImage.channels,
+        format: newFormat || imageTypeFromChannelsForPng(sourceImage.channels + channelImage.channels),
         pixels: Buffer.alloc(sourceImage.width * sourceImage.height * (sourceImage.channels + channelImage.channels)),
     };
 

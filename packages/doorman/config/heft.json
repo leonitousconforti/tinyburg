@@ -4,25 +4,17 @@
         "build": {
             "cleanFiles": [{ "sourcePath": "dist" }],
             "tasksByName": {
-                // "copy-templates": {
-                //     "taskPlugin": {
-                //         "pluginPackage": "@rushstack/heft",
-                //         "pluginName": "copy-files-plugin",
-                //         "options": {
-                //             "copyOperations": [
-                //                 {
-                //                     "destinationFolders": ["dist"],
-                //                     "includeGlobs": [
-                //                         "templates/png/**/*.*",
-                //                         "templates/raw/**/*.*",
-                //                         "templates/metadata/**/*.*"
-                //                     ]
-                //                 }
-                //             ]
-                //         }
-                //     }
-                // },
+                "extract-apk-assets-and-generate-templates": {
+                    "taskPlugin": {
+                        "pluginPackage": "@rushstack/heft",
+                        "pluginName": "run-script-plugin",
+                        "options": {
+                            "scriptPath": "assets/extract-and-generate.cjs"
+                        }
+                    }
+                },
                 "typescript": {
+                    "taskDependencies": ["extract-apk-assets-and-generate-templates"],
                     "taskPlugin": {
                         "pluginPackage": "@rushstack/heft-typescript-plugin"
                     }
@@ -31,6 +23,25 @@
                     "taskDependencies": ["typescript"],
                     "taskPlugin": {
                         "pluginPackage": "@rushstack/heft-lint-plugin"
+                    }
+                },
+                "copy-templates": {
+                    "taskDependencies": ["typescript"],
+                    "taskPlugin": {
+                        "pluginPackage": "@rushstack/heft",
+                        "pluginName": "copy-files-plugin",
+                        "options": {
+                            "copyOperations": [
+                                {
+                                    "destinationFolders": ["dist"],
+                                    "includeGlobs": [
+                                        "templates/png/**/*.*",
+                                        "templates/raw/**/*.*",
+                                        "templates/metadata/**/*.*"
+                                    ]
+                                }
+                            ]
+                        }
                     }
                 }
             }

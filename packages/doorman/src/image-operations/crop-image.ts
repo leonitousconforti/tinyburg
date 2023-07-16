@@ -12,7 +12,14 @@ export interface ICropRegion {
     height: number;
 }
 
-// Crops an image to the area defined by the given region
+/**
+ * Crops an image to the area defined by the given region. The defined region
+ * must be within the bounds of the source image, otherwise an error will be
+ * thrown.
+ *
+ * @param sourceImage The image to crop
+ * @param region The region to crop to
+ */
 export const cropImage = (sourceImage: Image, region: ICropRegion): Image => {
     cropRegionGuard(region);
     sourceImageGuard(sourceImage);
@@ -22,10 +29,10 @@ export const cropImage = (sourceImage: Image, region: ICropRegion): Image => {
     // Create a new image with the same number of channels and format, the region's
     // width, the region's height, and the correct pixel buffer size.
     const croppedImage: Image = {
-        channels: sourceImage.channels,
         width: region.width,
         height: region.height,
         format: sourceImage.format,
+        channels: sourceImage.channels,
         pixels: Buffer.alloc(region.width * region.height * sourceImage.channels),
     };
 
@@ -51,4 +58,8 @@ export const cropImage = (sourceImage: Image, region: ICropRegion): Image => {
     }
 
     return croppedImage;
+};
+
+export const cropScreenshotToNotes = (sourceImage: Image): Image => {
+    return cropImage(sourceImage, { top: 0, left: 0, width: 1920, height: 1080 });
 };

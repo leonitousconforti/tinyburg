@@ -2,7 +2,7 @@ import type { Image } from "../image-operations/image.js";
 import type { ITriggerLocation } from "./base-handler.js";
 import type { BaseAction } from "../actions/base-action.js";
 import type { ITemplateMatchingOrientationOptions } from "../image-operations/template-matching.js";
-import { EmulatorControllerClient } from "@tinyburg/architect/protobuf/emulator_controller.client.js";
+import type { EmulatorControllerClient } from "@tinyburg/architect/protobuf/emulator_controller.client.js";
 
 import Debug from "debug";
 import { BaseHandler } from "./base-handler.js";
@@ -28,7 +28,7 @@ export class BitbookPostHandler extends BaseHandler<ITriggerLocation> {
 
     public constructor() {
         super("Default Bitbook Note Handler");
-        const dropChannelResult = dropChannel(note_bb, ImageType.RGB, 4);
+        const dropChannelResult = dropChannel(note_bb, 4, ImageType.RGB);
         this._templateNoteImage = dropChannelResult.modifiedSourceImage;
         this._templateNoteMask = negateImage(dropChannelResult.droppedChannelImage);
         debug("Created new bitbook handler");

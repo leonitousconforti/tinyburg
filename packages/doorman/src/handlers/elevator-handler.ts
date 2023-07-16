@@ -1,12 +1,12 @@
-import type { Touch } from "../grpc/send-touch.js";
 import type { Image } from "../image-operations/image.js";
 import type { ITriggerLocation } from "./base-handler.js";
 import type { ICropRegion } from "../image-operations/crop-image.js";
-import { EmulatorControllerClient } from "@tinyburg/architect/protobuf/emulator_controller.client.js";
+import type { EmulatorControllerClient } from "@tinyburg/architect/protobuf/emulator_controller.client.js";
 
 import { BaseHandler } from "./base-handler.js";
-import { sendTouches } from "../grpc/send-touch.js";
+import { BaseAction } from "../actions/base-action.js";
 import { ImageType } from "../image-operations/image.js";
+import { ClickAction } from "../actions/click-action.js";
 import { getScreenshot } from "../grpc/get-screenshots.js";
 import { cropImage } from "../image-operations/crop-image.js";
 import { negateImage } from "../image-operations/negate-image.js";
@@ -28,7 +28,7 @@ export class ElevatorHandler extends BaseHandler<ITriggerLocation> {
 
     public constructor() {
         super("Default Elevator Ride Handler");
-        const dropChannelResult = dropChannel(note_ride1, ImageType.RGB, 4);
+        const dropChannelResult = dropChannel(note_ride1, 4, ImageType.RGB);
         this._templateTriggerImage = dropChannelResult.modifiedSourceImage;
         this._templateTriggerMask = negateImage(dropChannelResult.droppedChannelImage);
     }
@@ -62,58 +62,45 @@ export class ElevatorHandler extends BaseHandler<ITriggerLocation> {
         emulatorClient: EmulatorControllerClient,
         initialScreenshot: Image,
         triggerData: ITriggerLocation
-    ) {
-        const resourceScale = calculateResourceScale(initialScreenshot.width, initialScreenshot.height);
+    ): Promise<BaseAction[]> {
+        class DriveElevatorAction extends BaseAction {
+            public override async do(): Promise<boolean> {
+                const resourceScale = calculateResourceScale(initialScreenshot.width, initialScreenshot.height);
 
-        // Press the elevator note
-        const baseElevatorNoteTouch = {
-            x: triggerData.x + (this._templateTriggerImage.width * resourceScale) / 2,
-            y:
-                triggerData.y +
-                initialScreenshot.height -
-                Math.round(initialScreenshot.height / 8) -
-                (this._templateTriggerImage.height * resourceScale) / 2,
-            expiration: "EVENT_EXPIRATION_UNSPECIFIED",
-            timeout: 600,
-        } as const;
-        const pressElevatorNote: Touch = { ...baseElevatorNoteTouch, pressure: 1 };
-        const releaseElevatorNote: Touch = { ...baseElevatorNoteTouch, pressure: 0 };
-        await sendTouches(emulatorClient, [pressElevatorNote, releaseElevatorNote]);
+                // Get the numbers library ready for optical character recognition.
+                const numbersLibrary = prepDictionaryToLibrary(numericalImagesDictionary, resourceScale, negateImage);
 
-        // Get the numbers library ready for optical character recognition.
-        const numbersLibrary = prepDictionaryToLibrary(numericalImagesDictionary, resourceScale, negateImage);
+                // Get a second screenshot with the floor number in it, crop it, and ocr the floor number
+                const secondScreenshot = await getScreenshot(emulatorClient);
+                const desiredFloorCropRegion: ICropRegion = { left: 130, width: 40, top: 1240, height: 50 };
+                const secondScreenshotCropped = cropImage(secondScreenshot, desiredFloorCropRegion);
+                const floor = Number(detectSequence(secondScreenshotCropped, numbersLibrary).sequence);
 
-        // Get a second screenshot with the floor number in it, crop it, and ocr the floor number
-        const secondScreenshot = await getScreenshot(emulatorClient);
-        const desiredFloorCropRegion: ICropRegion = { left: 130, width: 40, top: 1240, height: 50 };
-        const secondScreenshotCropped1 = cropImage(secondScreenshot, desiredFloorCropRegion);
-        const floor = Number(detectSequence(secondScreenshotCropped1, numbersLibrary).sequence);
+                // Send approximate elevator controls
+                await new ClickAction(emulatorClient, {
+                    x: secondScreenshot.width / 4,
+                    y: secondScreenshot.height / 2,
+                    timeout: (floor - 1) * 1000,
+                }).do();
 
-        // Send approximate elevator controls
-        const baseElevatorUpTouch = {
-            x: secondScreenshot.width / 4,
-            y: secondScreenshot.height / 2,
-            expiration: "EVENT_EXPIRATION_UNSPECIFIED",
-        } as const;
-        const pressElevatorUp: Touch = { ...baseElevatorUpTouch, pressure: 1, timeout: (floor - 1) * 1000 };
-        const releaseElevatorUp: Touch = { ...baseElevatorUpTouch, pressure: 0, timeout: 1 };
-        await sendTouches(emulatorClient, [pressElevatorUp, releaseElevatorUp]);
+                // See if we got a costume or pet from this bitizen
+                const thirdScreenshot = await getScreenshot(emulatorClient);
+                const continueLibrary = prepDictionaryToLibrary(continueTemplates, resourceScale);
+                const message = detectSequence(thirdScreenshot, continueLibrary);
+                if (message.sequence === "continue") {
+                    const continueButton = message.matches[Math.floor(message.matches.length / 2)].position;
+                    await new ClickAction(emulatorClient, continueButton).do();
+                }
 
-        // See if we got a costume or pet from this bitizen
-        const thirdScreenshot = await getScreenshot(emulatorClient);
-        const continueLibrary = prepDictionaryToLibrary(continueTemplates, resourceScale);
-        const message = detectSequence(thirdScreenshot, continueLibrary);
-        if (message.sequence === "continue") {
-            const continueButton = message.matches[Math.floor(message.matches.length / 2)].position;
-            const baseContinueButtonTouch = {
-                x: continueButton.x,
-                y: continueButton.y,
-                expiration: "EVENT_EXPIRATION_UNSPECIFIED",
-                timeout: 600,
-            } as const;
-            const pressContinueButton: Touch = { ...baseContinueButtonTouch, pressure: 1 };
-            const releaseContinueButton: Touch = { ...baseContinueButtonTouch, pressure: 0 };
-            await sendTouches(emulatorClient, [pressContinueButton, releaseContinueButton]);
+                return true;
+            }
         }
+
+        return [
+            // Press the elevator note
+            new ClickAction(emulatorClient, triggerData),
+            // Drive the elevator
+            new DriveElevatorAction(emulatorClient),
+        ];
     }
 }

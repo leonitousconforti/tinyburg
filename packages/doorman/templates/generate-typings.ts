@@ -12,8 +12,8 @@ const needToEscape = new Set(["\\", '"']);
 
 // Get all the names
 const spriteNames = Object.keys(sprites.frames).map((name) => `"${name.slice(0, name.lastIndexOf("."))}"`);
-const characterNames = silkscreen.silkscreen.map((char) => `"char_${char.char_id}"`);
-const characters = silkscreen.silkscreen
+const characterNames = silkscreen.map((char) => `"char_${char.char_id}"`);
+const characters = silkscreen
     .map((char) => String.fromCodePoint(char.char_id))
     .map((char) => `"${needToEscape.has(char) ? "\\" : ""}${char}"`);
 
@@ -26,9 +26,9 @@ const typescriptCharacterType = `export type Characters = ${characters.join(" | 
 const sourceFile = new URL("../src/image-operations/load-template.ts", import.meta.url);
 const fileContents = await fs.readFile(sourceFile, { encoding: "ascii" });
 const updatedFileContents = fileContents
-    .replace(/export type SpriteTemplateName =\n?[\s\w"/|-]+;\n/gm, typescriptSpriteNameType)
-    .replace(/export type CharacterTemplateName =\n?[\s\w"/|-]+;\n/gm, typescriptCharacterNameType)
-    .replace(
+    .replaceAll(/export type SpriteTemplateName =\n?[\s\w"/|-]+;\n/gm, typescriptSpriteNameType)
+    .replaceAll(/export type CharacterTemplateName =\n?[\s\w"/|-]+;\n/gm, typescriptCharacterNameType)
+    .replaceAll(
         /export type Characters =\n?[\s\w!"#$%&'()*+,./:<=>?@[\\\]^`{|}~-]+(";")\n?[\s\w!"#$%&'()*+,./:<=>?@[\\\]^`{|}~-]+;\n/gm,
         typescriptCharacterType
     );

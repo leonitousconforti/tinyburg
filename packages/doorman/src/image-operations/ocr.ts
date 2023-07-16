@@ -4,10 +4,10 @@ import type { Match } from "./template-matching.js";
 import { ImageType } from "./image.js";
 import { dropChannel } from "./drop-channel.js";
 import { upscaleImage } from "./upscale-image.js";
-import { loadCharTemplates } from "./load-template.js";
 import { matchTemplate } from "./template-matching.js";
+import { loadCharTemplates } from "./load-template.js";
 
-export type DetectionLibrary = { character: string; template: Image; mask?: Image }[];
+export type DetectionLibrary = Array<{ character: string; template: Image; mask?: Image }>;
 export const numericalImagesDictionary = await loadCharTemplates("0", "1", "2", "3", "4", "5", "6", "7", "8", "9");
 export const punctuationImagesDictionary = await loadCharTemplates("!", "?", ",", ".", '"', "'", ";", ":");
 export const alphabeticalImagesDictionary = await loadCharTemplates(
@@ -39,7 +39,7 @@ export const alphabeticalImagesDictionary = await loadCharTemplates(
     "Z"
 );
 
-// Preps an image dictionary to be used by the detect sequence method
+/** Preps an image dictionary to be used by the detect sequence method */
 export const prepDictionaryToLibrary = (
     dictionary: Record<string, Image>,
     resourceScale = 1,
@@ -53,7 +53,7 @@ export const prepDictionaryToLibrary = (
         .map(({ image, ...rest }) => ({ upscaledImage: upscaleImage(image, resourceScale), ...rest }))
 
         // Map each image to the dropped channel equivalent
-        .map(({ upscaledImage, ...rest }) => ({ ...dropChannel(upscaledImage, ImageType.RGB, 4), ...rest }))
+        .map(({ upscaledImage, ...rest }) => ({ ...dropChannel(upscaledImage, 4, ImageType.RGB), ...rest }))
 
         // Convert to final form
         .map(({ modifiedSourceImage, droppedChannelImage, ...rest }) => ({
@@ -62,7 +62,10 @@ export const prepDictionaryToLibrary = (
             ...rest,
         }));
 
-// Detects a sequence of characters from the supplied detection library in the source image
+/**
+ * Detects a sequence of characters from the supplied detection library in the
+ * source image
+ */
 export const detectSequence = (sourceImage: Image, detectionLibrary: DetectionLibrary, templateMatchThreshold = 1) =>
     detectionLibrary
         // Map each entry in the detection library to an object with
@@ -85,6 +88,7 @@ export const detectSequence = (sourceImage: Image, detectionLibrary: DetectionLi
         })
 
         // Convert each detection to the detected character, then join them all into one string
+        // eslint-disable-next-line unicorn/no-array-reduce
         .reduce<{ sequence: string; matches: Match[] }>(
             (object, detection) => {
                 object.matches.push(detection.match);

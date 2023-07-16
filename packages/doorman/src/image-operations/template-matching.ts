@@ -3,7 +3,7 @@ import type { Image } from "./image.js";
 import assert from "node:assert";
 import { ImageType } from "./image.js";
 
-// A match is comprised of a position and similarity score [0, 1] for a match
+/** A match is comprised of a position and similarity score [0, 1] for a match */
 export type Match = {
     position: {
         x: number;
@@ -12,7 +12,7 @@ export type Match = {
     similarity: number;
 };
 
-// Specify how the template image can land in the search image
+/** Specify how the template image can land in the search image */
 export interface ITemplateMatchingOrientationOptions {
     noOverlapVertically?: boolean;
     noOverlapHorizontally?: boolean;
@@ -23,15 +23,24 @@ export interface ITemplateMatchingOrientationOptions {
 export const MAX_SEARCH_DOMAIN: number = 250 * 250 * 3;
 export const MAX_TEMPLATE_DOMAIN: number = 50 * 50 * 3;
 
-// Matches a template against a search image using a SAD (sum of absolute differences) measure.
-// https://en.wikipedia.org/wiki/Template_matching#Implementation
-// https://docs.opencv.org/4.5.5/de/da9/tutorial_template_matching.html
-// https://pyimagesearch.com/2021/03/22/opencv-template-matching-cv2-matchtemplate/
+/**
+ * Matches a template against a search image using a SAD (sum of absolute
+ * differences) measure.
+ *
+ * @param searchImage
+ * @param templateImage
+ * @param mask
+ * @param wantExact
+ * @param orientationOptions
+ * @see https://en.wikipedia.org/wiki/Template_matching#Implementation
+ * @see https://docs.opencv.org/4.5.5/de/da9/tutorial_template_matching.html
+ * @see https://pyimagesearch.com/2021/03/22/opencv-template-matching-cv2-matchtemplate/
+ */
 export const matchTemplate = (
     searchImage: Image,
     templateImage: Image,
     mask?: Image,
-    exact?: boolean,
+    wantExact: boolean = true,
     orientationOptions?: ITemplateMatchingOrientationOptions
 ): Match[] => {
     // The search image and template image must have the same number of channels
@@ -51,7 +60,7 @@ export const matchTemplate = (
     }
 
     // If every pixel in the mask is less than 255, then every pixel in the
-    // template image will be skipped thus there should be no matches
+    // template image will be skipped thus there would be no matches
     if (mask?.pixels.every((pixel) => pixel < 255)) {
         console.warn("Mask image supplied was trivial, no matches would be detected");
         return [];
@@ -90,7 +99,7 @@ export const matchTemplate = (
             let similaritySum = 0;
 
             // Keep track of any differences in the image at all
-            let notExact = false;
+            let exact = true;
 
             // Loop over the template image
             for (let t_y = 0; t_y < templateImage.height; t_y++) {
@@ -121,24 +130,24 @@ export const matchTemplate = (
                     similaritySum += diffs.map((diff) => diff / 255).reduce((partialSum, diff) => partialSum + diff, 0);
                     SAD += diffs.reduce((partialSum, diff) => partialSum + diff, 0);
 
-                    if (SAD > 0 && exact) {
-                        notExact = true;
+                    if (SAD > 0 && wantExact) {
+                        exact = false;
                         break;
                     }
                 }
 
-                if (notExact) {
+                if (wantExact && !exact) {
                     break;
                 }
             }
 
             // If this match is a new best score, clear the matches list
-            if (SAD < minSAD && (!exact || (exact && !notExact))) {
+            if (SAD < minSAD && (!wantExact || (wantExact && exact))) {
                 matches = [];
             }
 
             // Save the best found positions
-            if (SAD <= minSAD && (!exact || (exact && !notExact))) {
+            if (SAD <= minSAD && (!wantExact || (wantExact && exact))) {
                 // Reset the min sum of absolute differences
                 minSAD = SAD;
                 matches.push({
