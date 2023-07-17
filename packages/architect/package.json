@@ -35,8 +35,8 @@
         "_phase:build": "heft run --only build -- --clean",
         "_phase:test": "NODE_OPTIONS=\"--experimental-vm-modules --no-warnings\" heft run --only test -- --clean",
         "build": "NODE_OPTIONS=\"--experimental-vm-modules --no-warnings\" heft test --clean",
-        "docker:build": "docker build ./emulator --platform linux/x86_64 --tag ghcr.io/leonitousconforti/tinyburg/architect:emulator-10086546_sys-30-google-apis-x64-r12_frida-16.0.19",
-        "docker:run": "docker run --rm --platform linux/x86_64 --device /dev/kvm --publish 5554:5554/tcp --publish 5555:5555/tcp --publish 8554:8554/tcp --publish 27042:27042/tcp -it ghcr.io/leonitousconforti/tinyburg/architect:emulator-10086546_sys-30-google-apis-x64-r12_frida-16.0.19",
+        "docker:build": "docker build ./emulator --platform linux/x86_64 --tag ghcr.io/leonitousconforti/tinyburg/architect_emulator:10086546_sys-30-google-apis-x64-r12_frida-16.0.19",
+        "docker:run": "docker run --rm --platform linux/x86_64 --device /dev/kvm --publish 5554:5554/tcp --publish 5555:5555/tcp --publish 8554:8554/tcp --publish 27042:27042/tcp -it ghcr.io/leonitousconforti/tinyburg/architect_emulator:10086546_sys-30-google-apis-x64-r12_frida-16.0.19",
         "protobuf:clean": "rimraf --glob protobuf/**/*.js && rimraf --glob protobuf/**/*.d.ts",
         "protobuf:gen": "protoc -I ./protobuf --ts_out ./protobuf --ts_opt optimize_code_size --ts_opt output_javascript --ts_opt eslint_disable ./protobuf/emulator_controller.proto ./protobuf/rtc_service.proto",
         "stress": "DEBUG=tinyburg:* ts-node --files --esm ./src/stress-test.ts"

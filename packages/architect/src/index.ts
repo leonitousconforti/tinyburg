@@ -11,7 +11,7 @@ import DockerodeCompose from "dockerode-compose";
 
 const logger: Debug.Debugger = Debug.debug("tinyburg:architect");
 const tag: string =
-    "ghcr.io/leonitousconforti/tinyburg/architect:emulator-10086546_sys-30-google-apis-x64-r12_frida-16.0.19";
+    "ghcr.io/leonitousconforti/tinyburg/architect_emulator:10086546_sys-30-google-apis-x64-r12_frida-16.0.19";
 
 // Override the docker host environment variable
 if (process.env["ARCHITECT_DOCKER_HOST"] !== undefined) {

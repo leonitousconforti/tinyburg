@@ -15,13 +15,13 @@ describe("simple tests", () => {
         const allContainers = await dockerode.listContainers({ all: true });
 
         const allArchitectNetworks = allNetworks
-            .filter((network) => network.Name.startsWith("ghcr.io/leonitousconforti/tinyburg/architect:emulator-"))
+            .filter((network) => network.Name.startsWith("ghcr.io/leonitousconforti/tinyburg/architect_"))
             .map((network) => dockerode.getNetwork(network.Id));
         const allArchitectContainers = allContainers
-            .filter((container) => container.Image.startsWith("ghcr.io/leonitousconforti/tinyburg/architect:emulator-"))
+            .filter((container) => container.Image.startsWith("ghcr.io/leonitousconforti/tinyburg/architect_"))
             .map((container) => dockerode.getContainer(container.Id));
         const allRunningArchitectContainers = allContainers
-            .filter((container) => container.Image.startsWith("ghcr.io/leonitousconforti/tinyburg/architect:emulator-"))
+            .filter((container) => container.Image.startsWith("ghcr.io/leonitousconforti/tinyburg/architect_"))
             .filter((container) => container.State === "running")
             .map((container) => dockerode.getContainer(container.Id));
 
