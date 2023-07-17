@@ -1,12 +1,10 @@
 {
     "extends": "@tinyburg/tsconfig-rig/profile/default/config/tsconfig.json",
     "compilerOptions": {
-        "module": "esnext",
-        "moduleResolution": "NodeNext",
-        "outDir": "./dist",
         "noEmit": false,
         "sourceMap": true,
         "declaration": true,
+        "outDir": "./dist",
 
         // For project references
         "types": [],
