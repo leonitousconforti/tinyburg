@@ -7,8 +7,7 @@ services:
     networks:
       - envoymesh
     ports:
-      - "8080:8080"
-      - "8081:8081"
+      - "0:8080"
 
   emulator:
     image: ghcr.io/leonitousconforti/tinyburg/architect_emulator:10086546_sys-30-google-apis-x64-r12_frida-16.0.19
@@ -22,10 +21,10 @@ services:
     build:
       context: ./emulator
     ports:
-      - "5554:5554"
-      - "5555:5555"
-      - "8554:8554"
-      - "27042:27042"
+      - "0:5554"
+      - "0:5555"
+      - "0:8554"
+      - "0:27042"
     networks:
       envoymesh:
         aliases:
@@ -35,8 +34,8 @@ services:
     image: ghcr.io/leonitousconforti/tinyburg/architect_jwt_signer:latest
     build:
       context: ./jwt-provider
-    ports:
-      - "8082:8080"
+    expose:
+      - "8080"
     networks:
       envoymesh:
         aliases:
@@ -46,8 +45,8 @@ services:
     image: ghcr.io/leonitousconforti/tinyburg/architect_frontend_instructions:latest
     build:
       context: ./frontend-placeholder
-    ports:
-      - "8083:8080"
+    expose:
+      - "8080"
     networks:
       envoymesh:
         aliases:

@@ -45,7 +45,6 @@ const buildFreshContainer = async (
     dockerode: Dockerode,
     portBindings?: IArchitectPortBindings
 ): Promise<Dockerode.Container> => {
-    // Build a new docker container
     const context = new URL("../emulator", import.meta.url);
     const tarStream = tar.pack(url.fileURLToPath(context));
     logger("Building docker image from context %s, will tag image as %s when finished", context.toString(), tag);
@@ -69,7 +68,6 @@ const buildFreshContainer = async (
         portBindings || {}
     );
 
-    // Create the container
     logger("Creating container from image with kvm acceleration enabled");
     const container = await dockerode.createContainer({
         Image: tag,
@@ -85,7 +83,6 @@ const buildFreshContainer = async (
         },
     });
 
-    // Start the container
     logger("Starting container %s", container.id);
     await container.start();
     return container;
@@ -99,16 +96,20 @@ const buildFreshContainer = async (
  * @returns The main emulator container
  */
 const buildFreshContainerWithServices = async (dockerode: Dockerode): Promise<Dockerode.Container> => {
-    logger("Starting architect with additional services using docker compose");
+    const dockerComposeServiceName = `architect${Math.floor(Math.random() * (999_999 - 100_000 + 1)) + 100_000}`;
+    logger(
+        "Starting architect with additional services using docker compose, service name will be %s",
+        dockerComposeServiceName
+    );
     const dockerodeCompose: DockerodeCompose = new DockerodeCompose(
         dockerode,
         url.fileURLToPath(new URL("../docker-compose.yaml", import.meta.url)),
-        "architect"
+        dockerComposeServiceName
     );
     const compose = await dockerodeCompose.up();
-    const containers = compose.services as unknown as Dockerode.Container[];
+    const containers = compose.services as Dockerode.Container[];
     const inspections = await Promise.all(containers.map((container) => container.inspect()));
-    const id = inspections.find((container) => container.Image === tag)!.Id;
+    const id = inspections.find((container) => container.Config.Image === tag)!.Id;
     return dockerode.getContainer(id);
 };
 
@@ -273,6 +274,41 @@ const launchGame = async (container: Dockerode.Container): Promise<void> => {
         ],
     });
     await exec.start({});
+};
+
+/**
+ * Removes all running and stopped architect containers and networks from the
+ * docker host. Can also remove images is specified.
+ */
+export const cleanUpArchitectArtifacts = async (
+    dockerConnectionOptions?: DockerConnectionOptions,
+    removeStopped: boolean = true
+): Promise<void> => {
+    const dockerode: Dockerode = new Dockerode(
+        Object.assign({ socketPath: "/var/run/docker.sock" }, dockerConnectionOptions || {})
+    );
+
+    const allNetworks = await dockerode.listNetworks({ all: removeStopped });
+    const allContainers = await dockerode.listContainers({ all: removeStopped });
+
+    const containerFilter = (container: Dockerode.ContainerInfo): boolean =>
+        container.Image.startsWith("ghcr.io/leonitousconforti/tinyburg/architect_") ||
+        container.Names.some((name) => name.includes("architect-"));
+
+    const allArchitectNetworks = allNetworks
+        .filter((network) => network.Name.includes("architect"))
+        .map((network) => dockerode.getNetwork(network.Id));
+    const allArchitectContainers = allContainers
+        .filter((container) => containerFilter(container))
+        .map((container) => dockerode.getContainer(container.Id));
+    const allRunningArchitectContainers = allContainers
+        .filter((container) => containerFilter(container))
+        .filter((container) => container.State === "running")
+        .map((container) => dockerode.getContainer(container.Id));
+
+    await Promise.all(allRunningArchitectContainers.map((container) => container.stop()));
+    await Promise.all(allArchitectContainers.map((container) => container.remove()));
+    await Promise.all(allArchitectNetworks.map((network) => network.remove()));
 };
 
 /**

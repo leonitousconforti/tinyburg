@@ -1,0 +1,19 @@
+diff --git a/lib/servicesTools.js b/lib/servicesTools.js
+index 9c1808d384db7797019df10e70381cfbbc77acf1..447ed7b1830272717c5c04f7b704c71febc29255 100644
+--- a/lib/servicesTools.js
++++ b/lib/servicesTools.js
+@@ -183,7 +183,13 @@ module.exports = {
+     if (service.ports !== undefined) {
+       this.buildPorts(service.ports, output);
+     }
+-
++    if (service.devices !== undefined) {
++      output.Devices = service.devices.map((device) => ({
++        CgroupPermissions: "mrw",
++        PathInContainer: device,
++        PathOnHost: device,
++      }));
++    }
+     if (service.cpu_count !== undefined) {
+       output.CpuCount = service.cpu_count;
+     }

@@ -17,7 +17,7 @@ declare module "dockerode-compose" {
             volumes: Record<string, unknown>;
             configs: Record<string, unknown>;
             networks: Record<string, unknown>;
-            services: Record<string, unknown>;
+            services: Dockerode.Container[];
         }>;
 
         pull(
