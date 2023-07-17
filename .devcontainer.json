@@ -150,8 +150,8 @@
         }
     },
 
+    "runArgs": ["--network=host"],
+    "postCreateCommand": "/bin/bash ./setup.sh",
     "remoteEnv": { "PUPPETEER_EXECUTABLE_PATH": "/usr/bin/chromium" },
-    "containerEnv": { "PUPPETEER_EXECUTABLE_PATH": "/usr/bin/chromium" },
-    "appPort": ["3000:3000"],
-    "postCreateCommand": "/bin/bash ./setup.sh"
+    "containerEnv": { "PUPPETEER_EXECUTABLE_PATH": "/usr/bin/chromium" }
 }
