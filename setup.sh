@@ -11,6 +11,10 @@ rush install
 rush update-autoinstaller --name rush-prettier
 rush update-autoinstaller --name rush-commitlint
 
+echo "📝 Running some bash setup scripts"
+(cd packages/apks/vendor && ./setup.sh)
+(cd packages/architect/jwt-provider && ./setup.sh)
+
 echo "🏗️ Building all packages..."
 rush retest
 
