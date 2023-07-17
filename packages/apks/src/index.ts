@@ -24,7 +24,7 @@ export const loadApk = async <
     logger("Loading version %s from %s downloads", version, source);
 
     const fileNames = await fs.readdir(new URL(`../downloads/${source}`, import.meta.url));
-    const file = fileNames.filter((fileName) => fileName.includes(version));
+    const file = fileNames.find((fileName) => fileName.includes(version)) || version;
     return fileURLToPath(new URL(`../downloads/${source}/${file}`, import.meta.url));
 };
 export default loadApk;

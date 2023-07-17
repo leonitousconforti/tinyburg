@@ -1,8 +1,17 @@
 const path = require("node:path");
 const fs = require("node:fs/promises");
 
+const checkFileExists = async (path) => {
+    try {
+        await fs.access(path, fs.constants.R_OK | fs.constants.W_OK);
+        return true;
+    } catch {
+        return false;
+    }
+};
+
 module.exports.runAsync = async () => {
-    const { LatestVersion } = await import("../dist/latest-version.js");
+    const { loadApk } = await import("../dist/index.js");
     const { getApkpureLatestDetails, downloadLatestApkpureApk } = await import("../dist/apkpure.puppeteer.js");
     const { getApkmirrorLatestDetails, downloadLatestApkmirrorApk } = await import("../dist/apkmirror.puppeteer.js");
 
@@ -13,7 +22,10 @@ module.exports.runAsync = async () => {
     if (latestVersion1 !== latestVersion2) {
         throw new Error("I got two different latest versions!");
     }
-    if (LatestVersion === latestVersion1) {
+
+    const apks = await Promise.all([loadApk("apkpure", latestVersion1), loadApk("apkmirror", latestVersion1)]);
+    const exists = await Promise.all(apks.map((apk) => checkFileExists(apk)));
+    if (exists.every(Boolean)) {
         return;
     }
 
