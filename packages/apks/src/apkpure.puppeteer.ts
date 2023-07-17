@@ -47,10 +47,11 @@ export const getApkpureLatestDetails = async (): Promise<IPuppeteerDetails> => {
 };
 
 export const downloadLatestApkpureApk = async (
+    suppliedDetails?: IPuppeteerDetails,
     downloadsFolder: string = url.fileURLToPath(new URL("../downloads/apkpure/", import.meta.url))
 ): Promise<IPuppeteerDetails> => {
     // Get the details from apkpure for the latest version url
-    const details = await getApkpureLatestDetails();
+    const details = suppliedDetails ?? (await getApkpureLatestDetails());
 
     // Open the browser in headless mode
     const browser = await puppeteer.launch({ headless: "new" });

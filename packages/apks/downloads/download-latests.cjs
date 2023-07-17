@@ -1,4 +1,5 @@
 const path = require("node:path");
+const prettier = require("prettier");
 const fs = require("node:fs/promises");
 
 const checkFileExists = async (path) => {
@@ -12,25 +13,47 @@ const checkFileExists = async (path) => {
 
 module.exports.runAsync = async () => {
     const { loadApk } = await import("../dist/index.js");
+    const { LatestVersion } = await import("../dist/latest-version.js");
     const { getApkpureLatestDetails, downloadLatestApkpureApk } = await import("../dist/apkpure.puppeteer.js");
     const { getApkmirrorLatestDetails, downloadLatestApkmirrorApk } = await import("../dist/apkmirror.puppeteer.js");
 
-    const [{ latestVersion: latestVersion1 }, { latestVersion: latestVersion2 }] = await Promise.all([
+    const prettierOptions = {
+        parser: "typescript",
+        ...(await prettier.resolveConfig(__dirname, { editorconfig: true })),
+    };
+
+    const [apkpureLatestDetails, apkmirrorLatestDetails] = await Promise.all([
         getApkpureLatestDetails(),
         getApkmirrorLatestDetails(),
     ]);
-    if (latestVersion1 !== latestVersion2) {
+    if (apkpureLatestDetails.latestVersion !== apkmirrorLatestDetails.latestVersion) {
         throw new Error("I got two different latest versions!");
     }
 
-    const apks = await Promise.all([loadApk("apkpure", latestVersion1), loadApk("apkmirror", latestVersion1)]);
+    const apks = await Promise.all([
+        loadApk("apkpure", apkpureLatestDetails.latestVersion),
+        loadApk("apkmirror", apkmirrorLatestDetails.latestVersion),
+    ]);
     const exists = await Promise.all(apks.map((apk) => checkFileExists(apk)));
-    if (exists.every(Boolean)) {
+    if (exists.every(Boolean) && apkpureLatestDetails.latestVersion === LatestVersion) {
         return;
     }
 
-    await Promise.all([downloadLatestApkmirrorApk(), downloadLatestApkpureApk()]);
+    await Promise.all([
+        downloadLatestApkmirrorApk(apkmirrorLatestDetails),
+        downloadLatestApkpureApk(apkpureLatestDetails),
+    ]);
+
     const disableEslintError = "// eslint-disable-next-line @rushstack/typedef-var\n";
-    const typescriptExport = `export const LatestVersion = "${latestVersion1}" as const;\n`;
-    await fs.writeFile(path.join(__dirname, "../src/latest-version.ts"), disableEslintError + typescriptExport);
+    const typescriptExport1 = `export const LatestVersion = "${apkpureLatestDetails.latestVersion}" as const;\n`;
+    const typescriptExport2 = `export const LatestDetails = [${JSON.stringify(apkpureLatestDetails)}, ${JSON.stringify(
+        apkmirrorLatestDetails
+    )}] as const;\n`;
+    await fs.writeFile(
+        path.join(__dirname, "../src/latest-version.ts"),
+        prettier.format(
+            disableEslintError + typescriptExport1 + "\n" + disableEslintError + typescriptExport2,
+            prettierOptions
+        )
+    );
 };

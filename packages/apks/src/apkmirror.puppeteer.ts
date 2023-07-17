@@ -62,10 +62,11 @@ export const getApkmirrorLatestDetails = async (): Promise<IPuppeteerDetails> =>
 };
 
 export const downloadLatestApkmirrorApk = async (
+    suppliedDetails?: IPuppeteerDetails,
     downloadsFolder: string = url.fileURLToPath(new URL("../downloads/apkmirror/", import.meta.url))
 ): Promise<IPuppeteerDetails> => {
     // Get the details from apkmirror for the latest version url
-    const details = await getApkmirrorLatestDetails();
+    const details = suppliedDetails ?? (await getApkmirrorLatestDetails());
 
     // Navigate to the page with the latest version
     const browser = await puppeteer.launch({ headless: "new" });
