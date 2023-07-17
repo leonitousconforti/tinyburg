@@ -18,6 +18,9 @@
     "author": "Leo Conforti <leo@leoconforti.us> (https://leoconforti.us)",
     "type": "module",
     "main": "index.js",
+    "bin": {
+        "TinyTower-cli": "./cli.js"
+    },
     "dependencies": {
         "@tinyburg/core": "workspace:*",
         "find-up": "~6.3.0",
