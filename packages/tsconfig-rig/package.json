@@ -3,11 +3,11 @@
     "version": "0.0.1",
     "private": true,
     "files": [
-        "./profiles/*"
+        "./profile/*"
     ],
     "devDependencies": {
         "@tsconfig/esm": "~1.0.3",
-        "@tsconfig/node18": "~2.0.1",
+        "@tsconfig/node18": "~18.2.0",
         "@tsconfig/strictest": "~2.0.1"
     }
 }

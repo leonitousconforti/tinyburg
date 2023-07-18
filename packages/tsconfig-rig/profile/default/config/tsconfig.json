@@ -9,7 +9,7 @@
         "noEmit": true,
 
         // https://github.com/tsconfig/bases/blob/main/bases/esm.json
-        "module": "es2022",
+        "module": "ESNext",
         "verbatimModuleSyntax": true,
 
         // https://github.com/tsconfig/bases/blob/main/bases/node18.json
