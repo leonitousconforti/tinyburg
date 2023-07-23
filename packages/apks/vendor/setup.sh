@@ -5,5 +5,5 @@ wget https://github.com/patrickfav/uber-apk-signer/releases/download/v1.3.0/uber
 wget https://github.com/frida/frida/releases/download/16.1.0/frida-gadget-16.1.0-android-arm64.so.xz
 wget https://github.com/frida/frida/releases/download/16.1.0/frida-gadget-16.1.0-android-x86_64.so.xz
 
-unxz frida-gadget-16.1.0-android-arm64.so.xz
-unxz frida-gadget-16.1.0-android-x86_64.so.xz
+unxz --force frida-gadget-16.1.0-android-arm64.so.xz
+unxz --force frida-gadget-16.1.0-android-x86_64.so.xz
