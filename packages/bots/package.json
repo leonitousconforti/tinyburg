@@ -19,6 +19,9 @@
     "type": "module",
     "main": "index.js",
     "types": "index.d.ts",
+    "devDependencies": {
+        "@tinyburg/tsconfig-rig": "workspace:*"
+    },
     "engines": {
         "node": ">=14.16"
     }
