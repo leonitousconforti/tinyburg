@@ -221,3 +221,6 @@ export const architect = async (options?: {
 };
 
 export default architect;
+export { ArchitectDataVolume } from "./resources.js";
+export { ArchitectEmulatorServices } from "./resources.js";
+export { cleanUpAllArchitectResources } from "./resources.js";
