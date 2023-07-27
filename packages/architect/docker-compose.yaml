@@ -20,6 +20,8 @@ services:
           memory: 5G
     build:
       context: ./emulator
+    volumes:
+      - emulator_data:/android/avd-home/Pixel2.avd/
     ports:
       - "0:5554"
       - "0:5555"
@@ -54,3 +56,6 @@ services:
 
 networks:
   envoymesh: {}
+
+volumes:
+  emulator_data:

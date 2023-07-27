@@ -146,7 +146,7 @@ const findExistingContainerOrCreateNew = async (
     architectDataDirectory?: fs.PathLike,
     portBindings?: IArchitectPortBindings
 ): Promise<[emulatorContainer: ArchitectEmulatorServices, emulatorVolume: ArchitectDataVolume]> => {
-    logger("Searching for already started container with image %s...", tag);
+    logger("Searching for already started container with image %s and container name %s...", tag, containerName);
     const runningContainers = await dockerode.listContainers();
     const foundContainerId = runningContainers.find(
         (container) =>
@@ -156,9 +156,11 @@ const findExistingContainerOrCreateNew = async (
     if (foundContainerId) {
         const foundContainer = dockerode.getContainer(foundContainerId);
         const { Name: foundContainerName } = await foundContainer.inspect();
+        const foundContainerVolume = dockerode.getVolume(foundContainerName.replace("/", ""));
+        logger("Found container %s, reusing it", foundContainerName);
         return [
             new ArchitectEmulatorServices(dockerode, foundContainer),
-            ArchitectDataVolume.createFromExisting(dockerode, dockerode.getVolume(foundContainerName)),
+            ArchitectDataVolume.createFromExisting(dockerode, foundContainerVolume),
         ];
     }
 
@@ -195,7 +197,7 @@ export const architect = async (options?: {
         (dockerode.modem as DockerModem.ConstructorOptions).host || "localhost"
     );
 
-    const emulatorContainerName = options?.emulatorContainerName ?? generateContainerName();
+    const emulatorContainerName = options?.emulatorContainerName;
     const architectDataDirectory = options?.emulatorDataDirectory ?? process.env["ARCHITECT_DATA_DIRECTORY"];
     const [emulatorServices, emulatorDataVolume] = options?.withAdditionalServices
         ? await buildFreshContainerWithServices(dockerode)
