@@ -14,8 +14,8 @@ for (let run_index: number = 1; run_index <= TOTAL_RUN_ITERATIONS; run_index++) 
     const results: Array<Awaited<ReturnType<typeof architect>>> = await Promise.all(
         Array.from({ length: PARALLEL_CONTAINERS_PER_RUN }, () => architect({ reuseExistingContainers: false }))
     );
-    await Promise.all(results.map(({ emulatorContainer }) => emulatorContainer.stop()));
-    await Promise.all(results.map(({ emulatorContainer }) => emulatorContainer.remove()));
+    await Promise.all(results.map(({ emulatorServices }) => emulatorServices.stop()));
+    await Promise.all(results.map(({ emulatorServices }) => emulatorServices.remove()));
     await Promise.all(results.map(({ emulatorDataVolume }) => emulatorDataVolume.remove()));
     console.log(`----------run_index=${run_index}----------`);
 }

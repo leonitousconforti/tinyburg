@@ -28,6 +28,10 @@ export class ArchitectEmulatorServices {
         this._otherContainers = otherContainers;
     }
 
+    public getEmulatorContainer(): Dockerode.Container {
+        return this._emulatorContainer;
+    }
+
     public getContainers(): Dockerode.Container[] {
         return [this._emulatorContainer, ...this._otherContainers];
     }
