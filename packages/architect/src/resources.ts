@@ -36,16 +36,12 @@ export class ArchitectEmulatorServices {
         return [this._emulatorContainer, ...this._otherContainers];
     }
 
-    public async stop(allServices: boolean = true): Promise<void> {
-        return allServices
-            ? Promise.all(this.getContainers().map((container) => container.stop()))
-            : this._emulatorContainer.stop();
+    public async stop(): Promise<void> {
+        await Promise.all(this.getContainers().map((container) => container.stop()));
     }
 
-    public async remove(allServices: boolean = true): Promise<void> {
-        return allServices
-            ? Promise.all(this.getContainers().map((container) => container.remove()))
-            : this._emulatorContainer.remove();
+    public async remove(): Promise<void> {
+        await Promise.all(this.getContainers().map((container) => container.remove()));
     }
 
     /**
@@ -213,18 +209,15 @@ export class ArchitectDataVolume {
         architectDataDirectory?: fs.PathLike
     ): Promise<ArchitectDataVolume> {
         if (architectDataDirectory) {
-            await dockerode.run(
-                "alpine",
-                ["echo"],
-                undefined as unknown as NodeJS.WritableStream | NodeJS.WritableStream[],
-                {
-                    HostConfig: {
-                        AutoRemove: true,
-                        Binds: [`${path.join(architectDataDirectory.toString(), containerName)}:/tmp`],
-                    },
+            const hostPathCreationHelperContainer = await dockerode.createContainer({
+                Image: "alpine",
+                Cmd: ["echo"],
+                HostConfig: {
+                    AutoRemove: true,
+                    Binds: [`${path.join(architectDataDirectory.toString(), containerName)}:/tmp`],
                 },
-                {}
-            );
+            });
+            await hostPathCreationHelperContainer.start();
         }
 
         const createVolume = dockerode.createVolume({
@@ -252,18 +245,16 @@ export class ArchitectDataVolume {
         const architectDataDirectory = inspectResult?.Options?.["device"]?.replace(containerName, "");
 
         if (inspectResult?.Options?.["o"] === "bind") {
-            await this._dockerode.run(
-                "alpine",
-                ["rm", "-r", `/architect/${containerName}`],
-                undefined as unknown as NodeJS.WritableStream | NodeJS.WritableStream[],
-                {
-                    HostConfig: {
-                        AutoRemove: true,
-                        Binds: [`${architectDataDirectory}:/architect`],
-                    },
+            const hostPathDeletionContainerHelper = await this._dockerode.createContainer({
+                Image: "alpine",
+                Cmd: ["rm", "-r", `/architect/${containerName}`],
+
+                HostConfig: {
+                    AutoRemove: true,
+                    Binds: [`${architectDataDirectory}:/architect`],
                 },
-                {}
-            );
+            });
+            await hostPathDeletionContainerHelper.start();
         }
 
         await this._volume.remove();

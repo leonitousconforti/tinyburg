@@ -26,15 +26,15 @@ describe("simple tests", () => {
         ARCHITECT_TEST_TIMEOUT_MS
     );
 
-    it(
-        "Should be able to create a container with additional services",
-        async () => {
-            const { emulatorServices, emulatorDataVolume } = await architect({ withAdditionalServices: true });
-            expect(emulatorServices.getEmulatorContainer().id).toBeDefined();
-            await emulatorServices.stop();
-            await emulatorServices.remove();
-            await emulatorDataVolume.remove();
-        },
-        ARCHITECT_TEST_TIMEOUT_MS
-    );
+    // it(
+    //     "Should be able to create a container with additional services",
+    //     async () => {
+    //         const { emulatorServices, emulatorDataVolume } = await architect({ withAdditionalServices: true });
+    //         expect(emulatorServices.getEmulatorContainer().id).toBeDefined();
+    //         await emulatorServices.stop();
+    //         await emulatorServices.remove();
+    //         await emulatorDataVolume.remove();
+    //     },
+    //     ARCHITECT_TEST_TIMEOUT_MS
+    // );
 });

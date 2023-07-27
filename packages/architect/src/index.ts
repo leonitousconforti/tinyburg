@@ -82,9 +82,7 @@ const buildFreshContainer = async (
     const container: Dockerode.Container = await dockerode.createContainer({
         name: containerName,
         Image: tag,
-        Volumes: {
-            "/android/avd-home/Pixel2.avd/": {},
-        },
+        Volumes: { "/android/avd-home/Pixel2.avd/": {} },
         HostConfig: {
             Binds: [`${containerName}:/android/avd-home/Pixel2.avd/`],
             PortBindings,
