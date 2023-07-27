@@ -1,13 +1,13 @@
 import type DockerModem from "docker-modem";
 
+import fs from "node:fs";
 import url from "node:url";
-import path from "node:path";
 
 import tar from "tar-fs";
-import frida from "frida";
 import Debug from "debug";
 import Dockerode from "dockerode";
 import DockerodeCompose from "dockerode-compose";
+import { ArchitectEmulatorServices, ArchitectDataVolume } from "./resources.js";
 
 const logger: Debug.Debugger = Debug.debug("tinyburg:architect");
 const tag: string =
@@ -30,21 +30,29 @@ interface IArchitectPortBindings {
  * Custom Docker options type for dockerode that allows us to specify the ssh
  * agent correctly.
  */
-type DockerConnectionOptions = Omit<Dockerode.DockerOptions, "sshAuthAgent"> & {
+export type DockerConnectionOptions = Omit<Dockerode.DockerOptions, "sshAuthAgent"> & {
     sshOptions?: { agent?: string | undefined };
 };
+
+/** Generates a random name for an architect container/service */
+export const generateContainerName = (): string =>
+    `architect${Math.floor(Math.random() * (999_999 - 100_000 + 1)) + 100_000}`;
 
 /**
  * Builds the emulator image using the docker host provided by dockerode.
  *
  * @param dockerode - The dockerode instance to use to build the image
- * @param portBindings - The port bindings to use for the container
- * @returns The started container
+ * @param containerName - The name for the emulator container
+ * @param architectDataDirectory - Path on the docker host to put emulator files
+ * @param portBindings - The port bindings to use for the emulator container
+ * @returns The started container and its data volume if one was made
  */
 const buildFreshContainer = async (
     dockerode: Dockerode,
+    containerName: string = generateContainerName(),
+    architectDataDirectory?: fs.PathLike,
     portBindings?: IArchitectPortBindings
-): Promise<Dockerode.Container> => {
+): Promise<[emulatorContainer: ArchitectEmulatorServices, emulatorVolume: ArchitectDataVolume]> => {
     const context = new URL("../emulator", import.meta.url);
     const tarStream = tar.pack(url.fileURLToPath(context));
     logger("Building docker image from context %s, will tag image as %s when finished", context.toString(), tag);
@@ -68,10 +76,17 @@ const buildFreshContainer = async (
         portBindings || {}
     );
 
+    const emulatorDataVolume = await ArchitectDataVolume.createNew(dockerode, containerName, architectDataDirectory);
+
     logger("Creating container from image with kvm acceleration enabled");
-    const container = await dockerode.createContainer({
+    const container: Dockerode.Container = await dockerode.createContainer({
+        name: containerName,
         Image: tag,
+        Volumes: {
+            "/android/avd-home/Pixel2.avd/": {},
+        },
         HostConfig: {
+            Binds: [`${containerName}:/android/avd-home/Pixel2.avd/`],
             PortBindings,
             Devices: [
                 {
@@ -85,7 +100,7 @@ const buildFreshContainer = async (
 
     logger("Starting container %s", container.id);
     await container.start();
-    return container;
+    return [new ArchitectEmulatorServices(dockerode, container), emulatorDataVolume];
 };
 
 /**
@@ -95,8 +110,10 @@ const buildFreshContainer = async (
  * @param dockerode - The dockerode instance to use to build the images
  * @returns The main emulator container
  */
-const buildFreshContainerWithServices = async (dockerode: Dockerode): Promise<Dockerode.Container> => {
-    const dockerComposeServiceName = `architect${Math.floor(Math.random() * (999_999 - 100_000 + 1)) + 100_000}`;
+const buildFreshContainerWithServices = async (
+    dockerode: Dockerode
+): Promise<[emulatorContainer: ArchitectEmulatorServices, emulatorVolume: ArchitectDataVolume]> => {
+    const dockerComposeServiceName = generateContainerName();
     logger(
         "Starting architect with additional services using docker compose, service name will be %s",
         dockerComposeServiceName
@@ -106,11 +123,17 @@ const buildFreshContainerWithServices = async (dockerode: Dockerode): Promise<Do
         url.fileURLToPath(new URL("../docker-compose.yaml", import.meta.url)),
         dockerComposeServiceName
     );
+
     const compose = await dockerodeCompose.up();
+    const volumes = compose.volumes as Dockerode.Volume[];
     const containers = compose.services as Dockerode.Container[];
-    const inspections = await Promise.all(containers.map((container) => container.inspect()));
-    const id = inspections.find((container) => container.Config.Image === tag)!.Id;
-    return dockerode.getContainer(id);
+    const containerInspections = await Promise.all(containers.map((container) => container.inspect()));
+    const containerId = containerInspections.find((container) => container.Config.Image === tag)!.Id;
+
+    return [
+        new ArchitectEmulatorServices(dockerode, dockerode.getContainer(containerId)),
+        ArchitectDataVolume.createFromExisting(dockerode, volumes?.[0]!),
+    ];
 };
 
 /**
@@ -119,196 +142,29 @@ const buildFreshContainerWithServices = async (dockerode: Dockerode): Promise<Do
  * @param dockerode - The dockerode instance to use to find the container
  * @returns The id of the found container or undefined if none was found
  */
-const findExistingContainer = async (
+const findExistingContainerOrCreateNew = async (
     dockerode: Dockerode,
+    containerName?: string,
+    architectDataDirectory?: fs.PathLike,
     portBindings?: IArchitectPortBindings
-): Promise<Dockerode.Container> => {
+): Promise<[emulatorContainer: ArchitectEmulatorServices, emulatorVolume: ArchitectDataVolume]> => {
     logger("Searching for already started container with image %s...", tag);
     const runningContainers = await dockerode.listContainers();
-    const id = runningContainers.find((container) => container.Image === tag)?.Id;
-    return id ? dockerode.getContainer(id) : await buildFreshContainer(dockerode, portBindings);
-};
+    const foundContainerId = runningContainers.find(
+        (container) =>
+            container.Image === tag && (containerName === undefined || container.Names.includes(containerName))
+    )?.Id;
 
-/**
- * Get the addresses that are exposed by the container using port bindings
- * provided when starting the container.
- */
-const getExposedContainerEndpoints = async (
-    dockerode: Dockerode,
-    container: Dockerode.Container
-): Promise<{
-    containerHost: string;
-    adbConsoleAddress: string;
-    adbAddress: string;
-    grpcAddress: string;
-    fridaAddress: string;
-}> => {
-    const containerHost = (dockerode.modem as DockerModem.ConstructorOptions).host || "localhost";
-    const inspectResults = await container.inspect();
-    const containerPortBindings = inspectResults.NetworkSettings.Ports;
-    const adbConsoleAddress = `${containerHost}:${containerPortBindings["5554/tcp"]![0]?.HostPort}`;
-    const adbAddress = `${containerHost}:${containerPortBindings["5555/tcp"]![0]?.HostPort}`;
-    const grpcAddress = `${containerHost}:${containerPortBindings["8554/tcp"]![0]?.HostPort}`;
-    const fridaAddress = `${containerHost}:${containerPortBindings["27042/tcp"]![0]?.HostPort}`;
-    return { containerHost, adbConsoleAddress, adbAddress, grpcAddress, fridaAddress };
-};
-
-/**
- * Waits for the emulator container's health check to report that the container
- * has entered a healthy state. Will throw early if the container ever dies
- * prematurely but will keep retrying if the container just reports as
- * unhealthy.
- *
- * @param container - The emulator container to inspect
- * @param retries - The maximum number of tries before giving up
- * @param waitMs - The number of milliseconds to wait between retries
- */
-const waitForContainerToBeHealthy = async (
-    container: Dockerode.Container,
-    retries: number = 40,
-    waitMs: number = 3000
-): Promise<void> => {
-    const inspectResult = await container.inspect();
-    if (inspectResult.State.Status === "exited") throw new Error("Container exited prematurely");
-
-    // Wrap this in a try-catch because we don't want errors to bubble up
-    // because there might be the opportunity to recover from these.
-    try {
-        if (inspectResult.State.Health?.Status !== "healthy")
-            throw new Error(`Container is not healthy, status=${inspectResult.State.Health?.Status}`);
-    } catch (error: unknown) {
-        // If there are retries remaining, wait for the desired timeout and then recurse
-        if (retries > 0) {
-            await new Promise((resolve) => setTimeout(resolve, waitMs));
-            return await waitForContainerToBeHealthy(container, retries - 1, waitMs);
-        }
-
-        // Otherwise, throw this error to reject the promise
-        throw error;
+    if (foundContainerId) {
+        const foundContainer = dockerode.getContainer(foundContainerId);
+        const { Name: foundContainerName } = await foundContainer.inspect();
+        return [
+            new ArchitectEmulatorServices(dockerode, foundContainer),
+            ArchitectDataVolume.createFromExisting(dockerode, dockerode.getVolume(foundContainerName)),
+        ];
     }
-};
 
-/**
- * Waits for the frida server to be reachable. Will keep retrying until the
- * sever is able to list the running processes on the emulator.
- *
- * @param fridaAddress - The frida server to inspect
- * @param retries - The maximum number of tries before giving up
- * @param waitMs - The number of milliseconds to wait between retries
- */
-const waitForFridaToBeReachable = async (
-    fridaAddress: string,
-    retries: number = 20,
-    waitMs: number = 3000
-): Promise<void> => {
-    // Wrap this in a try-catch because we don't want errors to bubble up
-    // because there might be the opportunity to recover from these
-    try {
-        const deviceManager = frida.getDeviceManager();
-        const device = await deviceManager.addRemoteDevice(fridaAddress);
-        const processes = await device.enumerateProcesses();
-        if (!processes) throw new Error("Frida server is not reachable");
-    } catch (error: unknown) {
-        // Remove the remote device on error because it might be in a bad state
-        const deviceManager = frida.getDeviceManager();
-        await deviceManager.removeRemoteDevice(fridaAddress);
-
-        // If there are retries remaining, wait for the desired timeout and then recurse
-        if (retries > 0) {
-            await new Promise((resolve) => setTimeout(resolve, waitMs));
-            return await waitForFridaToBeReachable(fridaAddress, retries - 1, waitMs);
-        }
-
-        // Otherwise, throw this error to reject the promise
-        throw error;
-    }
-};
-
-/**
- * Given the path to an apk, will install it into the emulator container. Will
- * replace the existing application (if present), will downgrade the version (if
- * supplied a lower version of the application), allows tests packages and will
- * grant all runtime permissions by default.
- *
- * @see https://developer.android.com/tools/adb
- */
-const installApk = async (container: Dockerode.Container, apk: string): Promise<void> => {
-    logger("Installing apk %s into container %s...", apk, container.id);
-    const tarball = tar.pack(path.dirname(apk), { entries: [path.basename(apk)] });
-    await container.putArchive(tarball, { path: "/android/apks/" });
-    const exec = await container.exec({
-        Cmd: [
-            "/android/sdk/platform-tools/adb",
-            "install",
-            "-r", // Replace existing application (if present)
-            "-t", // Allow test packages
-            "-g", // Grant all runtime permissions
-            "-d", // Allow downgrade
-            `/android/apks/${path.basename(apk)}`,
-        ],
-    });
-    await exec.start({});
-    await new Promise((resolve) => setTimeout(resolve, 10_000));
-    logger("Done installing apk");
-};
-
-/**
- * Will launch the Launcher intent of the com.nimblebit.tinytower application in
- * the emulator. Does not wait/block for the application to load before
- * returning.
- *
- * @see https://stackoverflow.com/questions/4567904/how-to-start-an-application-using-android-adb-tools
- */
-const launchGame = async (container: Dockerode.Container): Promise<void> => {
-    logger("Launching game");
-    const exec = await container.exec({
-        Cmd: [
-            "/android/sdk/platform-tools/adb",
-            "shell",
-            "monkey",
-            "-p",
-            "com.nimblebit.tinytower",
-            "-c",
-            "android.intent.category.LAUNCHER",
-            "1",
-        ],
-    });
-    await exec.start({});
-};
-
-/**
- * Removes all running and stopped architect containers and networks from the
- * docker host. Can also remove images is specified.
- */
-export const cleanUpArchitectArtifacts = async (
-    dockerConnectionOptions?: DockerConnectionOptions,
-    removeStopped: boolean = true
-): Promise<void> => {
-    const dockerode: Dockerode = new Dockerode(
-        Object.assign({ socketPath: "/var/run/docker.sock" }, dockerConnectionOptions || {})
-    );
-
-    const allNetworks = await dockerode.listNetworks({ all: removeStopped });
-    const allContainers = await dockerode.listContainers({ all: removeStopped });
-
-    const containerFilter = (container: Dockerode.ContainerInfo): boolean =>
-        container.Image.startsWith("ghcr.io/leonitousconforti/tinyburg/architect_") ||
-        container.Names.some((name) => name.includes("architect-"));
-
-    const allArchitectNetworks = allNetworks
-        .filter((network) => network.Name.includes("architect"))
-        .map((network) => dockerode.getNetwork(network.Id));
-    const allArchitectContainers = allContainers
-        .filter((container) => containerFilter(container))
-        .map((container) => dockerode.getContainer(container.Id));
-    const allRunningArchitectContainers = allContainers
-        .filter((container) => containerFilter(container))
-        .filter((container) => container.State === "running")
-        .map((container) => dockerode.getContainer(container.Id));
-
-    await Promise.all(allRunningArchitectContainers.map((container) => container.stop()));
-    await Promise.all(allArchitectContainers.map((container) => container.remove()));
-    await Promise.all(allArchitectNetworks.map((network) => network.remove()));
+    return buildFreshContainer(dockerode, containerName, architectDataDirectory, portBindings);
 };
 
 /**
@@ -318,16 +174,17 @@ export const cleanUpArchitectArtifacts = async (
  * services required to interact with the container from a web browser.
  */
 export const architect = async (options?: {
-    withAdditionalServices?: boolean;
-    reuseExistingContainers?: boolean;
-    dockerConnectionOptions?: DockerConnectionOptions;
-    portBindings?: IArchitectPortBindings;
+    withAdditionalServices?: boolean | undefined;
+    reuseExistingContainers?: boolean | undefined;
+    dockerConnectionOptions?: DockerConnectionOptions | undefined;
+    emulatorDataDirectory?: fs.PathLike | undefined;
+    emulatorContainerName?: string | undefined;
+    portBindings?: IArchitectPortBindings | undefined;
 }): Promise<
     {
-        emulatorContainer: Dockerode.Container;
-        launchGame: () => Promise<void>;
-        installApk: (apk: string) => Promise<void>;
-    } & Awaited<ReturnType<typeof getExposedContainerEndpoints>>
+        emulatorServices: ArchitectEmulatorServices;
+        emulatorDataVolume: ArchitectDataVolume;
+    } & Awaited<ReturnType<InstanceType<typeof ArchitectEmulatorServices>["getExposedEmulatorEndpoints"]>>
 > => {
     const dockerConnectionOptions = Object.assign(
         { socketPath: "/var/run/docker.sock" },
@@ -340,21 +197,27 @@ export const architect = async (options?: {
         (dockerode.modem as DockerModem.ConstructorOptions).host || "localhost"
     );
 
-    const emulatorContainer = options?.withAdditionalServices
+    const emulatorContainerName = options?.emulatorContainerName ?? generateContainerName();
+    const architectDataDirectory = options?.emulatorDataDirectory ?? process.env["ARCHITECT_DATA_DIRECTORY"];
+    const [emulatorServices, emulatorDataVolume] = options?.withAdditionalServices
         ? await buildFreshContainerWithServices(dockerode)
         : options?.reuseExistingContainers
-        ? await findExistingContainer(dockerode, options?.portBindings)
-        : await buildFreshContainer(dockerode, options?.portBindings);
+        ? await findExistingContainerOrCreateNew(
+              dockerode,
+              emulatorContainerName,
+              architectDataDirectory,
+              options?.portBindings
+          )
+        : await buildFreshContainer(dockerode, emulatorContainerName, architectDataDirectory, options?.portBindings);
 
-    const emulatorEndpoints = await getExposedContainerEndpoints(dockerode, emulatorContainer);
-    await waitForContainerToBeHealthy(emulatorContainer);
-    await waitForFridaToBeReachable(emulatorEndpoints.fridaAddress);
+    const emulatorEndpoints = await emulatorServices.getExposedEmulatorEndpoints();
+    await emulatorServices.waitForContainerToBeHealthy();
+    await emulatorServices.waitForFridaToBeReachable(emulatorEndpoints.fridaAddress);
     logger("Everything is healthy, you can start connecting to it now!");
 
     return {
-        emulatorContainer,
-        launchGame: () => launchGame(emulatorContainer),
-        installApk: (apk: string) => installApk(emulatorContainer, apk),
+        emulatorServices,
+        emulatorDataVolume,
         ...emulatorEndpoints,
     };
 };

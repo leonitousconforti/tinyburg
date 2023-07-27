@@ -6,17 +6,17 @@ declare module "dockerode-compose" {
 
         down(options?: { volumes?: boolean }): Promise<{
             file: string;
-            services: Record<string, unknown>;
-            networks: Record<string, unknown>;
-            volumes?: Record<string, unknown>;
+            services: Dockerode.Container[];
+            networks: Dockerode.Network[];
+            volumes?: Dockerode.Volume[];
         }>;
 
         up(options?: { verbose?: boolean }): Promise<{
             file: string;
             secrets: Record<string, unknown>;
-            volumes: Record<string, unknown>;
+            volumes: Dockerode.Volume[];
             configs: Record<string, unknown>;
-            networks: Record<string, unknown>;
+            networks: Dockerode.Network[];
             services: Dockerode.Container[];
         }>;
 
