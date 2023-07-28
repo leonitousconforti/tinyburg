@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`All getter agents should return something and not throw any errors BitbookAgent should produce data without throwing any errors 1`] = `
-"// TinyTower version: 4.23.0
+"// TinyTower version: 4.23.1
 export enum BBEventType {
     None = \\"None\\",
     FullyStocked = \\"FullyStocked\\",
@@ -1981,7 +1981,7 @@ export type Post = (typeof posts)[number];
 `;
 
 exports[`All getter agents should return something and not throw any errors BitizenAgent should produce data without throwing any errors 1`] = `
-"// TinyTower version: 4.23.0
+"// TinyTower version: 4.23.1
 export const numberHairAccessories = 3 as const;
 export const numberGlasses = 9 as const;
 export const numberFemaleHats = 2 as const;
@@ -2968,7 +2968,7 @@ export type LastName = (typeof lastNames)[number];
 `;
 
 exports[`All getter agents should return something and not throw any errors CostumeAgent should produce data without throwing any errors 1`] = `
-"// TinyTower version: 4.23.0
+"// TinyTower version: 4.23.1
 export const costumes = {
     fishtank: {
         file: \\"fishtank\\",
@@ -4832,7 +4832,7 @@ export type Costume = typeof costumes;
 `;
 
 exports[`All getter agents should return something and not throw any errors ElevatorAgent should produce data without throwing any errors 1`] = `
-"// TinyTower version: 4.23.0
+"// TinyTower version: 4.23.1
 export const upgradeElevatorCost = (liftSpeed: number) => {
     return liftSpeed * liftSpeed * 100;
 };
@@ -4957,7 +4957,7 @@ export type Elevator = (typeof elevators)[number];
 `;
 
 exports[`All getter agents should return something and not throw any errors FloorAgent should produce data without throwing any errors 1`] = `
-"// TinyTower version: 4.23.0
+"// TinyTower version: 4.23.1
 export const buildFloorCost = (numFloors: number) => {
     const num1 = numFloors - 1;
     const num2 = Math.max(5000, Math.ceil(num1 * num1 * 500 - (12 - num1) * 9000));
@@ -5684,7 +5684,7 @@ export type Floor = (typeof floors)[number];
 `;
 
 exports[`All getter agents should return something and not throw any errors MissionAgent should produce data without throwing any errors 1`] = `
-"// TinyTower version: 4.23.0
+"// TinyTower version: 4.23.1
 import { FloorType } from \\"./floors.js\\";
 
 export enum MissionType {
@@ -8195,7 +8195,7 @@ export type Mission = typeof missions;
 `;
 
 exports[`All getter agents should return something and not throw any errors PetAgent should produce data without throwing any errors 1`] = `
-"// TinyTower version: 4.23.0
+"// TinyTower version: 4.23.1
 export const pets = {
     ankylosaurus: { VIP: true, jHeight: \\"2\\", jDist: \\"4\\", jSpeed: \\"0.35\\", jSquish: \\"0.1\\" },
     bear: { jHeight: \\"2\\", jDist: \\"4\\", jSpeed: \\"0.35\\", jSquish: \\"0.1\\" },
@@ -8319,7 +8319,7 @@ export type Pet = typeof pets;
 `;
 
 exports[`All getter agents should return something and not throw any errors RoofAgent should produce data without throwing any errors 1`] = `
-"// TinyTower version: 4.23.0
+"// TinyTower version: 4.23.1
 export const numberOfRoofs = 54 as const;
 
 export const roofs = [

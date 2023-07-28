@@ -50,7 +50,8 @@
         "build": "NODE_OPTIONS=\"--experimental-vm-modules --no-warnings\" heft test --clean",
         "run-js-example": "rushx build && node dist/examples/js/index.js",
         "run-js-typed-example": "rushx build && node dist/examples/js-typed/index.js",
-        "run-ts-example": "rushx build && node dist/examples/ts/index.js"
+        "run-ts-example": "rushx build && node dist/examples/ts/index.js",
+        "update-snapshots": "NODE_OPTIONS=\"--experimental-vm-modules --no-warnings\" heft run --only test -- --clean --update-snapshots"
     },
     "dependencies": {
         "@swc/core": "~1.3.64",
@@ -77,6 +78,7 @@
         "@types/heft-jest": "1.0.3",
         "@types/node": "20.4.2",
         "@types/prettier": "~2.7.2",
+        "dotenv": "~16.3.1",
         "eslint": "8.45.0",
         "eslint-config-prettier": "~8.8.0",
         "eslint-plugin-prettier": "~4.2.1",
