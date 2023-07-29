@@ -131,6 +131,36 @@ export class ArchitectEmulatorServices {
         }
     };
 
+    public waitForTinyTowerToBeSpawnable = async (
+        fridaAddress: string,
+        retries: number = 20,
+        waitMs: number = 3000
+    ): Promise<void> => {
+        try {
+            const deviceManager = frida.getDeviceManager();
+            const device = await deviceManager.addRemoteDevice(fridaAddress);
+            const pid = await device.spawn("com.nimblebit.tinytower");
+            const session = await device.attach(pid);
+            await device.resume(pid);
+            await new Promise((resolve) => setTimeout(resolve, 5000));
+            await session.detach();
+            await device.kill(pid);
+        } catch (error: unknown) {
+            // Remove the remote device on error because it might be in a bad state
+            const deviceManager = frida.getDeviceManager();
+            await deviceManager.removeRemoteDevice(fridaAddress);
+
+            // If there are retries remaining, wait for the desired timeout and then recurse
+            if (retries > 0) {
+                await new Promise((resolve) => setTimeout(resolve, waitMs));
+                return await this.waitForFridaToBeReachable(fridaAddress, retries - 1, waitMs);
+            }
+
+            // Otherwise, throw this error to reject the promise
+            throw error;
+        }
+    };
+
     /**
      * Given the path to an apk, will install it into the emulator container.
      * Will replace the existing application (if present), will downgrade the
@@ -154,7 +184,8 @@ export class ArchitectEmulatorServices {
             ],
         });
         await exec.start({});
-        await new Promise((resolve) => setTimeout(resolve, 10_000));
+        const { fridaAddress } = await this.getExposedEmulatorEndpoints();
+        await this.waitForTinyTowerToBeSpawnable(fridaAddress);
     };
 
     /**
@@ -214,20 +245,20 @@ export class ArchitectDataVolume {
                 Cmd: ["echo"],
                 HostConfig: {
                     AutoRemove: true,
-                    Binds: [`${path.join(architectDataDirectory.toString(), containerName)}:/tmp`],
+                    Binds: [`${path.join(architectDataDirectory.toString(), `${containerName}_emulator_data`)}:/tmp`],
                 },
             });
             await hostPathCreationHelperContainer.start();
         }
 
         const createVolume = dockerode.createVolume({
-            Name: `${containerName}`,
+            Name: `${containerName}_emulator_data`,
             Driver: "local",
             DriverOpts: architectDataDirectory
                 ? {
                       o: "bind",
                       type: "none",
-                      device: path.join(architectDataDirectory.toString(), containerName),
+                      device: path.join(architectDataDirectory.toString(), `${containerName}_emulator_data`),
                   }
                 : { type: "none" },
         }) as Promise<unknown> as Promise<Dockerode.Volume>;

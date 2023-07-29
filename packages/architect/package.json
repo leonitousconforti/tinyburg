@@ -29,7 +29,8 @@
         "jwt-provider/",
         "infrastructure/",
         "frontend-placeholder/",
-        "docker-compose.yaml"
+        "docker-compose.yaml",
+        ".env.example"
     ],
     "scripts": {
         "_phase:build": "heft run --only build -- --clean",

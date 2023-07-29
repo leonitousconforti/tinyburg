@@ -84,7 +84,7 @@ const buildFreshContainer = async (
         Image: tag,
         Volumes: { "/android/avd-home/Pixel2.avd/": {} },
         HostConfig: {
-            Binds: [`${containerName}:/android/avd-home/Pixel2.avd/`],
+            Binds: [`${containerName}_emulator_data:/android/avd-home/Pixel2.avd/`],
             PortBindings,
             Devices: [
                 {
@@ -109,7 +109,8 @@ const buildFreshContainer = async (
  * @returns The main emulator container
  */
 const buildFreshContainerWithServices = async (
-    dockerode: Dockerode
+    dockerode: Dockerode,
+    architectDataDirectory?: fs.PathLike
 ): Promise<[emulatorContainer: ArchitectEmulatorServices, emulatorVolume: ArchitectDataVolume]> => {
     const dockerComposeServiceName = generateContainerName();
     logger(
@@ -122,16 +123,13 @@ const buildFreshContainerWithServices = async (
         dockerComposeServiceName
     );
 
+    const volume = await ArchitectDataVolume.createNew(dockerode, dockerComposeServiceName, architectDataDirectory);
+
     const compose = await dockerodeCompose.up();
-    const volumes = compose.volumes as Dockerode.Volume[];
     const containers = compose.services as Dockerode.Container[];
     const containerInspections = await Promise.all(containers.map((container) => container.inspect()));
     const containerId = containerInspections.find((container) => container.Config.Image === tag)!.Id;
-
-    return [
-        new ArchitectEmulatorServices(dockerode, dockerode.getContainer(containerId)),
-        ArchitectDataVolume.createFromExisting(dockerode, volumes?.[0]!),
-    ];
+    return [new ArchitectEmulatorServices(dockerode, dockerode.getContainer(containerId)), volume];
 };
 
 /**
@@ -200,7 +198,7 @@ export const architect = async (options?: {
     const emulatorContainerName = options?.emulatorContainerName;
     const architectDataDirectory = options?.emulatorDataDirectory ?? process.env["ARCHITECT_DATA_DIRECTORY"];
     const [emulatorServices, emulatorDataVolume] = options?.withAdditionalServices
-        ? await buildFreshContainerWithServices(dockerode)
+        ? await buildFreshContainerWithServices(dockerode, architectDataDirectory)
         : options?.reuseExistingContainers
         ? await findExistingContainerOrCreateNew(
               dockerode,
