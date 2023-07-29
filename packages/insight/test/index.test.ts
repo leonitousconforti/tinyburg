@@ -1,7 +1,9 @@
-import type Dockerode from "dockerode";
+import "dotenv/config";
 
-import loadApk from "@tinyburg/apks";
+import type { ArchitectDataVolume, ArchitectEmulatorServices } from "@tinyburg/architect";
+
 import architect from "@tinyburg/architect";
+import loadApk, { LatestVersion } from "@tinyburg/apks";
 import { bootstrapAgentOnRemote, AllAgents } from "../src/index.js";
 
 const GoodAgent = AllAgents["GoodAgent"];
@@ -21,19 +23,22 @@ const INSIGHT_PREP_TIMEOUT_MS = Number.parseInt(process.env["INSIGHT_PREP_TIMEOU
 
 describe("All getter agents should return something and not throw any errors", () => {
     let fridaAddress: string;
-    let emulatorContainer: Dockerode.Container;
+    let emulatorDataVolume: ArchitectDataVolume;
+    let emulatorServices: ArchitectEmulatorServices;
 
     beforeAll(async () => {
-        const apk = await loadApk("apkpure", "4.23.0");
+        const apk = await loadApk("apkpure", LatestVersion);
         const architectResult = await architect({ reuseExistingContainers: false });
-        await architectResult.installApk(apk);
+        await architectResult.emulatorServices.installApk(apk);
         fridaAddress = architectResult.fridaAddress;
-        emulatorContainer = architectResult.emulatorContainer;
+        emulatorServices = architectResult.emulatorServices;
+        emulatorDataVolume = architectResult.emulatorDataVolume;
     }, INSIGHT_PREP_TIMEOUT_MS);
 
     afterAll(async () => {
-        await emulatorContainer.stop();
-        await emulatorContainer.remove();
+        await emulatorServices.stop();
+        await emulatorServices.remove();
+        await emulatorDataVolume.remove();
     }, INSIGHT_PREP_TIMEOUT_MS);
 
     it(
