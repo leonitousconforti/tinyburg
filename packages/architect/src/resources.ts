@@ -141,8 +141,10 @@ export class ArchitectEmulatorServices {
             const device = await deviceManager.addRemoteDevice(fridaAddress);
             const pid = await device.spawn("com.nimblebit.tinytower");
             const session = await device.attach(pid);
+            const script = await session.createScript('send("Hi, mom!");');
+            await script.load();
             await device.resume(pid);
-            await new Promise((resolve) => setTimeout(resolve, 5000));
+            await script.unload();
             await session.detach();
             await device.kill(pid);
         } catch (error: unknown) {
@@ -153,7 +155,7 @@ export class ArchitectEmulatorServices {
             // If there are retries remaining, wait for the desired timeout and then recurse
             if (retries > 0) {
                 await new Promise((resolve) => setTimeout(resolve, waitMs));
-                return await this.waitForFridaToBeReachable(fridaAddress, retries - 1, waitMs);
+                return await this.waitForTinyTowerToBeSpawnable(fridaAddress, retries - 1, waitMs);
             }
 
             // Otherwise, throw this error to reject the promise
@@ -184,6 +186,7 @@ export class ArchitectEmulatorServices {
             ],
         });
         await exec.start({});
+        await new Promise((resolve) => setTimeout(resolve, 15_000));
         const { fridaAddress } = await this.getExposedEmulatorEndpoints();
         await this.waitForTinyTowerToBeSpawnable(fridaAddress);
     };
