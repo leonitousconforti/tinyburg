@@ -22,14 +22,14 @@ export const loadApk = async <
     version: U
 ): Promise<string> => {
     logger("Loading version %s from %s downloads", version, source);
-
     const fileNames = await fs.readdir(new URL(`../downloads/${source}`, import.meta.url));
     const file = fileNames.find((fileName) => fileName.includes(version)) || version;
     return fileURLToPath(new URL(`../downloads/${source}/${file}`, import.meta.url));
 };
 export default loadApk;
 
-export const loadPatchedApk = (version: PatchedVersion): Promise<string> => loadApk("patched", version);
+export const loadPatchedApk = (version: PatchedVersion): Promise<string> =>
+    loadApk("patched", version as PatchedVersion);
 export const loadApkFromApkpure = (version: ApkpureVersion): Promise<string> =>
     loadApk("apkpure", version as TinyTowerApkVersion);
 export const loadApkFromApkmirror = (version: ApkmirrorVersion): Promise<string> =>
