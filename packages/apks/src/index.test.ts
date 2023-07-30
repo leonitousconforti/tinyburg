@@ -1,4 +1,4 @@
-import fs from "node:fs/promises";
+import fs from "node:fs";
 
 import { PatchedVersions } from "./patched.type.js";
 import { ApkpureVersions } from "./apkpure.type.js";
@@ -7,18 +7,18 @@ import { getApkpureLatestDetails } from "./apkpure.puppeteer.js";
 import { getApkmirrorLatestDetails } from "./apkmirror.puppeteer.js";
 import { loadPatchedApk, loadApkFromApkpure, loadApkFromApkmirror, TinyTowerApkSources } from "./index.js";
 
-const checkFileExists = async (path: string): Promise<boolean> => {
+const checkFileExists = async (path: fs.PathLike): Promise<boolean> => {
     try {
-        await fs.access(path, fs.constants.F_OK);
+        await fs.promises.access(path, fs.constants.F_OK);
         return true;
     } catch {
         return false;
     }
 };
 
-const checkForApkWithVersionInFolder = async (folder: URL, version: string): Promise<boolean> => {
+const checkForApkWithVersionInFolder = async (folder: fs.PathLike, version: string): Promise<boolean> => {
     try {
-        const files = await fs.readdir(folder);
+        const files = await fs.promises.readdir(folder);
         return files.map((apkFileName) => apkFileName.match(/\d+.\d+.\d+/gm)?.[0]).includes(version);
     } catch {
         return false;
@@ -71,9 +71,10 @@ describe("Should have the latest apk downloaded", () => {
 });
 
 const allSource = [...TinyTowerApkSources, "patched"];
-const filePromises = allSource.map((source) => fs.readdir(new URL(`../downloads/${source}`, import.meta.url)));
-const countPromises = await Promise.all(filePromises);
-const count = countPromises.flat().length - allSource.length;
+const filePromises = await Promise.all(
+    allSource.map((source) => fs.promises.readdir(new URL(`../downloads/${source}`, import.meta.url)))
+);
+const count = filePromises.flat().length - allSource.length;
 describe("Should load all apks from all sources at least once", () => {
     it(`Should load all ${count} versions`, async () => {
         expect(count).toEqual(ApkmirrorVersions.length + ApkpureVersions.length + PatchedVersions.length);
