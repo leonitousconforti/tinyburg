@@ -41,7 +41,7 @@ module.exports.runAsync = async () => {
         Object.keys(AgentOutputFileMap).map(async (file) => {
             const outputPath = path.join(__dirname, file);
             const contents = await fs.readFile(outputPath);
-            return contents.toString().includes(`With TinyTower version: 4.23.0`);
+            return contents.toString().includes(`With TinyTower version: 4.23.1`);
         })
     );
 
@@ -50,9 +50,9 @@ module.exports.runAsync = async () => {
     }
 
     // Create a container to extract information from
-    const apk = await loadApkFromApkpure("4.23.0");
-    const { fridaAddress, installApk, emulatorContainer } = await architect();
-    await installApk(apk);
+    const apk = await loadApkFromApkpure("4.23.1");
+    const { fridaAddress, emulatorServices, emulatorDataVolume } = await architect();
+    await emulatorServices.installApk(apk);
 
     for (const [outputDestination, agent] of Object.entries(AgentOutputFileMap)) {
         const { runAgentMain } = await bootstrapAgentOnRemote(agent, fridaAddress);
@@ -70,6 +70,7 @@ module.exports.runAsync = async () => {
         await fs.writeFile(outputPath, formattedBanner + cleanedSource);
     }
 
-    await emulatorContainer.stop();
-    await emulatorContainer.remove();
+    await emulatorServices.stop();
+    await emulatorServices.remove();
+    await emulatorDataVolume.remove();
 };
