@@ -1,5 +1,3 @@
-import "dotenv/config";
-
 import architect from "./index.js";
 import { cleanUpAllArchitectResources } from "./resources.js";
 
