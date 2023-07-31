@@ -1,5 +1,3 @@
-import "dotenv/config";
-
 import type { ArchitectDataVolume, ArchitectEmulatorServices } from "@tinyburg/architect";
 
 import architect from "@tinyburg/architect";
