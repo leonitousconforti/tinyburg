@@ -1,5 +1,5 @@
 import dotenv from "dotenv";
-dotenv.config({ path: new URL("../.env", import.meta.url) });
+dotenv.config({ override: false, path: new URL("../.env", import.meta.url) });
 
 import type DockerModem from "docker-modem";
 
