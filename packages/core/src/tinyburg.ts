@@ -52,7 +52,10 @@ import { DebugLogger, type ILogger } from "./logger.js";
 const debug: ILogger = new DebugLogger("tinyburg:core");
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export const fromConfig = (partialConfig: ITTConfig, logger: ILogger = debug) => {
+export const fromConfig = (
+    partialConfig: Pick<Partial<ITTConfig>, "burnBot" | "proxy"> & Omit<ITTConfig, "burnBot" | "proxy">,
+    logger: ILogger = debug
+) => {
     // Extend the values in the default config with the values in the config provided
     // Needs to be a deep extend, not userConfig = Object.assign(defaultConfig, userConfig);
     const config: ITTConfig = deepExtend(defaultConfig, partialConfig);
