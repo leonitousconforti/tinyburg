@@ -1,0 +1,13 @@
+{
+    "nimblebitHost": "https://sync.nimblebit.com",
+    "authenticated": true,
+    "proxy": {
+        "useProxy": false,
+        "address": "https://authproxy.tinyburg.app"
+    },
+    "player": {
+        "playerId": "ASD12",
+        "playerSs": "00000000-1234-5678-9123-000000000000",
+        "playerEmail": "you@example.com"
+    }
+}
