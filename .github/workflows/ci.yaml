@@ -27,5 +27,3 @@ jobs:
         run: node common/scripts/install-run-rush.js install
       - name: Rush test
         run: node common/scripts/install-run-rush.js test --verbose --timeline --production
-        env:
-          ARCHITECT_DOCKER_HOST: "ssh://root@architect02.tinyburg.app:22"
