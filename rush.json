@@ -507,6 +507,11 @@
             "shouldPublish": false
         },
         {
+            "packageName": "@tinyburg/core-authproxy-integration",
+            "projectFolder": "packages/integrations/core+authproxy",
+            "shouldPublish": false
+        },
+        {
             "packageName": "@tinyburg/doorman-architect-apks-integration",
             "projectFolder": "packages/integrations/doorman+architect+apks",
             "shouldPublish": false
