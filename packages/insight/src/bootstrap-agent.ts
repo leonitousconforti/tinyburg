@@ -142,9 +142,8 @@ export const bootstrapAgent = async <T extends IAgent>(
                 data = prettier.format(data, prettierOptions);
             }
 
-            // Cleanup 10-15 seconds after receiving data
-            logger("Finished. Will unload script, teardown session, and kill process during the next 15 seconds");
-            await new Promise((resolve) => setTimeout(resolve, 10_000));
+            logger("Finished. Will unload script, teardown session, and kill process during the next 3 seconds");
+            await new Promise((resolve) => setTimeout(resolve, 3000));
             await cleanupAgent({ device, session, script, pid });
             return data as Awaited<ReturnType<T["rpcTypes"]["main"]>>;
         } catch (error: unknown) {
