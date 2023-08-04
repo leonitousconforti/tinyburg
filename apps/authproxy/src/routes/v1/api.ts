@@ -11,39 +11,42 @@ import ResponseSchema from "../schemas/response_v1.json" assert { type: "json" }
 import QuerystringSchema from "../schemas/querystring_v1.json" assert { type: "json" };
 
 // Import the generated interfaces
+import type { FastifyInstance } from "fastify";
 import type { HeadersSchema as HeadersSchemaInterface } from "../types/headers_v1.js";
 import type { QuerystringSchema as QuerystringSchemaInterface } from "../types/querystring_v1.js";
 
 // Fastify routing for api v1
 // eslint-disable-next-line @rushstack/typedef-var
-const api_v1 = fp<{ url: string }>(async (fastify, options): Promise<void> => {
-    fastify.route<{
-        Querystring: QuerystringSchemaInterface;
-        Headers: HeadersSchemaInterface;
-    }>({
-        url: options.url || "/v1",
-        method: ["GET", "POST"],
+const api_v1 = fp<{ url: string }>(
+    async (fastify: FastifyInstance, options: { url: string | undefined }): Promise<void> => {
+        fastify.route<{
+            Querystring: QuerystringSchemaInterface;
+            Headers: HeadersSchemaInterface;
+        }>({
+            url: options.url || "/v1",
+            method: ["GET", "POST"],
 
-        // Request and reply schema
-        schema: {
-            headers: HeadersSchema,
-            querystring: QuerystringSchema,
-            response: ResponseSchema.response,
-        },
+            // Request and reply schema
+            schema: {
+                headers: HeadersSchema,
+                querystring: QuerystringSchema,
+                response: ResponseSchema.response,
+            },
 
-        // Hooks
-        onRequest,
-        preHandler,
-        handler,
-    });
+            // Hooks
+            onRequest,
+            preHandler,
+            handler,
+        });
 
-    // Add decorators if necessary
-    if (!fastify.hasRequestDecorator("apiKey")) {
-        fastify.decorateRequest("apiKey", undefined);
+        // Add decorators if necessary
+        if (!fastify.hasRequestDecorator("apiKey")) {
+            fastify.decorateRequest("apiKey", undefined);
+        }
+        if (!fastify.hasRequestDecorator("nimblebitData")) {
+            fastify.decorateRequest("nimblebitData", undefined);
+        }
     }
-    if (!fastify.hasRequestDecorator("nimblebitData")) {
-        fastify.decorateRequest("nimblebitData", undefined);
-    }
-});
+);
 
 export default api_v1;

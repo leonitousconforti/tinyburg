@@ -1,8 +1,8 @@
-import type { FastifyReply } from "fastify";
+import type { FastifyInstance, FastifyReply } from "fastify";
 
 import fp from "fastify-plugin";
 
-export default fp(async (fastify) => {
+export default fp(async (fastify: FastifyInstance) => {
     // Decorator to call the badRequest function
     fastify.decorateReply("badRequest", function (this: FastifyReply, error: string) {
         return this.status(400).send(new Error(error));
