@@ -30,6 +30,7 @@ jobs:
           tags: tag:ci
       - name: Ping1
         run: |
+          tailscale status
           tailscale ping skynet.internal.leoconforti.us
       - name: Install SSH key
         uses: shimataro/ssh-key-action@v2
