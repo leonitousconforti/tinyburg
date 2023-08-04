@@ -38,8 +38,8 @@ jobs:
       - name: Rush Install
         run: |
           node common/scripts/install-run-rush.js install
-          rush update-autoinstaller --name rush-prettier
-          rush update-autoinstaller --name rush-commitlint
+          node common/scripts/install-run-rush.js update-autoinstaller --name rush-prettier
+          node common/scripts/install-run-rush.js update-autoinstaller --name rush-commitlint
           (cd packages/apks/vendor && ./setup.sh)
           (cd packages/architect/jwt-provider && ./setup.sh)
       - name: Rush test
