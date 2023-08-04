@@ -12,6 +12,7 @@ jobs:
     name: Node.js v${{ matrix.NodeVersion }}
     runs-on: ubuntu-latest
     strategy:
+      max-parallel: 1
       matrix:
         NodeVersion: [16, 18, 20]
     steps:
