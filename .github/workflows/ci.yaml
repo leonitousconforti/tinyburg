@@ -33,8 +33,8 @@ jobs:
         run: |
           tailscale status
           tailscale netcheck
+          tail -f ~/tailscaled.log &
           tailscale ping 100.122.8.45
-          tail -f ~/tailscaled.log
       - name: Install SSH key
         uses: shimataro/ssh-key-action@v2
         with:
