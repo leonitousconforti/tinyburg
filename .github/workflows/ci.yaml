@@ -31,7 +31,7 @@ jobs:
       - name: Ping1
         run: |
           tailscale status
-          tailscale ping skynet.internal.leoconforti.us
+          tailscale ping 100.122.8.45
       - name: Install SSH key
         uses: shimataro/ssh-key-action@v2
         with:
@@ -39,7 +39,7 @@ jobs:
           known_hosts: ${{ secrets.KNOWN_HOSTS }}
       - name: Ping2
         run: |
-          ping -c 10 skynet.internal.leoconforti.us
+          tailscale ping 100.122.8.45
       # - name: Verify Change Logs
       #   run: node common/scripts/install-run-rush.js change --verify
       # - name: Rush Install
