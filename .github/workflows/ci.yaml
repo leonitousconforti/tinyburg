@@ -36,7 +36,12 @@ jobs:
       - name: Verify Change Logs
         run: node common/scripts/install-run-rush.js change --verify
       - name: Rush Install
-        run: node common/scripts/install-run-rush.js install
+        run: |
+          node common/scripts/install-run-rush.js install
+          rush update-autoinstaller --name rush-prettier
+          rush update-autoinstaller --name rush-commitlint
+          (cd packages/apks/vendor && ./setup.sh)
+          (cd packages/architect/jwt-provider && ./setup.sh)
       - name: Rush test
         run: node common/scripts/install-run-rush.js test --verbose --timeline --production
         env:
