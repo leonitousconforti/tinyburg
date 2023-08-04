@@ -28,22 +28,28 @@ jobs:
           oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
           oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
           tags: tag:ci
+      - name: Ping1
+        run: |
+          ping -c 10 skynet.internal.leoconforti.us
       - name: Install SSH key
         uses: shimataro/ssh-key-action@v2
         with:
           key: ${{ secrets.SSH_KEY }}
           known_hosts: ${{ secrets.KNOWN_HOSTS }}
-      - name: Verify Change Logs
-        run: node common/scripts/install-run-rush.js change --verify
-      - name: Rush Install
+      - name: Ping2
         run: |
-          node common/scripts/install-run-rush.js install
-          node common/scripts/install-run-rush.js update-autoinstaller --name rush-prettier
-          node common/scripts/install-run-rush.js update-autoinstaller --name rush-commitlint
-          (cd packages/apks/vendor && ./setup.sh)
-          (cd packages/architect/jwt-provider && ./setup.sh)
-      - name: Rush test
-        run: node common/scripts/install-run-rush.js test --verbose --timeline --production
-        env:
-          ARCHITECT_DATA_DIRECTORY: "/mnt/disks/TrueNAS_iSCSI_Disk/"
-          ARCHITECT_DOCKER_HOST: "ssh://root@skynet.internal.leoconforti.us:22"
+          ping -c 10 skynet.internal.leoconforti.us
+      # - name: Verify Change Logs
+      #   run: node common/scripts/install-run-rush.js change --verify
+      # - name: Rush Install
+      #   run: |
+      #     node common/scripts/install-run-rush.js install
+      #     node common/scripts/install-run-rush.js update-autoinstaller --name rush-prettier
+      #     node common/scripts/install-run-rush.js update-autoinstaller --name rush-commitlint
+      #     (cd packages/apks/vendor && ./setup.sh)
+      #     (cd packages/architect/jwt-provider && ./setup.sh)
+      # - name: Rush test
+      #   run: node common/scripts/install-run-rush.js test --verbose --timeline --production
+      #   env:
+      #     ARCHITECT_DATA_DIRECTORY: "/mnt/disks/TrueNAS_iSCSI_Disk/"
+      #     ARCHITECT_DOCKER_HOST: "ssh://root@skynet.internal.leoconforti.us:22"
