@@ -32,6 +32,7 @@ jobs:
       - name: Ping1
         run: |
           tailscale status
+          tailscale netcheck
           tailscale ping 100.122.8.45
       - name: Install SSH key
         uses: shimataro/ssh-key-action@v2
