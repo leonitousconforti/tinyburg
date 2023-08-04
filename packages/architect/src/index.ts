@@ -131,8 +131,12 @@ const buildFreshContainerWithServices = async (
     const compose = await dockerodeCompose.up();
     const containers = compose.services as Dockerode.Container[];
     const containerInspections = await Promise.all(containers.map((container) => container.inspect()));
-    const containerId = containerInspections.find((container) => container.Config.Image === tag)!.Id;
-    return [new ArchitectEmulatorServices(dockerode, dockerode.getContainer(containerId)), volume];
+    const emulatorContainerId = containerInspections.find((container) => container.Config.Image === tag)!.Id;
+    const otherServiceContainers = containers.filter((container) => container.id !== emulatorContainerId);
+    return [
+        new ArchitectEmulatorServices(dockerode, dockerode.getContainer(emulatorContainerId), otherServiceContainers),
+        volume,
+    ];
 };
 
 /**
