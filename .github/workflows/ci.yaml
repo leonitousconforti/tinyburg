@@ -28,7 +28,7 @@ jobs:
           oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
           oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
           tags: tag:ci
-      - name: Test Ping
+      - name: Testing Server Online?
         run: |
           tailscale status
           tailscale ping skynet.internal.leoconforti.us
@@ -37,6 +37,8 @@ jobs:
         with:
           key: ${{ secrets.SSH_KEY }}
           known_hosts: ${{ secrets.KNOWN_HOSTS }}
+      - name: Testing Server Reachable?
+        run: ssh root@skynet.internal.leoconforti.us "echo 'Hi, Mom!'"
       - name: Verify Change Logs
         run: node common/scripts/install-run-rush.js change --verify
       - name: Rush Install
