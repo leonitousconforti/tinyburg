@@ -69,7 +69,7 @@ jobs:
           (cd packages/architect/jwt-provider && ./setup.sh)
 
       - name: Rush test
-        run: node common/scripts/install-run-rush.js test --verbose --timeline --production
+        run: node common/scripts/install-run-rush.js retest --verbose --timeline --production
         env:
           ARCHITECT_DATA_DIRECTORY: "/mnt/disks/TrueNAS_iSCSI_Disk/"
           ARCHITECT_DOCKER_HOST: "ssh://root@skynet.internal.leoconforti.us:22"
