@@ -29,4 +29,7 @@ sleep 2s
 sleep 2s
 /android/sdk/platform-tools/adb forward tcp:27043 tcp:27042
 sleep 2s
+# https://github.com/frida/frida/issues/1879
+/android/sdk/platform-tools/adb shell "setprop persist.device_config.runtime_native.usap_pool_enabled false"
+sleep 2s
 /android/sdk/platform-tools/adb shell "/data/local/tmp/frida-server"
