@@ -172,7 +172,7 @@ const findExistingContainerOrCreateNew = async (
     return buildFreshContainer(dockerode, containerName, architectDataDirectory, portBindings);
 };
 
-const waitForStartingInstanceLock = async (retries = 60, waitMs = 5000): Promise<void> => {
+const waitForStartingInstanceLock = async (retries = 180, waitMs = 5000): Promise<void> => {
     try {
         await new Promise((resolve) => setTimeout(resolve, Math.random() * 1000));
         await fs.promises.access(new URL("../starting-instance.lock", import.meta.url), fs.constants.F_OK);
