@@ -41,7 +41,7 @@ module.exports.runAsync = async () => {
         Object.keys(AgentOutputFileMap).map(async (file) => {
             const outputPath = path.join(__dirname, file);
             const contents = await fs.readFile(outputPath);
-            return contents.toString().includes(`With TinyTower version: 4.23.1`);
+            return contents.toString().includes(`With TinyTower version: ${"4.24.0"}`);
         })
     );
 
