@@ -5,7 +5,7 @@ const exec = require("node:child_process");
 
 module.exports.runAsync = async () => {
     const { loadApk } = await import("@tinyburg/apks");
-    const apkPath = await loadApk("apkpure", "4.23.1");
+    const apkPath = await loadApk("apkpure", "4.24.0");
     const pythonExtractScript = path.join(__dirname, "extract.py");
     const pipRequirements = path.join(__dirname, "requirements.txt");
     exec.execSync(`pip3 install -r ${pipRequirements}`);

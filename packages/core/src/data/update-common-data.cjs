@@ -50,7 +50,7 @@ module.exports.runAsync = async () => {
     }
 
     // Create a container to extract information from
-    const apk = await loadApkFromApkpure("4.23.1");
+    const apk = await loadApkFromApkpure("4.24.0");
     const { fridaAddress, emulatorServices, emulatorDataVolume } = await architect();
     await emulatorServices.installApk(apk);
 

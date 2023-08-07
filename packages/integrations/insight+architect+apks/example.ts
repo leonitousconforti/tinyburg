@@ -2,7 +2,7 @@ import loadApk from "@tinyburg/apks";
 import architect from "@tinyburg/architect";
 import { AllAgents, bootstrapAgentOnRemote } from "@tinyburg/insight";
 
-const apk: string = await loadApk("apkpure", "4.23.1");
+const apk: string = await loadApk("apkpure", "4.24.0");
 const { emulatorServices, fridaAddress } = await architect({ reuseExistingContainers: false });
 await emulatorServices.installApk(apk);
 
