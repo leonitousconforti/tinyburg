@@ -128,7 +128,7 @@ export class ArchitectEmulatorServices {
             }
 
             // Otherwise, throw this error to reject the promise
-            throw error;
+            throw error instanceof Error ? error : new Error(error as string | undefined);
         }
     };
 
