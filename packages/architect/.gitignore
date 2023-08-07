@@ -1,4 +1,5 @@
 /dist
+/starting-instance.lock
 
 /protobuf/**/*.js
 /protobuf/**/*.d.ts
