@@ -12,6 +12,7 @@ import Dockerode from "dockerode";
 import DockerodeCompose from "dockerode-compose";
 import { ArchitectEmulatorServices, ArchitectDataVolume } from "./resources.js";
 
+let instanceIsStarting: boolean = false;
 const logger: Debug.Debugger = Debug.debug("tinyburg:architect");
 const tag: string =
     "ghcr.io/leonitousconforti/tinyburg/architect_emulator:10086546_sys-30-google-apis-x64-r12_frida-16.0.19";
@@ -172,6 +173,21 @@ const findExistingContainerOrCreateNew = async (
     return buildFreshContainer(dockerode, containerName, architectDataDirectory, portBindings);
 };
 
+const waitForNoStartingInstances = async (retries = 60, waitMs = 5000): Promise<void> => {
+    try {
+        if (instanceIsStarting) throw new Error("There is already an instance trying to start");
+    } catch (error: unknown) {
+        // If there are retries remaining, wait for the desired timeout and then recurse
+        if (retries > 0) {
+            await new Promise((resolve) => setTimeout(resolve, waitMs));
+            return await waitForNoStartingInstances(retries - 1, waitMs);
+        }
+
+        // Otherwise, throw this error to reject the promise
+        throw error;
+    }
+};
+
 /**
  * Allocates an emulator container on a local or remote docker host that has kvm
  * acceleration capabilities. Provides convince functions for interacting with
@@ -202,6 +218,9 @@ export const architect = async (options?: {
         (dockerode.modem as DockerModem.ConstructorOptions).host || "localhost"
     );
 
+    await waitForNoStartingInstances();
+    instanceIsStarting = true;
+
     const emulatorContainerName = options?.emulatorContainerName;
     const architectDataDirectory = options?.emulatorDataDirectory ?? process.env["ARCHITECT_DATA_DIRECTORY"];
     const [emulatorServices, emulatorDataVolume] = options?.withAdditionalServices
@@ -221,6 +240,8 @@ export const architect = async (options?: {
     await emulatorServices.startFridaServer();
     await emulatorServices.waitForFridaToBeReachable(emulatorEndpoints.fridaAddress);
     logger("Everything is healthy, you can start connecting to it now!");
+
+    instanceIsStarting = false;
 
     return {
         emulatorServices,
