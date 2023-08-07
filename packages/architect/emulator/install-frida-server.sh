@@ -14,3 +14,4 @@ sleep 2s
 /android/sdk/platform-tools/adb forward tcp:27043 tcp:27042
 sleep 2s
 /android/sdk/platform-tools/adb shell /data/local/tmp/frida-server
+sleep 5s
