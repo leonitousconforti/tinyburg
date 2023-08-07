@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -euo pipefail
 
 # Remove any previous lock files left over
 rm -f /tmp/pulse-socket
