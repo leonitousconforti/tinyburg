@@ -217,6 +217,8 @@ export const architect = async (options?: {
 
     const emulatorEndpoints = await emulatorServices.getExposedEmulatorEndpoints();
     await emulatorServices.waitForContainerToBeHealthy();
+    await emulatorServices.waitForCpuToBeIdle();
+    await emulatorServices.startFridaServer();
     await emulatorServices.waitForFridaToBeReachable(emulatorEndpoints.fridaAddress);
     logger("Everything is healthy, you can start connecting to it now!");
 

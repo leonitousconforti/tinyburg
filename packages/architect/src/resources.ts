@@ -5,6 +5,7 @@ import fs from "node:fs";
 import tar from "tar-fs";
 import frida from "frida";
 import path from "node:path";
+import assert from "node:assert";
 import Dockerode from "dockerode";
 
 /**
@@ -74,7 +75,7 @@ export class ArchitectEmulatorServices {
      * @param retries - The maximum number of tries before giving up
      * @param waitMs - The number of milliseconds to wait between retries
      */
-    public waitForContainerToBeHealthy = async (retries: number = 40, waitMs: number = 3000): Promise<void> => {
+    public waitForContainerToBeHealthy = async (retries: number = 60, waitMs: number = 3000): Promise<void> => {
         const inspectResult = await this._emulatorContainer.inspect();
         if (inspectResult.State.Status === "exited") throw new Error("Container exited prematurely");
 
@@ -105,7 +106,7 @@ export class ArchitectEmulatorServices {
      */
     public waitForFridaToBeReachable = async (
         fridaAddress: string,
-        retries: number = 20,
+        retries: number = 60,
         waitMs: number = 3000
     ): Promise<void> => {
         // Wrap this in a try-catch because we don't want errors to bubble up
@@ -131,19 +132,56 @@ export class ArchitectEmulatorServices {
         }
     };
 
+    public waitForCpuToBeIdle = async (cpuThreshold = 3, retries = 60, waitMs = 3000): Promise<void> => {
+        try {
+            const statsResult = await this._emulatorContainer.stats({ stream: false });
+            const currentCpuStats = statsResult.cpu_stats;
+            const previousCpuStats = statsResult.precpu_stats;
+            const cpuDelta = currentCpuStats.cpu_usage.total_usage - previousCpuStats.cpu_usage.total_usage;
+            const systemDelta = currentCpuStats.system_cpu_usage - previousCpuStats.system_cpu_usage;
+            const cpuUsage = (cpuDelta / systemDelta) * 100;
+            if (cpuUsage && cpuUsage >= cpuThreshold) throw new Error(`CPU is not idle, usage=${cpuUsage}`);
+        } catch (error: unknown) {
+            // If there are retries remaining, wait for the desired timeout and then recurse
+            if (retries > 0) {
+                await new Promise((resolve) => setTimeout(resolve, waitMs));
+                return await this.waitForCpuToBeIdle(cpuThreshold, retries - 1, waitMs);
+            }
+
+            // Otherwise, throw this error to reject the promise
+            throw error;
+        }
+    };
+
     public waitForTinyTowerToBeSpawnable = async (
         fridaAddress: string,
-        retries: number = 20,
+        retries: number = 60,
         waitMs: number = 3000
     ): Promise<void> => {
+        const testScript = `
+            rpc.exports = {
+                main: async () => {
+                    await new Promise((resolve) => setTimeout(resolve, 1000));
+                    return "Hi, mom!";
+                },
+            };
+        `;
+
         try {
             const deviceManager = frida.getDeviceManager();
             const device = await deviceManager.addRemoteDevice(fridaAddress);
+            const applications = await device.enumerateApplications();
+            assert(applications.some((application) => application.identifier === "com.nimblebit.tinytower"));
+
             const pid = await device.spawn("com.nimblebit.tinytower");
             const session = await device.attach(pid);
-            const script = await session.createScript('send("Hi, mom!");');
+            const script = await session.createScript(testScript);
+
             await script.load();
             await device.resume(pid);
+            const result = await script.exports["main"]?.();
+            assert(result === "Hi, mom!");
+
             await script.unload();
             await session.detach();
             await device.kill(pid);
@@ -175,6 +213,7 @@ export class ArchitectEmulatorServices {
         const tarball = tar.pack(path.dirname(apk), { entries: [path.basename(apk)] });
         await this._emulatorContainer.putArchive(tarball, { path: "/android/apks/" });
         const exec = await this._emulatorContainer.exec({
+            AttachStderr: true,
             Cmd: [
                 "/android/sdk/platform-tools/adb",
                 "install",
@@ -185,10 +224,19 @@ export class ArchitectEmulatorServices {
                 `/android/apks/${path.basename(apk)}`,
             ],
         });
-        await exec.start({});
-        await new Promise((resolve) => setTimeout(resolve, 15_000));
+        const execStream = await exec.start({});
+        await new Promise<void>((resolve, reject) => {
+            this._dockerode.modem.followProgress(execStream, (error) => (error ? reject(error) : resolve()));
+        });
         const { fridaAddress } = await this.getExposedEmulatorEndpoints();
         await this.waitForTinyTowerToBeSpawnable(fridaAddress);
+    };
+
+    public startFridaServer = async (): Promise<void> => {
+        const exec = await this._emulatorContainer.exec({
+            Cmd: ["/android/sdk/install-frida-server.sh"],
+        });
+        await exec.start({ Detach: true });
     };
 
     /**
@@ -211,7 +259,7 @@ export class ArchitectEmulatorServices {
                 "1",
             ],
         });
-        await exec.start({});
+        await exec.start({ Detach: true });
     };
 }
 
