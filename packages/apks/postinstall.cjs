@@ -5,4 +5,4 @@ async function main() {
     await Promise.all([downloadLatestApkpureApk(LatestDetails[0]), downloadLatestApkmirrorApk(LatestDetails[1])]);
 }
 
-main().catch((error) => console.error(error));
+main().catch(() => {});
