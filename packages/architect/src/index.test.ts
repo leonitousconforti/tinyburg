@@ -17,8 +17,8 @@ describe("simple tests", () => {
         async () => {
             const { emulatorServices, emulatorDataVolume } = await architect();
             expect(emulatorServices.getEmulatorContainer().id).toBeDefined();
-            await emulatorServices.stop();
-            await emulatorServices.remove();
+            await emulatorServices.stopAll();
+            await emulatorServices.removeAll();
             await emulatorDataVolume.remove();
         },
         ARCHITECT_TEST_TIMEOUT_MS
@@ -29,8 +29,8 @@ describe("simple tests", () => {
         async () => {
             const { emulatorServices, emulatorDataVolume } = await architect({ withAdditionalServices: true });
             expect(emulatorServices.getEmulatorContainer().id).toBeDefined();
-            await emulatorServices.stop();
-            await emulatorServices.remove();
+            await emulatorServices.stopAll();
+            await emulatorServices.removeAll();
             await emulatorDataVolume.remove();
         },
         ARCHITECT_TEST_TIMEOUT_MS
