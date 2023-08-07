@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`All getter agents should return something and not throw any errors BitbookAgent should produce data without throwing any errors 1`] = `
-"// TinyTower version: 4.23.1
+"// TinyTower version: 4.24.0
 export enum BBEventType {
     None = \\"None\\",
     FullyStocked = \\"FullyStocked\\",
@@ -1981,7 +1981,7 @@ export type Post = (typeof posts)[number];
 `;
 
 exports[`All getter agents should return something and not throw any errors BitizenAgent should produce data without throwing any errors 1`] = `
-"// TinyTower version: 4.23.1
+"// TinyTower version: 4.24.0
 export const numberHairAccessories = 3 as const;
 export const numberGlasses = 9 as const;
 export const numberFemaleHats = 2 as const;
@@ -2968,7 +2968,7 @@ export type LastName = (typeof lastNames)[number];
 `;
 
 exports[`All getter agents should return something and not throw any errors CostumeAgent should produce data without throwing any errors 1`] = `
-"// TinyTower version: 4.23.1
+"// TinyTower version: 4.24.0
 export const costumes = {
     fishtank: {
         file: \\"fishtank\\",
@@ -2977,6 +2977,7 @@ export const costumes = {
         shoe: \\"RGBA(0.694, 0.902, 0.933, 1.000)\\",
         hideHair: false,
         displayName: \\"fish tank\\",
+        contentOffer: false,
     },
     runway: {
         file: \\"runway\\",
@@ -2985,6 +2986,7 @@ export const costumes = {
         shoe: \\"RGBA(0.227, 0.227, 0.227, 1.000)\\",
         hideHair: false,
         displayName: \\"runway\\",
+        contentOffer: false,
     },
     geisha: {
         file: \\"geisha\\",
@@ -2993,6 +2995,7 @@ export const costumes = {
         shoe: \\"RGBA(0.945, 0.922, 0.922, 1.000)\\",
         hideHair: false,
         displayName: \\"geisha\\",
+        contentOffer: false,
     },
     mountie: {
         file: \\"mountie\\",
@@ -3001,6 +3004,7 @@ export const costumes = {
         shoe: \\"RGBA(0.333, 0.173, 0.000, 1.000)\\",
         hideHair: false,
         displayName: \\"mountie\\",
+        contentOffer: false,
     },
     executioner: {
         file: \\"executioner\\",
@@ -3009,6 +3013,7 @@ export const costumes = {
         shoe: \\"RGBA(0.227, 0.227, 0.227, 1.000)\\",
         hideHair: false,
         displayName: \\"executioner\\",
+        contentOffer: false,
     },
     waldo: {
         file: \\"waldo\\",
@@ -3017,6 +3022,7 @@ export const costumes = {
         shoe: \\"RGBA(0.333, 0.173, 0.000, 1.000)\\",
         hideHair: false,
         displayName: \\"waldo\\",
+        contentOffer: false,
     },
     neanderthal: {
         file: \\"neanderthal\\",
@@ -3025,6 +3031,7 @@ export const costumes = {
         shoe: \\"RGBA(0.937, 0.788, 0.620, 1.000)\\",
         hideHair: true,
         displayName: \\"neanderthal\\",
+        contentOffer: false,
     },
     \\"massive coat\\": {
         file: \\"massive_coat\\",
@@ -3033,6 +3040,7 @@ export const costumes = {
         shoe: \\"RGBA(0.227, 0.227, 0.227, 1.000)\\",
         hideHair: false,
         displayName: \\"massive coat\\",
+        contentOffer: false,
     },
     krampus: {
         file: \\"krampus\\",
@@ -3041,6 +3049,7 @@ export const costumes = {
         shoe: \\"RGBA(0.078, 0.078, 0.078, 1.000)\\",
         hideHair: true,
         displayName: \\"krampus\\",
+        contentOffer: false,
     },
     gift: {
         file: \\"gift\\",
@@ -3049,6 +3058,7 @@ export const costumes = {
         shoe: \\"RGBA(0.227, 0.227, 0.227, 1.000)\\",
         hideHair: false,
         displayName: \\"gift\\",
+        contentOffer: false,
     },
     \\"christmas rudolph\\": {
         file: \\"christmas_rudolph\\",
@@ -3057,6 +3067,7 @@ export const costumes = {
         shoe: \\"RGBA(0.157, 0.059, 0.016, 1.000)\\",
         hideHair: false,
         displayName: \\"rudolph\\",
+        contentOffer: false,
     },
     \\"skier b\\": {
         file: \\"skier_b\\",
@@ -3065,6 +3076,7 @@ export const costumes = {
         shoe: \\"RGBA(0.918, 0.894, 0.910, 1.000)\\",
         hideHair: false,
         displayName: \\"skier b\\",
+        contentOffer: false,
     },
     \\"skier a\\": {
         file: \\"skier_a\\",
@@ -3073,6 +3085,7 @@ export const costumes = {
         shoe: \\"RGBA(0.227, 0.227, 0.227, 1.000)\\",
         hideHair: false,
         displayName: \\"skier a\\",
+        contentOffer: false,
     },
     \\"ghost vampire\\": {
         file: \\"ghost_vampire\\",
@@ -3081,6 +3094,7 @@ export const costumes = {
         shoe: \\"RGBA(0.227, 0.227, 0.227, 1.000)\\",
         hideHair: true,
         displayName: \\"ghost vampire\\",
+        contentOffer: false,
     },
     \\"ghost trick treat\\": {
         file: \\"ghost_trick_treat\\",
@@ -3089,6 +3103,7 @@ export const costumes = {
         shoe: \\"RGBA(0.227, 0.227, 0.227, 1.000)\\",
         hideHair: true,
         displayName: \\"ghost trick treat\\",
+        contentOffer: false,
     },
     \\"ghost hexe\\": {
         file: \\"ghost_hexe\\",
@@ -3097,6 +3112,7 @@ export const costumes = {
         shoe: \\"RGBA(0.227, 0.227, 0.227, 1.000)\\",
         hideHair: true,
         displayName: \\"ghost witch\\",
+        contentOffer: false,
     },
     \\"ghost devil\\": {
         file: \\"ghost_devil\\",
@@ -3105,6 +3121,7 @@ export const costumes = {
         shoe: \\"RGBA(0.227, 0.227, 0.227, 1.000)\\",
         hideHair: true,
         displayName: \\"ghost devil\\",
+        contentOffer: false,
     },
     \\"ghost arrow\\": {
         file: \\"ghost_arrow\\",
@@ -3113,6 +3130,7 @@ export const costumes = {
         shoe: \\"RGBA(0.227, 0.227, 0.227, 1.000)\\",
         hideHair: true,
         displayName: \\"ghost arrow\\",
+        contentOffer: false,
     },
     \\"famous construct\\": {
         file: \\"famous_construct\\",
@@ -3121,6 +3139,7 @@ export const costumes = {
         shoe: \\"RGBA(0.227, 0.227, 0.227, 1.000)\\",
         hideHair: true,
         displayName: \\"frankenstein\\",
+        contentOffer: false,
     },
     lecter: {
         file: \\"lecter\\",
@@ -3129,6 +3148,7 @@ export const costumes = {
         shoe: \\"RGBA(0.227, 0.227, 0.227, 1.000)\\",
         hideHair: false,
         displayName: \\"lecter\\",
+        contentOffer: false,
     },
     inquisitor: {
         file: \\"inquisitor\\",
@@ -3137,6 +3157,7 @@ export const costumes = {
         shoe: \\"RGBA(0.227, 0.227, 0.227, 1.000)\\",
         hideHair: false,
         displayName: \\"inquisitor\\",
+        contentOffer: false,
     },
     werebit: {
         file: \\"werebit\\",
@@ -3145,6 +3166,7 @@ export const costumes = {
         shoe: \\"RGBA(0.227, 0.227, 0.227, 1.000)\\",
         hideHair: true,
         displayName: \\"werebit\\",
+        contentOffer: false,
     },
     dummy: {
         file: \\"dummy\\",
@@ -3153,6 +3175,7 @@ export const costumes = {
         shoe: \\"RGBA(0.227, 0.227, 0.227, 1.000)\\",
         hideHair: false,
         displayName: \\"dummy\\",
+        contentOffer: false,
     },
     inuit: {
         file: \\"inuit\\",
@@ -3161,6 +3184,7 @@ export const costumes = {
         shoe: \\"RGBA(0.584, 0.482, 0.392, 1.000)\\",
         hideHair: false,
         displayName: \\"inuit\\",
+        contentOffer: false,
     },
     \\"summer dj\\": {
         file: \\"summer_dj\\",
@@ -3169,6 +3193,7 @@ export const costumes = {
         shoe: \\"RGBA(0.227, 0.227, 0.227, 1.000)\\",
         hideHair: false,
         displayName: \\"summer dj\\",
+        contentOffer: false,
     },
     \\"tourist diver\\": {
         file: \\"tourist_diver\\",
@@ -3177,6 +3202,7 @@ export const costumes = {
         shoe: \\"RGBA(0.227, 0.227, 0.227, 1.000)\\",
         hideHair: false,
         displayName: \\"tourist diver\\",
+        contentOffer: false,
     },
     influencer: {
         file: \\"influencer\\",
@@ -3185,6 +3211,7 @@ export const costumes = {
         shoe: \\"RGBA(0.227, 0.227, 0.227, 1.000)\\",
         hideHair: false,
         displayName: \\"travel influencer\\",
+        contentOffer: false,
     },
     \\"photography lover\\": {
         file: \\"photography_lover\\",
@@ -3193,6 +3220,7 @@ export const costumes = {
         shoe: \\"RGBA(0.227, 0.227, 0.227, 1.000)\\",
         hideHair: false,
         displayName: \\"photography lover\\",
+        contentOffer: false,
     },
     \\"student tourist\\": {
         file: \\"student_tourist\\",
@@ -3201,6 +3229,7 @@ export const costumes = {
         shoe: \\"RGBA(0.227, 0.227, 0.227, 1.000)\\",
         hideHair: false,
         displayName: \\"student tourist\\",
+        contentOffer: false,
     },
     \\"pool lifeguard\\": {
         file: \\"pool_lifeguard\\",
@@ -3209,6 +3238,7 @@ export const costumes = {
         shoe: \\"RGBA(0.227, 0.227, 0.227, 1.000)\\",
         hideHair: false,
         displayName: \\"pool lifeguard\\",
+        contentOffer: false,
     },
     coastguard: {
         file: \\"coastguard\\",
@@ -3217,6 +3247,7 @@ export const costumes = {
         shoe: \\"RGBA(0.227, 0.227, 0.227, 1.000)\\",
         hideHair: false,
         displayName: \\"coastguard\\",
+        contentOffer: false,
     },
     salesman: {
         file: \\"salesman\\",
@@ -3225,6 +3256,7 @@ export const costumes = {
         shoe: \\"RGBA(0.227, 0.227, 0.227, 1.000)\\",
         hideHair: false,
         displayName: \\"salesman\\",
+        contentOffer: false,
     },
     swimmer: {
         file: \\"swimmer\\",
@@ -3233,6 +3265,7 @@ export const costumes = {
         shoe: \\"RGBA(1.000, 1.000, 1.000, 1.000)\\",
         hideHair: false,
         displayName: \\"swimmer\\",
+        contentOffer: false,
     },
     \\"ice cream master\\": {
         file: \\"ice_cream_master\\",
@@ -3241,6 +3274,7 @@ export const costumes = {
         shoe: \\"RGBA(0.227, 0.227, 0.227, 1.000)\\",
         hideHair: false,
         displayName: \\"ice cream master\\",
+        contentOffer: false,
     },
     dj: {
         file: \\"dj\\",
@@ -3249,6 +3283,7 @@ export const costumes = {
         shoe: \\"RGBA(0.227, 0.227, 0.227, 1.000)\\",
         hideHair: false,
         displayName: \\"dj\\",
+        contentOffer: false,
     },
     \\"beach lifeguard\\": {
         file: \\"beach_lifeguard\\",
@@ -3257,6 +3292,7 @@ export const costumes = {
         shoe: \\"RGBA(0.227, 0.227, 0.227, 1.000)\\",
         hideHair: false,
         displayName: \\"beach lifeguard\\",
+        contentOffer: false,
     },
     \\"old diver\\": {
         file: \\"old_diver\\",
@@ -3265,6 +3301,7 @@ export const costumes = {
         shoe: \\"RGBA(0.227, 0.227, 0.227, 1.000)\\",
         hideHair: false,
         displayName: \\"old diver\\",
+        contentOffer: false,
     },
     emperor: {
         file: \\"emperor\\",
@@ -3273,6 +3310,7 @@ export const costumes = {
         shoe: \\"RGBA(0.227, 0.227, 0.227, 1.000)\\",
         hideHair: false,
         displayName: \\"emperor\\",
+        contentOffer: false,
     },
     explorer: {
         file: \\"explorer\\",
@@ -3281,6 +3319,7 @@ export const costumes = {
         shoe: \\"RGBA(0.227, 0.227, 0.227, 1.000)\\",
         hideHair: false,
         displayName: \\"explorer\\",
+        contentOffer: false,
     },
     \\"general washington\\": {
         file: \\"general_washington\\",
@@ -3289,6 +3328,7 @@ export const costumes = {
         shoe: \\"RGBA(0.000, 0.000, 0.000, 1.000)\\",
         hideHair: false,
         displayName: \\"general washington\\",
+        contentOffer: false,
     },
     \\"bald eagle\\": {
         file: \\"bald_eagle\\",
@@ -3297,6 +3337,7 @@ export const costumes = {
         shoe: \\"RGBA(1.000, 0.800, 0.000, 1.000)\\",
         hideHair: true,
         displayName: \\"bald eagle\\",
+        contentOffer: false,
     },
     \\"betsy ross\\": {
         file: \\"betsy_ross\\",
@@ -3305,6 +3346,7 @@ export const costumes = {
         shoe: \\"RGBA(0.000, 0.000, 0.000, 1.000)\\",
         hideHair: false,
         displayName: \\"betsy ross\\",
+        contentOffer: false,
     },
     \\"revolutionary british\\": {
         file: \\"revolutionary_british\\",
@@ -3313,6 +3355,7 @@ export const costumes = {
         shoe: \\"RGBA(0.227, 0.227, 0.227, 1.000)\\",
         hideHair: false,
         displayName: \\"british revolutionary\\",
+        contentOffer: false,
     },
     \\"revolutionary usa\\": {
         file: \\"revolutionary_usa\\",
@@ -3321,6 +3364,7 @@ export const costumes = {
         shoe: \\"RGBA(0.000, 0.000, 0.000, 1.000)\\",
         hideHair: false,
         displayName: \\"us revolutionary\\",
+        contentOffer: false,
     },
     yeti: {
         file: \\"yeti\\",
@@ -3329,6 +3373,7 @@ export const costumes = {
         shoe: \\"RGBA(0.337, 0.427, 0.588, 1.000)\\",
         hideHair: true,
         displayName: \\"yeti\\",
+        contentOffer: false,
     },
     goth: {
         file: \\"goth\\",
@@ -3337,6 +3382,7 @@ export const costumes = {
         shoe: \\"RGBA(0.055, 0.047, 0.051, 1.000)\\",
         hideHair: true,
         displayName: \\"goth\\",
+        contentOffer: false,
     },
     hatchlingblue: {
         file: \\"hatchlingblue\\",
@@ -3345,6 +3391,7 @@ export const costumes = {
         shoe: \\"RGBA(0.847, 0.549, 0.231, 1.000)\\",
         hideHair: true,
         displayName: \\"hatchling blue\\",
+        contentOffer: false,
     },
     hatchling: {
         file: \\"hatchling\\",
@@ -3353,6 +3400,7 @@ export const costumes = {
         shoe: \\"RGBA(0.847, 0.549, 0.231, 1.000)\\",
         hideHair: true,
         displayName: \\"hatchling\\",
+        contentOffer: false,
     },
     moai: {
         file: \\"moai\\",
@@ -3361,6 +3409,7 @@ export const costumes = {
         shoe: \\"RGBA(0.227, 0.227, 0.227, 1.000)\\",
         hideHair: true,
         displayName: \\"moai\\",
+        contentOffer: false,
     },
     folklore: {
         file: \\"folklore\\",
@@ -3369,6 +3418,7 @@ export const costumes = {
         shoe: \\"RGBA(0.937, 0.788, 0.620, 1.000)\\",
         hideHair: false,
         displayName: \\"folklore\\",
+        contentOffer: false,
     },
     egg: {
         file: \\"egg\\",
@@ -3377,6 +3427,7 @@ export const costumes = {
         shoe: \\"RGBA(0.937, 0.788, 0.620, 1.000)\\",
         hideHair: true,
         displayName: \\"egg\\",
+        contentOffer: false,
     },
     bunnyeaster: {
         file: \\"bunnyeaster\\",
@@ -3385,6 +3436,7 @@ export const costumes = {
         shoe: \\"RGBA(1.000, 0.980, 0.980, 1.000)\\",
         hideHair: false,
         displayName: \\"easter bunny\\",
+        contentOffer: false,
     },
     sumo: {
         file: \\"sumo\\",
@@ -3393,6 +3445,7 @@ export const costumes = {
         shoe: \\"RGBA(0.937, 0.788, 0.620, 1.000)\\",
         hideHair: false,
         displayName: \\"sumo\\",
+        contentOffer: false,
     },
     avocadont: {
         file: \\"avocadont\\",
@@ -3401,6 +3454,7 @@ export const costumes = {
         shoe: \\"RGBA(0.129, 0.129, 0.129, 1.000)\\",
         hideHair: true,
         displayName: \\"avocadon't\\",
+        contentOffer: false,
     },
     avocado: {
         file: \\"avocado\\",
@@ -3409,6 +3463,7 @@ export const costumes = {
         shoe: \\"RGBA(0.129, 0.129, 0.129, 1.000)\\",
         hideHair: true,
         displayName: \\"avocado\\",
+        contentOffer: false,
     },
     \\"panda suit\\": {
         file: \\"panda\\",
@@ -3417,6 +3472,7 @@ export const costumes = {
         shoe: \\"RGBA(0.227, 0.227, 0.227, 1.000)\\",
         hideHair: false,
         displayName: \\"panda suit\\",
+        contentOffer: false,
     },
     \\"frog suit\\": {
         file: \\"frog\\",
@@ -3425,6 +3481,7 @@ export const costumes = {
         shoe: \\"RGBA(0.349, 0.725, 0.075, 1.000)\\",
         hideHair: false,
         displayName: \\"frog suit\\",
+        contentOffer: false,
     },
     \\"monster suit\\": {
         file: \\"monster\\",
@@ -3433,6 +3490,7 @@ export const costumes = {
         shoe: \\"RGBA(0.400, 0.200, 0.000, 1.000)\\",
         hideHair: false,
         displayName: \\"monster suit\\",
+        contentOffer: false,
     },
     astronaut: {
         file: \\"astronaut\\",
@@ -3441,6 +3499,7 @@ export const costumes = {
         shoe: \\"RGBA(0.118, 0.047, 0.000, 1.000)\\",
         hideHair: false,
         displayName: \\"astronaut\\",
+        contentOffer: false,
     },
     chef: {
         file: \\"chef\\",
@@ -3449,6 +3508,7 @@ export const costumes = {
         shoe: \\"RGBA(0.227, 0.227, 0.227, 1.000)\\",
         hideHair: false,
         displayName: \\"chef\\",
+        contentOffer: false,
     },
     cowboy: {
         file: \\"cowboy\\",
@@ -3457,6 +3517,7 @@ export const costumes = {
         shoe: \\"RGBA(0.412, 0.231, 0.082, 1.000)\\",
         hideHair: false,
         displayName: \\"cowpoke\\",
+        contentOffer: false,
     },
     overalls: {
         file: \\"overalls\\",
@@ -3465,6 +3526,7 @@ export const costumes = {
         shoe: \\"RGBA(0.482, 0.251, 0.000, 1.000)\\",
         hideHair: false,
         displayName: \\"overalls\\",
+        contentOffer: false,
     },
     fireman: {
         file: \\"fireman\\",
@@ -3473,6 +3535,7 @@ export const costumes = {
         shoe: \\"RGBA(0.227, 0.227, 0.227, 1.000)\\",
         hideHair: false,
         displayName: \\"firefighter\\",
+        contentOffer: false,
     },
     knight: {
         file: \\"knight\\",
@@ -3481,6 +3544,7 @@ export const costumes = {
         shoe: \\"RGBA(0.961, 0.898, 0.816, 1.000)\\",
         hideHair: false,
         displayName: \\"knight\\",
+        contentOffer: false,
     },
     \\"g-man\\": {
         file: \\"gman\\",
@@ -3489,6 +3553,7 @@ export const costumes = {
         shoe: \\"RGBA(0.082, 0.086, 0.094, 1.000)\\",
         hideHair: false,
         displayName: \\"g-man\\",
+        contentOffer: false,
     },
     \\"business suit\\": {
         file: \\"businesssuit\\",
@@ -3497,6 +3562,7 @@ export const costumes = {
         shoe: \\"RGBA(0.082, 0.086, 0.094, 1.000)\\",
         hideHair: false,
         displayName: \\"business suit\\",
+        contentOffer: false,
     },
     \\"plumber a\\": {
         file: \\"plumbera\\",
@@ -3505,6 +3571,7 @@ export const costumes = {
         shoe: \\"RGBA(0.502, 0.263, 0.086, 1.000)\\",
         hideHair: false,
         displayName: \\"plumber a\\",
+        contentOffer: false,
     },
     \\"plumber b\\": {
         file: \\"plumberb\\",
@@ -3513,6 +3580,7 @@ export const costumes = {
         shoe: \\"RGBA(0.502, 0.263, 0.086, 1.000)\\",
         hideHair: false,
         displayName: \\"plumber b\\",
+        contentOffer: false,
     },
     nerd: {
         file: \\"nerd\\",
@@ -3521,6 +3589,7 @@ export const costumes = {
         shoe: \\"RGBA(0.106, 0.137, 0.133, 1.000)\\",
         hideHair: false,
         displayName: \\"nerd\\",
+        contentOffer: false,
     },
     pumpkin: {
         file: \\"pumpkin\\",
@@ -3529,6 +3598,7 @@ export const costumes = {
         shoe: \\"RGBA(0.878, 0.333, 0.008, 1.000)\\",
         hideHair: false,
         displayName: \\"pumpkin\\",
+        contentOffer: false,
     },
     pilgrim: {
         file: \\"pilgrim\\",
@@ -3537,6 +3607,7 @@ export const costumes = {
         shoe: \\"RGBA(0.000, 0.000, 0.000, 1.000)\\",
         hideHair: false,
         displayName: \\"pilgrim\\",
+        contentOffer: false,
     },
     santa: {
         file: \\"santa\\",
@@ -3545,6 +3616,7 @@ export const costumes = {
         shoe: \\"RGBA(0.059, 0.212, 0.208, 1.000)\\",
         hideHair: false,
         displayName: \\"santa\\",
+        contentOffer: false,
     },
     elf: {
         file: \\"elf\\",
@@ -3553,6 +3625,7 @@ export const costumes = {
         shoe: \\"RGBA(0.051, 0.098, 0.051, 1.000)\\",
         hideHair: false,
         displayName: \\"elf\\",
+        contentOffer: false,
     },
     gentleman: {
         file: \\"gentleman\\",
@@ -3561,6 +3634,7 @@ export const costumes = {
         shoe: \\"RGBA(0.051, 0.098, 0.051, 1.000)\\",
         hideHair: false,
         displayName: \\"gentleman\\",
+        contentOffer: false,
     },
     lady: {
         file: \\"lady\\",
@@ -3569,6 +3643,7 @@ export const costumes = {
         shoe: \\"RGBA(0.051, 0.098, 0.051, 1.000)\\",
         hideHair: false,
         displayName: \\"lady\\",
+        contentOffer: false,
     },
     caveman: {
         file: \\"caveman\\",
@@ -3577,6 +3652,7 @@ export const costumes = {
         shoe: \\"RGBA(0.482, 0.251, 0.000, 1.000)\\",
         hideHair: false,
         displayName: \\"cave dweller\\",
+        contentOffer: false,
     },
     \\"bee suit\\": {
         file: \\"bee\\",
@@ -3585,6 +3661,7 @@ export const costumes = {
         shoe: \\"RGBA(0.027, 0.031, 0.008, 1.000)\\",
         hideHair: false,
         displayName: \\"bee suit\\",
+        contentOffer: false,
     },
     \\"white suit\\": {
         file: \\"whitesuit\\",
@@ -3593,6 +3670,7 @@ export const costumes = {
         shoe: \\"RGBA(0.227, 0.227, 0.227, 1.000)\\",
         hideHair: false,
         displayName: \\"white suit\\",
+        contentOffer: false,
     },
     \\"lab coat\\": {
         file: \\"labcoat\\",
@@ -3601,6 +3679,7 @@ export const costumes = {
         shoe: \\"RGBA(0.227, 0.227, 0.227, 1.000)\\",
         hideHair: false,
         displayName: \\"lab coat\\",
+        contentOffer: false,
     },
     doctor: {
         file: \\"doctor\\",
@@ -3609,6 +3688,7 @@ export const costumes = {
         shoe: \\"RGBA(0.408, 0.294, 0.149, 1.000)\\",
         hideHair: false,
         displayName: \\"doctor\\",
+        contentOffer: false,
     },
     surgeon: {
         file: \\"surgeon\\",
@@ -3617,6 +3697,7 @@ export const costumes = {
         shoe: \\"RGBA(0.890, 0.894, 0.902, 1.000)\\",
         hideHair: false,
         displayName: \\"surgeon\\",
+        contentOffer: false,
     },
     nurse: {
         file: \\"nurse\\",
@@ -3625,6 +3706,7 @@ export const costumes = {
         shoe: \\"RGBA(0.890, 0.894, 0.902, 1.000)\\",
         hideHair: false,
         displayName: \\"nurse\\",
+        contentOffer: false,
     },
     engineer: {
         file: \\"engineer\\",
@@ -3633,6 +3715,7 @@ export const costumes = {
         shoe: \\"RGBA(0.278, 0.224, 0.180, 1.000)\\",
         hideHair: false,
         displayName: \\"engineer\\",
+        contentOffer: false,
     },
     waiter: {
         file: \\"waiter\\",
@@ -3641,6 +3724,7 @@ export const costumes = {
         shoe: \\"RGBA(0.000, 0.000, 0.000, 1.000)\\",
         hideHair: false,
         displayName: \\"waiter\\",
+        contentOffer: false,
     },
     bellhop: {
         file: \\"bellhop\\",
@@ -3649,6 +3733,7 @@ export const costumes = {
         shoe: \\"RGBA(0.000, 0.000, 0.000, 1.000)\\",
         hideHair: false,
         displayName: \\"bellhop\\",
+        contentOffer: false,
     },
     \\"mapple genius\\": {
         file: \\"genius\\",
@@ -3657,6 +3742,7 @@ export const costumes = {
         shoe: \\"RGBA(0.933, 0.933, 0.933, 1.000)\\",
         hideHair: false,
         displayName: \\"mapple genius\\",
+        contentOffer: false,
     },
     apron: {
         file: \\"apron\\",
@@ -3665,6 +3751,7 @@ export const costumes = {
         shoe: \\"RGBA(0.227, 0.227, 0.227, 1.000)\\",
         hideHair: false,
         displayName: \\"apron\\",
+        contentOffer: false,
     },
     dinosaur: {
         file: \\"dino\\",
@@ -3673,6 +3760,7 @@ export const costumes = {
         shoe: \\"RGBA(0.643, 0.757, 0.255, 1.000)\\",
         hideHair: false,
         displayName: \\"dinosaur\\",
+        contentOffer: false,
     },
     ninja: {
         file: \\"ninja\\",
@@ -3681,6 +3769,7 @@ export const costumes = {
         shoe: \\"RGBA(0.000, 0.000, 0.000, 1.000)\\",
         hideHair: false,
         displayName: \\"ninja\\",
+        contentOffer: false,
     },
     \\"karate outfit\\": {
         file: \\"karate\\",
@@ -3689,6 +3778,7 @@ export const costumes = {
         shoe: \\"RGBA(0.918, 0.894, 0.910, 1.000)\\",
         hideHair: false,
         displayName: \\"karate outfit\\",
+        contentOffer: false,
     },
     pirate: {
         file: \\"pirate\\",
@@ -3697,6 +3787,7 @@ export const costumes = {
         shoe: \\"RGBA(0.318, 0.149, 0.125, 1.000)\\",
         hideHair: false,
         displayName: \\"pirate\\",
+        contentOffer: false,
     },
     barista: {
         file: \\"barista\\",
@@ -3705,6 +3796,7 @@ export const costumes = {
         shoe: \\"RGBA(0.227, 0.227, 0.227, 1.000)\\",
         hideHair: false,
         displayName: \\"barista\\",
+        contentOffer: false,
     },
     hippie: {
         file: \\"hippie\\",
@@ -3713,6 +3805,7 @@ export const costumes = {
         shoe: \\"RGBA(0.459, 0.239, 0.000, 1.000)\\",
         hideHair: false,
         displayName: \\"hippie\\",
+        contentOffer: false,
     },
     \\"leather jacket\\": {
         file: \\"leatherjacket\\",
@@ -3721,6 +3814,7 @@ export const costumes = {
         shoe: \\"RGBA(0.227, 0.227, 0.227, 1.000)\\",
         hideHair: false,
         displayName: \\"leather jacket\\",
+        contentOffer: false,
     },
     clown: {
         file: \\"clown\\",
@@ -3729,6 +3823,7 @@ export const costumes = {
         shoe: \\"RGBA(1.000, 0.114, 0.141, 1.000)\\",
         hideHair: false,
         displayName: \\"clown\\",
+        contentOffer: false,
     },
     biker: {
         file: \\"biker\\",
@@ -3737,6 +3832,7 @@ export const costumes = {
         shoe: \\"RGBA(0.000, 0.000, 0.000, 1.000)\\",
         hideHair: false,
         displayName: \\"biker\\",
+        contentOffer: false,
     },
     \\"baseball uniform\\": {
         file: \\"baseball\\",
@@ -3745,6 +3841,7 @@ export const costumes = {
         shoe: \\"RGBA(0.000, 0.000, 0.000, 1.000)\\",
         hideHair: false,
         displayName: \\"baseball uniform\\",
+        contentOffer: false,
     },
     \\"fast food uniform\\": {
         file: \\"fastfood\\",
@@ -3753,6 +3850,7 @@ export const costumes = {
         shoe: \\"RGBA(0.227, 0.227, 0.227, 1.000)\\",
         hideHair: false,
         displayName: \\"fast food uniform\\",
+        contentOffer: false,
     },
     \\"cat suit\\": {
         file: \\"catsuit\\",
@@ -3761,6 +3859,7 @@ export const costumes = {
         shoe: \\"RGBA(0.227, 0.227, 0.227, 1.000)\\",
         hideHair: false,
         displayName: \\"cat suit\\",
+        contentOffer: false,
     },
     gangster: {
         file: \\"gangster\\",
@@ -3769,6 +3868,7 @@ export const costumes = {
         shoe: \\"RGBA(0.000, 0.000, 0.000, 1.000)\\",
         hideHair: false,
         displayName: \\"gangster\\",
+        contentOffer: false,
     },
     bride: {
         file: \\"bride\\",
@@ -3777,6 +3877,7 @@ export const costumes = {
         shoe: \\"RGBA(1.000, 1.000, 1.000, 1.000)\\",
         hideHair: false,
         displayName: \\"bride\\",
+        contentOffer: false,
     },
     groom: {
         file: \\"groom\\",
@@ -3785,6 +3886,7 @@ export const costumes = {
         shoe: \\"RGBA(0.227, 0.227, 0.227, 1.000)\\",
         hideHair: false,
         displayName: \\"groom\\",
+        contentOffer: false,
     },
     king: {
         file: \\"king\\",
@@ -3793,6 +3895,7 @@ export const costumes = {
         shoe: \\"RGBA(0.467, 0.110, 0.110, 1.000)\\",
         hideHair: false,
         displayName: \\"king\\",
+        contentOffer: false,
     },
     security: {
         file: \\"security\\",
@@ -3801,6 +3904,7 @@ export const costumes = {
         shoe: \\"RGBA(0.102, 0.118, 0.129, 1.000)\\",
         hideHair: false,
         displayName: \\"security\\",
+        contentOffer: false,
     },
     usher: {
         file: \\"usher\\",
@@ -3809,6 +3913,7 @@ export const costumes = {
         shoe: \\"RGBA(0.227, 0.227, 0.227, 1.000)\\",
         hideHair: false,
         displayName: \\"usher\\",
+        contentOffer: false,
     },
     guard: {
         file: \\"guard\\",
@@ -3817,6 +3922,7 @@ export const costumes = {
         shoe: \\"RGBA(0.102, 0.118, 0.129, 1.000)\\",
         hideHair: false,
         displayName: \\"guard\\",
+        contentOffer: false,
     },
     mime: {
         file: \\"mime\\",
@@ -3825,6 +3931,7 @@ export const costumes = {
         shoe: \\"RGBA(0.227, 0.227, 0.227, 1.000)\\",
         hideHair: true,
         displayName: \\"mime\\",
+        contentOffer: false,
     },
     angel: {
         file: \\"angel\\",
@@ -3833,6 +3940,7 @@ export const costumes = {
         shoe: \\"RGBA(1.000, 1.000, 1.000, 1.000)\\",
         hideHair: false,
         displayName: \\"angel\\",
+        contentOffer: false,
     },
     devil: {
         file: \\"devil\\",
@@ -3841,6 +3949,7 @@ export const costumes = {
         shoe: \\"RGBA(0.910, 0.004, 0.024, 1.000)\\",
         hideHair: false,
         displayName: \\"devil\\",
+        contentOffer: false,
     },
     robot: {
         file: \\"robot\\",
@@ -3849,6 +3958,7 @@ export const costumes = {
         shoe: \\"RGBA(0.835, 0.843, 0.839, 1.000)\\",
         hideHair: false,
         displayName: \\"robot\\",
+        contentOffer: false,
     },
     chicken: {
         file: \\"chicken\\",
@@ -3857,6 +3967,7 @@ export const costumes = {
         shoe: \\"RGBA(0.925, 0.129, 0.184, 1.000)\\",
         hideHair: false,
         displayName: \\"chicken\\",
+        contentOffer: false,
     },
     viking: {
         file: \\"viking\\",
@@ -3865,6 +3976,7 @@ export const costumes = {
         shoe: \\"RGBA(0.408, 0.302, 0.200, 1.000)\\",
         hideHair: false,
         displayName: \\"viking\\",
+        contentOffer: false,
     },
     elvis: {
         file: \\"elvis\\",
@@ -3873,6 +3985,7 @@ export const costumes = {
         shoe: \\"RGBA(0.149, 0.149, 0.149, 1.000)\\",
         hideHair: false,
         displayName: \\"elvis\\",
+        contentOffer: false,
     },
     \\"uncle sam\\": {
         file: \\"unclesam\\",
@@ -3881,6 +3994,7 @@ export const costumes = {
         shoe: \\"RGBA(0.000, 0.000, 0.000, 1.000)\\",
         hideHair: false,
         displayName: \\"uncle sam\\",
+        contentOffer: false,
     },
     \\"young wizard\\": {
         file: \\"youngwizard\\",
@@ -3889,6 +4003,7 @@ export const costumes = {
         shoe: \\"RGBA(0.000, 0.000, 0.000, 1.000)\\",
         hideHair: false,
         displayName: \\"young wizard\\",
+        contentOffer: false,
     },
     \\"mad hatter\\": {
         file: \\"madhatter\\",
@@ -3897,6 +4012,7 @@ export const costumes = {
         shoe: \\"RGBA(1.000, 0.624, 0.290, 1.000)\\",
         hideHair: false,
         displayName: \\"mad hatter\\",
+        contentOffer: false,
     },
     \\"super hero\\": {
         file: \\"superhero\\",
@@ -3905,6 +4021,7 @@ export const costumes = {
         shoe: \\"RGBA(0.000, 0.000, 0.000, 1.000)\\",
         hideHair: false,
         displayName: \\"super hero\\",
+        contentOffer: false,
     },
     phantom: {
         file: \\"phantom\\",
@@ -3913,6 +4030,7 @@ export const costumes = {
         shoe: \\"RGBA(0.000, 0.000, 0.000, 1.000)\\",
         hideHair: false,
         displayName: \\"phantom\\",
+        contentOffer: false,
     },
     hazmat: {
         file: \\"hazmat\\",
@@ -3921,6 +4039,7 @@ export const costumes = {
         shoe: \\"RGBA(0.957, 0.788, 0.000, 1.000)\\",
         hideHair: false,
         displayName: \\"hazmat\\",
+        contentOffer: false,
     },
     \\"mad scientist\\": {
         file: \\"madscientist\\",
@@ -3929,6 +4048,7 @@ export const costumes = {
         shoe: \\"RGBA(0.510, 0.275, 0.145, 1.000)\\",
         hideHair: false,
         displayName: \\"mad scientist\\",
+        contentOffer: false,
     },
     detective: {
         file: \\"detective\\",
@@ -3937,6 +4057,7 @@ export const costumes = {
         shoe: \\"RGBA(0.227, 0.227, 0.227, 1.000)\\",
         hideHair: false,
         displayName: \\"detective\\",
+        contentOffer: false,
     },
     princess: {
         file: \\"princess\\",
@@ -3945,6 +4066,7 @@ export const costumes = {
         shoe: \\"RGBA(1.000, 1.000, 1.000, 1.000)\\",
         hideHair: false,
         displayName: \\"princess\\",
+        contentOffer: false,
     },
     fairy: {
         file: \\"fairy\\",
@@ -3953,6 +4075,7 @@ export const costumes = {
         shoe: \\"RGBA(1.000, 1.000, 1.000, 1.000)\\",
         hideHair: false,
         displayName: \\"fairy\\",
+        contentOffer: false,
     },
     \\"red dress\\": {
         file: \\"reddress\\",
@@ -3961,6 +4084,7 @@ export const costumes = {
         shoe: \\"RGBA(1.000, 1.000, 1.000, 1.000)\\",
         hideHair: false,
         displayName: \\"red dress\\",
+        contentOffer: false,
     },
     cheerleader: {
         file: \\"cheerleader\\",
@@ -3969,6 +4093,7 @@ export const costumes = {
         shoe: \\"RGBA(0.902, 0.902, 0.902, 1.000)\\",
         hideHair: false,
         displayName: \\"cheerleader\\",
+        contentOffer: false,
     },
     \\"brown dress\\": {
         file: \\"browndress\\",
@@ -3977,6 +4102,7 @@ export const costumes = {
         shoe: \\"RGBA(0.227, 0.227, 0.227, 1.000)\\",
         hideHair: false,
         displayName: \\"brown dress\\",
+        contentOffer: false,
     },
     magician: {
         file: \\"magician\\",
@@ -3985,6 +4111,7 @@ export const costumes = {
         shoe: \\"RGBA(0.227, 0.227, 0.227, 1.000)\\",
         hideHair: false,
         displayName: \\"magician\\",
+        contentOffer: false,
     },
     leprechaun: {
         file: \\"leprechaun\\",
@@ -3993,6 +4120,7 @@ export const costumes = {
         shoe: \\"RGBA(0.192, 0.400, 0.149, 1.000)\\",
         hideHair: false,
         displayName: \\"leprechaun\\",
+        contentOffer: false,
     },
     witch: {
         file: \\"witch\\",
@@ -4001,6 +4129,7 @@ export const costumes = {
         shoe: \\"RGBA(0.000, 0.000, 0.000, 1.000)\\",
         hideHair: false,
         displayName: \\"witch\\",
+        contentOffer: false,
     },
     golfer: {
         file: \\"golfer\\",
@@ -4009,6 +4138,7 @@ export const costumes = {
         shoe: \\"RGBA(0.965, 0.980, 0.976, 1.000)\\",
         hideHair: false,
         displayName: \\"golfer\\",
+        contentOffer: false,
     },
     maid: {
         file: \\"maid\\",
@@ -4017,6 +4147,7 @@ export const costumes = {
         shoe: \\"RGBA(1.000, 1.000, 1.000, 1.000)\\",
         hideHair: false,
         displayName: \\"maid\\",
+        contentOffer: false,
     },
     amigo: {
         file: \\"amigo\\",
@@ -4025,6 +4156,7 @@ export const costumes = {
         shoe: \\"RGBA(0.357, 0.231, 0.180, 1.000)\\",
         hideHair: false,
         displayName: \\"sombrero\\",
+        contentOffer: false,
     },
     liberty: {
         file: \\"liberty\\",
@@ -4033,6 +4165,7 @@ export const costumes = {
         shoe: \\"RGBA(0.282, 0.643, 0.561, 1.000)\\",
         hideHair: false,
         displayName: \\"liberty\\",
+        contentOffer: false,
     },
     piggy: {
         file: \\"piggy\\",
@@ -4041,6 +4174,7 @@ export const costumes = {
         shoe: \\"RGBA(0.000, 0.000, 0.000, 1.000)\\",
         hideHair: false,
         displayName: \\"piggy\\",
+        contentOffer: false,
     },
     \\"star captain\\": {
         file: \\"starcaptain\\",
@@ -4049,6 +4183,7 @@ export const costumes = {
         shoe: \\"RGBA(0.000, 0.000, 0.000, 1.000)\\",
         hideHair: false,
         displayName: \\"star captain\\",
+        contentOffer: false,
     },
     judge: {
         file: \\"judge\\",
@@ -4057,6 +4192,7 @@ export const costumes = {
         shoe: \\"RGBA(0.000, 0.000, 0.000, 1.000)\\",
         hideHair: false,
         displayName: \\"judge\\",
+        contentOffer: false,
     },
     soldier: {
         file: \\"soldier\\",
@@ -4065,6 +4201,7 @@ export const costumes = {
         shoe: \\"RGBA(0.412, 0.345, 0.275, 1.000)\\",
         hideHair: false,
         displayName: \\"soldier\\",
+        contentOffer: false,
     },
     toga: {
         file: \\"toga\\",
@@ -4073,6 +4210,7 @@ export const costumes = {
         shoe: \\"RGBA(0.475, 0.329, 0.224, 1.000)\\",
         hideHair: false,
         displayName: \\"toga\\",
+        contentOffer: false,
     },
     diver: {
         file: \\"diver\\",
@@ -4081,6 +4219,7 @@ export const costumes = {
         shoe: \\"RGBA(0.227, 0.227, 0.227, 1.000)\\",
         hideHair: false,
         displayName: \\"diver\\",
+        contentOffer: false,
     },
     lumberjack: {
         file: \\"lumberjack\\",
@@ -4089,6 +4228,7 @@ export const costumes = {
         shoe: \\"RGBA(0.435, 0.278, 0.098, 1.000)\\",
         hideHair: false,
         displayName: \\"lumberjack\\",
+        contentOffer: false,
     },
     barber: {
         file: \\"barber\\",
@@ -4097,6 +4237,7 @@ export const costumes = {
         shoe: \\"RGBA(0.227, 0.227, 0.227, 1.000)\\",
         hideHair: false,
         displayName: \\"barber\\",
+        contentOffer: false,
     },
     burglar: {
         file: \\"burglar\\",
@@ -4105,6 +4246,7 @@ export const costumes = {
         shoe: \\"RGBA(0.145, 0.145, 0.145, 1.000)\\",
         hideHair: false,
         displayName: \\"burglar\\",
+        contentOffer: false,
     },
     convict: {
         file: \\"convict\\",
@@ -4113,6 +4255,7 @@ export const costumes = {
         shoe: \\"RGBA(0.227, 0.227, 0.227, 1.000)\\",
         hideHair: false,
         displayName: \\"convict\\",
+        contentOffer: false,
     },
     boxer: {
         file: \\"boxer\\",
@@ -4121,6 +4264,7 @@ export const costumes = {
         shoe: \\"RGBA(0.227, 0.227, 0.227, 1.000)\\",
         hideHair: false,
         displayName: \\"boxer\\",
+        contentOffer: false,
     },
     \\"football player\\": {
         file: \\"footballplayer\\",
@@ -4129,6 +4273,7 @@ export const costumes = {
         shoe: \\"RGBA(0.227, 0.227, 0.227, 1.000)\\",
         hideHair: false,
         displayName: \\"football player\\",
+        contentOffer: false,
     },
     hunter: {
         file: \\"hunter\\",
@@ -4137,6 +4282,7 @@ export const costumes = {
         shoe: \\"RGBA(0.227, 0.227, 0.227, 1.000)\\",
         hideHair: false,
         displayName: \\"hunter\\",
+        contentOffer: false,
     },
     sailor: {
         file: \\"sailor\\",
@@ -4145,6 +4291,7 @@ export const costumes = {
         shoe: \\"RGBA(0.000, 0.000, 0.000, 1.000)\\",
         hideHair: false,
         displayName: \\"sailor\\",
+        contentOffer: false,
     },
     rockstar: {
         file: \\"rockstar\\",
@@ -4153,6 +4300,7 @@ export const costumes = {
         shoe: \\"RGBA(1.000, 1.000, 1.000, 1.000)\\",
         hideHair: false,
         displayName: \\"rockstar\\",
+        contentOffer: false,
     },
     archaeologist: {
         file: \\"archaeologist\\",
@@ -4161,6 +4309,7 @@ export const costumes = {
         shoe: \\"RGBA(0.227, 0.227, 0.227, 1.000)\\",
         hideHair: false,
         displayName: \\"archaeologist\\",
+        contentOffer: false,
     },
     \\"native american\\": {
         file: \\"nativeamerican\\",
@@ -4169,6 +4318,7 @@ export const costumes = {
         shoe: \\"RGBA(0.804, 0.714, 0.518, 1.000)\\",
         hideHair: false,
         displayName: \\"deerskin\\",
+        contentOffer: false,
     },
     ghost: {
         file: \\"ghost\\",
@@ -4177,6 +4327,7 @@ export const costumes = {
         shoe: \\"RGBA(0.227, 0.227, 0.227, 1.000)\\",
         hideHair: true,
         displayName: \\"ghost\\",
+        contentOffer: false,
     },
     bunny: {
         file: \\"bunny\\",
@@ -4185,6 +4336,7 @@ export const costumes = {
         shoe: \\"RGBA(0.886, 0.886, 0.886, 1.000)\\",
         hideHair: false,
         displayName: \\"bunny\\",
+        contentOffer: false,
     },
     heart: {
         file: \\"heart\\",
@@ -4193,6 +4345,7 @@ export const costumes = {
         shoe: \\"RGBA(1.000, 1.000, 1.000, 1.000)\\",
         hideHair: false,
         displayName: \\"heart\\",
+        contentOffer: false,
     },
     tourist: {
         file: \\"tourist\\",
@@ -4201,6 +4354,7 @@ export const costumes = {
         shoe: \\"RGBA(1.000, 0.000, 0.000, 1.000)\\",
         hideHair: false,
         displayName: \\"tourist\\",
+        contentOffer: false,
     },
     trooper: {
         file: \\"trooper\\",
@@ -4209,6 +4363,7 @@ export const costumes = {
         shoe: \\"RGBA(1.000, 1.000, 1.000, 1.000)\\",
         hideHair: true,
         displayName: \\"trooper\\",
+        contentOffer: false,
     },
     \\"red baron\\": {
         file: \\"redbaron\\",
@@ -4217,6 +4372,7 @@ export const costumes = {
         shoe: \\"RGBA(0.227, 0.227, 0.227, 1.000)\\",
         hideHair: false,
         displayName: \\"red baron\\",
+        contentOffer: false,
     },
     \\"pilot headset\\": {
         file: \\"pilotheadset\\",
@@ -4225,6 +4381,7 @@ export const costumes = {
         shoe: \\"RGBA(0.227, 0.227, 0.227, 1.000)\\",
         hideHair: false,
         displayName: \\"pilot headset\\",
+        contentOffer: false,
     },
     \\"jet helmet\\": {
         file: \\"jethelmet\\",
@@ -4233,6 +4390,7 @@ export const costumes = {
         shoe: \\"RGBA(0.227, 0.227, 0.227, 1.000)\\",
         hideHair: false,
         displayName: \\"jet helmet\\",
+        contentOffer: false,
     },
     \\"airline pilot\\": {
         file: \\"airlinepilot\\",
@@ -4241,6 +4399,7 @@ export const costumes = {
         shoe: \\"RGBA(0.000, 0.000, 0.000, 1.000)\\",
         hideHair: false,
         displayName: \\"airline pilot\\",
+        contentOffer: false,
     },
     horse: {
         file: \\"horse\\",
@@ -4249,6 +4408,7 @@ export const costumes = {
         shoe: \\"RGBA(0.000, 0.000, 0.000, 1.000)\\",
         hideHair: false,
         displayName: \\"horse\\",
+        contentOffer: false,
     },
     zombie: {
         file: \\"zombie\\",
@@ -4257,6 +4417,7 @@ export const costumes = {
         shoe: \\"RGBA(0.376, 0.318, 0.263, 1.000)\\",
         hideHair: true,
         displayName: \\"zombie\\",
+        contentOffer: false,
     },
     construction: {
         file: \\"construction\\",
@@ -4265,6 +4426,7 @@ export const costumes = {
         shoe: \\"RGBA(0.000, 0.000, 0.000, 1.000)\\",
         hideHair: false,
         displayName: \\"construction\\",
+        contentOffer: false,
     },
     paparazzi: {
         file: \\"paparazzi\\",
@@ -4273,6 +4435,7 @@ export const costumes = {
         shoe: \\"RGBA(1.000, 1.000, 1.000, 1.000)\\",
         hideHair: false,
         displayName: \\"paparazzi\\",
+        contentOffer: false,
     },
     delivery: {
         file: \\"delivery\\",
@@ -4281,6 +4444,7 @@ export const costumes = {
         shoe: \\"RGBA(0.000, 0.000, 0.000, 1.000)\\",
         hideHair: false,
         displayName: \\"delivery\\",
+        contentOffer: false,
     },
     \\"travel agent\\": {
         file: \\"travelagent\\",
@@ -4289,6 +4453,7 @@ export const costumes = {
         shoe: \\"RGBA(0.000, 0.000, 0.000, 1.000)\\",
         hideHair: false,
         displayName: \\"travel agent\\",
+        contentOffer: false,
     },
     \\"panda hat\\": {
         file: \\"pandahat\\",
@@ -4297,6 +4462,7 @@ export const costumes = {
         shoe: \\"RGBA(0.000, 0.000, 0.000, 1.000)\\",
         hideHair: false,
         displayName: \\"panda hat\\",
+        contentOffer: false,
     },
     disco: {
         file: \\"afro\\",
@@ -4305,6 +4471,7 @@ export const costumes = {
         shoe: \\"RGBA(1.000, 1.000, 1.000, 1.000)\\",
         hideHair: false,
         displayName: \\"disco\\",
+        contentOffer: false,
     },
     pharaoh: {
         file: \\"pharaoh\\",
@@ -4313,6 +4480,7 @@ export const costumes = {
         shoe: \\"RGBA(1.000, 0.961, 0.408, 1.000)\\",
         hideHair: false,
         displayName: \\"pharaoh\\",
+        contentOffer: false,
     },
     cyborg: {
         file: \\"cyborg\\",
@@ -4321,6 +4489,7 @@ export const costumes = {
         shoe: \\"RGBA(0.784, 0.784, 0.784, 1.000)\\",
         hideHair: true,
         displayName: \\"cyborg\\",
+        contentOffer: false,
     },
     aloha: {
         file: \\"aloha\\",
@@ -4329,6 +4498,7 @@ export const costumes = {
         shoe: \\"RGBA(0.227, 0.227, 0.227, 1.000)\\",
         hideHair: false,
         displayName: \\"aloha\\",
+        contentOffer: false,
     },
     \\"chinese suit\\": {
         file: \\"china\\",
@@ -4337,6 +4507,7 @@ export const costumes = {
         shoe: \\"RGBA(1.000, 0.992, 0.216, 1.000)\\",
         hideHair: false,
         displayName: \\"gold suit\\",
+        contentOffer: false,
     },
     cossack: {
         file: \\"russia\\",
@@ -4345,6 +4516,7 @@ export const costumes = {
         shoe: \\"RGBA(0.129, 0.129, 0.129, 1.000)\\",
         hideHair: false,
         displayName: \\"cossack\\",
+        contentOffer: false,
     },
     fishing: {
         file: \\"fishing\\",
@@ -4353,6 +4525,7 @@ export const costumes = {
         shoe: \\"RGBA(0.129, 0.129, 0.129, 1.000)\\",
         hideHair: false,
         displayName: \\"fishing\\",
+        contentOffer: false,
     },
     farmer: {
         file: \\"farmer\\",
@@ -4361,6 +4534,7 @@ export const costumes = {
         shoe: \\"RGBA(0.129, 0.129, 0.129, 1.000)\\",
         hideHair: false,
         displayName: \\"farmer\\",
+        contentOffer: false,
     },
     \\"blue suit\\": {
         file: \\"bluesuit\\",
@@ -4369,6 +4543,7 @@ export const costumes = {
         shoe: \\"RGBA(0.333, 0.173, 0.000, 1.000)\\",
         hideHair: false,
         displayName: \\"blue suit\\",
+        contentOffer: false,
     },
     \\"red suit\\": {
         file: \\"redsuit\\",
@@ -4377,6 +4552,7 @@ export const costumes = {
         shoe: \\"RGBA(1.000, 1.000, 1.000, 1.000)\\",
         hideHair: false,
         displayName: \\"red suit\\",
+        contentOffer: false,
     },
     \\"black dress\\": {
         file: \\"blackdress\\",
@@ -4385,6 +4561,7 @@ export const costumes = {
         shoe: \\"RGBA(0.129, 0.129, 0.129, 1.000)\\",
         hideHair: false,
         displayName: \\"black dress\\",
+        contentOffer: false,
     },
     \\"gold dress\\": {
         file: \\"golddress\\",
@@ -4393,6 +4570,7 @@ export const costumes = {
         shoe: \\"RGBA(0.129, 0.129, 0.129, 1.000)\\",
         hideHair: false,
         displayName: \\"gold dress\\",
+        contentOffer: false,
     },
     fez: {
         file: \\"fez\\",
@@ -4401,6 +4579,7 @@ export const costumes = {
         shoe: \\"RGBA(0.227, 0.227, 0.227, 1.000)\\",
         hideHair: false,
         displayName: \\"fez\\",
+        contentOffer: false,
     },
     bitman: {
         file: \\"bitman\\",
@@ -4409,6 +4588,7 @@ export const costumes = {
         shoe: \\"RGBA(0.129, 0.129, 0.129, 1.000)\\",
         hideHair: false,
         displayName: \\"bitman\\",
+        contentOffer: false,
     },
     superbit: {
         file: \\"superbit\\",
@@ -4417,6 +4597,7 @@ export const costumes = {
         shoe: \\"RGBA(0.643, 0.000, 0.067, 1.000)\\",
         hideHair: false,
         displayName: \\"superbit\\",
+        contentOffer: false,
     },
     ironbit: {
         file: \\"ironbit\\",
@@ -4425,6 +4606,7 @@ export const costumes = {
         shoe: \\"RGBA(0.569, 0.098, 0.102, 1.000)\\",
         hideHair: true,
         displayName: \\"ironbit\\",
+        contentOffer: false,
     },
     eyepatch: {
         file: \\"eyepatch\\",
@@ -4433,6 +4615,7 @@ export const costumes = {
         shoe: \\"RGBA(0.227, 0.227, 0.227, 1.000)\\",
         hideHair: false,
         displayName: \\"eyepatch\\",
+        contentOffer: false,
     },
     roman: {
         file: \\"roman\\",
@@ -4441,6 +4624,7 @@ export const costumes = {
         shoe: \\"RGBA(0.306, 0.157, 0.000, 1.000)\\",
         hideHair: false,
         displayName: \\"roman\\",
+        contentOffer: false,
     },
     \\"french maid\\": {
         file: \\"frenchmaid\\",
@@ -4449,6 +4633,7 @@ export const costumes = {
         shoe: \\"RGBA(0.227, 0.227, 0.227, 1.000)\\",
         hideHair: false,
         displayName: \\"french maid\\",
+        contentOffer: false,
     },
     snowman: {
         file: \\"snowman\\",
@@ -4457,6 +4642,7 @@ export const costumes = {
         shoe: \\"RGBA(1.000, 1.000, 1.000, 1.000)\\",
         hideHair: false,
         displayName: \\"snowman\\",
+        contentOffer: false,
     },
     hotdog: {
         file: \\"hotdog\\",
@@ -4465,6 +4651,7 @@ export const costumes = {
         shoe: \\"RGBA(0.298, 0.118, 0.047, 1.000)\\",
         hideHair: false,
         displayName: \\"hotdog\\",
+        contentOffer: false,
     },
     \\"captain bit\\": {
         file: \\"captainbit\\",
@@ -4473,6 +4660,7 @@ export const costumes = {
         shoe: \\"RGBA(0.651, 0.000, 0.000, 1.000)\\",
         hideHair: false,
         displayName: \\"captain bit\\",
+        contentOffer: false,
     },
     \\"ice queen\\": {
         file: \\"iceprincess\\",
@@ -4481,6 +4669,7 @@ export const costumes = {
         shoe: \\"RGBA(1.000, 1.000, 1.000, 1.000)\\",
         hideHair: false,
         displayName: \\"ice queen\\",
+        contentOffer: false,
     },
     \\"yellow ranger\\": {
         file: \\"yellowranger\\",
@@ -4489,6 +4678,7 @@ export const costumes = {
         shoe: \\"RGBA(1.000, 1.000, 1.000, 1.000)\\",
         hideHair: true,
         displayName: \\"yellow ranger\\",
+        contentOffer: false,
     },
     \\"blue ranger\\": {
         file: \\"blueranger\\",
@@ -4497,6 +4687,7 @@ export const costumes = {
         shoe: \\"RGBA(1.000, 1.000, 1.000, 1.000)\\",
         hideHair: true,
         displayName: \\"blue ranger\\",
+        contentOffer: false,
     },
     \\"green ranger\\": {
         file: \\"greenranger\\",
@@ -4505,6 +4696,7 @@ export const costumes = {
         shoe: \\"RGBA(1.000, 1.000, 1.000, 1.000)\\",
         hideHair: true,
         displayName: \\"green ranger\\",
+        contentOffer: false,
     },
     \\"red ranger\\": {
         file: \\"redranger\\",
@@ -4513,6 +4705,7 @@ export const costumes = {
         shoe: \\"RGBA(1.000, 1.000, 1.000, 1.000)\\",
         hideHair: true,
         displayName: \\"red ranger\\",
+        contentOffer: false,
     },
     \\"black ranger\\": {
         file: \\"blackranger\\",
@@ -4521,6 +4714,7 @@ export const costumes = {
         shoe: \\"RGBA(1.000, 1.000, 1.000, 1.000)\\",
         hideHair: true,
         displayName: \\"black ranger\\",
+        contentOffer: false,
     },
     \\"red hat\\": {
         file: \\"redhat\\",
@@ -4529,6 +4723,7 @@ export const costumes = {
         shoe: \\"RGBA(0.059, 0.059, 0.059, 1.000)\\",
         hideHair: false,
         displayName: \\"red hat\\",
+        contentOffer: false,
     },
     \\"pink ranger\\": {
         file: \\"pinkranger\\",
@@ -4537,6 +4732,7 @@ export const costumes = {
         shoe: \\"RGBA(1.000, 1.000, 1.000, 1.000)\\",
         hideHair: true,
         displayName: \\"pink ranger\\",
+        contentOffer: false,
     },
     vampire: {
         file: \\"vampire\\",
@@ -4545,6 +4741,7 @@ export const costumes = {
         shoe: \\"RGBA(0.000, 0.000, 0.000, 1.000)\\",
         hideHair: false,
         displayName: \\"vampire\\",
+        contentOffer: false,
     },
     elephant: {
         file: \\"elephant\\",
@@ -4553,6 +4750,7 @@ export const costumes = {
         shoe: \\"RGBA(0.255, 0.322, 0.365, 1.000)\\",
         hideHair: false,
         displayName: \\"elephant\\",
+        contentOffer: false,
     },
     creepy: {
         file: \\"creepy\\",
@@ -4561,6 +4759,7 @@ export const costumes = {
         shoe: \\"RGBA(0.267, 0.522, 0.247, 1.000)\\",
         hideHair: true,
         displayName: \\"creepy\\",
+        contentOffer: false,
     },
     ghosthustler: {
         file: \\"ghosthustler\\",
@@ -4569,6 +4768,7 @@ export const costumes = {
         shoe: \\"RGBA(0.000, 0.000, 0.000, 1.000)\\",
         hideHair: false,
         displayName: \\"ghosthustler\\",
+        contentOffer: false,
     },
     soccer: {
         file: \\"soccer\\",
@@ -4577,6 +4777,7 @@ export const costumes = {
         shoe: \\"RGBA(0.000, 0.000, 0.000, 1.000)\\",
         hideHair: false,
         displayName: \\"soccer\\",
+        contentOffer: false,
     },
     blink: {
         file: \\"blink\\",
@@ -4585,6 +4786,7 @@ export const costumes = {
         shoe: \\"RGBA(0.765, 0.216, 0.024, 1.000)\\",
         hideHair: false,
         displayName: \\"blink\\",
+        contentOffer: false,
     },
     blacksmith: {
         file: \\"blacksmith\\",
@@ -4593,6 +4795,7 @@ export const costumes = {
         shoe: \\"RGBA(0.129, 0.129, 0.129, 1.000)\\",
         hideHair: false,
         displayName: \\"blacksmith\\",
+        contentOffer: false,
     },
     monkey: {
         file: \\"monkey\\",
@@ -4601,6 +4804,7 @@ export const costumes = {
         shoe: \\"RGBA(0.224, 0.133, 0.086, 1.000)\\",
         hideHair: false,
         displayName: \\"monkey\\",
+        contentOffer: false,
     },
     bikachu: {
         file: \\"bikachu\\",
@@ -4609,6 +4813,7 @@ export const costumes = {
         shoe: \\"RGBA(1.000, 0.820, 0.075, 1.000)\\",
         hideHair: false,
         displayName: \\"bikachu\\",
+        contentOffer: false,
     },
     snapdog: {
         file: \\"snapdog\\",
@@ -4617,6 +4822,7 @@ export const costumes = {
         shoe: \\"RGBA(0.227, 0.227, 0.227, 1.000)\\",
         hideHair: false,
         displayName: \\"snapdog\\",
+        contentOffer: false,
     },
     sanitation: {
         file: \\"sanitation\\",
@@ -4625,6 +4831,7 @@ export const costumes = {
         shoe: \\"RGBA(0.129, 0.129, 0.129, 1.000)\\",
         hideHair: false,
         displayName: \\"sanitation\\",
+        contentOffer: false,
     },
     shark: {
         file: \\"shark\\",
@@ -4633,6 +4840,7 @@ export const costumes = {
         shoe: \\"RGBA(0.075, 0.404, 0.631, 1.000)\\",
         hideHair: false,
         displayName: \\"shark\\",
+        contentOffer: false,
     },
     bear: {
         file: \\"bear\\",
@@ -4641,6 +4849,7 @@ export const costumes = {
         shoe: \\"RGBA(0.639, 0.325, 0.169, 1.000)\\",
         hideHair: true,
         displayName: \\"bear\\",
+        contentOffer: false,
     },
     banana: {
         file: \\"banana\\",
@@ -4649,6 +4858,7 @@ export const costumes = {
         shoe: \\"RGBA(0.227, 0.227, 0.227, 1.000)\\",
         hideHair: false,
         displayName: \\"banana\\",
+        contentOffer: false,
     },
     watermelon: {
         file: \\"watermelon\\",
@@ -4657,6 +4867,7 @@ export const costumes = {
         shoe: \\"RGBA(0.227, 0.227, 0.227, 1.000)\\",
         hideHair: false,
         displayName: \\"watermelon\\",
+        contentOffer: false,
     },
     corn: {
         file: \\"corn\\",
@@ -4665,6 +4876,7 @@ export const costumes = {
         shoe: \\"RGBA(1.000, 0.824, 0.000, 1.000)\\",
         hideHair: false,
         displayName: \\"corn\\",
+        contentOffer: false,
     },
     brick: {
         file: \\"brick\\",
@@ -4673,6 +4885,7 @@ export const costumes = {
         shoe: \\"RGBA(0.227, 0.227, 0.227, 1.000)\\",
         hideHair: false,
         displayName: \\"brick\\",
+        contentOffer: false,
     },
     \\"blue egg\\": {
         file: \\"blueegg\\",
@@ -4681,6 +4894,7 @@ export const costumes = {
         shoe: \\"RGBA(0.259, 0.788, 0.831, 1.000)\\",
         hideHair: false,
         displayName: \\"blue egg\\",
+        contentOffer: false,
     },
     \\"yellow egg\\": {
         file: \\"yellowegg\\",
@@ -4689,6 +4903,7 @@ export const costumes = {
         shoe: \\"RGBA(0.976, 0.925, 0.631, 1.000)\\",
         hideHair: false,
         displayName: \\"yellow egg\\",
+        contentOffer: false,
     },
     \\"pink egg\\": {
         file: \\"pinkegg\\",
@@ -4697,6 +4912,7 @@ export const costumes = {
         shoe: \\"RGBA(1.000, 0.627, 0.800, 1.000)\\",
         hideHair: false,
         displayName: \\"pink egg\\",
+        contentOffer: false,
     },
     mask: {
         file: \\"mask\\",
@@ -4705,6 +4921,7 @@ export const costumes = {
         shoe: \\"RGBA(0.129, 0.129, 0.129, 1.000)\\",
         hideHair: false,
         displayName: \\"mask\\",
+        contentOffer: false,
     },
     birthday: {
         file: \\"birthday\\",
@@ -4713,6 +4930,7 @@ export const costumes = {
         shoe: \\"RGBA(0.129, 0.129, 0.129, 1.000)\\",
         hideHair: false,
         displayName: \\"birthday\\",
+        contentOffer: false,
     },
     flower: {
         file: \\"flower\\",
@@ -4721,6 +4939,7 @@ export const costumes = {
         shoe: \\"RGBA(0.200, 0.651, 0.000, 1.000)\\",
         hideHair: false,
         displayName: \\"flower\\",
+        contentOffer: false,
     },
     icecube: {
         file: \\"icecube\\",
@@ -4729,6 +4948,7 @@ export const costumes = {
         shoe: \\"RGBA(0.129, 0.129, 0.129, 1.000)\\",
         hideHair: false,
         displayName: \\"icecube\\",
+        contentOffer: false,
     },
     balloon: {
         file: \\"balloon\\",
@@ -4737,6 +4957,7 @@ export const costumes = {
         shoe: \\"RGBA(0.129, 0.129, 0.129, 1.000)\\",
         hideHair: false,
         displayName: \\"balloon\\",
+        contentOffer: false,
     },
     samurai: {
         file: \\"samurai\\",
@@ -4745,6 +4966,7 @@ export const costumes = {
         shoe: \\"RGBA(0.306, 0.200, 0.129, 1.000)\\",
         hideHair: false,
         displayName: \\"samurai\\",
+        contentOffer: false,
     },
     pizza: {
         file: \\"pizza\\",
@@ -4753,6 +4975,7 @@ export const costumes = {
         shoe: \\"RGBA(0.306, 0.200, 0.129, 1.000)\\",
         hideHair: false,
         displayName: \\"pizza\\",
+        contentOffer: false,
     },
     kangaroo: {
         file: \\"kangaroo\\",
@@ -4761,6 +4984,7 @@ export const costumes = {
         shoe: \\"RGBA(0.298, 0.216, 0.125, 1.000)\\",
         hideHair: false,
         displayName: \\"kangaroo\\",
+        contentOffer: false,
     },
     unicorn: {
         file: \\"unicorn\\",
@@ -4769,6 +4993,7 @@ export const costumes = {
         shoe: \\"RGBA(0.616, 0.329, 0.749, 1.000)\\",
         hideHair: false,
         displayName: \\"unicorn\\",
+        contentOffer: false,
     },
     mummy: {
         file: \\"mummy\\",
@@ -4777,6 +5002,7 @@ export const costumes = {
         shoe: \\"RGBA(0.988, 0.957, 0.816, 1.000)\\",
         hideHair: false,
         displayName: \\"mummy\\",
+        contentOffer: false,
     },
     \\"race driver\\": {
         file: \\"racedriver\\",
@@ -4785,6 +5011,7 @@ export const costumes = {
         shoe: \\"RGBA(0.129, 0.129, 0.129, 1.000)\\",
         hideHair: false,
         displayName: \\"race driver\\",
+        contentOffer: false,
     },
     baby: {
         file: \\"baby\\",
@@ -4793,6 +5020,7 @@ export const costumes = {
         shoe: \\"RGBA(1.000, 1.000, 1.000, 1.000)\\",
         hideHair: false,
         displayName: \\"baby\\",
+        contentOffer: false,
     },
     butterfly: {
         file: \\"butterfly\\",
@@ -4801,6 +5029,7 @@ export const costumes = {
         shoe: \\"RGBA(0.129, 0.129, 0.129, 1.000)\\",
         hideHair: false,
         displayName: \\"butterfly\\",
+        contentOffer: false,
     },
     evilmistress: {
         file: \\"evilmistress\\",
@@ -4809,6 +5038,7 @@ export const costumes = {
         shoe: \\"RGBA(0.129, 0.129, 0.129, 1.000)\\",
         hideHair: false,
         displayName: \\"Malefibit\\",
+        contentOffer: false,
     },
     babyalien: {
         file: \\"babyalien\\",
@@ -4817,6 +5047,7 @@ export const costumes = {
         shoe: \\"RGBA(1.000, 1.000, 1.000, 1.000)\\",
         hideHair: true,
         displayName: \\"baby alien\\",
+        contentOffer: false,
     },
     _parachute: {
         file: \\"_parachute\\",
@@ -4825,6 +5056,7 @@ export const costumes = {
         shoe: \\"RGBA(0.227, 0.227, 0.227, 1.000)\\",
         hideHair: false,
         displayName: \\"red baron\\",
+        contentOffer: false,
     },
 } as const;
 export type Costume = typeof costumes;
@@ -4832,12 +5064,12 @@ export type Costume = typeof costumes;
 `;
 
 exports[`All getter agents should return something and not throw any errors ElevatorAgent should produce data without throwing any errors 1`] = `
-"// TinyTower version: 4.23.1
+"// TinyTower version: 4.24.0
 export const upgradeElevatorCost = (liftSpeed: number) => {
     return liftSpeed * liftSpeed * 100;
 };
 
-export const numberElevators = 30 as const;
+export const numberElevators = 31 as const;
 
 export const elevators = [
     {
@@ -4951,13 +5183,22 @@ export const elevators = [
     { name: \\"Elevator of Freedom\\", buxcost: 1000, yoffset: \\"-13\\", hidden: true },
     { name: \\"Cooling Elevator\\", buxcost: 9999, yoffset: \\"-13\\", yDoorOffset: \\"3\\", hidden: true },
     { name: \\"Ice Cream\\", buxcost: 1000, yoffset: \\"-18\\", holiday: \\"IceCream\\" },
+    {
+        name: \\"Lifeguard\\",
+        buxcost: 9999,
+        yoffset: \\"-16\\",
+        xoffset: \\"-2\\",
+        xDoorOffset: \\"2\\",
+        hidden: true,
+        holiday: \\"SummerEvent\\",
+    },
 ] as const;
 export type Elevator = (typeof elevators)[number];
 "
 `;
 
 exports[`All getter agents should return something and not throw any errors FloorAgent should produce data without throwing any errors 1`] = `
-"// TinyTower version: 4.23.1
+"// TinyTower version: 4.24.0
 export const buildFloorCost = (numFloors: number) => {
     const num1 = numFloors - 1;
     const num2 = Math.max(5000, Math.ceil(num1 * num1 * 500 - (12 - num1) * 9000));
@@ -5678,13 +5919,47 @@ export const floors = [
             { element: \\"floor289_black\\", x: 98, y: 38, ftime: \\"0.125\\" },
         ],
     },
+    {
+        name: \\"Tool Shed Apts.\\",
+        type: FloorType.Residential,
+        contentOffer: true,
+        animations: [{ element: \\"floor290_tool\\", x: 2, y: 42, ftime: \\"0.125\\" }],
+    },
+    {
+        name: \\"Venice Apts.\\",
+        type: FloorType.Residential,
+        contentOffer: true,
+        animations: [{ element: \\"floor291_boat\\", x: 77, y: 48, ftime: \\"0.125\\" }],
+    },
+    {
+        name: \\"Nordic Apts.\\",
+        type: FloorType.Residential,
+        contentOffer: true,
+        animations: [{ element: \\"floor292_fire\\", x: 74, y: 41, ftime: \\"0.125\\" }],
+    },
+    {
+        name: \\"Spaceship Apts.\\",
+        type: FloorType.Residential,
+        contentOffer: true,
+        animations: [{ element: \\"floor293_planets\\", x: 65, y: 48, ftime: \\"0.125\\" }],
+    },
+    { name: \\"Friends Apts.\\", type: FloorType.Residential, contentOffer: true },
+    {
+        name: \\"Forever Frosty Bar\\",
+        type: FloorType.Lobby,
+        buxcost: 9999,
+        hidden: true,
+        character: \\"artmajor\\",
+        fid: 295,
+        animations: [{ element: \\"floor295_iceguy\\", x: 35, y: 46, ftime: \\"0.07\\" }],
+    },
 ] as const;
 export type Floor = (typeof floors)[number];
 "
 `;
 
 exports[`All getter agents should return something and not throw any errors MissionAgent should produce data without throwing any errors 1`] = `
-"// TinyTower version: 4.23.1
+"// TinyTower version: 4.24.0
 import { FloorType } from \\"./floors.js\\";
 
 export enum MissionType {
@@ -8195,132 +8470,15 @@ export type Mission = typeof missions;
 `;
 
 exports[`All getter agents should return something and not throw any errors PetAgent should produce data without throwing any errors 1`] = `
-"// TinyTower version: 4.23.1
-export const pets = {
-    ankylosaurus: { VIP: true, jHeight: \\"2\\", jDist: \\"4\\", jSpeed: \\"0.35\\", jSquish: \\"0.1\\" },
-    bear: { jHeight: \\"2\\", jDist: \\"4\\", jSpeed: \\"0.35\\", jSquish: \\"0.1\\" },
-    beaver: { jHeight: \\"3\\", jDist: \\"4\\", jSpeed: \\"0.35\\" },
-    bee: { VIP: true, hoverY: \\"6\\", jHeight: \\"2\\", jDist: \\"4\\", jSpeed: \\"0.3\\", fTime: \\"0.0325\\" },
-    butterfly_blue: { VIP: true, hoverY: \\"4\\", jHeight: \\"3\\", jDist: \\"3\\", jSpeed: \\"0.4\\", fTime: \\"0.1\\" },
-    cactus: {},
-    cat: {},
-    camel: { jHeight: \\"4\\", jDist: \\"4\\", jSpeed: \\"0.35\\", jSquish: \\"0.1\\" },
-    capybara: {},
-    chicken: { jHeight: \\"2\\", jDist: \\"3\\", jSpeed: \\"0.15\\" },
-    chipmunk: { jHeight: \\"2\\", jDist: \\"5\\", jSpeed: \\"0.1\\" },
-    cockatoo: {},
-    cougar: { jHeight: \\"2\\", jDist: \\"4\\", jSpeed: \\"0.35\\", jSquish: \\"0.1\\" },
-    cow: { jHeight: \\"4\\", jDist: \\"4\\", jSpeed: \\"0.35\\" },
-    coyote: { jHeight: \\"2\\" },
-    crocodile: { jHeight: \\"1\\", jDist: \\"4\\", jSpeed: \\"0.35\\", jSquish: \\"0.1\\" },
-    dino_toy: {},
-    diplodocus: { VIP: true, jHeight: \\"2\\", jDist: \\"4\\", jSpeed: \\"0.35\\", jSquish: \\"0.1\\" },
-    direwolf: { jHeight: \\"2\\", jDist: \\"4\\", jSpeed: \\"0.35\\", jSquish: \\"0.1\\" },
-    dog: {},
-    dragon: { VIP: true, jHeight: \\"2\\", jDist: \\"4\\", jSpeed: \\"0.35\\", jSquish: \\"0.1\\" },
-    eagle: {},
-    echidna: { jHeight: \\"3\\", jDist: \\"4\\", jSpeed: \\"0.35\\" },
-    egg: {},
-    elephant: { jHeight: \\"4\\", jDist: \\"4\\", jSpeed: \\"0.35\\" },
-    elk: {},
-    fox: { jHeight: \\"2\\" },
-    frog: {},
-    giraffe: { jHeight: \\"2\\", jDist: \\"4\\", jSpeed: \\"0.35\\", jSquish: \\"0.1\\" },
-    goat: {},
-    gorilla: { jHeight: \\"2\\", jDist: \\"4\\", jSpeed: \\"0.35\\", jSquish: \\"0.1\\" },
-    griffin: { VIP: true, jSpeed: \\"0.75\\", jHeight: \\"6\\", jDist: \\"6\\", jSquish: \\"0.1\\" },
-    hippo: { jHeight: \\"2\\", jDist: \\"4\\", jSpeed: \\"0.35\\", jSquish: \\"0.1\\" },
-    horse: {},
-    kangaroo: {},
-    koala: { jHeight: \\"2\\", jDist: \\"3\\", jSpeed: \\"0.35\\" },
-    lemur: {},
-    lion: { jHeight: \\"2\\", jDist: \\"4\\", jSpeed: \\"0.35\\", jSquish: \\"0.1\\", static: 1 },
-    mammoth: { VIP: true, jHeight: \\"2\\", jDist: \\"4\\", jSpeed: \\"0.35\\", jSquish: \\"0.1\\" },
-    moose: { jHeight: \\"2\\", jDist: \\"4\\", jSpeed: \\"0.35\\", jSquish: \\"0.1\\" },
-    monkey: {},
-    muskox: { jHeight: \\"2\\", jDist: \\"4\\", jSpeed: \\"0.35\\", jSquish: \\"0.1\\" },
-    opossum: { jHeight: \\"1\\", jDist: \\"3\\", jSpeed: \\"0.1\\" },
-    otter: { jHeight: \\"3\\", jDist: \\"4\\", jSpeed: \\"0.35\\" },
-    owl: {},
-    panda: { jHeight: \\"2\\", jDist: \\"4\\", jSpeed: \\"0.35\\", jSquish: \\"0.1\\" },
-    penguin: { jHeight: \\"1\\", jDist: \\"2\\", jSpeed: \\"0.2\\" },
-    pika: { jHeight: \\"2\\", jDist: \\"5\\", jSpeed: \\"0.1\\" },
-    pig: { jHeight: \\"2\\", jDist: \\"4\\", jSpeed: \\"0.25\\", jSquish: \\"0.1\\" },
-    pigeon: { jHeight: \\"2.5\\", jDist: \\"3\\", jSpeed: \\"0.175\\" },
-    platypus: { jHeight: \\"3\\", jDist: \\"4\\", jSpeed: \\"0.35\\" },
-    polar_bear: { jHeight: \\"2\\", jDist: \\"4\\", jSpeed: \\"0.35\\", jSquish: \\"0.1\\" },
-    rabbit: { jHeight: \\"3.5\\", jDist: \\"5\\", jSpeed: \\"0.175\\" },
-    raccoon: {},
-    rat: { jHeight: \\"1\\", jDist: \\"3\\", jSpeed: \\"0.1\\" },
-    rhino: { jHeight: \\"2\\", jDist: \\"4\\", jSpeed: \\"0.35\\", jSquish: \\"0.1\\" },
-    rock: { canTurnTowardsOwner: true, jHeight: \\"0\\", jSpeed: \\"10\\", jSquish: \\"0\\", jDist: \\"0.001\\" },
-    rover: { jHeight: \\"0\\", jSpeed: \\"0.5\\", jSquish: \\"0.075\\" },
-    robot: { VIP: true, jHeight: \\"0\\", jSpeed: \\"0.5\\", jSquish: \\"0.075\\" },
-    seal: { jHeight: \\"0\\", jDist: \\"4\\", jSpeed: \\"0.35\\", jSquish: \\"0.1\\" },
-    sheep: { jHeight: \\"4\\", jDist: \\"4\\", jSpeed: \\"0.35\\" },
-    skunk: { jHeight: \\"3\\", jDist: \\"4\\", jSpeed: \\"0.35\\" },
-    snake: { jHeight: \\"0\\", jSpeed: \\"1.7\\", jDist: \\"6\\", jSquish: \\"0\\", fTime: \\"0.1\\" },
-    snowman: { VIP: true, jHeight: \\"3\\", jDist: \\"4\\", jSpeed: \\"0.35\\" },
-    spider: { jHeight: \\"2\\", jDist: \\"6\\", jSpeed: \\"0.15\\", jSquish: \\"0.1\\" },
-    squirrel: { jHeight: \\"2\\", jDist: \\"5\\", jSpeed: \\"0.1\\" },
-    stegosaurus: { VIP: true, jHeight: \\"2\\", jDist: \\"4\\", jSpeed: \\"0.35\\", jSquish: \\"0.1\\" },
-    tiger: { jHeight: \\"2\\", jDist: \\"4\\", jSpeed: \\"0.35\\", jSquish: \\"0.1\\" },
-    toucan: {},
-    tribble: {},
-    triceratops: { VIP: true, jHeight: \\"2\\", jDist: \\"4\\", jSpeed: \\"0.35\\", jSquish: \\"0.1\\" },
-    turtle: { jHeight: \\"0\\", jSpeed: \\"0.75\\", jDist: \\"1.5\\", jSquish: \\"0.075\\" },
-    tyrannosaur: { VIP: true, jHeight: \\"2\\", jDist: \\"4\\", jSpeed: \\"0.35\\", jSquish: \\"0.1\\" },
-    unicorn: { VIP: true, jSpeed: \\"0.35\\", jHeight: \\"4\\" },
-    velociraptor: { VIP: true, jHeight: \\"2\\", jDist: \\"5\\", jSpeed: \\"0.3\\", jSquish: \\"0.1\\" },
-    walrus: { jHeight: \\"0\\", jDist: \\"4\\", jSpeed: \\"0.35\\", jSquish: \\"0.1\\" },
-    zebra: {},
-    black_panther: { jHeight: \\"3\\", jDist: \\"4\\", jSpeed: \\"0.3\\", jSquish: \\"0.1\\" },
-    chameleon: { jHeight: \\"0.05\\", jDist: \\"2\\", jSpeed: \\"1\\", jSquish: \\"0.05\\", fTime: \\"0.2\\" },
-    duck: { jHeight: \\"0.25\\", jDist: \\"3\\", jSpeed: \\"0.25\\", jSquish: \\"0.05\\", fTime: \\"0.2\\" },
-    chick: { jHeight: \\"0.1\\", jSpeed: \\"1\\", jSquish: \\"0.1\\", fTime: \\"0.2\\" },
-    chicks: { jSquish: \\"0.1\\", fTime: \\"0.2\\" },
-    lamb: { jHeight: \\"2\\", jDist: \\"4\\", jSquish: \\"0.15\\", fTime: \\"0.2\\" },
-    crow: { jHeight: \\"2.5\\", jDist: \\"5\\", fTime: \\"0.2\\" },
-    iguana: { jHeight: \\"0.025\\", jDist: \\"2\\", jSpeed: \\"1\\", jSquish: \\"0.05\\", fTime: \\"0.2\\" },
-    redpanda: { name: \\"red panda\\", jHeight: \\"0.25\\", jSpeed: \\"0.4\\", jSquish: \\"0.05\\", fTime: \\"0.2\\" },
-    badger: { jHeight: \\"0.05\\", jDist: \\"1.5\\", jSpeed: \\"1\\", jSquish: \\"0.05\\", fTime: \\"0.2\\" },
-    bald_eagle: { jHeight: \\"0.25\\", jDist: \\"3\\", jSpeed: \\"0.25\\", jSquish: \\"0.05\\", fTime: \\"0.2\\" },
-    black_bear: { jHeight: \\"3\\", jDist: \\"4\\", jSpeed: \\"0.3\\", jSquish: \\"0.1\\", fTime: \\"0.2\\" },
-    bluejay: { jHeight: \\"0.1\\", jSpeed: \\"1\\", jSquish: \\"0.1\\", fTime: \\"0.2\\" },
-    rattlesnake: { jHeight: \\"0.1\\", jSpeed: \\"1\\", jSquish: \\"0.1\\", fTime: \\"0.2\\" },
-    sloth: { jHeight: \\"0\\", jSpeed: \\"0.25\\", jDist: \\"2.5\\", jSquish: \\"0\\", fTime: \\"0.3\\" },
-    thylacine: { jHeight: \\"2\\", jDist: \\"4\\", jSpeed: \\"0.35\\", jSquish: \\"0.1\\", fTime: \\"0.2\\" },
-    ant_farm: { canTurnTowardsOwner: true, jHeight: \\"0\\", jSpeed: \\"10\\", jSquish: \\"0\\", jDist: \\"0.001\\", fTime: \\"0.2\\" },
-    crab: { fTime: \\"0.2\\" },
-    octopus: { jHeight: \\"0.025\\", jDist: \\"2\\", jSpeed: \\"1\\", jSquish: \\"0.05\\", fTime: \\"0.2\\" },
-    sponge: { fTime: \\"0.2\\" },
-    ibex: { jHeight: \\"2\\", jDist: \\"4\\", jSpeed: \\"0.35\\", fTime: \\"0.2\\" },
-    porcupine: { jHeight: \\"1\\", jSquish: \\"0.05\\", jDist: \\"5\\", fTime: \\"0.2\\" },
-    bat: { hoverY: \\"13\\", jHeight: \\"3\\", jDist: \\"3\\", jSpeed: \\"0.4\\", fTime: \\"0.1\\" },
-    dog_skeleton: { fTime: \\"0.2\\" },
-    slime: { fTime: \\"0.1\\" },
-    tentacle: { fTime: \\"0.1\\" },
-    artic_fox: { name: \\"arctic fox\\", jHeight: \\"2\\", fTime: \\"0.2\\" },
-    saint_bernard: {},
-    husky: { fTime: \\"0.3\\" },
-    box_pet: { name: \\"gift\\", jHeight: \\"0\\", jSpeed: \\"10\\", jSquish: \\"0\\", jDist: \\"0.001\\", fTime: \\"0.2\\" },
-    elasmotherium: { jHeight: \\"2\\", jDist: \\"4\\", jSpeed: \\"0.35\\", jSquish: \\"0.1\\", fTime: \\"0.2\\" },
-    christmas_rudolph: { name: \\"rudolph\\", jHeight: \\"2\\", jDist: \\"4\\", jSpeed: \\"0.35\\", jSquish: \\"0.1\\", fTime: \\"0.2\\" },
-    lemming: { jHeight: \\"2\\", jDist: \\"5\\", jSpeed: \\"0.1\\", fTime: \\"0.2\\" },
-    snow_leopard: { jHeight: \\"3\\", jDist: \\"4\\", jSpeed: \\"0.3\\", jSquish: \\"0.1\\", fTime: \\"0.2\\" },
-    armadillo: { jHeight: \\"0\\", fTime: \\"0.2\\" },
-    hyena: { fTime: \\"0.2\\" },
-    kiwi: { jHeight: \\"1\\", jSpeed: \\"0.25\\", fTime: \\"0.2\\" },
-    vulture: { fTime: \\"0.2\\" },
-    komodo: { jHeight: \\"0.05\\", jDist: \\"4\\", jSpeed: \\"0.5\\", jSquish: \\"0.05\\", fTime: \\"0.2\\" },
-} as const;
+"// TinyTower version: 4.24.0
+export const pets = {} as const;
 export type Pet = typeof pets;
 "
 `;
 
 exports[`All getter agents should return something and not throw any errors RoofAgent should produce data without throwing any errors 1`] = `
-"// TinyTower version: 4.23.1
-export const numberOfRoofs = 54 as const;
+"// TinyTower version: 4.24.0
+export const numberOfRoofs = 56 as const;
 
 export const roofs = [
     { name: \\"Crane\\", buxcost: 0, fwcolors: [] },
@@ -8689,7 +8847,7 @@ export const roofs = [
         ],
     },
     {
-        name: \\"Tiny Ice Factory\\",
+        name: \\"Bit cream bar\\",
         buxcost: 9999,
         hidden: true,
         fwcolors: [],
@@ -8704,12 +8862,23 @@ export const roofs = [
         ],
     },
     {
-        name: \\"Bit Cream Bar\\",
+        name: \\"Tiny ice factory\\",
         buxcost: 1000,
         holiday: \\"IceCream\\",
         fwcolors: [],
         animations: [{ element: \\"machine\\", x: 1, y: 95, ftime: \\"0.05\\" }],
     },
+    {
+        name: \\"Flyboard Acrobatics\\",
+        buxcost: 9999,
+        hidden: true,
+        fwcolors: [],
+        animations: [
+            { element: \\"surfer\\", x: 55, y: 88, ftime: \\"0.07\\" },
+            { element: \\"boats\\", x: 1, y: 82, ftime: \\"0.14\\" },
+        ],
+    },
+    { name: \\"Dollhouse roof\\", buxcost: 1000, contentOffer: true, fwcolors: [], animations: [] },
 ] as const;
 export type Roof = (typeof roofs)[number];
 "
