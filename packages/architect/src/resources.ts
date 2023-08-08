@@ -2,11 +2,15 @@ import type DockerModem from "docker-modem";
 import type { DockerConnectionOptions } from "./index.js";
 
 import fs from "node:fs";
-import tar from "tar-fs";
-import frida from "frida";
 import path from "node:path";
 import assert from "node:assert";
+
+import tar from "tar-fs";
+import frida from "frida";
+import Debug from "debug";
 import Dockerode from "dockerode";
+
+export type ArchitectResource = Dockerode.Container | Dockerode.Volume | Dockerode.Network;
 
 /**
  * Wrapper around the dockerode container class that stores multiple containers.
@@ -15,34 +19,43 @@ import Dockerode from "dockerode";
  * destroy all the resources that were allocated at once.
  */
 export class ArchitectEmulatorServices {
+    private _logger: Debug.Debugger;
     private _dockerode: Dockerode;
     private _emulatorContainer: Dockerode.Container;
-    private _otherContainers: Array<Dockerode.Container>;
+    private _otherResources: Array<ArchitectResource>;
 
     public constructor(
         dockerode: Dockerode,
+        serviceName: string,
         emulatorContainer: Dockerode.Container,
-        otherContainers: Array<Dockerode.Container> = []
+        otherResources: Array<Dockerode.Container> = []
     ) {
         this._dockerode = dockerode;
         this._emulatorContainer = emulatorContainer;
-        this._otherContainers = otherContainers;
+        this._otherResources = otherResources;
+        this._logger = Debug(`tinyburg:architect:emulator-${serviceName}`);
     }
 
     public getEmulatorContainer(): Dockerode.Container {
         return this._emulatorContainer;
     }
 
-    public getContainers(): Dockerode.Container[] {
-        return [this._emulatorContainer, ...this._otherContainers];
+    public getResources(): ArchitectResource[] {
+        return [this._emulatorContainer, ...this._otherResources];
     }
 
-    public async stop(): Promise<void> {
+    public getContainers(): Dockerode.Container[] {
+        return this.getResources().filter(
+            (resource) => resource instanceof Dockerode.Container
+        ) as Dockerode.Container[];
+    }
+
+    public async stopAll(): Promise<void> {
         await Promise.all(this.getContainers().map((container) => container.stop()));
     }
 
-    public async remove(): Promise<void> {
-        await Promise.all(this.getContainers().map((container) => container.remove()));
+    public async removeAll(): Promise<void> {
+        await Promise.all(this.getResources().map((resource) => resource.remove()));
     }
 
     /**
@@ -76,14 +89,16 @@ export class ArchitectEmulatorServices {
      * @param waitMs - The number of milliseconds to wait between retries
      */
     public waitForContainerToBeHealthy = async (retries: number = 60, waitMs: number = 3000): Promise<void> => {
+        this._logger("Waiting for container to be healthy");
         const inspectResult = await this._emulatorContainer.inspect();
         if (inspectResult.State.Status === "exited") throw new Error("Container exited prematurely");
 
         // Wrap this in a try-catch because we don't want errors to bubble up
         // because there might be the opportunity to recover from these.
         try {
-            if (inspectResult.State.Health?.Status !== "healthy")
+            if (inspectResult.State.Health?.Status !== "healthy") {
                 throw new Error(`Container is not healthy, status=${inspectResult.State.Health?.Status}`);
+            }
         } catch (error: unknown) {
             // If there are retries remaining, wait for the desired timeout and then recurse
             if (retries > 0) {
@@ -100,21 +115,22 @@ export class ArchitectEmulatorServices {
      * Waits for the frida server to be reachable. Will keep retrying until the
      * sever is able to list the running processes on the emulator.
      *
-     * @param fridaAddress - The frida server to inspect
      * @param retries - The maximum number of tries before giving up
      * @param waitMs - The number of milliseconds to wait between retries
      */
-    public waitForFridaToBeReachable = async (
-        fridaAddress: string,
-        retries: number = 60,
-        waitMs: number = 3000
-    ): Promise<void> => {
+    public waitForFridaToBeReachable = async (retries: number = 60, waitMs: number = 3000): Promise<void> => {
+        this._logger("Waiting for frida server to be reachable");
+        const { fridaAddress } = await this.getExposedEmulatorEndpoints();
+
         // Wrap this in a try-catch because we don't want errors to bubble up
         // because there might be the opportunity to recover from these
         try {
             const deviceManager = frida.getDeviceManager();
             const device = await deviceManager.addRemoteDevice(fridaAddress);
-            const processes = await device.enumerateProcesses();
+            const processes = await device.enumerateApplications({
+                identifiers: ["com.nimblebit.tinytower"],
+                scope: frida.Scope.Minimal,
+            });
             if (!processes) throw new Error("Frida server is not reachable");
         } catch (error: unknown) {
             // Remove the remote device on error because it might be in a bad state
@@ -124,7 +140,7 @@ export class ArchitectEmulatorServices {
             // If there are retries remaining, wait for the desired timeout and then recurse
             if (retries > 0) {
                 await new Promise((resolve) => setTimeout(resolve, waitMs));
-                return await this.waitForFridaToBeReachable(fridaAddress, retries - 1, waitMs);
+                return await this.waitForFridaToBeReachable(retries - 1, waitMs);
             }
 
             // Otherwise, throw this error to reject the promise
@@ -133,6 +149,8 @@ export class ArchitectEmulatorServices {
     };
 
     public waitForCpuToBeIdle = async (cpuThreshold = 3, retries = 60, waitMs = 3000): Promise<void> => {
+        this._logger("Waiting for CPU to be idle");
+
         try {
             const statsResult = await this._emulatorContainer.stats({ stream: false });
             const currentCpuStats = statsResult.cpu_stats;
@@ -153,11 +171,10 @@ export class ArchitectEmulatorServices {
         }
     };
 
-    public waitForTinyTowerToBeSpawnable = async (
-        fridaAddress: string,
-        retries: number = 60,
-        waitMs: number = 3000
-    ): Promise<void> => {
+    public waitForTinyTowerToBeSpawnable = async (retries: number = 60, waitMs: number = 3000): Promise<void> => {
+        this._logger("Waiting for Tiny Tower to be spawnable");
+
+        const { fridaAddress } = await this.getExposedEmulatorEndpoints();
         const testScript = `
             rpc.exports = {
                 main: async () => {
@@ -170,7 +187,10 @@ export class ArchitectEmulatorServices {
         try {
             const deviceManager = frida.getDeviceManager();
             const device = await deviceManager.addRemoteDevice(fridaAddress);
-            const applications = await device.enumerateApplications();
+            const applications = await device.enumerateApplications({
+                identifiers: ["com.nimblebit.tinytower"],
+                scope: frida.Scope.Minimal,
+            });
             assert(applications.some((application) => application.identifier === "com.nimblebit.tinytower"));
 
             const pid = await device.spawn("com.nimblebit.tinytower");
@@ -193,7 +213,52 @@ export class ArchitectEmulatorServices {
             // If there are retries remaining, wait for the desired timeout and then recurse
             if (retries > 0) {
                 await new Promise((resolve) => setTimeout(resolve, waitMs));
-                return await this.waitForTinyTowerToBeSpawnable(fridaAddress, retries - 1, waitMs);
+                return await this.waitForTinyTowerToBeSpawnable(retries - 1, waitMs);
+            }
+
+            // Otherwise, throw this error to reject the promise
+            throw error;
+        }
+    };
+
+    public startFridaServer = async (retries: number = 5, waitMs: number = 10_000): Promise<void> => {
+        this._logger("Starting frida server");
+
+        try {
+            const exec = await this._emulatorContainer.exec({
+                AttachStdout: true,
+                AttachStderr: true,
+                Cmd: ["/android/sdk/install-frida-server.sh"],
+            });
+            const execStream = await exec.start({});
+
+            const result = await new Promise<string>((resolve, reject) => {
+                const data: string[] = [];
+                execStream.on("data", (chunk: Buffer) => {
+                    data.push(chunk.toString());
+                    if (data.join("").includes("27043")) {
+                        execStream.removeAllListeners("data");
+                        execStream.removeAllListeners("end");
+                        execStream.removeAllListeners("error");
+                        resolve(data.join(""));
+                    }
+                });
+                execStream.on("end", () => resolve(data.join("")));
+                execStream.on("error", (error) => reject(error));
+            });
+
+            if (result.includes("Cannot read properties of null (reading 'queryIntentActivities')")) {
+                throw new Error("Frida server failed to start: queryIntentActivities bug");
+            } else if (result.includes("adb: device offline")) {
+                throw new Error("Frida server failed to start: device offline");
+            } else if (result.includes("error: closed")) {
+                throw new Error("Frida server failed to start: closed");
+            }
+        } catch (error: unknown) {
+            // If there are retries remaining, wait for the desired timeout and then recurse
+            if (retries > 0) {
+                await new Promise((resolve) => setTimeout(resolve, waitMs));
+                return await this.startFridaServer(retries - 1, waitMs);
             }
 
             // Otherwise, throw this error to reject the promise
@@ -210,10 +275,12 @@ export class ArchitectEmulatorServices {
      * @see https://developer.android.com/tools/adb
      */
     public installApk = async (apk: string): Promise<void> => {
+        this._logger(`Installing apk=${apk}`);
         const tarball = tar.pack(path.dirname(apk), { entries: [path.basename(apk)] });
         await this._emulatorContainer.putArchive(tarball, { path: "/android/apks/" });
         const exec = await this._emulatorContainer.exec({
             AttachStderr: true,
+            AttachStdout: true,
             Cmd: [
                 "/android/sdk/platform-tools/adb",
                 "install",
@@ -226,17 +293,13 @@ export class ArchitectEmulatorServices {
         });
         const execStream = await exec.start({});
         await new Promise<void>((resolve, reject) => {
-            this._dockerode.modem.followProgress(execStream, (error) => (error ? reject(error) : resolve()));
+            execStream.on("data", () => resolve());
+            execStream.on("error", (error) => reject(error));
+            execStream.on("end", () => resolve());
+            execStream.on("close", () => resolve());
         });
-        const { fridaAddress } = await this.getExposedEmulatorEndpoints();
-        await this.waitForTinyTowerToBeSpawnable(fridaAddress);
-    };
-
-    public startFridaServer = async (): Promise<void> => {
-        const exec = await this._emulatorContainer.exec({
-            Cmd: ["/android/sdk/install-frida-server.sh"],
-        });
-        await exec.start({ Detach: true });
+        await new Promise((resolve) => setTimeout(resolve, 5000));
+        await this.waitForTinyTowerToBeSpawnable();
     };
 
     /**
@@ -247,6 +310,7 @@ export class ArchitectEmulatorServices {
      * @see https://stackoverflow.com/questions/4567904/how-to-start-an-application-using-android-adb-tools
      */
     public launchGame = async (): Promise<void> => {
+        this._logger("Launching TinyTower");
         const exec = await this._emulatorContainer.exec({
             Cmd: [
                 "/android/sdk/platform-tools/adb",

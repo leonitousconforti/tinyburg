@@ -29,6 +29,15 @@ interface IArchitectPortBindings {
     "27042/tcp"?: Dockerode.PortBinding[];
 }
 
+interface IWaitForOptions {
+    globalWaitMs?: number;
+    globalRetries?: number;
+    waitForCpuToBeIdle?: { skip?: boolean; waitMs?: number; retries?: number };
+    waitForFridaToStart?: { skip?: boolean; waitMs?: number; retries?: number };
+    waitForFridaToBeReachable?: { skip?: boolean; waitMs?: number; retries?: number };
+    waitForContainerToBeHealthy?: { skip?: boolean; waitMs?: number; retries?: number };
+}
+
 /**
  * Custom Docker options type for dockerode that allows us to specify the ssh
  * agent correctly.
@@ -101,7 +110,7 @@ const buildFreshContainer = async (
 
     logger("Starting container %s", container.id);
     await container.start();
-    return [new ArchitectEmulatorServices(dockerode, container), emulatorDataVolume];
+    return [new ArchitectEmulatorServices(dockerode, containerName, container), emulatorDataVolume];
 };
 
 /**
@@ -134,7 +143,12 @@ const buildFreshContainerWithServices = async (
     const emulatorContainerId = containerInspections.find((container) => container.Config.Image === tag)!.Id;
     const otherServiceContainers = containers.filter((container) => container.id !== emulatorContainerId);
     return [
-        new ArchitectEmulatorServices(dockerode, dockerode.getContainer(emulatorContainerId), otherServiceContainers),
+        new ArchitectEmulatorServices(
+            dockerode,
+            dockerComposeServiceName,
+            dockerode.getContainer(emulatorContainerId),
+            otherServiceContainers
+        ),
         volume,
     ];
 };
@@ -164,28 +178,12 @@ const findExistingContainerOrCreateNew = async (
         const foundContainerVolume = dockerode.getVolume(foundContainerName.replace("/", ""));
         logger("Found container %s, reusing it", foundContainerName);
         return [
-            new ArchitectEmulatorServices(dockerode, foundContainer),
+            new ArchitectEmulatorServices(dockerode, foundContainerName, foundContainer),
             ArchitectDataVolume.createFromExisting(dockerode, foundContainerVolume),
         ];
     }
 
     return buildFreshContainer(dockerode, containerName, architectDataDirectory, portBindings);
-};
-
-const waitForStartingInstanceLock = async (retries = 180, waitMs = 5000): Promise<void> => {
-    try {
-        await new Promise((resolve) => setTimeout(resolve, Math.random() * 1000));
-        await fs.promises.access(new URL("../starting-instance.lock", import.meta.url), fs.constants.F_OK);
-
-        // If there are retries remaining, wait for the desired timeout and then recurse
-        if (retries > 0) {
-            await new Promise((resolve) => setTimeout(resolve, waitMs));
-            return await waitForStartingInstanceLock(retries - 1, waitMs);
-        }
-    } catch {
-        const handle = await fs.promises.open(new URL("../starting-instance.lock", import.meta.url), "w");
-        await handle.close();
-    }
 };
 
 /**
@@ -201,6 +199,7 @@ export const architect = async (options?: {
     emulatorDataDirectory?: fs.PathLike | undefined;
     emulatorContainerName?: string | undefined;
     portBindings?: IArchitectPortBindings | undefined;
+    waitForOptions?: IWaitForOptions | undefined;
 }): Promise<
     {
         emulatorServices: ArchitectEmulatorServices;
@@ -217,7 +216,6 @@ export const architect = async (options?: {
         dockerConnectionOptions.socketPath,
         (dockerode.modem as DockerModem.ConstructorOptions).host || "localhost"
     );
-    await waitForStartingInstanceLock();
 
     const emulatorContainerName = options?.emulatorContainerName;
     const architectDataDirectory = options?.emulatorDataDirectory ?? process.env["ARCHITECT_DATA_DIRECTORY"];
@@ -232,14 +230,34 @@ export const architect = async (options?: {
           )
         : await buildFreshContainer(dockerode, emulatorContainerName, architectDataDirectory, options?.portBindings);
 
-    const emulatorEndpoints = await emulatorServices.getExposedEmulatorEndpoints();
-    await emulatorServices.waitForContainerToBeHealthy();
-    await emulatorServices.waitForCpuToBeIdle();
-    await emulatorServices.startFridaServer();
-    await emulatorServices.waitForFridaToBeReachable(emulatorEndpoints.fridaAddress);
-    logger("Everything is healthy, you can start connecting to it now!");
+    if (!options?.waitForOptions?.waitForContainerToBeHealthy?.skip) {
+        await emulatorServices.waitForContainerToBeHealthy(
+            options?.waitForOptions?.waitForContainerToBeHealthy?.retries || options?.waitForOptions?.globalRetries,
+            options?.waitForOptions?.waitForContainerToBeHealthy?.waitMs || options?.waitForOptions?.globalWaitMs
+        );
+    }
+    if (!options?.waitForOptions?.waitForCpuToBeIdle?.skip) {
+        await emulatorServices.waitForCpuToBeIdle(
+            options?.waitForOptions?.waitForCpuToBeIdle?.retries || options?.waitForOptions?.globalRetries,
+            options?.waitForOptions?.waitForCpuToBeIdle?.waitMs || options?.waitForOptions?.globalWaitMs
+        );
+    }
+    if (!options?.waitForOptions?.waitForFridaToStart?.skip) {
+        await emulatorServices.startFridaServer(
+            options?.waitForOptions?.waitForFridaToStart?.retries || options?.waitForOptions?.globalRetries,
+            options?.waitForOptions?.waitForFridaToStart?.waitMs || options?.waitForOptions?.globalWaitMs
+        );
+    }
+    if (!options?.waitForOptions?.waitForFridaToBeReachable?.skip) {
+        await emulatorServices.waitForFridaToBeReachable(
+            options?.waitForOptions?.waitForFridaToBeReachable?.retries || options?.waitForOptions?.globalRetries,
+            options?.waitForOptions?.waitForFridaToBeReachable?.waitMs || options?.waitForOptions?.globalWaitMs
+        );
+    }
 
-    await fs.promises.rm(new URL("../starting-instance.lock", import.meta.url));
+    logger("Everything is healthy, you can start connecting to it now!");
+    const emulatorEndpoints = await emulatorServices.getExposedEmulatorEndpoints();
+
     return {
         emulatorServices,
         emulatorDataVolume,

@@ -16,8 +16,8 @@ for (let run_index: number = 1; run_index <= TOTAL_RUN_ITERATIONS; run_index++) 
         Array.from({ length: PARALLEL_CONTAINERS_PER_RUN }, () => architect({ reuseExistingContainers: false }))
     );
     await Promise.all(results.map(({ emulatorServices }) => emulatorServices.installApk(apk)));
-    await Promise.all(results.map(({ emulatorServices }) => emulatorServices.stop()));
-    await Promise.all(results.map(({ emulatorServices }) => emulatorServices.remove()));
+    await Promise.all(results.map(({ emulatorServices }) => emulatorServices.stopAll()));
+    await Promise.all(results.map(({ emulatorServices }) => emulatorServices.removeAll()));
     await Promise.all(results.map(({ emulatorDataVolume }) => emulatorDataVolume.remove()));
     console.log(`----------run_index=${run_index}----------`);
 }
