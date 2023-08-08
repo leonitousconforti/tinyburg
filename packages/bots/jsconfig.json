@@ -1,5 +1,0 @@
-{
-    "extends": "@tinyburg/tsconfig-rig/profile/default/config/tsconfig.json",
-    "compilerOptions": { "checkJs": true },
-    "include": ["index.js"]
-}
