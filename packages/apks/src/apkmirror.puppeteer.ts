@@ -16,7 +16,7 @@ export const getApkmirrorLatestDetails = async (): Promise<IPuppeteerDetails> =>
     // Start a browser in headless mode and navigate to the apkmirror page
     const browser = await puppeteer.launch({ headless: "new" });
     const page = await browser.newPage();
-    await page.goto(baseUrl);
+    await page.goto(baseUrl, { waitUntil: "load", timeout: 0 });
 
     // Grab the detail banner for the top/first entry
     const detailBanner = await page.$("#primary > div.listWidget.p-relative > div:nth-child(2) > div.appRow > div");
@@ -71,7 +71,7 @@ export const downloadLatestApkmirrorApk = async (
     // Navigate to the page with the latest version
     const browser = await puppeteer.launch({ headless: "new" });
     const page = await browser.newPage();
-    await page.goto(details.latestDownloadUrl);
+    await page.goto(details.latestDownloadUrl, { waitUntil: "load", timeout: 0 });
 
     // Grab the download apk button
     const downloadButton = await page.$("#file > div.row.d-flex.f-a-start > div.center.f-sm-50 > div > a");
@@ -85,7 +85,7 @@ export const downloadLatestApkmirrorApk = async (
     const pageWithAutomaticDownload: string = await pageWithAutomaticDownloadButtonHref.jsonValue();
 
     // Get the real/override download link
-    await page.goto(pageWithAutomaticDownload);
+    await page.goto(pageWithAutomaticDownload, { waitUntil: "load", timeout: 0 });
     const overrideDownloadButton = await page.$(
         "div.card-with-tabs > div > div > div:nth-child(1) > p:nth-child(3) > span > a"
     );

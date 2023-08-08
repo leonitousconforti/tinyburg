@@ -15,7 +15,7 @@ export const getApkpureLatestDetails = async (): Promise<IPuppeteerDetails> => {
     // Start a browser in headless mode and navigate to the apkmirror page
     const browser = await puppeteer.launch({ headless: "new" });
     const page = await browser.newPage();
-    await page.goto(baseUrl);
+    await page.goto(baseUrl, { waitUntil: "load", timeout: 0 });
 
     // Grab the detail banner
     const detailBanner = await page.$(".detail_banner");
@@ -70,7 +70,7 @@ export const downloadLatestApkpureApk = async (
                 resolve(u);
             });
 
-            page.goto(downloadUrl).catch((error) => {
+            page.goto(downloadUrl, { waitUntil: "load", timeout: 0 }).catch((error) => {
                 // When the error is reported, it means success.
                 if (error.message === "Navigation failed because browser has disconnected!") return;
                 throw error;
