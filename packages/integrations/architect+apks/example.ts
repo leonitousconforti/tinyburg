@@ -10,10 +10,10 @@ import architect from "@tinyburg/architect";
 
 const apk: string = await loadApk("apkpure", "4.24.0");
 const { emulatorServices, emulatorDataVolume } = await architect({
-    reuseExistingContainers: true,
+    reuseExistingContainers: false,
     dockerConnectionOptions: {
         protocol: "ssh",
-        host: "architect.tinyburg.app",
+        host: "skynet.internal.leoconforti.us",
         port: 22,
         username: "root",
         sshOptions: {
@@ -27,6 +27,6 @@ await emulatorServices.installApk(apk);
 const emulatorContainer: Dockerode.Container = emulatorServices.getEmulatorContainer();
 console.log(emulatorContainer.id);
 
-await emulatorServices.stop();
-await emulatorServices.remove();
+await emulatorServices.stopAll();
+await emulatorServices.removeAll();
 await emulatorDataVolume.remove();
