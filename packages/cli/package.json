@@ -21,15 +21,30 @@
     "bin": {
         "TinyTower-cli": "./cli.js"
     },
+    "scripts": {
+        "_phase:build": "heft run --only build -- --clean",
+        "build": "heft build --clean"
+    },
     "dependencies": {
         "@tinyburg/core": "workspace:*",
         "find-up": "~6.3.0",
         "yargs": "~17.7.2"
     },
     "devDependencies": {
+        "@rushstack/eslint-config": "3.3.2",
+        "@rushstack/heft": "0.57.0",
+        "@rushstack/heft-jest-plugin": "0.7.15",
+        "@rushstack/heft-lint-plugin": "~0.1.18",
+        "@rushstack/heft-typescript-plugin": "~0.1.17",
         "@tinyburg/tsconfig-rig": "workspace:*",
         "@types/node": "20.4.2",
-        "@types/yargs": "~17.0.24"
+        "@types/yargs": "~17.0.24",
+        "eslint": "8.45.0",
+        "eslint-config-prettier": "~8.8.0",
+        "eslint-plugin-prettier": "~4.2.1",
+        "eslint-plugin-unicorn": "~47.0.0",
+        "prettier": "~2.8.8",
+        "typescript": "5.1.6"
     },
     "engines": {
         "node": ">=14.16"
