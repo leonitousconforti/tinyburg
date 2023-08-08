@@ -7,7 +7,7 @@
         "build": "prisma generate && prisma db push && next build",
         "dev": "prisma generate && next dev",
         "lint": "next lint",
-        "prisma": "prisma generate",
+        "prisma": "prisma --schema ./db/schema.prisma generate",
         "start": "next start"
     },
     "dependencies": {
