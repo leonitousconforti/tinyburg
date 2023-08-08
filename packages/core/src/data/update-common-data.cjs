@@ -70,7 +70,7 @@ module.exports.runAsync = async () => {
         await fs.writeFile(outputPath, formattedBanner + cleanedSource);
     }
 
-    await emulatorServices.stop();
-    await emulatorServices.remove();
+    await emulatorServices.stopAll();
+    await emulatorServices.removeAll();
     await emulatorDataVolume.remove();
 };

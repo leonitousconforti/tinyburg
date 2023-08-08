@@ -6,7 +6,7 @@
  *
  * With TinyTower version: 4.24.0
  *
- * On: Mon, 07 Aug 2023 06:48:17 GMT
+ * On: Mon, 07 Aug 2023 23:51:41 GMT
  */
 
 export enum BBEventType {

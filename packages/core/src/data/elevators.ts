@@ -6,7 +6,7 @@
  *
  * With TinyTower version: 4.24.0
  *
- * On: Mon, 07 Aug 2023 06:50:07 GMT
+ * On: Mon, 07 Aug 2023 23:53:11 GMT
  */
 
 export const upgradeElevatorCost = (liftSpeed: number) => {
