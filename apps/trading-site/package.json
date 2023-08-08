@@ -4,7 +4,7 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "build": "prisma generate --schema=./db/schema.prisma && prisma db push && next build",
+        "build": "prisma generate --schema=./db/schema.prisma && prisma db push --schema=./db/schema.prisma && next build",
         "dev": "prisma generate --schema=./db/schema.prisma && next dev",
         "lint": "next lint",
         "prisma": "prisma generate --schema=./db/schema.prisma",
