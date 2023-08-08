@@ -34,8 +34,8 @@ describe("All getter agents should return something and not throw any errors", (
     }, INSIGHT_PREP_TIMEOUT_MS);
 
     afterAll(async () => {
-        await emulatorServices.stop();
-        await emulatorServices.remove();
+        await emulatorServices.stopAll();
+        await emulatorServices.removeAll();
         await emulatorDataVolume.remove();
     }, INSIGHT_PREP_TIMEOUT_MS);
 
