@@ -9,7 +9,7 @@ import { sourceImageGuard } from "../parameter-guards/source-image-guard.js";
  * will have the same width and height as the source image, but will have only
  * one channel. The new image format will be grayscale.
  *
- * @param sourceImage
+ * @param sourceImage - Image to convert
  */
 export const grayscaleImage = (sourceImage: Image): Image => {
     sourceImageGuard(sourceImage);

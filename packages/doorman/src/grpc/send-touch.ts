@@ -4,6 +4,7 @@ import type { EmulatorControllerClient } from "@tinyburg/architect/protobuf/emul
 import { Touch_EventExpiration } from "@tinyburg/architect/protobuf/emulator_controller.js";
 
 // Override some of the properties to be required
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type Touch = {
     x: number;
     y: number;
@@ -12,7 +13,7 @@ export type Touch = {
     expiration: Touch_EventExpiration;
 };
 
-export const sendTouches = async (client: EmulatorControllerClient, touches: Touch[]) => {
+export const sendTouches = async (client: EmulatorControllerClient, touches: Touch[]): Promise<void> => {
     const randomIdentifier = Math.floor(Math.random() * 100);
 
     // For every touch event
@@ -33,7 +34,7 @@ export const sendTouches = async (client: EmulatorControllerClient, touches: Tou
 export const click = (
     client: EmulatorControllerClient,
     { x, y, timeout }: { x: number; y: number; timeout?: number }
-) => {
+): Promise<void> => {
     const pressTouch: Touch = {
         x,
         y,

@@ -1,4 +1,5 @@
 /** Stores an image in memory */
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type Image = {
     /** The width of the image */
     width: number;

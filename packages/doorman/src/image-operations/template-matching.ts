@@ -4,6 +4,7 @@ import assert from "node:assert";
 import { ImageType } from "./image.js";
 
 /** A match is comprised of a position and similarity score [0, 1] for a match */
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type Match = {
     position: {
         x: number;
@@ -27,11 +28,11 @@ export const MAX_TEMPLATE_DOMAIN: number = 50 * 50 * 3;
  * Matches a template against a search image using a SAD (sum of absolute
  * differences) measure.
  *
- * @param searchImage
- * @param templateImage
- * @param mask
- * @param wantExact
- * @param orientationOptions
+ * @param searchImage - Todo
+ * @param templateImage - Todo
+ * @param mask - Todo
+ * @param wantExact - Todo
+ * @param orientationOptions - Todo
  * @see https://en.wikipedia.org/wiki/Template_matching#Implementation
  * @see https://docs.opencv.org/4.5.5/de/da9/tutorial_template_matching.html
  * @see https://pyimagesearch.com/2021/03/22/opencv-template-matching-cv2-matchtemplate/

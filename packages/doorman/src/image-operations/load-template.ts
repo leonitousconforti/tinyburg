@@ -55,7 +55,7 @@ export async function loadCharTemplates<T extends Characters[], U extends { [C i
     ...chars: T
 ): Promise<U> {
     // Transforms a character into an array [character, characterTemplateImage]
-    const charTransformer = async (char: T[number]) =>
+    const charTransformer = async (char: T[number]): Promise<[T[number], Image]> =>
         [char, await loadTemplateByName(`char_${char.codePointAt(0)}` as CharacterTemplateName)] as [T[number], Image];
 
     // Maps every char from the parameters to its entry in an object. Since the

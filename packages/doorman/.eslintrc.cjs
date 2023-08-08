@@ -19,5 +19,17 @@ module.exports = {
         ecmaVersion: 2022,
         sourceType: "module",
     },
+    rules: {
+        "@typescript-eslint/no-unused-vars": "off",
+        "@typescript-eslint/naming-convention": "off",
+    },
+    overrides: [
+        {
+            files: ["./templates/*.ts"],
+            rules: {
+                "@rushstack/typedef-var": "off",
+            },
+        },
+    ],
     ignorePatterns: ["dist/"],
 };

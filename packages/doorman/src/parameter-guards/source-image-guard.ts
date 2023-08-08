@@ -2,7 +2,7 @@ import type { Image } from "../image-operations/image.js";
 
 import assert from "node:assert";
 
-export const sourceImageGuard = (sourceImage: Image) => {
+export const sourceImageGuard = (sourceImage: Image): void => {
     assert(Number.isSafeInteger(sourceImage.width), "Image's width must be a safe integer");
     assert(Number.isSafeInteger(sourceImage.height), "Image's height must be a safe integer");
 

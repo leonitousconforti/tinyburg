@@ -9,7 +9,7 @@ export const createEmulatorControllerClient = (
     address: string,
     credentials: ChannelCredentials = ChannelCredentials.createInsecure(),
     options?: ClientOptions
-) => {
+): EmulatorControllerClient => {
     const transport = new GrpcTransport({
         host: address,
         channelCredentials: credentials,

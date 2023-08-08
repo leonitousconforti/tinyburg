@@ -17,8 +17,8 @@ export interface ICropRegion {
  * must be within the bounds of the source image, otherwise an error will be
  * thrown.
  *
- * @param sourceImage The image to crop
- * @param region The region to crop to
+ * @param sourceImage - The image to crop
+ * @param region - The region to crop to
  */
 export const cropImage = (sourceImage: Image, region: ICropRegion): Image => {
     cropRegionGuard(region);

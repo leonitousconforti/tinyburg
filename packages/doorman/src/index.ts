@@ -55,13 +55,13 @@ export class Doorman extends Emittery<
         }
     }
 
-    public addHandlers(...handlers: BaseHandler<unknown>[]) {
+    public addHandlers(...handlers: BaseHandler<unknown>[]): void {
         for (const handler of handlers) {
             this._handlers.add(handler);
         }
     }
 
-    public removeHandlers(...handlerNames: IHandlerName[]) {
+    public removeHandlers(...handlerNames: IHandlerName[]): void {
         for (const handlerName of handlerNames) {
             for (const handler of this._handlers) {
                 if (handler.name === handlerName) {
@@ -71,7 +71,7 @@ export class Doorman extends Emittery<
         }
     }
 
-    public defaultHandlers() {
+    public defaultHandlers(): BaseHandler<unknown>[] {
         return [new BitbookPostHandler(), new ElevatorHandler(), new RestockHandler(StockMode.STOCK_ALL)];
     }
 }

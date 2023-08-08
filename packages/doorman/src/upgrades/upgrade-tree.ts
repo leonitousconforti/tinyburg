@@ -9,7 +9,7 @@ export class UpgradeTree {
         this._currentUpgrade = [];
     }
 
-    public getNext() {
+    public getNext(): IUpgrade[] {
         return this._currentUpgrade;
     }
 

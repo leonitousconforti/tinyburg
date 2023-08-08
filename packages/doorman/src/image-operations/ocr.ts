@@ -1,3 +1,5 @@
+/* eslint-disable @rushstack/typedef-var */
+
 import type { Image } from "./image.js";
 import type { Match } from "./template-matching.js";
 
@@ -66,7 +68,14 @@ export const prepDictionaryToLibrary = (
  * Detects a sequence of characters from the supplied detection library in the
  * source image
  */
-export const detectSequence = (sourceImage: Image, detectionLibrary: DetectionLibrary, templateMatchThreshold = 1) =>
+export const detectSequence = (
+    sourceImage: Image,
+    detectionLibrary: DetectionLibrary,
+    templateMatchThreshold = 1
+): {
+    sequence: string;
+    matches: Match[];
+} =>
     detectionLibrary
         // Map each entry in the detection library to an object with
         // its character and a list of matches found in the source image

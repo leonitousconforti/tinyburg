@@ -43,7 +43,7 @@ export abstract class ClickActionTemplateMatching extends BaseAction {
         template: Image,
         fromScreen?: GameScreen,
         toScreen?: GameScreen,
-        canCache = false
+        canCache: boolean = false
     ) {
         super(emulatorClient, fromScreen, toScreen);
         this._template = template;

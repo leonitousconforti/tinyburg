@@ -11,9 +11,9 @@ import { sourceImageGuard } from "../parameter-guards/source-image-guard.js";
  * on the new number of channels. If the source image only has one channel, an
  * error will be thrown.
  *
- * @param sourceImage The image to drop the channel from
- * @param dropChannel The index of the channel to drop, starting at 0
- * @param newFormat
+ * @param sourceImage - The image to drop the channel from
+ * @param dropChannel - The index of the channel to drop, starting at 0
+ * @param newFormat - The new image format to use
  */
 export const dropChannel = (
     sourceImage: Image,

@@ -14,10 +14,10 @@ import { uint8safeIntegerGuard } from "../parameter-guards/uint8-safe-integer.js
  * specified threshold will be removed. Additionally, the newly masked image can
  * be automatically cropped to its bounding box.
  *
- * @param sourceImage The image to apply the mask to
- * @param mask The mask to apply to the source image
- * @param threshold The threshold to apply the mask at
- * @param crop Should the newly masked image be cropped to its bounding box
+ * @param sourceImage - The image to apply the mask to
+ * @param mask - The mask to apply to the source image
+ * @param threshold - The threshold to apply the mask at
+ * @param crop - Should the newly masked image be cropped to its bounding box
  */
 export const maskImage = (sourceImage: Image, mask: Image, threshold: number, crop = false): Image => {
     sourceImageGuard(mask);

@@ -20,6 +20,8 @@ import { detectSequence, numericalImagesDictionary, prepDictionaryToLibrary } fr
 // 'Notes' are the boxes that appear in the bottom left of the screen.
 // In this case, the red elevator note is called note_ride1
 const note_ride1: Image = await loadTemplateByName("note_ride1");
+
+// eslint-disable-next-line @rushstack/typedef-var
 const continueTemplates = await loadCharTemplates("C", "O", "N", "T", "I", "N", "U", "E", "?");
 
 export class ElevatorHandler extends BaseHandler<ITriggerLocation> {

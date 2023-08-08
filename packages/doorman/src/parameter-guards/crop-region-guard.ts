@@ -2,7 +2,7 @@ import type { ICropRegion } from "../image-operations/crop-image.js";
 
 import assert from "node:assert";
 
-export const cropRegionGuard = (cropRegion: ICropRegion) => {
+export const cropRegionGuard = (cropRegion: ICropRegion): void => {
     assert(Number.isSafeInteger(cropRegion.top), "Crop region's top field is not a safe integer");
     assert(Number.isSafeInteger(cropRegion.left), "Crop region's left field is not a safe integer");
     assert(Number.isSafeInteger(cropRegion.width), "Crop region's width field is not a safe integer");

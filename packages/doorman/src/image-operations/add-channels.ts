@@ -11,11 +11,11 @@ import { sourceImageGuard } from "../parameter-guards/source-image-guard.js";
  * channels. A new image format can be specified, otherwise the format will be
  * generated based on the combined number of channels.
  *
- * @param sourceImage The image to add the channel image to
- * @param channelImage The image with the channels to add
- * @param newFormat
+ * @param sourceImage - The image to add the channel image to
+ * @param channelImage - The image with the channels to add
+ * @param newFormat - The new image format
  */
-export const addChannel = (sourceImage: Image, channelImage: Image, newFormat?: ImageType) => {
+export const addChannel = (sourceImage: Image, channelImage: Image, newFormat?: ImageType): Image => {
     sourceImageGuard(sourceImage);
     sourceImageGuard(channelImage);
     assert(sourceImage.width === channelImage.width, "Source and new channel images must be the same width");

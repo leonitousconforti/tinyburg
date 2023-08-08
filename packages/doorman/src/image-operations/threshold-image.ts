@@ -10,10 +10,10 @@ import { uint8safeIntegerGuard } from "../parameter-guards/uint8-safe-integer.js
  * image will have the same width, height, and number of channels as the source
  * image.
  *
- * @param sourceImage The image to threshold
- * @param threshold The threshold value
+ * @param sourceImage - The image to threshold
+ * @param threshold - The threshold value
  */
-export const thresholdImage = (sourceImage: Image, threshold: number) => {
+export const thresholdImage = (sourceImage: Image, threshold: number): Image => {
     sourceImageGuard(sourceImage);
     uint8safeIntegerGuard(threshold);
     assert(sourceImage.channels === 1);

@@ -1,29 +1,29 @@
-import type { Image } from "../image-operations/image.js";
+// import type { Image } from "../image-operations/image.js";
 
-import Debug from "debug";
-import { BaseHandler } from "../handlers/base-handler.js";
-import { GlobalGameStateHolder } from "../global-game-state.js";
-import { loadTemplateByName } from "../image-operations/load-template.js";
-import { EmulatorControllerClient } from "@tinyburg/architect/protobuf/emulator_controller.client.js";
+// import Debug from "debug";
+// import { BaseHandler } from "../handlers/base-handler.js";
+// import { GlobalGameStateHolder } from "../global-game-state.js";
+// import { loadTemplateByName } from "../image-operations/load-template.js";
+// import { EmulatorControllerClient } from "@tinyburg/architect/protobuf/emulator_controller.client.js";
 
-const debug: Debug.Debugger = Debug("doorman:handlers:build-floor");
+// const debug: Debug.Debugger = Debug("doorman:handlers:build-floor");
 
-const empty_floor: Image = await loadTemplateByName("floor58");
-const build_new_floor: Image = await loadTemplateByName("floor-1");
-const under_construction: Image = await loadTemplateByName("construction");
+// const empty_floor: Image = await loadTemplateByName("floor58");
+// const build_new_floor: Image = await loadTemplateByName("floor-1");
+// const under_construction: Image = await loadTemplateByName("construction");
 
-const category_food: Image = await loadTemplateByName("category_food");
-const category_retail: Image = await loadTemplateByName("category_retail");
-const category_service: Image = await loadTemplateByName("category_service");
-const category_choose_floor: Image = await loadTemplateByName("choose_floor");
-const category_creative: Image = await loadTemplateByName("category_creative");
-const category_recreation: Image = await loadTemplateByName("category_recreation");
-const category_residential: Image = await loadTemplateByName("category_residential");
+// const category_food: Image = await loadTemplateByName("category_food");
+// const category_retail: Image = await loadTemplateByName("category_retail");
+// const category_service: Image = await loadTemplateByName("category_service");
+// const category_choose_floor: Image = await loadTemplateByName("choose_floor");
+// const category_creative: Image = await loadTemplateByName("category_creative");
+// const category_recreation: Image = await loadTemplateByName("category_recreation");
+// const category_residential: Image = await loadTemplateByName("category_residential");
 
-const hud_pop: Image = await loadTemplateByName("hud_pop");
-const hud_stories: Image = await loadTemplateByName("hud_stories");
-const hud_pop_wide: Image = await loadTemplateByName("hud_pop_wide");
-const hud_stories_wide: Image = await loadTemplateByName("hud_stories_wide");
+// const hud_pop: Image = await loadTemplateByName("hud_pop");
+// const hud_stories: Image = await loadTemplateByName("hud_stories");
+// const hud_pop_wide: Image = await loadTemplateByName("hud_pop_wide");
+// const hud_stories_wide: Image = await loadTemplateByName("hud_stories_wide");
 
 export enum WhenBuildNewFloor {
     ASAP = "As soon as possible",

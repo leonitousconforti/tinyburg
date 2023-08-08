@@ -2,7 +2,7 @@ import type { IUpgrade } from "./base-upgrade.js";
 import type { Floor } from "@tinyburg/core/data/floors";
 
 import Debug from "debug";
-import { floors } from "@tinyburg/core/data/floors";
+// import { floors } from "@tinyburg/core/data/floors";
 import { NeedsVersion } from "../decorators/needs-version.js";
 
 const debug: Debug.Debugger = Debug("doorman:upgrades:unlock-lobby");
@@ -18,6 +18,7 @@ export class UnlockLobby implements IUpgrade {
 
     public canAfford(): boolean {
         // return (floors.find(({ name }) => name === this._lobbyToBuy) as Floor).buxcost < 10;
+        console.log(this._lobbyToBuy);
         return false;
     }
 

@@ -4,8 +4,8 @@ import type { Image } from "./image.js";
  * Upscale an image by a given scale factor. The scale factor must be an integer
  * greater than or equal to 1.
  *
- * @param sourceImage The image to upscale
- * @param scale The scaling factor
+ * @param sourceImage - The image to upscale
+ * @param scale - The scaling factor
  */
 export const upscaleImage = (sourceImage: Image, scale: number): Image => {
     if (!Number.isInteger(scale) || scale < 1) {

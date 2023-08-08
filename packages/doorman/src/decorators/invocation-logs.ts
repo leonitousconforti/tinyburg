@@ -8,6 +8,7 @@ interface IExitLogOptions {
     withReturnValue?: boolean;
 }
 
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export const EnterLog = (debug: Debugger, options: IEnterLogOptions = {}) => {
     const { withArguments } = options;
 
@@ -24,6 +25,7 @@ export const EnterLog = (debug: Debugger, options: IEnterLogOptions = {}) => {
     };
 };
 
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export const ExitLog = (debug: Debugger, options: IExitLogOptions = {}) => {
     const { withReturnValue } = options;
 

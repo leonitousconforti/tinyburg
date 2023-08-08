@@ -87,11 +87,11 @@ export class GlobalGameStateHolder {
         };
     }
 
-    public queueGameStateUpdates(...updates: GlobalGameStateUpdate[]) {
+    public queueGameStateUpdates(...updates: GlobalGameStateUpdate[]): void {
         for (const update of updates) this._queuedUpdates.add(update);
     }
 
-    public async updateGlobalGameState(client?: EmulatorControllerClient): Promise<boolean> {
+    public async updateGlobalGameState(_client?: EmulatorControllerClient): Promise<boolean> {
         // Check if there are any updates to perform
         if (this._queuedUpdates.size === 0) {
             return true;
@@ -103,7 +103,7 @@ export class GlobalGameStateHolder {
         return true;
     }
 
-    public setScreen(screen: GameScreen) {
+    public setScreen(screen: GameScreen): void {
         this._screen = screen;
     }
 }

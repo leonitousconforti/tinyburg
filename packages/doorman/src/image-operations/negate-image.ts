@@ -7,7 +7,7 @@ import { sourceImageGuard } from "../parameter-guards/source-image-guard.js";
  * Applies a binary negation to an image. The new image will have the same width
  * and height as the source image.
  *
- * @param sourceImage The image to negate
+ * @param sourceImage - The image to negate
  */
 export const negateImage = (sourceImage: Image): Image => {
     sourceImageGuard(sourceImage);
