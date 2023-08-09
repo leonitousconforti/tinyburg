@@ -3,9 +3,29 @@
     "version": "0.0.1-alpha",
     "private": true,
     "type": "module",
+    "scripts": {
+        "_phase:build": "heft run --only build --"
+    },
     "dependencies": {
         "@tinyburg/cli": "workspace:*",
         "@tinyburg/core": "workspace:*",
         "prompts": "~2.4.2"
+    },
+    "devDependencies": {
+        "@rushstack/eslint-config": "3.3.2",
+        "@rushstack/heft": "0.57.0",
+        "@rushstack/heft-jest-plugin": "0.7.15",
+        "@rushstack/heft-lint-plugin": "~0.1.18",
+        "@rushstack/heft-typescript-plugin": "~0.1.17",
+        "@tinyburg/tsconfig-rig": "workspace:*",
+        "@types/node": "20.4.2",
+        "@types/prompts": "~2.4.4",
+        "@types/yargs": "~17.0.24",
+        "eslint": "8.45.0",
+        "eslint-config-prettier": "~8.8.0",
+        "eslint-plugin-prettier": "~4.2.1",
+        "eslint-plugin-unicorn": "~47.0.0",
+        "prettier": "~2.8.8",
+        "typescript": "5.1.6"
     }
 }

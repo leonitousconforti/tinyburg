@@ -1,19 +1,22 @@
 import type { Image } from "../image-operations/image.js";
-import type { ITriggerLocation } from "./base-handler.js";
+import type { ILocationBasedTrigger } from "./base-handler.js";
 import type { ICropRegion } from "../image-operations/crop-image.js";
 import type { EmulatorControllerClient } from "@tinyburg/architect/protobuf/emulator_controller.client.js";
 
-import { BaseHandler } from "./base-handler.js";
-import { BaseAction } from "../actions/base-action.js";
-import { ImageType } from "../image-operations/image.js";
-import { ClickAction } from "../actions/click-action.js";
 import { getScreenshot } from "../grpc/get-screenshots.js";
+
+import { BaseHandler } from "./base-handler.js";
+import { calculateResourceScale } from "../utils/calculate-resource-scale.js";
+
+import { BaseAction } from "../actions/base-action.js";
+import { ClickAction } from "../actions/click-action.js";
+
+import { ImageType } from "../image-operations/image.js";
 import { cropImage } from "../image-operations/crop-image.js";
 import { negateImage } from "../image-operations/negate-image.js";
 import { dropChannel } from "../image-operations/drop-channel.js";
 import { upscaleImage } from "../image-operations/upscale-image.js";
 import { matchTemplate } from "../image-operations/template-matching.js";
-import { calculateResourceScale } from "../utils/calculate-resource-scale.js";
 import { loadTemplateByName, loadCharTemplates } from "../image-operations/load-template.js";
 import { detectSequence, numericalImagesDictionary, prepDictionaryToLibrary } from "../image-operations/ocr.js";
 
@@ -24,7 +27,7 @@ const note_ride1: Image = await loadTemplateByName("note_ride1");
 // eslint-disable-next-line @rushstack/typedef-var
 const continueTemplates = await loadCharTemplates("C", "O", "N", "T", "I", "N", "U", "E", "?");
 
-export class ElevatorHandler extends BaseHandler<ITriggerLocation> {
+export class ElevatorHandler extends BaseHandler<ILocationBasedTrigger> {
     private _templateTriggerMask: Image;
     private _templateTriggerImage: Image;
 
@@ -35,7 +38,7 @@ export class ElevatorHandler extends BaseHandler<ITriggerLocation> {
         this._templateTriggerMask = negateImage(dropChannelResult.droppedChannelImage);
     }
 
-    public async detectTrigger(screenshot: Image): Promise<ITriggerLocation | undefined> {
+    public async detectTrigger(screenshot: Image): Promise<ILocationBasedTrigger | undefined> {
         // Scale the template image to the proper size based on the source image
         const resourceScale = calculateResourceScale(screenshot.width, screenshot.height);
         const templateTriggerUpscaled = upscaleImage(this._templateTriggerImage, resourceScale);
@@ -63,14 +66,18 @@ export class ElevatorHandler extends BaseHandler<ITriggerLocation> {
     public async generateActionsList(
         emulatorClient: EmulatorControllerClient,
         initialScreenshot: Image,
-        triggerData: ITriggerLocation
+        triggerData: ILocationBasedTrigger
     ): Promise<BaseAction[]> {
         class DriveElevatorAction extends BaseAction {
             public override async do(): Promise<boolean> {
                 const resourceScale = calculateResourceScale(initialScreenshot.width, initialScreenshot.height);
 
                 // Get the numbers library ready for optical character recognition.
-                const numbersLibrary = prepDictionaryToLibrary(numericalImagesDictionary, resourceScale, negateImage);
+                const numbersLibrary = prepDictionaryToLibrary(
+                    numericalImagesDictionary,
+                    resourceScale,
+                    (image: Image) => negateImage(image)
+                );
 
                 // Get a second screenshot with the floor number in it, crop it, and ocr the floor number
                 const secondScreenshot = await getScreenshot(emulatorClient);

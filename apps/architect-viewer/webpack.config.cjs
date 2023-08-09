@@ -31,8 +31,8 @@ function createWebpackConfig({ production }) {
             filename: "[name]_[contenthash].js",
         },
         performance: {
-            maxAssetSize: 250000,
-            maxEntrypointSize: 250000,
+            maxEntrypointSize: 512000,
+            maxAssetSize: 512000,
         },
         devServer: {
             port: 8084,

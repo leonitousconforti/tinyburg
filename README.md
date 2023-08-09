@@ -24,8 +24,7 @@
 
 ## About Tinyburg
 
-Tinyburg is a collection of javascript projects centered around the mobile game TinyTower by Nimblebit. What started as a small idea, wanting to be automatically entered into the raffle every hour, has grown over time into this monorepo. This monorepo is separated into two different folders, the /packages folder and the /apps folder, the difference between them being that projects in the /packages folder are generally public and published to npm whereas projects in the /apps folder are not. Nothing relevant to Tinyburg is in the /common folder, that is just a place where rush (the monorepo tool) stores some data. More documentation for each project can be found on their individual readme
-
+Tinyburg is a collection of javascript projects centered around the mobile game TinyTower by Nimblebit. What started as a small idea, wanting to be automatically entered into the raffle every hour, has grown over time into this monorepo.
 
 The initial desire for creating this library came from wanting to build an application that automatically entered me into the raffle every hour. While I am aware that you could achieve some of the same results by running Tiny Tower on your computer with an emulator like blue stacks and writing a simple script to make your mouse enter the raffle every hour, that really wasn't as exciting/what I really wanted to do. Some notable projects I found on GitHub that take this approach include [Cydia--Script-TinyTowerBot](https://github.com/egold555/Cydia--Script-TinyTowerBot), [TinyClicker](https://github.com/filadog/TinyClicker), [SortTinyTowerWorkers](https://github.com/andagr/SortTinyTowerWorkers), [Tiny-Tower-Bot](https://github.com/CeHaga/Tiny-Tower-Bot), and [tiny-tower-bot](https://github.com/jacdavwill/tiny-tower-bot). I looked pretty hard on GitHub but these 5 projects were the only things I could find that had code pushed to them and were somewhat functioning. Tinyburg, however, is unique because it enables you to do anything you can do on the mobile game and more from anywhere with an internet connection without needing to open the app. Not to mention there are some things that you simply cannot do with just an emulator, mouse scripts, and screen recording/video processing. Tinyburg achieves all this by utilizing the same API that Tiny Tower to make requests to Nimblebit’s servers.
 
@@ -67,28 +66,13 @@ The tinyburg site is in the works. [https://tinyburg.app](https://tinyburg.app) 
 
 ![lots of docs](https://img.shields.io/badge/docs-lots%20of%20them-blueviolet)
 
-Most of the information is documented there, so please try to read them first. If you still can't find the information you are looking for, feel free to open a [discussion](https://github.com/leonitousconforti/tinyburg/discussions) post and try to leave issues to bug reports or other problems.
-
--   [Configuring tinyburg](docs/Configuration.md)
--   [Authentication](docs/Authentication.md)
--   [Using the CLI app](docs/CLI.md)
--   [Implemented game endpoints](docs/Endpoints.md)
--   [Handling save game data](docs/HandlingSaveGameData.md)
--   [Using the auth proxy](docs/AuthProxy.md)
-
-and there are some examples as well to help get you started
-
--   [Authentication example](examples/authenticate_app.js)
--   [Modify your save data](examples/booster_app.js)
--   [Raffle example](examples/raffle_app.js)
--   [Connecting to the auth proxy](examples/connecting-to-auth-proxy_app.js)
--   [Working with gifts and bitizens](examples/auto-gold-bits.js)
+Most of the information is documented in the [/docs](/docs) folder, so please try to read them first. If you still can't find the information you are looking for, feel free to open a [discussion](https://github.com/leonitousconforti/tinyburg/discussions) post and try to leave issues to bug reports or other problems.
 
 ## :bulb: Fun projects you could actually make
 
--   A 'better' discord RaffleBot
+-   A discord RaffleBot
 
-    Ok maybe better is being a little too harsh here. I love the current discord raffle bot, but it is a little simple and you could enhance it with some new features. Why not have the bot be able to query if you are currently entered in the raffle or not.
+    The current raffle bot is a little simple and I feel you could enhance it with some new features. Why not have the bot be able to query if you are currently entered in the raffle or not.
 
 -   A player stats leader board
 

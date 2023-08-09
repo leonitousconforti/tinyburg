@@ -3,7 +3,7 @@ import type { BaseAction } from "../actions/base-action.js";
 
 import { EmulatorControllerClient } from "@tinyburg/architect/protobuf/emulator_controller.client.js";
 
-interface IHandlerNames {
+export interface IHandlerNames {
     RestockDone: "Default Restocking Handler";
     BitbookNote: "Default Bitbook Note Handler";
     ElevatorRider: "Default Elevator Ride Handler";
@@ -11,7 +11,7 @@ interface IHandlerNames {
 export type IHandlerName = IHandlerNames[keyof IHandlerNames];
 
 // A location where a trigger was detected
-export interface ITriggerLocation {
+export interface ILocationBasedTrigger {
     x: number;
     y: number;
 }

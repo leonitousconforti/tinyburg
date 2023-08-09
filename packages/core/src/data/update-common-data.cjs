@@ -23,7 +23,7 @@ const sourceCodeBanner = `/**
 module.exports.runAsync = async () => {
     const { architect } = await import("@tinyburg/architect");
     const { loadApkFromApkpure } = await import("@tinyburg/apks");
-    const { bootstrapAgentOnRemote, GetterAgents } = await import("@tinyburg/insight");
+    const { bootstrapAgentOnRemote, cleanupAgent, GetterAgents } = await import("@tinyburg/insight");
 
     // To know where to put the generated source code
     const AgentOutputFileMap = {
@@ -55,9 +55,10 @@ module.exports.runAsync = async () => {
     await emulatorServices.installApk(apk);
 
     for (const [outputDestination, agent] of Object.entries(AgentOutputFileMap)) {
-        const { runAgentMain } = await bootstrapAgentOnRemote(agent, fridaAddress);
+        const { runAgentMain, ...agentDetails } = await bootstrapAgentOnRemote(agent, fridaAddress);
 
         const result = await runAgentMain();
+        await cleanupAgent(agentDetails);
         const version = result.match(/TinyTower version: ([\d.]+)/gm)?.[0];
         const cleanedSource = result.replaceAll(/\/\/ TinyTower version: ([\d.]+)/gm, "");
 

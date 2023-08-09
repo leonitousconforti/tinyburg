@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import prompts from "prompts";
 import { fork } from "node:child_process";
 import { isValidEmailAddress } from "@tinyburg/core/endpoints/register-email";
@@ -23,6 +25,6 @@ const { playerId, playerEmail } = await prompts(
 );
 
 // Spawn the CLI app
-let env = { DEBUG: "tinyburg:*" };
-let cliArgs = ["-i", playerId, "-e", playerEmail];
-fork("node_modules/.bin/TinyTower-cli", cliArgs, { env });
+const environment = { DEBUG: "tinyburg:*" };
+const cliArguments = ["-i", playerId, "-e", playerEmail];
+fork("node_modules/.bin/TinyTower-cli", cliArguments, { env: environment });

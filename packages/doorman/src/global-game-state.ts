@@ -7,12 +7,12 @@ export interface IGlobalGameState {
     goldTickets: number;
     floors: number;
     bitizens: number;
-    nextFloorCost: number;
     elevatorSpeed: number;
-    upgradeElevatorCost: number;
     gameScreen: GameScreen;
 }
+
 export type GlobalGameStateUpdate = Exclude<keyof IGlobalGameState, "version" | "screen">;
+
 export enum GameScreen {
     Tower,
     Hud,
@@ -25,6 +25,7 @@ export enum GameScreen {
     TechTree,
     Upgrades,
     Mission,
+    Unknown,
 }
 
 export class GlobalGameStateHolder {
@@ -36,7 +37,6 @@ export class GlobalGameStateHolder {
     private _nextFloorCost: number;
     private _elevatorSpeed: number;
     private _upgradeElevatorCost: number;
-    private _queuedUpdates: Set<GlobalGameStateUpdate>;
     private _screen: GameScreen = GameScreen.Tower;
     private readonly _version: string;
 

@@ -9,12 +9,13 @@ dependencies:
   "@commitlint/config-conventional": 17.6.5
 
 packages:
-  /@babel/code-frame/7.22.5:
+  /@babel/code-frame/7.22.10:
     resolution:
-      { integrity: sha512-Xmwn266vad+6DAqEB2A6V/CcZVp62BbwVmcOJc2RPuwih1kw02TjQvWVWlcKGbBPd+8/0V5DEkOcizRGYsspYQ== }
+      { integrity: sha512-/KKIMG4UEL35WmI9OlvMhurwtytjvXoFcGNrOvyG9zIzA8YmPjVtIZUf7b05+TPO7G7/GEmLHDaoCgACHl9hhA== }
     engines: { node: ">=6.9.0" }
     dependencies:
-      "@babel/highlight": 7.22.5
+      "@babel/highlight": 7.22.10
+      chalk: 2.4.2
     dev: false
 
   /@babel/helper-validator-identifier/7.22.5:
@@ -23,9 +24,9 @@ packages:
     engines: { node: ">=6.9.0" }
     dev: false
 
-  /@babel/highlight/7.22.5:
+  /@babel/highlight/7.22.10:
     resolution:
-      { integrity: sha512-BSKlD1hgnedS5XRnGOljZawtag7H1yPfQp0tdNJCHoH6AZ+Pcm9VvkrK59/Yy593Ypg0zMxH2BxD1VPYUQ7UIw== }
+      { integrity: sha512-78aUtVcT7MUscr0K5mIEnkwxPE0MaxkR5RxRwuHaQ+JuU5AmTPhY+do2mdzVTnIJJpyBglql2pehuBIWHug+WQ== }
     engines: { node: ">=6.9.0" }
     dependencies:
       "@babel/helper-validator-identifier": 7.22.5
@@ -128,15 +129,15 @@ packages:
       "@commitlint/execute-rule": 17.4.0
       "@commitlint/resolve-extends": 17.6.7
       "@commitlint/types": 17.4.4
-      "@types/node": 20.4.4
+      "@types/node": 20.4.8
       chalk: 4.1.2
       cosmiconfig: 8.2.0
-      cosmiconfig-typescript-loader: 4.3.0_6jqrcrulstvpxayltcfp6us2nu
+      cosmiconfig-typescript-loader: 4.4.0_mf6jrku2pfvcki7g5sfhik6xi4
       lodash.isplainobject: 4.0.6
       lodash.merge: 4.6.2
       lodash.uniq: 4.5.0
       resolve-from: 5.0.0
-      ts-node: 10.9.1_6e36wiwpbpx74h6pccbhma6nom
+      ts-node: 10.9.1_vjdgkrlpvzy57ywk3l7oo5hswi
       typescript: 5.1.6
     transitivePeerDependencies:
       - "@swc/core"
@@ -270,9 +271,9 @@ packages:
       { integrity: sha512-jhuKLIRrhvCPLqwPcx6INqmKeiA5EWrsCOPhrlFSrbrmU4ZMPjj5Ul/oLCMDO98XRUIwVm78xICz4EPCektzeQ== }
     dev: false
 
-  /@types/node/20.4.4:
+  /@types/node/20.4.8:
     resolution:
-      { integrity: sha512-CukZhumInROvLq3+b5gLev+vgpsIqC2D0deQr/yS1WnxvmYLlJXZpaQrQiseMY+6xusl79E04UjWoqyr+t1/Ew== }
+      { integrity: sha512-0mHckf6D2DiIAzh8fM8f3HQCvMKDpK94YQ0DSVkfWTG9BZleYIWudw9cJxX8oCk9bM+vAkDyujDV6dmKHbvQpg== }
     dev: false
 
   /@types/normalize-package-data/2.4.1:
@@ -472,19 +473,19 @@ packages:
       through2: 4.0.2
     dev: false
 
-  /cosmiconfig-typescript-loader/4.3.0_6jqrcrulstvpxayltcfp6us2nu:
+  /cosmiconfig-typescript-loader/4.4.0_mf6jrku2pfvcki7g5sfhik6xi4:
     resolution:
-      { integrity: sha512-NTxV1MFfZDLPiBMjxbHRwSh5LaLcPMwNdCutmnHJCKoVnlvldPWlllonKwrsRJ5pYZBIBGRWWU2tfvzxgeSW5Q== }
-    engines: { node: ">=12", npm: ">=6" }
+      { integrity: sha512-BabizFdC3wBHhbI4kJh0VkQP9GkBfoHPydD0COMce1nJ1kJAB3F2TmJ/I7diULBKtmEWSwEbuN/KDtgnmUUVmw== }
+    engines: { node: ">=v14.21.3" }
     peerDependencies:
       "@types/node": "*"
       cosmiconfig: ">=7"
       ts-node: ">=10"
-      typescript: ">=3"
+      typescript: ">=4"
     dependencies:
-      "@types/node": 20.4.4
+      "@types/node": 20.4.8
       cosmiconfig: 8.2.0
-      ts-node: 10.9.1_6e36wiwpbpx74h6pccbhma6nom
+      ts-node: 10.9.1_vjdgkrlpvzy57ywk3l7oo5hswi
       typescript: 5.1.6
     dev: false
 
@@ -740,9 +741,9 @@ packages:
       { integrity: sha512-zz06S8t0ozoDXMG+ube26zeCTNXcKIPJZJi8hBrF4idCLms4CG9QtK7qBl1boi5ODzFpjswb5JPmHCbMpjaYzg== }
     dev: false
 
-  /is-core-module/2.12.1:
+  /is-core-module/2.13.0:
     resolution:
-      { integrity: sha512-Q4ZuBAe2FUsKtyQJoQHlvP8OvBERxO3jEmy1I7hcRXcJBGGHFh/aJBswbXuS9sgrDH2QUO8ilkwNPHvHMd8clg== }
+      { integrity: sha512-Z7dk6Qo8pOCp3l4tsX2C5ZVas4V+UxwQodwZhLopL91TX8UyyHEXafPcyoeeWuLrwzHcr3igO78wNLwHJHsMCQ== }
     dependencies:
       has: 1.0.3
     dev: false
@@ -984,7 +985,7 @@ packages:
       { integrity: sha512-/5CMN3T0R4XTj4DcGaexo+roZSdSFW/0AOOTROrjxzCG1wrWXEsGbRKevjlIL+ZDE4sZlJr5ED4YW0yqmkK+eA== }
     dependencies:
       hosted-git-info: 2.8.9
-      resolve: 1.22.2
+      resolve: 1.22.4
       semver: 5.7.2
       validate-npm-package-license: 3.0.4
     dev: false
@@ -995,7 +996,7 @@ packages:
     engines: { node: ">=10" }
     dependencies:
       hosted-git-info: 4.1.0
-      is-core-module: 2.12.1
+      is-core-module: 2.13.0
       semver: 7.5.4
       validate-npm-package-license: 3.0.4
     dev: false
@@ -1067,7 +1068,7 @@ packages:
       { integrity: sha512-ayCKvm/phCGxOkYRSCM82iDwct8/EonSEgCSxWxD7ve6jHggsFl4fZVQBPRNgQoKiuV/odhFrGzQXZwbifC8Rg== }
     engines: { node: ">=8" }
     dependencies:
-      "@babel/code-frame": 7.22.5
+      "@babel/code-frame": 7.22.10
       error-ex: 1.3.2
       json-parse-even-better-errors: 2.3.1
       lines-and-columns: 1.2.4
@@ -1186,12 +1187,12 @@ packages:
       global-dirs: 0.1.1
     dev: false
 
-  /resolve/1.22.2:
+  /resolve/1.22.4:
     resolution:
-      { integrity: sha512-Sb+mjNHOULsBv818T40qSPeRiuWLyaGMa5ewydRLFimneixmVy2zdivRl+AF6jaYPC8ERxGDmFSiqui6SfPd+g== }
+      { integrity: sha512-PXNdCiPqDqeUou+w1C2eTQbNfxKSuMxqTCuvlmmMsk1NWHL5fRrhY6Pl0qEYYc6+QqGClco1Qj8XnjPego4wfg== }
     hasBin: true
     dependencies:
-      is-core-module: 2.12.1
+      is-core-module: 2.13.0
       path-parse: 1.0.7
       supports-preserve-symlinks-flag: 1.0.0
     dev: false
@@ -1362,7 +1363,7 @@ packages:
     engines: { node: ">=8" }
     dev: false
 
-  /ts-node/10.9.1_6e36wiwpbpx74h6pccbhma6nom:
+  /ts-node/10.9.1_vjdgkrlpvzy57ywk3l7oo5hswi:
     resolution:
       { integrity: sha512-NtVysVPkxxrwFGUUxGYhfux8k78pQB3JqYBXlLRZgdGUqTO5wU/UyHop5p70iEbGhB7q5KmiZiU0Y3KlJrScEw== }
     hasBin: true
@@ -1382,7 +1383,7 @@ packages:
       "@tsconfig/node12": 1.0.11
       "@tsconfig/node14": 1.0.3
       "@tsconfig/node16": 1.0.4
-      "@types/node": 20.4.4
+      "@types/node": 20.4.8
       acorn: 8.10.0
       acorn-walk: 8.2.0
       arg: 4.1.3

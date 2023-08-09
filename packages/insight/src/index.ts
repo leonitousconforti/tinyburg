@@ -11,7 +11,9 @@ import type { IMissionAgentExports } from "./shared/mission-agent-exports.js";
 import type { IPetAgentExports } from "./shared/pet-agent-exports.js";
 import type { IRoofAgentExports } from "./shared/roof-agent-exports.js";
 import type { ITargetFpsAgentExports } from "./shared/target-fps-agent-exports.js";
-import type { ITowerCredentialsAgentExports } from "./shared/tower-credentials-agent-exports.js";
+import type { ISetTowerCredentialsAgentExports } from "./shared/tower-credentials-agent-exports.js";
+import type { IGetTowerCredentialsAgentExports } from "./shared/tower-credentials-agent-exports.js";
+import type { IGameStateAgentExports } from "./shared/game-state-exports.js";
 import type { IBadAgentExports } from "./shared/bad-agent-exports.js";
 import type { IGoodAgentExports } from "./shared/good-agent-exports.js";
 
@@ -49,6 +51,14 @@ export const GetterAgents = {
         agentFile: fileURLToPath(new URL("agents/get-roof-data.js", import.meta.url)),
         rpcTypes: {} as unknown as IRoofAgentExports,
     } satisfies IAgent,
+    GetTowerCredentialsAgent: {
+        agentFile: fileURLToPath(new URL("agents/get-tower-credentials.js", import.meta.url)),
+        rpcTypes: {} as unknown as IGetTowerCredentialsAgentExports,
+    } satisfies IAgent,
+    GetGameStateAgent: {
+        agentFile: fileURLToPath(new URL("agents/get-game-state.js", import.meta.url)),
+        rpcTypes: {} as unknown as IGameStateAgentExports,
+    } satisfies IAgent,
 } as const;
 
 // eslint-disable-next-line @rushstack/typedef-var
@@ -59,7 +69,7 @@ export const SetterAgents = {
     } satisfies IAgent,
     SetTowerCredentialsAgent: {
         agentFile: fileURLToPath(new URL("agents/set-tower-credentials.js", import.meta.url)),
-        rpcTypes: {} as unknown as ITowerCredentialsAgentExports,
+        rpcTypes: {} as unknown as ISetTowerCredentialsAgentExports,
     } satisfies IAgent,
 } as const;
 

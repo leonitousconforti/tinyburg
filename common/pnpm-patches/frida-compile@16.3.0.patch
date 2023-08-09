@@ -1,0 +1,13 @@
+diff --git a/dist/compiler.js b/dist/compiler.js
+index 6e285a74103422095ff8a74adf8d135e46757a91..0f1349085f71cd6f5eb2ab3ec4b7152db3a22b53 100644
+--- a/dist/compiler.js
++++ b/dist/compiler.js
+@@ -256,7 +256,7 @@ export function makeDefaultCompilerOptions() {
+         target: ts.ScriptTarget.ES2020,
+         lib: ["lib.es2020.d.ts"],
+         module: ts.ModuleKind.ES2020,
+-        moduleResolution: ts.ModuleResolutionKind.Node16,
++        moduleResolution: ts.ModuleResolutionKind.Node10,
+         allowSyntheticDefaultImports: true,
+         resolveJsonModule: true,
+         allowJs: true,

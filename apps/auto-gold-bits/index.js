@@ -12,12 +12,12 @@ import { parseDataToType, typedDataToBlock } from "@tinyburg/core/modify-save";
 
 // Create the bot
 const bitFarm = tinyburg.fromPlayerId(
-    process.env.BIT_FARM_PLAYER_ID,
-    process.env.BIT_FARM_PLAYER_EMAIL,
-    process.env.BIT_FARM_PLAYER_SS
+    process.env["BIT_FARM_PLAYER_ID"] || "",
+    process.env["BIT_FARM_PLAYER_EMAIL"],
+    process.env["BIT_FARM_PLAYER_SS"]
 );
 bitFarm.config.proxy.useProxy = true;
-bitFarm.config.proxy.api_key = process.env.TINYBURG_AUTHPROXY_API_KEY;
+bitFarm.config.proxy.api_key = process.env["TINYBURG_AUTHPROXY_API_KEY"];
 
 async function processGifts() {
     // Get all the bitizens sent to this account
@@ -38,7 +38,7 @@ async function processGifts() {
         // certainly able to handle it, but I like to acknowledge that it is
         // here and remove it anyways as a reminder to put it back before we
         // send the bit.
-        const bitizenString = bitizenGift.gift_str.replace(/^bit:/gim, "");
+        const bitizenString = bitizenGift.gift_str.replaceAll(/^bit:/gim, "");
 
         // Parse the bitizen to the correct type for easier manipulation,
         // YAY for typings and generic functions!
@@ -56,9 +56,10 @@ async function processGifts() {
         // want the friend meta data because it will tell us if they are
         // requesting a particular floor so we can set the dream job index
         // automatically
-        const friendMeta = await bitFarm.pullFriendMeta({ friendId: bitizenGift.gift_from });
-        if (friendMeta.meta[bitizenGift.gift_from].reqFID !== -1) {
-            bitizen.dreamJobIndex = friendMeta.meta[bitizenGift.gift_from].reqFID;
+        const friend = await bitFarm.pullFriendMeta({ friendId: bitizenGift.gift_from });
+        const fridaMeta = friend.meta[bitizenGift.gift_from];
+        if (fridaMeta && fridaMeta.reqFID !== -1) {
+            bitizen.dreamJobIndex = fridaMeta.reqFID;
         }
 
         // There are a number of transformations we need to perform before we
@@ -80,6 +81,6 @@ async function processGifts() {
 }
 
 // Schedule the process gifts function
-let processGiftsIntervalMinutes = Number.parseInt(process.env.PROCESS_GIFTS_INTERVAL_MINUTES) || 5;
+let processGiftsIntervalMinutes = Number.parseInt(process.env["PROCESS_GIFTS_INTERVAL_MINUTES"] || "5");
 setInterval(processGifts, 1000 * 60 * processGiftsIntervalMinutes);
 bitFarm.logger.info("Auto gold bit farm is running! Will process bits every %d mins", processGiftsIntervalMinutes);

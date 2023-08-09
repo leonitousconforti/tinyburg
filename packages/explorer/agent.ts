@@ -1,4 +1,4 @@
-import { TinyTowerFridaAgent } from "@tinyburg/insight/agents/base-frida-agent";
+import { TinyTowerFridaAgent } from "@tinyburg/insight/dist/src/agents/base-frida-agent";
 
 export class ExplorerAgent extends TinyTowerFridaAgent<ExplorerAgent> {
     public override loadDependencies() {

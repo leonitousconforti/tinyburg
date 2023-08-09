@@ -1,8 +1,8 @@
 {
     "extends": "@tinyburg/tsconfig-rig/profile/default/config/tsconfig.json",
     "compilerOptions": {
-        "types": ["frida-gum"],
-        "moduleResolution": "Node"
+        "checkJs": true,
+        "outDir": "./dist"
     },
-    "include": ["agent.ts"]
+    "include": ["index.js"]
 }

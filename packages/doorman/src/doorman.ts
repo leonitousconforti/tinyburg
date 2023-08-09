@@ -19,14 +19,16 @@ export class Doorman extends Emittery<
         [h in IHandlerName]: BaseAction[];
     }
 > {
-    private _handlers: Set<BaseHandler<unknown>>;
+    private readonly _pollTimer: NodeJS.Timer;
     private readonly _emulatorControllerClient: EmulatorControllerClient;
+
+    private _handlers: Set<BaseHandler<unknown>>;
 
     public constructor(emulatorAddress: string, pollInterval: number) {
         super();
         this._emulatorControllerClient = createEmulatorControllerClient(emulatorAddress);
         this._handlers = new Set();
-        setInterval(this.poll, pollInterval);
+        this._pollTimer = setInterval(this.poll, pollInterval);
 
         this.on("Default Bitbook Note Handler", this.executeActions);
         this.on("Default Elevator Ride Handler", this.executeActions);
@@ -71,7 +73,7 @@ export class Doorman extends Emittery<
         }
     }
 
-    public defaultHandlers(): BaseHandler<unknown>[] {
+    public static defaultHandlers(): BaseHandler<unknown>[] {
         return [new BitbookPostHandler(), new ElevatorHandler(), new RestockHandler(StockMode.STOCK_ALL)];
     }
 }

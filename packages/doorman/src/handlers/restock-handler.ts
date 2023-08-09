@@ -1,14 +1,14 @@
 import type { Image } from "../image-operations/image.js";
-import type { ITriggerLocation } from "./base-handler.js";
+import type { ILocationBasedTrigger } from "./base-handler.js";
 import type { BaseAction } from "../actions/base-action.js";
 import type { EmulatorControllerClient } from "@tinyburg/architect/protobuf/emulator_controller.client.js";
 
 import { BaseHandler } from "./base-handler.js";
-// import { loadTemplateByName } from "../image-operations/load-template.js";
+import { loadTemplateByName } from "../image-operations/load-template.js";
 
-// const note_stock: Image = await loadTemplateByName("note_stock");
-// const button_rushall: Image = await loadTemplateByName("button_rushall");
-// const button_stockall: Image = await loadTemplateByName("button_stockall");
+const note_stock: Image = await loadTemplateByName("note_stock");
+const button_rushall: Image = await loadTemplateByName("button_rushall");
+const button_stockall: Image = await loadTemplateByName("button_stockall");
 
 export enum StockMode {
     INDIVIDUAL,
@@ -16,7 +16,7 @@ export enum StockMode {
     RUSH_ALL,
 }
 
-export class RestockHandler extends BaseHandler<ITriggerLocation | undefined> {
+export class RestockHandler extends BaseHandler<ILocationBasedTrigger | undefined> {
     private _stockingMode: StockMode;
 
     public constructor(stockingMode: StockMode) {
@@ -24,7 +24,7 @@ export class RestockHandler extends BaseHandler<ITriggerLocation | undefined> {
         this._stockingMode = stockingMode;
     }
 
-    public async detectTrigger(_screenshot: Image): Promise<ITriggerLocation | undefined> {
+    public async detectTrigger(_screenshot: Image): Promise<ILocationBasedTrigger | undefined> {
         console.log(this._stockingMode);
         throw new Error("Method not implemented.");
     }
@@ -32,7 +32,7 @@ export class RestockHandler extends BaseHandler<ITriggerLocation | undefined> {
     public generateActionsList(
         _client: EmulatorControllerClient,
         _initialScreenshot: Image,
-        _triggerData: ITriggerLocation | undefined
+        _triggerData: ILocationBasedTrigger | undefined
     ): Promise<BaseAction[]> {
         throw new Error("Method not implemented.");
     }

@@ -16,14 +16,11 @@
     "license": "MIT",
     "author": "Leo Conforti <leo@leoconforti.us> (https://leoconforti.us)",
     "type": "module",
-    "main": "dist/src/index.js",
-    "files": [
-        "dist/"
-    ],
     "scripts": {
+        "_phase:build": "frida-compile agent.ts --compress --output dist/agent.js --",
         "build": "frida-compile agent.ts --compress --output dist/agent.js",
         "compile": "frida-compile agent.ts --watch --output dist/agent.js",
-        "inject": "frida --host architect02.tinyburg.app:27042 -f com.nimblebit.tinytower --realm emulated --load dist/agent.js"
+        "inject": "frida --host localhost:27042 -f com.nimblebit.tinytower --realm emulated --load dist/agent.js"
     },
     "dependencies": {
         "@tinyburg/insight": "workspace:*",

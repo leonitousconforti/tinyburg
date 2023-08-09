@@ -13,8 +13,9 @@ const getterAgent = {
     rpcTypes: {},
 };
 
-const result1 = await bootstrapAgentOverUsb(getterAgent);
-const data1 = await result1.runAgentMain();
+const { runAgentMain: runAgentMain1, ...agentDetails1 } = await bootstrapAgentOverUsb(getterAgent);
+const data1 = await runAgentMain1();
+await cleanupAgent(agentDetails1);
 console.log(`isMusicEnabled: ${data1.musicEnabled}`);
 
 /** Run the setter agent */
@@ -26,8 +27,9 @@ const setterAgent = {
     rpcTypes: {},
 };
 
-const result2 = await bootstrapAgentOverUsb(setterAgent);
-const data2 = await result2.runAgentMain(!data1.musicEnabled);
+const { runAgentMain: runAgentMain2, ...agentDetails2 } = await bootstrapAgentOverUsb(setterAgent);
+const data2 = await runAgentMain2(!data1.musicEnabled);
+await cleanupAgent(agentDetails2);
 console.log(`isMusicEnabled: ${data2.musicEnabled}`);
 
 /** Run one version of the alert agent */
@@ -39,12 +41,12 @@ const alertAgent1 = {
     rpcTypes: {},
 };
 
-const result3 = await bootstrapAgentOverUsb(alertAgent1);
+const { runAgentMain: runAgentMain3, ...agentDetails3 } = await bootstrapAgentOverUsb(alertAgent1);
 const callback3 = (/** @type {boolean} */ musicStatus) => {
     console.log(`isMusicEnabled: ${musicStatus}`);
-    cleanupAgent(result3).catch((error) => console.error(error));
+    cleanupAgent(agentDetails3).catch((error) => console.error(error));
 };
-await result3.runAgentMain(callback3);
+await runAgentMain3(callback3);
 
 /** Runt the other version of the alert agent */
 const alertAgent2 = {
@@ -55,9 +57,9 @@ const alertAgent2 = {
     rpcTypes: {},
 };
 
-const result4 = await bootstrapAgentOverUsb(alertAgent2);
-const data4 = await result4.runAgentMain();
+const { runAgentMain: runAgentMain4, ...agentDetails4 } = await bootstrapAgentOverUsb(alertAgent2);
+const data4 = await runAgentMain4();
 data4.on("musicStatusChanged", (musicStatus) => {
     console.log(`isMusicEnabled: ${musicStatus}`);
-    cleanupAgent(result4).catch((error) => console.error(error));
+    cleanupAgent(agentDetails4).catch((error) => console.error(error));
 });

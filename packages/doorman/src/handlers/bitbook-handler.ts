@@ -1,28 +1,31 @@
+import Debug from "debug";
+
 import type { Image } from "../image-operations/image.js";
-import type { ITriggerLocation } from "./base-handler.js";
 import type { BaseAction } from "../actions/base-action.js";
+import type { ILocationBasedTrigger } from "./base-handler.js";
 import type { ITemplateMatchingOrientationOptions } from "../image-operations/template-matching.js";
 import type { EmulatorControllerClient } from "@tinyburg/architect/protobuf/emulator_controller.client.js";
 
-import Debug from "debug";
 import { BaseHandler } from "./base-handler.js";
+import { calculateResourceScale } from "../utils/calculate-resource-scale.js";
+
 import { OpenHud } from "../actions/hud/open.js";
 import { CloseHud } from "../actions/hud/close.js";
+import { OpenBitbook } from "../actions/hud/menus/bitbook/open.js";
+import { CloseBitbook } from "../actions/hud/menus/bitbook/close.js";
+
 import { ImageType } from "../image-operations/image.js";
 import { dropChannel } from "../image-operations/drop-channel.js";
 import { negateImage } from "../image-operations/negate-image.js";
-import { OpenBitbook } from "../actions/hud/menus/bitbook/open.js";
 import { upscaleImage } from "../image-operations/upscale-image.js";
-import { CloseBitbook } from "../actions/hud/menus/bitbook/close.js";
 import { matchTemplate } from "../image-operations/template-matching.js";
 import { loadTemplateByName } from "../image-operations/load-template.js";
 import { cropScreenshotToNotes } from "../image-operations/crop-image.js";
-import { calculateResourceScale } from "../utils/calculate-resource-scale.js";
 
 const debug: Debug.Debugger = Debug("doorman:handlers:bitbook");
 const note_bb: Image = await loadTemplateByName("note_bb");
 
-export class BitbookPostHandler extends BaseHandler<ITriggerLocation> {
+export class BitbookPostHandler extends BaseHandler<ILocationBasedTrigger> {
     private readonly _templateNoteMask: Image;
     private readonly _templateNoteImage: Image;
 
@@ -35,7 +38,7 @@ export class BitbookPostHandler extends BaseHandler<ITriggerLocation> {
     }
 
     // Should detect if there is a bitbook note on screen
-    public async detectTrigger(screenshot: Image): Promise<ITriggerLocation | undefined> {
+    public async detectTrigger(screenshot: Image): Promise<ILocationBasedTrigger | undefined> {
         // Upscale the note image and its mask
         const resourceScale = calculateResourceScale(screenshot.width, screenshot.height);
         const maskUpscaled = upscaleImage(this._templateNoteMask, resourceScale);
@@ -60,7 +63,7 @@ export class BitbookPostHandler extends BaseHandler<ITriggerLocation> {
     public async generateActionsList(
         emulatorClient: EmulatorControllerClient,
         _initialScreenshot: Image,
-        _triggerData: ITriggerLocation
+        _triggerData: ILocationBasedTrigger
     ): Promise<BaseAction[]> {
         return [
             new OpenHud(emulatorClient),

@@ -2,7 +2,7 @@ import type { ArchitectDataVolume, ArchitectEmulatorServices } from "@tinyburg/a
 
 import architect from "@tinyburg/architect";
 import loadApk, { LatestVersion } from "@tinyburg/apks";
-import { bootstrapAgentOnRemote, AllAgents } from "../src/index.js";
+import { bootstrapAgentOnRemote, AllAgents, cleanupAgent } from "../src/index.js";
 
 const GoodAgent = AllAgents["GoodAgent"];
 const BadAgent = AllAgents["BadAgent"];
@@ -42,8 +42,9 @@ describe("All getter agents should return something and not throw any errors", (
     it(
         "GoodAgent should produce data without throwing any errors",
         async () => {
-            const { runAgentMain } = await bootstrapAgentOnRemote(GoodAgent, fridaAddress);
+            const { runAgentMain, ...agentDetails } = await bootstrapAgentOnRemote(GoodAgent, fridaAddress);
             const data = await runAgentMain("me");
+            await cleanupAgent(agentDetails);
             expect(data).toEqual([1, "Hello, me"]);
         },
         INSIGHT_TEST_TIMEOUT_MS
@@ -61,8 +62,9 @@ describe("All getter agents should return something and not throw any errors", (
     it(
         "BitbookAgent should produce data without throwing any errors",
         async () => {
-            const { runAgentMain } = await bootstrapAgentOnRemote(BitbookAgent, fridaAddress);
+            const { runAgentMain, ...agentDetails } = await bootstrapAgentOnRemote(BitbookAgent, fridaAddress);
             const data = await runAgentMain();
+            await cleanupAgent(agentDetails);
             expect(data).toMatchSnapshot();
         },
         INSIGHT_TEST_TIMEOUT_MS
@@ -71,8 +73,9 @@ describe("All getter agents should return something and not throw any errors", (
     it(
         "BitizenAgent should produce data without throwing any errors",
         async () => {
-            const { runAgentMain } = await bootstrapAgentOnRemote(BitizenAgent, fridaAddress);
+            const { runAgentMain, ...agentDetails } = await bootstrapAgentOnRemote(BitizenAgent, fridaAddress);
             const data = await runAgentMain();
+            await cleanupAgent(agentDetails);
             expect(data).toMatchSnapshot();
         },
         INSIGHT_TEST_TIMEOUT_MS
@@ -81,8 +84,9 @@ describe("All getter agents should return something and not throw any errors", (
     it(
         "CostumeAgent should produce data without throwing any errors",
         async () => {
-            const { runAgentMain } = await bootstrapAgentOnRemote(CostumeAgent, fridaAddress);
+            const { runAgentMain, ...agentDetails } = await bootstrapAgentOnRemote(CostumeAgent, fridaAddress);
             const data = await runAgentMain();
+            await cleanupAgent(agentDetails);
             expect(data).toMatchSnapshot();
         },
         INSIGHT_TEST_TIMEOUT_MS
@@ -91,8 +95,9 @@ describe("All getter agents should return something and not throw any errors", (
     it(
         "ElevatorAgent should produce data without throwing any errors",
         async () => {
-            const { runAgentMain } = await bootstrapAgentOnRemote(ElevatorAgent, fridaAddress);
+            const { runAgentMain, ...agentDetails } = await bootstrapAgentOnRemote(ElevatorAgent, fridaAddress);
             const data = await runAgentMain();
+            await cleanupAgent(agentDetails);
             expect(data).toMatchSnapshot();
         },
         INSIGHT_TEST_TIMEOUT_MS
@@ -101,8 +106,9 @@ describe("All getter agents should return something and not throw any errors", (
     it(
         "FloorAgent should produce data without throwing any errors",
         async () => {
-            const { runAgentMain } = await bootstrapAgentOnRemote(FloorAgent, fridaAddress);
+            const { runAgentMain, ...agentDetails } = await bootstrapAgentOnRemote(FloorAgent, fridaAddress);
             const data = await runAgentMain();
+            await cleanupAgent(agentDetails);
             expect(data).toMatchSnapshot();
         },
         INSIGHT_TEST_TIMEOUT_MS
@@ -111,8 +117,9 @@ describe("All getter agents should return something and not throw any errors", (
     it(
         "MissionAgent should produce data without throwing any errors",
         async () => {
-            const { runAgentMain } = await bootstrapAgentOnRemote(MissionAgent, fridaAddress);
+            const { runAgentMain, ...agentDetails } = await bootstrapAgentOnRemote(MissionAgent, fridaAddress);
             const data = await runAgentMain();
+            await cleanupAgent(agentDetails);
             expect(data).toMatchSnapshot();
         },
         INSIGHT_TEST_TIMEOUT_MS
@@ -121,8 +128,9 @@ describe("All getter agents should return something and not throw any errors", (
     it(
         "PetAgent should produce data without throwing any errors",
         async () => {
-            const { runAgentMain } = await bootstrapAgentOnRemote(PetAgent, fridaAddress);
+            const { runAgentMain, ...agentDetails } = await bootstrapAgentOnRemote(PetAgent, fridaAddress);
             const data = await runAgentMain();
+            await cleanupAgent(agentDetails);
             expect(data).toMatchSnapshot();
         },
         INSIGHT_TEST_TIMEOUT_MS
@@ -131,8 +139,9 @@ describe("All getter agents should return something and not throw any errors", (
     it(
         "RoofAgent should produce data without throwing any errors",
         async () => {
-            const { runAgentMain } = await bootstrapAgentOnRemote(RoofAgent, fridaAddress);
+            const { runAgentMain, ...agentDetails } = await bootstrapAgentOnRemote(RoofAgent, fridaAddress);
             const data = await runAgentMain();
+            await cleanupAgent(agentDetails);
             expect(data).toMatchSnapshot();
         },
         INSIGHT_TEST_TIMEOUT_MS
