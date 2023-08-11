@@ -32,7 +32,9 @@ jobs:
           tags: tag:ci
 
       - name: Testing Server Online?
-        run: tailscale status
+        run: |
+          tailscale status
+          tailscale ping skynet.internal.leoconforti.us
 
       - name: Start ssh agent
         run: |
