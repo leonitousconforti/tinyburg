@@ -34,7 +34,7 @@ jobs:
       - name: Testing Server Online?
         run: |
           tailscale status
-          # tailscale ping skynet.internal.leoconforti.us
+          tailscale ping skynet.internal.leoconforti.us
 
       - name: Start ssh agent
         run: |
