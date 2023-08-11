@@ -1,5 +1,4 @@
 import type DockerModem from "docker-modem";
-import type { DockerConnectionOptions } from "./index.js";
 
 import path from "node:path";
 import assert from "node:assert";
@@ -319,38 +318,3 @@ export class ArchitectServices {
         await exec.start({ Detach: true });
     };
 }
-
-/**
- * Removes all running and stopped architect containers and networks from the
- * docker host.
- */
-export const cleanUpAllArchitectResources = async (
-    dockerConnectionOptions?: DockerConnectionOptions,
-    removeStopped: boolean = true
-): Promise<void> => {
-    const dockerode: Dockerode = new Dockerode(
-        Object.assign({ socketPath: "/var/run/docker.sock" }, dockerConnectionOptions || {})
-    );
-
-    const allNetworks = await dockerode.listNetworks({ all: removeStopped });
-    const allContainers = await dockerode.listContainers({ all: removeStopped });
-
-    const containerFilter = (container: Dockerode.ContainerInfo): boolean =>
-        container.Image.startsWith("ghcr.io/leonitousconforti/tinyburg/architect_") ||
-        container.Names.some((name) => name.includes("architect-"));
-
-    const allArchitectNetworks = allNetworks
-        .filter((network) => network.Name.includes("architect"))
-        .map((network) => dockerode.getNetwork(network.Id));
-    const allArchitectContainers = allContainers
-        .filter((container) => containerFilter(container))
-        .map((container) => dockerode.getContainer(container.Id));
-    const allRunningArchitectContainers = allContainers
-        .filter((container) => containerFilter(container))
-        .filter((container) => container.State === "running")
-        .map((container) => dockerode.getContainer(container.Id));
-
-    await Promise.all(allRunningArchitectContainers.map((container) => container.stop()));
-    await Promise.all(allArchitectContainers.map((container) => container.remove()));
-    await Promise.all(allArchitectNetworks.map((network) => network.remove()));
-};

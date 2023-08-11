@@ -210,4 +210,3 @@ export const architect = async (options?: {
 
 export default architect;
 export { ArchitectServices } from "./resources.js";
-export { cleanUpAllArchitectResources } from "./resources.js";
