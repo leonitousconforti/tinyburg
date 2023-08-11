@@ -1,11 +1,13 @@
 {
     "extends": "@tinyburg/tsconfig-rig/profile/default/config/tsconfig.json",
     "compilerOptions": {
+        "outDir": "./dist",
         "noEmit": false,
         "sourceMap": true,
         "declaration": true,
-        "outDir": "./dist",
+
+        "checkJs": true,
         "types": ["node", "heft-jest"]
     },
-    "include": ["src/**/*.ts"]
+    "include": ["src/**/*.ts", "src/**/*.cjs"]
 }

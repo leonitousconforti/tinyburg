@@ -1,21 +1,19 @@
+const fs = require("node:fs");
 const path = require("node:path");
 const prettier = require("prettier");
-const fs = require("node:fs/promises");
 
-const checkFileExists = async (path) => {
-    try {
-        await fs.access(path, fs.constants.R_OK | fs.constants.W_OK);
-        return true;
-    } catch {
-        return false;
-    }
-};
+/** @param {string} path */
+const checkFileExists = async (path) =>
+    await fs.promises
+        .access(path, fs.constants.F_OK)
+        .then(() => true)
+        .catch(() => false);
 
 module.exports.runAsync = async () => {
-    const { loadApk } = await import("../dist/index.js");
-    const { LatestVersion } = await import("../dist/latest-version.js");
-    const { getApkpureLatestDetails, downloadLatestApkpureApk } = await import("../dist/apkpure.puppeteer.js");
-    const { getApkmirrorLatestDetails, downloadLatestApkmirrorApk } = await import("../dist/apkmirror.puppeteer.js");
+    const { loadApk } = await import("./index.js");
+    const { LatestVersion } = await import("./latest-version.js");
+    const { getApkpureLatestDetails, downloadLatestApkpureApk } = await import("./apkpure.puppeteer.js");
+    const { getApkmirrorLatestDetails, downloadLatestApkmirrorApk } = await import("./apkmirror.puppeteer.js");
 
     const prettierOptions = {
         parser: "typescript",
@@ -31,7 +29,9 @@ module.exports.runAsync = async () => {
     }
 
     const apks = await Promise.all([
+        // @ts-ignore
         loadApk("apkpure", apkpureLatestDetails.latestVersion),
+        // @ts-ignore
         loadApk("apkmirror", apkmirrorLatestDetails.latestVersion),
     ]);
     const exists = await Promise.all(apks.map((apk) => checkFileExists(apk)));
@@ -49,7 +49,8 @@ module.exports.runAsync = async () => {
     const typescriptExport2 = `export const LatestDetails = [${JSON.stringify(apkpureLatestDetails)}, ${JSON.stringify(
         apkmirrorLatestDetails
     )}] as const;\n`;
-    await fs.writeFile(
+
+    await fs.promises.writeFile(
         path.join(__dirname, "../src/latest-version.ts"),
         prettier.format(
             disableEslintError + typescriptExport1 + "\n" + disableEslintError + typescriptExport2,

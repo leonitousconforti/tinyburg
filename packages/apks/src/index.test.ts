@@ -7,23 +7,18 @@ import { getApkpureLatestDetails } from "./apkpure.puppeteer.js";
 import { getApkmirrorLatestDetails } from "./apkmirror.puppeteer.js";
 import { loadPatchedApk, loadApkFromApkpure, loadApkFromApkmirror, TinyTowerApkSources } from "./index.js";
 
-const checkFileExists = async (path: fs.PathLike): Promise<boolean> => {
-    try {
-        await fs.promises.access(path, fs.constants.F_OK);
-        return true;
-    } catch {
-        return false;
-    }
-};
+const checkFileExists = async (path: fs.PathLike): Promise<boolean> =>
+    await fs.promises
+        .access(path, fs.constants.F_OK)
+        .then(() => true)
+        .catch(() => false);
 
-const checkForApkWithVersionInFolder = async (folder: fs.PathLike, version: string): Promise<boolean> => {
-    try {
-        const files = await fs.promises.readdir(folder);
-        return files.map((apkFileName) => apkFileName.match(/\d+.\d+.\d+/gm)?.[0]).includes(version);
-    } catch {
-        return false;
-    }
-};
+const checkForApkWithVersionInFolder = async (folder: fs.PathLike, version: string): Promise<boolean> =>
+    await fs.promises
+        .readdir(folder)
+        .then((files) => files.map((apkFileName) => apkFileName.match(/\d+.\d+.\d+/gm)?.[0]))
+        .then((versions) => versions.includes(version))
+        .catch(() => false);
 
 describe("Should load all apks from apkmirror", () => {
     for (const version of ApkmirrorVersions) {

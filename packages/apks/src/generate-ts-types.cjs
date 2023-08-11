@@ -1,15 +1,15 @@
+const fs = require("node:fs");
 const path = require("node:path");
-const fs = require("node:fs/promises");
 const prettier = require("prettier");
 
 /**
- * Generates a Typescript version type for the list of apks in a folder
+ * Generates a Typescript version type for the list of apks in a folder.
  *
- * @param {string} source
- * @param {(apk: string) => string} formatFunction
+ * @param {"apkpure" | "apkmirror" | "patched"} source
+ * @param {(apk: string) => string | undefined} formatFunction
  */
-const generateVersion = async (source, formatFunction = (apk) => apk.match(/\d+.\d+.\d+/gm)?.[0] || "unknown") => {
-    const allFiles = await fs.readdir(path.join(__dirname, source));
+const generateVersion = async (source, formatFunction) => {
+    const allFiles = await fs.promises.readdir(path.join(__dirname, "..", "downloads", source));
     const apks = allFiles.filter((file) => file.endsWith(".apk"));
     const formattedApkNames = apks.map((apk) => formatFunction(apk));
 
@@ -28,11 +28,11 @@ const generateVersion = async (source, formatFunction = (apk) => apk.match(/\d+.
         ...(await prettier.resolveConfig(__dirname, { editorconfig: true })),
     };
     const outFile = path.join(__dirname, "..", "src", `${source}.type.ts`);
-    await fs.writeFile(outFile, prettier.format(typescriptSource, prettierOptions));
+    await fs.promises.writeFile(outFile, prettier.format(typescriptSource, prettierOptions));
 };
 
 module.exports.runAsync = async () => {
-    await generateVersion("apkpure");
-    await generateVersion("apkmirror");
     await generateVersion("patched", (apk) => apk.replace(".apk", ""));
+    await generateVersion("apkpure", (apk) => apk.match(/\d+.\d+.\d+/gm)?.[0]);
+    await generateVersion("apkmirror", (apk) => apk.match(/\d+.\d+.\d+/gm)?.[0]);
 };
