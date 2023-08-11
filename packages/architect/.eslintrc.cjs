@@ -19,13 +19,13 @@ module.exports = {
         ecmaVersion: 2022,
         sourceType: "module",
     },
-    // overrides: [
-    //     {
-    //         files: ["./src/index.ts", "./src/resources.ts"],
-    //         rules: {
-    //             "dot-notation": "off",
-    //         },
-    //     },
-    // ],
+    overrides: [
+        {
+            files: ["./src/index.ts"],
+            rules: {
+                "dot-notation": "off",
+            },
+        },
+    ],
     ignorePatterns: ["dist/", "protobuf/"],
 };

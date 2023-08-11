@@ -1,7 +1,6 @@
 import type DockerModem from "docker-modem";
 import type { DockerConnectionOptions } from "./index.js";
 
-import fs from "node:fs";
 import path from "node:path";
 import assert from "node:assert";
 
@@ -23,7 +22,7 @@ export type ArchitectResource =
  * they can all be captured in this class. This allows the user to stop and
  * destroy all the resources that were allocated at once.
  */
-export class ArchitectEmulator {
+export class ArchitectServices {
     private _logger: Debug.Debugger;
     private _dockerode: Dockerode;
     private _emulatorContainer: Dockerode.Container;
@@ -49,18 +48,28 @@ export class ArchitectEmulator {
         return [this._emulatorContainer, ...this._otherResources];
     }
 
-    public getContainers(): Dockerode.Container[] {
+    public getContainerResources(): Dockerode.Container[] {
         return this.getResources().filter(
             (resource) => resource instanceof Dockerode.Container
         ) as Dockerode.Container[];
     }
 
+    public getNonContainerResources(): (Dockerode.Volume | Dockerode.Network | Dockerode.Image | Dockerode.Secret)[] {
+        return this.getResources().filter((resource) => !(resource instanceof Dockerode.Container)) as (
+            | Dockerode.Volume
+            | Dockerode.Network
+            | Dockerode.Image
+            | Dockerode.Secret
+        )[];
+    }
+
     public async stopAll(): Promise<void> {
-        await Promise.all(this.getContainers().map((container) => container.stop()));
+        await Promise.all(this.getContainerResources().map((container) => container.stop()));
     }
 
     public async removeAll(): Promise<void> {
-        await Promise.all(this.getResources().map((resource) => resource.remove()));
+        await Promise.all(this.getContainerResources().map((container) => container.remove()));
+        await Promise.all(this.getNonContainerResources().map((resource) => resource.remove()));
     }
 
     /**
@@ -74,9 +83,9 @@ export class ArchitectEmulator {
         grpcAddress: string;
         fridaAddress: string;
     }> => {
-        const containerHost = (this._dockerode.modem as DockerModem.ConstructorOptions).host || "localhost";
         const inspectResults = await this._emulatorContainer.inspect();
         const containerPortBindings = inspectResults.NetworkSettings.Ports;
+        const containerHost = (this._dockerode.modem as DockerModem.ConstructorOptions).host || "localhost";
         const adbConsoleAddress = `${containerHost}:${containerPortBindings["5554/tcp"]![0]?.HostPort}`;
         const adbAddress = `${containerHost}:${containerPortBindings["5555/tcp"]![0]?.HostPort}`;
         const grpcAddress = `${containerHost}:${containerPortBindings["8554/tcp"]![0]?.HostPort}`;
@@ -93,7 +102,7 @@ export class ArchitectEmulator {
      * @param retries - The maximum number of tries before giving up
      * @param waitMs - The number of milliseconds to wait between retries
      */
-    public waitForContainerToBeHealthy = async (retries: number = 60, waitMs: number = 3000): Promise<void> => {
+    public waitForContainerToBeHealthy = async (retries: number = 20, waitMs: number = 3000): Promise<void> => {
         this._logger("Waiting for container to be healthy");
         const inspectResult = await this._emulatorContainer.inspect();
         if (inspectResult.State.Status === "exited") throw new Error("Container exited prematurely");
@@ -123,7 +132,7 @@ export class ArchitectEmulator {
      * @param retries - The maximum number of tries before giving up
      * @param waitMs - The number of milliseconds to wait between retries
      */
-    public waitForFridaToBeReachable = async (retries: number = 60, waitMs: number = 3000): Promise<void> => {
+    public waitForFridaToBeReachable = async (retries: number = 10, waitMs: number = 3000): Promise<void> => {
         this._logger("Waiting for frida server to be reachable");
         const { fridaAddress } = await this.getExposedEmulatorEndpoints();
 
@@ -153,7 +162,7 @@ export class ArchitectEmulator {
         }
     };
 
-    public waitForTinyTowerToBeSpawnable = async (retries: number = 60, waitMs: number = 3000): Promise<void> => {
+    public waitForTinyTowerToBeSpawnable = async (retries: number = 10, waitMs: number = 3000): Promise<void> => {
         this._logger("Waiting for Tiny Tower to be spawnable");
 
         const { fridaAddress } = await this.getExposedEmulatorEndpoints();
@@ -181,6 +190,7 @@ export class ArchitectEmulator {
 
             await script.load();
             await device.resume(pid);
+            // eslint-disable-next-line dot-notation
             const result = await script.exports["main"]?.();
             assert(result === "Hi, mom!");
 
@@ -203,7 +213,7 @@ export class ArchitectEmulator {
         }
     };
 
-    public startFridaServer = async (retries: number = 5, waitMs: number = 1000): Promise<void> => {
+    public startFridaServer = async (retries: number = 10, waitMs: number = 3000): Promise<void> => {
         this._logger("Starting frida server");
 
         try {
@@ -308,87 +318,6 @@ export class ArchitectEmulator {
         });
         await exec.start({ Detach: true });
     };
-}
-
-/**
- * When a named docker volume is deleted, all the data in that volume is deleted
- * as well which saves on storage space. However, when a bind mount/bind volume
- * is deleted, the data on the host is not deleted with it - and for good
- * reasons! However, this means that we need to manually delete the data on the
- * docker host, which is not ideal if I want to be running lots of containers on
- * the same host. This class is a wrapper around the dockerode volume class that
- * will delete the data on the host when the bind volume is deleted.
- */
-export class ArchitectDataVolume {
-    private _dockerode: Dockerode;
-    private _volume: Dockerode.Volume;
-
-    private constructor(dockerode: Dockerode, volume: Dockerode.Volume) {
-        this._volume = volume;
-        this._dockerode = dockerode;
-    }
-
-    public static createFromExisting(dockerode: Dockerode, volume: Dockerode.Volume): ArchitectDataVolume {
-        return new this(dockerode, volume);
-    }
-
-    public static async createNew(
-        dockerode: Dockerode,
-        containerName: string,
-        architectDataDirectory?: fs.PathLike
-    ): Promise<ArchitectDataVolume> {
-        if (architectDataDirectory) {
-            const hostPathCreationHelperContainer = await dockerode.createContainer({
-                Image: "alpine",
-                Cmd: ["echo"],
-                HostConfig: {
-                    AutoRemove: true,
-                    Binds: [`${path.join(architectDataDirectory.toString(), `${containerName}_emulator_data`)}:/tmp`],
-                },
-            });
-            await hostPathCreationHelperContainer.start();
-        }
-
-        const createVolume = dockerode.createVolume({
-            Name: `${containerName}_emulator_data`,
-            Driver: "local",
-            DriverOpts: architectDataDirectory
-                ? {
-                      o: "bind",
-                      type: "none",
-                      device: path.join(architectDataDirectory.toString(), `${containerName}_emulator_data`),
-                  }
-                : { type: "none" },
-        }) as Promise<unknown> as Promise<Dockerode.Volume>;
-
-        return new this(dockerode, await createVolume);
-    }
-
-    public async inspect(): Promise<Dockerode.VolumeInspectInfo> {
-        return this._volume.inspect();
-    }
-
-    public async remove(): Promise<void> {
-        const inspectResult = await this._volume.inspect();
-        const containerName = inspectResult?.Name!;
-        const architectDataDirectory = inspectResult?.Options?.["device"]?.replace(containerName, "");
-
-        if (inspectResult?.Options?.["o"] === "bind") {
-            const hostPathDeletionContainerHelper = await this._dockerode.createContainer({
-                Image: "alpine",
-                Cmd: ["rm", "-r", `/architect/${containerName}`],
-
-                HostConfig: {
-                    AutoRemove: true,
-                    Binds: [`${architectDataDirectory}:/architect`],
-                },
-            });
-            await hostPathDeletionContainerHelper.start();
-        }
-
-        await this._volume.remove();
-        return;
-    }
 }
 
 /**

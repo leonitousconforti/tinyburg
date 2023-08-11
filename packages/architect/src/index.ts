@@ -3,13 +3,11 @@ dotenv.config({ override: false, path: new URL("../.env", import.meta.url) });
 
 import type DockerModem from "docker-modem";
 
-import fs from "node:fs";
-import url from "node:url";
-
 import tar from "tar-fs";
 import Debug from "debug";
+import url from "node:url";
 import Dockerode from "dockerode";
-import { ArchitectEmulator, ArchitectDataVolume } from "./resources.js";
+import { ArchitectServices } from "./resources.js";
 
 const logger: Debug.Debugger = Debug.debug("tinyburg:architect");
 const tag: string =
@@ -53,16 +51,13 @@ export const generateContainerName = (): string =>
  *
  * @param dockerode - The dockerode instance to use to build the image
  * @param containerName - The name for the emulator container
- * @param architectDataDirectory - Path on the docker host to put emulator files
  * @param portBindings - The port bindings to use for the emulator container
- * @returns The started container and its data volume if one was made
  */
 const buildFreshContainer = async (
     dockerode: Dockerode,
     containerName: string = generateContainerName(),
-    architectDataDirectory?: fs.PathLike,
     portBindings?: IArchitectPortBindings
-): Promise<[emulatorContainer: ArchitectEmulator, emulatorVolume: ArchitectDataVolume]> => {
+): Promise<ArchitectServices> => {
     const context = new URL("../emulator", import.meta.url);
     const tarStream = tar.pack(url.fileURLToPath(context));
     logger("Building docker image from context %s, will tag image as %s when finished", context.toString(), tag);
@@ -86,7 +81,11 @@ const buildFreshContainer = async (
         portBindings || {}
     );
 
-    const emulatorDataVolume = await ArchitectDataVolume.createNew(dockerode, containerName, architectDataDirectory);
+    logger("Creating data volume for emulator data");
+    const emulatorDataVolume = (await dockerode.createVolume({
+        Driver: "local",
+        Name: `${containerName}_emulator_data`,
+    })) as unknown as Dockerode.Volume;
 
     logger("Creating container from image with kvm acceleration enabled");
     const container: Dockerode.Container = await dockerode.createContainer({
@@ -108,21 +107,21 @@ const buildFreshContainer = async (
 
     logger("Starting container %s", container.id);
     await container.start();
-    return [new ArchitectEmulator(dockerode, containerName, container), emulatorDataVolume];
+    return new ArchitectServices(dockerode, containerName, container, [emulatorDataVolume]);
 };
 
 /**
  * Finds an existing container that is already running with the architect image.
  *
  * @param dockerode - The dockerode instance to use to find the container
- * @returns The id of the found container or undefined if none was found
+ * @param containerName - The name of the container to find
+ * @param portBindings - The port bindings to use for the emulator container
  */
 const findExistingContainerOrCreateNew = async (
     dockerode: Dockerode,
     containerName?: string,
-    architectDataDirectory?: fs.PathLike,
     portBindings?: IArchitectPortBindings
-): Promise<[emulatorContainer: ArchitectEmulator, emulatorVolume: ArchitectDataVolume]> => {
+): Promise<ArchitectServices> => {
     logger("Searching for already started container with image %s and container name %s...", tag, containerName);
     const runningContainers = await dockerode.listContainers({ all: true });
     const foundContainerId = runningContainers.find(
@@ -132,21 +131,20 @@ const findExistingContainerOrCreateNew = async (
 
     if (foundContainerId) {
         const foundContainer = dockerode.getContainer(foundContainerId);
-        const { Name: foundContainerName, State } = await foundContainer.inspect();
-        const foundContainerVolume = dockerode.getVolume(foundContainerName.replace("/", ""));
-        logger("Found container %s, reusing it", foundContainerName.replace("/", ""));
+        const { Name: foundContainerName, State: foundContainerState } = await foundContainer.inspect();
+        const foundContainerNameNoSlash = foundContainerName.replace("/", "");
+        const foundContainerVolume = dockerode.getVolume(`${foundContainerNameNoSlash}_emulator_data`);
+        logger("Found container %s, reusing it", foundContainerNameNoSlash);
 
-        if (!State.Running) {
+        if (!foundContainerState.Running) {
             await foundContainer.start();
         }
 
-        return [
-            new ArchitectEmulator(dockerode, foundContainerName.replace("/", ""), foundContainer),
-            ArchitectDataVolume.createFromExisting(dockerode, foundContainerVolume),
-        ];
+        const otherResources = [foundContainerVolume];
+        return new ArchitectServices(dockerode, foundContainerNameNoSlash, foundContainer, otherResources);
     }
 
-    return buildFreshContainer(dockerode, containerName, architectDataDirectory, portBindings);
+    return buildFreshContainer(dockerode, containerName, portBindings);
 };
 
 /**
@@ -158,15 +156,13 @@ const findExistingContainerOrCreateNew = async (
 export const architect = async (options?: {
     reuseExistingContainers?: boolean | undefined;
     dockerConnectionOptions?: DockerConnectionOptions | undefined;
-    emulatorDataDirectory?: fs.PathLike | undefined;
     emulatorContainerName?: string | undefined;
     portBindings?: IArchitectPortBindings | undefined;
     waitForOptions?: IWaitForOptions | undefined;
 }): Promise<
     {
-        emulatorServices: ArchitectEmulator;
-        emulatorDataVolume: ArchitectDataVolume;
-    } & Awaited<ReturnType<InstanceType<typeof ArchitectEmulator>["getExposedEmulatorEndpoints"]>>
+        emulatorServices: ArchitectServices;
+    } & Awaited<ReturnType<InstanceType<typeof ArchitectServices>["getExposedEmulatorEndpoints"]>>
 > => {
     const dockerConnectionOptions = Object.assign(
         { socketPath: "/var/run/docker.sock" },
@@ -180,15 +176,9 @@ export const architect = async (options?: {
     );
 
     const emulatorContainerName = options?.emulatorContainerName;
-    const architectDataDirectory = options?.emulatorDataDirectory ?? process.env["ARCHITECT_DATA_DIRECTORY"];
-    const [emulatorServices, emulatorDataVolume] = options?.reuseExistingContainers
-        ? await findExistingContainerOrCreateNew(
-              dockerode,
-              emulatorContainerName,
-              architectDataDirectory,
-              options?.portBindings
-          )
-        : await buildFreshContainer(dockerode, emulatorContainerName, architectDataDirectory, options?.portBindings);
+    const emulatorServices = options?.reuseExistingContainers
+        ? await findExistingContainerOrCreateNew(dockerode, emulatorContainerName, options?.portBindings)
+        : await buildFreshContainer(dockerode, emulatorContainerName, options?.portBindings);
 
     if (!options?.waitForOptions?.waitForContainerToBeHealthy?.skip) {
         await emulatorServices.waitForContainerToBeHealthy(
@@ -214,12 +204,10 @@ export const architect = async (options?: {
 
     return {
         emulatorServices,
-        emulatorDataVolume,
         ...emulatorEndpoints,
     };
 };
 
 export default architect;
-export { ArchitectDataVolume } from "./resources.js";
-export { ArchitectEmulator } from "./resources.js";
+export { ArchitectServices } from "./resources.js";
 export { cleanUpAllArchitectResources } from "./resources.js";
