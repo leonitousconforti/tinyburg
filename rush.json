@@ -426,6 +426,11 @@
             "shouldPublish": true
         },
         {
+            "packageName": "@tinyburg/bitprints",
+            "projectFolder": "packages/bitprints",
+            "shouldPublish": true
+        },
+        {
             "packageName": "@tinyburg/bots",
             "projectFolder": "packages/bots",
             "shouldPublish": true
