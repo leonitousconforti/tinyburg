@@ -9,7 +9,8 @@
         "noEmit": true,
 
         // https://github.com/tsconfig/bases/blob/main/bases/esm.json
-        "module": "ESNext",
+        // https://github.com/microsoft/TypeScript/issues/50647
+        "module": "NodeNext",
         "verbatimModuleSyntax": true,
 
         // https://github.com/tsconfig/bases/blob/main/bases/node18.json
