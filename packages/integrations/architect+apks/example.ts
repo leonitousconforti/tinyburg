@@ -9,7 +9,7 @@ import architect from "@tinyburg/architect";
 // process.env["DOCKER_HOST"] = "ssh://root@architect02.tinyburg.app:22";
 
 const apk: string = await loadApk("apkpure", "4.24.0");
-const { emulatorServices, emulatorDataVolume } = await architect({
+const { emulatorServices } = await architect({
     reuseExistingContainers: false,
     dockerConnectionOptions: {
         protocol: "ssh",
@@ -29,4 +29,3 @@ console.log(emulatorContainer.id);
 
 await emulatorServices.stopAll();
 await emulatorServices.removeAll();
-await emulatorDataVolume.remove();

@@ -1,4 +1,4 @@
-import type { ArchitectDataVolume, ArchitectEmulatorServices } from "@tinyburg/architect";
+import type { ArchitectServices } from "@tinyburg/architect";
 
 import architect from "@tinyburg/architect";
 import loadApk, { LatestVersion } from "@tinyburg/apks";
@@ -21,8 +21,7 @@ const INSIGHT_PREP_TIMEOUT_MS = Number.parseInt(process.env["INSIGHT_PREP_TIMEOU
 
 describe("All getter agents should return something and not throw any errors", () => {
     let fridaAddress: string;
-    let emulatorDataVolume: ArchitectDataVolume;
-    let emulatorServices: ArchitectEmulatorServices;
+    let emulatorServices: ArchitectServices;
 
     beforeAll(async () => {
         const apk = await loadApk("apkpure", LatestVersion);
@@ -30,13 +29,11 @@ describe("All getter agents should return something and not throw any errors", (
         await architectResult.emulatorServices.installApk(apk);
         fridaAddress = architectResult.fridaAddress;
         emulatorServices = architectResult.emulatorServices;
-        emulatorDataVolume = architectResult.emulatorDataVolume;
     }, INSIGHT_PREP_TIMEOUT_MS);
 
     afterAll(async () => {
         await emulatorServices.stopAll();
         await emulatorServices.removeAll();
-        await emulatorDataVolume.remove();
     }, INSIGHT_PREP_TIMEOUT_MS);
 
     it(
