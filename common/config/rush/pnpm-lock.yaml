@@ -343,7 +343,6 @@ importers:
       "@types/dockerode": ~3.3.18
       "@types/heft-jest": 1.0.3
       "@types/node": 20.4.2
-      "@types/ssh2": ~1.11.11
       "@types/tar-fs": ~2.0.1
       "@types/yargs": ~17.0.24
       debug: ~4.3.4
@@ -357,7 +356,6 @@ importers:
       frida: ~16.1.0
       prettier: ~2.8.8
       rimraf: ~5.0.1
-      ssh2: ~1.14.0
       supports-color: ~9.4.0
       tar-fs: ~2.1.1
       typescript: 5.1.6
@@ -387,7 +385,6 @@ importers:
       "@types/dockerode": 3.3.19
       "@types/heft-jest": 1.0.3
       "@types/node": 20.4.2
-      "@types/ssh2": 1.11.13
       "@types/tar-fs": 2.0.1
       "@types/yargs": 17.0.24
       dotenv: 16.3.1
@@ -397,8 +394,13 @@ importers:
       eslint-plugin-unicorn: 47.0.0_eslint@8.45.0
       prettier: 2.8.8
       rimraf: 5.0.1
-      ssh2: 1.14.0
       typescript: 5.1.6
+
+  ../../packages/bitprints:
+    specifiers:
+      "@tinyburg/tsconfig-rig": workspace:*
+    devDependencies:
+      "@tinyburg/tsconfig-rig": link:../tsconfig-rig
 
   ../../packages/bots:
     specifiers:
@@ -652,7 +654,7 @@ importers:
       prettier: ~2.8.8
       typescript: 5.1.6
     dependencies:
-      "@swc/core": 1.3.75
+      "@swc/core": 1.3.76
       debug: 4.3.4
       emittery: 1.0.1
       esbuild: 0.18.20
@@ -2074,7 +2076,7 @@ packages:
       "@jest/console": 29.6.2
       "@jest/reporters": 29.5.0
       "@jest/test-result": 29.6.2
-      "@jest/transform": 29.6.2
+      "@jest/transform": 29.5.0
       "@jest/types": 29.6.1
       "@types/node": 20.4.2
       ansi-escapes: 4.3.2
@@ -2087,11 +2089,11 @@ packages:
       jest-haste-map: 29.6.2
       jest-message-util: 29.6.2
       jest-regex-util: 29.4.3
-      jest-resolve: 29.6.2
+      jest-resolve: 29.5.0
       jest-resolve-dependencies: 29.6.2
       jest-runner: 29.6.2
       jest-runtime: 29.6.2
-      jest-snapshot: 29.6.2
+      jest-snapshot: 29.5.0
       jest-util: 29.6.2
       jest-validate: 29.6.2
       jest-watcher: 29.6.2
@@ -2118,7 +2120,7 @@ packages:
       "@jest/console": 29.6.2
       "@jest/reporters": 29.5.0_supports-color@9.4.0
       "@jest/test-result": 29.6.2
-      "@jest/transform": 29.6.2_supports-color@9.4.0
+      "@jest/transform": 29.5.0_supports-color@9.4.0
       "@jest/types": 29.6.1
       "@types/node": 20.4.2
       ansi-escapes: 4.3.2
@@ -2131,11 +2133,11 @@ packages:
       jest-haste-map: 29.6.2
       jest-message-util: 29.6.2
       jest-regex-util: 29.4.3
-      jest-resolve: 29.6.2
+      jest-resolve: 29.5.0
       jest-resolve-dependencies: 29.6.2_supports-color@9.4.0
       jest-runner: 29.6.2_supports-color@9.4.0
       jest-runtime: 29.6.2_supports-color@9.4.0
-      jest-snapshot: 29.6.2_supports-color@9.4.0
+      jest-snapshot: 29.5.0_supports-color@9.4.0
       jest-util: 29.6.2
       jest-validate: 29.6.2
       jest-watcher: 29.6.2
@@ -2162,7 +2164,7 @@ packages:
       "@jest/console": 29.6.2
       "@jest/reporters": 29.5.0
       "@jest/test-result": 29.6.2
-      "@jest/transform": 29.6.2
+      "@jest/transform": 29.5.0
       "@jest/types": 29.6.1
       "@types/node": 20.4.2
       ansi-escapes: 4.3.2
@@ -2175,11 +2177,11 @@ packages:
       jest-haste-map: 29.6.2
       jest-message-util: 29.6.2
       jest-regex-util: 29.4.3
-      jest-resolve: 29.6.2
+      jest-resolve: 29.5.0
       jest-resolve-dependencies: 29.6.2
       jest-runner: 29.6.2
       jest-runtime: 29.6.2
-      jest-snapshot: 29.6.2
+      jest-snapshot: 29.5.0
       jest-util: 29.6.2
       jest-validate: 29.6.2
       jest-watcher: 29.6.2
@@ -2286,7 +2288,7 @@ packages:
       "@bcoe/v8-coverage": 0.2.3
       "@jest/console": 29.6.2
       "@jest/test-result": 29.6.2
-      "@jest/transform": 29.6.2
+      "@jest/transform": 29.5.0
       "@jest/types": 29.6.1
       "@jridgewell/trace-mapping": 0.3.19
       "@types/node": 20.4.2
@@ -2324,7 +2326,7 @@ packages:
       "@bcoe/v8-coverage": 0.2.3
       "@jest/console": 29.6.2
       "@jest/test-result": 29.6.2
-      "@jest/transform": 29.6.2_supports-color@9.4.0
+      "@jest/transform": 29.5.0_supports-color@9.4.0
       "@jest/types": 29.6.1
       "@jridgewell/trace-mapping": 0.3.19
       "@types/node": 20.4.2
@@ -3530,9 +3532,9 @@ packages:
       { integrity: sha512-Uy0+khmZqUrUGm5dmMqVlnvufZRSK0FbYzVgp0UMstm+F5+W2/jnEEQyc9vo1ZR/E5ZI/B1WjjoTqBqwJL6Krw== }
     dev: false
 
-  /@swc/core-darwin-arm64/1.3.75:
+  /@swc/core-darwin-arm64/1.3.76:
     resolution:
-      { integrity: sha512-anDnx9L465lGbjB2mvcV54NGHW6illr0IDvVV7JmkabYUVneaRdQvTr0tbHv3xjHnjrK1wuwVOHKV0LcQF2tnQ== }
+      { integrity: sha512-ovviEhZ/1E81Z9OGrO0ivLWk4VCa3I3ZzM+cd3gugglRRwVwtlIaoIYqY5S3KiCAupDd1+UCl5X7Vbio7a/V8g== }
     engines: { node: ">=10" }
     cpu: [arm64]
     os: [darwin]
@@ -3540,9 +3542,9 @@ packages:
     dev: false
     optional: true
 
-  /@swc/core-darwin-x64/1.3.75:
+  /@swc/core-darwin-x64/1.3.76:
     resolution:
-      { integrity: sha512-dIHDfrLmeZfr2xwi1whO7AmzdI3HdamgvxthaL+S8L1x8TeczAZEvsmZTjy3s8p3Va4rbGXcb3+uBhmfkqCbfw== }
+      { integrity: sha512-tcySTDqs0SHCebtW35sCdcLWsmTEo7bEwx0gNL/spetqVT9fpFi6qU8qcnt7i2KaZHbeNl9g1aadu+Yrni+GzA== }
     engines: { node: ">=10" }
     cpu: [x64]
     os: [darwin]
@@ -3550,9 +3552,9 @@ packages:
     dev: false
     optional: true
 
-  /@swc/core-linux-arm-gnueabihf/1.3.75:
+  /@swc/core-linux-arm-gnueabihf/1.3.76:
     resolution:
-      { integrity: sha512-qeJmvMGrjC6xt+G0R4kVqqxvlhxJx7tTzhcEoWgLJnfvGZiF6SJdsef4OSM7HuReXrlBoEtJbfGPrLJtbV+C0w== }
+      { integrity: sha512-apgzpGWy1AwoMF4urAAASsAjE7rEzZFIF+p6utuxhS7cNHzE0AyEVDYJbo+pzBdlZ8orBdzzsHtFwoEgKOjebA== }
     engines: { node: ">=10" }
     cpu: [arm]
     os: [linux]
@@ -3560,9 +3562,9 @@ packages:
     dev: false
     optional: true
 
-  /@swc/core-linux-arm64-gnu/1.3.75:
+  /@swc/core-linux-arm64-gnu/1.3.76:
     resolution:
-      { integrity: sha512-sqA9JqHEJBF4AdNuwo5zRqq0HC3l31SPsG9zpRa4nRzG5daBBJ80H7fi6PZQud1rfNNq+Q08gjYrdrxwHstvjw== }
+      { integrity: sha512-c3c0zz6S0eludqidDpuqbadE0WT3OZczyQxe9Vw8lFFXES85mvNGtwYzyGK2o7TICpsuHrndwDIoYpmpWk879g== }
     engines: { node: ">=10" }
     cpu: [arm64]
     os: [linux]
@@ -3570,9 +3572,9 @@ packages:
     dev: false
     optional: true
 
-  /@swc/core-linux-arm64-musl/1.3.75:
+  /@swc/core-linux-arm64-musl/1.3.76:
     resolution:
-      { integrity: sha512-95rQT5xTAL3eKhMJbJbLsZHHP9EUlh1rcrFoLf0gUApoVF8g94QjZ9hYZiI72mMP5WPjgTEXQVnVB9O2GxeaLw== }
+      { integrity: sha512-Is3bpq7F2qtlnkzEeOD6HIZJPpOmu3q6c82lKww90Q0NnrlSluVMozTHJgwVoFZyizH7uLnk0LuNcEAWLnmJIw== }
     engines: { node: ">=10" }
     cpu: [arm64]
     os: [linux]
@@ -3580,9 +3582,9 @@ packages:
     dev: false
     optional: true
 
-  /@swc/core-linux-x64-gnu/1.3.75:
+  /@swc/core-linux-x64-gnu/1.3.76:
     resolution:
-      { integrity: sha512-If7UpAhnPduMmtC+TSgPpZ1UXZfp2hIpjUFxpeCmHHYLS6Fn/2GZC5hpEiu+wvFJF0hzPh93eNAHa9gUxGUG+w== }
+      { integrity: sha512-iwCeRzd9oSvUzqt7nU6p/ztceAWfnO9XVxBn502R5gs6QCBbE1HCKrWHDO77aKPK7ss+0NcIGHvXTd9L8/wRzw== }
     engines: { node: ">=10" }
     cpu: [x64]
     os: [linux]
@@ -3590,9 +3592,9 @@ packages:
     dev: false
     optional: true
 
-  /@swc/core-linux-x64-musl/1.3.75:
+  /@swc/core-linux-x64-musl/1.3.76:
     resolution:
-      { integrity: sha512-HOhxX0YNHTElCZqIviquka3CGYTN8rSQ6BdFfSk/K0O+ZEHx3qGte0qr+gGLPF/237GxreUkp3OMaWKuURtuCg== }
+      { integrity: sha512-a671g4tW8kyFeuICsgq4uB9ukQfiIyXJT4V6YSnmqhCTz5mazWuDxZ5wKnx/1g5nXTl+U5cWH2TZaCJatp4GKA== }
     engines: { node: ">=10" }
     cpu: [x64]
     os: [linux]
@@ -3600,9 +3602,9 @@ packages:
     dev: false
     optional: true
 
-  /@swc/core-win32-arm64-msvc/1.3.75:
+  /@swc/core-win32-arm64-msvc/1.3.76:
     resolution:
-      { integrity: sha512-7QPI+mvBXAerVfWahrgBNe+g7fK8PuetxFnZSEmXUcDXvWcdJXAndD7GjAJzbDyjQpLKHbsDKMiHYvfNxZoN/A== }
+      { integrity: sha512-+swEFtjdMezS0vKUhJC3psdSDtOJGY5pEOt4e8XOPvn7aQpKQ9LfF49XVtIwDSk5SGuWtVoLFzkSY3reWUJCyg== }
     engines: { node: ">=10" }
     cpu: [arm64]
     os: [win32]
@@ -3610,9 +3612,9 @@ packages:
     dev: false
     optional: true
 
-  /@swc/core-win32-ia32-msvc/1.3.75:
+  /@swc/core-win32-ia32-msvc/1.3.76:
     resolution:
-      { integrity: sha512-EfABCy4Wlq7O5ShWsm32FgDkSjyeyj/SQ4wnUIvWpkXhgfT1iNXky7KRU1HtX+SmnVk/k/NnabVZpIklYbjtZA== }
+      { integrity: sha512-5CqwAykpGBJ3PqGLOlWGLGIPpBAG1IwWVDUfro3hhjQ7XJxV5Z1aQf5V5OJ90HJVtrEAVx2xx59UV/Dh081LOg== }
     engines: { node: ">=10" }
     cpu: [ia32]
     os: [win32]
@@ -3620,9 +3622,9 @@ packages:
     dev: false
     optional: true
 
-  /@swc/core-win32-x64-msvc/1.3.75:
+  /@swc/core-win32-x64-msvc/1.3.76:
     resolution:
-      { integrity: sha512-cTvP0pOD9C3pSp1cwtt85ZsrUkQz8RZfSPhM+jCGxKxmoowDCnInoOQ4Ica/ehyuUnQ4/IstSdYtYpO5yzPDJg== }
+      { integrity: sha512-CiMpWLLlR3Cew9067E7XxaLBwYYJ90r9EhGSO6V1pvYSWj7ET/Ppmtj1ZhzPJMqRXAP6xflfl5R5o4ee1m4WLA== }
     engines: { node: ">=10" }
     cpu: [x64]
     os: [win32]
@@ -3630,9 +3632,9 @@ packages:
     dev: false
     optional: true
 
-  /@swc/core/1.3.75:
+  /@swc/core/1.3.76:
     resolution:
-      { integrity: sha512-YLqd5oZVnaOq/OzkjRSsJUQqAfKYiD0fzUyVUPVlNNCoQEfVfSMcXH80hLmYe9aDH0T/a7qEMjWyIr/0kWqy1A== }
+      { integrity: sha512-aYYTA2aVYkwJAZepQXtPnkUthhOfn8qd6rsh+lrJxonFrjmpI7RHt2tMDVTXP6XDX7fvnvrVtT1bwZfmBFPh0Q== }
     engines: { node: ">=10" }
     requiresBuild: true
     peerDependencies:
@@ -3641,16 +3643,16 @@ packages:
       "@swc/helpers":
         optional: true
     optionalDependencies:
-      "@swc/core-darwin-arm64": 1.3.75
-      "@swc/core-darwin-x64": 1.3.75
-      "@swc/core-linux-arm-gnueabihf": 1.3.75
-      "@swc/core-linux-arm64-gnu": 1.3.75
-      "@swc/core-linux-arm64-musl": 1.3.75
-      "@swc/core-linux-x64-gnu": 1.3.75
-      "@swc/core-linux-x64-musl": 1.3.75
-      "@swc/core-win32-arm64-msvc": 1.3.75
-      "@swc/core-win32-ia32-msvc": 1.3.75
-      "@swc/core-win32-x64-msvc": 1.3.75
+      "@swc/core-darwin-arm64": 1.3.76
+      "@swc/core-darwin-x64": 1.3.76
+      "@swc/core-linux-arm-gnueabihf": 1.3.76
+      "@swc/core-linux-arm64-gnu": 1.3.76
+      "@swc/core-linux-arm64-musl": 1.3.76
+      "@swc/core-linux-x64-gnu": 1.3.76
+      "@swc/core-linux-x64-musl": 1.3.76
+      "@swc/core-win32-arm64-msvc": 1.3.76
+      "@swc/core-win32-ia32-msvc": 1.3.76
+      "@swc/core-win32-x64-msvc": 1.3.76
     dev: false
 
   /@swc/helpers/0.5.1:
@@ -3933,9 +3935,9 @@ packages:
       { integrity: sha512-dRLjCWHYg4oaA77cxO64oO+7JwCwnIzkZPdrrC71jQmQtlhM556pwKo5bUzqvZndkVbeFLIIi+9TC40JNF5hNQ== }
     dev: true
 
-  /@types/lodash/4.14.196:
+  /@types/lodash/4.14.197:
     resolution:
-      { integrity: sha512-22y3o88f4a94mKljsZcanlNWPzO0uBsBdzLAngf2tp533LzZcQzb6+eZPJ+vCTt+bqF2XnvT9gejTLsAcJAJyQ== }
+      { integrity: sha512-BMVOiWs0uNxHVlHBgzTIqJYmj+PgCo4euloGF+5m4okL3rEYzM2EEv78mw8zWSMM57dM7kVIgJ2QDvwHSoCI5g== }
     dev: true
 
   /@types/long/4.0.2:
@@ -5035,6 +5037,7 @@ packages:
       { integrity: sha512-ix/FxPn0MDjeyJ7i/yoHGFt/EX6LyNbxSEhPPXODPL+KB0VPk86UYfL0lMdy+KCnv+fmvIzySwaK5COwqVbWTQ== }
     dependencies:
       safer-buffer: 2.1.2
+    dev: false
 
   /ast-types-flow/0.0.7:
     resolution:
@@ -5237,6 +5240,7 @@ packages:
       { integrity: sha512-qeFIXtP4MSoi6NLqO12WfqARWWuCKi2Rn/9hJLEmtB5yTNr9DqFWkJRCf2qShWzPeAMRnOgCrq0sg/KLv5ES9w== }
     dependencies:
       tweetnacl: 0.14.5
+    dev: false
 
   /bcrypt/5.1.0:
     resolution:
@@ -5339,7 +5343,7 @@ packages:
     hasBin: true
     dependencies:
       caniuse-lite: 1.0.30001519
-      electron-to-chromium: 1.4.488
+      electron-to-chromium: 1.4.490
       node-releases: 2.0.13
       update-browserslist-db: 1.0.11_browserslist@4.21.10
     dev: true
@@ -5390,6 +5394,7 @@ packages:
     resolution:
       { integrity: sha512-8f9ZJCUXyT1M35Jx7MkBgmBMo3oHTTBIPLiY9xyL0pl3T5RwcPEY8cUHr5LBNfu/fk6c2T4DJZuVM/8ZZT2D2A== }
     engines: { node: ">=10.0.0" }
+    dev: false
     optional: true
 
   /builtin-modules/3.3.0:
@@ -5881,6 +5886,7 @@ packages:
     dependencies:
       buildcheck: 0.0.6
       nan: 2.17.0
+    dev: false
     optional: true
 
   /create-require/1.1.1:
@@ -6316,9 +6322,9 @@ packages:
       { integrity: sha512-WMwm9LhRUo+WUaRN+vRuETqG89IgZphVSNkdFgeb6sS/E4OrDIN7t48CAewSHXc6C8lefD8KKfr5vY61brQlow== }
     dev: true
 
-  /electron-to-chromium/1.4.488:
+  /electron-to-chromium/1.4.490:
     resolution:
-      { integrity: sha512-Dv4sTjiW7t/UWGL+H8ZkgIjtUAVZDgb/PwGWvMsCT7jipzUV/u5skbLXPFKb6iV0tiddVi/bcS2/kUrczeWgIQ== }
+      { integrity: sha512-6s7NVJz+sATdYnIwhdshx/N/9O6rvMxmhVoDSDFdj6iA45gHR8EQje70+RYsF4GeB+k0IeNSBnP7yG9ZXJFr7A== }
     dev: true
 
   /emittery/0.13.1:
@@ -6618,7 +6624,7 @@ packages:
       eslint-module-utils: 2.8.0_eslint@8.45.0
       eslint-plugin-import: 2.28.0_eslint@8.45.0
       fast-glob: 3.3.1
-      get-tsconfig: 4.6.2
+      get-tsconfig: 4.7.0
       is-core-module: 2.13.0
       is-glob: 4.0.3
     transitivePeerDependencies:
@@ -7614,9 +7620,9 @@ packages:
       get-intrinsic: 1.2.1
     dev: true
 
-  /get-tsconfig/4.6.2:
+  /get-tsconfig/4.7.0:
     resolution:
-      { integrity: sha512-E5XrT4CbbXcXWy+1jChlZmrmCwd5KGx502kDCXJJ7y898TtWW9FwoG5HfOLVRKmlmDGkWN2HM9Ho+/Y8F0sJDg== }
+      { integrity: sha512-pmjiZ7xtB8URYm74PlGJozDNyhvsVLUcpBa8DZBG3bWHwaHa9bPiRpiSfovw+fjhwONSCWKRyk+JQHEGZmMrzw== }
     dependencies:
       resolve-pkg-maps: 1.0.0
     dev: true
@@ -7669,7 +7675,7 @@ packages:
     hasBin: true
     dependencies:
       foreground-child: 3.1.1
-      jackspeak: 2.2.2
+      jackspeak: 2.2.3
       minimatch: 9.0.3
       minipass: 7.0.2
       path-scurry: 1.10.1
@@ -8559,9 +8565,9 @@ packages:
       istanbul-lib-report: 3.0.1
     dev: true
 
-  /jackspeak/2.2.2:
+  /jackspeak/2.2.3:
     resolution:
-      { integrity: sha512-mgNtVv4vUuaKA97yxUHoA3+FkuhtxkjdXEWOyB/N76fjy0FjezEt34oy3epBtvCvS+7DyKwqCFWx/oJLV5+kCg== }
+      { integrity: sha512-pF0kfjmg8DJLxDrizHoCZGUFz4P4czQ3HyfW4BU0ffebYkzAVlBywp5zaxW/TM+r0sGbmrQdi8EQQVTJFxnGsQ== }
     engines: { node: ">=14" }
     dependencies:
       "@isaacs/cliui": 8.0.2
@@ -8665,7 +8671,7 @@ packages:
       jest-environment-node: 29.6.2
       jest-get-type: 29.4.3
       jest-regex-util: 29.4.3
-      jest-resolve: 29.6.2
+      jest-resolve: 29.5.0
       jest-runner: 29.6.2
       jest-util: 29.6.2
       jest-validate: 29.6.2
@@ -8706,7 +8712,7 @@ packages:
       jest-environment-node: 29.6.2
       jest-get-type: 29.4.3
       jest-regex-util: 29.4.3
-      jest-resolve: 29.6.2
+      jest-resolve: 29.5.0
       jest-runner: 29.6.2_supports-color@9.4.0
       jest-util: 29.6.2
       jest-validate: 29.6.2
@@ -8747,7 +8753,7 @@ packages:
       jest-environment-node: 29.6.2
       jest-get-type: 29.4.3
       jest-regex-util: 29.4.3
-      jest-resolve: 29.6.2
+      jest-resolve: 29.5.0
       jest-runner: 29.6.2
       jest-util: 29.6.2
       jest-validate: 29.6.2
@@ -9098,7 +9104,7 @@ packages:
       "@babel/traverse": 7.22.10
       "@babel/types": 7.22.10
       "@jest/expect-utils": 29.6.2
-      "@jest/transform": 29.6.2
+      "@jest/transform": 29.5.0
       "@jest/types": 29.6.1
       "@types/babel__traverse": 7.20.1
       "@types/prettier": 2.7.3
@@ -9130,7 +9136,7 @@ packages:
       "@babel/traverse": 7.22.10_supports-color@9.4.0
       "@babel/types": 7.22.10
       "@jest/expect-utils": 29.6.2
-      "@jest/transform": 29.6.2_supports-color@9.4.0
+      "@jest/transform": 29.5.0_supports-color@9.4.0
       "@jest/types": 29.6.1
       "@types/babel__traverse": 7.20.1
       "@types/prettier": 2.7.3
@@ -9343,7 +9349,7 @@ packages:
     dependencies:
       "@bcherny/json-schema-ref-parser": 10.0.5-fork
       "@types/json-schema": 7.0.12
-      "@types/lodash": 4.14.196
+      "@types/lodash": 4.14.197
       "@types/prettier": 2.7.3
       cli-color: 2.0.3
       get-stdin: 8.0.0
@@ -9586,9 +9592,9 @@ packages:
     engines: { node: ^12.20.0 || ^14.13.1 || >=16.0.0 }
     dev: false
 
-  /lru-cache/10.0.0:
+  /lru-cache/10.0.1:
     resolution:
-      { integrity: sha512-svTf/fzsKHffP42sujkO/Rjs37BCIsQVRCeNYIm9WN8rgT7ffoUnRtZCqU+6BqcSBdv8gwJeTz8knJpgACeQMw== }
+      { integrity: sha512-IJ4uwUTi2qCccrioU6g9g/5rvvVl13bsdczUUcqbciD9iLr095yj8DQKdObriEvuNSx325N1rV1O0sJFszx75g== }
     engines: { node: 14 || >=16.14 }
     dev: true
 
@@ -9864,6 +9870,7 @@ packages:
   /nan/2.17.0:
     resolution:
       { integrity: sha512-2ZTgtl0nJsO0KQCjEpxcIr5D+Yv90plTitZt9JBfQvVJDS5seMl3FOvsh3+9CoYWXf/1l5OaZzzF6nDm4cagaQ== }
+    dev: false
     optional: true
 
   /nanoid/3.3.6:
@@ -10416,7 +10423,7 @@ packages:
       { integrity: sha512-MkhCqzzBEpPvxxQ71Md0b1Kk51W01lrYvlMzSUaIzNsODdd7mqhiimSZlr+VegAz5Z6Vzt9Xg2ttE//XBhH3EQ== }
     engines: { node: ">=16 || 14 >=14.17" }
     dependencies:
-      lru-cache: 10.0.0
+      lru-cache: 10.0.1
       minipass: 7.0.2
     dev: true
 
@@ -12008,6 +12015,7 @@ packages:
     optionalDependencies:
       cpu-features: 0.0.8
       nan: 2.17.0
+    dev: false
 
   /stack-utils/2.0.6:
     resolution:
@@ -12626,6 +12634,7 @@ packages:
   /tweetnacl/0.14.5:
     resolution:
       { integrity: sha512-KXXFFdAbFXY4geFIwoyNK+f5Z1b7swfXABfL7HXCmoIWMKU3dmS26672A4EeQtDzLKy7SXmfBu51JolvEKwtGA== }
+    dev: false
 
   /type-check/0.4.0:
     resolution:
