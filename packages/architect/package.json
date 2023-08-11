@@ -23,13 +23,8 @@
     },
     "files": [
         "dist/",
-        "envoy/",
         "emulator/",
         "protobuf/",
-        "jwt-provider/",
-        "infrastructure/",
-        "frontend-placeholder/",
-        "docker-compose.yaml",
         ".env.example"
     ],
     "scripts": {

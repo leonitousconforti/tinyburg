@@ -10,7 +10,12 @@ import frida from "frida";
 import Debug from "debug";
 import Dockerode from "dockerode";
 
-export type ArchitectResource = Dockerode.Container | Dockerode.Volume | Dockerode.Network;
+export type ArchitectResource =
+    | Dockerode.Container
+    | Dockerode.Volume
+    | Dockerode.Network
+    | Dockerode.Image
+    | Dockerode.Secret;
 
 /**
  * Wrapper around the dockerode container class that stores multiple containers.
@@ -18,7 +23,7 @@ export type ArchitectResource = Dockerode.Container | Dockerode.Volume | Dockero
  * they can all be captured in this class. This allows the user to stop and
  * destroy all the resources that were allocated at once.
  */
-export class ArchitectEmulatorServices {
+export class ArchitectEmulator {
     private _logger: Debug.Debugger;
     private _dockerode: Dockerode;
     private _emulatorContainer: Dockerode.Container;
@@ -28,7 +33,7 @@ export class ArchitectEmulatorServices {
         dockerode: Dockerode,
         serviceName: string,
         emulatorContainer: Dockerode.Container,
-        otherResources: Array<Dockerode.Container> = []
+        otherResources: Array<ArchitectResource> = []
     ) {
         this._dockerode = dockerode;
         this._emulatorContainer = emulatorContainer;
@@ -148,29 +153,6 @@ export class ArchitectEmulatorServices {
         }
     };
 
-    public waitForCpuToBeIdle = async (cpuThreshold = 3, retries = 60, waitMs = 3000): Promise<void> => {
-        this._logger("Waiting for CPU to be idle");
-
-        try {
-            const statsResult = await this._emulatorContainer.stats({ stream: false });
-            const currentCpuStats = statsResult.cpu_stats;
-            const previousCpuStats = statsResult.precpu_stats;
-            const cpuDelta = currentCpuStats.cpu_usage.total_usage - previousCpuStats.cpu_usage.total_usage;
-            const systemDelta = currentCpuStats.system_cpu_usage - previousCpuStats.system_cpu_usage;
-            const cpuUsage = (cpuDelta / systemDelta) * 100;
-            if (cpuUsage && cpuUsage >= cpuThreshold) throw new Error(`CPU is not idle, usage=${cpuUsage}`);
-        } catch (error: unknown) {
-            // If there are retries remaining, wait for the desired timeout and then recurse
-            if (retries > 0) {
-                await new Promise((resolve) => setTimeout(resolve, waitMs));
-                return await this.waitForCpuToBeIdle(cpuThreshold, retries - 1, waitMs);
-            }
-
-            // Otherwise, throw this error to reject the promise
-            throw error;
-        }
-    };
-
     public waitForTinyTowerToBeSpawnable = async (retries: number = 60, waitMs: number = 3000): Promise<void> => {
         this._logger("Waiting for Tiny Tower to be spawnable");
 
@@ -221,7 +203,7 @@ export class ArchitectEmulatorServices {
         }
     };
 
-    public startFridaServer = async (retries: number = 5, waitMs: number = 10_000): Promise<void> => {
+    public startFridaServer = async (retries: number = 5, waitMs: number = 1000): Promise<void> => {
         this._logger("Starting frida server");
 
         try {
@@ -255,6 +237,7 @@ export class ArchitectEmulatorServices {
                 throw new Error("Frida server failed to start: closed");
             }
         } catch (error: unknown) {
+            console.log(error);
             // If there are retries remaining, wait for the desired timeout and then recurse
             if (retries > 0) {
                 await new Promise((resolve) => setTimeout(resolve, waitMs));

@@ -1,5 +1,0 @@
-This is a placeholder/demo frontend.
-
-An implemented frontend exists @tinyburg/architect-viewer
-which you can use to connect to and visualize the emulator
-from your browser or you can try to roll your own here.

@@ -10,9 +10,7 @@ await yargs(process.argv.slice(2))
         "the default command",
         (yargs) =>
             yargs
-                .option("with-additional-services", { type: "boolean", default: false })
                 .option("reuse-existing-containers", { type: "boolean", default: false })
-                .option("emulator-data-directory", { type: "string", demandOption: false })
                 .option("emulator-container-name", { type: "string", demandOption: false })
                 .options({
                     "adb-port": { type: "string", demandOption: false, default: "0" },
@@ -22,9 +20,7 @@ await yargs(process.argv.slice(2))
                 }),
         async (argv) => {
             await architect({
-                withAdditionalServices: argv["with-additional-services"],
                 reuseExistingContainers: argv["reuse-existing-containers"],
-                emulatorDataDirectory: argv["emulator-data-directory"],
                 emulatorContainerName: argv["emulator-container-name"],
                 portBindings: {
                     "5554/tcp": [{ HostPort: argv["console-port"] }],

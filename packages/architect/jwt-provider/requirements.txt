@@ -1,5 +1,0 @@
-pyjwt
-flask
-Werkzeug
-JWCrypto
-Flask-HTTPAuth

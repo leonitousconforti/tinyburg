@@ -7,5 +7,5 @@
         "outDir": "./dist",
         "types": ["node", "heft-jest"]
     },
-    "include": ["src/**/*.ts", "src/dockerode-compose.d.ts"]
+    "include": ["src/**/*.ts"]
 }

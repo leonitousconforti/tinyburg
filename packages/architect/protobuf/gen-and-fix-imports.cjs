@@ -4,7 +4,7 @@ const { execSync } = require("node:child_process");
 
 const generateProtobufJavascriptSources = () =>
     execSync(
-        "protoc -I ./protobuf --ts_out ./protobuf --ts_opt optimize_code_size --ts_opt output_javascript --ts_opt eslint_disable ./protobuf/emulator_controller.proto ./protobuf/rtc_service.proto"
+        "protoc -I ./protobuf --ts_out ./protobuf --ts_opt optimize_code_size --ts_opt output_javascript ./protobuf/emulator_controller.proto ./protobuf/rtc_service.proto"
     );
 
 const fixProtobufImportsForEsm = async () => {

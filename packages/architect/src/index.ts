@@ -9,8 +9,7 @@ import url from "node:url";
 import tar from "tar-fs";
 import Debug from "debug";
 import Dockerode from "dockerode";
-import DockerodeCompose from "dockerode-compose";
-import { ArchitectEmulatorServices, ArchitectDataVolume } from "./resources.js";
+import { ArchitectEmulator, ArchitectDataVolume } from "./resources.js";
 
 const logger: Debug.Debugger = Debug.debug("tinyburg:architect");
 const tag: string =
@@ -32,7 +31,6 @@ interface IArchitectPortBindings {
 interface IWaitForOptions {
     globalWaitMs?: number;
     globalRetries?: number;
-    waitForCpuToBeIdle?: { skip?: boolean; waitMs?: number; retries?: number };
     waitForFridaToStart?: { skip?: boolean; waitMs?: number; retries?: number };
     waitForFridaToBeReachable?: { skip?: boolean; waitMs?: number; retries?: number };
     waitForContainerToBeHealthy?: { skip?: boolean; waitMs?: number; retries?: number };
@@ -64,7 +62,7 @@ const buildFreshContainer = async (
     containerName: string = generateContainerName(),
     architectDataDirectory?: fs.PathLike,
     portBindings?: IArchitectPortBindings
-): Promise<[emulatorContainer: ArchitectEmulatorServices, emulatorVolume: ArchitectDataVolume]> => {
+): Promise<[emulatorContainer: ArchitectEmulator, emulatorVolume: ArchitectDataVolume]> => {
     const context = new URL("../emulator", import.meta.url);
     const tarStream = tar.pack(url.fileURLToPath(context));
     logger("Building docker image from context %s, will tag image as %s when finished", context.toString(), tag);
@@ -110,47 +108,7 @@ const buildFreshContainer = async (
 
     logger("Starting container %s", container.id);
     await container.start();
-    return [new ArchitectEmulatorServices(dockerode, containerName, container), emulatorDataVolume];
-};
-
-/**
- * Builds the emulator image and all the additional services using docker
- * compose.
- *
- * @param dockerode - The dockerode instance to use to build the images
- * @returns The main emulator container
- */
-const buildFreshContainerWithServices = async (
-    dockerode: Dockerode,
-    architectDataDirectory?: fs.PathLike
-): Promise<[emulatorContainer: ArchitectEmulatorServices, emulatorVolume: ArchitectDataVolume]> => {
-    const dockerComposeServiceName = generateContainerName();
-    logger(
-        "Starting architect with additional services using docker compose, service name will be %s",
-        dockerComposeServiceName
-    );
-    const dockerodeCompose: DockerodeCompose = new DockerodeCompose(
-        dockerode,
-        url.fileURLToPath(new URL("../docker-compose.yaml", import.meta.url)),
-        dockerComposeServiceName
-    );
-
-    const volume = await ArchitectDataVolume.createNew(dockerode, dockerComposeServiceName, architectDataDirectory);
-
-    const compose = await dockerodeCompose.up();
-    const containers = compose.services as Dockerode.Container[];
-    const containerInspections = await Promise.all(containers.map((container) => container.inspect()));
-    const emulatorContainerId = containerInspections.find((container) => container.Config.Image === tag)!.Id;
-    const otherServiceContainers = containers.filter((container) => container.id !== emulatorContainerId);
-    return [
-        new ArchitectEmulatorServices(
-            dockerode,
-            dockerComposeServiceName,
-            dockerode.getContainer(emulatorContainerId),
-            otherServiceContainers
-        ),
-        volume,
-    ];
+    return [new ArchitectEmulator(dockerode, containerName, container), emulatorDataVolume];
 };
 
 /**
@@ -164,21 +122,26 @@ const findExistingContainerOrCreateNew = async (
     containerName?: string,
     architectDataDirectory?: fs.PathLike,
     portBindings?: IArchitectPortBindings
-): Promise<[emulatorContainer: ArchitectEmulatorServices, emulatorVolume: ArchitectDataVolume]> => {
+): Promise<[emulatorContainer: ArchitectEmulator, emulatorVolume: ArchitectDataVolume]> => {
     logger("Searching for already started container with image %s and container name %s...", tag, containerName);
-    const runningContainers = await dockerode.listContainers();
+    const runningContainers = await dockerode.listContainers({ all: true });
     const foundContainerId = runningContainers.find(
         (container) =>
-            container.Image === tag && (containerName === undefined || container.Names.includes(containerName))
+            container.Image === tag && (containerName === undefined || container.Names.includes(`/${containerName}`))
     )?.Id;
 
     if (foundContainerId) {
         const foundContainer = dockerode.getContainer(foundContainerId);
-        const { Name: foundContainerName } = await foundContainer.inspect();
+        const { Name: foundContainerName, State } = await foundContainer.inspect();
         const foundContainerVolume = dockerode.getVolume(foundContainerName.replace("/", ""));
-        logger("Found container %s, reusing it", foundContainerName);
+        logger("Found container %s, reusing it", foundContainerName.replace("/", ""));
+
+        if (!State.Running) {
+            await foundContainer.start();
+        }
+
         return [
-            new ArchitectEmulatorServices(dockerode, foundContainerName, foundContainer),
+            new ArchitectEmulator(dockerode, foundContainerName.replace("/", ""), foundContainer),
             ArchitectDataVolume.createFromExisting(dockerode, foundContainerVolume),
         ];
     }
@@ -193,7 +156,6 @@ const findExistingContainerOrCreateNew = async (
  * services required to interact with the container from a web browser.
  */
 export const architect = async (options?: {
-    withAdditionalServices?: boolean | undefined;
     reuseExistingContainers?: boolean | undefined;
     dockerConnectionOptions?: DockerConnectionOptions | undefined;
     emulatorDataDirectory?: fs.PathLike | undefined;
@@ -202,9 +164,9 @@ export const architect = async (options?: {
     waitForOptions?: IWaitForOptions | undefined;
 }): Promise<
     {
-        emulatorServices: ArchitectEmulatorServices;
+        emulatorServices: ArchitectEmulator;
         emulatorDataVolume: ArchitectDataVolume;
-    } & Awaited<ReturnType<InstanceType<typeof ArchitectEmulatorServices>["getExposedEmulatorEndpoints"]>>
+    } & Awaited<ReturnType<InstanceType<typeof ArchitectEmulator>["getExposedEmulatorEndpoints"]>>
 > => {
     const dockerConnectionOptions = Object.assign(
         { socketPath: "/var/run/docker.sock" },
@@ -219,9 +181,7 @@ export const architect = async (options?: {
 
     const emulatorContainerName = options?.emulatorContainerName;
     const architectDataDirectory = options?.emulatorDataDirectory ?? process.env["ARCHITECT_DATA_DIRECTORY"];
-    const [emulatorServices, emulatorDataVolume] = options?.withAdditionalServices
-        ? await buildFreshContainerWithServices(dockerode, architectDataDirectory)
-        : options?.reuseExistingContainers
+    const [emulatorServices, emulatorDataVolume] = options?.reuseExistingContainers
         ? await findExistingContainerOrCreateNew(
               dockerode,
               emulatorContainerName,
@@ -234,12 +194,6 @@ export const architect = async (options?: {
         await emulatorServices.waitForContainerToBeHealthy(
             options?.waitForOptions?.waitForContainerToBeHealthy?.retries || options?.waitForOptions?.globalRetries,
             options?.waitForOptions?.waitForContainerToBeHealthy?.waitMs || options?.waitForOptions?.globalWaitMs
-        );
-    }
-    if (!options?.waitForOptions?.waitForCpuToBeIdle?.skip) {
-        await emulatorServices.waitForCpuToBeIdle(
-            options?.waitForOptions?.waitForCpuToBeIdle?.retries || options?.waitForOptions?.globalRetries,
-            options?.waitForOptions?.waitForCpuToBeIdle?.waitMs || options?.waitForOptions?.globalWaitMs
         );
     }
     if (!options?.waitForOptions?.waitForFridaToStart?.skip) {
@@ -267,5 +221,5 @@ export const architect = async (options?: {
 
 export default architect;
 export { ArchitectDataVolume } from "./resources.js";
-export { ArchitectEmulatorServices } from "./resources.js";
+export { ArchitectEmulator } from "./resources.js";
 export { cleanUpAllArchitectResources } from "./resources.js";
