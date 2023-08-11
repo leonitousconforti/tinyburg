@@ -65,8 +65,6 @@ jobs:
           node common/scripts/install-run-rush.js install
           node common/scripts/install-run-rush.js update-autoinstaller --name rush-prettier
           node common/scripts/install-run-rush.js update-autoinstaller --name rush-commitlint
-          (cd packages/apks/vendor && ./setup.sh)
-          (cd packages/architect/jwt-provider && ./setup.sh)
 
       - name: Rush build
         run: node common/scripts/install-run-rush.js rebuild --timeline --production
@@ -74,5 +72,4 @@ jobs:
       - name: Rush test
         run: node common/scripts/install-run-rush.js retest --timeline --production
         env:
-          ARCHITECT_DATA_DIRECTORY: "/mnt/disks/TrueNAS_iSCSI_Disk/"
           ARCHITECT_DOCKER_HOST: "ssh://root@skynet.internal.leoconforti.us:22"
