@@ -22,7 +22,9 @@ if (process.env["ARCHITECT_DOCKER_HOST"] !== undefined) {
 interface IArchitectPortBindings {
     "5554/tcp"?: Dockerode.PortBinding[];
     "5555/tcp"?: Dockerode.PortBinding[];
+    "8081/tcp"?: Dockerode.PortBinding[];
     "8554/tcp"?: Dockerode.PortBinding[];
+    "8555/tcp"?: Dockerode.PortBinding[];
     "27042/tcp"?: Dockerode.PortBinding[];
 }
 
@@ -75,7 +77,9 @@ const buildFreshContainer = async (
         {
             "5554/tcp": [{ HostPort: "0" }],
             "5555/tcp": [{ HostPort: "0" }],
+            "8081/tcp": [{ HostPort: "0" }],
             "8554/tcp": [{ HostPort: "0" }],
+            "8555/tcp": [{ HostPort: "0" }],
             "27042/tcp": [{ HostPort: "0" }],
         },
         portBindings || {}
@@ -85,9 +89,10 @@ const buildFreshContainer = async (
     const emulatorDataVolume = (await dockerode.createVolume({
         Driver: "local",
         Name: `${containerName}_emulator_data`,
+        DriverOpts: { type: "tmpfs", device: "tmpfs" },
     })) as unknown as Dockerode.Volume;
 
-    logger("Creating container from image with kvm acceleration enabled");
+    logger("Creating emulator container from image with kvm acceleration enabled");
     const container: Dockerode.Container = await dockerode.createContainer({
         name: containerName,
         Image: tag,
@@ -198,6 +203,7 @@ export const architect = async (options?: {
             options?.waitForOptions?.waitForFridaToBeReachable?.waitMs || options?.waitForOptions?.globalWaitMs
         );
     }
+    await emulatorServices.startEnvoy();
 
     logger("Everything is healthy, you can start connecting to it now!");
     const emulatorEndpoints = await emulatorServices.getExposedEmulatorEndpoints();

@@ -81,15 +81,27 @@ export class ArchitectServices {
         adbAddress: string;
         grpcAddress: string;
         fridaAddress: string;
+        envoyGrpcWebAddress: string;
+        envoyAdminAddress: string;
     }> => {
         const inspectResults = await this._emulatorContainer.inspect();
         const containerPortBindings = inspectResults.NetworkSettings.Ports;
         const containerHost = (this._dockerode.modem as DockerModem.ConstructorOptions).host || "localhost";
         const adbConsoleAddress = `${containerHost}:${containerPortBindings["5554/tcp"]![0]?.HostPort}`;
         const adbAddress = `${containerHost}:${containerPortBindings["5555/tcp"]![0]?.HostPort}`;
+        const envoyAdminAddress = `${containerHost}:${containerPortBindings["8081/tcp"]![0]?.HostPort}`;
         const grpcAddress = `${containerHost}:${containerPortBindings["8554/tcp"]![0]?.HostPort}`;
+        const envoyGrpcWebAddress = `${containerHost}:${containerPortBindings["8555/tcp"]![0]?.HostPort}`;
         const fridaAddress = `${containerHost}:${containerPortBindings["27042/tcp"]![0]?.HostPort}`;
-        return { containerHost, adbConsoleAddress, adbAddress, grpcAddress, fridaAddress };
+        return {
+            containerHost,
+            adbConsoleAddress,
+            adbAddress,
+            grpcAddress,
+            fridaAddress,
+            envoyGrpcWebAddress,
+            envoyAdminAddress,
+        };
     };
 
     /**
@@ -140,10 +152,7 @@ export class ArchitectServices {
         try {
             const deviceManager = frida.getDeviceManager();
             const device = await deviceManager.addRemoteDevice(fridaAddress);
-            const processes = await device.enumerateApplications({
-                identifiers: ["com.nimblebit.tinytower"],
-                scope: frida.Scope.Minimal,
-            });
+            const processes = await device.enumerateApplications();
             if (!processes) throw new Error("Frida server is not reachable");
         } catch (error: unknown) {
             // Remove the remote device on error because it might be in a bad state
@@ -161,6 +170,13 @@ export class ArchitectServices {
         }
     };
 
+    /**
+     * Will wait for frida to be able to spawn Tiny Tower and inject a basic
+     * agent into the game.
+     *
+     * @param retries - The maximum number of tries before giving up
+     * @param waitMs - The number of milliseconds to wait between retries
+     */
     public waitForTinyTowerToBeSpawnable = async (retries: number = 10, waitMs: number = 3000): Promise<void> => {
         this._logger("Waiting for Tiny Tower to be spawnable");
 
@@ -177,10 +193,7 @@ export class ArchitectServices {
         try {
             const deviceManager = frida.getDeviceManager();
             const device = await deviceManager.addRemoteDevice(fridaAddress);
-            const applications = await device.enumerateApplications({
-                identifiers: ["com.nimblebit.tinytower"],
-                scope: frida.Scope.Minimal,
-            });
+            const applications = await device.enumerateApplications();
             assert(applications.some((application) => application.identifier === "com.nimblebit.tinytower"));
 
             const pid = await device.spawn("com.nimblebit.tinytower");
@@ -212,6 +225,12 @@ export class ArchitectServices {
         }
     };
 
+    /**
+     * Runs the start-frida-server.sh script until there are no errors
+     *
+     * @param retries - The maximum number of tries before giving up
+     * @param waitMs - The number of milliseconds to wait between retries
+     */
     public startFridaServer = async (retries: number = 10, waitMs: number = 3000): Promise<void> => {
         this._logger("Starting frida server");
 
@@ -219,7 +238,7 @@ export class ArchitectServices {
             const exec = await this._emulatorContainer.exec({
                 AttachStdout: true,
                 AttachStderr: true,
-                Cmd: ["/android/sdk/install-frida-server.sh"],
+                Cmd: ["/android/sdk/start-frida-server.sh"],
             });
             const execStream = await exec.start({});
 
@@ -244,9 +263,10 @@ export class ArchitectServices {
                 throw new Error("Frida server failed to start: device offline");
             } else if (result.includes("error: closed")) {
                 throw new Error("Frida server failed to start: closed");
+            } else if (result.includes("Connection closed")) {
+                throw new Error("Frida server failed to start: connection closed");
             }
         } catch (error: unknown) {
-            console.log(error);
             // If there are retries remaining, wait for the desired timeout and then recurse
             if (retries > 0) {
                 await new Promise((resolve) => setTimeout(resolve, waitMs));
@@ -256,6 +276,23 @@ export class ArchitectServices {
             // Otherwise, throw this error to reject the promise
             throw error;
         }
+    };
+
+    /** Starts the start-envoy.sh script */
+    public startEnvoy = async (): Promise<void> => {
+        this._logger("Starting envoy");
+        const exec = await this._emulatorContainer.exec({
+            AttachStderr: true,
+            AttachStdout: true,
+            Cmd: ["/android/sdk/start-envoy.sh"],
+        });
+        const execStream = await exec.start({});
+        await new Promise<void>((resolve, reject) => {
+            execStream.on("data", () => resolve());
+            execStream.on("error", (error) => reject(error));
+            execStream.on("end", () => resolve());
+            execStream.on("close", () => resolve());
+        });
     };
 
     /**

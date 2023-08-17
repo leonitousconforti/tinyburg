@@ -29,7 +29,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libxext6 libxfixes3 zlib1g libgl1 pulseaudio socat \
     iputils-ping \
     # Enable turncfg through usage of curl
-    curl ca-certificates && \
+    curl ca-certificates wget && \
+    wget -P /usr/local/bin/ https://github.com/envoyproxy/envoy/releases/download/v1.27.0/envoy-1.27.0-linux-x86_64 && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
@@ -49,16 +50,20 @@ COPY --from=dependency-preparer /tmp/sysimg/ /android/sdk/system-images/android/
 COPY --from=dependency-preparer /tmp/frida-server-16.0.19-android-x86_64 /android/frida/frida-server
 
 ADD avd/ /android/avd-home
+COPY envoy.yaml /etc/envoy/envoy.yaml
+COPY start-envoy.sh /android/sdk/
 COPY launch-emulator.sh /android/sdk/
-COPY install-frida-server.sh /android/sdk/
+COPY start-frida-server.sh /android/sdk/
 COPY default.pulse-audio /etc/pulse/default.pa
 
 RUN gpasswd -a root audio && \
-    chmod +x /android/sdk/install-frida-server.sh && \
+    chmod +x /android/sdk/start-envoy.sh && \
+    chmod +x /android/sdk/start-frida-server.sh && \
     chmod +x /android/sdk/launch-emulator.sh && \
-    chmod +x /android/sdk/platform-tools/adb
+    chmod +x /android/sdk/platform-tools/adb && \
+    chmod +x /usr/local/bin/envoy-1.27.0-linux-x86_64
 
-EXPOSE 5554 5555 8554 27042
+EXPOSE 5554 5555 8081 8554 8555 27042
 CMD ["/android/sdk/launch-emulator.sh"]
 
 HEALTHCHECK --interval=10s \
