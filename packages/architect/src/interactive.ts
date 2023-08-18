@@ -1,4 +1,4 @@
-// DEBUG=tinyburg:* node --loader ts-node/esm ./src/playground.ts
+// DEBUG=tinyburg:* node --loader ts-node/esm ./src/interactive.ts
 
 import architect from "./index.js";
 
