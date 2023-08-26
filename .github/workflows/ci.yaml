@@ -12,9 +12,8 @@ jobs:
     name: Node.js v${{ matrix.NodeVersion }}
     runs-on: ubuntu-latest
     strategy:
-      max-parallel: 1
       matrix:
-        NodeVersion: [16, 18]
+        NodeVersion: [16, 18, 20]
     steps:
       - uses: actions/checkout@v3
         with:
@@ -34,7 +33,7 @@ jobs:
       - name: Testing Server Online?
         run: |
           tailscale status
-          tailscale ping skynet.internal.leoconforti.us
+          tailscale ping tinyburg.internal.leoconforti.us
 
       - name: Start ssh agent
         run: |
@@ -55,7 +54,7 @@ jobs:
           ssh-add
 
       - name: Testing Server Reachable?
-        run: ssh root@skynet.internal.leoconforti.us "echo 'Hi, Mom!'"
+        run: ssh ci@tinyburg.internal.leoconforti.us "echo 'Hi, Mom!'"
 
       - name: Verify Change Logs
         run: node common/scripts/install-run-rush.js change --verify
@@ -72,4 +71,4 @@ jobs:
       - name: Rush test
         run: node common/scripts/install-run-rush.js retest --timeline --production
         env:
-          ARCHITECT_DOCKER_HOST: "ssh://root@skynet.internal.leoconforti.us:22"
+          ARCHITECT_DOCKER_HOST: "ssh://ci@tinyburg.internal.leoconforti.us:22"
