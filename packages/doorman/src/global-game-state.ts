@@ -32,9 +32,7 @@ export class GlobalGameStateHolder {
     private _goldTickets: number;
     private _floors: number;
     private _bitizens: number;
-    private _nextFloorCost: number;
     private _elevatorSpeed: number;
-    private _upgradeElevatorCost: number;
     private _screen: GameScreen = GameScreen.Tower;
     private readonly _version: string;
 
@@ -48,8 +46,6 @@ export class GlobalGameStateHolder {
         this._goldTickets = 0;
         this._elevatorSpeed = 1;
         this._version = "0.0.0";
-        this._nextFloorCost = Number.POSITIVE_INFINITY;
-        this._upgradeElevatorCost = Number.POSITIVE_INFINITY;
     }
 
     public static getInstance(): GlobalGameStateHolder {

@@ -4,11 +4,11 @@ import type { BaseAction } from "../actions/base-action.js";
 import type { EmulatorControllerClient } from "@tinyburg/architect/protobuf/emulator_controller.client.js";
 
 import { BaseHandler } from "./base-handler.js";
-import { loadTemplateByName } from "../image-operations/load-template.js";
+// import { loadTemplateByName } from "../image-operations/load-template.js";
 
-const note_stock: Image = await loadTemplateByName("note_stock");
-const button_rushall: Image = await loadTemplateByName("button_rushall");
-const button_stockall: Image = await loadTemplateByName("button_stockall");
+// const note_stock: Image = await loadTemplateByName("note_stock");
+// const button_rushall: Image = await loadTemplateByName("button_rushall");
+// const button_stockall: Image = await loadTemplateByName("button_stockall");
 
 export enum StockMode {
     INDIVIDUAL,

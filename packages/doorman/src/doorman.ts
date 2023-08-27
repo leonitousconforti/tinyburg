@@ -19,16 +19,14 @@ export class Doorman extends Emittery<
         [h in IHandlerName]: BaseAction[];
     }
 > {
-    private readonly _pollTimer: NodeJS.Timer;
     private readonly _emulatorControllerClient: EmulatorControllerClient;
 
     private _handlers: Set<BaseHandler<unknown>>;
 
-    public constructor(emulatorAddress: string, pollInterval: number) {
+    public constructor(emulatorAddress: string) {
         super();
         this._emulatorControllerClient = createEmulatorControllerClient(emulatorAddress);
         this._handlers = new Set();
-        this._pollTimer = setInterval(this.poll, pollInterval);
 
         this.on("Default Bitbook Note Handler", this.executeActions);
         this.on("Default Elevator Ride Handler", this.executeActions);
