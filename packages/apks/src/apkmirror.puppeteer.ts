@@ -13,8 +13,8 @@ const errorMessage: string =
     "Something is wrong with the puppeteer configuration or apkmirror has changed their website";
 
 export const getApkmirrorLatestDetails = async (): Promise<IPuppeteerDetails> => {
-    // Start a browser in headless mode and navigate to the apkmirror page
-    const browser = await puppeteer.launch({ headless: "new" });
+    // Start a browser and navigate to the apkmirror page
+    const browser = await puppeteer.launch({ headless: false });
     const page = await browser.newPage();
     await page.goto(baseUrl, { waitUntil: "load", timeout: 0 });
 
@@ -69,7 +69,7 @@ export const downloadLatestApkmirrorApk = async (
     const details = suppliedDetails ?? (await getApkmirrorLatestDetails());
 
     // Navigate to the page with the latest version
-    const browser = await puppeteer.launch({ headless: "new" });
+    const browser = await puppeteer.launch({ headless: false });
     const page = await browser.newPage();
     await page.goto(details.latestDownloadUrl, { waitUntil: "load", timeout: 0 });
 

@@ -12,8 +12,8 @@ const baseUrl: string = "https://m.apkpure.com/tiny-tower-8-bit-retro-tycoon/com
 const errorMessage: string = "Something is wrong with the puppeteer configuration or apkpure has changed their website";
 
 export const getApkpureLatestDetails = async (): Promise<IPuppeteerDetails> => {
-    // Start a browser in headless mode and navigate to the apkmirror page
-    const browser = await puppeteer.launch({ headless: "new" });
+    // Start a browser and navigate to the apkmirror page
+    const browser = await puppeteer.launch({ headless: false });
     const page = await browser.newPage();
     await page.goto(baseUrl, { waitUntil: "load", timeout: 0 });
 
@@ -52,9 +52,7 @@ export const downloadLatestApkpureApk = async (
 ): Promise<IPuppeteerDetails> => {
     // Get the details from apkpure for the latest version url
     const details = suppliedDetails ?? (await getApkpureLatestDetails());
-
-    // Open the browser in headless mode
-    const browser = await puppeteer.launch({ headless: "new" });
+    const browser = await puppeteer.launch({ headless: false });
 
     // https://github.com/adewaleng/node-apkpure-crawler/blob/5a13fd7dd17d33c1642796c5bf75365a54edd56f/src/download-apk.js#L40C1-L68C2
     const getWinudfUrl = async (downloadUrl: string): Promise<string> => {
