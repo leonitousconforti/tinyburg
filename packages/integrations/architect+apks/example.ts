@@ -1,5 +1,3 @@
-import type Dockerode from "dockerode";
-
 import loadApk from "@tinyburg/apks";
 import architect from "@tinyburg/architect";
 
@@ -9,23 +7,21 @@ import architect from "@tinyburg/architect";
 // process.env["DOCKER_HOST"] = "ssh://root@architect02.tinyburg.app:22";
 
 const apk: string = await loadApk("apkpure", "4.24.0");
-const { emulatorServices } = await architect({
-    reuseExistingContainers: false,
+const { emulatorContainer, installApk } = await architect({
     dockerConnectionOptions: {
         protocol: "ssh",
-        host: "skynet.internal.leoconforti.us",
+        host: "ci.tinyburg.app",
         port: 22,
-        username: "root",
+        username: "ci",
         sshOptions: {
             // eslint-disable-next-line dot-notation
             agent: process.env["SSH_AUTH_SOCK"],
         },
     },
 });
-await emulatorServices.installApk(apk);
 
-const emulatorContainer: Dockerode.Container = emulatorServices.getEmulatorContainer();
+await installApk(apk);
 console.log(emulatorContainer.id);
 
-await emulatorServices.stopAll();
-await emulatorServices.removeAll();
+await emulatorContainer.stop();
+await emulatorContainer.remove();
