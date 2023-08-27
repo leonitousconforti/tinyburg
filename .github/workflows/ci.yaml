@@ -65,14 +65,11 @@ jobs:
           node common/scripts/install-run-rush.js update-autoinstaller --name rush-prettier
           node common/scripts/install-run-rush.js update-autoinstaller --name rush-commitlint
 
-      - name: Rush build
+      - name: Rush build and test
         run: |
+          export DISPLAY=:99
           sudo Xvfb -ac :99 -screen 0 1280x1024x24 > /dev/null 2>&1 &
-          node common/scripts/install-run-rush.js rebuild --timeline --production
-        env:
-          DISPLAY: ":99"
-
-      - name: Rush test
-        run: node common/scripts/install-run-rush.js retest --timeline --production
+          node common/scripts/install-run-rush.js build --timeline --production
+          node common/scripts/install-run-rush.js test --timeline --production
         env:
           ARCHITECT_DOCKER_HOST: "ssh://ci@ci.internal.tinyburg.app:22"
