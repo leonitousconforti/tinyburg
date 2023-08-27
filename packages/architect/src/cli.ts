@@ -9,23 +9,22 @@ await yargs(process.argv.slice(2))
         "$0",
         "the default command",
         (yargs) =>
-            yargs
-                .option("reuse-existing-containers", { type: "boolean", default: false })
-                .option("emulator-container-name", { type: "string", demandOption: false })
-                .options({
-                    "adb-port": { type: "string", demandOption: false, default: "0" },
-                    "grpc-port": { type: "string", demandOption: false, default: "0" },
-                    "frida-port": { type: "string", demandOption: false, default: "0" },
-                    "console-port": { type: "string", demandOption: false, default: "0" },
-                }),
+            yargs.options({
+                "adb-port": { type: "string", demandOption: false, default: "0" },
+                "grpc-port": { type: "string", demandOption: false, default: "0" },
+                "frida-port": { type: "string", demandOption: false, default: "0" },
+                "console-port": { type: "string", demandOption: false, default: "0" },
+                "grpc-web-port": { type: "string", demandOption: false, default: "0" },
+                "envoy-admin-port": { type: "string", demandOption: false, default: "0" },
+            }),
         async (argv) => {
             await architect({
-                reuseExistingContainers: argv["reuse-existing-containers"],
-                emulatorContainerName: argv["emulator-container-name"],
                 portBindings: {
                     "5554/tcp": [{ HostPort: argv["console-port"] }],
                     "5555/tcp": [{ HostPort: argv["adb-port"] }],
+                    "8081/tcp": [{ HostPort: argv["envoy-admin-port"] }],
                     "8554/tcp": [{ HostPort: argv["grpc-port"] }],
+                    "8555/tcp": [{ HostPort: argv["grpc-web-port"] }],
                     "27042/tcp": [{ HostPort: argv["frida-port"] }],
                 },
             });

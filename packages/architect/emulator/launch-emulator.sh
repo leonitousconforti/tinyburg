@@ -1,18 +1,16 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Remove any previous lock files left over
-rm -f /tmp/pulse-socket
-rm -f /android/avd-home/Pixel2.avd/*.lock
-
-# Setup pulse audio for the webrtc video bridge
-mkdir -p /root/.config/pulse
-export PULSE_SERVER=unix:/tmp/pulse-socket
-pulseaudio -D --log-time=1 --log-target=newfile:/tmp/pulseverbose.log --log-time=1 --exit-idle-time=-1
-
-# Make sure the config is in the right place
-cp --no-clobber /android/avd-home/config.ini /android/avd-home/Pixel2.avd/config.ini
-
-# Start the adb server and the emulator
+rm -f /tmp/boot-completed
 /android/sdk/platform-tools/adb start-server
-/android/sdk/emulator/emulator -avd Pixel2 -no-window -no-boot-anim -read-only -ports 5554,5555 -grpc 8554 -gpu swiftshader_indirect -qemu -append panic=1
+/android/sdk/emulator/emulator -avd Pixel2 -no-window -gpu swiftshader_indirect -ports 5554,5555 -grpc 8554 -read-only -snapshot-list &
+/android/sdk/platform-tools/adb wait-for-device
+until /android/sdk/platform-tools/adb root; do echo "Failed to run adb root"; sleep 1s; done
+/android/sdk/platform-tools/adb push /android/frida/frida-server /data/local/tmp/
+/android/sdk/platform-tools/adb shell "chmod 755 /data/local/tmp/frida-server"
+/android/sdk/platform-tools/adb shell "/data/local/tmp/frida-server" &
+/android/sdk/platform-tools/adb forward tcp:27043 tcp:27042
+socat tcp-listen:27042,reuseaddr,fork tcp:127.0.0.1:27043 &
+/usr/local/bin/envoy-1.27.0-linux-x86_64 -c /etc/envoy/envoy.yaml &
+touch /tmp/boot-completed
+sleep infinity

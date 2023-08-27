@@ -22,13 +22,11 @@ ENV NVIDIA_DRIVER_CAPABILITIES ${NVIDIA_DRIVER_CAPABILITIES},display
 
 # Pulse audio is needed due to some webrtc dependencies.
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    # Emulator & video bridge dependencies
     libc6 libdbus-1-3 libfontconfig1 libgcc1 \
     libpulse0 libtinfo5 libx11-6 libxcb1 libxdamage1 \
     libnss3 libxcomposite1 libxcursor1 libxi6 \
     libxext6 libxfixes3 zlib1g libgl1 pulseaudio socat \
     iputils-ping \
-    # Enable turncfg through usage of curl
     curl ca-certificates wget && \
     wget -P /usr/local/bin/ https://github.com/envoyproxy/envoy/releases/download/v1.27.0/envoy-1.27.0-linux-x86_64 && \
     apt-get clean && \
@@ -51,14 +49,12 @@ COPY --from=dependency-preparer /tmp/frida-server-16.0.19-android-x86_64 /androi
 
 ADD avd/ /android/avd-home
 COPY envoy.yaml /etc/envoy/envoy.yaml
-COPY start-envoy.sh /android/sdk/
+COPY make-snapshot.sh /android/sdk/
 COPY launch-emulator.sh /android/sdk/
-COPY start-frida-server.sh /android/sdk/
 COPY default.pulse-audio /etc/pulse/default.pa
 
 RUN gpasswd -a root audio && \
-    chmod +x /android/sdk/start-envoy.sh && \
-    chmod +x /android/sdk/start-frida-server.sh && \
+    chmod +x /android/sdk/make-snapshot.sh && \
     chmod +x /android/sdk/launch-emulator.sh && \
     chmod +x /android/sdk/platform-tools/adb && \
     chmod +x /usr/local/bin/envoy-1.27.0-linux-x86_64
@@ -66,10 +62,10 @@ RUN gpasswd -a root audio && \
 EXPOSE 5554 5555 8081 8554 8555 27042
 CMD ["/android/sdk/launch-emulator.sh"]
 
-HEALTHCHECK --interval=10s \
-    --timeout=10s \
-    --retries=3 \
-    CMD /android/sdk/platform-tools/adb shell getprop dev.bootcomplete | grep "1"
+HEALTHCHECK --interval=1s \
+    --timeout=3s \
+    --retries=90 \
+    CMD bash -c "[ -f /tmp/boot-completed ]"
 
 LABEL android-sdk.emulator.version="10086546" \
     android-sdk.platform-tools.version="34.0.1" \

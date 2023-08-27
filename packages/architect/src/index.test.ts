@@ -5,12 +5,12 @@ const ARCHITECT_TEST_TIMEOUT_MS = 1000 * 60 * 8;
 
 describe("simple tests", () => {
     it(
-        "Should be able to create a container without additional services",
+        "Should be able to create a container",
         async () => {
-            const { emulatorServices } = await architect();
-            expect(emulatorServices.getEmulatorContainer().id).toBeDefined();
-            await emulatorServices.stopAll();
-            await emulatorServices.removeAll();
+            const { emulatorContainer } = await architect();
+            expect(emulatorContainer.id).toBeDefined();
+            await emulatorContainer.stop();
+            await emulatorContainer.remove();
         },
         ARCHITECT_TEST_TIMEOUT_MS
     );
