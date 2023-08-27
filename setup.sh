@@ -13,10 +13,9 @@ rush update-autoinstaller --name rush-commitlint
 
 echo "🩹 Running some bash setup scripts"
 (cd packages/apks/vendor && ./setup.sh)
-(cd packages/architect/jwt-provider && ./setup.sh)
 
 echo "❓ Where should I run @tinyburg/architect tests? [default: /var/run/docker.sock]"
-# export ARCHITECT_DOCKER_HOST="ssh://root@skynet.internal.leoconforti.us:22"
+# export ARCHITECT_DOCKER_HOST="ssh://ci@ci.tinyburg.app:22"
 
 echo "🏗️ Building all packages..."
 rush retest
