@@ -12,17 +12,14 @@
         "ghcr.io/devcontainers/features/github-cli:1": {},
         "ghcr.io/devcontainers-contrib/features/act:1": {},
         "ghcr.io/devcontainers/features/common-utils:2": {},
+        "ghcr.io/devcontainers/features/desktop-lite:1": {},
         "ghcr.io/devcontainers-contrib/features/black:2": {},
         "ghcr.io/devcontainers-contrib/features/mitmproxy:2": {},
         "ghcr.io/devcontainers-contrib/features/actionlint:1": {},
         "ghcr.io/devcontainers-contrib/features/digitalocean-cli:1": {},
         "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {},
-        "ghcr.io/frntn/devcontainers-features/gitleaks:1": {
-            "version": "v8.16.0"
-        },
-        "ghcr.io/devcontainers-contrib/features/apt-get-packages:1": {
-            "packages": "chromium"
-        }
+        "ghcr.io/frntn/devcontainers-features/gitleaks:1": { "version": "v8.16.0" },
+        "ghcr.io/devcontainers-contrib/features/apt-get-packages:1": { "packages": "chromium" }
     },
 
     "customizations": {
@@ -76,7 +73,6 @@
                         "source.organizeImports": true
                     }
                 },
-                "python.formatting.provider": "black",
                 "isort.args": ["--profile", "black"],
                 "files.associations": { "*.json": "jsonc", "package.json": "json", "cloudinit.conf": "plaintext" },
                 "files.exclude": {
