@@ -14,6 +14,8 @@
         "dist/"
     ],
     "scripts": {
+        "_phase:build": "heft run --only build -- --clean",
+        "build": "NODE_OPTIONS=\"--experimental-vm-modules --no-warnings\" heft test --clean",
         "templates:clean": "rimraf ./templates/metadata ./templates/raw ./templates/png",
         "templates:gen": "ts-node --esm ./templates/generate-sprites.ts && ts-node --esm ./templates/generate-font-characters.ts && ts-node --esm ./templates/generate-typings.ts"
     },

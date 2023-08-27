@@ -1,5 +1,3 @@
-import { EmulatorControllerClient } from "@tinyburg/architect/protobuf/emulator_controller.client.js";
-
 export interface IGlobalGameState {
     version: string;
     coins: number;
@@ -52,17 +50,6 @@ export class GlobalGameStateHolder {
         this._version = "0.0.0";
         this._nextFloorCost = Number.POSITIVE_INFINITY;
         this._upgradeElevatorCost = Number.POSITIVE_INFINITY;
-
-        this._queuedUpdates = new Set();
-        this.queueGameStateUpdates(
-            "bux",
-            "coins",
-            "elevatorSpeed",
-            "floors",
-            "goldTickets",
-            "nextFloorCost",
-            "upgradeElevatorCost"
-        );
     }
 
     public static getInstance(): GlobalGameStateHolder {
@@ -80,27 +67,11 @@ export class GlobalGameStateHolder {
             goldTickets: this._goldTickets,
             floors: this._floors,
             bitizens: this._bitizens,
-            nextFloorCost: this._nextFloorCost,
+            // nextFloorCost: this._nextFloorCost,
             elevatorSpeed: this._elevatorSpeed,
-            upgradeElevatorCost: this._upgradeElevatorCost,
+            // upgradeElevatorCost: this._upgradeElevatorCost,
             gameScreen: this._screen,
         };
-    }
-
-    public queueGameStateUpdates(...updates: GlobalGameStateUpdate[]): void {
-        for (const update of updates) this._queuedUpdates.add(update);
-    }
-
-    public async updateGlobalGameState(_client?: EmulatorControllerClient): Promise<boolean> {
-        // Check if there are any updates to perform
-        if (this._queuedUpdates.size === 0) {
-            return true;
-        }
-
-        // Perform the requested updates in the queue by analyzing screenshots
-
-        this._queuedUpdates.clear();
-        return true;
     }
 
     public setScreen(screen: GameScreen): void {
