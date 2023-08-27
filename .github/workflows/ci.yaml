@@ -33,7 +33,7 @@ jobs:
       - name: Testing Server Online?
         run: |
           tailscale status
-          tailscale ping ci.tinyburg.app
+          tailscale ping ci.internal.tinyburg.app
 
       - name: Start ssh agent
         run: |
@@ -54,7 +54,7 @@ jobs:
           ssh-add
 
       - name: Testing Server Reachable?
-        run: ssh ci@ci.tinyburg.app "echo 'Hi, Mom!'"
+        run: ssh ci@ci.internal.tinyburg.app "echo 'Hi, Mom!'"
 
       - name: Verify Change Logs
         run: node common/scripts/install-run-rush.js change --verify
@@ -71,4 +71,4 @@ jobs:
       - name: Rush test
         run: node common/scripts/install-run-rush.js retest --timeline --production
         env:
-          ARCHITECT_DOCKER_HOST: "ssh://ci@ci.tinyburg.app:22"
+          ARCHITECT_DOCKER_HOST: "ssh://ci@ci.internal.tinyburg.app:22"

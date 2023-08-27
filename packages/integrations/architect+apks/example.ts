@@ -10,7 +10,7 @@ const apk: string = await loadApk("apkpure", "4.24.0");
 const { emulatorContainer, installApk } = await architect({
     dockerConnectionOptions: {
         protocol: "ssh",
-        host: "ci.tinyburg.app",
+        host: "ci.internal.tinyburg.app",
         port: 22,
         username: "ci",
         sshOptions: {

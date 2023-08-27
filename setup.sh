@@ -18,7 +18,7 @@ echo "🏗️ Building all packages..."
 rush rebuild
 
 # echo "❓ Where should I run @tinyburg/architect tests? [default: /var/run/docker.sock]"
-# export ARCHITECT_DOCKER_HOST="ssh://ci@ci.tinyburg.app:22"
+# export ARCHITECT_DOCKER_HOST="ssh://ci@ci.internal.tinyburg.app:22"
 
 # echo "🧪 Testing all packages..."
 # rush retest
