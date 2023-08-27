@@ -53,6 +53,11 @@ jobs:
           ssh-add -D
           ssh-add
 
+      - name: X11 Display
+        run: |
+          export DISPLAY=:99
+          sudo Xvfb -ac :99 -screen 0 1280x1024x24 > /dev/null 2>&1 &
+
       - name: Testing Server Reachable?
         run: ssh ci@ci.internal.tinyburg.app "echo 'Hi, Mom!'"
 
