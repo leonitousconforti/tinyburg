@@ -1,4 +1,4 @@
-import type { ArchitectServices } from "@tinyburg/architect";
+import type Dockerode from "dockerode";
 
 import architect from "@tinyburg/architect";
 import loadApk, { LatestVersion } from "@tinyburg/apks";
@@ -21,19 +21,19 @@ const INSIGHT_PREP_TIMEOUT_MS = Number.parseInt(process.env["INSIGHT_PREP_TIMEOU
 
 describe("All getter agents should return something and not throw any errors", () => {
     let fridaAddress: string;
-    let emulatorServices: ArchitectServices;
+    let emulatorContainer: Dockerode.Container;
 
     beforeAll(async () => {
         const apk = await loadApk("apkpure", LatestVersion);
-        const architectResult = await architect({ reuseExistingContainers: false });
-        await architectResult.emulatorServices.installApk(apk);
+        const architectResult = await architect();
+        await architectResult.installApk(apk);
         fridaAddress = architectResult.fridaAddress;
-        emulatorServices = architectResult.emulatorServices;
+        emulatorContainer = architectResult.emulatorContainer;
     }, INSIGHT_PREP_TIMEOUT_MS);
 
     afterAll(async () => {
-        await emulatorServices.stopAll();
-        await emulatorServices.removeAll();
+        await emulatorContainer.stop();
+        await emulatorContainer.remove();
     }, INSIGHT_PREP_TIMEOUT_MS);
 
     it(

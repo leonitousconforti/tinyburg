@@ -7,23 +7,30 @@ export interface IGameStateAgentExports {
             version: string;
             coins: number;
             bux: number;
-            goldTickets: number;
-            floors: number;
-            bitizens: number;
+            goldenTickets: number;
+            allTimeGoldenTickets: number;
             elevatorSpeed: number;
-            // gameScreen:
-            //     | "Tower"
-            //     | "Hud"
-            //     | "Bitbook"
-            //     | "Bitizens"
-            //     | "Friends"
-            //     | "Raffle"
-            //     | "Rebuild"
-            //     | "Settings"
-            //     | "TechTree"
-            //     | "Upgrades"
-            //     | "Mission"
-            //     | "Unknown";
+            numberOfFloors: number;
+            numberOfBitizens: number;
+            numberOfRoofsUnlocked: number;
+            numberOfCostumesUnlocked: number;
+            numberOfLobbiesUnlocked: number;
+            numberOfElevatorsUnlocked: number;
+            gameScreen:
+                | "Tower"
+                | "Airport"
+                | "House"
+                | "Menu"
+                | "Bitbook"
+                | "Bitizens"
+                | "Friends"
+                | "Raffle"
+                | "Rebuild"
+                | "Settings"
+                | "TechTree"
+                | "Upgrades"
+                | "Mission"
+                | "Unknown";
         }
     >;
 }

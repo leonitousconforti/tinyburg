@@ -73,6 +73,7 @@ export class GetFloorData extends TinyTowerFridaAgent<GetFloorData> {
             delete floor.prods;
             delete floor.prodimgs;
             delete floor.index;
+            delete floor.fid;
         }
 
         return { TTVersion: version || "unknown", floorTypeEnumFields, floors };
