@@ -59,6 +59,12 @@ jobs:
       - name: Verify Change Logs
         run: node common/scripts/install-run-rush.js change --verify
 
+      - name: Cache
+        uses: actions/cache@v3
+        with:
+          path: common/temp/build-cache
+          key: ${{ runner.os }}-node_${{ matrix.NodeVersion }}_build-cache
+
       - name: Rush Install
         run: |
           node common/scripts/install-run-rush.js install
@@ -68,8 +74,10 @@ jobs:
       - name: Rush build and test
         run: |
           export DISPLAY=:99
-          sudo Xvfb -ac :99 -screen 0 1280x1024x24 > /dev/null 2>&1 &
+          sudo /usr/bin/Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
           node common/scripts/install-run-rush.js build --timeline --production
           node common/scripts/install-run-rush.js test --timeline --production
         env:
+          RUSH_BUILD_CACHE_ENABLED: 1
+          RUSH_BUILD_CACHE_WRITE_ALLOWED: 1
           ARCHITECT_DOCKER_HOST: "ssh://ci@ci.internal.tinyburg.app:22"
