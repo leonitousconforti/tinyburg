@@ -63,7 +63,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: common/temp/build-cache
-          key: ${{ runner.os }}-node_${{ matrix.NodeVersion }}_build-cache
+          key: ${{ runner.os }}_node-${{ matrix.NodeVersion }}_build-cache
 
       - name: Rush Install
         run: |
@@ -75,7 +75,6 @@ jobs:
         run: |
           export DISPLAY=:99
           sudo /usr/bin/Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
-          node common/scripts/install-run-rush.js build --timeline --production
           node common/scripts/install-run-rush.js test --timeline --production
         env:
           RUSH_BUILD_CACHE_ENABLED: 1
