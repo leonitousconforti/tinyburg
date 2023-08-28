@@ -160,7 +160,6 @@
         }
     },
 
-    "runArgs": ["--network=host"],
     "postCreateCommand": "/bin/bash ./setup.sh",
     "remoteEnv": { "PUPPETEER_EXECUTABLE_PATH": "/usr/bin/chromium" },
     "containerEnv": { "PUPPETEER_EXECUTABLE_PATH": "/usr/bin/chromium" }
