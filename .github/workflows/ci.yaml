@@ -59,7 +59,7 @@ jobs:
       - name: Verify Change Logs
         run: node common/scripts/install-run-rush.js change --verify
 
-      - name: Build cache
+      - name: Setup cache
         uses: actions/cache@v3
         with:
           path: |
