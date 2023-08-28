@@ -25,4 +25,4 @@ rush rebuild
 
 echo "✅ Devcontainer setup complete!"
 echo "🙏 Thank you for contributing to Tinyburg!"
-echo "📝 You can find docs at ..."
+echo "📝 You can find docs at https://github.com/leonitousconforti/tinyburg/tree/main/docs"
