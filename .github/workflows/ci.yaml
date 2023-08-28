@@ -59,10 +59,13 @@ jobs:
       - name: Verify Change Logs
         run: node common/scripts/install-run-rush.js change --verify
 
-      - name: Cache
+      - name: Build cache
         uses: actions/cache@v3
         with:
-          path: common/temp/build-cache
+          path: |
+            common/temp/build-cache
+            packages/apks/downloads/apkmirror
+            packages/apks/downloads/apkpure
           key: ${{ runner.os }}_node-${{ matrix.NodeVersion }}_build-cache
 
       - name: Rush Install
