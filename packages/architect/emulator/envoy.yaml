@@ -1,5 +1,4 @@
 admin:
-  access_log_path: "/dev/stdout"
   address:
     socket_address: { address: 0.0.0.0, port_value: 8081 }
 
@@ -15,13 +14,17 @@ static_resources:
                 "@type": type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
                 codec_type: auto
                 stat_prefix: ingress_http
+                access_log:
+                  - name: envoy.access_loggers.stdout
+                    typed_config:
+                      "@type": type.googleapis.com/envoy.extensions.access_loggers.stream.v3.StdoutAccessLog
                 route_config:
                   name: local_route
                   virtual_hosts:
                     - name: local_service
                       domains: ["*"]
                       routes:
-                        - match: { prefix: "/android.emulation.control" }
+                        - match: { prefix: "/android.emulation.control.EmulatorController" }
                           route:
                             cluster: emulator_service_grpc
                             max_stream_duration:
@@ -31,15 +34,15 @@ static_resources:
                             cluster: emulator_service_grpc
                             max_stream_duration:
                               grpc_timeout_header_max: 0s
-                      cors:
-                        allow_origin_string_match:
-                          - safe_regex:
-                              google_re2: {}
-                              regex: ".*"
-                        allow_methods: GET, PUT, DELETE, POST, OPTIONS
-                        allow_headers: keep-alive,user-agent,cache-control,content-type,content-transfer-encoding,x-accept-content-transfer-encoding,x-accept-response-streaming,x-user-agent,x-grpc-web,grpc-timeout,authorization
-                        max_age: "1728000"
-                        expose_headers: grpc-status,grpc-message
+                      typed_per_filter_config:
+                        envoy.filters.http.cors:
+                          "@type": type.googleapis.com/envoy.extensions.filters.http.cors.v3.CorsPolicy
+                          allow_origin_string_match:
+                            - safe_regex:
+                                regex: \*
+                          allow_methods: "GET, PUT, DELETE, POST, OPTIONS"
+                          allow_headers: keep-alive,user-agent,cache-control,content-type,content-transfer-encoding,x-accept-content-transfer-encoding,x-accept-response-streaming,x-user-agent,x-grpc-web,grpc-timeout
+                          expose_headers: grpc-status,grpc-message
                 http_filters:
                   - name: envoy.filters.http.grpc_web
                     typed_config:
@@ -53,16 +56,17 @@ static_resources:
 
   clusters:
     - name: emulator_service_grpc
-      connect_timeout: 1s
+      connect_timeout: 0.25s
       type: strict_dns
       lb_policy: round_robin
+      dns_lookup_family: v4_only
       http2_protocol_options: {}
       load_assignment:
-        cluster_name: emulator_service_grpc
+        cluster_name: emulator_service_grpc_0
         endpoints:
           - lb_endpoints:
               - endpoint:
                   address:
                     socket_address:
-                      address: 127.0.0.1
+                      address: localhost
                       port_value: 8554
