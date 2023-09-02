@@ -1,6 +1,6 @@
 import type { Image } from "../image-operations/image.js";
-import type { Rotation, ImageTransport, ImageFormat } from "@tinyburg/architect/protobuf/emulator_controller.js";
 import type { EmulatorControllerClient } from "@tinyburg/architect/protobuf/emulator_controller.client.js";
+import type { Rotation, ImageTransport, ImageFormat } from "@tinyburg/architect/protobuf/emulator_controller.js";
 
 import assert from "node:assert";
 import { ImageType } from "../image-operations/image.js";
@@ -19,6 +19,9 @@ const defaultScreenshotRequest: ImageFormat = {
     // No rotation
     rotation: {
         rotation: Rotation_SkinRotation.PORTRAIT,
+        xAxis: 0,
+        yAxis: 0,
+        zAxis: 0,
     } as Rotation,
 
     // Use the width and height of the display
@@ -31,7 +34,11 @@ const defaultScreenshotRequest: ImageFormat = {
     // Transport the image as a raw buffer
     transport: {
         channel: ImageTransport_TransportChannel.TRANSPORT_CHANNEL_UNSPECIFIED,
+        handle: "",
     } as ImageTransport,
+
+    // Ignore folding display settings
+    foldedDisplay: undefined,
 
     // Ignore display mode because AVD is not re-sizeable
     displayMode: DisplayModeValue.PHONE,
