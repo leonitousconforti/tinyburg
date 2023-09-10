@@ -4,16 +4,16 @@ WORKDIR /tmp
 
 # https://developer.android.com/studio/emulator_archive
 # https://developer.android.com/studio/releases/platform-tools
-RUN wget https://dl.google.com/android/repository/emulator-linux_x64-10330179.zip && \
+RUN wget https://dl.google.com/android/repository/emulator-linux_x64-10410302.zip && \
     wget https://dl.google.com/android/repository/platform-tools_r34.0.1-linux.zip && \
     wget https://dl.google.com/android/repository/sys-img/google_apis/x86_64-30_r12.zip && \
     wget https://github.com/frida/frida/releases/download/16.0.19/frida-server-16.0.19-android-x86_64.xz && \
     unzip -u -o x86_64-30_r12.zip -d sysimg && \
-    unzip -u -o emulator-linux_x64-10330179.zip && \
+    unzip -u -o emulator-linux_x64-10410302.zip && \
     unzip -u -o platform-tools_r34.0.1-linux.zip && \
     xz --decompress frida-server-16.0.19-android-x86_64.xz && \
     rm -f x86_64-30_r12.zip && \
-    rm -f emulator-linux_x64-10330179.zip && \
+    rm -f emulator-linux_x64-10410302.zip && \
     rm -f platform-tools_r34.0.1-linux.zip && \
     rm -f frida-server-16.0.19-android-x86_64.xz
 
@@ -52,6 +52,7 @@ COPY envoy.yaml /etc/envoy/envoy.yaml
 COPY make-snapshot.sh /android/sdk/
 COPY launch-emulator.sh /android/sdk/
 COPY default.pulse-audio /etc/pulse/default.pa
+COPY emulator_access.json /android/sdk/emulator/lib/emulator_access.json
 
 RUN gpasswd -a root audio && \
     chmod +x /android/sdk/make-snapshot.sh && \
@@ -67,7 +68,7 @@ HEALTHCHECK --interval=1s \
     --retries=90 \
     CMD bash -c "[ -f /tmp/boot-completed ]"
 
-LABEL android-sdk.emulator.version="10330179" \
+LABEL android-sdk.emulator.version="10410302" \
     android-sdk.platform-tools.version="34.0.1" \
     frida-server.version="16.0.19-android-x86_64" \
     android-sdk.system-image.version="sys-30-google-apis-x64-r12" \
