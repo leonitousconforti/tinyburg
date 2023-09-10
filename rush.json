@@ -414,7 +414,7 @@
         //   "tags": ["tools"]
         // }
 
-        // Packages
+        // Packages (do get published)
         {
             "packageName": "@tinyburg/apks",
             "projectFolder": "packages/apks",
@@ -460,25 +460,13 @@
             "projectFolder": "packages/insight",
             "shouldPublish": true
         },
-
-        // Rigs
         {
-            "packageName": "@tinyburg/tsconfig-rig",
-            "projectFolder": "packages/tsconfig-rig",
-            "shouldPublish": false
+            "packageName": "@tinyburg/spectator",
+            "projectFolder": "packages/spectator",
+            "shouldPublish": true
         },
 
-        // Apps
-        {
-            "packageName": "@tinyburg/architect-orchestrator",
-            "projectFolder": "apps/architect-orchestrator",
-            "shouldPublish": false
-        },
-        {
-            "packageName": "@tinyburg/architect-viewer",
-            "projectFolder": "apps/architect-viewer",
-            "shouldPublish": false
-        },
+        // Apps (do not get published)
         {
             "packageName": "@tinyburg/authproxy",
             "projectFolder": "apps/authproxy",
@@ -490,8 +478,18 @@
             "shouldPublish": false
         },
         {
+            "packageName": "@tinyburg/bank",
+            "projectFolder": "apps/bank",
+            "shouldPublish": false
+        },
+        {
             "packageName": "@tinyburg/discord-bot",
             "projectFolder": "apps/discord-bot",
+            "shouldPublish": false
+        },
+        {
+            "packageName": "@tinyburg/economy",
+            "projectFolder": "apps/economy",
             "shouldPublish": false
         },
         {
@@ -504,8 +502,13 @@
             "projectFolder": "apps/trading-site",
             "shouldPublish": false
         },
+        {
+            "packageName": "@tinyburg/urbanization",
+            "projectFolder": "apps/urbanization",
+            "shouldPublish": false
+        },
 
-        // Integration examples
+        // Integration examples (do not get published)
         {
             "packageName": "@tinyburg/architect-apks-integration",
             "projectFolder": "packages/integrations/architect+apks",
@@ -522,6 +525,11 @@
             "shouldPublish": false
         },
         {
+            "packageName": "@tinyburg/doorman-bitprints-integration",
+            "projectFolder": "packages/integrations/doorman+bitprints",
+            "shouldPublish": false
+        },
+        {
             "packageName": "@tinyburg/explorer-architect-apks-integration",
             "projectFolder": "packages/integrations/explorer+architect+apks",
             "shouldPublish": false
@@ -529,6 +537,13 @@
         {
             "packageName": "@tinyburg/insight-architect-apks-integration",
             "projectFolder": "packages/integrations/insight+architect+apks",
+            "shouldPublish": false
+        },
+
+        // Rigs (do not get published)
+        {
+            "packageName": "@tinyburg/tsconfig-rig",
+            "projectFolder": "packages/tsconfig-rig",
             "shouldPublish": false
         }
     ]

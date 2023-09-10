@@ -5,7 +5,7 @@ import type { ServerStreamingCall } from "@protobuf-ts/runtime-rpc";
 import { JsepMsg } from "@tinyburg/architect/protobuf/rtc_service.js";
 import { KeyboardEvent, MouseEvent, TouchEvent } from "@tinyburg/architect/protobuf/emulator_controller.js";
 
-export default class JsepProtocol {
+export class JsepProtocol {
     private readonly _rtcClient: IRtcClient;
     private readonly _onDisconnected: () => void;
 
@@ -34,9 +34,13 @@ export default class JsepProtocol {
              */
             if (signal.start) {
                 peerConnection = new RTCPeerConnection(signal.start as RTCConfiguration);
-                peerConnection.ontrack = (event: RTCTrackEvent) => onMediaTrack(event.track);
+                peerConnection.ontrack = (event: RTCTrackEvent) => {
+                    console.log(event);
+                    onMediaTrack(event.track);
+                };
                 peerConnection.onicecandidate = async (event: RTCPeerConnectionIceEvent) => {
                     if (!event.candidate) return;
+                    console.log(event.candidate);
                     await this._sendJsep(rtcId, { candidate: event.candidate });
                 };
                 peerConnection.ondatachannel = (event: RTCDataChannelEvent) => {
@@ -60,6 +64,7 @@ export default class JsepProtocol {
              * that can be assigned to a RTCSessionDescription
              */
             if (signal.sdp) {
+                console.log(signal);
                 await peerConnection?.setRemoteDescription(new RTCSessionDescription(signal));
                 const answer = await peerConnection?.createAnswer();
                 await peerConnection?.setLocalDescription(answer);
@@ -72,6 +77,7 @@ export default class JsepProtocol {
              * RTCIceCandidate.
              */
             if (signal.candidate) {
+                console.log(signal);
                 candidates.push(signal);
             }
         }
@@ -95,3 +101,5 @@ export default class JsepProtocol {
         await this._rtcClient.sendJsepMessage(request);
     };
 }
+
+export default JsepProtocol;

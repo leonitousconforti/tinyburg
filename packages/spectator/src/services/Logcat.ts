@@ -7,6 +7,8 @@ export class Logcat {
     private readonly _emulatorClient: IEmulatorControllerClient;
     private readonly _onLogcatMessages: (logcatMessages: string[]) => void;
 
+    private _messages: string[] = [];
+    private _maxHistory: number = 100;
     private _offset: bigint = BigInt(0);
     private _stream: ServerStreamingCall<LogMessage, LogMessage> | undefined;
 
@@ -23,7 +25,10 @@ export class Logcat {
         this._stream = this._emulatorClient.streamLogcat(request);
         for await (const logMessages of this._stream.responses) {
             this._offset = logMessages.next;
-            this._onLogcatMessages(logMessages.contents.split("\n"));
+            this._messages = [...logMessages.contents.split("\n"), ...this._messages]
+                .filter((message) => message !== "")
+                .slice(0, this._maxHistory);
+            this._onLogcatMessages(this._messages);
         }
     };
 
