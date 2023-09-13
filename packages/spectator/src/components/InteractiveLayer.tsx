@@ -25,17 +25,7 @@ export const WithMouseKeyHandler: React.FunctionComponent<IWithMouseKeyHandlerPr
     const [deviceWidth, setDeviceWidth] = useState(0);
     const [deviceHeight, setDeviceHeight] = useState(0);
 
-    const [mouse, setMouse] = useState<{
-        x: number;
-        y: number;
-        mouseButton: number;
-        mouseDown: boolean;
-    }>({
-        x: -1,
-        y: -1,
-        mouseButton: 0,
-        mouseDown: false,
-    });
+    const [mouseDown, setMouseDown] = useState(false);
 
     const getScreenSize = useCallback(async () => {
         const status = await emulatorClient.getStatus({}).response;
@@ -59,8 +49,17 @@ export const WithMouseKeyHandler: React.FunctionComponent<IWithMouseKeyHandlerPr
         return { x: x, y: y, scaleX: scaleX, scaleY: scaleY };
     };
 
-    const sendMouseCoordinates = (): void => {
-        const { mouseDown, mouseButton, x, y } = mouse;
+    const sendMouseCoordinates = ({
+        x,
+        y,
+        mouseButton,
+        mouseDown,
+    }: {
+        x: number;
+        y: number;
+        mouseButton: number;
+        mouseDown: boolean;
+    }): void => {
         const request = MouseEvent.create();
         const scaledCoordinates = scaleCoordinates(x, y);
         request.x = scaledCoordinates.x;
@@ -71,28 +70,38 @@ export const WithMouseKeyHandler: React.FunctionComponent<IWithMouseKeyHandlerPr
 
     const handleMouseDown = (event: React.MouseEvent): void => {
         const { offsetX, offsetY } = event.nativeEvent;
-        setMouse({
+        const mouse = {
             x: offsetX,
             y: offsetY,
             mouseDown: true,
-            mouseButton: event.button === 0 ? 1 : event.button === 2 ? 2 : 0,
-        });
-        sendMouseCoordinates();
+            mouseButton: (1 / 2) * event.button + 1,
+        };
+        setMouseDown(true);
+        sendMouseCoordinates(mouse);
     };
 
     const handleMouseUp = (event: React.MouseEvent): void => {
         const { offsetX, offsetY } = event.nativeEvent;
-        setMouse({ x: offsetX, y: offsetY, mouseDown: false, mouseButton: 0 });
-        sendMouseCoordinates();
+        const mouse = {
+            x: offsetX,
+            y: offsetY,
+            mouseDown: false,
+            mouseButton: (1 / 2) * event.button + 1,
+        };
+        setMouseDown(false);
+        sendMouseCoordinates(mouse);
     };
 
     const handleMouseMove = (event: React.MouseEvent): void => {
-        if (!mouse.mouseDown) return;
+        if (!mouseDown) return;
         const { offsetX, offsetY } = event.nativeEvent;
-        mouse.x = offsetX;
-        mouse.y = offsetY;
-        setMouse(mouse);
-        sendMouseCoordinates();
+        const mouse = {
+            x: offsetX,
+            y: offsetY,
+            mouseDown: true,
+            mouseButton: (1 / 2) * event.button + 1,
+        };
+        sendMouseCoordinates(mouse);
     };
 
     const scaleAxis = (value: number, minIn: number, maxIn: number): number => {
