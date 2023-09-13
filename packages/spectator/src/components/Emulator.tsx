@@ -28,7 +28,9 @@ export const Emulator: React.FunctionComponent<IEmulatorProps> = ({ address }) =
             <Grid container spacing={3}>
                 <Grid item xs={12} sm={6}>
                     <Container maxWidth="sm">
-                        <WebRtcView jsep={jsepService} muted={true} volume={1} />
+                        <WithMouseKeyHandler emulatorClient={emulatorClient} jsep={jsepService}>
+                            <WebRtcView jsep={jsepService} muted={true} volume={1} />
+                        </WithMouseKeyHandler>
                     </Container>
                 </Grid>
                 <Grid item xs={12} sm={6}>

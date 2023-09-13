@@ -5,10 +5,10 @@ import type { ServerStreamingCall } from "@protobuf-ts/runtime-rpc";
 import { JsepMsg } from "@tinyburg/architect/protobuf/rtc_service.js";
 import { KeyboardEvent, MouseEvent, TouchEvent } from "@tinyburg/architect/protobuf/emulator_controller.js";
 
+// https://rtcweb-wg.github.io/jsep
 export class JsepProtocol {
     private readonly _rtcClient: IRtcClient;
     private readonly _onDisconnected: () => void;
-
     private _eventForwarders: Record<string, RTCDataChannel> = {};
 
     public constructor(rtcServiceClient: IRtcClient, onDisconnected: () => void = () => {}) {
@@ -16,12 +16,11 @@ export class JsepProtocol {
         this._onDisconnected = onDisconnected;
     }
 
+    // https://rtcweb-wg.github.io/jsep/#sec.detailed-example
     public startStream = async (onMediaTrack: (event: MediaStreamTrack) => void): Promise<void> => {
+        let peerConnection: RTCPeerConnection | undefined;
         const rtcId: RtcId = await this._rtcClient.requestRtcStream({}).response;
         const jsepStream: ServerStreamingCall<RtcId, JsepMsg> = this._rtcClient.receiveJsepMessages(rtcId);
-
-        let candidates: RTCIceCandidateInit[] = [];
-        let peerConnection: RTCPeerConnection | undefined;
 
         for await (const response of jsepStream.responses) {
             const signal = JSON.parse(response.message);
@@ -34,17 +33,13 @@ export class JsepProtocol {
              */
             if (signal.start) {
                 peerConnection = new RTCPeerConnection(signal.start as RTCConfiguration);
-                peerConnection.ontrack = (event: RTCTrackEvent) => {
-                    console.log(event);
-                    onMediaTrack(event.track);
+                peerConnection.ontrack = (event: RTCTrackEvent) => onMediaTrack(event.track);
+                peerConnection.ondatachannel = (event: RTCDataChannelEvent) => {
+                    this._eventForwarders[event.channel.label] = event.channel;
                 };
                 peerConnection.onicecandidate = async (event: RTCPeerConnectionIceEvent) => {
                     if (!event.candidate) return;
-                    console.log(event.candidate);
                     await this._sendJsep(rtcId, { candidate: event.candidate });
-                };
-                peerConnection.ondatachannel = (event: RTCDataChannelEvent) => {
-                    this._eventForwarders[event.channel.label] = event.channel;
                 };
             }
 
@@ -53,7 +48,6 @@ export class JsepProtocol {
              * has stopped the RTC stream.
              */
             if (signal.bye) {
-                candidates = [];
                 peerConnection?.close();
                 this._eventForwarders = {};
                 this._onDisconnected();
@@ -64,10 +58,13 @@ export class JsepProtocol {
              * that can be assigned to a RTCSessionDescription
              */
             if (signal.sdp) {
-                console.log(signal);
-                await peerConnection?.setRemoteDescription(new RTCSessionDescription(signal));
-                const answer = await peerConnection?.createAnswer();
-                await peerConnection?.setLocalDescription(answer);
+                if (!peerConnection) {
+                    throw new Error("peerConnection is not initialized from sdp signal");
+                }
+
+                await peerConnection.setRemoteDescription(new RTCSessionDescription(signal));
+                const answer = await peerConnection.createAnswer();
+                await peerConnection.setLocalDescription(answer);
                 await this._sendJsep(rtcId, { sdp: answer });
             }
 
@@ -77,8 +74,10 @@ export class JsepProtocol {
              * RTCIceCandidate.
              */
             if (signal.candidate) {
-                console.log(signal);
-                candidates.push(signal);
+                if (!peerConnection) {
+                    throw new Error("peerConnection is not initialized from candidate signal");
+                }
+                await peerConnection.addIceCandidate(new RTCIceCandidate(signal));
             }
         }
     };
