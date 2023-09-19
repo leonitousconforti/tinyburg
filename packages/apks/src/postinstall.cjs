@@ -4,7 +4,7 @@ async function main() {
     await Promise.all([
         loadApk("TinyTower", defaultVersion, defaultSupplier, defaultArchitecture),
         loadApk("LegoTower", defaultVersion, defaultSupplier, defaultArchitecture),
-        loadApk("TinyTowerVegas", defaultVersion, defaultSupplier, defaultArchitecture),
+        // loadApk("TinyTowerVegas", defaultVersion, defaultSupplier, defaultArchitecture),
     ]);
 }
 
