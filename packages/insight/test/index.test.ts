@@ -1,7 +1,7 @@
 import type Dockerode from "dockerode";
 
+import loadApk from "@tinyburg/apks";
 import architect from "@tinyburg/architect";
-import loadApk, { LatestVersion } from "@tinyburg/apks";
 import { bootstrapAgentOnRemote, AllAgents, cleanupAgent } from "../src/index.js";
 
 const GoodAgent = AllAgents["GoodAgent"];
@@ -24,7 +24,7 @@ describe("All getter agents should return something and not throw any errors", (
     let emulatorContainer: Dockerode.Container;
 
     beforeAll(async () => {
-        const apk = await loadApk("apkpure", LatestVersion);
+        const apk = await loadApk("TinyTower");
         const architectResult = await architect();
         await architectResult.installApk(apk);
         fridaAddress = architectResult.fridaAddress;

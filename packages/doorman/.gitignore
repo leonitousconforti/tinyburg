@@ -1,5 +1,3 @@
-/dist
-
 # Generated assets
 /assets/*
 !/assets/extract.py
