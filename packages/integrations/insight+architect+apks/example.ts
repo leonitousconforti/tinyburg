@@ -2,7 +2,7 @@ import loadApk from "@tinyburg/apks";
 import architect from "@tinyburg/architect";
 import { AllAgents, bootstrapAgentOnRemote, cleanupAgent } from "@tinyburg/insight";
 
-const apk: string = await loadApk("apkpure", "4.24.0");
+const apk: string = await loadApk("TinyTower");
 const { emulatorContainer, fridaAddress, installApk } = await architect();
 await installApk(apk);
 
