@@ -1,2 +1,27 @@
+/* eslint-disable @rushstack/no-new-null */
+/* eslint-disable @typescript-eslint/naming-convention */
+
+import net from "node:net";
+import url from "node:url";
+import path from "node:path";
+
+import Debug from "debug";
+import express from "express";
+
+import loadapk from "@tinyburg/apks";
 import architect from "@tinyburg/architect";
-import spectator from "@tinyburg/spectator";
+
+const apk: string = await loadapk("TinyTower", "latest version");
+const logger: Debug.Debugger = Debug.debug("tinyburg:integrations:architect+spectator");
+const spectator: string = url.fileURLToPath(new URL("node_modules/@tinyburg/spectator/build", import.meta.url));
+
+const { envoyGrpcWebAddress, installApk } = await architect();
+await installApk(apk);
+
+const address: net.AddressInfo | string | null = express()
+    .use(express.static(spectator))
+    .get("/", (_request, response) => response.sendFile(path.join(spectator, "index.html")))
+    .listen(9000)
+    .address();
+
+logger("Available at %s?address=%s", address, envoyGrpcWebAddress);
