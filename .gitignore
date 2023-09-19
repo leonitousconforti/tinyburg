@@ -45,6 +45,10 @@ common/autoinstallers/*/.npmrc
 .heft
 .cache
 
+# Typescript
+**/dist/
+**/build/
+
 # gitleaks
 .gitleaks.toml
 
