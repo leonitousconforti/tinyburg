@@ -22,4 +22,4 @@ express()
     .get("/", (_request, response) => response.sendFile(path.join(spectator, "index.html")))
     .listen(9000);
 
-logger("Available at localhost:9000/?address=http://%s", envoyGrpcWebAddress);
+logger("Available at localhost:9000/?address=%s", envoyGrpcWebAddress);
