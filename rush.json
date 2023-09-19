@@ -515,6 +515,11 @@
             "shouldPublish": false
         },
         {
+            "packageName": "@tinyburg/architect-spectator-integration",
+            "projectFolder": "packages/integrations/architect+spectator",
+            "shouldPublish": false
+        },
+        {
             "packageName": "@tinyburg/core-authproxy-integration",
             "projectFolder": "packages/integrations/core+authproxy",
             "shouldPublish": false
