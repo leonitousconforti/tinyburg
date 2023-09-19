@@ -1,7 +1,6 @@
 /* eslint-disable @rushstack/no-new-null */
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import net from "node:net";
 import url from "node:url";
 import path from "node:path";
 
@@ -18,10 +17,9 @@ const spectator: string = url.fileURLToPath(new URL("node_modules/@tinyburg/spec
 const { envoyGrpcWebAddress, installApk } = await architect();
 await installApk(apk);
 
-const address: net.AddressInfo | string | null = express()
+express()
     .use(express.static(spectator))
     .get("/", (_request, response) => response.sendFile(path.join(spectator, "index.html")))
-    .listen(9000)
-    .address();
+    .listen(9000);
 
-logger("Available at %s?address=%s", address, envoyGrpcWebAddress);
+logger("Available at localhost:9000/?address=http://%s", envoyGrpcWebAddress);
