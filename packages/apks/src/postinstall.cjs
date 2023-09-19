@@ -1,8 +1,11 @@
 async function main() {
-    const { LatestDetails } = await import("./latest-version.js");
-    const { downloadLatestApkpureApk } = await import("./apkpure.puppeteer.js");
-    const { downloadLatestApkmirrorApk } = await import("./apkmirror.puppeteer.js");
-    await Promise.all([downloadLatestApkpureApk(LatestDetails[0]), downloadLatestApkmirrorApk(LatestDetails[1])]);
+    const { loadApk } = await import("./index.js");
+    const { defaultVersion, defaultSupplier, defaultArchitecture } = await import("./types.js");
+    await Promise.all([
+        loadApk("TinyTower", defaultVersion, defaultSupplier, defaultArchitecture),
+        loadApk("LegoTower", defaultVersion, defaultSupplier, defaultArchitecture),
+        loadApk("TinyTowerVegas", defaultVersion, defaultSupplier, defaultArchitecture),
+    ]);
 }
 
 main().catch((error) => console.error(error));

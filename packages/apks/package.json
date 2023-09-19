@@ -31,8 +31,7 @@
     },
     "dependencies": {
         "debug": "~4.3.4",
-        "got": "~13.0.0",
-        "supports-color": "~9.4.0"
+        "got": "~13.0.0"
     },
     "devDependencies": {
         "@rushstack/eslint-config": "3.3.2",

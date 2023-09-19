@@ -1,108 +1,146 @@
-import type { IPuppeteerDetails } from "./shared.puppeteer.js";
+import type { IPuppeteerDetails, RequestedGame, RequestedArchitecture } from "./types.js";
 
-import got from "got";
-import fs from "node:fs";
 import Debug from "debug";
-import url from "node:url";
 import puppeteer from "puppeteer";
-import stream from "node:stream/promises";
 
-const logger: Debug.Debugger = Debug.debug("tinyburg:apks:puppeteer:apkpure");
-const baseUrl: string = "https://www.apkmirror.com/apk/nimblebit-llc/tiny-tower";
-const errorMessage: string =
-    "Something is wrong with the puppeteer configuration or apkmirror has changed their website";
+const logger: Debug.Debugger = Debug.debug("tinyburg:apks:puppeteer:apkmirror");
 
-export const getApkmirrorLatestDetails = async (): Promise<IPuppeteerDetails> => {
-    // Start a browser and navigate to the apkmirror page
-    const browser = await puppeteer.launch({ headless: false });
-    const page = await browser.newPage();
-    await page.goto(baseUrl, { waitUntil: "load", timeout: 0 });
+/**
+ * Apkmirror only has the base game and lego tower uploaded, it does not have
+ * tiny tower vegas uploaded. These are the pages where we will start trying to
+ * download each game from.
+ */
+const productPages: { [k in "TinyTower" | "LegoTower"]: string } = {
+    TinyTower: "https://www.apkmirror.com/apk/nimblebit-llc/tiny-tower",
+    LegoTower: "https://www.apkmirror.com/apk/nimblebit-llc/lego-tower",
+};
 
-    // Grab the detail banner for the top/first entry
-    const detailBanner = await page.$("#primary > div.listWidget.p-relative > div:nth-child(2) > div.appRow > div");
-    if (!detailBanner) {
-        await browser.close();
-        throw new Error(errorMessage);
+/**
+ * For a given version, these are the pages for all the releases under that
+ * version for each game. Each version can have multiple releases for different
+ * architectures/revisions etc.
+ */
+const releasePages: { [k in keyof typeof productPages]: (version: string) => string } = {
+    TinyTower: (version: string) => `${productPages.TinyTower}/tiny-tower-${version}-release/`,
+    LegoTower: (version: string) => `${productPages.LegoTower}/lego-tower-${version}-release/`,
+};
+
+export const getApkmirrorDetails = async (
+    game: RequestedGame,
+    versionsBeforeLatest: number,
+    architecture: RequestedArchitecture
+): Promise<[downloadUrl: string, details: IPuppeteerDetails]> => {
+    if (game === "TinyTowerVegas") {
+        throw new Error("TinyTower Vegas is not available on apkmirror");
     }
 
-    // Parse desired information
-    const name: string | undefined = await detailBanner.$eval(
-        "div:nth-child(2) > div > h5 > a",
-        (node) => node.textContent
+    // Start a browser and navigate to the apkmirror product page
+    const browser = await puppeteer.launch({ headless: false });
+    const page = await browser.newPage();
+    logger("Navigating to product page %s", productPages[game]);
+    await page.goto(productPages[game], { waitUntil: "load", timeout: 15_000 });
+
+    // Grab the detail banner for the desired entry
+    const versionIndex = 2 + versionsBeforeLatest;
+    const detailBanner = await page.$(
+        `#primary > div.listWidget.p-relative > div:nth-child(${versionIndex}) > div.appRow > div`
     );
+    if (!detailBanner) {
+        await browser.close();
+        throw new Error("Could not find detail banner on apkmirror website");
+    }
+
+    // Parse updatedDate, and version information
     const updatedDate: string | undefined = await detailBanner.$eval(
         "div.table-cell.hidden-xs > span > span",
         (node) => node.textContent
     );
-    const latestVersion: string | undefined = await detailBanner.$eval(
+    const version: string | undefined = await detailBanner.$eval(
         "div:nth-child(2) > div > h5 > a",
         (node) => (node.textContent as string).match(/\d+.\d+.\d+/gm)?.[0]
     );
 
-    // Make sure to close the browser here in case we throw an error
-    await browser.close();
-    logger("Extracted %o from apkmirror website", { name, updatedDate, latestVersion });
-
-    // Check that everything was retrieved correctly
-    if (!name || !updatedDate || !latestVersion) {
-        throw new Error(errorMessage);
+    // Check that everything above was retrieved correctly
+    logger("Extracted %o from apkmirror website", { updatedDate, version });
+    if (!updatedDate) {
+        await browser.close();
+        throw new Error("Could not extract updated date from apkmirror website");
+    }
+    if (!version) {
+        await browser.close();
+        throw new Error("Could not extract latest version from apkmirror website");
     }
 
-    const versionToUrlVersion = latestVersion.replaceAll(".", "-");
+    // Navigate to the releases page for this version
+    const releasePage: string = releasePages[game](version.replaceAll(".", "-") || "unknown");
+    logger("Navigating to release page %s", releasePage);
+    await page.goto(releasePage, { waitUntil: "load", timeout: 15_000 });
 
-    return {
-        name,
-        updatedDate,
-        latestVersion,
-        latestDownloadUrl:
-            baseUrl +
-            `/tiny-tower-${versionToUrlVersion}-release` +
-            `/tiny-tower-8-bit-retro-tycoon-${versionToUrlVersion}-android-apk-download/`,
-    };
-};
+    // Grab the downloads table and find the row for the desired architecture
+    const downloadsTable = await page.$$("#downloads > div > div > div");
+    const availableDownloadsByArchitecture = await Promise.all(
+        downloadsTable.map(async (tableEntry) => {
+            const architectureChild = await tableEntry.$("div:nth-child(2)");
+            const architectureText = await architectureChild?.getProperty("innerText");
+            const architectureTextString: string = await architectureText?.jsonValue();
+            return [architectureTextString, tableEntry] as const;
+        })
+    );
+    const downloadRowForArchitecture = availableDownloadsByArchitecture.find(([entry]) => entry.includes(architecture));
+    if (!downloadRowForArchitecture) {
+        await browser.close();
+        throw new Error("Could not find download row for architecture on apkmirror website");
+    }
 
-export const downloadLatestApkmirrorApk = async (
-    suppliedDetails?: IPuppeteerDetails,
-    downloadsFolder: string = url.fileURLToPath(new URL("../downloads/apkmirror/", import.meta.url))
-): Promise<IPuppeteerDetails> => {
-    // Get the details from apkmirror for the latest version url
-    const details = suppliedDetails ?? (await getApkmirrorLatestDetails());
-
-    // Navigate to the page with the latest version
-    const browser = await puppeteer.launch({ headless: false });
-    const page = await browser.newPage();
-    await page.goto(details.latestDownloadUrl, { waitUntil: "load", timeout: 0 });
-
-    // Grab the download apk button
-    const downloadButton = await page.$("#file > div.row.d-flex.f-a-start > div.center.f-sm-50 > div > a");
+    // Grab the download button for the desired architecture
+    const downloadButton = await downloadRowForArchitecture[1]?.$("div:nth-child(5) > a");
     if (!downloadButton) {
         await browser.close();
-        throw new Error(errorMessage);
+        throw new Error("Could not find download button on apkmirror website");
     }
 
     // Get the download link for the page that automatically starts downloading the apk
-    const pageWithAutomaticDownloadButtonHref = await downloadButton.getProperty("href");
-    const pageWithAutomaticDownload: string = await pageWithAutomaticDownloadButtonHref.jsonValue();
+    const downloadButtonHref = await downloadButton.getProperty("href");
+    const downloadsPage: string = await downloadButtonHref.jsonValue();
 
     // Get the real/override download link
-    await page.goto(pageWithAutomaticDownload, { waitUntil: "load", timeout: 0 });
-    const overrideDownloadButton = await page.$(
-        "div.card-with-tabs > div > div > div:nth-child(1) > p:nth-child(3) > span > a"
-    );
+    logger("Navigating to download page %s", downloadsPage);
+    await page.goto(downloadsPage, { waitUntil: "load", timeout: 15_000 });
+    const overrideDownloadButton = await page.$("#file > div.row.d-flex.f-a-start > div.center.f-sm-50 > div > a");
     if (!overrideDownloadButton) {
         await browser.close();
-        throw new Error(errorMessage);
+        throw new Error("Could not find download link on apkmirror website");
     }
 
-    // Get the override download link for the page that automatically starts downloading the apk
+    // Get the download link for the page that automatically starts downloading the apk
     const overrideDownloadButtonHref = await overrideDownloadButton.getProperty("href");
     const overrideDownloadUrl: string = await overrideDownloadButtonHref.jsonValue();
+
+    logger("Navigating to auto download page %s", overrideDownloadUrl);
+    await page.goto(overrideDownloadUrl, { waitUntil: "load", timeout: 15_000 });
+    const downloadButton2 = await page.$(
+        "div.card-with-tabs > div > div > div:nth-child(1) > p:nth-child(3) > span > a"
+    );
+    if (!downloadButton2) {
+        console.log(await page.content());
+        await browser.close();
+        throw new Error("Could not find downloadButton2 on apkmirror website");
+    }
+
+    // Get the download link for the page that automatically starts downloading the apk
+    const downloadButton2Href = await downloadButton2.getProperty("href");
+    const downloadUrl: string = await downloadButton2Href.jsonValue();
+    logger("Found download url %s", downloadUrl);
     await browser.close();
 
-    // Stream the response to a file
-    await stream.pipeline(
-        got.stream(overrideDownloadUrl),
-        fs.createWriteStream(`${downloadsFolder}/${details.name}.apk`)
-    );
-    return details;
+    return [
+        downloadUrl,
+        {
+            name: game,
+            updatedDate,
+            architecture,
+            semVer: version,
+            supplier: "apkmirror",
+        },
+    ];
 };

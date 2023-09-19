@@ -4,41 +4,14 @@
         "build": {
             "cleanFiles": [{ "sourcePath": "dist" }],
             "tasksByName": {
-                "typescript1": {
+                "typescript": {
                     "taskPlugin": {
                         "pluginPackage": "@rushstack/heft-typescript-plugin"
-                    }
-                },
-                "check-latest-apks": {
-                    "taskDependencies": ["typescript1"],
-                    "taskPlugin": {
-                        "pluginPackage": "@rushstack/heft",
-                        "pluginName": "run-script-plugin",
-                        "options": {
-                            "scriptPath": "dist/check-latests.cjs"
-                        }
                     }
                 },
                 "lint": {
-                    "taskDependencies": ["typescript1"],
                     "taskPlugin": {
                         "pluginPackage": "@rushstack/heft-lint-plugin"
-                    }
-                },
-                "generate-types": {
-                    "taskDependencies": ["check-latest-apks"],
-                    "taskPlugin": {
-                        "pluginPackage": "@rushstack/heft",
-                        "pluginName": "run-script-plugin",
-                        "options": {
-                            "scriptPath": "dist/generate-ts-types.cjs"
-                        }
-                    }
-                },
-                "typescript2": {
-                    "taskDependencies": ["generate-types"],
-                    "taskPlugin": {
-                        "pluginPackage": "@rushstack/heft-typescript-plugin"
                     }
                 }
             }

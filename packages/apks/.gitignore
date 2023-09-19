@@ -1,5 +1,1 @@
-/dist
-/downloads/**/*.apk
-
-/vendor/*
-!/vendor/setup.sh
+/downloads/*.apk

@@ -1,36 +1,75 @@
-import type { PatchedVersion } from "./patched.type.js";
-import type { ApkpureVersion } from "./apkpure.type.js";
-import type { ApkmirrorVersion } from "./apkmirror.type.js";
+import {
+    defaultVersion,
+    defaultSupplier,
+    defaultArchitecture,
+    type RequestedGame,
+    type RequestedVersion,
+    type RequestedSupplier,
+    type RequestedArchitecture,
+} from "./types.js";
 
+import { getApkpureDetails } from "./apkpure.puppeteer.js";
+import { getApkmirrorDetails } from "./apkmirror.puppeteer.js";
+import { getTinyTowerVersions, getLegoTowerVersions, getTinyTowerVegasVersions } from "./versions.js";
+
+import got from "got";
+import url from "node:url";
 import fs from "node:fs/promises";
-import { fileURLToPath } from "node:url";
 
 import Debug from "debug";
 const logger: Debug.Debugger = Debug.debug("tinyburg:apks");
 
-// eslint-disable-next-line @rushstack/typedef-var
-export const TinyTowerApkSources = ["apkpure", "apkmirror"] as const;
-export type TinyTowerApkSource = (typeof TinyTowerApkSources)[number];
-export type TinyTowerApkVersion = ApkpureVersion & ApkmirrorVersion;
-export { LatestVersion } from "./latest-version.js";
-
-export const loadApk = async <
-    T extends TinyTowerApkSource | "patched",
-    U extends T extends TinyTowerApkSource ? TinyTowerApkVersion : PatchedVersion
->(
-    source: T,
-    version: U
+export const loadApk = async (
+    game: RequestedGame,
+    version: RequestedVersion = defaultVersion,
+    supplier: RequestedSupplier = defaultSupplier,
+    architecture: RequestedArchitecture = defaultArchitecture
 ): Promise<string> => {
-    logger("Loading version %s from %s downloads", version, source);
-    const fileNames = await fs.readdir(new URL(`../downloads/${source}`, import.meta.url));
-    const file = fileNames.find((fileName) => fileName.includes(version)) || version;
-    return fileURLToPath(new URL(`../downloads/${source}/${file}`, import.meta.url));
-};
-export default loadApk;
+    logger("Loading %s %s for architecture %s from supplier %s", game, version, architecture, supplier);
 
-export const loadPatchedApk = (version: PatchedVersion): Promise<string> =>
-    loadApk("patched", version as PatchedVersion);
-export const loadApkFromApkpure = (version: ApkpureVersion): Promise<string> =>
-    loadApk("apkpure", version as TinyTowerApkVersion);
-export const loadApkFromApkmirror = (version: ApkmirrorVersion): Promise<string> =>
-    loadApk("apkmirror", version as TinyTowerApkVersion);
+    const versionsBeforeLatest = version === "latest version" ? 0 : Number.parseInt(version.split(" ")[0]!);
+    if (versionsBeforeLatest < 0 || Number.isNaN(versionsBeforeLatest)) {
+        throw new Error("Invalid version requested");
+    }
+
+    const supplierVersions =
+        game === "TinyTower"
+            ? await getTinyTowerVersions()
+            : game === "LegoTower"
+            ? await getLegoTowerVersions()
+            : game === "TinyTowerVegas"
+            ? await getTinyTowerVegasVersions()
+            : {};
+
+    const sanitizedRequestedVersion = version === "latest version" ? "0 versions before latest" : version;
+    const semanticVersion = supplierVersions[sanitizedRequestedVersion];
+    if (!semanticVersion) {
+        throw new Error("Invalid version requested");
+    }
+
+    const fileNames = await fs.readdir(new URL(`../downloads/`, import.meta.url));
+    const maybeCachedApk = fileNames.find((fileName) =>
+        fileName.includes(`${supplier}_${game}_${semanticVersion}_${architecture}.apk`)
+    );
+
+    if (maybeCachedApk) {
+        logger("Apk was found in downloads cache: %s", maybeCachedApk);
+        return url.fileURLToPath(new URL(`../downloads/${maybeCachedApk}`, import.meta.url));
+    } else if (supplier === "patched") {
+        throw new Error("No patched apk found in downloads folder");
+    }
+
+    const [downloadUrl, scrapeResults] =
+        supplier === "apkmirror"
+            ? await getApkmirrorDetails(game, versionsBeforeLatest, architecture)
+            : await getApkpureDetails(game, versionsBeforeLatest, architecture);
+
+    const downloadsFolder = url.fileURLToPath(new URL(`../downloads/`, import.meta.url));
+    const filename = `${scrapeResults.supplier}_${scrapeResults.name}_${scrapeResults.semVer}_${scrapeResults.architecture}.apk`;
+
+    const downloadStream = await got(downloadUrl).buffer();
+    await fs.writeFile(`${downloadsFolder}/${filename}`, downloadStream);
+    return `${downloadsFolder}/${filename}`;
+};
+
+export default loadApk;
