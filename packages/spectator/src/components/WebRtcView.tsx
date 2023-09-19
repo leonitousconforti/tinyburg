@@ -23,10 +23,10 @@ export const WebRtcView: React.FunctionComponent<IWebRtcViewProps> = ({ jsep, mu
         jsep.startStream(onTrack).catch((error) => console.error(error));
     }, [jsep]);
 
-    // useEffect(() => {
-    //     if (!video.current) return;
-    //     video.current.volume = volume;
-    // }, [volume]);
+    useEffect(() => {
+        if (!video.current) return;
+        video.current.volume = volume;
+    }, [volume]);
 
     return (
         <video

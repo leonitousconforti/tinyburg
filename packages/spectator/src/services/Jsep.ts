@@ -5,6 +5,7 @@ import type { ServerStreamingCall } from "@protobuf-ts/runtime-rpc";
 import { JsepMsg } from "@tinyburg/architect/protobuf/rtc_service.js";
 import { KeyboardEvent, MouseEvent, TouchEvent } from "@tinyburg/architect/protobuf/emulator_controller.js";
 
+// JavaScript Session Establishment Protocol
 // https://rtcweb-wg.github.io/jsep
 export class JsepProtocol {
     private readonly _rtcClient: IRtcClient;
