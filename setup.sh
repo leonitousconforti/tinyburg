@@ -12,7 +12,8 @@ rush update-autoinstaller --name rush-prettier
 rush update-autoinstaller --name rush-commitlint
 
 echo "🩹 Running some bash setup scripts"
-(cd packages/apks/vendor && ./setup.sh)
+pip3 install -r packages/explorer/requirements.txt
+pip3 install -r packages/doorman/assets/requirements.txt
 
 echo "🏗️ Building all packages..."
 rush rebuild
