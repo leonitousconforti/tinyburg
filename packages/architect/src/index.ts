@@ -74,6 +74,7 @@ export const architect = async (options?: {
         "Everything reported healthy after %ss, you can start interacting with the emulator+frida now!",
         ((end - start) / 1000).toFixed(2)
     );
+
     return {
         emulatorContainer,
         ...emulatorEndpoints,

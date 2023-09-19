@@ -1,16 +1,2 @@
-/dist
-/starting-instance.lock
-
 /protobuf/**/*.js
 /protobuf/**/*.d.ts
-
-/emulator/avd/Pixel2.avd/*
-!/emulator/avd/Pixel2.avd/config.ini
-
-/infrastructure/*tfstate*
-/infrastructure/.terraform
-/infrastructure/.terraform.*
-
-/envoy/jwt_secrets_pub.json
-/jwt-provider/credentials.json
-/jwt-provider/jwt_secrets_priv.json
