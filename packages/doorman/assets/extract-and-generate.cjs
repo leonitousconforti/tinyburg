@@ -5,7 +5,7 @@ const exec = require("node:child_process");
 
 module.exports.runAsync = async () => {
     const { loadApk } = await import("@tinyburg/apks");
-    const apkPath = await loadApk("apkpure", "4.24.0");
+    const apkPath = await loadApk("TinyTower");
     const pythonExtractScript = path.join(__dirname, "extract.py");
     const pipRequirements = path.join(__dirname, "requirements.txt");
     exec.execSync(`pip3 install -r ${pipRequirements}`);
@@ -32,7 +32,7 @@ module.exports.runAsync = async () => {
         .slice(4)
         .map((line) => line.split(/\s+/))
         .map((fields) => fields.map((field) => field.split("=")))
-        .map((fields) => fields.map(([key, value]) => [key, isNaN(Number(value)) ? value : Number(value)]))
+        .map((fields) => fields.map(([key, value]) => [key, Number.isNaN(Number(value)) ? value : Number(value)]))
         .map((fields) => Object.fromEntries(fields));
 
     await silkscreenPng.toFile(path.join(__dirname, "../templates/silkscreen.png"));
