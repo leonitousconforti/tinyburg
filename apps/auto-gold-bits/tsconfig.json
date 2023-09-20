@@ -2,8 +2,7 @@
     "extends": "@tinyburg/tsconfig-rig/profile/default/config/tsconfig.json",
     "compilerOptions": {
         "checkJs": true,
-        "outDir": "./dist",
-        "exactOptionalPropertyTypes": false
+        "outDir": "./dist"
     },
     "include": ["index.js"]
 }

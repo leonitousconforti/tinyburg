@@ -17,7 +17,7 @@ const bitFarm = tinyburg.fromPlayerId(
     process.env["BIT_FARM_PLAYER_SS"]
 );
 bitFarm.config.proxy.useProxy = true;
-bitFarm.config.proxy.api_key = process.env["TINYBURG_AUTHPROXY_API_KEY"];
+bitFarm.config.proxy.api_key = process.env["TINYBURG_AUTHPROXY_API_KEY"] || "";
 
 async function processGifts() {
     // Get all the bitizens sent to this account

@@ -1,14 +1,10 @@
 {
     "extends": "@tinyburg/tsconfig-rig/profile/default/config/tsconfig.json",
     "compilerOptions": {
-        "outDir": "./dist",
-        "module": "NodeNext",
-        "moduleResolution": "NodeNext",
-        "resolveJsonModule": true,
-
         "noEmit": false,
         "sourceMap": true,
-        "declaration": true
+        "declaration": true,
+        "outDir": "./dist"
     },
     "include": ["example.ts"]
 }

@@ -2,6 +2,7 @@
     "extends": "@tinyburg/tsconfig-rig/profile/default/config/tsconfig.json",
     "compilerOptions": {
         "types": ["frida-gum"],
+        "module": "ES2020",
         "moduleResolution": "Node"
     },
     "include": ["agent.ts"]

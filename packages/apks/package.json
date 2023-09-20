@@ -34,7 +34,7 @@
         "got": "~13.0.0"
     },
     "devDependencies": {
-        "@rushstack/eslint-config": "3.3.2",
+        "@rushstack/eslint-config": "3.3.4",
         "@rushstack/heft": "0.60.0",
         "@rushstack/heft-jest-plugin": "0.9.1",
         "@rushstack/heft-lint-plugin": "~0.2.1",
@@ -44,13 +44,13 @@
         "@types/heft-jest": "1.0.4",
         "@types/node": "20.6.2",
         "@types/prettier": "~2.7.2",
-        "eslint": "8.45.0",
+        "eslint": "8.49.0",
         "eslint-config-prettier": "~8.8.0",
         "eslint-plugin-prettier": "~4.2.1",
-        "eslint-plugin-unicorn": "~47.0.0",
+        "eslint-plugin-unicorn": "~48.0.1",
         "prettier": "~2.8.8",
-        "puppeteer": "~21.2.1",
-        "typescript": "5.1.6"
+        "puppeteer": "~21.3.1",
+        "typescript": "5.2.2"
     },
     "engines": {
         "node": ">=16"

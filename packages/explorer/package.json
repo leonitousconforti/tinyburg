@@ -28,16 +28,16 @@
         "frida-il2cpp-bridge": "~0.8.5"
     },
     "devDependencies": {
-        "@rushstack/eslint-config": "3.3.2",
+        "@rushstack/eslint-config": "3.3.4",
         "@tinyburg/tsconfig-rig": "workspace:*",
         "@types/frida-gum": "~18.4.0",
-        "eslint": "8.45.0",
+        "eslint": "8.49.0",
         "eslint-config-prettier": "~8.8.0",
         "eslint-plugin-prettier": "~4.2.1",
-        "eslint-plugin-unicorn": "~47.0.0",
+        "eslint-plugin-unicorn": "~48.0.1",
         "frida-compile": "~16.3.0",
         "prettier": "~2.8.8",
-        "typescript": "5.1.6"
+        "typescript": "5.2.2"
     },
     "engines": {
         "node": ">=14.16"

@@ -44,19 +44,19 @@
         "uuid": "~9.0.0"
     },
     "devDependencies": {
-        "@rushstack/eslint-config": "3.3.2",
+        "@rushstack/eslint-config": "3.3.4",
         "@rushstack/heft": "0.60.0",
         "@rushstack/heft-lint-plugin": "~0.2.1",
         "@rushstack/heft-typescript-plugin": "~0.2.1",
         "@tinyburg/tsconfig-rig": "workspace:*",
         "@types/node": "20.6.2",
         "@types/uuid": "~9.0.1",
-        "eslint": "8.45.0",
+        "eslint": "8.49.0",
         "eslint-config-prettier": "~8.8.0",
         "eslint-plugin-prettier": "~4.2.1",
-        "eslint-plugin-unicorn": "~47.0.0",
+        "eslint-plugin-unicorn": "~48.0.1",
         "json-schema-to-typescript": "~13.0.1",
         "prettier": "~2.8.8",
-        "typescript": "5.1.6"
+        "typescript": "5.2.2"
     }
 }
