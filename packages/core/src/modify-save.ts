@@ -37,7 +37,7 @@ export const typedDataToBlock = function <T extends GenericBlocks, U extends Gen
 export const extract = async function <
     T extends INimblebitJsonSave | DecompressedSave,
     U extends keyof INimblebitJsonSave,
-    V extends T extends INimblebitJsonSave ? INimblebitJsonSave[U] : DecompressedSave
+    V extends T extends INimblebitJsonSave ? INimblebitJsonSave[U] : DecompressedSave,
 >(saveData: T, key: U, forceLoadStructs: boolean = false, logger: ILogger = debug): Promise<V> {
     const passLogger = logger === debug ? undefined : logger;
     logger.debug("Extracting key %s from data %o", key, saveData);
@@ -69,7 +69,7 @@ export const modifySave = async function <
     U extends keyof INimblebitJsonSave | (readonly [] | readonly (keyof INimblebitJsonSave)[]),
     V extends U extends keyof INimblebitJsonSave
         ? INimblebitJsonSave[U]
-        : { [W in keyof U]: U[W] extends keyof INimblebitJsonSave ? INimblebitJsonSave[U[W]] : never }
+        : { [W in keyof U]: U[W] extends keyof INimblebitJsonSave ? INimblebitJsonSave[U[W]] : never },
 >(saveDataToModify: T, keys: U, values: V, forceLoadStructs: boolean = false, logger: ILogger = debug): Promise<T> {
     const passLogger = logger === debug ? undefined : logger;
 

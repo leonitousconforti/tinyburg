@@ -89,7 +89,7 @@ export async function applicationLevelBackup<
         ? string
         : T extends BackupType.DECOMPRESSED
         ? DecompressedSave
-        : INimblebitJsonSave
+        : INimblebitJsonSave,
 >({ config, type, logger = debug }: BackupParameters & { type: T }): Promise<U> {
     // Setup logging
     const passLogger = logger === debug ? undefined : logger;

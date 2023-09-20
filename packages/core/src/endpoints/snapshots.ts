@@ -55,7 +55,7 @@ export interface IRetrieveSnapshotList extends ISuccessFoundNotFound, Omit<INimb
 
             /** Meta data for the player at the time this snapshot was taken. */
             meta: IUserMetaDescribed;
-        }
+        },
     ];
 }
 

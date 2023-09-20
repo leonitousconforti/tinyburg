@@ -19,7 +19,7 @@ export type BitbookPostBlocks4_0_0 = Omit<typeof mutableBitizenBlocks, "bb_bzn">
 const mutableBitizenBlocks = _bitbookPostBlocks as Mutable<typeof _bitbookPostBlocks>;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 mutableBitizenBlocks.bb_bzn = ["bitizen", bitizenBlocks, undefined, "object"] as any;
-mutableBitizenBlocks.__type = (): IBitbookPost => ({} as IBitbookPost);
+mutableBitizenBlocks.__type = (): IBitbookPost => ({}) as IBitbookPost;
 
 // Update type information for blocks
 const mutableBitizenBlocksTyped = mutableBitizenBlocks as unknown as BitbookPostBlocks4_0_0;

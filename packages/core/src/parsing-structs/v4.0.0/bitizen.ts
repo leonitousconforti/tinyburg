@@ -21,7 +21,7 @@ export const bitizenAttributesBlocks = bitizenAttributeBlocksWithIdk;
 
 // Update bitizen blocks (including type information)
 (_bitizenBlocks.BA[1] as unknown as string[]).push("unknown");
-(_bitizenBlocks.__type as unknown) = (): IBitizen => ({} as IBitizen);
+(_bitizenBlocks.__type as unknown) = (): IBitizen => ({}) as IBitizen;
 const mutableBitizenBlocks = _bitizenBlocks as unknown as BitizenBlocks4_0_0;
 
 // Export new blocks for parsing a bitizen as immutable

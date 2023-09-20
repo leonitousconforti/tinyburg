@@ -3,9 +3,9 @@
     "version": "1.0.0",
     "private": true,
     "dependencies": {
-        "prettier": "^2.8.8",
-        "prettier-plugin-jsdoc": "^0.4.2",
-        "prettier-plugin-packagejson": "^2.4.3",
+        "prettier": "^3.0.3",
+        "prettier-plugin-jsdoc": "^1.0.2",
+        "prettier-plugin-packagejson": "^2.4.5",
         "pretty-quick": "^3.1.3"
     }
 }

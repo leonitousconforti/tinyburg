@@ -17,9 +17,9 @@
     "license": "MIT",
     "author": "Leo Conforti <leo@leoconforti.us> (https://leoconforti.us)",
     "type": "module",
-    "main": "index.js",
+    "main": "./dist/cli.js",
     "bin": {
-        "TinyTower-cli": "./cli.js"
+        "TinyTower-cli": "./dist/cli.js"
     },
     "scripts": {
         "_phase:build": "heft run --only build -- --clean",
@@ -40,10 +40,10 @@
         "@types/node": "20.6.2",
         "@types/yargs": "~17.0.24",
         "eslint": "8.49.0",
-        "eslint-config-prettier": "~8.8.0",
-        "eslint-plugin-prettier": "~4.2.1",
+        "eslint-config-prettier": "~9.0.0",
+        "eslint-plugin-prettier": "~5.0.0",
         "eslint-plugin-unicorn": "~48.0.1",
-        "prettier": "~2.8.8",
+        "prettier": "~3.0.3",
         "typescript": "5.2.2"
     },
     "engines": {

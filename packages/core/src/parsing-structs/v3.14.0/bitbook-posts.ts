@@ -24,5 +24,5 @@ export const bitbookPostBlocks = {
     bb_lks: "likes",
 
     // Type "metadata" for these blocks
-    __type: (): IBitbookPost => ({} as IBitbookPost),
+    __type: (): IBitbookPost => ({}) as IBitbookPost,
 } as const;

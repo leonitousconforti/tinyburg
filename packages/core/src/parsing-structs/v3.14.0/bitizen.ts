@@ -84,5 +84,5 @@ export const bitizenBlocks = {
     BA: ["attributes", bitizenAttributesBlocks, ",", "object"],
 
     // Type "metadata" for these blocks
-    __type: (): IBitizen => ({} as IBitizen),
+    __type: (): IBitizen => ({}) as IBitizen,
 } as const;

@@ -35,7 +35,7 @@ const updatedFileContents = fileContents
 
 // Format the source code with prettier before writing it back to the file
 const prettierConfig = await prettier.resolveConfig(import.meta.url, { editorconfig: true });
-const formattedFileContents = prettier.format(updatedFileContents, {
+const formattedFileContents = await prettier.format(updatedFileContents, {
     parser: "typescript",
     ...prettierConfig,
     trailingComma: "es5",

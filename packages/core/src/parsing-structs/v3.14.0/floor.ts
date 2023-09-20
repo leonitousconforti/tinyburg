@@ -34,5 +34,5 @@ export const floorBlocks = {
     Fp: "floorPaint",
 
     // Type "metadata" for these blocks
-    __type: (): IFloor => ({} as IFloor),
+    __type: (): IFloor => ({}) as IFloor,
 } as const;

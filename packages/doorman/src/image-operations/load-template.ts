@@ -40,7 +40,7 @@ export const loadTemplateByName = async (name: SpriteTemplateName | CharacterTem
  */
 export async function loadTemplatesByNames<
     T extends Array<SpriteTemplateName | CharacterTemplateName>,
-    U extends { [C in T[number]]: Image }
+    U extends { [C in T[number]]: Image },
 >(...names: T): Promise<U> {
     // Maps every name from the parameters to its entry in an object.
     const charPromises = names.map(async (name) => [name, await loadTemplateByName(name)] as [T[number], Image]);

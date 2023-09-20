@@ -70,7 +70,7 @@ export interface IFriendSnapshotList extends ISuccessFoundNotFound, Omit<INimble
 
             /** Meta data for the player at the time this snapshot was taken */
             meta: IUserMetaDescribed;
-        }
+        },
     ];
 }
 

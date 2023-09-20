@@ -24,5 +24,5 @@ export const missionBlocks = {
     m_com: "com",
 
     // Type "metadata" for these blocks
-    __type: (): IMission => ({} as IMission),
+    __type: (): IMission => ({}) as IMission,
 } as const;

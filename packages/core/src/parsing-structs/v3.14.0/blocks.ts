@@ -155,5 +155,5 @@ export const blocks = {
     ale: "ale",
 
     // Type "metadata" for these blocks
-    __type: (): INimblebitJsonSave => ({} as INimblebitJsonSave),
+    __type: (): INimblebitJsonSave => ({}) as INimblebitJsonSave,
 } as const;

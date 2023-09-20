@@ -50,7 +50,7 @@ const PHouseBlocks = { PHouse: "house" } as const;
 const blocksWithHouse = insertIntoBlocks(blocksWithPAir, "PAir", PHouseBlocks);
 
 // Add the mission history blocks
-const PMissionHistoryBlocks = { __type: (): INimblebitJsonSave => ({} as INimblebitJsonSave) } as const;
+const PMissionHistoryBlocks = { __type: (): INimblebitJsonSave => ({}) as INimblebitJsonSave } as const;
 const blocksWithMissionHistory = insertIntoBlocks(blocksWithHouse, "Pbhst", PMissionHistoryBlocks);
 
 // Export the new blocks as immutable
