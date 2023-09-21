@@ -209,7 +209,7 @@
             "commandKind": "global",
             "summary": "Used by the pre-commit Git hook. This command invokes Prettier to reformat staged changes.",
             "autoinstallerName": "rush-prettier",
-            "shellCommand": "pretty-quick --staged",
+            "shellCommand": "lint-staged --config common/autoinstallers/rush-prettier/.lintstagedrc.json",
             "safeForSimultaneousRushProcesses": true
         }
     ],
