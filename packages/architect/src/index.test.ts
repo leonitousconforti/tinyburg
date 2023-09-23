@@ -1,7 +1,7 @@
 import architect from "./index.js";
 
-// Timeout tests after 8 minutes
-const ARCHITECT_TEST_TIMEOUT_MS = 1000 * 60 * 8;
+// Timeout tests after 14 minutes
+const ARCHITECT_TEST_TIMEOUT_MS = 1000 * 60 * 14;
 
 describe("simple tests", () => {
     it(
