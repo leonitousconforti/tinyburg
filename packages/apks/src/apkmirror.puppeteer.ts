@@ -122,7 +122,6 @@ export const getApkmirrorDetails = async (
         "div.card-with-tabs > div > div > div:nth-child(1) > p:nth-child(3) > span > a"
     );
     if (!downloadButton2) {
-        console.log(await page.content());
         await browser.close();
         throw new Error("Could not find downloadButton2 on apkmirror website");
     }

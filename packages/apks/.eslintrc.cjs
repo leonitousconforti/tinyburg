@@ -19,5 +19,8 @@ module.exports = {
         ecmaVersion: 2022,
         sourceType: "module",
     },
+    rules: {
+        "no-console": "warn",
+    },
     ignorePatterns: ["dist/"],
 };

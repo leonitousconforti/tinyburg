@@ -8,4 +8,5 @@ async function main() {
     ]);
 }
 
+// eslint-disable-next-line no-console
 main().catch((error) => console.error(error));
