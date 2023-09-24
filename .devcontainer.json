@@ -38,7 +38,8 @@
                 "ms-python.black-formatter",
                 "zxh404.vscode-proto3",
                 "Prisma.prisma",
-                "bradlc.vscode-tailwindcss"
+                "bradlc.vscode-tailwindcss",
+                "RushStack.rushstack"
             ],
             "settings": {
                 "cSpell.enabled": true,
