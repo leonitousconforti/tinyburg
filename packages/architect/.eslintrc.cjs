@@ -27,5 +27,8 @@ module.exports = {
             },
         },
     ],
-    ignorePatterns: ["dist/", "protobuf/"],
+    rules: {
+        "no-console": "warn",
+    },
+    ignorePatterns: ["dist/"],
 };

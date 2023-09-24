@@ -31,8 +31,7 @@
         "_phase:build": "heft run --only build -- --clean",
         "_phase:test": "NODE_OPTIONS=\"--experimental-vm-modules --no-warnings\" heft run --only test -- --clean",
         "build": "NODE_OPTIONS=\"--experimental-vm-modules --no-warnings\" heft test --clean",
-        "protobuf:clean": "rimraf --glob protobuf/**/*.js && rimraf --glob protobuf/**/*.d.ts",
-        "protobuf:gen": "protoc -I ./protobuf --ts_out ./protobuf --ts_opt optimize_code_size --ts_opt output_javascript --ts_opt eslint_disable ./protobuf/emulator_controller.proto ./protobuf/rtc_service.proto"
+        "protobuf": "buf generate"
     },
     "dependencies": {
         "debug": "~4.3.4",
@@ -44,10 +43,9 @@
         "yargs": "~17.7.2"
     },
     "devDependencies": {
-        "@protobuf-ts/plugin": "~2.9.0",
-        "@protobuf-ts/protoc": "~2.9.0",
-        "@protobuf-ts/runtime": "~2.9.0",
-        "@protobuf-ts/runtime-rpc": "~2.9.0",
+        "@bufbuild/buf": "~1.26.1",
+        "@bufbuild/protobuf": "~1.3.1",
+        "@bufbuild/protoc-gen-es": "~1.3.1",
         "@rushstack/eslint-config": "3.3.4",
         "@rushstack/heft": "0.61.0",
         "@rushstack/heft-jest-plugin": "0.9.2",
@@ -67,7 +65,6 @@
         "eslint-plugin-prettier": "~5.0.0",
         "eslint-plugin-unicorn": "~48.0.1",
         "prettier": "~3.0.3",
-        "rimraf": "~5.0.1",
         "typescript": "5.2.2"
     },
     "engines": {
