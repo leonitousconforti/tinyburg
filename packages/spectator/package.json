@@ -12,7 +12,7 @@
     "repository": {
         "type": "git",
         "url": "https://github.com/leonitousconforti/tinyburg.git",
-        "directory": "apps/spectator"
+        "directory": "packages/spectator"
     },
     "license": "MIT",
     "author": "Leo Conforti <leo@leoconforti.us> (https://leoconforti.us)",
@@ -28,35 +28,28 @@
         "watch": "heft build-watch"
     },
     "dependencies": {
-        "@emotion/react": "~11.11.0",
-        "@emotion/styled": "~11.11.0",
-        "@mui/icons-material": "~5.14.0",
         "@mui/material": "~5.14.0",
         "@protobuf-ts/grpcweb-transport": "~2.9.0",
         "@protobuf-ts/runtime-rpc": "~2.9.0",
         "@tinyburg/architect": "workspace:*",
-        "buffer": "~6.0.3",
         "react": "18.2.0",
-        "react-dom": "18.2.0",
-        "web-vitals": "~3.4.0"
+        "react-dom": "18.2.0"
     },
     "devDependencies": {
         "@rushstack/eslint-config": "3.3.4",
-        "@rushstack/heft": "0.60.0",
-        "@rushstack/heft-jest-plugin": "0.9.1",
-        "@rushstack/heft-lint-plugin": "~0.2.1",
+        "@rushstack/heft": "0.61.0",
+        "@rushstack/heft-lint-plugin": "~0.2.2",
         "@rushstack/heft-sass-plugin": "0.11.20",
-        "@rushstack/heft-typescript-plugin": "~0.2.1",
+        "@rushstack/heft-typescript-plugin": "~0.2.2",
         "@rushstack/heft-web-rig": "~0.18.25",
         "@rushstack/heft-webpack5-plugin": "0.8.9",
         "@tinyburg/tsconfig-rig": "workspace:*",
-        "@types/heft-jest": "1.0.4",
-        "@types/node": "20.6.2",
+        "@types/node": "20.6.3",
         "@types/react": "18.2.15",
         "@types/react-dom": "18.2.7",
         "@types/webpack-env": "~1.18.1",
         "css-loader": "~6.8.1",
-        "eslint": "8.49.0",
+        "eslint": "8.50.0",
         "eslint-config-prettier": "~9.0.0",
         "eslint-plugin-prettier": "~5.0.0",
         "html-webpack-plugin": "~5.5.1",
