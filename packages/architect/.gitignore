@@ -1,2 +1,3 @@
 /protobuf/**/*.js
+/protobuf/**/*.ts
 /protobuf/**/*.d.ts
