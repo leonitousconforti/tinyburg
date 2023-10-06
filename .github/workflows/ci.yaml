@@ -8,78 +8,21 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
-    name: Node.js v${{ matrix.NodeVersion }}
+  call-workflow:
+    uses: ./.github/workflows/build.yaml
+
+  deploy-authproxy:
+    needs: build
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        NodeVersion: [16, 18]
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 2
 
-      - uses: actions/setup-node@v3
-        with:
-          node-version: ${{ matrix.NodeVersion }}
+  deploy-auto-gold-bits:
+    needs: build
+    runs-on: ubuntu-latest
 
-      - name: Connect to Tailscale
-        uses: tailscale/github-action@v2
-        with:
-          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
-          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
-          tags: tag:ci
+  deploy-discord-bot:
+    needs: build
+    runs-on: ubuntu-latest
 
-      - name: Testing Server Online?
-        run: |
-          tailscale status
-          tailscale ping ci.internal.tinyburg.app
-
-      - name: Start ssh agent
-        run: |
-          eval "$(ssh-agent -s)"
-          echo $SSH_AUTH_SOCK
-          echo "SSH_AUTH_SOCK=${SSH_AUTH_SOCK}" >> $GITHUB_ENV
-
-      - name: Install SSH key
-        uses: shimataro/ssh-key-action@v2
-        with:
-          key: ${{ secrets.SSH_KEY }}
-          known_hosts: ${{ secrets.KNOWN_HOSTS }}
-
-      - name: Add SSH key to agent
-        run: |
-          echo $SSH_AUTH_SOCK
-          ssh-add -D
-          ssh-add
-
-      - name: Testing Server Reachable?
-        run: ssh ci@ci.internal.tinyburg.app "echo 'Hi, Mom!'"
-
-      - name: Verify Change Logs
-        run: node common/scripts/install-run-rush.js change --verify
-
-      - name: Setup cache
-        uses: actions/cache@v3
-        with:
-          path: |
-            common/temp/build-cache
-            packages/apks/downloads/apkmirror
-            packages/apks/downloads/apkpure
-          key: ${{ runner.os }}_node-${{ matrix.NodeVersion }}_build-cache
-
-      - name: Rush Install
-        run: |
-          node common/scripts/install-run-rush.js install
-          node common/scripts/install-run-rush.js update-autoinstaller --name rush-prettier
-          node common/scripts/install-run-rush.js update-autoinstaller --name rush-commitlint
-
-      - name: Rush build and test
-        run: |
-          export DISPLAY=:99
-          sudo /usr/bin/Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
-          node common/scripts/install-run-rush.js test --timeline --production
-        env:
-          RUSH_BUILD_CACHE_ENABLED: 1
-          RUSH_BUILD_CACHE_WRITE_ALLOWED: 1
-          ARCHITECT_DOCKER_HOST: "ssh://ci@ci.internal.tinyburg.app:22"
+  deploy-repl-demo:
+    needs: build
+    runs-on: ubuntu-latest
