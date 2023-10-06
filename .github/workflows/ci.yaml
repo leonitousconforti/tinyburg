@@ -14,15 +14,27 @@ jobs:
   deploy-authproxy:
     needs: build
     runs-on: ubuntu-latest
+    steps:
+      - name: Hi Mom
+        run: echo "Hi, Mom!"
 
   deploy-auto-gold-bits:
     needs: build
     runs-on: ubuntu-latest
+    steps:
+      - name: Hi Mom
+        run: echo "Hi, Mom!"
 
   deploy-discord-bot:
     needs: build
     runs-on: ubuntu-latest
+    steps:
+      - name: Hi Mom
+        run: echo "Hi, Mom!"
 
   deploy-repl-demo:
     needs: build
     runs-on: ubuntu-latest
+    steps:
+      - name: Hi Mom
+        run: echo "Hi, Mom!"
