@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import type { ITTConfig } from "@tinyburg/core/tt-config";
+import type { IConfig } from "@tinyburg/core/config";
 
 import yargs from "yargs";
 import repl from "node:repl";
@@ -9,7 +9,7 @@ import { readFileSync } from "node:fs";
 import { fromConfig, fromPlayerId } from "@tinyburg/core";
 
 const configPath: string | undefined = findUpSync(["tinyburgrc", "tinyburgrc.json"]);
-const config: ITTConfig = configPath ? JSON.parse(readFileSync(configPath).toString()) : {};
+const config: IConfig = configPath ? JSON.parse(readFileSync(configPath).toString()) : {};
 
 // eslint-disable-next-line @rushstack/typedef-var
 const cliArguments = yargs(process.argv.slice(2))
