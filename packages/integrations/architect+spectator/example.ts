@@ -1,4 +1,3 @@
-/* eslint-disable @rushstack/no-new-null */
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import url from "node:url";

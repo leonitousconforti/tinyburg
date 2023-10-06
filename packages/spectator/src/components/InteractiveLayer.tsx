@@ -1,5 +1,6 @@
 import type JsepProtocol from "../services/Jsep.js";
-import type { IEmulatorControllerClient } from "@tinyburg/architect/protobuf/emulator_controller.client.js";
+import type { PromiseClient } from "@connectrpc/connect";
+import type { EmulatorController } from "@tinyburg/architect/protobuf/emulator_controller_connect.js";
 
 import {
     Touch,
@@ -7,12 +8,12 @@ import {
     TouchEvent,
     KeyboardEvent,
     KeyboardEvent_KeyEventType,
-} from "@tinyburg/architect/protobuf/emulator_controller.js";
+} from "@tinyburg/architect/protobuf/emulator_controller_pb.js";
 import React, { useState, useRef, useEffect, useCallback } from "react";
 
 interface IWithMouseKeyHandlerProps extends React.PropsWithChildren {
     jsep: JsepProtocol;
-    emulatorClient: IEmulatorControllerClient;
+    emulatorClient: PromiseClient<typeof EmulatorController>;
 }
 
 export const WithMouseKeyHandler: React.FunctionComponent<IWithMouseKeyHandlerProps> = ({
@@ -28,7 +29,7 @@ export const WithMouseKeyHandler: React.FunctionComponent<IWithMouseKeyHandlerPr
     const [mouseDown, setMouseDown] = useState(false);
 
     const getScreenSize = useCallback(async () => {
-        const status = await emulatorClient.getStatus({}).response;
+        const status = await emulatorClient.getStatus({});
         const lcdHeight = status.hardwareConfig?.entry[34];
         const lcdWidth = status.hardwareConfig?.entry[95];
         setDeviceWidth(Number.parseInt(lcdWidth?.value || "1080"));
@@ -60,7 +61,7 @@ export const WithMouseKeyHandler: React.FunctionComponent<IWithMouseKeyHandlerPr
         mouseButton: number;
         mouseDown: boolean;
     }): void => {
-        const request = MouseEvent.create();
+        const request = new MouseEvent();
         const scaledCoordinates = scaleCoordinates(x, y);
         request.x = scaledCoordinates.x;
         request.y = scaledCoordinates.y;
@@ -124,11 +125,7 @@ export const WithMouseKeyHandler: React.FunctionComponent<IWithMouseKeyHandlerPr
             const { x, y, scaleX, scaleY } = scaleCoordinates(offsetX, offsetY);
             const scaledRadiusX = 2 * radiusX * scaleX;
             const scaledRadiusY = 2 * radiusY * scaleY;
-
-            const request = Touch.create();
-            request.x = x;
-            request.y = y;
-            request.identifier = identifier;
+            const request = new Touch({ x, y, identifier });
 
             // Normalize the force
             const MT_PRESSURE = scaleAxis(Math.max(minForce, Math.min(maxForce, force)), 0, 1);
@@ -139,7 +136,7 @@ export const WithMouseKeyHandler: React.FunctionComponent<IWithMouseKeyHandlerPr
             return request;
         });
 
-        const requestTouchEvent = TouchEvent.create();
+        const requestTouchEvent = new TouchEvent();
         requestTouchEvent.touches = touchesToSend;
         jsep.sendTouch(requestTouchEvent);
     };
@@ -155,7 +152,7 @@ export const WithMouseKeyHandler: React.FunctionComponent<IWithMouseKeyHandlerPr
         return (event: React.KeyboardEvent) => {
             if (event.key === "space") event.preventDefault();
 
-            const request = KeyboardEvent.create();
+            const request = new KeyboardEvent();
             if (eventType === "KEYUP") request.eventType = KeyboardEvent_KeyEventType.keyup;
             if (eventType === "KEYDOWN") request.eventType = KeyboardEvent_KeyEventType.keydown;
             request.key = event.key;

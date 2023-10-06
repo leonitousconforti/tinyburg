@@ -1,4 +1,5 @@
-import type { IEmulatorControllerClient } from "@tinyburg/architect/protobuf/emulator_controller.client.js";
+import type { PromiseClient } from "@connectrpc/connect";
+import type { EmulatorController } from "@tinyburg/architect/protobuf/emulator_controller_connect.js";
 
 import { List } from "@mui/material";
 import { ListItem } from "@mui/material";
@@ -8,7 +9,7 @@ import Logcat from "../services/Logcat.js";
 import React, { useEffect, useState } from "react";
 
 export interface ILogcatViewProps {
-    emulatorClient: IEmulatorControllerClient;
+    emulatorClient: PromiseClient<typeof EmulatorController>;
 }
 
 export const LogcatView: React.FunctionComponent<ILogcatViewProps> = ({ emulatorClient }) => {

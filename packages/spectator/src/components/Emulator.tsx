@@ -1,9 +1,12 @@
+import type { Transport } from "@connectrpc/connect";
+
 import React from "react";
 import { Box, Grid, Container } from "@mui/material";
-import { GrpcWebFetchTransport } from "@protobuf-ts/grpcweb-transport";
+import { createPromiseClient } from "@connectrpc/connect";
+import { createGrpcWebTransport } from "@connectrpc/connect-web";
 
-import { RtcClient } from "@tinyburg/architect/protobuf/rtc_service.client.js";
-import { EmulatorControllerClient } from "@tinyburg/architect/protobuf/emulator_controller.client.js";
+import { Rtc } from "@tinyburg/architect/protobuf/rtc_service_connect.js";
+import { EmulatorController } from "@tinyburg/architect/protobuf/emulator_controller_connect.js";
 
 import JsepProtocol from "../services/Jsep.js";
 import Copyright from "../components/Copyright.js";
@@ -16,12 +19,11 @@ interface IEmulatorProps {
 }
 
 export const Emulator: React.FunctionComponent<IEmulatorProps> = ({ address }) => {
-    const useTransport = (): GrpcWebFetchTransport =>
-        React.useMemo(() => new GrpcWebFetchTransport({ baseUrl: address }), [address]);
+    const useTransport = (): Transport => React.useMemo(() => createGrpcWebTransport({ baseUrl: address }), [address]);
 
-    const [rtcClient] = React.useState(new RtcClient(useTransport()));
+    const [rtcClient] = React.useState(createPromiseClient(Rtc, useTransport()));
     const [jsepService] = React.useState(new JsepProtocol(rtcClient));
-    const [emulatorClient] = React.useState(new EmulatorControllerClient(useTransport()));
+    const [emulatorClient] = React.useState(createPromiseClient(EmulatorController, useTransport()));
 
     return (
         <>

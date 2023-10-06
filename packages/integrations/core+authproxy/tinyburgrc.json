@@ -1,6 +1,7 @@
 {
     "nimblebitHost": "https://sync.nimblebit.com",
     "authenticated": true,
+    "game": "TinyTower",
     "proxy": {
         "useProxy": false,
         "address": "https://authproxy.tinyburg.app"

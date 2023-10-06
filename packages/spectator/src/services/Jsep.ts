@@ -1,18 +1,17 @@
-import type { RtcId } from "@tinyburg/architect/protobuf/rtc_service.js";
-import type { IRtcClient } from "@tinyburg/architect/protobuf/rtc_service.client.js";
-import type { ServerStreamingCall } from "@protobuf-ts/runtime-rpc";
+import type { PromiseClient } from "@connectrpc/connect";
+import type { Rtc } from "@tinyburg/architect/protobuf/rtc_service_connect.js";
 
-import { JsepMsg } from "@tinyburg/architect/protobuf/rtc_service.js";
-import { KeyboardEvent, MouseEvent, TouchEvent } from "@tinyburg/architect/protobuf/emulator_controller.js";
+import { JsepMsg, RtcId } from "@tinyburg/architect/protobuf/rtc_service_pb.js";
+import { KeyboardEvent, MouseEvent, TouchEvent } from "@tinyburg/architect/protobuf/emulator_controller_pb.js";
 
 // JavaScript Session Establishment Protocol
 // https://rtcweb-wg.github.io/jsep
 export class JsepProtocol {
-    private readonly _rtcClient: IRtcClient;
+    private readonly _rtcClient: PromiseClient<typeof Rtc>;
     private readonly _onDisconnected: () => void;
     private _eventForwarders: Record<string, RTCDataChannel> = {};
 
-    public constructor(rtcServiceClient: IRtcClient, onDisconnected: () => void = () => {}) {
+    public constructor(rtcServiceClient: PromiseClient<typeof Rtc>, onDisconnected: () => void = () => {}) {
         this._rtcClient = rtcServiceClient;
         this._onDisconnected = onDisconnected;
     }
@@ -20,10 +19,10 @@ export class JsepProtocol {
     // https://rtcweb-wg.github.io/jsep/#sec.detailed-example
     public startStream = async (onMediaTrack: (event: MediaStreamTrack) => void): Promise<void> => {
         let peerConnection: RTCPeerConnection | undefined;
-        const rtcId: RtcId = await this._rtcClient.requestRtcStream({}).response;
-        const jsepStream: ServerStreamingCall<RtcId, JsepMsg> = this._rtcClient.receiveJsepMessages(rtcId);
+        const rtcId: RtcId = await this._rtcClient.requestRtcStream({});
+        const jsepStream: AsyncIterable<JsepMsg> = this._rtcClient.receiveJsepMessages(rtcId);
 
-        for await (const response of jsepStream.responses) {
+        for await (const response of jsepStream) {
             const signal = JSON.parse(response.message);
 
             /**
@@ -83,9 +82,9 @@ export class JsepProtocol {
         }
     };
 
-    public sendMouse = (message: MouseEvent): void => this.sendBytes("mouse", MouseEvent.toBinary(message));
-    public sendTouch = (message: TouchEvent): void => this.sendBytes("touch", TouchEvent.toBinary(message));
-    public sendKeyboard = (message: KeyboardEvent): void => this.sendBytes("keyboard", KeyboardEvent.toBinary(message));
+    public sendMouse = (message: MouseEvent): void => this.sendBytes("mouse", message.toBinary());
+    public sendTouch = (message: TouchEvent): void => this.sendBytes("touch", message.toBinary());
+    public sendKeyboard = (message: KeyboardEvent): void => this.sendBytes("keyboard", message.toBinary());
 
     public sendBytes = (label: "mouse" | "keyboard" | "touch", bytes: Uint8Array): void => {
         const forwarder = this._eventForwarders[label];
@@ -95,9 +94,7 @@ export class JsepProtocol {
     };
 
     private _sendJsep = async (rtcId: RtcId, jsonObject: Record<string, unknown>): Promise<void> => {
-        const request = JsepMsg.create();
-        request.id = rtcId;
-        request.message = JSON.stringify(jsonObject);
+        const request = new JsepMsg({ id: rtcId, message: JSON.stringify(jsonObject) });
         await this._rtcClient.sendJsepMessage(request);
     };
 }

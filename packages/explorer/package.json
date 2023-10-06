@@ -25,13 +25,13 @@
     "dependencies": {
         "@tinyburg/insight": "workspace:*",
         "frida": "~16.1.0",
-        "frida-il2cpp-bridge": "~0.8.5"
+        "frida-il2cpp-bridge": "~0.9.0"
     },
     "devDependencies": {
-        "@rushstack/eslint-config": "3.3.4",
+        "@rushstack/eslint-config": "3.4.1",
         "@tinyburg/tsconfig-rig": "workspace:*",
         "@types/frida-gum": "~18.4.0",
-        "eslint": "8.50.0",
+        "eslint": "8.51.0",
         "eslint-config-prettier": "~9.0.0",
         "eslint-plugin-prettier": "~5.0.0",
         "eslint-plugin-unicorn": "~48.0.1",
