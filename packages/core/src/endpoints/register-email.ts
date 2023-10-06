@@ -1,5 +1,5 @@
 import type { ILogger } from "../logger.js";
-import type { ITTConfig } from "../tt-config.js";
+import type { IConfig } from "../config.js";
 import type { INimblebitResponse } from "./nimblebit-response.js";
 
 import { DebugLogger } from "../logger.js";
@@ -16,7 +16,7 @@ export interface IRegisterEmail extends INimblebitResponse {
 }
 
 // Requests that nimblebit send a verification code to your cloud sync email address.
-export const registerEmail = async (config: ITTConfig, logger: ILogger = debug): Promise<IRegisterEmail> => {
+export const registerEmail = async (config: IConfig, logger: ILogger = debug): Promise<IRegisterEmail> => {
     // Setup logging
     const passLogger = logger === debug ? undefined : logger;
     logger.info("Starting register email workflow");
@@ -36,7 +36,7 @@ export const registerEmail = async (config: ITTConfig, logger: ILogger = debug):
     // salt is a random 32bit signed integer, [-2147483648 to 2147483647]
     // and hash is the md5 hash of tt/{burnBotId}/{salt} + {playerEmail} + {burnBotSs} + {secretSalt}
     const salt = cryptoSalt(passLogger);
-    const endpoint = serverEndpoints.register_email + config.burnBot.playerId + "/" + salt;
+    const endpoint = serverEndpoints.registerEmail + config.burnBot.playerId + "/" + salt;
     const hash = "tt/" + config.burnBot.playerId + "/" + salt + config.player.playerEmail + config.burnBot.playerSs;
     const serverResponse = await postNetworkRequest<IRegisterEmail>({
         config,

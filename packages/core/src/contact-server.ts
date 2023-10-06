@@ -1,6 +1,6 @@
 import type { ILogger } from "./logger.js";
 import type { Headers, Method } from "got";
-import type { ITTConfig } from "./tt-config.js";
+import type { IConfig } from "./config.js";
 
 import got from "got";
 import { DebugLogger } from "./logger.js";
@@ -11,31 +11,29 @@ const loggingNamespace: string = "tinyburg:contact_server";
 const debug: ILogger = new DebugLogger(loggingNamespace);
 
 // Tiny tower server endpoints
-/* eslint-disable @typescript-eslint/naming-convention */
 // eslint-disable-next-line @rushstack/typedef-var
 export const serverEndpoints = {
-    new_user: "/register/tt/",
-    player_details: "/player_details/tt/",
-    verify_device: "/verify_device/tt/",
-    register_email: "/register_email/tt/",
-    pull_save: "/sync/pull/tt/",
-    push_save: "/sync/push/tt/",
-    check_for_newer_save: "/sync/current_version/tt/",
-    enter_raffle: "/raffle/enter/tt/",
-    enter_multi_raffle: "/raffle/enter_multi/tt/",
-    entered_current: "/raffle/entered_current/tt/",
-    send_item: "/send_item/tt/",
-    get_gifts: "/get_gifts/tt/",
-    receive_gift: "/receive_item/tt/",
-    friend_pull_meta: "/friend/pull_meta/tt/",
-    friend_pull_tower: "/friend/pull_game/tt/",
-    get_visits: "/get_visits/tt/",
-    push_snapshot: "/sync/push_snapshot/tt/",
-    pull_snapshot: "/sync/pull_snapshot/tt/",
-    retrieve_snapshot_list: "/sync/current_snapshots/tt",
-    retrieve_friends_snapshot_list: "/sync/current_player_snapshots/tt/",
+    newUser: "/register/tt/",
+    playerDetails: "/player_details/tt/",
+    verifyDevice: "/verify_device/tt/",
+    registerEmail: "/register_email/tt/",
+    pullSave: "/sync/pull/tt/",
+    pushSave: "/sync/push/tt/",
+    checkForNewerSave: "/sync/current_version/tt/",
+    enterRaffle: "/raffle/enter/tt/",
+    enterMultiRaffle: "/raffle/enter_multi/tt/",
+    enteredCurrent: "/raffle/entered_current/tt/",
+    sendItem: "/send_item/tt/",
+    getGifts: "/get_gifts/tt/",
+    receiveGift: "/receive_item/tt/",
+    friendPullMeta: "/friend/pull_meta/tt/",
+    friendPullTower: "/friend/pull_game/tt/",
+    getVisits: "/get_visits/tt/",
+    pushSnapshot: "/sync/push_snapshot/tt/",
+    pullSnapshot: "/sync/pull_snapshot/tt/",
+    retrieveSnapshotList: "/sync/current_snapshots/tt",
+    retrieveFriendsSnapshotList: "/sync/current_player_snapshots/tt/",
 } as const;
-/* eslint-enable @typescript-eslint/naming-convention */
 
 // Default headers to include in every request
 export const defaultHeaders: Headers = {
@@ -47,7 +45,7 @@ export const defaultHeaders: Headers = {
 interface INetworkRequestParameters {
     hash: string;
     method: Method;
-    config: ITTConfig;
+    config: IConfig;
     endpoint: string;
     log: ILogger | undefined;
     postData?: Record<string, unknown>;
@@ -101,7 +99,7 @@ const networkRequest = async <T>({
 
 // Get network request function params
 export interface IGetNetworkRequestParameters {
-    config: ITTConfig;
+    config: IConfig;
     endpoint: string;
     hash: string;
     log: ILogger | undefined;

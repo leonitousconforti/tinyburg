@@ -1,5 +1,5 @@
 import type { ILogger } from "../logger.js";
-import type { ITTConfig } from "../tt-config.js";
+import type { IConfig } from "../config.js";
 import type { IDownloadSave } from "./download-save.js";
 import type { DecompressedSave } from "../decompress-save.js";
 import type { INimblebitJsonSave } from "../parsing-structs/blocks.js";
@@ -72,7 +72,7 @@ export interface IPushSnapshot extends INimblebitResponse {
 
 // Retrieves a list of your snapshots.
 export const retrieveSnapshotList = async (
-    config: ITTConfig,
+    config: IConfig,
     logger: ILogger = debug
 ): Promise<IRetrieveSnapshotList> => {
     // Setup logging
@@ -92,7 +92,7 @@ export const retrieveSnapshotList = async (
     // and hash is the md5 hash of tt/{playerId}/{salt} + {playerSs} + {secretSalt}
     const salt = cryptoSalt(passLogger);
     const hash = "tt/" + config.player.playerId + "/" + salt + config.player.playerSs;
-    const endpoint = serverEndpoints.retrieve_snapshot_list + config.player.playerId + "/" + salt;
+    const endpoint = serverEndpoints.retrieveSnapshotList + config.player.playerId + "/" + salt;
     const serverResponse = await getNetworkRequest<IRetrieveSnapshotList>({ config, endpoint, hash, log: passLogger });
 
     // Bad response
@@ -111,7 +111,7 @@ export const retrieveSnapshotList = async (
 
 // Pushes a snapshot.
 export const pushSnapshot = async (
-    config: ITTConfig,
+    config: IConfig,
     { saveData, language, platform }: PushSnapshotParameters,
     logger: ILogger = debug
 ): Promise<IPushSnapshot> => {
@@ -135,7 +135,7 @@ export const pushSnapshot = async (
     // and hash is the md5 hash of tt/{playerId}/{salt} + {compressedSave} + {playerSs} + {secretSalt}
     const salt = cryptoSalt(passLogger);
     const hash = "tt/" + config.player.playerId + "/" + salt + compressedSave + config.player.playerSs;
-    const endpoint = serverEndpoints.push_snapshot + config.player.playerId + "/" + salt;
+    const endpoint = serverEndpoints.pushSnapshot + config.player.playerId + "/" + salt;
     const serverResponse = await postNetworkRequest<IPushSnapshot>({
         config,
         endpoint,
@@ -160,7 +160,7 @@ export const pushSnapshot = async (
 
 // Pulls one of your snapshots.
 export const pullSnapshot = async (
-    config: ITTConfig,
+    config: IConfig,
     { snapshotId }: PullSnapshotParameters,
     logger: ILogger = debug
 ): Promise<DecompressedSave> => {
@@ -181,7 +181,7 @@ export const pullSnapshot = async (
     // and hash is the md5 hash of tt/{playerId}/{snapshotId}/{salt} + {playerSs} + {secretSalt}
     const salt = cryptoSalt(passLogger);
     const hash = "tt/" + config.player.playerId + "/" + snapshotId + "/" + salt + config.player.playerSs;
-    const endpoint = serverEndpoints.pull_snapshot + config.player.playerId + "/" + snapshotId + "/" + salt;
+    const endpoint = serverEndpoints.pullSnapshot + config.player.playerId + "/" + snapshotId + "/" + salt;
     const serverResponse = await getNetworkRequest<IPullSnapshot>({ config, endpoint, hash, log: passLogger });
 
     // Bad response

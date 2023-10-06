@@ -1,5 +1,5 @@
 import type { ILogger } from "../logger.js";
-import type { ITTConfig } from "../tt-config.js";
+import type { IConfig } from "../config.js";
 import type { INimblebitResponse, ISuccessFoundNotFound } from "./nimblebit-response.js";
 
 import { DebugLogger } from "../logger.js";
@@ -36,7 +36,7 @@ export interface ICheckForNewerSave extends ISuccessFoundNotFound, Omit<INimbleb
 
 // Checks if there is a newer save to download from the cloud.
 export const checkForNewerSave = async (
-    config: ITTConfig,
+    config: IConfig,
     { saveVersion }: ICheckForNewerSaveParameters,
     logger: ILogger = debug
 ): Promise<number> => {
@@ -57,7 +57,7 @@ export const checkForNewerSave = async (
     // and hash is the md5 hash of tt/{playerId}/{salt} + {playerSs} + {secretSalt}
     const salt = cryptoSalt(passLogger);
     const hash = "tt/" + config.player.playerId + "/" + salt + config.player.playerSs;
-    const endpoint = serverEndpoints.check_for_newer_save + config.player.playerId + "/" + salt;
+    const endpoint = serverEndpoints.checkForNewerSave + config.player.playerId + "/" + salt;
     const serverResponse = await getNetworkRequest<ICheckForNewerSave>({ config, endpoint, hash, log: passLogger });
 
     // Bad response

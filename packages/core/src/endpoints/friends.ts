@@ -1,5 +1,5 @@
 import type { ILogger } from "../logger.js";
-import type { ITTConfig } from "../tt-config.js";
+import type { IConfig } from "../config.js";
 import type { IUploadSave } from "./upload-save.js";
 import type { IDownloadSave } from "./download-save.js";
 import type { DecompressedSave } from "../decompress-save.js";
@@ -77,7 +77,7 @@ export interface IFriendSnapshotList extends ISuccessFoundNotFound, Omit<INimble
 // Adds a friend to your friends list. Your friends list is saved in your save data, so adding
 // a friend works by modifying your save data friends list then uploading your save data.
 export const addFriend = async (
-    config: ITTConfig,
+    config: IConfig,
     { friendId, forceLoadStructs = false, forcePush = false }: AddFriendParameters,
     logger: ILogger = debug
 ): Promise<IUploadSave> => {
@@ -114,7 +114,7 @@ export const addFriend = async (
 // person if actually your friend. Additionally, this endpoint does not require an authenticated tinyburg config
 // as it is able to proxy requests through the burn bots.
 export const pullFriendMeta = async function <FriendId extends string>(
-    config: ITTConfig,
+    config: IConfig,
     { friendId }: Omit<IPullFriendParameters, "friendId"> & { friendId: FriendId },
     logger: ILogger = debug
 ): Promise<IFriendMeta<FriendId>> {
@@ -146,7 +146,7 @@ export const pullFriendMeta = async function <FriendId extends string>(
     // and hash is the md5 hash of tt/{playerId}/{salt} + {friendId} + {playerSs} + {secretSalt}
     const salt = cryptoSalt(passLogger);
     const hash = "tt/" + requester.playerId + "/" + salt + friendId + requester.playerSs;
-    const endpoint = serverEndpoints.friend_pull_meta + requester.playerId + "/" + salt;
+    const endpoint = serverEndpoints.friendPullMeta + requester.playerId + "/" + salt;
     const serverResponse = await postNetworkRequest<IFriendMeta<FriendId>>({
         config,
         endpoint,
@@ -174,7 +174,7 @@ export const pullFriendMeta = async function <FriendId extends string>(
 // person if actually your friend. Additionally, this endpoint does not require an authenticated tinyburg config
 // as it is able to proxy requests through the burn bots.
 export const retrieveFriendSnapshotList = async (
-    config: ITTConfig,
+    config: IConfig,
     { friendId }: IPullFriendParameters,
     logger: ILogger = debug
 ): Promise<IFriendSnapshotList> => {
@@ -203,7 +203,7 @@ export const retrieveFriendSnapshotList = async (
     // and hash is the md5 hash of tt/{playerId}/{friendId}/{salt} + {playerSs} + {secretSalt}
     const salt = cryptoSalt(passLogger);
     const hash = "tt/" + requester.playerId + "/" + friendId + "/" + salt + requester.playerSs;
-    const endpoint = serverEndpoints.retrieve_friends_snapshot_list + requester.playerId + "/" + friendId + "/" + salt;
+    const endpoint = serverEndpoints.retrieveFriendsSnapshotList + requester.playerId + "/" + friendId + "/" + salt;
     const serverResponse = await getNetworkRequest<IFriendSnapshotList>({ config, endpoint, hash, log: passLogger });
 
     // Bad response
@@ -225,7 +225,7 @@ export const retrieveFriendSnapshotList = async (
 // person if actually your friend. Additionally, this endpoint does not require an authenticated tinyburg config
 // as it is able to proxy requests through the burn bots.
 export const pullFriendTower = async (
-    config: ITTConfig,
+    config: IConfig,
     { friendId }: IPullFriendParameters,
     logger: ILogger = debug
 ): Promise<DecompressedSave> => {
@@ -254,7 +254,7 @@ export const pullFriendTower = async (
     // and hash is the md5 hash of tt/{playerId}/{friendId}/{salt} + {playerSs} + {secretSalt}
     const salt = cryptoSalt(passLogger);
     const hash = "tt/" + requester.playerId + "/" + friendId + "/" + salt + requester.playerSs;
-    const endpoint = serverEndpoints.friend_pull_tower + requester.playerId + "/" + friendId + "/" + salt;
+    const endpoint = serverEndpoints.friendPullTower + requester.playerId + "/" + friendId + "/" + salt;
     const serverResponse = await getNetworkRequest<IFriendTower>({ config, endpoint, hash, log: passLogger });
 
     // Bad response

@@ -1,5 +1,5 @@
 import type { ILogger } from "../logger.js";
-import type { ITTConfig } from "../tt-config.js";
+import type { IConfig } from "../config.js";
 import type { DecompressedSave } from "../decompress-save.js";
 import type { INimblebitResponse } from "./nimblebit-response.js";
 import type { INimblebitJsonSave } from "../parsing-structs/blocks.js";
@@ -110,7 +110,7 @@ export const generateUploadMetadata = async ({
 
 // Uploads save data to the cloud.
 export const uploadSave = async (
-    config: ITTConfig,
+    config: IConfig,
     { saveData, version, language, platform, forcePush = false }: UploadSaveParameters,
     logger: ILogger = debug
 ): Promise<IUploadSave> => {
@@ -152,7 +152,7 @@ export const uploadSave = async (
     // and hash is the md5 hash of tt/{playerId}/{salt} + {compressedSave} + {playerSs} + {secretSalt}
     const salt = cryptoSalt(passLogger);
     const hash = "tt/" + config.player.playerId + "/" + salt + compressedSave + config.player.playerSs;
-    const endpoint = serverEndpoints.push_save + config.player.playerId + "/" + salt;
+    const endpoint = serverEndpoints.pushSave + config.player.playerId + "/" + salt;
     const serverResponse = await postNetworkRequest<IUploadSave>({
         config,
         endpoint,

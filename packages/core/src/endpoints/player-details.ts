@@ -1,5 +1,5 @@
 import type { ILogger } from "../logger.js";
-import type { ITTConfig } from "../tt-config.js";
+import type { IConfig } from "../config.js";
 import type { ICheckForNewerSave } from "./check-for-newer-save.js";
 import type { INimblebitResponse, ISuccessFoundNotFound } from "./nimblebit-response.js";
 
@@ -22,7 +22,7 @@ export interface IPlayerDetails extends ISuccessFoundNotFound, Omit<INimblebitRe
 }
 
 // Enters a player into the current hourly raffle drawing.
-export const playerDetails = async (config: ITTConfig, logger: ILogger = debug): Promise<IPlayerDetails["player"]> => {
+export const playerDetails = async (config: IConfig, logger: ILogger = debug): Promise<IPlayerDetails["player"]> => {
     // Setup logging
     const passLogger = logger === debug ? undefined : logger;
     logger.info("Retrieving player details for player %s...", config.player.playerId);
@@ -40,7 +40,7 @@ export const playerDetails = async (config: ITTConfig, logger: ILogger = debug):
     // and hash is the md5 hash of tt/{playerId}/{salt} + {playerSs} + {secretSalt}
     const salt = cryptoSalt(passLogger);
     const hash = "tt/" + config.player.playerId + "/" + salt + config.player.playerSs;
-    const endpoint = serverEndpoints.player_details + config.player.playerId + "/" + salt;
+    const endpoint = serverEndpoints.playerDetails + config.player.playerId + "/" + salt;
     const serverResponse = await getNetworkRequest<IPlayerDetails>({ config, endpoint, hash, log: passLogger });
 
     // Bad response

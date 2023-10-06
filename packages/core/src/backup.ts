@@ -1,5 +1,5 @@
 import type { ILogger } from "./logger.js";
-import type { ITTConfig } from "./tt-config.js";
+import type { IConfig } from "./config.js";
 import type { DecompressedSave } from "./decompress-save.js";
 import type { IPushSnapshot } from "./endpoints/snapshots.js";
 import type { INimblebitJsonSave } from "./parsing-structs/blocks.js";
@@ -23,7 +23,7 @@ export enum BackupType {
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type BackupParameters = {
-    config: ITTConfig;
+    config: IConfig;
     logger?: ILogger;
 };
 

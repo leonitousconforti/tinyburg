@@ -1,9 +1,10 @@
 import { getRandomBurnerBot } from "@tinyburg/bots/burnbots.js";
 
-export interface ITTConfig {
-    nimblebitHost: string;
+export interface IConfig {
+    nimblebitHost: string | URL;
     secretSalt?: string;
     authenticated: boolean;
+    game: "TinyTower" | "LegoTower" | "TinyTowerVegas";
 
     proxy: {
         useProxy: boolean;
@@ -23,9 +24,10 @@ export interface ITTConfig {
     };
 }
 
-export const defaultConfig: ITTConfig = {
-    nimblebitHost: "https://sync.nimblebit.com",
+export const defaultConfig: IConfig = {
+    nimblebitHost: new URL("https://sync.nimblebit.com"),
     authenticated: false,
+    game: "TinyTower",
     proxy: {
         useProxy: false,
         address: "https://authproxy.tinyburg.app",

@@ -1,5 +1,5 @@
 import type { ILogger } from "../logger.js";
-import type { ITTConfig } from "../tt-config.js";
+import type { IConfig } from "../config.js";
 
 import { DebugLogger } from "../logger.js";
 import { cryptoSalt } from "../crypto-salt.js";
@@ -17,7 +17,7 @@ export interface INewUser {
 }
 
 // Request a new user from nimblebit's servers.
-export const newUser = async (config: ITTConfig, logger: ILogger = debug): Promise<INewUser> => {
+export const newUser = async (config: IConfig, logger: ILogger = debug): Promise<INewUser> => {
     // Setup logging
     const passLogger = logger === debug ? undefined : logger;
     logger.info("Contacting Nimblebit server for TinyTower new user creation...");
@@ -31,7 +31,7 @@ export const newUser = async (config: ITTConfig, logger: ILogger = debug): Promi
     const salt1 = cryptoSalt(passLogger);
     const salt2 = cryptoSalt(passLogger);
     const hash = "tt/" + salt1 + "/" + salt2;
-    const endpoint = serverEndpoints.new_user + salt1 + "/" + salt2;
+    const endpoint = serverEndpoints.newUser + salt1 + "/" + salt2;
     const serverResponse = await getNetworkRequest<INewUser>({ config, endpoint, hash, log: passLogger });
 
     // Bad response

@@ -1,5 +1,5 @@
 import type { ILogger } from "../logger.js";
-import type { ITTConfig } from "../tt-config.js";
+import type { IConfig } from "../config.js";
 import type { INimblebitResponse } from "./nimblebit-response.js";
 
 import got from "got";
@@ -40,7 +40,7 @@ export interface IVerifyDevice extends INimblebitResponse {
 
 // Sends a verification code to nimblebit to verify your device.
 export const verifyDevice = async (
-    config: ITTConfig,
+    config: IConfig,
     { verificationCode }: VerifyDeviceParameters,
     logger: ILogger = debug
 ): Promise<IVerifyDevice> => {
@@ -56,7 +56,7 @@ export const verifyDevice = async (
     // url will be https://sync.nimblebit.com/verify_device/tt/{burnBotId}/{verificationCode} where
     //
     // burnBotId is the cloud player id of the burn bot used for the register email endpoint
-    const endpoint = serverEndpoints.verify_device + config.burnBot.playerId + "/" + verificationCode;
+    const endpoint = serverEndpoints.verifyDevice + config.burnBot.playerId + "/" + verificationCode;
     const url = new URL(endpoint, config.nimblebitHost);
     const serverResponse = await got.get(url, { headers: defaultHeaders }).json<IVerifyDevice>();
 

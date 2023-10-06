@@ -1,5 +1,5 @@
 import type { ILogger } from "../logger.js";
-import type { ITTConfig } from "../tt-config.js";
+import type { IConfig } from "../config.js";
 import type { DecompressedSave } from "../decompress-save.js";
 import type { INimblebitResponse, ISuccessFoundNotFound } from "./nimblebit-response.js";
 
@@ -37,7 +37,7 @@ export interface IDownloadSave extends ISuccessFoundNotFound, Omit<INimblebitRes
  * Downloads a players save data from the cloud. Will feed the compressed data
  * into the decompress-save module and return the decompressed save data.
  */
-export const downloadSave = async (config: ITTConfig, logger: ILogger = debug): Promise<DecompressedSave> => {
+export const downloadSave = async (config: IConfig, logger: ILogger = debug): Promise<DecompressedSave> => {
     // Setup logging
     const passLogger = logger === debug ? undefined : logger;
     logger.info("Starting download of current cloud save data...");
@@ -55,7 +55,7 @@ export const downloadSave = async (config: ITTConfig, logger: ILogger = debug): 
     // and hash is the md5 hash of tt/{playerId}/{salt} + {playerSs} + {secretSalt}
     const salt = cryptoSalt(passLogger);
     const hash = "tt/" + config.player.playerId + "/" + salt + config.player.playerSs;
-    const endpoint = serverEndpoints.pull_save + config.player.playerId + "/" + salt;
+    const endpoint = serverEndpoints.pullSave + config.player.playerId + "/" + salt;
     const serverResponse = await getNetworkRequest<IDownloadSave>({ config, endpoint, hash, log: passLogger });
 
     // Bad response

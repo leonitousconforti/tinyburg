@@ -8,7 +8,7 @@ import { loggerConfigClosure } from "./closures/logger-config.js";
 import { isValidPlayerId } from "./validation/is-valid-player-id.js";
 
 // Library configs
-import { type ITTConfig, defaultConfig } from "./tt-config.js";
+import { type IConfig, defaultConfig } from "./config.js";
 
 // Library methods to expose
 import { saveConfig } from "./save-config.js";
@@ -53,12 +53,13 @@ const debug: ILogger = new DebugLogger("tinyburg:core");
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export const fromConfig = (
-    partialConfig: Pick<Partial<ITTConfig>, "burnBot" | "proxy"> & Omit<ITTConfig, "burnBot" | "proxy">,
+    partialConfig: Pick<Partial<IConfig>, "burnBot" | "proxy"> &
+        Omit<IConfig, "game" | "burnBot" | "proxy"> & { game: string },
     logger: ILogger = debug
 ) => {
     // Extend the values in the default config with the values in the config provided
     // Needs to be a deep extend, not userConfig = Object.assign(defaultConfig, userConfig);
-    const config: ITTConfig = deepExtend(defaultConfig, partialConfig);
+    const config: IConfig = deepExtend(defaultConfig, partialConfig);
 
     // Not enough data provided, or data was in the wrong format
     if (!config.player.playerEmail && !config.player.playerSs) {
@@ -148,7 +149,7 @@ export const fromPlayerId = (playerId: string, playerEmail?: string, playerSs?: 
                 playerSs,
                 playerEmail,
             },
-        } as unknown as ITTConfig,
+        } as unknown as IConfig,
         log === debug ? undefined : log
     );
 };

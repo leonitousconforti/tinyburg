@@ -1,5 +1,5 @@
 import type { ILogger } from "../logger.js";
-import type { ITTConfig } from "../tt-config.js";
+import type { IConfig } from "../config.js";
 import type { IGift } from "../parsing-structs/gift.js";
 import type { INimblebitResponse, ISuccessFoundNotFound } from "./nimblebit-response.js";
 
@@ -32,7 +32,7 @@ export interface IReceiveGift extends INimblebitResponse {
 }
 
 // Retrieves all the gifts waiting for you.
-export const getGifts = async (config: ITTConfig, logger: ILogger = debug): Promise<IGifts> => {
+export const getGifts = async (config: IConfig, logger: ILogger = debug): Promise<IGifts> => {
     // Setup logging
     const passLogger = logger === debug ? undefined : logger;
     logger.info("Retrieving gifts for player: %s", config.player.playerId);
@@ -50,7 +50,7 @@ export const getGifts = async (config: ITTConfig, logger: ILogger = debug): Prom
     // and hash is the md5 hash of tt/{playerId}/{salt} + {playerSs} + {secretSalt}
     const salt = cryptoSalt(passLogger);
     const hash = "tt/" + config.player.playerId + "/" + salt + config.player.playerSs;
-    const endpoint = serverEndpoints.get_gifts + config.player.playerId + "/" + salt;
+    const endpoint = serverEndpoints.getGifts + config.player.playerId + "/" + salt;
     const serverResponse = await getNetworkRequest<IGifts>({ config, endpoint, hash, log: passLogger });
 
     // Bad response
@@ -69,7 +69,7 @@ export const getGifts = async (config: ITTConfig, logger: ILogger = debug): Prom
 
 // Marks a gift as received so it is removed from your feed.
 export const receiveGift = async (
-    config: ITTConfig,
+    config: IConfig,
     { gift }: IReceiveGiftParameters,
     logger: ILogger = debug
 ): Promise<IReceiveGift> => {
@@ -90,7 +90,7 @@ export const receiveGift = async (
     // and hash is the md5 hash of tt/{playerId}/{gift_id}/{salt} + {playerSs} + {secretSalt}
     const salt = cryptoSalt(passLogger);
     const hash = "tt/" + config.player.playerId + "/" + gift.gift_id + "/" + salt + config.player.playerSs;
-    const endpoint = serverEndpoints.receive_gift + config.player.playerId + "/" + gift.gift_id + "/" + salt;
+    const endpoint = serverEndpoints.receiveGift + config.player.playerId + "/" + gift.gift_id + "/" + salt;
     const serverResponse = await getNetworkRequest<IReceiveGift>({ config, endpoint, hash, log: passLogger });
 
     // Bad response

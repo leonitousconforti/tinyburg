@@ -1,5 +1,5 @@
 import type { ILogger } from "../logger.js";
-import type { ITTConfig } from "../tt-config.js";
+import type { IConfig } from "../config.js";
 import type { IGift } from "../parsing-structs/gift.js";
 import type { INimblebitResponse, ISuccessFoundNotFound } from "./nimblebit-response.js";
 
@@ -38,7 +38,7 @@ export interface IVisits extends ISuccessFoundNotFound, Omit<INimblebitResponse,
 
 // Visits a player and leaves your doorman so they can visit back.
 export const visitFriend = async (
-    config: ITTConfig,
+    config: IConfig,
     { friend }: VisitPlayerParameters,
     logger: ILogger = debug
 ): Promise<IVisitFriend> => {
@@ -65,7 +65,7 @@ export const visitFriend = async (
 };
 
 // Returns a list of players who has visited you that you have not received.
-export const getVisits = async (config: ITTConfig, logger: ILogger = debug): Promise<IVisits> => {
+export const getVisits = async (config: IConfig, logger: ILogger = debug): Promise<IVisits> => {
     // Setup logging
     const passLogger = logger === debug ? undefined : logger;
     logger.info("Fetching visit...");
@@ -83,7 +83,7 @@ export const getVisits = async (config: ITTConfig, logger: ILogger = debug): Pro
     // and hash is the md5 hash of tt/{playerId}/{salt} + {playerSs} + {secretSalt}
     const salt = cryptoSalt(passLogger);
     const hash = "tt/" + config.player.playerId + "/" + salt + config.player.playerSs;
-    const endpoint = serverEndpoints.get_visits + config.player.playerId + "/" + salt;
+    const endpoint = serverEndpoints.getVisits + config.player.playerId + "/" + salt;
     const serverResponse = await getNetworkRequest<IVisits>({ config, endpoint, hash, log: passLogger });
 
     // Bad response

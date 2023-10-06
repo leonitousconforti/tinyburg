@@ -1,8 +1,8 @@
-import type { ITTConfig } from "./tt-config.js";
+import type { IConfig } from "./config.js";
 
 import fs from "node:fs";
 
-export const loadSecrets = (config: ITTConfig, localFile: string): ITTConfig => {
+export const loadSecrets = (config: IConfig, localFile: string): IConfig => {
     const data = fs.readFileSync(localFile);
     const secretSalt = JSON.parse(data.toString()).secretSalt;
 

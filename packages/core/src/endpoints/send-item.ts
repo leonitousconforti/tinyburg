@@ -1,5 +1,5 @@
 import type { ILogger } from "../logger.js";
-import type { ITTConfig } from "../tt-config.js";
+import type { IConfig } from "../config.js";
 import type { DecompressedSave } from "../decompress-save.js";
 import type { INimblebitResponse } from "./nimblebit-response.js";
 import type { SyncItemType } from "../parsing-structs/sync-item.js";
@@ -38,7 +38,7 @@ export interface ISendItem extends INimblebitResponse {
 // sending bitizens the players. You can send items to yourself and it will proxy the requests
 // through a burn bot.
 export const sendItem = async (
-    config: ITTConfig,
+    config: IConfig,
     { itemType, sendTo, item }: SendItemParameters,
     logger: ILogger = debug
 ): Promise<ISendItem> => {
@@ -77,7 +77,7 @@ export const sendItem = async (
     // and hash is the md5 hash of tt/{itemType}/{sendFromId}/{sendTo}/{salt} + {itemStr} + {sendFromSs} + {secretSalt}
     const salt = cryptoSalt(passLogger);
     const hash = `tt/${itemType.toString()}/${sendFrom.id}/${sendTo}/${salt}${itemString.toString()}${sendFrom.ss}`;
-    const endpoint = serverEndpoints.send_item + itemType.toString() + "/" + sendFrom.id + "/" + sendTo + "/" + salt;
+    const endpoint = serverEndpoints.sendItem + itemType.toString() + "/" + sendFrom.id + "/" + sendTo + "/" + salt;
     const serverResponse = await postNetworkRequest<ISendItem>({
         config,
         endpoint,

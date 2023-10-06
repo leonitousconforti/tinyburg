@@ -1,10 +1,10 @@
-import type { ITTConfig } from "./tt-config.js";
+import type { IConfig } from "./config.js";
 
 import { writeFileSync } from "node:fs";
 
 // Save config function params
 export interface ISaveConfigParameters {
-    config: ITTConfig;
+    config: IConfig;
     fileName: string;
 }
 

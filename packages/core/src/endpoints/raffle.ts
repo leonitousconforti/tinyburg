@@ -1,5 +1,5 @@
 import type { ILogger } from "../logger.js";
-import type { ITTConfig } from "../tt-config.js";
+import type { IConfig } from "../config.js";
 import type { INimblebitResponse } from "./nimblebit-response.js";
 
 import { DebugLogger } from "../logger.js";
@@ -22,7 +22,7 @@ export interface IEnterRaffle extends IEnteredRaffle {
 }
 
 // Enters a player into the current hourly raffle drawing.
-export const enterRaffle = async (config: ITTConfig, logger: ILogger = debug): Promise<IEnterRaffle> => {
+export const enterRaffle = async (config: IConfig, logger: ILogger = debug): Promise<IEnterRaffle> => {
     // Setup logging
     const passLogger = logger === debug ? undefined : logger;
     logger.info("Entering raffle for player %s...", config.player.playerId);
@@ -40,7 +40,7 @@ export const enterRaffle = async (config: ITTConfig, logger: ILogger = debug): P
     // and hash is the md5 hash of tt/{playerId}/{salt} + {playerSs} + {secretSalt}
     const salt = cryptoSalt(passLogger);
     const hash = "tt/" + config.player.playerId + "/" + salt + config.player.playerSs;
-    const endpoint = serverEndpoints.enter_raffle + config.player.playerId + "/" + salt;
+    const endpoint = serverEndpoints.enterRaffle + config.player.playerId + "/" + salt;
     const serverResponse = await getNetworkRequest<IEnteredRaffle>({ config, endpoint, hash, log: passLogger });
 
     // Bad response
@@ -59,7 +59,7 @@ export const enterRaffle = async (config: ITTConfig, logger: ILogger = debug): P
 };
 
 // Enters a player into the multi raffle (next 8 raffles).
-export const enterMultiRaffle = async (config: ITTConfig, logger: ILogger = debug): Promise<IEnterRaffle> => {
+export const enterMultiRaffle = async (config: IConfig, logger: ILogger = debug): Promise<IEnterRaffle> => {
     // Setup logging
     const passLogger = logger === debug ? undefined : logger;
     logger.info("Entering multi-raffle for player %s...", config.player.playerId);
@@ -77,7 +77,7 @@ export const enterMultiRaffle = async (config: ITTConfig, logger: ILogger = debu
     // and hash is the md5 hash of tt/{playerId}/{salt} + {playerSs} + {secretSalt}
     const salt = cryptoSalt(passLogger);
     const hash = "tt/" + config.player.playerId + "/" + salt + config.player.playerSs;
-    const endpoint = serverEndpoints.enter_multi_raffle + config.player.playerId + "/" + salt;
+    const endpoint = serverEndpoints.enterMultiRaffle + config.player.playerId + "/" + salt;
     const serverResponse = await getNetworkRequest<IEnteredRaffle>({ config, endpoint, hash, log: passLogger });
 
     // Bad response
@@ -96,7 +96,7 @@ export const enterMultiRaffle = async (config: ITTConfig, logger: ILogger = debu
 };
 
 // Checks if a player is entered in the current raffle drawing.
-export const checkEnteredRaffle = async (config: ITTConfig, logger: ILogger = debug): Promise<boolean> => {
+export const checkEnteredRaffle = async (config: IConfig, logger: ILogger = debug): Promise<boolean> => {
     // Setup logging
     const passLogger = logger === debug ? undefined : logger;
     logger.info("Checking if player %s is entered in current raffle drawing...", config.player.playerId);
@@ -114,7 +114,7 @@ export const checkEnteredRaffle = async (config: ITTConfig, logger: ILogger = de
     // and hash is the md5 hash of tt/{playerId}/{salt} + {playerSs} + {secretSalt}
     const salt = cryptoSalt(passLogger);
     const hash = "tt/" + config.player.playerId + "/" + salt + config.player.playerSs;
-    const endpoint = serverEndpoints.entered_current + config.player.playerId + "/" + salt;
+    const endpoint = serverEndpoints.enteredCurrent + config.player.playerId + "/" + salt;
     const serverResponse = await getNetworkRequest<IEnteredRaffle>({ config, endpoint, hash, log: passLogger });
 
     // Bad response
