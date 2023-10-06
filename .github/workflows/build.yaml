@@ -13,7 +13,7 @@ on:
         required: true
 
 jobs:
-  build:
+  build-packages:
     strategy:
       matrix:
         include:
@@ -21,14 +21,14 @@ jobs:
             OS: linux-latest
           - NodeVersion: 18
             OS: linux-latest
-          - NodeVersion: 16
-            OS: windows-latest
-          - NodeVersion: 18
-            OS: windows-latest
-          - NodeVersion: 16
-            OS: macos-latest
-          - NodeVersion: 18
-            OS: macos-latest
+          # - NodeVersion: 16
+          #   OS: windows-latest
+          # - NodeVersion: 18
+          #   OS: windows-latest
+          # - NodeVersion: 16
+          #   OS: macos-latest
+          # - NodeVersion: 18
+          #   OS: macos-latest
     name: Node.js v${{ matrix.NodeVersion }} (${{ matrix.OS }})
     runs-on: ${{ matrix.OS }}
     steps:

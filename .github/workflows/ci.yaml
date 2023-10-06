@@ -12,28 +12,28 @@ jobs:
     uses: ./.github/workflows/build.yaml
     secrets: inherit
 
-  build-authproxy:
+  build-docker-authproxy:
     needs: build
     runs-on: ubuntu-latest
     steps:
       - name: Hi Mom
         run: echo "Hi, Mom!"
 
-  build-auto-gold-bits:
+  build-docker-auto-gold-bits:
     needs: build
     runs-on: ubuntu-latest
     steps:
       - name: Hi Mom
         run: echo "Hi, Mom!"
 
-  build-discord-bot:
+  build-docker-discord-bot:
     needs: build
     runs-on: ubuntu-latest
     steps:
       - name: Hi Mom
         run: echo "Hi, Mom!"
 
-  build-repl-demo:
+  build-docker-repl-demo:
     needs: build
     runs-on: ubuntu-latest
     steps:
