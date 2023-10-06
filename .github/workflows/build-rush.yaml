@@ -24,7 +24,7 @@ jobs:
 
       - uses: actions/setup-node@v3
         with:
-          node-version: ${{ matrix.NodeVersion }}
+          node-version: 18
 
       - name: Connect to Tailscale
         uses: tailscale/github-action@v2
@@ -69,7 +69,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: common/temp/build-cache
-          key: ${{ runner.os }}_node-${{ matrix.NodeVersion }}_build-cache
+          key: linux_node-18_build-cache
 
       - name: Verify Change Logs
         run: node common/scripts/install-run-rush.js change --verify
