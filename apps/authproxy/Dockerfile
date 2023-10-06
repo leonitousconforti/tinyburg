@@ -1,7 +1,7 @@
 FROM alpine:latest as dependency-preparer
 WORKDIR /workspace/tinyburg
-ADD deploy.zip .
-RUN unzip deploy.zip && rm deploy.zip
+COPY common/deploy/authproxy.zip authproxy.zip
+RUN unzip authproxy.zip && rm authproxy.zip
 
 FROM node:18-slim
 ARG GIT_SHA=""

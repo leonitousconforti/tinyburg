@@ -24,7 +24,7 @@ export const handler = async function (request: Request, reply: Reply): Promise<
     request.log.info({ nimblebitResponse, req: request }, "Nimblebit request sent");
 
     // Check for special endpoints that need a proxied hash as well - current save version
-    if (endpoint === serverEndpoints.check_for_newer_save) {
+    if (endpoint === serverEndpoints.checkForNewerSave) {
         nimblebitResponse.body.proxiedHash = computeCheckForNewerSaveValidationHash({
             playerId,
             playerSs,
@@ -35,7 +35,7 @@ export const handler = async function (request: Request, reply: Reply): Promise<
     }
 
     // Check for special endpoints that need a proxied hash as well - download save
-    if (endpoint === serverEndpoints.pull_save) {
+    if (endpoint === serverEndpoints.pullSave) {
         nimblebitResponse.body.proxiedHash = computeDownloadSaveValidationHash({
             playerId,
             playerSs,

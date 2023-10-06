@@ -11,10 +11,10 @@
         "start": "next start"
     },
     "dependencies": {
-        "@prisma/client": "~5.0.0",
+        "@prisma/client": "~5.4.1",
         "bcrypt": "~5.1.0",
-        "next": "~13.4.10",
-        "next-auth": "~4.22.3",
+        "next": "~13.5.4",
+        "next-auth": "~4.23.2",
         "react": "18.2.0",
         "react-dom": "18.2.0",
         "react-hot-toast": "~2.4.1"
@@ -22,15 +22,15 @@
     "devDependencies": {
         "@tinyburg/tsconfig-rig": "workspace:*",
         "@types/bcrypt": "~5.0.0",
-        "@types/node": "20.6.2",
-        "@types/react": "18.2.15",
-        "@types/react-dom": "18.2.7",
+        "@types/node": "20.8.2",
+        "@types/react": "18.2.25",
+        "@types/react-dom": "18.2.10",
         "autoprefixer": "~10.4.14",
         "csstype": "~3.1.2",
-        "eslint": "8.49.0",
-        "eslint-config-next": "~13.4.10",
-        "postcss": "~8.4.26",
-        "prisma": "~5.0.0",
+        "eslint": "8.51.0",
+        "eslint-config-next": "~13.5.4",
+        "postcss": "~8.4.31",
+        "prisma": "~5.4.1",
         "tailwindcss": "~3.3.3",
         "typescript": "5.2.2"
     }

@@ -3,16 +3,16 @@ import { serverEndpoints } from "@tinyburg/core/contact-server";
 
 export type Scope = keyof typeof serverEndpoints;
 export const defaultAllowedScopes: Scope[] = [
-    "verify_device",
-    "register_email",
-    "pull_save",
-    "check_for_newer_save",
-    "entered_current",
-    "send_item",
-    "get_gifts",
-    "receive_gift",
-    "friend_pull_meta",
-    "get_visits",
+    "verifyDevice",
+    "registerEmail",
+    "pullSave",
+    "checkForNewerSave",
+    "enteredCurrent",
+    "sendItem",
+    "getGifts",
+    "receiveGift",
+    "friendPullMeta",
+    "getVisits",
 ];
 
 export const hasScopePermission = (

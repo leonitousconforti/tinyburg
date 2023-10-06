@@ -44,7 +44,7 @@ const api_v1 = fp<{ url: string }>(
             fastify.decorateRequest("apiKey", undefined);
         }
         if (!fastify.hasRequestDecorator("nimblebitData")) {
-            fastify.decorateRequest("nimblebitData", undefined);
+            fastify.decorateRequest("nimblebitData");
         }
     }
 );
