@@ -14,15 +14,8 @@ on:
 
 jobs:
   build-packages:
-    strategy:
-      matrix:
-        include:
-          - NodeVersion: 14
-            OS: ubuntu-latest
-          - NodeVersion: 18
-            OS: ubuntu-latest
-    name: Node.js v${{ matrix.NodeVersion }} (${{ matrix.OS }})
-    runs-on: ${{ matrix.OS }}
+    name: Rush Build
+    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v3
