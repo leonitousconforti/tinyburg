@@ -9,7 +9,7 @@ on:
 
 jobs:
   build:
-    uses: ./.github/workflows/build.yaml
+    uses: ./.github/workflows/build-rush.yaml
     secrets: inherit
 
   build-docker-authproxy:
@@ -27,13 +27,6 @@ jobs:
         run: echo "Hi, Mom!"
 
   build-docker-discord-bot:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Hi Mom
-        run: echo "Hi, Mom!"
-
-  build-docker-repl-demo:
     needs: build
     runs-on: ubuntu-latest
     steps:
