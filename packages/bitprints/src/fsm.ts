@@ -139,7 +139,7 @@ export class FiniteStateMachine<State extends string | number | symbol, EventDat
     public canGo = (state: State): boolean => this._canGo(this._currentState, state);
 
     /** Transition to another valid state */
-    public async go(state: State, data: EventData): Promise<boolean> {
+    public async go(state: State, data: EventData): Promise<EventData | undefined> {
         if (this.canGo(state)) {
             return await this._transitionTo(state, data);
         } else {
@@ -149,7 +149,7 @@ export class FiniteStateMachine<State extends string | number | symbol, EventDat
         }
     }
 
-    public async feed(data: EventData): Promise<boolean> {
+    public async feed(data: EventData): Promise<EventData | undefined> {
         const possibleTransitions = this._transitionFunctions.filter(
             (transitionFunction) => transitionFunction.from === this._currentState
         );
@@ -157,17 +157,17 @@ export class FiniteStateMachine<State extends string | number | symbol, EventDat
         for (const possibleTransition of possibleTransitions) {
             const success = await this._transitionTo(possibleTransition.to, data);
             if (success) {
-                return true;
+                return success;
             }
         }
 
-        return false;
+        return;
     }
 
     /** Whether or not the current state equals the given state */
     public is = (state: State): boolean => this._currentState === state;
 
-    private async _transitionTo(state: State, data: EventData): Promise<boolean> {
+    private async _transitionTo(state: State, data: EventData): Promise<EventData | undefined> {
         if (!this._exitCallbacks[this._currentState]) {
             this._exitCallbacks[this._currentState] = [];
         }
@@ -202,9 +202,9 @@ export class FiniteStateMachine<State extends string | number | symbol, EventDat
                     newEventData = a;
                 }
             }
-            return true;
+            return newEventData;
         }
 
-        return false;
+        return;
     }
 }
