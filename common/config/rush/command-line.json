@@ -198,7 +198,7 @@
             "safeForSimultaneousRushProcesses": false,
             "enableParallelism": true,
             "incremental": true,
-            "phases": ["_phase:build"],
+            "phases": ["_phase:build", "_phase:test"],
             "watchOptions": {
                 "alwaysWatch": true, // Act as though `--watch` is always passed. If false, adds support for passing `--watch`.
                 "watchPhases": ["_phase:build", "_phase:test"] // During watch recompilation run both build and test for affected projects
@@ -343,8 +343,15 @@
             "longName": "--production",
             "parameterKind": "flag",
             "description": "Perform a production build, including minification and localization steps",
-            "associatedPhases": ["_phase:build", "_phase:test"],
-            "associatedCommands": ["build", "rebuild", "test", "retest"]
+            "associatedCommands": ["build", "rebuild", "test", "retest"],
+            "associatedPhases": ["_phase:build"]
+        },
+        {
+            "longName": "--update-snapshots",
+            "parameterKind": "flag",
+            "description": "Update unit test snapshots for all projects",
+            "associatedCommands": ["test", "retest"],
+            "associatedPhases": ["_phase:test"]
         }
     ],
 

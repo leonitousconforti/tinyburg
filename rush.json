@@ -16,7 +16,7 @@
      * path segment in the "$schema" field for all your Rush config files. This will ensure
      * correct error-underlining and tab-completion for editors such as VS Code.
      */
-    "rushVersion": "5.100.0",
+    "rushVersion": "5.108.0",
 
     /**
      * The next field selects which package manager should be installed and determines its version.
@@ -26,7 +26,7 @@
      * Specify one of: "pnpmVersion", "npmVersion", or "yarnVersion". See the Rush documentation
      * for details about these alternatives.
      */
-    "pnpmVersion": "7.33.0",
+    "pnpmVersion": "7.33.5",
     // "npmVersion": "6.14.15",
     // "yarnVersion": "1.9.4",
 
@@ -451,6 +451,11 @@
             "shouldPublish": true
         },
         {
+            "packageName": "@tinyburg/economy",
+            "projectFolder": "packages/economy",
+            "shouldPublish": true
+        },
+        {
             "packageName": "@tinyburg/explorer",
             "projectFolder": "packages/explorer",
             "shouldPublish": true
@@ -485,11 +490,6 @@
         {
             "packageName": "@tinyburg/discord-bot",
             "projectFolder": "apps/discord-bot",
-            "shouldPublish": false
-        },
-        {
-            "packageName": "@tinyburg/economy",
-            "projectFolder": "apps/economy",
             "shouldPublish": false
         },
         {
