@@ -1,5 +1,6 @@
 import type { Image } from "../image-operations/image.js";
-import type { EmulatorControllerClient } from "@tinyburg/architect/protobuf/emulator_controller.client.js";
+import type { PromiseClient } from "@connectrpc/connect";
+import type { EmulatorController } from "@tinyburg/architect/protobuf/emulator_controller_connect.js";
 
 import crypto from "node:crypto";
 import { click } from "../grpc/send-touch.js";
@@ -16,7 +17,7 @@ export class ClickAction extends BaseAction {
     private readonly _pos: { x: number; y: number; timeout?: number };
 
     public constructor(
-        emulatorClient: EmulatorControllerClient,
+        emulatorClient: PromiseClient<typeof EmulatorController>,
         pos: { x: number; y: number; timeout?: number },
         fromScreen?: GameScreen,
         toScreen?: GameScreen
@@ -39,7 +40,7 @@ export abstract class ClickActionTemplateMatching extends BaseAction {
     private static readonly _templateCache: Map<string, { x: number; y: number }> = new Map();
 
     public constructor(
-        emulatorClient: EmulatorControllerClient,
+        emulatorClient: PromiseClient<typeof EmulatorController>,
         template: Image,
         fromScreen?: GameScreen,
         toScreen?: GameScreen,

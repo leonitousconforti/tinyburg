@@ -1,7 +1,8 @@
+import type { PromiseClient } from "@connectrpc/connect";
 import type { Image } from "../image-operations/image.js";
 import type { ILocationBasedTrigger } from "./base-handler.js";
 import type { BaseAction } from "../actions/base-action.js";
-import type { EmulatorControllerClient } from "@tinyburg/architect/protobuf/emulator_controller.client.js";
+import type { EmulatorController } from "@tinyburg/architect/protobuf/emulator_controller_connect.js";
 
 import { BaseHandler } from "./base-handler.js";
 // import { loadTemplateByName } from "../image-operations/load-template.js";
@@ -30,7 +31,7 @@ export class RestockHandler extends BaseHandler<ILocationBasedTrigger | undefine
     }
 
     public generateActionsList(
-        _client: EmulatorControllerClient,
+        _emulatorClient: PromiseClient<typeof EmulatorController>,
         _initialScreenshot: Image,
         _triggerData: ILocationBasedTrigger | undefined
     ): Promise<BaseAction[]> {

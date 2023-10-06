@@ -1,7 +1,7 @@
-import type { Touch as _Touch } from "@tinyburg/architect/protobuf/emulator_controller.js";
-import type { EmulatorControllerClient } from "@tinyburg/architect/protobuf/emulator_controller.client.js";
+import type { PromiseClient } from "@connectrpc/connect";
+import type { EmulatorController } from "@tinyburg/architect/protobuf/emulator_controller_connect.js";
 
-import { Touch_EventExpiration } from "@tinyburg/architect/protobuf/emulator_controller.js";
+import { Touch_EventExpiration, Touch as _Touch } from "@tinyburg/architect/protobuf/emulator_controller_pb.js";
 
 // Override some of the properties to be required
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
@@ -13,13 +13,21 @@ export type Touch = {
     expiration: Touch_EventExpiration;
 };
 
-export const sendTouches = async (client: EmulatorControllerClient, touches: Touch[]): Promise<void> => {
+export const sendTouches = async (
+    client: PromiseClient<typeof EmulatorController>,
+    touches: Touch[]
+): Promise<void> => {
     const randomIdentifier = Math.floor(Math.random() * 100);
 
     // For every touch event
     for (const touch of touches) {
         // Assign a random identifier to all touches that do not have one already
-        const emulatorTouch: _Touch = { identifier: randomIdentifier, touchMajor: 0, touchMinor: 0, ...touch };
+        const emulatorTouch: _Touch = new _Touch({
+            identifier: randomIdentifier,
+            touchMajor: 0,
+            touchMinor: 0,
+            ...touch,
+        });
 
         // Send the touch
         await client.sendTouch({ touches: [emulatorTouch], display: 0 });
@@ -32,7 +40,7 @@ export const sendTouches = async (client: EmulatorControllerClient, touches: Tou
 };
 
 export const click = (
-    client: EmulatorControllerClient,
+    client: PromiseClient<typeof EmulatorController>,
     { x, y, timeout }: { x: number; y: number; timeout?: number }
 ): Promise<void> => {
     const pressTouch: Touch = {

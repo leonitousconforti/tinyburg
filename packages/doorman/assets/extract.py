@@ -22,6 +22,7 @@ from UnityPy.tools.extractor import extract_assets
     required=False,
     is_flag=True,
     default=False,
+    help="Only extract the required assets to build doorman",
 )
 def extract(apk, only_required):
     # Open the file as a zip file object, it will

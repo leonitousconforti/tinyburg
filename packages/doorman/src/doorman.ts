@@ -1,3 +1,4 @@
+import type { PromiseClient } from "@connectrpc/connect";
 import type { IUpgrade } from "./upgrades/base-upgrade.js";
 import type { BaseAction } from "./actions/base-action.js";
 import type { IGlobalGameState } from "./global-game-state.js";
@@ -9,7 +10,7 @@ import { ElevatorHandler } from "./handlers/elevator-handler.js";
 import { BitbookPostHandler } from "./handlers/bitbook-handler.js";
 import { RestockHandler, StockMode } from "./handlers/restock-handler.js";
 import { createEmulatorControllerClient } from "./grpc/emulator-controller-client.js";
-import { EmulatorControllerClient } from "@tinyburg/architect/protobuf/emulator_controller.client.js";
+import { EmulatorController } from "@tinyburg/architect/protobuf/emulator_controller_connect.js";
 
 export class Doorman extends Emittery<
     {
@@ -19,7 +20,7 @@ export class Doorman extends Emittery<
         [h in IHandlerName]: BaseAction[];
     }
 > {
-    private readonly _emulatorControllerClient: EmulatorControllerClient;
+    private readonly _emulatorControllerClient: PromiseClient<typeof EmulatorController>;
 
     private _handlers: Set<BaseHandler<unknown>>;
 

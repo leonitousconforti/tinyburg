@@ -1,9 +1,9 @@
 import type { Debugger } from "debug";
-
-import { EmulatorControllerClient } from "@tinyburg/architect/protobuf/emulator_controller.client.js";
+import type { PromiseClient } from "@connectrpc/connect";
+import type { EmulatorController } from "@tinyburg/architect/protobuf/emulator_controller_connect.js";
 
 export interface IUpgrade {
     readonly logger: Debugger;
     canAfford(): boolean;
-    doUpgrade(client: EmulatorControllerClient): Promise<void>;
+    doUpgrade(client: PromiseClient<typeof EmulatorController>): Promise<void>;
 }

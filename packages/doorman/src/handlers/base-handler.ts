@@ -1,7 +1,7 @@
 import type { Image } from "../image-operations/image.js";
 import type { BaseAction } from "../actions/base-action.js";
-
-import { EmulatorControllerClient } from "@tinyburg/architect/protobuf/emulator_controller.client.js";
+import type { PromiseClient } from "@connectrpc/connect";
+import type { EmulatorController } from "@tinyburg/architect/protobuf/emulator_controller_connect.js";
 
 export interface IHandlerNames {
     RestockDone: "Default Restocking Handler";
@@ -35,7 +35,7 @@ export abstract class BaseHandler<T> {
     // When a trigger is detected, this method should create a list of actions
     // that would need to be performed in the game.
     public abstract generateActionsList(
-        client: EmulatorControllerClient,
+        client: PromiseClient<typeof EmulatorController>,
         initialScreenshot: Image,
         triggerData: T
     ): Promise<BaseAction[]>;

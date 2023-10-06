@@ -1,7 +1,8 @@
 import type { IUpgrade } from "./base-upgrade.js";
 import type { Roof } from "@tinyburg/core/data/roofs";
 import type { Image } from "../image-operations/image.js";
-import { EmulatorControllerClient } from "@tinyburg/architect/protobuf/emulator_controller.client.js";
+import type { PromiseClient } from "@connectrpc/connect";
+import type { EmulatorController } from "@tinyburg/architect/protobuf/emulator_controller_connect.js";
 
 import Debug from "debug";
 import { roofs } from "@tinyburg/core/data/roofs";
@@ -36,7 +37,7 @@ export class UnlockRoof implements IUpgrade {
 
     @EnterLog(debug)
     @ExitLog(debug)
-    public async doUpgrade(client: EmulatorControllerClient): Promise<void> {
+    public async doUpgrade(client: PromiseClient<typeof EmulatorController>): Promise<void> {
         // Open the hud and navigate to the roofs upgrades menu
         // await openHud(client);
         // await openUpgradesMenu(client);

@@ -1,18 +1,20 @@
+import type { PromiseClient } from "@connectrpc/connect";
 import type { Image } from "../image-operations/image.js";
-import type { EmulatorControllerClient } from "@tinyburg/architect/protobuf/emulator_controller.client.js";
-import type { Rotation, ImageTransport, ImageFormat } from "@tinyburg/architect/protobuf/emulator_controller.js";
+import type { EmulatorController } from "@tinyburg/architect/protobuf/emulator_controller_connect.js";
+import type { Rotation, ImageTransport } from "@tinyburg/architect/protobuf/emulator_controller_pb.js";
 
 import assert from "node:assert";
 import { ImageType } from "../image-operations/image.js";
 import {
+    ImageFormat,
     DisplayModeValue,
     ImageFormat_ImgFormat,
     Rotation_SkinRotation,
     ImageTransport_TransportChannel,
-} from "@tinyburg/architect/protobuf/emulator_controller.js";
+} from "@tinyburg/architect/protobuf/emulator_controller_pb.js";
 
 // Default screenshot request params
-const defaultScreenshotRequest: ImageFormat = {
+const defaultScreenshotRequest: ImageFormat = new ImageFormat({
     // Three channel RGB format
     format: ImageFormat_ImgFormat.RGB888,
 
@@ -42,13 +44,13 @@ const defaultScreenshotRequest: ImageFormat = {
 
     // Ignore display mode because AVD is not re-sizeable
     displayMode: DisplayModeValue.PHONE,
-};
+});
 
 export const getScreenshot = async (
-    emulatorControllerClient: EmulatorControllerClient,
+    emulatorControllerClient: PromiseClient<typeof EmulatorController>,
     requestOptions = defaultScreenshotRequest
 ): Promise<Image> => {
-    const image = await emulatorControllerClient.getScreenshot(requestOptions).response;
+    const image = await emulatorControllerClient.getScreenshot(requestOptions);
 
     assert(image);
     assert(image.image);
