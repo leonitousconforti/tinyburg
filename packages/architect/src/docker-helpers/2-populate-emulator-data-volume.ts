@@ -1,8 +1,8 @@
 import Debug from "debug";
 import Dockerode from "dockerode";
+
 import { couldNotPopulateShareVolume } from "../errors.js";
 import { containerCreateOptions } from "./0-shared-options.js";
-
 import { SHARED_EMULATOR_DATA_VOLUME_NAME, SHARED_VOLUME_CONTAINER_HELPER_NAME } from "./constants.js";
 
 export const populateSharedDataVolume = async ({
@@ -51,7 +51,7 @@ export const populateSharedDataVolume = async ({
     const exitCode: { StatusCode: number } = await volumeHelperContainer.wait();
     if (exitCode.StatusCode !== 0) {
         await volumeHelperContainer.remove();
-        throw couldNotPopulateShareVolume(SHARED_VOLUME_CONTAINER_HELPER_NAME);
+        throw new Error(couldNotPopulateShareVolume(SHARED_VOLUME_CONTAINER_HELPER_NAME));
     }
 
     logger("Shared emulator data volume population complete!");

@@ -34,7 +34,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 ENV ANDROID_SDK_ROOT /android/sdk
 ENV ANDROID_AVD_HOME /android/avd-home
-RUN mkdir -p /android/apks/ && \
+RUN mkdir -p /envoy-certs/ && \
+    mkdir -p /android/apks/ && \
     mkdir -p /android/frida/ && \
     mkdir -p /android/avd-home/ && \
     mkdir -p /android/sdk/emulator/ && \
@@ -47,6 +48,7 @@ COPY --from=dependency-preparer /tmp/platform-tools/ /android/sdk/platform-tools
 COPY --from=dependency-preparer /tmp/sysimg/ /android/sdk/system-images/android/default/
 COPY --from=dependency-preparer /tmp/frida-server-16.0.19-android-x86_64 /android/frida/frida-server
 
+ADD certs/ /envoy-certs/
 ADD avd/ /android/avd-home
 COPY envoy.yaml /etc/envoy/envoy.yaml
 COPY make-snapshot.sh /android/sdk/

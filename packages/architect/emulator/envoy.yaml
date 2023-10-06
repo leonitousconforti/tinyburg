@@ -7,6 +7,19 @@ static_resources:
     - name: listener_0
       address:
         socket_address: { address: 0.0.0.0, port_value: 8555 }
+      transport_socket:
+        name: envoy.transport_sockets.tls
+        typed_config:
+          "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.DownstreamTlsContext
+          common_tls_context:
+            tls_certificates:
+              - certificate_chain:
+                  filename: /envoy-certs/your-key-and-cert.pem
+                private_key:
+                  filename: /envoy-certs/your-key-and-cert.pem
+            validation_context:
+              trusted_ca:
+                filename: /envoy-certs/your-key-and-cert.pem
       filter_chains:
         - filters:
             - name: envoy.filters.network.http_connection_manager

@@ -40,7 +40,7 @@ export const installApk = async ({
     const output = await runCommandBlocking({ container, command });
     const end = performance.now();
     logger("Apk install took %ss", ((end - start) / 1000).toFixed(2));
-    if (!output.includes("Success")) throw apkInstallFailed(container.id);
+    if (!output.includes("Success")) throw new Error(apkInstallFailed(container.id));
 };
 
 export const getExposedEmulatorEndpoints = async ({
@@ -77,9 +77,9 @@ export const isContainerHealthy = async ({
 }): Promise<boolean> => {
     const containerInspect = await container.inspect();
     logger("Waiting for container to report it is healthy, status=%s", containerInspect.State.Health?.Status);
-    if (!containerInspect.State.Running) throw containerDiedPrematurely(containerInspect.Name);
+    if (!containerInspect.State.Running) throw new Error(containerDiedPrematurely(containerInspect.Name));
     if (containerInspect.State.Health?.Status === "unhealthy")
-        throw timedOutWhileWaitingForContainerToBecomeHealthy(containerInspect.Name);
+        throw new Error(timedOutWhileWaitingForContainerToBecomeHealthy(containerInspect.Name));
     return containerInspect.State.Health?.Status === "healthy";
 };
 

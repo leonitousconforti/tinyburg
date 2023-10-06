@@ -1,4 +1,5 @@
 import Dockerode from "dockerode";
+
 import { DOCKER_IMAGE_TAG } from "../versions.js";
 
 /** The port bindings that all architect emulator containers must have. */
@@ -26,7 +27,8 @@ export const containerCreateOptions = ({
     Volumes: { "/android/avd-home/Pixel2.avd/": {} },
     HostConfig: {
         PortBindings: portBindings,
-        Binds: ["architect_emulator_data:/android/avd-home/Pixel2.avd/"] as string[],
+        Binds: ["architect_emulator_data:/android/avd-home/Pixel2.avd/"],
+        DeviceRequests: [{ Count: -1, Driver: "nvidia", Capabilities: [["gpu"]] }],
         Devices: [{ CgroupPermissions: "mrw", PathInContainer: "/dev/kvm", PathOnHost: "/dev/kvm" }],
     },
 });
