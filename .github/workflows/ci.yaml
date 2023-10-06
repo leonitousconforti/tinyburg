@@ -10,29 +10,30 @@ on:
 jobs:
   build:
     uses: ./.github/workflows/build.yaml
+    secrets: inherit
 
-  deploy-authproxy:
+  build-authproxy:
     needs: build
     runs-on: ubuntu-latest
     steps:
       - name: Hi Mom
         run: echo "Hi, Mom!"
 
-  deploy-auto-gold-bits:
+  build-auto-gold-bits:
     needs: build
     runs-on: ubuntu-latest
     steps:
       - name: Hi Mom
         run: echo "Hi, Mom!"
 
-  deploy-discord-bot:
+  build-discord-bot:
     needs: build
     runs-on: ubuntu-latest
     steps:
       - name: Hi Mom
         run: echo "Hi, Mom!"
 
-  deploy-repl-demo:
+  build-repl-demo:
     needs: build
     runs-on: ubuntu-latest
     steps:
