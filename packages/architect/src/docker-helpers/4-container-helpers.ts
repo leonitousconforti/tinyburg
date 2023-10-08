@@ -61,7 +61,7 @@ export const getExposedEmulatorEndpoints = async ({
         adbAddress: `${emulatorContainerHost}:${containerPortBindings["5555/tcp"][0].HostPort}`,
         envoyAdminAddress: `http://${emulatorContainerHost}:${containerPortBindings["8081/tcp"][0].HostPort}`,
         grpcAddress: `${emulatorContainerHost}:${containerPortBindings["8554/tcp"][0].HostPort}`,
-        envoyGrpcWebAddress: `http://${emulatorContainerHost}:${containerPortBindings["8555/tcp"][0].HostPort}`,
+        envoyGrpcWebAddress: `https://${emulatorContainerHost}:${containerPortBindings["8555/tcp"][0].HostPort}`,
         fridaAddress: `${emulatorContainerHost}:${containerPortBindings["27042/tcp"][0].HostPort}`,
     };
     logger("Container endpoints are: %o", endpoints);
