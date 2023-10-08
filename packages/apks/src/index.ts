@@ -73,3 +73,4 @@ export const loadApk = async (
 };
 
 export default loadApk;
+export { getTinyTowerVersions, getTinyTowerVegasVersions, getLegoTowerVersions } from "./versions.js";
