@@ -12,23 +12,23 @@ jobs:
     uses: ./.github/workflows/build-rush.yaml
     secrets: inherit
 
-  build-docker-authproxy:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Hi Mom
-        run: echo "Hi, Mom!"
+  # build-docker-authproxy:
+  #   needs: build
+  #   uses: ./.github/workflows/build-rush.yaml
+  #   secrets: inherit
+  #   with:
+  #     buildParameters: --verbose
 
-  build-docker-auto-gold-bits:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Hi Mom
-        run: echo "Hi, Mom!"
+  # build-docker-auto-gold-bits:
+  #   needs: build
+  #   uses: ./.github/workflows/build-rush.yaml
+  #   secrets: inherit
+  #   with:
+  #     buildParameters: --verbose
 
-  build-docker-discord-bot:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Hi Mom
-        run: echo "Hi, Mom!"
+  # build-docker-discord-bot:
+  #   needs: build
+  #   uses: ./.github/workflows/build-rush.yaml
+  #   secrets: inherit
+  #   with:
+  #     buildParameters: --verbose

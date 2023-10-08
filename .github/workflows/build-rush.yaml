@@ -11,6 +11,10 @@ on:
         required: true
       TS_OAUTH_CLIENT_ID:
         required: true
+    inputs:
+      buildParameters:
+        required: false
+        type: string
 
 jobs:
   build-packages:
@@ -24,7 +28,7 @@ jobs:
 
       - uses: actions/setup-node@v3
         with:
-          node-version: 18
+          node-version: latest
 
       - name: Connect to Tailscale
         uses: tailscale/github-action@v2
@@ -36,7 +40,7 @@ jobs:
       - name: Testing Server Online?
         run: |
           tailscale status
-        # tailscale ping ci.internal.tinyburg.app
+          tailscale ping ci.internal.tinyburg.app
 
       - name: Start ssh agent
         run: |
@@ -56,8 +60,8 @@ jobs:
           ssh-add -D
           ssh-add
 
-      # - name: Testing Server Reachable?
-      #   run: ssh ci@ci.internal.tinyburg.app "echo 'Hi, Mom!'"
+      - name: Testing Server Reachable?
+        run: ssh ci@ci.internal.tinyburg.app "echo 'Hi, Mom!'"
 
       - if: runner.os == 'Linux'
         name: Start xvfb
@@ -65,26 +69,13 @@ jobs:
           sudo /usr/bin/Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
           echo "DISPLAY=:99" >> $GITHUB_ENV
 
-      - name: Setup cache
-        uses: actions/cache@v3
-        with:
-          path: common/temp/build-cache
-          key: linux_node-18_build-cache
-
       - name: Rush Install
-        run: |
-          node common/scripts/install-run-rush.js install
-          node common/scripts/install-run-rush.js update-autoinstaller --name rush-prettier
-          node common/scripts/install-run-rush.js update-autoinstaller --name rush-commitlint
+        run: node common/scripts/install-run-rush.js install
 
       - name: Verify Change Logs
         run: node common/scripts/install-run-rush.js change --verify
 
       - name: Rush build and test
-        run: |
-          node common/scripts/install-run-rush.js rebuild
-        # node common/scripts/install-run-rush.js test --timeline --production
+        run: node common/scripts/install-run-rush.js test --timeline --production ${{ inputs.buildParameters }}
         env:
-          RUSH_BUILD_CACHE_ENABLED: 1
-          RUSH_BUILD_CACHE_WRITE_ALLOWED: 1
           ARCHITECT_DOCKER_HOST: "ssh://ci@ci.internal.tinyburg.app:22"
