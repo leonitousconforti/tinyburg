@@ -5,6 +5,7 @@
 
 const path = require("node:path");
 const fs = require("node:fs/promises");
+const prettier = require("prettier");
 const debug = require("debug")("tinyburg:core:update-common-data");
 
 // Banner to put at the top of every data file
@@ -22,8 +23,14 @@ const sourceCodeBanner = `/**
 
 module.exports.runAsync = async () => {
     const { architect } = await import("@tinyburg/architect");
-    const { loadApkFromApkpure } = await import("@tinyburg/apks");
+    const { getTinyTowerVersions, loadApk } = await import("@tinyburg/apks");
     const { bootstrapAgentOnRemote, cleanupAgent, GetterAgents } = await import("@tinyburg/insight");
+
+    // Find editorconfig and prettier formatting files
+    const prettierOptions = {
+        parser: "typescript",
+        ...(await prettier.resolveConfig(process.cwd(), { editorconfig: true })),
+    };
 
     // To know where to put the generated source code
     const AgentOutputFileMap = {
@@ -37,11 +44,14 @@ module.exports.runAsync = async () => {
         "./roofs.ts": GetterAgents.RoofAgent,
     };
 
+    const latestVersion = Object.entries(await getTinyTowerVersions()).find(
+        ([requestedVersion, _semanticVersion]) => requestedVersion === "0 versions before latest"
+    )[1];
     const alreadyGenerateForLatestVersion = await Promise.all(
         Object.keys(AgentOutputFileMap).map(async (file) => {
             const outputPath = path.join(__dirname, file);
             const contents = await fs.readFile(outputPath);
-            return contents.toString().includes(`With TinyTower version: ${"4.24.0"}`);
+            return contents.toString().includes(`With TinyTower version: ${latestVersion}`);
         })
     );
 
@@ -50,17 +60,18 @@ module.exports.runAsync = async () => {
     }
 
     // Create a container to extract information from
-    const apk = await loadApkFromApkpure("4.24.0");
-    const { fridaAddress, emulatorServices, emulatorDataVolume } = await architect();
-    await emulatorServices.installApk(apk);
+    const apk = await loadApk("TinyTower", "latest version");
+    const { fridaAddress, emulatorContainer, installApk } = await architect();
+    await installApk(apk);
 
     for (const [outputDestination, agent] of Object.entries(AgentOutputFileMap)) {
         const { runAgentMain, ...agentDetails } = await bootstrapAgentOnRemote(agent, fridaAddress);
 
         const result = await runAgentMain();
         await cleanupAgent(agentDetails);
+        const formattedSource = await prettier.format(result, prettierOptions);
         const version = result.match(/TinyTower version: ([\d.]+)/gm)?.[0];
-        const cleanedSource = result.replaceAll(/\/\/ TinyTower version: ([\d.]+)/gm, "");
+        const cleanedSource = formattedSource.replaceAll(/\/\/ TinyTower version: ([\d.]+)/gm, "");
 
         const formattedBanner = sourceCodeBanner
             .replace("__filename", agent.agentFile)
@@ -71,7 +82,6 @@ module.exports.runAsync = async () => {
         await fs.writeFile(outputPath, formattedBanner + cleanedSource);
     }
 
-    await emulatorServices.stopAll();
-    await emulatorServices.removeAll();
-    await emulatorDataVolume.remove();
+    await emulatorContainer.stop();
+    await emulatorContainer.remove();
 };
