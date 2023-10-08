@@ -70,7 +70,10 @@ jobs:
           echo "DISPLAY=:99" >> $GITHUB_ENV
 
       - name: Rush Install
-        run: node common/scripts/install-run-rush.js install
+        run: |
+          node common/scripts/install-run-rush.js install
+          node common/scripts/install-run-rush.js update-autoinstaller --name rush-prettier
+          node common/scripts/install-run-rush.js update-autoinstaller --name rush-commitlint
 
       - name: Verify Change Logs
         run: node common/scripts/install-run-rush.js change --verify
