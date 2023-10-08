@@ -612,7 +612,6 @@ importers:
       frida: 16.1.4
       frida-compile: 16.3.0_k6rur4rkfl73brd4g4ixi5xwdq
       frida-il2cpp-bridge: 0.9.0
-      prettier: 3.0.3
     devDependencies:
       "@rushstack/eslint-config": 3.4.1_srhnpoqmhm6ulnern6fnsuapfi
       "@rushstack/heft": 0.62.3_@types+node@20.8.2
@@ -631,6 +630,7 @@ importers:
       eslint-config-prettier: 9.0.0_eslint@8.51.0
       eslint-plugin-prettier: 5.0.0_o7yfm5ysghuptm2tk3i6zuwvty
       eslint-plugin-unicorn: 48.0.1_eslint@8.51.0
+      prettier: 3.0.3
       typescript: 5.2.2
 
   ../../packages/integrations/architect+apks:
@@ -12480,6 +12480,7 @@ packages:
       { integrity: sha512-L/4pUDMxcNa8R/EthV08Zt42WBO4h1rarVtK0K+QJG0X187OLo7l699jWw0GKuwzkPQ//jMFA/8Xm6Fh3J/DAg== }
     engines: { node: ">=14" }
     hasBin: true
+    dev: true
 
   /pretty-error/4.0.0:
     resolution:
