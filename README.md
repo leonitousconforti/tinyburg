@@ -24,15 +24,15 @@
 
 ## About Tinyburg
 
-Tinyburg is a collection of javascript projects centered around the mobile game TinyTower by Nimblebit. What started as a small idea, wanting to be automatically entered into the raffle every hour, has grown over time into this monorepo.
+Tinyburg is a collection of javascript projects centered around the mobile games TinyTower, LegoTower, and TinyTowerVegas by Nimblebit. What started as a small idea, wanting to be automatically entered into the raffle every hour, has grown over time into this monorepo.
 
-The initial desire for creating this library came from wanting to build an application that automatically entered me into the raffle every hour. While I am aware that you could achieve some of the same results by running Tiny Tower on your computer with an emulator like blue stacks and writing a simple script to make your mouse enter the raffle every hour, that really wasn't as exciting/what I really wanted to do. Some notable projects I found on GitHub that take this approach include [Cydia--Script-TinyTowerBot](https://github.com/egold555/Cydia--Script-TinyTowerBot), [TinyClicker](https://github.com/filadog/TinyClicker), [SortTinyTowerWorkers](https://github.com/andagr/SortTinyTowerWorkers), [Tiny-Tower-Bot](https://github.com/CeHaga/Tiny-Tower-Bot), and [tiny-tower-bot](https://github.com/jacdavwill/tiny-tower-bot). I looked pretty hard on GitHub but these 5 projects were the only things I could find that had code pushed to them and were somewhat functioning. Tinyburg, however, is unique because it enables you to do anything you can do on the mobile game and more from anywhere with an internet connection without needing to open the app. Not to mention there are some things that you simply cannot do with just an emulator, mouse scripts, and screen recording/video processing. Tinyburg achieves all this by utilizing the same API that Tiny Tower to make requests to Nimblebit’s servers.
+The initial desire for creating this library came from wanting to build an application that automatically entered me into the raffle every hour. While I am aware that you could achieve some of the same results by running Tiny Tower on your computer with an emulator like blue stacks and writing a simple script to make your mouse enter the raffle every hour, that really wasn't as exciting/what I really wanted to do. Some notable projects I found on GitHub that take this approach include [Cydia--Script-TinyTowerBot](https://github.com/egold555/Cydia--Script-TinyTowerBot), [TinyClicker](https://github.com/filadog/TinyClicker), [SortTinyTowerWorkers](https://github.com/andagr/SortTinyTowerWorkers), [Tiny-Tower-Bot](https://github.com/CeHaga/Tiny-Tower-Bot), and [tiny-tower-bot](https://github.com/jacdavwill/tiny-tower-bot). Tinyburg, however, is unique because it enables you to do anything you can do on the mobile game and more from anywhere with an internet connection without needing to open the app. Not to mention there are some things that you simply cannot do with just an emulator, mouse scripts, and screen recording/video processing. Tinyburg achieves all this by utilizing the same API that Tiny Tower to make requests to Nimblebit’s servers.
 
 ### How tinyburg works
 
-Tinyburg works by utilizing the cloud sync feature in Tiny Tower; without it Tinyburg would not be possible. If you are not familiar with the cloud sync feature, it allows you to sign in and sync your tower across multiple devices. Although some people have trouble getting their towers to sync properly when signed in to multiple devices, I have had no problem using tinyburg as long as you follow the best practices. Tinyburg is very robust and has been tested against every TinyTower version starting with 3.14.0 up to 4.2.0. Of note is that if you never push a save using the tinyburg library, then there is absolutely no way for your tower to stop syncing or for you to get banned for cheating. This means that you can still use every other feature available and be 100% confident that you won't screw anything up. If you are trying to build a project or mess around with tinyburg, I recommend starting with a dummy account first either in an emulator or somewhere else so just in case you mess something up it isn't on your main tower.
+Tinyburg works by utilizing the cloud sync feature in Tiny Tower; without it Tinyburg would not be possible. If you are not familiar with the cloud sync feature, it allows you to sign in and sync your tower across multiple devices. Although some people have trouble getting their towers to sync properly when signed in to multiple devices, I have had no problem using tinyburg as long as you follow the best practices. Tinyburg is very robust and has a large test suite. Of note is that if you never push a save using the tinyburg library, then there is absolutely no way for your tower to stop syncing or for you to get banned for cheating. This means that you can still use every other feature available and be 100% confident that you won't screw anything up. If you are trying to build a project or mess around with tinyburg, I recommend starting with a dummy account first either in an emulator or somewhere else so just in case you mess something up it isn't on your main tower - you can use @tinyburg/architect for quite prototyping.
 
-### :dart: Features
+### :dart: Features of the @tinyburg/core library
 
 -   Downloading, decompressing, parsing, modifying, compressing, and uploading save game data (your tower)
 -   Typed save data - save data is parsed into objects with types so that you can easily tell what you are modifying
@@ -40,12 +40,15 @@ Tinyburg works by utilizing the cloud sync feature in Tiny Tower; without it Tin
 -   Sending gifts (bitizens) + receiving gifts (bitizens, raffle tickets, gold/coins)
 -   Check entered raffle status, enter raffle, enter multi-raffle, and get raffle details
 -   Pulling your snapshot list, pulling snapshot data, and pushing snapshots (rebuilds)
--   Adding friends, Pulling friend meta data, pulling friends tower, pulling friends snapshot list
+-   Adding friends, pulling friend meta data, pulling friends tower, pulling friends snapshot list
 -   bitbook cloud posts (there is a bitbook cloud feed apart from the posts in your save data)
 -   cloud gifts feed (a feed where nimblebit can send gifts to everyone)
 -   Registering cloud sync email, verifying cloud sync email (used for the cloud sync sign in process and authentication workflow)
+-   Extracted data about all in game items (floors, roofs, lobbies, elevators, costumes, pets, etc)
 -   Send gifts to yourself by proxing them through a burn-bot
 -   Configurable logging (pino, debug, or bring your own logger)
+
+see [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the features/architecture of all the other projects in this repo
 
 ### Things I am not going to support/add
 
