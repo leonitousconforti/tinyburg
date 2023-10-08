@@ -120,6 +120,5 @@ const rpcExports: IFloorAgentExports = {
         const instance = await new GetFloorData().start();
         return instance.transformToSourceCode();
     },
-    mainProducesSourceCode: true,
 };
 rpc.exports = rpcExports as unknown as RpcExports;

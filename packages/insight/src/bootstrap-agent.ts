@@ -2,7 +2,6 @@ import type { IAgent } from "./shared/agent-main-export.js";
 
 import frida from "frida";
 import Debug from "debug";
-import prettier from "prettier";
 
 import { swcCompiler } from "./compilers/swc.js";
 import { fridaCompiler } from "./compilers/frida.js";
@@ -19,12 +18,6 @@ interface IBootstrapOptions {
     /** Message handler function to receive messages sent over frida gum's ipc */
     messageHandler?: frida.ScriptMessageHandler | undefined;
 }
-
-// Find editorconfig and prettier formatting files
-const prettierOptions: prettier.Options = {
-    parser: "typescript",
-    ...(await prettier.resolveConfig(import.meta.url, { editorconfig: true })),
-};
 
 /**
  * Cleans up after an agent by unloading the frida script, detaching from the
@@ -134,14 +127,8 @@ export const bootstrapAgent = async <T extends IAgent>(
         logger("Now calling agent main...");
         try {
             const main: T["rpcTypes"]["main"] = script.exports["main"]!;
-
-            let data = await main(...arguments_);
+            const data = await main(...arguments_);
             logger("Main returned with no errors");
-            if (script.exports["mainProducesSourceCode"] && typeof data === "string") {
-                logger("Formatting returned source code");
-                data = prettier.format(data, prettierOptions);
-            }
-
             return data as Awaited<ReturnType<T["rpcTypes"]["main"]>>;
         } catch (error: unknown) {
             logger("Somethings not right, shutting down and cleaning up");

@@ -70,6 +70,5 @@ const rpcExports: IRoofAgentExports = {
         const instance = await new GetRoofData().start();
         return instance.transformToSourceCode();
     },
-    mainProducesSourceCode: true,
 };
 rpc.exports = rpcExports as unknown as RpcExports;

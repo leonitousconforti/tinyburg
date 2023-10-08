@@ -3,7 +3,6 @@ export interface IAgent {
     agentFile: string;
     rpcTypes: {
         main: TAgentMain<any[], unknown>;
-        mainProducesSourceCode?: boolean;
     };
 }
 

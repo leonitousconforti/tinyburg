@@ -51,7 +51,7 @@
         "run-js-example": "rushx build && node dist/examples/js/index.js",
         "run-js-typed-example": "rushx build && node dist/examples/js-typed/index.js",
         "run-ts-example": "rushx build && node dist/examples/ts/index.js",
-        "update-snapshots": "NODE_OPTIONS=\"--experimental-vm-modules --no-warnings\" heft run --only test -- --clean --update-snapshots"
+        "update-snapshots": "NODE_OPTIONS=\"--experimental-vm-modules --no-warnings\" heft test --clean --update-snapshots"
     },
     "dependencies": {
         "@swc/core": "~1.3.92",
@@ -60,8 +60,7 @@
         "esbuild": "~0.19.4",
         "frida": "~16.1.0",
         "frida-compile": "~16.3.0",
-        "frida-il2cpp-bridge": "~0.9.0",
-        "prettier": "~3.0.3"
+        "frida-il2cpp-bridge": "~0.9.0"
     },
     "devDependencies": {
         "@rushstack/eslint-config": "3.4.1",
@@ -81,6 +80,7 @@
         "eslint-config-prettier": "~9.0.0",
         "eslint-plugin-prettier": "~5.0.0",
         "eslint-plugin-unicorn": "~48.0.1",
+        "prettier": "~3.0.3",
         "typescript": "5.2.2"
     },
     "engines": {

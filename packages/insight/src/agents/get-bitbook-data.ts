@@ -87,6 +87,5 @@ const rpcExports: IBitbookAgentExports = {
         const instance = await new GetBitbookData().start();
         return instance.transformToSourceCode();
     },
-    mainProducesSourceCode: true,
 };
 rpc.exports = rpcExports as unknown as RpcExports;

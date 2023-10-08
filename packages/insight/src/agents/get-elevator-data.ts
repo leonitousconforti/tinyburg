@@ -75,6 +75,5 @@ const rpcExports: IElevatorAgentExports = {
         const instance = await new GetElevatorData().start();
         return instance.transformToSourceCode();
     },
-    mainProducesSourceCode: true,
 };
 rpc.exports = rpcExports as unknown as RpcExports;

@@ -118,6 +118,5 @@ const rpcExports: IMissionAgentExports = {
         const instance = await new GetMissionData().start();
         return instance.transformToSourceCode();
     },
-    mainProducesSourceCode: true,
 };
 rpc.exports = rpcExports as unknown as RpcExports;

@@ -152,6 +152,5 @@ const rpcExports: IBitizenAgentExports = {
         const instance = await new GetBitizenData().start();
         return instance.transformToSourceCode();
     },
-    mainProducesSourceCode: true,
 };
 rpc.exports = rpcExports as unknown as RpcExports;

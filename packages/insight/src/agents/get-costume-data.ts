@@ -56,6 +56,5 @@ const rpcExports: ICostumeAgentExports = {
         const instance = await new GetCostumeData().start();
         return instance.transformToSourceCode();
     },
-    mainProducesSourceCode: true,
 };
 rpc.exports = rpcExports as unknown as RpcExports;
