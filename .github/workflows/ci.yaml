@@ -32,29 +32,24 @@ jobs:
     steps:
       - run: echo "Hi, mom!"
 
-  # docker-authproxy:
-  #   needs: build
-  #   uses: ./.github/workflows/build-docker.yaml
-  #   secrets: inherit
-  #   with:
-  #     project: "@tinyburg/authproxy"
-  #     dockerfile: "./apps/authproxy/Dockerfile"
-  #     tag: "ghcr.io/leonitousconforti/tinyburg/authproxy:latest"
-
-  # docker-auto-gold-bits:
-  #   needs: build
-  #   uses: ./.github/workflows/build-docker.yaml
-  #   secrets: inherit
-  #   with:
-  #     project: "@tinyburg/auto-gold-bits"
-  #     dockerfile: "./apps/auto-gold-bits/Dockerfile"
-  #     tag: "ghcr.io/leonitousconforti/tinyburg/auto-gold-bits:latest"
-
-  # docker-discord-bot:
-  #   needs: build
-  #   uses: ./.github/workflows/build-docker.yaml
-  #   secrets: inherit
-  #   with:
-  #     project: "@tinyburg/discord-bot"
-  #     dockerfile: "./apps/discord-bot/Dockerfile"
-  #     tag: "ghcr.io/leonitousconforti/tinyburg/discord-bot:latest"
+  docker-authproxy:
+    name: "Docker authproxy build"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - uses: ./.github/composable-workflows/rush-build
+        with:
+          SSH_KEY: ${{ secrets.SSH_KEY }}
+          KNOWN_HOSTS: ${{ inputs.KNOWN_HOSTS }}
+          TS_OAUTH_SECRET: ${{ inputs.TS_OAUTH_SECRET }}
+          TS_OAUTH_CLIENT_ID: ${{ inputs.TS_OAUTH_CLIENT_ID }}
+      - uses: ./.github/composable-workflows/docker-build
+        with:
+          PROJECT: "@tinyburg/authproxy"
+          DOCKERFILE: "./apps/authproxy/Dockerfile"
+          TAG: "ghcr.io/leonitousconforti/tinyburg/authproxy:latest"
