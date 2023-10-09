@@ -28,11 +28,13 @@ runs:
         tags: tag:ci
 
     - name: Testing Server Online?
+      shell: bash
       run: |
         tailscale status
         tailscale ping ci.internal.tinyburg.app
 
     - name: Start ssh agent
+      shell: bash
       run: |
         eval "$(ssh-agent -s)"
         echo $SSH_AUTH_SOCK
@@ -45,16 +47,19 @@ runs:
         known_hosts: ${{ inputs.KNOWN_HOSTS }}
 
     - name: Add SSH key to agent
+      shell: bash
       run: |
         echo $SSH_AUTH_SOCK
         ssh-add -D
         ssh-add
 
     - name: Testing Server Reachable?
+      shell: bash
       run: ssh ci@ci.internal.tinyburg.app "echo 'Hi, Mom!'"
 
     - if: runner.os == 'Linux'
       name: Start xvfb
+      shell: bash
       run: |
         sudo /usr/bin/Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
         echo "DISPLAY=:99" >> $GITHUB_ENV
@@ -63,6 +68,7 @@ runs:
       uses: gigara/rush-cache@v2
 
     - name: Rush Install
+      shell: bash
       run: |
         node common/scripts/install-run-rush.js install
         node common/scripts/install-run-rush.js update-autoinstaller --name rush-prettier
@@ -70,9 +76,11 @@ runs:
         node common/scripts/install-run-rush.js update-autoinstaller --name rush-github-action-cache
 
     - name: Verify Change Logs
+      shell: bash
       run: node common/scripts/install-run-rush.js change --verify
 
     - name: Rush build and test
+      shell: bash
       run: node common/scripts/install-run-rush.js test --timeline --production ${{ inputs.buildParameters }}
       env:
         ARCHITECT_DOCKER_HOST: "ssh://ci@ci.internal.tinyburg.app:22"
