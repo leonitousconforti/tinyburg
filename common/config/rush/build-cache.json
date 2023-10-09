@@ -17,7 +17,8 @@
      *
      * Possible values: "local-only", "azure-blob-storage", "amazon-s3"
      */
-    "cacheProvider": "local-only",
+    // "cacheProvider": "local-only",
+    "cacheProvider": "github-action-build-cache",
 
     /**
      * Setting this property overrides the cache entry ID.  If this property is set, it must contain
