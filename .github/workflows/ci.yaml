@@ -38,9 +38,23 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 18
-      - uses: ./.github/workflows/rush-build
       - uses: ./.github/workflows/docker-build
         with:
           PROJECT: "@tinyburg/authproxy"
           DOCKERFILE: "./apps/authproxy/Dockerfile"
-          TAG: "ghcr.io/leonitousconforti/tinyburg/authproxy:latest"
+
+  docker-auto-gold-bits:
+    needs: rush-build
+    name: "Docker auto gold bits build"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - uses: ./.github/workflows/docker-build
+        with:
+          PROJECT: "auto-gold-bits"
+          DOCKERFILE: "./apps/auto-gold-bits/Dockerfile"

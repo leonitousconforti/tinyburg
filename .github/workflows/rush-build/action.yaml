@@ -1,7 +1,7 @@
 name: Reusable rush build workflow
 
 inputs:
-  buildParameters:
+  BUILD_PARAMETERS:
     required: false
     description: "Build parameters to pass to rush build"
 
@@ -69,6 +69,6 @@ runs:
 
     - name: Rush build and test
       shell: bash
-      run: node common/scripts/install-run-rush.js test --timeline --production ${{ inputs.buildParameters }}
+      run: node common/scripts/install-run-rush.js test --timeline --production ${{ inputs.BUILD_PARAMETERS }}
       env:
         ARCHITECT_DOCKER_HOST: "ssh://ci@ci.internal.tinyburg.app:22"
