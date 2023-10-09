@@ -17,7 +17,7 @@ pip3 install -r packages/explorer/requirements.txt
 pip3 install -r packages/doorman/assets/requirements.txt
 
 echo "🏗️ Building all packages..."
-rush rebuild
+rush build
 
 # echo "❓ Where should I run @tinyburg/architect tests? [default: /var/run/docker.sock]"
 # export ARCHITECT_DOCKER_HOST="ssh://ci@ci.internal.tinyburg.app:22"
