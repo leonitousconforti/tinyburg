@@ -53,20 +53,6 @@ static_resources:
                   - name: envoy.filters.http.router
                     typed_config:
                       "@type": type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
-          transport_socket:
-            name: envoy.transport_sockets.tls
-            typed_config:
-              "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.DownstreamTlsContext
-              common_tls_context:
-                tls_certificates:
-                  - certificate_chain:
-                      filename: /etc/envoy/my-cert.pem
-                    private_key:
-                      filename: /etc/envoy/my-cert.pem
-                validation_context:
-                  trusted_ca:
-                    filename: /etc/envoy/my-cert.pem
-
   clusters:
     - name: emulator_service_grpc
       connect_timeout: 0.25s

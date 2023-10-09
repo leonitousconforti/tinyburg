@@ -49,7 +49,6 @@ COPY --from=dependency-preparer /tmp/frida-server-16.0.19-android-x86_64 /androi
 
 ADD avd/ /android/avd-home
 COPY envoy.yaml /etc/envoy/envoy.yaml
-COPY my-cert.pem /etc/envoy/my-cert.pem
 COPY make-snapshot.sh /android/sdk/
 COPY launch-emulator.sh /android/sdk/
 COPY default.pulse-audio /etc/pulse/default.pa
