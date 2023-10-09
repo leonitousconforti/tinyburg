@@ -26,13 +26,14 @@ jobs:
           TS_OAUTH_CLIENT_ID: ${{ secrets.TS_OAUTH_CLIENT_ID }}
 
   rush-pre-publish:
+    needs: rush-build
     name: "Rush pre-publish checks"
     runs-on: ubuntu-latest
     steps:
       - run: echo "Hi, mom!"
 
   rush-publish:
-    needs: rush-build
+    needs: rush-pre-publish
     name: "Rush publish"
     environment: Publish
     runs-on: ubuntu-latest
