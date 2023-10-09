@@ -2,7 +2,7 @@ version: v1
 plugins:
   - plugin: es
     opt: target=js+dts
-    out: .
+    out: ./dist
   - plugin: connect-es
     opt: target=js+dts
-    out: .
+    out: ./dist
