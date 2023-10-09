@@ -3,7 +3,7 @@
     "operationSettings": [
         {
             "operationName": "_phase:build",
-            "outputFolderNames": ["dist"]
+            "outputFolderNames": ["dist", "protobuf"]
         },
         {
             "operationName": "_phase:test",
