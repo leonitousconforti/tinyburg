@@ -54,6 +54,7 @@ jobs:
         with:
           PROJECT: "@tinyburg/authproxy"
           DOCKERFILE: "./apps/authproxy/Dockerfile"
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   docker-auto-gold-bits:
     needs: rush-build
@@ -77,3 +78,4 @@ jobs:
         with:
           PROJECT: "auto-gold-bits"
           DOCKERFILE: "./apps/auto-gold-bits/Dockerfile"
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

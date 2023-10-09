@@ -7,6 +7,9 @@ inputs:
   DOCKERFILE:
     required: true
     description: "The location of the dockerfile relative to monorepo root"
+  GITHUB_TOKEN:
+    required: true
+    description: "The github token to use for docker login"
 
 runs:
   using: "composite"
@@ -26,7 +29,7 @@ runs:
       with:
         registry: ghcr.io
         username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
+        password: ${{ inputs.GITHUB_TOKEN }}
 
     - name: Build docker image
       uses: docker/build-push-action@v5
