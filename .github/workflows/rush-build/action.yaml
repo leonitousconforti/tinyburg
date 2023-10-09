@@ -79,6 +79,10 @@ runs:
           ~/.cache/puppeteer
         key: pnpm-cache-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
 
+    - name: Verify Change Logs
+      shell: bash
+      run: node common/scripts/install-run-rush.js change --verify
+
     - name: Rush Install
       shell: bash
       run: |
@@ -86,10 +90,6 @@ runs:
         node common/scripts/install-run-rush.js update-autoinstaller --name rush-prettier
         node common/scripts/install-run-rush.js update-autoinstaller --name rush-commitlint
         node common/scripts/install-run-rush.js update-autoinstaller --name rush-github-action-cache
-
-    - name: Verify Change Logs
-      shell: bash
-      run: node common/scripts/install-run-rush.js change --verify
 
     - name: Rush build and test
       shell: bash
