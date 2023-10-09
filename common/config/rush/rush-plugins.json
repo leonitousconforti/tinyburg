@@ -21,5 +21,10 @@
         //    */
         //   "autoinstallerName": "plugins"
         // }
+        {
+            "packageName": "@gigara/rush-github-action-build-cache-plugin",
+            "pluginName": "rush-github-action-build-cache-plugin",
+            "autoinstallerName": "rush-github-action-cache"
+        }
     ]
 }
