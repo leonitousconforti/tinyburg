@@ -19,7 +19,7 @@ const RoofAgent = AllAgents["RoofAgent"];
 const INSIGHT_TEST_TIMEOUT_MS = Number.parseInt(process.env["INSIGHT_TEST_TIMEOUT_MS"] as string) || 1000 * 60 * 2;
 const INSIGHT_PREP_TIMEOUT_MS = Number.parseInt(process.env["INSIGHT_PREP_TIMEOUT_MS"] as string) || 1000 * 60 * 5;
 
-describe("All getter agents should return something and not throw any errors", () => {
+describe("All important agents should return something and not throw any errors", () => {
     let fridaAddress: string;
     let emulatorContainer: Dockerode.Container;
 

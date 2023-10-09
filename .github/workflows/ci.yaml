@@ -58,7 +58,7 @@ jobs:
 
   docker-auto-gold-bits:
     needs: rush-build
-    name: "Docker auto gold bits build"
+    name: "Docker auto-gold-bits build"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
