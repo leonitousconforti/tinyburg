@@ -10,6 +10,7 @@ echo "📦 Installing monorepo dependencies..."
 rush install
 rush update-autoinstaller --name rush-prettier
 rush update-autoinstaller --name rush-commitlint
+rush update-autoinstaller --name rush-github-action-cache
 
 echo "🩹 Running some bash setup scripts"
 pip3 install -r packages/explorer/requirements.txt
