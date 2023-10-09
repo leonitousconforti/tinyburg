@@ -33,6 +33,7 @@ jobs:
       - run: echo "Hi, mom!"
 
   docker-authproxy:
+    needs: rush-build
     name: "Docker authproxy build"
     runs-on: ubuntu-latest
     steps:
