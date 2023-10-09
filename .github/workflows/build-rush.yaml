@@ -1,88 +1,78 @@
 name: Reusable rush build workflow
 
-on:
-  workflow_call:
-    secrets:
-      SSH_KEY:
-        required: true
-      KNOWN_HOSTS:
-        required: true
-      TS_OAUTH_SECRET:
-        required: true
-      TS_OAUTH_CLIENT_ID:
-        required: true
-    inputs:
-      buildParameters:
-        required: false
-        type: string
+inputs:
+  SSH_KEY:
+    required: true
+    description: "The ssh key to your ci server"
+  KNOWN_HOSTS:
+    required: true
+    description: "The public key of your testing ci server"
+  TS_OAUTH_SECRET:
+    required: true
+    description: "Your Tailscale oauth secret"
+  TS_OAUTH_CLIENT_ID:
+    required: true
+    description: "Your tailscale oauth client id"
+  buildParameters:
+    required: false
+    description: "Build parameters to pass to rush build"
 
-jobs:
-  build-packages:
-    name: Rush Build
-    runs-on: ubuntu-latest
+runs:
+  using: "composite"
+  steps:
+    - name: Connect to Tailscale
+      uses: tailscale/github-action@v2
+      with:
+        oauth-client-id: ${{ inputs.TS_OAUTH_CLIENT_ID }}
+        oauth-secret: ${{ inputs.TS_OAUTH_SECRET }}
+        tags: tag:ci
 
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 2
+    - name: Testing Server Online?
+      run: |
+        tailscale status
+        tailscale ping ci.internal.tinyburg.app
 
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 18
+    - name: Start ssh agent
+      run: |
+        eval "$(ssh-agent -s)"
+        echo $SSH_AUTH_SOCK
+        echo "SSH_AUTH_SOCK=${SSH_AUTH_SOCK}" >> $GITHUB_ENV
 
-      - name: Connect to Tailscale
-        uses: tailscale/github-action@v2
-        with:
-          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
-          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
-          tags: tag:ci
+    - name: Install SSH key
+      uses: shimataro/ssh-key-action@v2
+      with:
+        key: ${{ inputs.SSH_KEY }}
+        known_hosts: ${{ inputs.KNOWN_HOSTS }}
 
-      - name: Testing Server Online?
-        run: |
-          tailscale status
-          tailscale ping ci.internal.tinyburg.app
+    - name: Add SSH key to agent
+      run: |
+        echo $SSH_AUTH_SOCK
+        ssh-add -D
+        ssh-add
 
-      - name: Start ssh agent
-        run: |
-          eval "$(ssh-agent -s)"
-          echo $SSH_AUTH_SOCK
-          echo "SSH_AUTH_SOCK=${SSH_AUTH_SOCK}" >> $GITHUB_ENV
+    - name: Testing Server Reachable?
+      run: ssh ci@ci.internal.tinyburg.app "echo 'Hi, Mom!'"
 
-      - name: Install SSH key
-        uses: shimataro/ssh-key-action@v2
-        with:
-          key: ${{ secrets.SSH_KEY }}
-          known_hosts: ${{ secrets.KNOWN_HOSTS }}
+    - if: runner.os == 'Linux'
+      name: Start xvfb
+      run: |
+        sudo /usr/bin/Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
+        echo "DISPLAY=:99" >> $GITHUB_ENV
 
-      - name: Add SSH key to agent
-        run: |
-          echo $SSH_AUTH_SOCK
-          ssh-add -D
-          ssh-add
+    - name: Setup rush cache
+      uses: gigara/rush-cache@v2
 
-      - name: Testing Server Reachable?
-        run: ssh ci@ci.internal.tinyburg.app "echo 'Hi, Mom!'"
+    - name: Rush Install
+      run: |
+        node common/scripts/install-run-rush.js install
+        node common/scripts/install-run-rush.js update-autoinstaller --name rush-prettier
+        node common/scripts/install-run-rush.js update-autoinstaller --name rush-commitlint
+        node common/scripts/install-run-rush.js update-autoinstaller --name rush-github-action-cache
 
-      - if: runner.os == 'Linux'
-        name: Start xvfb
-        run: |
-          sudo /usr/bin/Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
-          echo "DISPLAY=:99" >> $GITHUB_ENV
+    - name: Verify Change Logs
+      run: node common/scripts/install-run-rush.js change --verify
 
-      - name: Setup rush cache
-        uses: gigara/rush-cache@v2
-
-      - name: Rush Install
-        run: |
-          node common/scripts/install-run-rush.js install
-          node common/scripts/install-run-rush.js update-autoinstaller --name rush-prettier
-          node common/scripts/install-run-rush.js update-autoinstaller --name rush-commitlint
-          node common/scripts/install-run-rush.js update-autoinstaller --name rush-github-action-cache
-
-      - name: Verify Change Logs
-        run: node common/scripts/install-run-rush.js change --verify
-
-      - name: Rush build and test
-        run: node common/scripts/install-run-rush.js test --timeline --production ${{ inputs.buildParameters }}
-        env:
-          ARCHITECT_DOCKER_HOST: "ssh://ci@ci.internal.tinyburg.app:22"
+    - name: Rush build and test
+      run: node common/scripts/install-run-rush.js test --timeline --production ${{ inputs.buildParameters }}
+      env:
+        ARCHITECT_DOCKER_HOST: "ssh://ci@ci.internal.tinyburg.app:22"

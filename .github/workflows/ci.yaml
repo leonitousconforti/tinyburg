@@ -8,27 +8,53 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
-    uses: ./.github/workflows/build-rush.yaml
-    secrets: inherit
+  rush-build:
+    name: "Rush build + test"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 2
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - uses: .github/workflows/build-rush.yaml
+        with:
+          SSH_KEY: ${{ secrets.SSH_KEY }}
+          KNOWN_HOSTS: ${{ inputs.KNOWN_HOSTS }}
+          TS_OAUTH_SECRET: ${{ inputs.TS_OAUTH_SECRET }}
+          TS_OAUTH_CLIENT_ID: ${{ inputs.TS_OAUTH_CLIENT_ID }}
 
-  # build-docker-authproxy:
+  rush-publish:
+    needs: build
+    name: "Rush publish"
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Hi, mom!"
+
+  # docker-authproxy:
   #   needs: build
-  #   uses: ./.github/workflows/build-rush.yaml
+  #   uses: ./.github/workflows/build-docker.yaml
   #   secrets: inherit
   #   with:
-  #     buildParameters: --verbose
+  #     project: "@tinyburg/authproxy"
+  #     dockerfile: "./apps/authproxy/Dockerfile"
+  #     tag: "ghcr.io/leonitousconforti/tinyburg/authproxy:latest"
 
-  # build-docker-auto-gold-bits:
+  # docker-auto-gold-bits:
   #   needs: build
-  #   uses: ./.github/workflows/build-rush.yaml
+  #   uses: ./.github/workflows/build-docker.yaml
   #   secrets: inherit
   #   with:
-  #     buildParameters: --verbose
+  #     project: "@tinyburg/auto-gold-bits"
+  #     dockerfile: "./apps/auto-gold-bits/Dockerfile"
+  #     tag: "ghcr.io/leonitousconforti/tinyburg/auto-gold-bits:latest"
 
-  # build-docker-discord-bot:
+  # docker-discord-bot:
   #   needs: build
-  #   uses: ./.github/workflows/build-rush.yaml
+  #   uses: ./.github/workflows/build-docker.yaml
   #   secrets: inherit
   #   with:
-  #     buildParameters: --verbose
+  #     project: "@tinyburg/discord-bot"
+  #     dockerfile: "./apps/discord-bot/Dockerfile"
+  #     tag: "ghcr.io/leonitousconforti/tinyburg/discord-bot:latest"
