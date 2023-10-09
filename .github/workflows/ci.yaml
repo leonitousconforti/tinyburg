@@ -26,7 +26,7 @@ jobs:
           TS_OAUTH_CLIENT_ID: ${{ inputs.TS_OAUTH_CLIENT_ID }}
 
   rush-publish:
-    needs: build
+    needs: rush-build
     name: "Rush publish"
     runs-on: ubuntu-latest
     steps:
