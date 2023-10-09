@@ -18,7 +18,7 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 18
-      - uses: .github/workflows/build-rush.yaml
+      - uses: ./.github/workflows/build-rush.yaml
         with:
           SSH_KEY: ${{ secrets.SSH_KEY }}
           KNOWN_HOSTS: ${{ inputs.KNOWN_HOSTS }}
