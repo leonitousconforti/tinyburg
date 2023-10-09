@@ -87,3 +87,26 @@ jobs:
           PROJECT: "auto-gold-bits"
           DOCKERFILE: "./apps/auto-gold-bits/Dockerfile"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  deploy-authproxy:
+    needs: docker-authproxy
+    name: "Deploy docker authproxy"
+    environment: Publish
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Hi, mom!"
+
+  deploy-auto-gold-bits:
+    needs: docker-auto-gold-bits
+    name: "Deploy docker auto-gold-bits"
+    environment: Publish
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Hi, mom!"
+
+  publish-announcement:
+    needs: [rush-publish, deploy-authproxy, deploy-auto-gold-bits]
+    name: "Successful publish announcement"
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Hi, mom!"
