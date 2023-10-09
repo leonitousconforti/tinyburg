@@ -7,7 +7,7 @@ echo "📦 Installing Rush, Pnpm, and other global dependencies..."
 npm install -g pnpm @microsoft/rush vercel ts-node
 
 echo "📦 Installing monorepo dependencies..."
-rush install
+rush install --purge
 rush update-autoinstaller --name rush-prettier
 rush update-autoinstaller --name rush-commitlint
 rush update-autoinstaller --name rush-github-action-cache
@@ -28,3 +28,4 @@ rush build
 echo "✅ Devcontainer setup complete!"
 echo "🙏 Thank you for contributing to Tinyburg!"
 echo "📝 You can find docs at https://github.com/leonitousconforti/tinyburg/tree/main/docs"
+echo "📕 P.S Don't forget to configure your git credentials with 'git config --global user.name you' and 'git config --global user.email you@z.com'"
