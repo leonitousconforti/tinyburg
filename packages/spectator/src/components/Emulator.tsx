@@ -5,8 +5,8 @@ import { Box, Grid, Container } from "@mui/material";
 import { createPromiseClient } from "@connectrpc/connect";
 import { createGrpcWebTransport } from "@connectrpc/connect-web";
 
-import { Rtc } from "@tinyburg/architect/protobuf/rtc_service_connect.js";
-import { EmulatorController } from "@tinyburg/architect/protobuf/emulator_controller_connect.js";
+import { Rtc } from "@tinyburg/architect/protobuf/rtc_service_connect";
+import { EmulatorController } from "@tinyburg/architect/protobuf/emulator_controller_connect";
 
 import JsepProtocol from "../services/Jsep.js";
 import Copyright from "../components/Copyright.js";

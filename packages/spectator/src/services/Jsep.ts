@@ -1,8 +1,8 @@
 import type { PromiseClient } from "@connectrpc/connect";
-import type { Rtc } from "@tinyburg/architect/protobuf/rtc_service_connect.js";
+import type { Rtc } from "@tinyburg/architect/protobuf/rtc_service_connect";
 
-import { JsepMsg, RtcId } from "@tinyburg/architect/protobuf/rtc_service_pb.js";
-import { KeyboardEvent, MouseEvent, TouchEvent } from "@tinyburg/architect/protobuf/emulator_controller_pb.js";
+import { JsepMsg, RtcId } from "@tinyburg/architect/protobuf/rtc_service_pb";
+import { KeyboardEvent, MouseEvent, TouchEvent } from "@tinyburg/architect/protobuf/emulator_controller_pb";
 
 // JavaScript Session Establishment Protocol
 // https://rtcweb-wg.github.io/jsep

@@ -1,7 +1,7 @@
 import type { PromiseClient } from "@connectrpc/connect";
-import type { EmulatorController } from "@tinyburg/architect/protobuf/emulator_controller_connect.js";
+import type { EmulatorController } from "@tinyburg/architect/protobuf/emulator_controller_connect";
 
-import { LogMessage } from "@tinyburg/architect/protobuf/emulator_controller_pb.js";
+import { LogMessage } from "@tinyburg/architect/protobuf/emulator_controller_pb";
 
 export class Logcat {
     private readonly _emulatorClient: PromiseClient<typeof EmulatorController>;

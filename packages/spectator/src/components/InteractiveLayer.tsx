@@ -1,6 +1,6 @@
 import type JsepProtocol from "../services/Jsep.js";
 import type { PromiseClient } from "@connectrpc/connect";
-import type { EmulatorController } from "@tinyburg/architect/protobuf/emulator_controller_connect.js";
+import type { EmulatorController } from "@tinyburg/architect/protobuf/emulator_controller_connect";
 
 import {
     Touch,
@@ -8,7 +8,7 @@ import {
     TouchEvent,
     KeyboardEvent,
     KeyboardEvent_KeyEventType,
-} from "@tinyburg/architect/protobuf/emulator_controller_pb.js";
+} from "@tinyburg/architect/protobuf/emulator_controller_pb";
 import React, { useState, useRef, useEffect, useCallback } from "react";
 
 interface IWithMouseKeyHandlerProps extends React.PropsWithChildren {
