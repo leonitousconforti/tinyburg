@@ -1,0 +1,8 @@
+{
+    "name": "rush-github-action-cache",
+    "version": "1.0.0",
+    "private": true,
+    "dependencies": {
+        "@gigara/rush-github-action-build-cache-plugin": "^1.0.7"
+    }
+}
