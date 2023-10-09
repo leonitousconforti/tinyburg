@@ -8,6 +8,11 @@ on:
   workflow_dispatch:
 
 jobs:
+  # The first thing we want to do is build the entire monorepo, while still
+  # leveraging build caches and pnpm caches. If something has been changed,
+  # it will be rebuild, retested, and then re-cached. The next time any job
+  # needs the build output of a project, we restore the cache and then just
+  # build like normal which keeps the dependent jobs very fast.
   rush-build:
     name: "Rush build and test"
     runs-on: ubuntu-latest
@@ -25,6 +30,9 @@ jobs:
           TS_OAUTH_SECRET: ${{ secrets.TS_OAUTH_SECRET }}
           TS_OAUTH_CLIENT_ID: ${{ secrets.TS_OAUTH_CLIENT_ID }}
 
+  # Before we publish, we should check if all the projects we built against
+  # the latest versions of TinyTower, LegoTower, and TinyTowerVegas to make
+  # sure that we never accidentally release a stale branch.
   rush-pre-publish:
     needs: rush-build
     name: "Rush pre-publish checks"
@@ -32,6 +40,7 @@ jobs:
     steps:
       - run: echo "Hi, mom!"
 
+  # Uses rush publish to publish all the packages to the npm registry.
   rush-publish:
     needs: rush-pre-publish
     name: "Rush publish"
@@ -40,6 +49,11 @@ jobs:
     steps:
       - run: echo "Hi, mom!"
 
+  # In order to build the authproxy docker image, we first need to build it and
+  # its dependencies (remember this will be really fast because we are caching
+  # the build output and pnpm cache from the rush-build job). Then we use rush-deploy
+  # to create a tarball of the authproxy and only its dependencies before passing
+  # that to docker and letting docker build an image using it.
   docker-authproxy:
     needs: rush-build
     name: "Docker authproxy build"
@@ -64,6 +78,8 @@ jobs:
           DOCKERFILE: "./apps/authproxy/Dockerfile"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+  # In order to build the auto-gold-bits docker image, we do the same exact steps
+  # as we did for the authproxy docker image but using the auto-gold-bits project.
   docker-auto-gold-bits:
     needs: rush-build
     name: "Docker auto-gold-bits build"
@@ -88,25 +104,34 @@ jobs:
           DOCKERFILE: "./apps/auto-gold-bits/Dockerfile"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+  # In order to deploy the authproxy docker image, we ssh into the digitalocean
+  # droplet hosting dokku and then re deploy the dokku app which will pull the
+  # latest docker image and restart the app.
   deploy-authproxy:
     needs: docker-authproxy
+    if: ${{ github.ref == 'refs/heads/main' }}
     name: "Deploy docker authproxy"
     environment: Publish
     runs-on: ubuntu-latest
     steps:
-      - run: echo "Hi, mom!"
+      - uses: ./.github/workflows/dokku-deploy
 
+  # In order to deploy the auto-gold-bits docker image, we do the exact same
+  # steps as we did for the authproxy docker image but using the auto-gold-bits.
   deploy-auto-gold-bits:
     needs: docker-auto-gold-bits
+    if: ${{ github.ref == 'refs/heads/main' }}
     name: "Deploy docker auto-gold-bits"
     environment: Publish
     runs-on: ubuntu-latest
     steps:
-      - run: echo "Hi, mom!"
+      - uses: ./.github/workflows/dokku-deploy
 
+  # Because why not!
   publish-announcement:
     needs: [rush-publish, deploy-authproxy, deploy-auto-gold-bits]
+    if: ${{ github.ref == 'refs/heads/main' }}
     name: "Successful publish announcement"
     runs-on: ubuntu-latest
     steps:
-      - run: echo "Hi, mom!"
+      - run: echo "look Mom, look Mom!"
