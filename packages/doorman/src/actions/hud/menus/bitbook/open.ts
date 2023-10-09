@@ -1,6 +1,6 @@
 import type { PromiseClient } from "@connectrpc/connect";
 import type { Image } from "../../../../image-operations/image.js";
-import type { EmulatorController } from "@tinyburg/architect/protobuf/emulator_controller_connect.js";
+import type { EmulatorController } from "@tinyburg/architect/protobuf/emulator_controller_connect";
 
 import { ClickActionTemplateMatching } from "../../../click-action.js";
 import { GameScreen } from "../../../../global-game-state.js";

@@ -10,7 +10,7 @@ import { ElevatorHandler } from "./handlers/elevator-handler.js";
 import { BitbookPostHandler } from "./handlers/bitbook-handler.js";
 import { RestockHandler, StockMode } from "./handlers/restock-handler.js";
 import { createEmulatorControllerClient } from "./grpc/emulator-controller-client.js";
-import { EmulatorController } from "@tinyburg/architect/protobuf/emulator_controller_connect.js";
+import { EmulatorController } from "@tinyburg/architect/protobuf/emulator_controller_connect";
 
 export class Doorman extends Emittery<
     {

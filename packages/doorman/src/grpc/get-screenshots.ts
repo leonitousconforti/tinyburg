@@ -1,7 +1,7 @@
 import type { PromiseClient } from "@connectrpc/connect";
 import type { Image } from "../image-operations/image.js";
-import type { EmulatorController } from "@tinyburg/architect/protobuf/emulator_controller_connect.js";
-import type { Rotation, ImageTransport } from "@tinyburg/architect/protobuf/emulator_controller_pb.js";
+import type { EmulatorController } from "@tinyburg/architect/protobuf/emulator_controller_connect";
+import type { Rotation, ImageTransport } from "@tinyburg/architect/protobuf/emulator_controller_pb";
 
 import assert from "node:assert";
 import { ImageType } from "../image-operations/image.js";
@@ -11,7 +11,7 @@ import {
     ImageFormat_ImgFormat,
     Rotation_SkinRotation,
     ImageTransport_TransportChannel,
-} from "@tinyburg/architect/protobuf/emulator_controller_pb.js";
+} from "@tinyburg/architect/protobuf/emulator_controller_pb";
 
 // Default screenshot request params
 const defaultScreenshotRequest: ImageFormat = new ImageFormat({

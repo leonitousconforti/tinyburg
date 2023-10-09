@@ -2,7 +2,7 @@ import type { PromiseClient } from "@connectrpc/connect";
 import type { Image } from "../image-operations/image.js";
 import type { ILocationBasedTrigger } from "./base-handler.js";
 import type { ICropRegion } from "../image-operations/crop-image.js";
-import type { EmulatorController } from "@tinyburg/architect/protobuf/emulator_controller_connect.js";
+import type { EmulatorController } from "@tinyburg/architect/protobuf/emulator_controller_connect";
 
 import { getScreenshot } from "../grpc/get-screenshots.js";
 

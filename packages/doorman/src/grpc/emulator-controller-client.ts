@@ -2,7 +2,7 @@ import type { PromiseClient } from "@connectrpc/connect";
 
 import { createPromiseClient } from "@connectrpc/connect";
 import { createGrpcTransport } from "@connectrpc/connect-node";
-import { EmulatorController } from "@tinyburg/architect/protobuf/emulator_controller_connect.js";
+import { EmulatorController } from "@tinyburg/architect/protobuf/emulator_controller_connect";
 
 // Create a client and increase the default max message size to handle large screenshots
 export const createEmulatorControllerClient = (address: string): PromiseClient<typeof EmulatorController> => {

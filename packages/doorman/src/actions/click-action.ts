@@ -1,6 +1,6 @@
 import type { Image } from "../image-operations/image.js";
 import type { PromiseClient } from "@connectrpc/connect";
-import type { EmulatorController } from "@tinyburg/architect/protobuf/emulator_controller_connect.js";
+import type { EmulatorController } from "@tinyburg/architect/protobuf/emulator_controller_connect";
 
 import crypto from "node:crypto";
 import { click } from "../grpc/send-touch.js";

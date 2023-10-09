@@ -1,7 +1,7 @@
 import type { PromiseClient } from "@connectrpc/connect";
-import type { EmulatorController } from "@tinyburg/architect/protobuf/emulator_controller_connect.js";
+import type { EmulatorController } from "@tinyburg/architect/protobuf/emulator_controller_connect";
 
-import { Touch_EventExpiration, Touch as _Touch } from "@tinyburg/architect/protobuf/emulator_controller_pb.js";
+import { Touch_EventExpiration, Touch as _Touch } from "@tinyburg/architect/protobuf/emulator_controller_pb";
 
 // Override some of the properties to be required
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions

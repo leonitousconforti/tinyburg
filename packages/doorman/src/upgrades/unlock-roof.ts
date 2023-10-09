@@ -2,7 +2,7 @@ import type { IUpgrade } from "./base-upgrade.js";
 import type { Roof } from "@tinyburg/core/data/roofs";
 import type { Image } from "../image-operations/image.js";
 import type { PromiseClient } from "@connectrpc/connect";
-import type { EmulatorController } from "@tinyburg/architect/protobuf/emulator_controller_connect.js";
+import type { EmulatorController } from "@tinyburg/architect/protobuf/emulator_controller_connect";
 
 import Debug from "debug";
 import { roofs } from "@tinyburg/core/data/roofs";

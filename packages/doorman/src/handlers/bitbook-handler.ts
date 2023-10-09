@@ -5,7 +5,7 @@ import type { Image } from "../image-operations/image.js";
 import type { BaseAction } from "../actions/base-action.js";
 import type { ILocationBasedTrigger } from "./base-handler.js";
 import type { ITemplateMatchingOrientationOptions } from "../image-operations/template-matching.js";
-import type { EmulatorController } from "@tinyburg/architect/protobuf/emulator_controller_connect.js";
+import type { EmulatorController } from "@tinyburg/architect/protobuf/emulator_controller_connect";
 
 import { BaseHandler } from "./base-handler.js";
 import { calculateResourceScale } from "../utils/calculate-resource-scale.js";

@@ -1,6 +1,6 @@
 import type { PromiseClient } from "@connectrpc/connect";
-import type { EmulatorStatus } from "@tinyburg/architect/protobuf/emulator_controller_pb.js";
-import type { EmulatorController } from "@tinyburg/architect/protobuf/emulator_controller_connect.js";
+import type { EmulatorStatus } from "@tinyburg/architect/protobuf/emulator_controller_pb";
+import type { EmulatorController } from "@tinyburg/architect/protobuf/emulator_controller_connect";
 
 import assert from "node:assert";
 
