@@ -16,7 +16,7 @@ runs:
   steps:
     - name: Rush deploy
       shell: bash
-      run: rush deploy --project @tinyburg/${{ inputs.PROJECT }} --create-archive ${{ inputs.PROJECT }}.zip --create-archive-only --overwrite
+      run: node common/scripts/install-run-rush.js deploy --project @tinyburg/${{ inputs.PROJECT }} --create-archive ${{ inputs.PROJECT }}.zip --create-archive-only --overwrite
 
     - name: Setup QEMU
       uses: docker/setup-qemu-action@v3
