@@ -1,18 +1,6 @@
 name: Reusable rush build workflow
 
 inputs:
-  SSH_KEY:
-    required: true
-    description: "The ssh key to your ci server"
-  KNOWN_HOSTS:
-    required: true
-    description: "The public key of your testing ci server"
-  TS_OAUTH_SECRET:
-    required: true
-    description: "Your Tailscale oauth secret"
-  TS_OAUTH_CLIENT_ID:
-    required: true
-    description: "Your tailscale oauth client id"
   buildParameters:
     required: false
     description: "Build parameters to pass to rush build"
@@ -23,8 +11,8 @@ runs:
     - name: Connect to Tailscale
       uses: tailscale/github-action@v2
       with:
-        oauth-client-id: ${{ inputs.TS_OAUTH_CLIENT_ID }}
-        oauth-secret: ${{ inputs.TS_OAUTH_SECRET }}
+        oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+        oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
         tags: tag:ci
 
     - name: Testing Server Online?
@@ -43,8 +31,8 @@ runs:
     - name: Install SSH key
       uses: shimataro/ssh-key-action@v2
       with:
-        key: ${{ inputs.SSH_KEY }}
-        known_hosts: ${{ inputs.KNOWN_HOSTS }}
+        key: ${{ secrets.SSH_KEY }}
+        known_hosts: ${{ secrets.KNOWN_HOSTS }}
 
     - name: Add SSH key to agent
       shell: bash

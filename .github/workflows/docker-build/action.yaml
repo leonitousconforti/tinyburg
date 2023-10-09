@@ -14,4 +14,6 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - run: echo "Hi, mom!"
+    - name: "placeholder"
+      shell: bash
+      run: echo "Hi, mom!"
