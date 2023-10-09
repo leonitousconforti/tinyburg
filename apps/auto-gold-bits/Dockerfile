@@ -1,7 +1,7 @@
 FROM alpine:latest as dependency-preparer
 WORKDIR /workspace/tinyburg
-ADD deploy.zip .
-RUN unzip deploy.zip && rm deploy.zip
+COPY common/deploy/auto-gold-bits.zip auto-gold-bits.zip
+RUN unzip auto-gold-bits.zip && rm auto-gold-bits.zip
 
 FROM node:18-slim
 ENV NODE_ENV="production"
