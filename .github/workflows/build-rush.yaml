@@ -77,6 +77,7 @@ jobs:
           node common/scripts/install-run-rush.js install
           node common/scripts/install-run-rush.js update-autoinstaller --name rush-prettier
           node common/scripts/install-run-rush.js update-autoinstaller --name rush-commitlint
+          node common/scripts/install-run-rush.js update-autoinstaller --name rush-github-action-cache
 
       - name: Verify Change Logs
         run: node common/scripts/install-run-rush.js change --verify
