@@ -13,8 +13,7 @@
         "ghcr.io/devcontainers-contrib/features/black:2": {},
         "ghcr.io/devcontainers-contrib/features/actionlint:1": {},
         "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {},
-        "ghcr.io/frntn/devcontainers-features/gitleaks:1": { "version": "v8.16.0" },
-        "ghcr.io/devcontainers-contrib/features/apt-get-packages:1": { "packages": "chromium" }
+        "ghcr.io/frntn/devcontainers-features/gitleaks:1": { "version": "v8.16.0" }
     },
 
     "customizations": {
@@ -153,7 +152,5 @@
         }
     },
 
-    "postCreateCommand": "/bin/bash ./setup.sh",
-    "remoteEnv": { "PUPPETEER_EXECUTABLE_PATH": "/usr/bin/chromium" },
-    "containerEnv": { "PUPPETEER_EXECUTABLE_PATH": "/usr/bin/chromium" }
+    "postCreateCommand": "/bin/bash ./setup.sh"
 }
