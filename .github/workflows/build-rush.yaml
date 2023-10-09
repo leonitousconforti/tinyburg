@@ -69,6 +69,9 @@ jobs:
           sudo /usr/bin/Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
           echo "DISPLAY=:99" >> $GITHUB_ENV
 
+      - name: Setup rush cache
+        uses: gigara/rush-cache@v2
+
       - name: Rush Install
         run: |
           node common/scripts/install-run-rush.js install
