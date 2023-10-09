@@ -11,10 +11,6 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - uses: ./.github/workflows/rush-build
-      with:
-        BUILD_PARAMETERS: "--to @tinyburg/${{ inputs.PROJECT }}"
-
     - name: Rush deploy
       shell: bash
       run: rush deploy --project @tinyburg/${{ inputs.PROJECT }} --create-archive ${{ inputs.PROJECT }}.zip --create-archive-only --overwrite
@@ -36,6 +32,7 @@ runs:
       uses: docker/build-push-action@v5
       with:
         context: .
+        push: false
         platforms: linux/amd64,linux/arm64
         dockerfile: ${{ inputs.DOCKERFILE }}
         tags: ghcr.io/leonitousconforti/tinyburg/${{ inputs.PROJECT }}:latest

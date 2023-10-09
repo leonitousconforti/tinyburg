@@ -1,6 +1,14 @@
 name: Reusable rush build workflow
 
 inputs:
+  SSH_KEY:
+    requited: true
+  KNOWN_HOSTS:
+    requited: true
+  TS_OAUTH_SECRET:
+    requited: true
+  TS_OAUTH_CLIENT_ID:
+    requited: true
   BUILD_PARAMETERS:
     required: false
     description: "Build parameters to pass to rush build"
@@ -11,8 +19,8 @@ runs:
     - name: Connect to Tailscale
       uses: tailscale/github-action@v2
       with:
-        oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
-        oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
+        oauth-client-id: ${{ inputs.TS_OAUTH_CLIENT_ID }}
+        oauth-secret: ${{ inputs.TS_OAUTH_SECRET }}
         tags: tag:ci
 
     - name: Testing Server Online?
@@ -31,8 +39,8 @@ runs:
     - name: Install SSH key
       uses: shimataro/ssh-key-action@v2
       with:
-        key: ${{ secrets.SSH_KEY }}
-        known_hosts: ${{ secrets.KNOWN_HOSTS }}
+        key: ${{ inputs.SSH_KEY }}
+        known_hosts: ${{ inputs.KNOWN_HOSTS }}
 
     - name: Add SSH key to agent
       shell: bash
@@ -52,8 +60,22 @@ runs:
         sudo /usr/bin/Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
         echo "DISPLAY=:99" >> $GITHUB_ENV
 
-    - name: Setup rush cache
+    - name: Setup rush build cache
       uses: gigara/rush-cache@v2
+
+    - name: Setup rush install cache
+      uses: actions/cache@v3
+      with:
+        path: |
+          common/temp/install-run
+          ~/.rush
+        key: rush-install-run-cache-${{ hashFiles('rush.json') }}
+
+    - name: Setup pnpm cache
+      uses: actions/cache@v3
+      with:
+        path: common/temp/pnpm-store
+        key: pnpm-cache-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
 
     - name: Rush Install
       shell: bash
