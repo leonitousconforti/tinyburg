@@ -36,8 +36,8 @@ runs:
       with:
         context: .
         push: false
+        file: ${{ inputs.DOCKERFILE }}
         platforms: linux/amd64,linux/arm64
-        dockerfile: ${{ inputs.DOCKERFILE }}
         tags: ghcr.io/leonitousconforti/tinyburg/${{ inputs.PROJECT }}:latest
         build-args: |
           GIT_SHA=$GITHUB_SHA
