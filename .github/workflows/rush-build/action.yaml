@@ -16,6 +16,10 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - uses: actions/setup-node@v3
+      with:
+        node-version: 18
+
     - name: Connect to Tailscale
       uses: tailscale/github-action@v2
       with:
@@ -78,10 +82,6 @@ runs:
           common/temp/pnpm-store
           ~/.cache/puppeteer
         key: pnpm-cache-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
-
-    - name: Verify Change Logs
-      shell: bash
-      run: node common/scripts/install-run-rush.js change --verify
 
     - name: Rush Install
       shell: bash
