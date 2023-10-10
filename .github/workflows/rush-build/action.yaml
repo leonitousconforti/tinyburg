@@ -26,6 +26,7 @@ runs:
         oauth-client-id: ${{ inputs.TS_OAUTH_CLIENT_ID }}
         oauth-secret: ${{ inputs.TS_OAUTH_SECRET }}
         tags: tag:ci
+        args: "--exit-node=pfsense"
 
     - name: Testing Server Online?
       shell: bash
