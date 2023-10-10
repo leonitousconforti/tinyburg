@@ -1,6 +1,6 @@
 {
     "name": "@tinyburg/architect",
-    "version": "0.0.1-alpha.0",
+    "version": "0.0.1-alpha.20",
     "description": "Creates a TinyTower instance in an android emulator on a local or remote docker host",
     "keywords": [
         "tinyburg",
