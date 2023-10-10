@@ -1,0 +1,17 @@
+{
+    "name": "@tinyburg/bots",
+    "entries": [
+        {
+            "version": "0.0.1",
+            "tag": "@tinyburg/bots_v0.0.1",
+            "date": "Tue, 10 Oct 2023 02:46:40 GMT",
+            "comments": {
+                "patch": [
+                    {
+                        "comment": "Closer to a stable release"
+                    }
+                ]
+            }
+        }
+    ]
+}
