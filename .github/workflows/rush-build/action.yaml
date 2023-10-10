@@ -83,6 +83,12 @@ runs:
           ~/.cache/puppeteer
         key: pnpm-cache-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
 
+    - name: Setup apks cache
+      uses: actions/cache@v3
+      with:
+        path: packages/apks/downloads
+        key: apks-cache
+
     - name: Rush Install
       shell: bash
       run: |
