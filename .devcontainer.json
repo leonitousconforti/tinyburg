@@ -9,9 +9,8 @@
         "ghcr.io/devcontainers/features/python:1": {},
         "ghcr.io/devcontainers/features/common-utils:2": {},
         "ghcr.io/devcontainers/features/desktop-lite:1": {},
-        "ghcr.io/devcontainers-contrib/features/black:2": {},
         "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {},
-        "ghcr.io/frntn/devcontainers-features/gitleaks:1": { "version": "v8.16.0" }
+        "ghcr.io/frntn/devcontainers-features/gitleaks:1": { "version": "v8.18.0" }
     },
 
     "customizations": {
@@ -27,8 +26,6 @@
                 "icsharpcode.ilspy-vscode",
                 "shd101wyy.markdown-preview-enhanced",
                 "ms-python.python",
-                "stxr.iconfont-preview",
-                "DavidAnson.vscode-markdownlint",
                 "eamodio.gitlens",
                 "GitHub.vscode-pull-request-github",
                 "mutantdino.resourcemonitor",
