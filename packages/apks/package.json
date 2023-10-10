@@ -1,6 +1,6 @@
 {
     "name": "@tinyburg/apks",
-    "version": "0.1.0",
+    "version": "0.0.0",
     "description": "TinyTower apks downloaded from different sources, ready to be consumed by other tinyburg tools",
     "keywords": [
         "tinyburg",
