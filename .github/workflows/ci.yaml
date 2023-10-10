@@ -62,7 +62,7 @@ jobs:
           TS_OAUTH_SECRET: ${{ secrets.TS_OAUTH_SECRET }}
           TS_OAUTH_CLIENT_ID: ${{ secrets.TS_OAUTH_CLIENT_ID }}
       - name: Rush publish
-        run: rush publish --publish --apply --set-access-level public --npm-auth-token ${{ secrets.NPM_AUTH_TOKEN }}
+        run: rush publish --publish --apply --target-branch main --npm-auth-token ${{ secrets.NPM_AUTH_TOKEN }}
 
   # In order to build the authproxy docker image, we first need to build it and
   # its dependencies (remember this will be really fast because we are caching
