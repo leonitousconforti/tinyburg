@@ -1,6 +1,6 @@
 {
     "name": "@tinyburg/cli",
-    "version": "0.0.1-alpha.20",
+    "version": "0.1.0-alpha.1",
     "description": "CLI for TinyTower using @tinyburg/core",
     "keywords": [
         "tinyburg",
