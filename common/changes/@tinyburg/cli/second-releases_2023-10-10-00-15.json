@@ -1,0 +1,10 @@
+{
+    "changes": [
+        {
+            "packageName": "@tinyburg/cli",
+            "comment": "Closer to a stable release",
+            "type": "patch"
+        }
+    ],
+    "packageName": "@tinyburg/cli"
+}

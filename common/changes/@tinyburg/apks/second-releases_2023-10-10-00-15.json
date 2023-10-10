@@ -1,0 +1,10 @@
+{
+    "changes": [
+        {
+            "packageName": "@tinyburg/apks",
+            "comment": "Closer to a stable release",
+            "type": "patch"
+        }
+    ],
+    "packageName": "@tinyburg/apks"
+}
