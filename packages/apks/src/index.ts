@@ -49,12 +49,13 @@ const logger: Debug.Debugger = Debug.debug("tinyburg:apks");
  * immediately with the cached apk
  *
  * @example
- *     const tinytower1 = loadApk("TinyTower");
+ *     const tinytower1 = await loadApk("TinyTower");
  *
  * @param game - Either "TinyTower" or "LegoTower" or "TinyTowerVegas"
  * @param version - The version of the game to load
  * @param supplier - Where to load the game from
  * @param architecture - What architecture to load the game for
+ * @param downloadsDirectory - Where to cache the downloaded apks
  * @returns The path to the apk on the filesystem
  */
 export const loadApk = async <
@@ -70,14 +71,12 @@ export const loadApk = async <
     game: T,
     version: SemanticVersion | RelativeVersion | U = defaultVersion,
     supplier: RequestedSupplier = defaultSupplier,
-    architecture: RequestedArchitecture = defaultArchitecture
+    architecture: RequestedArchitecture = defaultArchitecture,
+    downloadsDirectory: string = url.fileURLToPath(new URL(`../downloads`, import.meta.url))
 ): Promise<string> => {
+    if (!fs.existsSync(downloadsDirectory)) await fs.promises.mkdir(downloadsDirectory);
     logger("Loading '%s' '%s' for architecture '%s' from supplier %s", game, version, architecture, supplier);
     let semanticVersion: SemanticVersion;
-
-    // TODO: maybe make this configurable?
-    const downloadsDirectory: string = url.fileURLToPath(new URL(`../downloads`, import.meta.url));
-    if (!fs.existsSync(downloadsDirectory)) await fs.promises.mkdir(downloadsDirectory);
 
     // If we were given a semantic version, nothing needs to be done to it
     if (isSemanticVersion(version)) {
