@@ -1,4 +1,4 @@
-import type { IPuppeteerDetails, RequestedGame, RequestedArchitecture } from "./types.js";
+import type { IPuppeteerDetails, RequestedGame, RequestedArchitecture, SemanticVersion } from "./types.js";
 
 import Debug from "debug";
 import puppeteer from "puppeteer";
@@ -10,7 +10,7 @@ const logger: Debug.Debugger = Debug.debug("tinyburg:apks:puppeteer:apkmirror");
  * tiny tower vegas uploaded. These are the pages where we will start trying to
  * download each game from.
  */
-const productPages: { [k in "TinyTower" | "LegoTower"]: string } = {
+const productPages: { [k in Exclude<RequestedGame, "TinyTowerVegas">]: string } = {
     TinyTower: "https://www.apkmirror.com/apk/nimblebit-llc/tiny-tower",
     LegoTower: "https://www.apkmirror.com/apk/nimblebit-llc/lego-tower",
 };
@@ -27,11 +27,11 @@ const releasePages: { [k in keyof typeof productPages]: (version: string) => str
 
 export const getApkmirrorDetails = async (
     game: RequestedGame,
-    versionsBeforeLatest: number,
+    semanticVersion: SemanticVersion,
     architecture: RequestedArchitecture
 ): Promise<[downloadUrl: string, details: IPuppeteerDetails]> => {
     if (game === "TinyTowerVegas") {
-        throw new Error("TinyTower Vegas is not available on apkmirror");
+        throw new Error("TinyTowerVegas is not available on apkmirror, use apkpure as the supplier instead");
     }
 
     // Start a browser and navigate to the apkmirror product page
@@ -40,25 +40,31 @@ export const getApkmirrorDetails = async (
     logger("Navigating to product page %s", productPages[game]);
     await page.goto(productPages[game], { waitUntil: "load", timeout: 15_000 });
 
-    // Grab the detail banner for the desired entry
-    const versionIndex = 2 + versionsBeforeLatest;
-    const detailBanner = await page.$(
-        `#primary > div.listWidget.p-relative > div:nth-child(${versionIndex}) > div.appRow > div`
+    // Grab all the detail banners from the page and map then to their semantic versions
+    const detailBanners = await page.$$(`#primary > div.listWidget.p-relative > div > div.appRow > div`);
+    const detailBannersBySemanticVersion = await Promise.all(
+        detailBanners.map(async (tableEntry) => {
+            const version = await tableEntry.$eval(
+                "div:nth-child(2) > div > h5 > a",
+                (node) => (node.textContent as string).match(/\d+.\d+.\d+/gm)?.[0] as SemanticVersion | undefined
+            );
+            return [version, tableEntry] as const;
+        })
     );
-    if (!detailBanner) {
+
+    // Find the detailed banner for the version we want to download
+    const detailBanner = detailBannersBySemanticVersion.find(([version]) => version === semanticVersion);
+    if (!detailBanner?.[1]) {
         await browser.close();
         throw new Error("Could not find detail banner on apkmirror website");
     }
 
     // Parse updatedDate, and version information
-    const updatedDate: string | undefined = await detailBanner.$eval(
+    const updatedDate: string | undefined = await detailBanner[1].$eval(
         "div.table-cell.hidden-xs > span > span",
         (node) => node.textContent
     );
-    const version: string | undefined = await detailBanner.$eval(
-        "div:nth-child(2) > div > h5 > a",
-        (node) => (node.textContent as string).match(/\d+.\d+.\d+/gm)?.[0]
-    );
+    const version: SemanticVersion | undefined = detailBanner[0];
 
     // Check that everything above was retrieved correctly
     logger("Extracted %o from apkmirror website", { updatedDate, version });

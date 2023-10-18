@@ -1,7 +1,7 @@
 {
     "name": "@tinyburg/apks",
     "version": "0.0.1",
-    "description": "TinyTower apks downloaded from different sources, ready to be consumed by other tinyburg tools",
+    "description": "fetches Nimblebit apks from different sources, ready to be consumed by other tinyburg tools",
     "keywords": [
         "tinyburg",
         "nimblebit",
@@ -17,11 +17,19 @@
     "license": "MIT",
     "author": "Leo Conforti <leo@leoconforti.us> (https://leoconforti.us)",
     "type": "module",
+    "exports": {
+        ".": {
+            "types": "./dist/index.d.ts",
+            "import": "./dist/index.js"
+        },
+        "./*": {
+            "types": "./dist/*.d.ts",
+            "import": "./dist/*.js"
+        }
+    },
     "main": "dist/index.js",
     "files": [
-        "dist",
-        "downloads",
-        "!/downloads/**/*.apk"
+        "dist"
     ],
     "scripts": {
         "_phase:build": "heft run --only build -- --clean",
@@ -40,12 +48,12 @@
         "@rushstack/heft-lint-plugin": "~0.2.9",
         "@rushstack/heft-typescript-plugin": "~0.2.9",
         "@tinyburg/tsconfig-rig": "workspace:*",
-        "@types/debug": "~4.1.9",
+        "@types/debug": "~4.1.10",
         "@types/heft-jest": "1.0.4",
-        "@types/node": "20.8.2",
+        "@types/node": "20.8.6",
         "eslint": "8.51.0",
         "eslint-config-prettier": "~9.0.0",
-        "eslint-plugin-prettier": "~5.0.0",
+        "eslint-plugin-prettier": "~5.0.1",
         "eslint-plugin-unicorn": "~48.0.1",
         "prettier": "~3.0.3",
         "puppeteer": "~21.3.8",
