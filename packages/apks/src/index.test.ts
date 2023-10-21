@@ -1,5 +1,4 @@
 import fs from "node:fs";
-
 import { loadApk } from "./index.js";
 
 const TINYBURG_APKS_TEST_TIMEOUT = 90_000;
