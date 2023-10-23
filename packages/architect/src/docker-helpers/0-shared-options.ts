@@ -41,8 +41,8 @@ export const containerCreateOptions = ({
     Env: environmentVariables,
     Volumes: { "/android/avd-home/Pixel2.avd/": {} },
     HostConfig: {
-        NetworkMode: networkMode || "host",
         PortBindings: portBindings,
+        NetworkMode: networkMode || "host",
         DeviceRequests: [{ Count: -1, Driver: "nvidia", Capabilities: [["gpu"]] }],
         Devices: [{ CgroupPermissions: "mrw", PathInContainer: "/dev/kvm", PathOnHost: "/dev/kvm" }],
         Binds: [
