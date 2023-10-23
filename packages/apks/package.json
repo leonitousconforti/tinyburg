@@ -44,7 +44,7 @@
     "devDependencies": {
         "@rushstack/eslint-config": "3.4.1",
         "@rushstack/heft": "0.62.3",
-        "@rushstack/heft-jest-plugin": "0.9.9",
+        "@rushstack/heft-jest-plugin": "0.10.0",
         "@rushstack/heft-lint-plugin": "~0.2.9",
         "@rushstack/heft-typescript-plugin": "~0.2.9",
         "@tinyburg/tsconfig-rig": "workspace:*",

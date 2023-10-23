@@ -96,3 +96,4 @@ export const loadApk = async <
 };
 
 export default loadApk;
+export { getSemanticVersionsByRequestedVersions } from "./versions.js";
