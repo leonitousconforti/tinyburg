@@ -37,6 +37,9 @@ const versionsPages: { [k in RequestedGame]: string } = {
 /**
  * Retrieves a map of semantic versions like "1.2.3" by relative versions like
  * "2 versions before latest" from an apkpure versions page.
+ *
+ * @param game - The game you are requesting the versions for
+ * @returns - A map of relative versions to semantic versions
  */
 export const getSemanticVersionsByRequestedVersions = async (
     game: RequestedGame
@@ -60,6 +63,14 @@ export const getSemanticVersionsByRequestedVersions = async (
     return new Map(versions);
 };
 
+/**
+ * Converts a requested version, which is either a semantic version or a
+ * relative version or an event version, into a semantic version.
+ *
+ * @param game - The game you are requesting the version for
+ * @param version - The requested version
+ * @returns - The semantic version
+ */
 export const toSemanticVersion = async (game: RequestedGame, version: string): Promise<SemanticVersion> => {
     // If we were given a semantic version, nothing needs to be done to it
     if (isSemanticVersion(version)) {
@@ -70,14 +81,14 @@ export const toSemanticVersion = async (game: RequestedGame, version: string): P
     // version by going to apkpure's website and parsing all the versions in
     // order into a map of relative version to semantic version.
     else if (isRelativeVersion(version)) {
-        const supplierSemanticVersionsByRelativeVersions: SemanticVersionsByRelativeVersions =
+        const gameSemanticVersionsByRelativeVersions: SemanticVersionsByRelativeVersions =
             await getSemanticVersionsByRequestedVersions(game);
 
         const sanitizedRelativeVersion: RelativeVersion =
             version === "latest version" ? "0 versions before latest" : version;
 
         const maybeSemanticVersion: SemanticVersion | undefined =
-            supplierSemanticVersionsByRelativeVersions.get(sanitizedRelativeVersion);
+            gameSemanticVersionsByRelativeVersions.get(sanitizedRelativeVersion);
 
         if (maybeSemanticVersion) {
             return maybeSemanticVersion;

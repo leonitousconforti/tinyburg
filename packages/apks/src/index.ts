@@ -8,22 +8,22 @@ import { getApkpureDetails } from "./apkpure.puppeteer.js";
 import { getApkmirrorDetails } from "./apkmirror.puppeteer.js";
 
 import {
+    defaultVersion,
+    defaultSupplier,
+    defaultArchitecture,
     type RequestedGame,
     type SemanticVersion,
     type RelativeVersion,
     type PuppeteerFetcher,
     type RequestedSupplier,
     type RequestedArchitecture,
-    defaultVersion,
-    defaultSupplier,
-    defaultArchitecture,
 } from "./types.js";
 
 import {
+    toSemanticVersion,
     type TrackedTinyTowerVersions,
     type TrackedLegoTowerVersions,
     type TrackedTinyTowerVegasVersions,
-    toSemanticVersion,
 } from "./versions.js";
 
 import Debug from "debug";
