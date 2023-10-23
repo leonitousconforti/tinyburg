@@ -8,29 +8,22 @@ import { getApkpureDetails } from "./apkpure.puppeteer.js";
 import { getApkmirrorDetails } from "./apkmirror.puppeteer.js";
 
 import {
-    defaultVersion,
-    defaultSupplier,
-    defaultArchitecture,
-    isRelativeVersion,
-    isSemanticVersion,
     type RequestedGame,
     type SemanticVersion,
     type RelativeVersion,
+    type PuppeteerFetcher,
     type RequestedSupplier,
     type RequestedArchitecture,
-    type SemanticVersionsByRelativeVersions,
+    defaultVersion,
+    defaultSupplier,
+    defaultArchitecture,
 } from "./types.js";
 
 import {
-    trackedTinyTowerVersions,
-    trackedLegoTowerVersions,
-    trackedTinyTowerVegasVersions,
-    getTinyTowerSemanticVersionsByRelativeVersions,
-    getLegoTowerSemanticVersionsByRelativeVersions,
-    getTinyTowerVegasSemanticVersionsByRelativeVersions,
     type TrackedTinyTowerVersions,
     type TrackedLegoTowerVersions,
     type TrackedTinyTowerVegasVersions,
+    toSemanticVersion,
 } from "./versions.js";
 
 import Debug from "debug";
@@ -76,59 +69,12 @@ export const loadApk = async <
 ): Promise<string> => {
     if (!fs.existsSync(downloadsDirectory)) await fs.promises.mkdir(downloadsDirectory);
     logger("Loading '%s' '%s' for architecture '%s' from supplier %s", game, version, architecture, supplier);
-    let semanticVersion: SemanticVersion;
-
-    // If we were given a semantic version, nothing needs to be done to it
-    if (isSemanticVersion(version)) {
-        semanticVersion = version;
-    }
-
-    // If we were given a relative version, we need to convert it to a semantic
-    // version by going to apkpure's website and parsing all the versions in
-    // order into a map of relative version to semantic version.
-    else if (isRelativeVersion(version)) {
-        const supplierSemanticVersionsByRelativeVersions: SemanticVersionsByRelativeVersions =
-            game === "TinyTower"
-                ? await getTinyTowerSemanticVersionsByRelativeVersions()
-                : game === "LegoTower"
-                ? await getLegoTowerSemanticVersionsByRelativeVersions()
-                : game === "TinyTowerVegas"
-                ? await getTinyTowerVegasSemanticVersionsByRelativeVersions()
-                : new Map();
-
-        const sanitizedRelativeVersion = version === "latest version" ? "0 versions before latest" : version;
-        const maybeSemanticVersion = supplierSemanticVersionsByRelativeVersions.get(sanitizedRelativeVersion);
-        if (maybeSemanticVersion) {
-            semanticVersion = maybeSemanticVersion;
-        } else {
-            throw new Error(`Could not find semantic version for game "${game}" relative version "${version}"`);
-        }
-    }
-
-    // Check to see if we were given a TinyTower event version
-    else if (game === "TinyTower" && trackedTinyTowerVersions[version as TrackedTinyTowerVersions]) {
-        semanticVersion = trackedTinyTowerVersions[version as TrackedTinyTowerVersions];
-    }
-
-    // Check to see if we were given a LegoTower event version
-    else if (game === "LegoTower" && trackedLegoTowerVersions[version as TrackedLegoTowerVersions]) {
-        semanticVersion = trackedLegoTowerVersions[version as TrackedLegoTowerVersions];
-    }
-
-    // Check to see if we were given a TinyTowerVegas event version
-    else if (game === "TinyTowerVegas" && trackedTinyTowerVegasVersions[version as TrackedTinyTowerVegasVersions]) {
-        semanticVersion = trackedTinyTowerVegasVersions[version as TrackedTinyTowerVegasVersions];
-    }
-
-    // Edge case if you pass something in from javascript that isn't type checked correctly
-    else {
-        throw new Error(`Invalid version "${version}" for game "${game}"`);
-    }
 
     // Check to see if the apk already exists in the downloads cache
-    const fileNames = await fs.promises.readdir(downloadsDirectory);
-    const desiredApkFilename = `${supplier}_${game}_${semanticVersion}_${architecture}.apk`;
-    const maybeCachedApk = fileNames.find((fileName) => fileName.includes(desiredApkFilename));
+    const semanticVersion: SemanticVersion = await toSemanticVersion(game, version);
+    const fileNames: string[] = await fs.promises.readdir(downloadsDirectory);
+    const desiredApkFilename: string = `${supplier}_${game}_${semanticVersion}_${architecture}.apk`;
+    const maybeCachedApk: string | undefined = fileNames.find((fileName) => fileName.includes(desiredApkFilename));
     if (maybeCachedApk) {
         logger("Apk was found in downloads cache: %s", maybeCachedApk);
         return path.join(downloadsDirectory, maybeCachedApk);
@@ -143,7 +89,7 @@ export const loadApk = async <
 
     // If the apk doesn't exist in the downloads cache, we need to fetch it
     // and stream the download directly to the downloads folder
-    const fetcher = supplier === "apkmirror" ? getApkmirrorDetails : getApkpureDetails;
+    const fetcher: PuppeteerFetcher = supplier === "apkmirror" ? getApkmirrorDetails : getApkpureDetails;
     const [downloadUrl] = await fetcher(game, semanticVersion, architecture);
     await stream.pipeline(got.stream(downloadUrl), fs.createWriteStream(`${downloadsDirectory}/${desiredApkFilename}`));
     return `${downloadsDirectory}/${desiredApkFilename}`;

@@ -1,4 +1,10 @@
-import type { IPuppeteerDetails, RequestedGame, RequestedArchitecture, SemanticVersion } from "./types.js";
+import type {
+    RequestedGame,
+    SemanticVersion,
+    PuppeteerFetcher,
+    IPuppeteerDetails,
+    RequestedArchitecture,
+} from "./types.js";
 
 import Debug from "debug";
 import puppeteer from "puppeteer";
@@ -15,19 +21,19 @@ const downloadPages: { [k in RequestedGame]: (version: SemanticVersion) => strin
         `https://apkpure.com/tiny-tower-8-bit-retro-tycoon/com.nimblebit.tinytower/download/${version}`,
 };
 
-export const getApkpureDetails = async (
+export const getApkpureDetails: PuppeteerFetcher = async (
     game: RequestedGame,
     semanticVersion: SemanticVersion,
     architecture: RequestedArchitecture
 ): Promise<[downloadUrl: string, details: IPuppeteerDetails]> => {
     // Start a browser and navigate to the apkpure product page
-    const browser = await puppeteer.launch({ headless: false });
-    const page = await browser.newPage();
+    const browser: puppeteer.Browser = await puppeteer.launch({ headless: false });
+    const page: puppeteer.Page = await browser.newPage();
     logger("Navigating to download page %s", downloadPages[game]);
     await page.goto(downloadPages[game](semanticVersion), { waitUntil: "load", timeout: 15_000 });
 
     // Try to find the download button on the page
-    const downloadButton = await page.$(
+    const downloadButton: puppeteer.ElementHandle | null = await page.$(
         "body > div.main-body > main > div.download-box.download-button-box.d-normal > a.btn.download-start-btn"
     );
     if (!downloadButton) {
@@ -35,7 +41,7 @@ export const getApkpureDetails = async (
     }
 
     // Grab the download url from the download button
-    const downloadButtonHref = await downloadButton.getProperty("href");
+    const downloadButtonHref: puppeteer.ElementHandle = await downloadButton.getProperty("href");
     const downloadUrl: string = await downloadButtonHref.jsonValue();
 
     // https://github.com/adewaleng/node-apkpure-crawler/blob/5a13fd7dd17d33c1642796c5bf75365a54edd56f/src/download-apk.js#L40C1-L68C2
@@ -44,7 +50,7 @@ export const getApkpureDetails = async (
 
         return new Promise((resolve, reject) => {
             page.on("request", async (event) => {
-                const u = event.url();
+                const u: string = event.url();
                 if (event.isInterceptResolutionHandled()) return;
                 if (!/^https:\/\/d-[\da-z]*\.winudf\.com/.test(u)) return await event.continue();
                 await event.respond({ status: 200, body: "" });
@@ -61,7 +67,7 @@ export const getApkpureDetails = async (
         });
     };
 
-    const realDownloadUrl = await getWinudfUrl(downloadUrl);
+    const realDownloadUrl: string = await getWinudfUrl(downloadUrl);
     await page.close();
     await browser.close();
 

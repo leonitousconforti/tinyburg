@@ -5,6 +5,7 @@ module.exports = {
     extends: [
         "@rushstack/eslint-config/profile/node",
         "@rushstack/eslint-config/mixins/tsdoc",
+        "@rushstack/eslint-config/mixins/friendly-locals",
         "plugin:unicorn/recommended",
         "plugin:prettier/recommended",
     ],

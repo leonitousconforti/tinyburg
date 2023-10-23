@@ -6,6 +6,13 @@ export type RequestedSupplier = "apkmirror" | "apkpure" | "patched";
 export type RequestedGame = "TinyTower" | "LegoTower" | "TinyTowerVegas";
 export type RequestedArchitecture = "armeabi-v7a" | "arm64-v8a" | "arm64-v8a + armeabi-v7a";
 
+// Type of a function that fetches the download url and details of an apk
+export type PuppeteerFetcher = (
+    game: RequestedGame,
+    semanticVersion: `${number}.${number}.${number}`,
+    architecture: RequestedArchitecture
+) => Promise<[downloadUrl: string, details: IPuppeteerDetails]>;
+
 // TODO: Implement approximate file size and SHA256 checksum fields
 export interface IPuppeteerDetails {
     /** The name of the apk. */

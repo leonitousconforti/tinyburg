@@ -3,7 +3,7 @@ import { loadApk } from "./index.js";
 
 const TINYBURG_APKS_TEST_TIMEOUT = 90_000;
 
-const checkFileExists = async (path: fs.PathLike): Promise<boolean> =>
+const checkFileExists = async (path: Readonly<fs.PathLike>): Promise<boolean> =>
     await fs.promises
         .access(path, fs.constants.F_OK)
         .then(() => true)

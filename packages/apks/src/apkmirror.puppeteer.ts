@@ -1,4 +1,10 @@
-import type { IPuppeteerDetails, RequestedGame, RequestedArchitecture, SemanticVersion } from "./types.js";
+import type {
+    RequestedGame,
+    SemanticVersion,
+    PuppeteerFetcher,
+    IPuppeteerDetails,
+    RequestedArchitecture,
+} from "./types.js";
 
 import Debug from "debug";
 import puppeteer from "puppeteer";
@@ -25,7 +31,7 @@ const releasePages: { [k in keyof typeof productPages]: (version: string) => str
     LegoTower: (version: string) => `${productPages.LegoTower}/lego-tower-${version}-release/`,
 };
 
-export const getApkmirrorDetails = async (
+export const getApkmirrorDetails: PuppeteerFetcher = async (
     game: RequestedGame,
     semanticVersion: SemanticVersion,
     architecture: RequestedArchitecture
@@ -35,16 +41,21 @@ export const getApkmirrorDetails = async (
     }
 
     // Start a browser and navigate to the apkmirror product page
-    const browser = await puppeteer.launch({ headless: false });
-    const page = await browser.newPage();
+    const browser: puppeteer.Browser = await puppeteer.launch({ headless: false });
+    const page: puppeteer.Page = await browser.newPage();
     logger("Navigating to product page %s", productPages[game]);
     await page.goto(productPages[game], { waitUntil: "load", timeout: 15_000 });
 
     // Grab all the detail banners from the page and map then to their semantic versions
-    const detailBanners = await page.$$(`#primary > div.listWidget.p-relative > div > div.appRow > div`);
-    const detailBannersBySemanticVersion = await Promise.all(
+    const detailBanners: puppeteer.ElementHandle[] = await page.$$(
+        `#primary > div.listWidget.p-relative > div > div.appRow > div`
+    );
+    const detailBannersBySemanticVersion: (readonly [
+        `${number}.${number}.${number}` | undefined,
+        puppeteer.ElementHandle,
+    ])[] = await Promise.all(
         detailBanners.map(async (tableEntry) => {
-            const version = await tableEntry.$eval(
+            const version: `${number}.${number}.${number}` | undefined = await tableEntry.$eval(
                 "div:nth-child(2) > div > h5 > a",
                 (node) => (node.textContent as string).match(/\d+.\d+.\d+/gm)?.[0] as SemanticVersion | undefined
             );
@@ -53,7 +64,8 @@ export const getApkmirrorDetails = async (
     );
 
     // Find the detailed banner for the version we want to download
-    const detailBanner = detailBannersBySemanticVersion.find(([version]) => version === semanticVersion);
+    const detailBanner: readonly [`${number}.${number}.${number}` | undefined, puppeteer.ElementHandle] | undefined =
+        detailBannersBySemanticVersion.find(([version]) => version === semanticVersion);
     if (!detailBanner?.[1]) {
         await browser.close();
         throw new Error("Could not find detail banner on apkmirror website");
@@ -83,48 +95,52 @@ export const getApkmirrorDetails = async (
     await page.goto(releasePage, { waitUntil: "load", timeout: 15_000 });
 
     // Grab the downloads table and find the row for the desired architecture
-    const downloadsTable = await page.$$("#downloads > div > div > div");
-    const availableDownloadsByArchitecture = await Promise.all(
+    const downloadsTable: puppeteer.ElementHandle[] = await page.$$("#downloads > div > div > div");
+    const availableDownloadsByArchitecture: (readonly [string, puppeteer.ElementHandle])[] = await Promise.all(
         downloadsTable.map(async (tableEntry) => {
-            const architectureChild = await tableEntry.$("div:nth-child(2)");
-            const architectureText = await architectureChild?.getProperty("innerText");
-            const architectureTextString: string = await architectureText?.jsonValue();
+            const child: puppeteer.ElementHandle | null = await tableEntry.$("div:nth-child(2)");
+            const text: puppeteer.ElementHandle | undefined = await child?.getProperty("innerText");
+            const architectureTextString: string = await text?.jsonValue();
             return [architectureTextString, tableEntry] as const;
         })
     );
-    const downloadRowForArchitecture = availableDownloadsByArchitecture.find(([entry]) => entry.includes(architecture));
+    const downloadRowForArchitecture: readonly [string, puppeteer.ElementHandle] | undefined =
+        availableDownloadsByArchitecture.find(([entry]) => entry.includes(architecture));
     if (!downloadRowForArchitecture) {
         await browser.close();
         throw new Error("Could not find download row for architecture on apkmirror website");
     }
 
     // Grab the download button for the desired architecture
-    const downloadButton = await downloadRowForArchitecture[1]?.$("div:nth-child(5) > a");
+    const downloadButton: puppeteer.ElementHandle | null =
+        await downloadRowForArchitecture[1]?.$("div:nth-child(5) > a");
     if (!downloadButton) {
         await browser.close();
         throw new Error("Could not find download button on apkmirror website");
     }
 
     // Get the download link for the page that automatically starts downloading the apk
-    const downloadButtonHref = await downloadButton.getProperty("href");
+    const downloadButtonHref: puppeteer.ElementHandle = await downloadButton.getProperty("href");
     const downloadsPage: string = await downloadButtonHref.jsonValue();
 
     // Get the real/override download link
     logger("Navigating to download page %s", downloadsPage);
     await page.goto(downloadsPage, { waitUntil: "load", timeout: 15_000 });
-    const overrideDownloadButton = await page.$("#file > div.row.d-flex.f-a-start > div.center.f-sm-50 > div > a");
+    const overrideDownloadButton: puppeteer.ElementHandle | null = await page.$(
+        "#file > div.row.d-flex.f-a-start > div.center.f-sm-50 > div > a"
+    );
     if (!overrideDownloadButton) {
         await browser.close();
         throw new Error("Could not find download link on apkmirror website");
     }
 
     // Get the download link for the page that automatically starts downloading the apk
-    const overrideDownloadButtonHref = await overrideDownloadButton.getProperty("href");
+    const overrideDownloadButtonHref: puppeteer.ElementHandle | null = await overrideDownloadButton.getProperty("href");
     const overrideDownloadUrl: string = await overrideDownloadButtonHref.jsonValue();
 
     logger("Navigating to auto download page %s", overrideDownloadUrl);
     await page.goto(overrideDownloadUrl, { waitUntil: "load", timeout: 15_000 });
-    const downloadButton2 = await page.$(
+    const downloadButton2: puppeteer.ElementHandle | null = await page.$(
         "div.card-with-tabs > div > div > div:nth-child(1) > p:nth-child(3) > span > a"
     );
     if (!downloadButton2) {
@@ -133,7 +149,7 @@ export const getApkmirrorDetails = async (
     }
 
     // Get the download link for the page that automatically starts downloading the apk
-    const downloadButton2Href = await downloadButton2.getProperty("href");
+    const downloadButton2Href: puppeteer.ElementHandle | null = await downloadButton2.getProperty("href");
     const downloadUrl: string = await downloadButton2Href.jsonValue();
     logger("Found download url %s", downloadUrl);
     await browser.close();
