@@ -7,7 +7,7 @@
 //                no access token is presented. No security checks will
 //                be performed when these methods are invoked.
 //
-// - allowlist: A set of json objects that specificies for each token issuer,
+// - allowlist: A set of json objects that specifies for each token issuer,
 //              what is allowed and what requires an "aud" field.
 //
 //             - "iss": The token issuer.
@@ -90,7 +90,7 @@
                 "/android.emulation.control.EmulatorController/setClipboard",
                 "/android.emulation.control.EmulatorController/getClipboard",
                 "/android.emulation.control.EmulatorController/streamClipboard",
-                // Can be used to "authenticate" with biodata.
+                // Can be used to "authenticate" with bio-data.
                 "/android.emulation.control.EmulatorController/sendFingerprint",
                 // Touch, key and mouse can be used to manipulate device state
                 "/android.emulation.control.EmulatorController/sendKey",

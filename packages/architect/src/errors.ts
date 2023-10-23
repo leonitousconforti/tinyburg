@@ -1,5 +1,3 @@
-// For when you just need to give up and quit
-
 const checkTheLogsOf = (containerName: string): string => `please check the logs of container "${containerName}"`;
 
 export const containerDiedPrematurely = (containerName: string): string =>

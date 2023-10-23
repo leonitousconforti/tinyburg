@@ -3,19 +3,31 @@ import Dockerode from "dockerode";
 
 import { containerCreateOptions, type IArchitectPortBindings } from "./0-shared-options.js";
 
+/**
+ * Creates a new architect docker container using the shared docker volume
+ * populated earlier. This container will not save any state in the shared
+ * volume, but it will load a snapshot from it which drastically decreases boot
+ * times.
+ */
 export const buildFreshContainer = async ({
     dockerode,
     logger,
     containerName,
+    abortSignal,
+    networkMode,
     portBindings,
+    environmentVariables,
 }: {
     dockerode: Dockerode;
     logger: Debug.Debugger;
     containerName: string;
+    abortSignal: AbortSignal;
+    networkMode?: string | undefined;
+    environmentVariables?: string[] | undefined;
     portBindings?: Partial<IArchitectPortBindings> | undefined;
 }): Promise<Dockerode.Container> => {
     // Merge port bindings, 0 means pick a random unused port
-    const PortBindings = Object.assign(
+    const PortBindings: IArchitectPortBindings = Object.assign(
         {},
         {
             "5554/tcp": [{ HostPort: "0" }],
@@ -28,9 +40,14 @@ export const buildFreshContainer = async ({
         portBindings || {}
     ) satisfies IArchitectPortBindings;
 
-    // Now we can start the container
     logger("Creating emulator container from image with kvm acceleration enabled");
-    const containerOptions = containerCreateOptions({ containerName, portBindings: PortBindings });
+    const containerOptions: Dockerode.ContainerCreateOptions = containerCreateOptions({
+        abortSignal,
+        containerName,
+        networkMode,
+        environmentVariables,
+        portBindings: PortBindings,
+    });
     const container: Dockerode.Container = await dockerode.createContainer(containerOptions);
 
     logger("Starting container %s", container.id);

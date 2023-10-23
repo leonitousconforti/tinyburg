@@ -10,6 +10,7 @@ await yargs(process.argv.slice(2))
         "the default command",
         (yargs) =>
             yargs.options({
+                timeout: { type: "number", demandOption: false },
                 "adb-port": { type: "string", demandOption: false, default: "0" },
                 "grpc-port": { type: "string", demandOption: false, default: "0" },
                 "frida-port": { type: "string", demandOption: false, default: "0" },
@@ -19,6 +20,7 @@ await yargs(process.argv.slice(2))
             }),
         async (argv) => {
             await architect({
+                timeout: argv.timeout,
                 portBindings: {
                     "5554/tcp": [{ HostPort: argv["console-port"] }],
                     "5555/tcp": [{ HostPort: argv["adb-port"] }],

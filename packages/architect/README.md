@@ -8,14 +8,17 @@ Architect leverages the android studio emulator from the android sdk. Why not us
 
 ## Where can architect run TinyTower
 
-- Local docker host (linux hosts only)
-- Remote docker host (using ssh or exposed docker daemon, linux hosts only)
-- ~~Local machine, any os (android command line tools must be installed)~~
-- ~~Remote machine over ssh, any os (android command line tools must be installed)~~
+-   On your local docker host (linux hosts only)
+-   On a remote docker host (using ssh or exposed docker daemon)
 
-## Caveats to keep in mind
+the docker host must have kvm acceleration available (note: the emulator does not like nested virtualization), an nvidia gpu installed, and the docker-nvidia plugin configured.
 
-- In the docker cases, if the HOST operating system where docker is running it must have kvm acceleration available
+You can check if your linux host has kvm acceleration available with:
+`sudo apt-get install cpu-checker
+sudo kvm-ok`
+
+You can check if your docker installation can find your nvidia gpus with:
+`docker run --rm --gpus all nvidia/cuda:12.2.0-devel-ubuntu20.04 nvidia-smi`
 
 ## Why only docker?
 
@@ -23,10 +26,10 @@ My initial idea included support for running on any system, local or via ssh. Bu
 
 ## Inspiration for this
 
-Heavily inspired by [https://github.com/google/android-emulator-container-scripts]
+Inspired by https://github.com/google/android-emulator-container-scripts
 
 ## Why are only google apis and play store images supported?
 
-Note to self, from: [https://android-developers.googleblog.com/2020/03/run-arm-apps-on-android-emulator.html]
+Note to self, from https://android-developers.googleblog.com/2020/03/run-arm-apps-on-android-emulator.html
 
-_Note that the ARM to x86 translation technology enables the execution of intellectual property owned by Arm Limited. It will only be available on Google APIs and Play Store system images, and can only be used for application development and debug purposes on x86 desktop, laptop, customer on-premises servers, and customer-procured cloud-based environments. The technology should not be used in the provision of commercial hosted services._
+"_Note that the ARM to x86 translation technology enables the execution of intellectual property owned by Arm Limited. It will only be available on Google APIs and Play Store system images, and can only be used for application development and debug purposes on x86 desktop, laptop, customer on-premises servers, and customer-procured cloud-based environments. The technology should not be used in the provision of commercial hosted services._"

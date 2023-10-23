@@ -5,12 +5,13 @@ import Debug from "debug";
 import path from "node:path";
 import Dockerode from "dockerode";
 import DockerModem from "docker-modem";
-import { runCommandBlocking, installApkCommand } from "../adb-commands.js";
+
 import {
     apkInstallFailed,
     containerDiedPrematurely,
     timedOutWhileWaitingForContainerToBecomeHealthy,
 } from "../errors.js";
+import { runCommandBlocking, installApkCommand } from "../adb-commands.js";
 
 /** The endpoints that can be generated from the port bindings. */
 export interface IArchitectEndpoints {
@@ -23,6 +24,7 @@ export interface IArchitectEndpoints {
     envoyAdminAddress: string;
 }
 
+/** Installs an apk into an architect container. */
 export const installApk = async ({
     apk,
     logger,
@@ -33,41 +35,55 @@ export const installApk = async ({
     container: Dockerode.Container;
 }): Promise<void> => {
     logger('Installing apk="%s"', apk);
-    const start = performance.now();
-    const tarball = tar.pack(path.dirname(apk), { entries: [path.basename(apk)] });
+    const start: number = performance.now();
+    const tarball: tar.Pack = tar.pack(path.dirname(apk), { entries: [path.basename(apk)] });
     await container.putArchive(tarball, { path: "/android/apks/" });
-    const command = installApkCommand(`/android/apks/${path.basename(apk)}`) as unknown as string[];
-    const output = await runCommandBlocking({ container, command });
-    const end = performance.now();
+    const command: string[] = installApkCommand(`/android/apks/${path.basename(apk)}`) as unknown as string[];
+    const output: string = await runCommandBlocking({ container, command });
+    const end: number = performance.now();
     logger("Apk install took %ss", ((end - start) / 1000).toFixed(2));
     if (!output.includes("Success")) throw new Error(apkInstallFailed(container.id));
 };
 
+/**
+ * Retrieves all the endpoints exposed by the container. If the endpoints are
+ * meant to be consumed in a browser, they will be prefixed with "http" or
+ * "https" appropriately. Application endpoints will have no prefix.
+ */
 export const getExposedEmulatorEndpoints = async ({
     dockerode,
-    logger,
     emulatorContainer,
 }: {
     dockerode: Dockerode;
-    logger: Debug.Debugger;
     emulatorContainer: Dockerode.Container;
 }): Promise<IArchitectEndpoints> => {
-    const inspectResults = await emulatorContainer.inspect();
-    const containerPortBindings = inspectResults.NetworkSettings.Ports as unknown as IArchitectPortBindings;
-    const emulatorContainerHost = (dockerode.modem as DockerModem.ConstructorOptions).host || "localhost";
-    const endpoints = {
-        emulatorContainerHost,
-        adbConsoleAddress: `${emulatorContainerHost}:${containerPortBindings["5554/tcp"][0].HostPort}`,
-        adbAddress: `${emulatorContainerHost}:${containerPortBindings["5555/tcp"][0].HostPort}`,
-        envoyAdminAddress: `http://${emulatorContainerHost}:${containerPortBindings["8081/tcp"][0].HostPort}`,
-        grpcAddress: `${emulatorContainerHost}:${containerPortBindings["8554/tcp"][0].HostPort}`,
-        envoyGrpcWebAddress: `http://${emulatorContainerHost}:${containerPortBindings["8555/tcp"][0].HostPort}`,
-        fridaAddress: `${emulatorContainerHost}:${containerPortBindings["27042/tcp"][0].HostPort}`,
-    };
-    logger("Container endpoints are: %o", endpoints);
-    return endpoints;
+    const inspectResults: Dockerode.ContainerInspectInfo = await emulatorContainer.inspect();
+    const emulatorContainerHost: string = (dockerode.modem as DockerModem.ConstructorOptions).host || "localhost";
+    const containerPortBindings: IArchitectPortBindings = inspectResults.NetworkSettings
+        .Ports as unknown as IArchitectPortBindings;
+
+    return inspectResults.HostConfig.NetworkMode === "host"
+        ? {
+              emulatorContainerHost,
+              adbConsoleAddress: `${emulatorContainerHost}:5554`,
+              adbAddress: `${emulatorContainerHost}:5555`,
+              envoyAdminAddress: `http://${emulatorContainerHost}:8081`,
+              grpcAddress: `${emulatorContainerHost}:8554`,
+              envoyGrpcWebAddress: `http://${emulatorContainerHost}:8555`,
+              fridaAddress: `${emulatorContainerHost}:27042`,
+          }
+        : {
+              emulatorContainerHost,
+              adbConsoleAddress: `${emulatorContainerHost}:${containerPortBindings["5554/tcp"]?.[0].HostPort}`,
+              adbAddress: `${emulatorContainerHost}:${containerPortBindings["5555/tcp"]?.[0].HostPort}`,
+              envoyAdminAddress: `http://${emulatorContainerHost}:${containerPortBindings["8081/tcp"]?.[0].HostPort}`,
+              grpcAddress: `${emulatorContainerHost}:${containerPortBindings["8554/tcp"]?.[0].HostPort}`,
+              envoyGrpcWebAddress: `http://${emulatorContainerHost}:${containerPortBindings["8555/tcp"]?.[0].HostPort}`,
+              fridaAddress: `${emulatorContainerHost}:${containerPortBindings["27042/tcp"]?.[0].HostPort}`,
+          };
 };
 
+/** Determines if a container is healthy or not by polling its status. */
 export const isContainerHealthy = async ({
     logger,
     container,
@@ -75,7 +91,7 @@ export const isContainerHealthy = async ({
     logger: Debug.Debugger;
     container: Dockerode.Container;
 }): Promise<boolean> => {
-    const containerInspect = await container.inspect();
+    const containerInspect: Dockerode.ContainerInspectInfo = await container.inspect();
     logger("Waiting for container to report it is healthy, status=%s", containerInspect.State.Health?.Status);
     if (!containerInspect.State.Running) throw new Error(containerDiedPrematurely(containerInspect.Name));
     if (containerInspect.State.Health?.Status === "unhealthy")

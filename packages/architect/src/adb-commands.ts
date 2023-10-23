@@ -1,5 +1,6 @@
 // For when you just need to rawdog an adb command
 
+import type Stream from "node:stream";
 import type Dockerode from "dockerode";
 
 /**
@@ -44,7 +45,7 @@ export const runCommandNonBlocking = async ({
     container: Dockerode.Container;
     command: string[];
 }): Promise<void> => {
-    const exec = await container.exec({ Cmd: command });
+    const exec: Dockerode.Exec = await container.exec({ Cmd: command });
     await exec.start({ Detach: true });
 };
 
@@ -56,13 +57,13 @@ export const runCommandBlocking = async ({
     container: Dockerode.Container;
     command: string[];
 }): Promise<string> => {
-    const exec = await container.exec({
+    const exec: Dockerode.Exec = await container.exec({
         AttachStderr: true,
         AttachStdout: true,
         AttachStdin: false,
         Cmd: command,
     });
-    const execStream = await exec.start({ Detach: false });
+    const execStream: Stream.Duplex = await exec.start({ Detach: false });
     return new Promise<string>((resolve, reject) => {
         const data: string[] = [];
         execStream.on("error", (error) => reject(error));

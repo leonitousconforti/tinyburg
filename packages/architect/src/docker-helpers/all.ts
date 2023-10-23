@@ -1,8 +1,8 @@
 export type { IArchitectEndpoints } from "./4-container-helpers.js";
 export type { IArchitectPortBindings } from "./0-shared-options.js";
 
-export { SHARED_EMULATOR_DATA_VOLUME_NAME } from "./constants.js";
-export { SHARED_VOLUME_CONTAINER_HELPER_NAME } from "./constants.js";
+export { SHARED_EMULATOR_DATA_VOLUME_NAME } from "../constants.js";
+export { SHARED_VOLUME_CONTAINER_HELPER_NAME } from "../constants.js";
 
 export { containerCreateOptions } from "./0-shared-options.js";
 export { buildImage } from "./1-build-image.js";
