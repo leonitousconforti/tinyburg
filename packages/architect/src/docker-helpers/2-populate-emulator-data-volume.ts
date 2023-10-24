@@ -1,9 +1,8 @@
 import Debug from "debug";
 import Dockerode from "dockerode";
 
-import { couldNotPopulateShareVolume } from "../errors.js";
 import { containerCreateOptions } from "./0-shared-options.js";
-import { SHARED_EMULATOR_DATA_VOLUME_NAME, SHARED_VOLUME_CONTAINER_HELPER_NAME } from "../constants.js";
+import { SHARED_EMULATOR_DATA_VOLUME_NAME, SHARED_VOLUME_CONTAINER_HELPER_NAME } from "../versions.js";
 
 /**
  * If the architect emulator shared volume does not exists on the docker host,
@@ -20,7 +19,7 @@ export const populateSharedDataVolume = async ({
 }: {
     dockerode: Dockerode;
     logger: Debug.Debugger;
-    abortSignal: AbortSignal;
+    abortSignal?: AbortSignal | undefined;
 }): Promise<void> => {
     logger("Populating shared emulator data volume...");
 
@@ -58,10 +57,10 @@ export const populateSharedDataVolume = async ({
     await volumeHelperContainer.start();
 
     // Wait for the container to exit and handle errors
-    const exitCode: { StatusCode: number } = await volumeHelperContainer.wait({ abortSignal });
+    const exitCode: { StatusCode: number } = await volumeHelperContainer.wait(abortSignal ? { abortSignal } : {});
     if (exitCode.StatusCode !== 0) {
         await volumeHelperContainer.remove();
-        throw new Error(couldNotPopulateShareVolume(SHARED_VOLUME_CONTAINER_HELPER_NAME));
+        throw new Error("An error ocurred when populating the shared emulator data volume");
     }
 
     logger("Shared emulator data volume population complete!");

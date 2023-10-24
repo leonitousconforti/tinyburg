@@ -10,20 +10,20 @@ await yargs(process.argv.slice(2))
         "the default command",
         (yargs) =>
             yargs.options({
-                timeout: { type: "number", demandOption: false },
                 "adb-port": { type: "string", demandOption: false, default: "0" },
                 "grpc-port": { type: "string", demandOption: false, default: "0" },
                 "frida-port": { type: "string", demandOption: false, default: "0" },
                 "console-port": { type: "string", demandOption: false, default: "0" },
+                "mitm-web-port": { type: "string", demandOption: false, default: "0" },
                 "grpc-web-port": { type: "string", demandOption: false, default: "0" },
                 "envoy-admin-port": { type: "string", demandOption: false, default: "0" },
             }),
         async (argv) => {
             await architect({
-                timeout: argv.timeout,
                 portBindings: {
                     "5554/tcp": [{ HostPort: argv["console-port"] }],
                     "5555/tcp": [{ HostPort: argv["adb-port"] }],
+                    "8080/tcp": [{ HostPort: argv["mitm-web-port"] }],
                     "8081/tcp": [{ HostPort: argv["envoy-admin-port"] }],
                     "8554/tcp": [{ HostPort: argv["grpc-port"] }],
                     "8555/tcp": [{ HostPort: argv["grpc-web-port"] }],

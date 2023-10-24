@@ -1,15 +1,28 @@
 import Dockerode from "dockerode";
 
-import { DOCKER_IMAGE_TAG } from "../versions.js";
-import { SHARED_EMULATOR_DATA_VOLUME_NAME } from "../constants.js";
+import { DOCKER_IMAGE_TAG, SHARED_EMULATOR_DATA_VOLUME_NAME } from "../versions.js";
 
 /** The port bindings that all architect emulator containers must have. */
 export interface IArchitectPortBindings {
+    /** Adb console port */
     "5554/tcp": [Omit<Dockerode.PortBinding, "HostPort"> & { HostPort: string }];
+
+    /** Adb port */
     "5555/tcp": [Omit<Dockerode.PortBinding, "HostPort"> & { HostPort: string }];
+
+    /** Mitmproxy web interface port */
+    "8080/tcp": [Omit<Dockerode.PortBinding, "HostPort"> & { HostPort: string }];
+
+    /** Envoy proxy admin web interface port */
     "8081/tcp": [Omit<Dockerode.PortBinding, "HostPort"> & { HostPort: string }];
+
+    /** Emulator grpc port */
     "8554/tcp": [Omit<Dockerode.PortBinding, "HostPort"> & { HostPort: string }];
+
+    /** Emulator grpc web port */
     "8555/tcp": [Omit<Dockerode.PortBinding, "HostPort"> & { HostPort: string }];
+
+    /** Frida server port */
     "27042/tcp": [Omit<Dockerode.PortBinding, "HostPort"> & { HostPort: string }];
 }
 

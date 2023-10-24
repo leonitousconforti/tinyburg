@@ -21,8 +21,8 @@ export const buildFreshContainer = async ({
     dockerode: Dockerode;
     logger: Debug.Debugger;
     containerName: string;
-    abortSignal: AbortSignal;
     networkMode?: string | undefined;
+    abortSignal?: AbortSignal | undefined;
     environmentVariables?: string[] | undefined;
     portBindings?: Partial<IArchitectPortBindings> | undefined;
 }): Promise<Dockerode.Container> => {
@@ -32,6 +32,7 @@ export const buildFreshContainer = async ({
         {
             "5554/tcp": [{ HostPort: "0" }],
             "5555/tcp": [{ HostPort: "0" }],
+            "8080/tcp": [{ HostPort: "0" }],
             "8081/tcp": [{ HostPort: "0" }],
             "8554/tcp": [{ HostPort: "0" }],
             "8555/tcp": [{ HostPort: "0" }],

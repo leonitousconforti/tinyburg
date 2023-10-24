@@ -41,6 +41,7 @@
     "scripts": {
         "_phase:build": "heft run --only build -- --clean",
         "_phase:test": "NODE_OPTIONS=\"--experimental-vm-modules --no-warnings\" heft run --only test -- --clean",
+        "ansible-lint": "ansible-lint --fix ./infrastructure.ansible.yaml",
         "build": "NODE_OPTIONS=\"--experimental-vm-modules --no-warnings\" heft test --clean",
         "protobuf": "buf generate"
     },
