@@ -18,7 +18,7 @@
         "@rushstack/heft-lint-plugin": "~0.2.9",
         "@rushstack/heft-typescript-plugin": "~0.2.9",
         "@tinyburg/tsconfig-rig": "workspace:*",
-        "@types/node": "20.8.7",
+        "@types/node": "20.8.8",
         "@types/prompts": "~2.4.5",
         "@types/yargs": "~17.0.29",
         "eslint": "8.52.0",

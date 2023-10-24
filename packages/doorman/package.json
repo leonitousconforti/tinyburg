@@ -20,7 +20,7 @@
         "templates:gen": "ts-node --esm ./templates/generate-sprites.ts && ts-node --esm ./templates/generate-font-characters.ts && ts-node --esm ./templates/generate-typings.ts"
     },
     "dependencies": {
-        "@bufbuild/protobuf": "~1.3.3",
+        "@bufbuild/protobuf": "~1.4.0",
         "@connectrpc/connect": "~1.1.1",
         "@connectrpc/connect-node": "~1.1.1",
         "@tinyburg/apks": "workspace:*",
@@ -40,7 +40,7 @@
         "@rushstack/heft-typescript-plugin": "~0.2.9",
         "@tinyburg/tsconfig-rig": "workspace:*",
         "@types/debug": "~4.1.10",
-        "@types/node": "20.8.7",
+        "@types/node": "20.8.8",
         "@types/semver": "~7.5.4",
         "eslint": "8.52.0",
         "eslint-config-prettier": "~9.0.0",

@@ -35,7 +35,7 @@
         "@rushstack/heft-lint-plugin": "~0.2.9",
         "@rushstack/heft-typescript-plugin": "~0.2.9",
         "@tinyburg/tsconfig-rig": "workspace:*",
-        "@types/node": "20.8.7",
+        "@types/node": "20.8.8",
         "eslint": "8.52.0",
         "eslint-config-prettier": "~9.0.0",
         "eslint-plugin-prettier": "~5.0.1",

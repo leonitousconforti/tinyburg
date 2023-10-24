@@ -55,7 +55,7 @@
         "@rushstack/heft-lint-plugin": "~0.2.9",
         "@rushstack/heft-typescript-plugin": "~0.2.9",
         "@tinyburg/tsconfig-rig": "workspace:*",
-        "@types/node": "20.8.7",
+        "@types/node": "20.8.8",
         "@types/uuid": "~9.0.1",
         "compile-schemas-to-typescript": "~0.2.0",
         "eslint": "8.52.0",
