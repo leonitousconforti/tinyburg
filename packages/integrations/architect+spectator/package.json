@@ -9,7 +9,8 @@
     ],
     "scripts": {
         "_phase:build": "heft run --only build -- --clean",
-        "build": "heft build --clean"
+        "build": "heft build --clean",
+        "run": "node ./dist/example.js"
     },
     "dependencies": {
         "@tinyburg/apks": "workspace:*",
@@ -24,12 +25,13 @@
         "@rushstack/heft-lint-plugin": "~0.2.9",
         "@rushstack/heft-typescript-plugin": "~0.2.9",
         "@tinyburg/tsconfig-rig": "workspace:*",
-        "@types/debug": "~4.1.9",
+        "@types/debug": "~4.1.10",
         "@types/express": "~4.17.17",
-        "@types/node": "20.8.2",
-        "eslint": "8.51.0",
+        "@types/node": "20.8.7",
+        "dotenv": "~16.3.1",
+        "eslint": "8.52.0",
         "eslint-config-prettier": "~9.0.0",
-        "eslint-plugin-prettier": "~5.0.0",
+        "eslint-plugin-prettier": "~5.0.1",
         "eslint-plugin-unicorn": "~48.0.1",
         "prettier": "~3.0.3",
         "typescript": "5.2.2"
