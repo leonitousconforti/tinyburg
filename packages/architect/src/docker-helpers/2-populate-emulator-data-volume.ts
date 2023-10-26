@@ -60,6 +60,7 @@ export const populateSharedDataVolume = async ({
     const exitCode: { StatusCode: number } = await volumeHelperContainer.wait(abortSignal ? { abortSignal } : {});
     if (exitCode.StatusCode !== 0) {
         await volumeHelperContainer.remove();
+        await dockerode.getVolume(SHARED_EMULATOR_DATA_VOLUME_NAME).remove();
         throw new Error("An error ocurred when populating the shared emulator data volume");
     }
 
