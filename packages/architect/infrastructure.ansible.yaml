@@ -30,3 +30,7 @@
         state: latest
         update_cache: true
         only_upgrade: true
+
+    - name: Make sure xorg server is accessible from anywhere
+      ansible.builtin.command: "xhost +"
+      changed_when: false

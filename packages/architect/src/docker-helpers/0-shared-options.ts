@@ -51,8 +51,8 @@ export const containerCreateOptions = ({
     name: containerName,
     Cmd: command,
     Image: DOCKER_IMAGE_TAG,
-    Env: environmentVariables,
     Volumes: { "/android/avd-home/Pixel2.avd/": {} },
+    Env: environmentVariables?.find((x) => x.startsWith("DISPLAY=")) ? environmentVariables : ["DISPLAY=:1"],
     HostConfig: {
         PortBindings: portBindings,
         NetworkMode: networkMode || "host",

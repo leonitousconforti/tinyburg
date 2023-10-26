@@ -1,3 +1,5 @@
+// rushx build && node dist/test/benchmark.js
+
 /**
  * Benchmark tests for architect don't really make sense, since it will largely
  * depend on this hardware and internet connection of your docker host. This
@@ -6,15 +8,9 @@
  * the time before your change to the time after your change.
  */
 
+import "./setup-tests.js";
 import { architect } from "../src/index.js";
 
-const start: number = performance.now();
 const { emulatorContainer } = await architect();
-const end: number = performance.now();
-const performanceDelta: string = ((end - start) / 1000).toFixed(2);
-
 await emulatorContainer.stop();
 await emulatorContainer.remove();
-
-// eslint-disable-next-line no-console
-console.log(`Architect took ${performanceDelta} seconds to start.`);

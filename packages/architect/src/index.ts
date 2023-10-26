@@ -74,7 +74,7 @@ export const architect = async (
         containerName,
         networkMode: options?.networkMode,
         portBindings: options?.portBindings,
-        environmentVariables: ["DISPLAY=:1"],
+        environmentVariables: options?.environmentVariables,
         abortSignal: options?.abortSignal,
     });
 

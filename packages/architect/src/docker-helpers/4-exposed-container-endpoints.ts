@@ -6,13 +6,13 @@ import DockerModem from "docker-modem";
 /** The endpoints that an architect container exposes. */
 export interface IArchitectEndpoints {
     dockerHostAddress: string;
-    emulatorContainerAddress: string;
+    emulatorContainerAddress: string | undefined;
     adbConsoleAddress: string;
     adbAddress: string;
     grpcAddress: string;
     fridaAddress: string;
-    envoyGrpcWebAddress: string;
     envoyAdminAddress: string;
+    envoyGrpcWebAddress: string;
     mitmWebInterfaceAddress: string;
 }
 
@@ -34,8 +34,8 @@ export const getExposedEmulatorEndpoints = async ({
     const inspectResults: Dockerode.ContainerInspectInfo = await emulatorContainer.inspect();
 
     // Addresses of the container and the docker host
-    const emulatorContainerAddress: string = inspectResults.NetworkSettings.IPAddress;
     const dockerHostAddress: string = (dockerode.modem as DockerModem.ConstructorOptions).host || "localhost";
+    const emulatorContainerAddress: string | undefined = inspectResults.NetworkSettings.IPAddress || undefined;
 
     // This is the port bindings the emulator container exposes
     const exposedEmulatorContainerPorts: IArchitectPortBindings =
@@ -57,11 +57,11 @@ export const getExposedEmulatorEndpoints = async ({
         emulatorContainerAddress,
         adbConsoleAddress: `${dockerHostAddress}:${exposedEmulatorContainerPorts["5554/tcp"][0].HostPort}`,
         adbAddress: `${dockerHostAddress}:${exposedEmulatorContainerPorts["5555/tcp"][0].HostPort}`,
+        mitmWebInterfaceAddress: `http://${dockerHostAddress}:${exposedEmulatorContainerPorts["8080/tcp"][0].HostPort}`,
         envoyAdminAddress: `http://${dockerHostAddress}:${exposedEmulatorContainerPorts["8081/tcp"][0].HostPort}`,
         grpcAddress: `${dockerHostAddress}:${exposedEmulatorContainerPorts["8554/tcp"][0].HostPort}`,
         envoyGrpcWebAddress: `http://${dockerHostAddress}:${exposedEmulatorContainerPorts["8555/tcp"][0].HostPort}`,
         fridaAddress: `${dockerHostAddress}:${exposedEmulatorContainerPorts["27042/tcp"][0].HostPort}`,
-        mitmWebInterfaceAddress: `http://${dockerHostAddress}:${exposedEmulatorContainerPorts["8080/tcp"][0].HostPort}`,
     };
 
     // How to reach these endpoints over the docker container's networking
@@ -70,11 +70,11 @@ export const getExposedEmulatorEndpoints = async ({
         emulatorContainerAddress,
         adbConsoleAddress: `${emulatorContainerAddress}:${exposedEmulatorContainerPorts["5554/tcp"][0].HostPort}`,
         adbAddress: `${emulatorContainerAddress}:${exposedEmulatorContainerPorts["5555/tcp"][0].HostPort}`,
+        mitmWebInterfaceAddress: `http://${emulatorContainerAddress}:${exposedEmulatorContainerPorts["8080/tcp"][0].HostPort}`,
         envoyAdminAddress: `http://${emulatorContainerAddress}:${exposedEmulatorContainerPorts["8081/tcp"][0].HostPort}`,
         grpcAddress: `${emulatorContainerAddress}:${exposedEmulatorContainerPorts["8554/tcp"][0].HostPort}`,
         envoyGrpcWebAddress: `http://${emulatorContainerAddress}:${exposedEmulatorContainerPorts["8555/tcp"][0].HostPort}`,
         fridaAddress: `${emulatorContainerAddress}:${exposedEmulatorContainerPorts["27042/tcp"][0].HostPort}`,
-        mitmWebInterfaceAddress: `http://${emulatorContainerAddress}:${exposedEmulatorContainerPorts["8080/tcp"][0].HostPort}`,
     };
 
     /**

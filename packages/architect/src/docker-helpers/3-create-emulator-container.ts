@@ -41,7 +41,7 @@ export const buildFreshContainer = async ({
         portBindings || {}
     ) satisfies IArchitectPortBindings;
 
-    logger("Creating emulator container from image with kvm acceleration enabled");
+    logger("Creating emulator container from image with kvm and gpu acceleration enabled");
     const containerOptions: Dockerode.ContainerCreateOptions = containerCreateOptions({
         abortSignal,
         containerName,

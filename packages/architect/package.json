@@ -31,7 +31,7 @@
             "import": "./dist/src/*.js"
         }
     },
-    "main": "dist/index.js",
+    "main": "dist/src/index.js",
     "bin": {
         "architect": "./dist/src/cli.js"
     },
