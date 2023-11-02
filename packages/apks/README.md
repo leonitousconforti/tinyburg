@@ -42,3 +42,10 @@ const legoTowerApkMirror = await loadApk("LegoTower", "latest version", "apkmirr
 // NOTE: TinyTowerVegas is only available from apkpure
 const tinytowerVegas = await loadApk("TinyTowerVegas", "latest version", "apkpure");
 ```
+
+## To patch apks right now
+
+```sh
+./node_modules/.bin/apk-mitm ./downloads/apkpure_TinyTower_4.27.1_arm64-v8a.apk
+mv ./downloads/apkpure_TinyTower_4.27.1_arm64-v8a-patched.apk ./downloads/patched_TinyTower_4.27.1_arm64-v8a.apk
+```
