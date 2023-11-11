@@ -72,7 +72,9 @@ const loadApkEffect = <T extends Games, U extends Extract<TrackedVersion<T>, Any
 
         // Stream the download directly to the downloads folder
         const results: readonly [string, IPuppeteerDetails] = yield* _(getApksupportDetails(game, versionInfo));
-        const request: Http.response.ClientResponse = yield* _(Http.request.get(results[0]).pipe(Http.client.fetch()));
+        const request: Http.response.ClientResponse = yield* _(
+            Http.request.get(results[0]).pipe(Http.client.fetchOk())
+        );
         yield* _(request.stream.pipe(Stream.run(effectFs.sink(`${cacheDirectory}/${desiredApkFilename}`))));
         return `${cacheDirectory}/${desiredApkFilename}`;
     });
