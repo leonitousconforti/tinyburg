@@ -15,8 +15,3 @@ tab_width = 4
 indent_style = space
 indent_size = 2
 tab_width = 2
-
-[*.conf]
-indent_style = space
-indent_size = 2
-tab_width = 2
