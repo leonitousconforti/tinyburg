@@ -1,3 +1,5 @@
+// https://android.googlesource.com/platform/prebuilts/android-emulator/+/refs/heads/main/linux-x86_64/lib/emulator_access.json
+
 // This contains the allow lists of the emulator gRPC endpoint.
 // This list defines which sets of methods are accessible by whom.
 //

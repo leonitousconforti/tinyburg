@@ -5,7 +5,8 @@
         "sourceMap": true,
         "declaration": true,
         "outDir": "./dist",
-        "types": ["node", "heft-jest"]
+        "types": ["node", "heft-jest"],
+        "plugins": [{ "name": "@effect/language-service" }]
     },
     "include": ["src/**/*.ts", "test/**/*.ts"]
 }

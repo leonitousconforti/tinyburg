@@ -1,6 +1,7 @@
-import Debug from "debug";
 import Dockerode from "dockerode";
+import { Effect, Option } from "effect";
 
+import { DockerError } from "./all.js";
 import { containerCreateOptions, type IArchitectPortBindings } from "./0-shared-options.js";
 
 /**
@@ -9,51 +10,49 @@ import { containerCreateOptions, type IArchitectPortBindings } from "./0-shared-
  * volume, but it will load a snapshot from it which drastically decreases boot
  * times.
  */
-export const buildFreshContainer = async ({
+export const buildFreshContainer = ({
     dockerode,
-    logger,
     containerName,
-    abortSignal,
     networkMode,
     portBindings,
     environmentVariables,
 }: {
     dockerode: Dockerode;
-    logger: Debug.Debugger;
     containerName: string;
-    networkMode?: string | undefined;
-    abortSignal?: AbortSignal | undefined;
-    environmentVariables?: string[] | undefined;
-    portBindings?: Partial<IArchitectPortBindings> | undefined;
-}): Promise<Dockerode.Container> => {
-    // Merge port bindings, 0 means pick a random unused port
-    const PortBindings: IArchitectPortBindings = Object.assign(
-        {},
-        {
-            "5554/tcp": [{ HostPort: "0" }],
-            "5555/tcp": [{ HostPort: "0" }],
-            "8080/tcp": [{ HostPort: "0" }],
-            "8081/tcp": [{ HostPort: "0" }],
-            "8554/tcp": [{ HostPort: "0" }],
-            "8555/tcp": [{ HostPort: "0" }],
-            "27042/tcp": [{ HostPort: "0" }],
-        },
-        portBindings || {}
-    ) satisfies IArchitectPortBindings;
+    environmentVariables: string[];
+    networkMode: Option.Option<string>;
+    portBindings: IArchitectPortBindings;
+}): Effect.Effect<never, DockerError, Dockerode.Container> =>
+    Effect.gen(function* (_: Effect.Adapter) {
+        // Merge port bindings, 0 means pick a random unused port
+        const PortBindings: IArchitectPortBindings = Object.assign(
+            {},
+            {
+                "5554/tcp": [{ HostPort: 0 }],
+                "5555/tcp": [{ HostPort: 0 }],
+                "8080/tcp": [{ HostPort: 0 }],
+                "8081/tcp": [{ HostPort: 0 }],
+                "8554/tcp": [{ HostPort: 0 }],
+                "8555/tcp": [{ HostPort: 0 }],
+                "27042/tcp": [{ HostPort: 0 }],
+            } satisfies IArchitectPortBindings,
+            portBindings
+        );
 
-    logger("Creating emulator container from image with kvm and gpu acceleration enabled");
-    const containerOptions: Dockerode.ContainerCreateOptions = containerCreateOptions({
-        abortSignal,
-        containerName,
-        networkMode,
-        environmentVariables,
-        portBindings: PortBindings,
+        const containerOptions: Dockerode.ContainerCreateOptions = containerCreateOptions({
+            networkMode,
+            containerName,
+            environmentVariables,
+            command: Option.none(),
+            portBindings: PortBindings,
+        });
+
+        const container: Dockerode.Container = yield* _(
+            Effect.promise(() => dockerode.createContainer(containerOptions))
+        );
+
+        yield* _(Effect.promise(() => container.start()));
+        return container;
     });
-    const container: Dockerode.Container = await dockerode.createContainer(containerOptions);
-
-    logger("Starting container %s", container.id);
-    await container.start();
-    return container;
-};
 
 export default buildFreshContainer;

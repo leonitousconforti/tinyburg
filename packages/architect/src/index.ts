@@ -1,6 +1,6 @@
-import Debug from "debug";
 import Dockerode from "dockerode";
 import DockerModem from "docker-modem";
+import { Effect, Option } from "effect";
 
 import {
     buildImage,
@@ -9,6 +9,7 @@ import {
     getExposedEmulatorEndpoints,
     isContainerHealthy,
     installApk,
+    DockerError,
     type IArchitectEndpoints,
     type IArchitectPortBindings,
 } from "./docker-helpers/all.js";
@@ -31,83 +32,75 @@ export type DockerConnectionOptions = Omit<Dockerode.DockerOptions, "sshAuthAgen
  * and gpu acceleration enabled. You can configure the network mode, environment
  * variables, and port bindings of the container.
  */
-export const architect = async (
+export const architect = (
     options?:
         | {
               // Configurable parts of the container
               networkMode?: string | undefined;
               environmentVariables?: string[] | undefined;
-              portBindings?: Partial<IArchitectPortBindings> | undefined;
+              portBindings?: { [P in keyof IArchitectPortBindings]: IArchitectPortBindings[P] | undefined } | undefined;
 
               // Docker things
-              abortSignal?: AbortSignal | undefined;
               dockerConnectionOptions?: DockerConnectionOptions | undefined;
           }
         | undefined
-): Promise<{
-    emulatorContainer: Dockerode.Container;
-    installApk: (apk: string) => Promise<void>;
-    containerEndpoints: Awaited<ReturnType<typeof getExposedEmulatorEndpoints>>;
-}> => {
-    // Generate a random container name which will be architectXXXXXX
-    const containerName: string = `architect${Math.floor(Math.random() * (999_999 - 100_000 + 1)) + 100_000}`;
-    const logger: Debug.Debugger = Debug.debug(`tinyburg:architect:${containerName}`);
-
-    // Connect to docker host!
-    const dockerConnectionOptions: DockerConnectionOptions = Object.assign(
-        { socketPath: "/var/run/docker.sock" },
-        options?.dockerConnectionOptions || {}
-    );
-    const dockerode: Dockerode = new Dockerode(dockerConnectionOptions);
-    const dockerHost: string = (dockerode.modem as DockerModem.ConstructorOptions).host || "localhost";
-    logger("Connected to docker daemon %s @ %s", dockerConnectionOptions.socketPath, dockerHost);
-
-    // Build the image, then populate the shared data volume, then
-    // build a fresh container and get the available container endpoints.
-    const start: number = performance.now();
-    await buildImage({ dockerode, logger, abortSignal: options?.abortSignal });
-    await populateSharedDataVolume({ dockerode, logger, abortSignal: options?.abortSignal });
-
-    const emulatorContainer: Dockerode.Container = await buildFreshContainer({
-        dockerode,
-        logger,
-        containerName,
-        networkMode: options?.networkMode,
-        portBindings: options?.portBindings,
-        environmentVariables: options?.environmentVariables,
-        abortSignal: options?.abortSignal,
-    });
-
-    const containerEndpoints:
-        | [usingHostNetworking: IArchitectEndpoints]
-        | [usingHostNetworking: IArchitectEndpoints, usingContainersIPv4Networking: IArchitectEndpoints] =
-        await getExposedEmulatorEndpoints({
-            dockerode,
-            emulatorContainer,
-        });
-
-    logger("Container endpoints are: %o", containerEndpoints);
-
-    // Wait for the container to become healthy
-    // (will timeout after 2mins when docker reports it's status as unhealthy)
-    let emulatorContainerHealth: boolean = await isContainerHealthy({ logger, container: emulatorContainer });
-    while (!emulatorContainerHealth) {
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        emulatorContainerHealth = await isContainerHealthy({ logger, container: emulatorContainer });
+): Effect.Effect<
+    never,
+    DockerError,
+    {
+        emulatorContainer: Dockerode.Container;
+        installApk: (apk: string) => Promise<void>;
+        containerEndpoints: Awaited<ReturnType<typeof getExposedEmulatorEndpoints>>;
     }
+> =>
+    Effect.gen(function* (_: Effect.Adapter) {
+        // Generate a random container name which will be architectXXXXXX
+        const containerName: string = `architect${Math.floor(Math.random() * (999_999 - 100_000 + 1)) + 100_000}`;
 
-    // Everything is finally healthy!
-    const end: number = performance.now();
-    logger(
-        "Everything reported healthy after %ss, you can start interacting with the endpoints now!",
-        ((end - start) / 1000).toFixed(2)
-    );
+        // Connect to docker host!
+        const dockerConnectionOptions: DockerConnectionOptions = Object.assign(
+            { socketPath: "/var/run/docker.sock" },
+            options?.dockerConnectionOptions || {}
+        );
+        const dockerode: Dockerode = new Dockerode(dockerConnectionOptions);
+        const dockerHost: string = (dockerode.modem as DockerModem.ConstructorOptions).host || "localhost";
 
-    return {
-        emulatorContainer,
-        containerEndpoints,
-        installApk: (apk: string) => installApk({ apk, logger, container: emulatorContainer }),
-    };
-};
+        // Build the image, then populate the shared data volume, then
+        // build a fresh container and get the available container endpoints.
+        yield* _(buildImage({ dockerode, onProgress: Option.none() }));
+        yield* _(populateSharedDataVolume({ dockerode }));
+
+        const emulatorContainer: Dockerode.Container = yield* _(
+            buildFreshContainer({
+                dockerode,
+                containerName,
+                portBindings: options?.portBindings || {},
+                networkMode: Option.fromNullable(options?.networkMode),
+                environmentVariables: options?.environmentVariables || [],
+            })
+        );
+
+        const containerEndpoints:
+            | [usingHostNetworking: IArchitectEndpoints]
+            | [usingHostNetworking: IArchitectEndpoints, usingContainersIPv4Networking: IArchitectEndpoints] =
+            getExposedEmulatorEndpoints({
+                dockerode,
+                emulatorContainer,
+            });
+
+        // Wait for the container to become healthy
+        // (will timeout after 2mins when docker reports it's status as unhealthy)
+        // let emulatorContainerHealth: boolean = isContainerHealthy({ container: emulatorContainer });
+        // while (!emulatorContainerHealth) {
+        //     new Promise((resolve) => setTimeout(resolve, 1000));
+        //     emulatorContainerHealth = isContainerHealthy({ container: emulatorContainer });
+        // }
+
+        return {
+            emulatorContainer,
+            containerEndpoints,
+            installApk: (apk: string) => installApk({ apk, container: emulatorContainer }),
+        };
+    });
 
 export default architect;

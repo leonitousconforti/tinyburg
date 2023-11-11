@@ -1,3 +1,4 @@
+import { Option } from "effect";
 import Dockerode from "dockerode";
 
 import { DOCKER_IMAGE_TAG, SHARED_EMULATOR_DATA_VOLUME_NAME } from "../versions.js";
@@ -5,57 +6,57 @@ import { DOCKER_IMAGE_TAG, SHARED_EMULATOR_DATA_VOLUME_NAME } from "../versions.
 /** The port bindings that all architect emulator containers must have. */
 export interface IArchitectPortBindings {
     /** Adb console port */
-    "5554/tcp": [Omit<Dockerode.PortBinding, "HostPort"> & { HostPort: string }];
+    "5554/tcp": [Omit<Dockerode.PortBinding, "HostPort"> & { HostPort: number }];
 
     /** Adb port */
-    "5555/tcp": [Omit<Dockerode.PortBinding, "HostPort"> & { HostPort: string }];
+    "5555/tcp": [Omit<Dockerode.PortBinding, "HostPort"> & { HostPort: number }];
 
     /** Mitmproxy web interface port */
-    "8080/tcp": [Omit<Dockerode.PortBinding, "HostPort"> & { HostPort: string }];
+    "8080/tcp": [Omit<Dockerode.PortBinding, "HostPort"> & { HostPort: number }];
 
     /** Envoy proxy admin web interface port */
-    "8081/tcp": [Omit<Dockerode.PortBinding, "HostPort"> & { HostPort: string }];
+    "8081/tcp": [Omit<Dockerode.PortBinding, "HostPort"> & { HostPort: number }];
 
     /** Emulator grpc port */
-    "8554/tcp": [Omit<Dockerode.PortBinding, "HostPort"> & { HostPort: string }];
+    "8554/tcp": [Omit<Dockerode.PortBinding, "HostPort"> & { HostPort: number }];
 
     /** Emulator grpc web port */
-    "8555/tcp": [Omit<Dockerode.PortBinding, "HostPort"> & { HostPort: string }];
+    "8555/tcp": [Omit<Dockerode.PortBinding, "HostPort"> & { HostPort: number }];
 
     /** Frida server port */
-    "27042/tcp": [Omit<Dockerode.PortBinding, "HostPort"> & { HostPort: string }];
+    "27042/tcp": [Omit<Dockerode.PortBinding, "HostPort"> & { HostPort: number }];
 }
 
 /**
  * Specifies the docker options for creating an architect container. You must
  * provide a name for the container and you can optionally provide the
- * entrypoint command, abort signal, network mode, port bindings, and
- * environment variables.
+ * entrypoint command, network mode, port bindings, and environment variables.
+ *
+ * @internal
  */
 export const containerCreateOptions = ({
     containerName,
     command,
-    abortSignal,
     networkMode,
     portBindings,
     environmentVariables,
 }: {
     containerName: string;
-    command?: string[] | undefined;
-    abortSignal?: AbortSignal | undefined;
-    networkMode?: string | undefined;
-    environmentVariables?: string[] | undefined;
-    portBindings?: IArchitectPortBindings | undefined;
+    environmentVariables: string[];
+    command: Option.Option<string[]>;
+    networkMode: Option.Option<string>;
+    portBindings: IArchitectPortBindings;
 }): Dockerode.ContainerCreateOptions => ({
-    ...(abortSignal ? { abortSignal } : {}),
     name: containerName,
-    Cmd: command,
     Image: DOCKER_IMAGE_TAG,
+    Cmd: Option.getOrUndefined(command),
     Volumes: { "/android/avd-home/Pixel2.avd/": {} },
-    Env: environmentVariables?.find((x) => x.startsWith("DISPLAY=")) ? environmentVariables : ["DISPLAY=:1"],
+    Env: environmentVariables.some((x) => x.startsWith("DISPLAY="))
+        ? environmentVariables
+        : ["DISPLAY=:1", ...environmentVariables],
     HostConfig: {
         PortBindings: portBindings,
-        NetworkMode: networkMode || "host",
+        NetworkMode: Option.getOrElse(networkMode, () => "host"),
         DeviceRequests: [{ Count: -1, Driver: "nvidia", Capabilities: [["gpu"]] }],
         Devices: [{ CgroupPermissions: "mrw", PathInContainer: "/dev/kvm", PathOnHost: "/dev/kvm" }],
         Binds: [

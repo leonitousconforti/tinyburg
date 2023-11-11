@@ -41,13 +41,13 @@ export const getExposedEmulatorEndpoints = async ({
     const exposedEmulatorContainerPorts: IArchitectPortBindings =
         inspectResults.HostConfig.NetworkMode === "host"
             ? ({
-                  "5554/tcp": [{ HostPort: "5554" }],
-                  "5555/tcp": [{ HostPort: "5555" }],
-                  "8080/tcp": [{ HostPort: "8080" }],
-                  "8081/tcp": [{ HostPort: "8081" }],
-                  "8554/tcp": [{ HostPort: "8554" }],
-                  "8555/tcp": [{ HostPort: "8555" }],
-                  "27042/tcp": [{ HostPort: "27042" }],
+                  "5554/tcp": [{ HostPort: 5554 }],
+                  "5555/tcp": [{ HostPort: 5555 }],
+                  "8080/tcp": [{ HostPort: 8080 }],
+                  "8081/tcp": [{ HostPort: 8081 }],
+                  "8554/tcp": [{ HostPort: 8554 }],
+                  "8555/tcp": [{ HostPort: 8555 }],
+                  "27042/tcp": [{ HostPort: 27_042 }],
               } satisfies IArchitectPortBindings)
             : (inspectResults.NetworkSettings.Ports as unknown as IArchitectPortBindings);
 

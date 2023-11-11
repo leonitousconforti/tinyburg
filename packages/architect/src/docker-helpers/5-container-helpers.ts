@@ -1,5 +1,4 @@
 import tar from "tar-fs";
-import Debug from "debug";
 import path from "node:path";
 import Stream from "node:stream";
 import Dockerode from "dockerode";
@@ -65,34 +64,22 @@ export const installApkCommand = (apkLocation: string): string[] => [
  */
 export const installApk = async ({
     apk,
-    logger,
     container,
 }: {
     apk: string;
-    logger: Debug.Debugger;
     container: Dockerode.Container;
 }): Promise<void> => {
-    logger('Installing apk="%s"', apk);
-    const start: number = performance.now();
     const tarball: tar.Pack = tar.pack(path.dirname(apk), { entries: [path.basename(apk)] });
     await container.putArchive(tarball, { path: "/android/apks/" });
     const command: string[] = installApkCommand(`/android/apks/${path.basename(apk)}`);
     const output: string = await runCommandBlocking({ container, command });
-    const end: number = performance.now();
-    logger("Apk install took %ss", ((end - start) / 1000).toFixed(2));
     if (!output.includes("Success")) throw new Error("Failed to install APK");
 };
 
 /** Determines if a container is healthy or not by polling its status. */
-export const isContainerHealthy = async ({
-    logger,
-    container,
-}: {
-    logger: Debug.Debugger;
-    container: Dockerode.Container;
-}): Promise<boolean> => {
+export const isContainerHealthy = async ({ container }: { container: Dockerode.Container }): Promise<boolean> => {
     const containerInspect: Dockerode.ContainerInspectInfo = await container.inspect();
-    logger("Waiting for container to report it is healthy, status=%s", containerInspect.State.Health?.Status);
+    // logger("Waiting for container to report it is healthy, status=%s", containerInspect.State.Health?.Status);
     if (!containerInspect.State.Running) throw new Error("Container died prematurely");
     if (containerInspect.State.Health?.Status === "unhealthy")
         throw new Error("Timed out while waiting for container to become healthy");
