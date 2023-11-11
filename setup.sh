@@ -3,6 +3,11 @@
 set -euo pipefail
 echo "🚀 Setting up tinyburg devcontainer..."
 
+echo "⏬ Download nodejs lts/hydrogen..."
+source "${NVM_DIR}/nvm.sh"
+nvm install
+nvm use
+
 echo "📦 Installing Rush, Pnpm, and other global dependencies..."
 npm install -g pnpm @microsoft/rush vercel ts-node
 
@@ -12,18 +17,20 @@ rush update-autoinstaller --name rush-prettier
 rush update-autoinstaller --name rush-commitlint
 rush update-autoinstaller --name rush-github-action-cache
 
-echo "🩹 Running some bash setup scripts"
+echo "🩹 Running some python setup scripts"
 pip3 install -r packages/explorer/requirements.txt
+pip3 install -r packages/architect/requirements.txt
 pip3 install -r packages/doorman/assets/requirements.txt
 
 echo "🏗️ Building all packages..."
 rush build
 
-# echo "❓ Where should I run @tinyburg/architect tests? [default: /var/run/docker.sock]"
-# export ARCHITECT_DOCKER_HOST="ssh://ci@ci.internal.tinyburg.app:22"
+echo "❓ You need to configure your .env file before we can run tests"
+cp -n .env.example .env
+nano .env
 
-# echo "🧪 Testing all packages..."
-# rush retest
+echo "🧪 Testing all packages..."
+rush test
 
 echo "✅ Devcontainer setup complete!"
 echo "🙏 Thank you for contributing to Tinyburg!"
