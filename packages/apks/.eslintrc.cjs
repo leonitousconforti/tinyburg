@@ -16,8 +16,7 @@ module.exports = {
     rules: {
         "no-console": "warn",
         "@effect/dprint": "off",
-        "unicorn/no-array-callback-reference": ["off"],
-        "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_", varsIgnorePattern: "^_" }],
+        "unicorn/no-array-callback-reference": "off",
         "@typescript-eslint/naming-convention": [
             "error",
             { format: null, selector: "parameter", filter: { regex: "^_", match: false } },
@@ -28,6 +27,10 @@ module.exports = {
             files: ["src/download-latest-apks.cjs"],
             rules: { "@typescript-eslint/naming-convention": "off" },
         },
+        {
+            files: ["src/types.ts"],
+            rules: { "@typescript-eslint/consistent-type-definitions": "off" },
+        },
     ],
-    ignorePatterns: ["dist/", "temp/"],
+    ignorePatterns: ["dist/"],
 };

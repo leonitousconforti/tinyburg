@@ -4,5 +4,6 @@
     "testMatch": ["<rootDir>/dist/**/*.test.js"],
     "collectCoverageFrom": ["<rootDir>/dist/**/*.js"],
     "collectCoverage": true,
-    "coverageProvider": "v8"
+    "coverageProvider": "v8",
+    "maxConcurrency": 7
 }

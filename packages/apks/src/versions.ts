@@ -1,130 +1,104 @@
 import {
-    type RelativeVersion,
-    type RequestedGame,
-    type SemanticVersion,
-    type SemanticVersionsByRelativeVersions,
+    Games,
+    RelativeVersion,
+    SemanticVersion,
+    SemanticVersionAndAppVersionCode,
+    SemanticVersionsByRelativeVersions,
 } from "./types.js";
 
-import rssParser from "rss-parser";
 import * as Http from "@effect/platform/HttpClient";
-import { Effect, HashMap, ReadonlyArray, Tuple, Option, pipe, flow, identity } from "effect";
+import { Chunk, Effect, HashMap, ReadonlyArray, Tuple, Option, Stream, pipe, flow, identity } from "effect";
 
-// TODO: Record some interesting events/versions
-// Important TinyTower versions that are worth tracking
+// TODO: Record some actually interesting events/versions
 // eslint-disable-next-line @typescript-eslint/typedef
-export const trackedTinyTowerVersions = { a: "0.0.0" } satisfies Record<string, SemanticVersion>;
-export type TrackedTinyTowerVersions = keyof typeof trackedTinyTowerVersions;
+export const trackedVersions = {
+    [Games.BitCity]: {
+        a1: { semanticVersion: "0.0.0", appVersionCode: "0" },
+        a2: { semanticVersion: "0.0.0", appVersionCode: "0" },
+    },
+    [Games.TinyTower]: {
+        b1: { semanticVersion: "0.0.0", appVersionCode: "0" },
+        b2: { semanticVersion: "0.0.0", appVersionCode: "0" },
+    },
+    [Games.LegoTower]: {
+        c1: { semanticVersion: "0.0.0", appVersionCode: "0" },
+        c2: { semanticVersion: "0.0.0", appVersionCode: "0" },
+    },
+    [Games.PocketFrogs]: {
+        d1: { semanticVersion: "0.0.0", appVersionCode: "0" },
+        d2: { semanticVersion: "0.0.0", appVersionCode: "0" },
+    },
+    [Games.PocketPlanes]: {
+        e1: { semanticVersion: "0.0.0", appVersionCode: "0" },
+        e2: { semanticVersion: "0.0.0", appVersionCode: "0" },
+    },
+    [Games.PocketTrains]: {
+        f1: { semanticVersion: "0.0.0", appVersionCode: "0" },
+        f2: { semanticVersion: "0.0.0", appVersionCode: "0" },
+    },
+    [Games.TinyTowerVegas]: {
+        g1: { semanticVersion: "0.0.0", appVersionCode: "0" },
+        g2: { semanticVersion: "0.0.0", appVersionCode: "0" },
+    },
+} satisfies { [game in Games]: { [eventVersion: string]: SemanticVersionAndAppVersionCode } };
 
-// TODO: Record some interesting events/versions
-// Important LegoTower versions that are worth tracking
-// eslint-disable-next-line @typescript-eslint/typedef
-export const trackedLegoTowerVersions = { b: "0.0.0" } satisfies Record<string, SemanticVersion>;
-export type TrackedLegoTowerVersions = keyof typeof trackedLegoTowerVersions;
+/** @internal */
+export const getSemanticVersionsByRelativeVersionsEffect = (
+    game: Games
+): Effect.Effect<never, Http.error.HttpClientError, SemanticVersionsByRelativeVersions> =>
+    Effect.gen(function* (_: Effect.Adapter) {
+        // Helper to recursively fetch all paginated version feed pages
+        const paginatedStream: Stream.Stream<never, Http.error.HttpClientError, string> = Stream.unfoldEffect(0, (pg) =>
+            Http.request.get(`https://apk.support/app/${game}/versions?page=${pg}`).pipe(
+                Http.client.fetch(),
+                Effect.flatMap((response) => response.text),
+                Effect.map(Option.liftPredicate((maybeResponseWithContent) => maybeResponseWithContent !== "")),
+                Effect.map(Option.map((responseWithContent) => [responseWithContent, pg + 1]))
+            )
+        );
 
-// TODO: Record some interesting events/versions
-// Important TinyTowerVegas versions that are worth tracking
-// eslint-disable-next-line @typescript-eslint/typedef
-export const trackedTinyTowerVegasVersions = { c: "0.0.0" } satisfies Record<string, SemanticVersion>;
-export type TrackedTinyTowerVegasVersions = keyof typeof trackedTinyTowerVegasVersions;
+        const allResponses: string = yield* _(Stream.runCollect(paginatedStream).pipe(Effect.map(Chunk.join(""))));
+        const versionRegex: RegExp = new RegExp(/div class="stitle">[\s\w:\u00AE\-]*(\d+\.\d+\.\d+)\((\d+)\)<\/div/gim);
 
-// TODO: Record some interesting events/versions
-// Important BitCity versions that are worth tracking
-// eslint-disable-next-line @typescript-eslint/typedef
-export const trackedBitCityVersions = { d: "0.0.0" } satisfies Record<string, SemanticVersion>;
-export type TrackedBitCityVersions = keyof typeof trackedBitCityVersions;
+        return pipe(
+            // Match all the versions in the paginated versions feed
+            ReadonlyArray.fromIterable([...allResponses.matchAll(versionRegex)]),
+            ReadonlyArray.map(([_x, y, z]) => Tuple.tuple(y as SemanticVersion, z)),
 
-// TODO: Record some interesting events/versions
-// Important PocketTrains versions that are worth tracking
-// eslint-disable-next-line @typescript-eslint/typedef
-export const trackedPocketTrainsVersions = { e: "0.0.0" } satisfies Record<string, SemanticVersion>;
-export type TrackedPocketTrainsVersions = keyof typeof trackedPocketTrainsVersions;
+            // If there are spillover versions somehow between the pages, get rid of them
+            ReadonlyArray.dedupeAdjacent,
 
-// TODO: Record some interesting events/versions
-// Important PocketPlanes versions that are worth tracking
-// eslint-disable-next-line @typescript-eslint/typedef
-export const trackedPocketPlanesVersions = { f: "0.0.0" } satisfies Record<string, SemanticVersion>;
-export type TrackedPocketPlanesVersions = keyof typeof trackedPocketPlanesVersions;
+            // Regex / array index could have returned undefined, so let's convert
+            // to options and then zip the while object to an options as long as both
+            // the required properties are present
+            ReadonlyArray.map(Tuple.mapBoth({ onFirst: Option.fromNullable, onSecond: Option.fromNullable })),
+            ReadonlyArray.map((x) => Option.zipWith(Tuple.getFirst(x), Tuple.getSecond(x), Tuple.tuple)),
+            ReadonlyArray.map(Option.map((x) => ({ semanticVersion: x[0], appVersionCode: x[1] }))),
 
-// TODO: Record some interesting events/versions
-// Important PocketFrogs versions that are worth tracking
-// eslint-disable-next-line @typescript-eslint/typedef
-export const trackedPocketFrogsVersions = { g: "0.0.0" } satisfies Record<string, SemanticVersion>;
-export type TrackedPocketFrogsVersions = keyof typeof trackedPocketFrogsVersions;
+            // Index the semantic version tuples and put the relative version first
+            ReadonlyArray.map(flow(Tuple.tuple, Tuple.swap)),
+            ReadonlyArray.map(Tuple.mapFirst((index) => `${index} versions before latest` as RelativeVersion)),
 
-// Where to find the versions of the games on apkpure
-const versionRssFeeds: { [k in RequestedGame]: string } = {
-    TinyTower: "apk/nimblebit-llc/tiny-tower/feed",
-    LegoTower: "apk/nimblebit-llc/lego-tower/feed",
-    TinyTowerVegas: "apk/nimblebit-llc/tiny-tower-vegas/feed",
-    BitCity: "apk/nimblebit-llc/bit-city-pocket-town-planner/feed",
-    PocketTrains: "apk/nimblebit-llc/pocket-trains-enterprise-sim/feed",
-    PocketFrogs: "apk/nimblebit-llc/pocket-frogs-tiny-pond-keeper/feed",
-    PocketPlanes: "apk/nimblebit-llc/pocket-frogs-tiny-pond-keeper/feed",
-};
+            // We kept entries that were Option.None from earlier to ensure that we
+            // generate the correct indexes, now we can lift the option again and
+            // get rid of all entries that are still Option.None
+            ReadonlyArray.map((x) => Option.zipWith(Option.some(Tuple.getFirst(x)), Tuple.getSecond(x), Tuple.tuple)),
+            ReadonlyArray.compact,
+
+            // We need to add an entry for "latest version" which we can achieve by
+            // duplicating the first entry in the list and changing its relative version.
+            // It is always guaranteed that the first entry is the latest version because
+            // that is the way apk.support has arranged the versions feed
+            ReadonlyArray.flatMap((x, index) => (identity(index) ? [x] : ([["latest version", x[1]], x] as const))),
+
+            // Convert to a hashmap
+            HashMap.fromIterable
+        );
+    });
 
 /**
  * Retrieves a map of semantic versions like "1.2.3" by relative versions like
- * "2 versions before latest" from an apkpure versions page.
- *
- * @param game - The game you are requesting the versions for
- * @returns - A map of relative versions to semantic versions
+ * "2 versions before latest" from an apksupport versions page.
  */
-export const getSemanticVersionsByRequestedVersions = (
-    game: RequestedGame
-): Effect.Effect<
-    Http.client.Client.Default,
-    Http.error.HttpClientError | Http.error.ResponseError,
-    SemanticVersionsByRelativeVersions
-> =>
-    Effect.gen(function* (_: Effect.Adapter) {
-        const effectHttpClient: Http.client.Client.Default = yield* _(Http.client.Client);
-
-        const client: Http.client.Client.WithResponse<never, Http.error.HttpClientError> = pipe(
-            effectHttpClient,
-            Http.client.filterStatusOk,
-            Http.client.mapRequest(Http.request.prependUrl("https://www.apkmirror.com/"))
-        );
-
-        const request: Http.request.ClientRequest = pipe(
-            Http.request.get(versionRssFeeds[game]),
-            Http.request.accept("application/xml")
-        );
-
-        interface IRssFeed {
-            link: string;
-            title: string;
-            description: string;
-        }
-
-        interface IRssItem {
-            link: string;
-            guid: string;
-            title: string;
-            pubDate: string;
-            isoDate: string;
-            content: string;
-            contentSnippet: string;
-        }
-
-        const response: Http.response.ClientResponse = yield* _(client(request));
-        const responseText: string = yield* _(response.text);
-        const responseJson: IRssFeed & rssParser.Output<IRssItem> = yield* _(
-            Effect.promise(() => new rssParser<IRssFeed, IRssItem>().parseString(responseText))
-        );
-
-        return pipe(
-            responseJson.items,
-            ReadonlyArray.fromIterable,
-            ReadonlyArray.map((x) => x.title),
-            ReadonlyArray.map(flow(Tuple.tuple, Tuple.swap)),
-            ReadonlyArray.map(Tuple.mapFirst((index) => `${index} versions before latest` as RelativeVersion)),
-            ReadonlyArray.map(Tuple.mapSecond((x) => x.match(/\d+\.\d+\.\d+/)?.[0] as SemanticVersion | undefined)),
-            ReadonlyArray.map(Tuple.mapBoth({ onFirst: Option.fromNullable, onSecond: Option.fromNullable })),
-            ReadonlyArray.map((x) => Option.zipWith(Tuple.getFirst(x), Tuple.getSecond(x), Tuple.tuple)),
-            ReadonlyArray.filterMap(identity),
-            HashMap.fromIterable,
-            HashMap.mutate((x) =>
-                Option.map(HashMap.get(x, "0 versions before latest"), (y) => HashMap.set(x, "latest version", y))
-            )
-        );
-    });
+export const getSemanticVersionsByRelativeVersions = (game: Games): Promise<SemanticVersionsByRelativeVersions> =>
+    getSemanticVersionsByRelativeVersionsEffect(game).pipe(Effect.orDie).pipe(Effect.runPromise);

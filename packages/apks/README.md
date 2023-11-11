@@ -1,51 +1,48 @@
 # @tinyburg/apks
 
-Downloads and stores versions of nimblebit apps that I want tinyburg to support, ready to be consumed by other tools such as @tinyburg/architect or @tinyburg/insight. You specify the version to download as a string:
+Downloads, stores, and patches versions of nimblebit apps that I want tinyburg to support, ready to be consumed by other tools such as @tinyburg/architect or @tinyburg/insight. You specify the version to download as a string:
 
 ```ts
 type version =
     | "latest version"
     | `${number} versions before latest`
     | `${number}.${number}.${number}`
-    | `${eventVersion}`;
+    | `${eventVersionForSpecificGame}`;
 ```
 
-If you have previously requested the same game from the same supplier and the same version and the same architecture then the file will be supplied from the downloads cache folder, otherwise it will be downloaded from the requested supplier (either apkmirror or apkpure).
+If you have previously requested the same game and the same version then the file will be supplied from the downloads cache folder, otherwise it will be downloaded directly from the play store using a link generated from apksupport.
 
 ## Example usage
 
 ```js
 // Either of these imports work
-import loadApk from "@tinyburg/apks";
-import { loadApk } from "@tinyburg/apks";
+import { loadApk, patchApk, Games } from "@tinyburg/apks";
+import apks from "@tinyburg/apks";
+const Games = apks.Games;
+const loadApk = apks.loadApk;
+const patchApk = apks.patchApk;
 
-// Will get the "latest version" by default
-const tinytower = await loadApk("TinyTower");
+// Will get the "latest version" by default directly from the play store
+const tinytower = await loadApk(Games.TinyTower);
 
 // You can request a custom version if desired
-const tinytower = await loadApk("TinyTower", "4.24.0");
-const tinytower = await loadApk("TinyTower", "Christmas 2022");
-const tinytower = await loadApk("TinyTower", "4 versions before latest");
+const tinytower = await loadApk(Games.TinyTower, "4.24.0");
+const tinytower = await loadApk(Games.TinyTower, "Christmas 2022");
+const tinytower = await loadApk(Games.TinyTower, "4 versions before latest");
 
 // These are all equivalent
-const tinytower = await loadApk("TinyTower");
-const tinytower = await loadApk("TinyTower", "latest version");
-const tinytower = await loadApk("TinyTower", "0 versions before latest");
+const tinytower = await loadApk(Games.TinyTower);
+const tinytower = await loadApk(Games.TinyTower, "latest version");
+const tinytower = await loadApk(Games.TinyTower, "0 versions before latest");
 
 // Other games can be requested by
-const legoTower = await loadApk("LegoTower");
+const legoTower = await loadApk(Games.LegoTower);
 
-// And you can choose the supplier to download apks from
-const legoTowerApkPure = await loadApk("LegoTower", "latest version", "apkpure");
-const legoTowerApkMirror = await loadApk("LegoTower", "latest version", "apkmirror");
-
-// NOTE: TinyTowerVegas is only available from apkpure
-const tinytowerVegas = await loadApk("TinyTowerVegas", "latest version", "apkpure");
+// You can patch an apk with
+const patchedTinyTower = await patchApk(Games.TinyTower);
+const patchedTinyTower2 = await patchApk(Games.TinyTower, "4 versions before latest");
 ```
 
-## To patch apks right now
+## Future improvements
 
-```sh
-./node_modules/.bin/apk-mitm ./downloads/apkpure_TinyTower_4.27.1_arm64-v8a.apk
-mv ./downloads/apkpure_TinyTower_4.27.1_arm64-v8a-patched.apk ./downloads/patched_TinyTower_4.27.1_arm64-v8a.apk
-```
+Add logging of some kind back, probably using Effect.log
