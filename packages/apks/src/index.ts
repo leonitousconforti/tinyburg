@@ -27,7 +27,7 @@ import {
 export const defaultCacheDirectory: string = url.fileURLToPath(new URL(`../downloads`, import.meta.url));
 
 /** @internal */
-const loadApkEffect = <T extends Games, U extends Extract<TrackedVersion<T>, AnyVersion>>(
+export const loadApkEffect = <T extends Games, U extends Extract<TrackedVersion<T>, AnyVersion>>(
     game: T,
     version: SemanticVersion | RelativeVersion | U = "latest version",
     cacheDirectory: string = defaultCacheDirectory
@@ -80,7 +80,7 @@ const loadApkEffect = <T extends Games, U extends Extract<TrackedVersion<T>, Any
     });
 
 /** @internal */
-const patchApkEffect = (
+export const patchApkEffect = (
     apkPath: string
 ): Effect.Effect<FS.FileSystem, PlatformErrors.BadArgument | PlatformErrors.SystemError, string> =>
     Effect.gen(function* (_: Effect.Adapter) {
