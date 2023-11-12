@@ -1,6 +1,5 @@
 import os from "node:os";
 import fs from "node:fs";
-import url from "node:url";
 import path from "node:path";
 import { HashMap, Option } from "effect";
 
@@ -60,8 +59,8 @@ describe("Apks tests", () => {
         TINYBURG_APKS_TEST_TIMEOUT
     );
 
-    it(`Should have ${Object.values(Games).length * 2} apks in the default cache`, async () => {
-        const items = await fs.promises.readdir(url.fileURLToPath(new URL("../downloads", import.meta.url)));
+    it(`Should have ${Object.values(Games).length * 2} apks in the cache directory`, async () => {
+        const items = await fs.promises.readdir(TINYBURG_APKS_TEST_CACHE_DIRECTORY);
         expect(items.length).toBe(Object.values(Games).length * 2);
     });
 });
