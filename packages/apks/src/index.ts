@@ -77,7 +77,7 @@ export const loadApkEffect = <T extends Games, U extends Extract<TrackedVersion<
 
         // Not found in cache directory, need to download it
         const results: readonly [string, IPuppeteerDetails] = yield* _(getApksupportDetails(game, versionInfo));
-        yield* _(Effect.logInfo(`Puppeteer scraping results: ${results}`));
+        yield* _(Effect.logInfo(`Puppeteer scraping results: ${results[0]}`));
 
         // Stream the download directly to the downloads folder
         const downloadedFile: string = `${cacheDirectory}/${desiredApkFilename}`;
