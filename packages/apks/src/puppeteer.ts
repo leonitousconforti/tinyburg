@@ -26,6 +26,7 @@ export const getApksupportDetails = (
         const page: puppeteer.Page = yield* _(Effect.promise(() => browser.newPage()));
         const url: string = `https://apk.support/download-app/${game}/${appVersionCode}/${semanticVersion}`;
 
+        yield* _(Effect.logInfo(`Navigating to ${url}`));
         yield* _(Effect.promise(() => page.goto(url, { waitUntil: ["networkidle0", "load"] })));
         yield* _(Effect.promise(() => page.waitForSelector("#apksubmit")));
         yield* _(Effect.promise(() => page.click("#apksubmit")));

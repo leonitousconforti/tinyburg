@@ -45,14 +45,14 @@
     "devDependencies": {
         "@effect/eslint-plugin": "0.1.2",
         "@effect/language-service": "0.0.21",
-        "@effect/platform": "0.28.0",
-        "@effect/platform-node": "0.29.0",
-        "@effect/schema": "0.47.3",
+        "@effect/platform": "0.28.1",
+        "@effect/platform-node": "0.29.1",
+        "@effect/schema": "0.47.6",
         "@rushstack/eslint-config": "3.4.1",
-        "@rushstack/heft": "0.63.1",
-        "@rushstack/heft-jest-plugin": "0.10.3",
-        "@rushstack/heft-lint-plugin": "0.2.11",
-        "@rushstack/heft-typescript-plugin": "0.2.11",
+        "@rushstack/heft": "0.63.2",
+        "@rushstack/heft-jest-plugin": "0.10.4",
+        "@rushstack/heft-lint-plugin": "0.2.12",
+        "@rushstack/heft-typescript-plugin": "0.2.12",
         "@tinyburg/tsconfig-rig": "workspace:*",
         "@types/heft-jest": "1.0.6",
         "@types/node": "20.9.0",
@@ -66,8 +66,8 @@
         "typescript": "5.2.2"
     },
     "peerDependencies": {
-        "@effect/platform": "~0.28.0",
-        "@effect/platform-node": "~0.29.0",
+        "@effect/platform": "~0.28.1",
+        "@effect/platform-node": "~0.29.1",
         "effect": "~2.0.0-next.54"
     },
     "engines": {

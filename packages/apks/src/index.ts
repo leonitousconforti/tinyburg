@@ -24,6 +24,7 @@ import {
     type SemanticVersionsByRelativeVersions,
 } from "./types.js";
 
+/** @internal */
 export const defaultCacheDirectory: string = url.fileURLToPath(new URL(`../downloads`, import.meta.url));
 
 /** @internal */
@@ -40,6 +41,7 @@ export const loadApkEffect = <T extends Games, U extends Extract<TrackedVersion<
         // Obtain resources and ensure the cache directory exists
         const effectFs: FS.FileSystem = yield* _(FS.FileSystem);
         yield* _(effectFs.makeDirectory(cacheDirectory, { recursive: true }));
+        yield* _(Effect.logInfo(`Using cache directory ${cacheDirectory}`));
 
         // Convert from whatever version was given to a semantic version
         const svbrv: SemanticVersionsByRelativeVersions = yield* _(getSemanticVersionsByRelativeVersionsEffect(game));
@@ -61,21 +63,29 @@ export const loadApkEffect = <T extends Games, U extends Extract<TrackedVersion<
             Match.when(isRelativeVersion, (v) => svbrv.pipe(HashMap.get(v), Option.getOrThrow)),
             Match.exhaustive
         );
+        yield* _(Effect.logInfo(`App version code for ${version} = ${versionInfo.appVersionCode}`));
+        yield* _(Effect.logInfo(`Semantic version for ${version} = ${versionInfo.semanticVersion}`));
 
         // Check to see if the apk already exists in the cache directory
         const fileNames: readonly string[] = yield* _(effectFs.readDirectory(cacheDirectory));
         const desiredApkFilename: string = `${game}_${versionInfo.semanticVersion}.apk`;
         const maybeCachedApk: string | undefined = fileNames.find((fileName) => fileName.includes(desiredApkFilename));
         if (maybeCachedApk) {
+            yield* _(Effect.logInfo(`Found ${maybeCachedApk} in cache directory`));
             return path.join(cacheDirectory, maybeCachedApk);
         }
 
-        // Stream the download directly to the downloads folder
+        // Not found in cache directory, need to download it
         const results: readonly [string, IPuppeteerDetails] = yield* _(getApksupportDetails(game, versionInfo));
+        yield* _(Effect.logInfo(`Puppeteer scraping results: ${results}`));
+
+        // Stream the download directly to the downloads folder
+        const downloadedFile: string = `${cacheDirectory}/${desiredApkFilename}`;
         const request: Http.response.ClientResponse = yield* _(
             Http.request.get(results[0]).pipe(Http.client.fetchOk())
         );
-        yield* _(request.stream.pipe(Stream.run(effectFs.sink(`${cacheDirectory}/${desiredApkFilename}`))));
+        yield* _(request.stream.pipe(Stream.run(effectFs.sink(downloadedFile))));
+        yield* _(Effect.logInfo(`Successfully downloaded ${game} ${version} to ${downloadedFile}`));
         return `${cacheDirectory}/${desiredApkFilename}`;
     });
 
