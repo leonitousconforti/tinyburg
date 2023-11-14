@@ -44,7 +44,7 @@ export const architectEffect = (
         // Generate a random container name which will be architectXXXXXX
         const containerName: string = `architect${Math.floor(Math.random() * (999_999 - 100_000 + 1)) + 100_000}`;
         yield* _(dockerClient(options?.dockerConnectionOptions));
-        yield* _(buildImage({ onProgress: Option.some(console.log) }));
+        yield* _(buildImage({ onProgress: Option.none() }));
         yield* _(populateSharedDataVolume());
 
         const emulatorContainer: Dockerode.Container = yield* _(

@@ -40,8 +40,7 @@ export const buildFreshContainer = ({
             portBindings
         );
 
-        console.log(PortBindings);
-
+        yield* _(Effect.log("Creating emulator container from image with kvm acceleration enabled"));
         const containerOptions: Dockerode.ContainerCreateOptions = containerCreateOptions({
             networkMode,
             containerName,
@@ -51,6 +50,7 @@ export const buildFreshContainer = ({
         });
         const container: Dockerode.Container = yield* _(dockerService.createContainer(dockerode, containerOptions));
 
+        yield* _(Effect.log(`Starting container ${container.id}`));
         yield* _(
             Effect.tryPromise({
                 try: () => container.start(),

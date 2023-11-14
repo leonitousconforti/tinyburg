@@ -19,6 +19,7 @@ export const populateSharedDataVolume = (): Effect.Effect<Scope.Scope | DockerSe
     Effect.gen(function* (_: Effect.Adapter) {
         const dockerode: Dockerode = yield* _(dockerClient());
         const dockerService: DockerService = yield* _(DockerService);
+        yield* _(Effect.logInfo("Populating shared emulator data volume..."));
 
         // Wait for any existing containers to be gone
         yield* _(
@@ -44,6 +45,7 @@ export const populateSharedDataVolume = (): Effect.Effect<Scope.Scope | DockerSe
 
         // If the volume exists then we do not have to repopulate it
         if (maybeVolumes?.length > 0) {
+            yield* _(Effect.log("Volume already existed, so no work needed to be done"));
             return;
         }
 
@@ -70,6 +72,7 @@ export const populateSharedDataVolume = (): Effect.Effect<Scope.Scope | DockerSe
             throw new Error("An error ocurred when populating the shared emulator data volume");
         }
 
+        yield* _(Effect.logInfo("Shared emulator data volume population complete"));
         yield* _(Effect.promise(() => volumeHelperContainer.remove()));
     }).pipe(Effect.catchAll((error: unknown) => new DockerError({ message: `${error}` })));
 

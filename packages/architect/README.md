@@ -11,14 +11,18 @@ Architect leverages the android studio emulator from the android sdk. Why not us
 -   On your local docker host (linux hosts only)
 -   On a remote docker host (using ssh or exposed docker daemon)
 
-the docker host must have kvm acceleration available (note: the emulator does not like nested virtualization), an nvidia gpu installed, the docker-nvidia plugin configured, and your xorg server must be accessible from docker. There is an ansible playbook to help setup the infrastructure that I've used after doing a fresh install of Ubuntu 22.04.
-
-You can check if your docker installation can find your nvidia gpus with:
-`docker run --rm --gpus all nvidia/cuda:12.2.0-devel-ubuntu20.04 nvidia-smi`
+the docker host must have kvm acceleration available, note: the emulator does not like nested virtualization.
 
 ## Why only docker?
 
 My initial idea included support for running on any system, local or via ssh. But doing that made the project turn into a nodejs wrapper for a bunch of shell commands and the functionality wasn't honestly needed. This package will mostly be used by other packages in their test suites, and so putting restriction on where this can run was perfectly fine by me. If I really wanted to, I could always just change a url and have the test suites for those packages point to a different emulator temporarily, either locally or on the network, that I would manually bring up with android studio. In the end, it just made more sense to limit where architect can run.
+
+## Infrastructure
+
+1. Install ubuntu 22.04 with additional drivers (if you have a gpu installed)
+2. Follow <https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository> to install docker
+3. Follow <https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html> to install the nvidia container toolkit
+4. You can check if your docker installation can find your nvidia gpus with: `docker run --rm --gpus all nvidia/cuda:12.2.0-devel-ubuntu20.04 nvidia-smi`
 
 ## Why are only google apis and play store images supported?
 

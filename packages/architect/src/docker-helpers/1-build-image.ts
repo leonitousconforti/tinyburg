@@ -43,6 +43,12 @@ export const buildImage = ({
         const context: url.URL = new URL("../../emulator", import.meta.url);
         const tarStream: tar.Pack = tar.pack(url.fileURLToPath(context));
 
+        yield* _(
+            Effect.logInfo(
+                `Building docker image from context ${context.toString()}, will tag image as ${DOCKER_IMAGE_TAG} when finished`
+            )
+        );
+
         const buildStream: NodeJS.ReadableStream = yield* _(
             dockerService.buildImage(dockerode, tarStream, {
                 t: DOCKER_IMAGE_TAG,

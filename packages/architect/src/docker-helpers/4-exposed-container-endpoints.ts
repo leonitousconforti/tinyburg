@@ -88,7 +88,13 @@ export const getExposedEmulatorEndpoints = ({
          * endpoints accessible over the docker host's networking and the docker
          * container's networking.
          */
-        return inspectResults.HostConfig.NetworkMode === "host"
-            ? [exposedEndpointsUsingHostsNetworking]
-            : [exposedEndpointsUsingHostsNetworking, exposedEndpointsUsingContainersNetworking];
+        const endpointsToReturn:
+            | [usingHostNetworking: IArchitectEndpoints]
+            | [usingHostNetworking: IArchitectEndpoints, usingContainersIPv4Networking: IArchitectEndpoints] =
+            inspectResults.HostConfig.NetworkMode === "host"
+                ? [exposedEndpointsUsingHostsNetworking]
+                : [exposedEndpointsUsingHostsNetworking, exposedEndpointsUsingContainersNetworking];
+
+        yield* _(Effect.log(`Container endpoints are: ${endpointsToReturn}`));
+        return endpointsToReturn;
     });

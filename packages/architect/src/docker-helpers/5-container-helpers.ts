@@ -80,6 +80,7 @@ export const installApk = ({
     container: Dockerode.Container;
 }): Effect.Effect<never, DockerError, void> =>
     Effect.gen(function* (_: Effect.Adapter) {
+        yield* _(Effect.log(`Installing apk ${apk}`));
         const tarball: tar.Pack = tar.pack(path.dirname(apk), { entries: [path.basename(apk)] });
         yield* _(
             Effect.tryPromise({
@@ -90,7 +91,8 @@ export const installApk = ({
         const command: string[] = installApkCommand(`/android/apks/${path.basename(apk)}`);
         const output: string = yield* _(runCommandBlocking({ container, command }));
         if (!output.includes("Success")) yield* _(new DockerError({ message: "Failed to install APK" }));
-    });
+        yield* _(Effect.log("Done installing apk"));
+    }).pipe(Effect.withLogSpan("installAPk"));
 
 export const inspectContainer = (
     container: Dockerode.Container
@@ -102,22 +104,26 @@ export const inspectContainer = (
 
 /** Determines if a container is healthy or not by polling its status. */
 export const isContainerHealthy = (container: Dockerode.Container): Effect.Effect<never, DockerError, boolean> =>
-    Effect.tryPromise({
-        try: async () => {
-            const containerInspect: Dockerode.ContainerInspectInfo = await container.inspect();
-            if (!containerInspect.State.Running) throw new Error("Container died prematurely");
-            if (containerInspect.State.Health?.Status === "unhealthy")
-                throw new Error("Timed out while waiting for container to become healthy");
-            return containerInspect.State.Health?.Status === "healthy";
-        },
-        catch: (error) => new DockerError({ message: `${error}` }),
+    Effect.gen(function* (_: Effect.Adapter) {
+        const containerInspect: Dockerode.ContainerInspectInfo = yield* _(inspectContainer(container));
+        yield* _(
+            Effect.log(`Waiting for container to report healthy: status=${containerInspect.State.Health?.Status}`)
+        );
+
+        if (!containerInspect.State.Running) yield* _(new DockerError({ message: "Container died prematurely" }));
+        if (containerInspect.State.Health?.Status === "unhealthy")
+            yield* _(new DockerError({ message: "Timed out while waiting for container to become healthy" }));
+
+        return containerInspect.State.Health?.Status === "healthy";
     });
 
 // Wait for the container to become healthy
 export const waitForContainerToBeHealthy = (container: Dockerode.Container): Effect.Effect<never, DockerError, void> =>
     Effect.retry(
         isContainerHealthy(container).pipe(
-            Effect.map((isHealthy) => (isHealthy ? Effect.succeed(true) : Effect.fail("")))
+            Effect.map((isHealthy) =>
+                isHealthy ? Effect.succeed(true) : new DockerError({ message: "Container is not healthy" })
+            )
         ),
         Schedule.addDelay(Schedule.recurs(45), () => 2000)
     );
