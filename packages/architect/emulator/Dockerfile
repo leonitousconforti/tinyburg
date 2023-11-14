@@ -75,7 +75,7 @@ RUN gpasswd -a root audio && \
     chmod +x /android/sdk/make-snapshot.sh && \
     chmod +x /android/sdk/platform-tools/adb && \
     apt-get update && \
-    apt-get install -y --no-install-recommends socat tzdata openssl nginx && \
+    apt-get install -y --no-install-recommends socat tzdata openssl && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 

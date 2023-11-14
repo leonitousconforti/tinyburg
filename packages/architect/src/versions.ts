@@ -1,8 +1,8 @@
 /** https://github.com/mitmproxy/mitmproxy/releases */
-export const MITM_PROXY_VERSION = "10.1.3" as const;
+export const MITM_PROXY_VERSION = "10.1.4" as const;
 
 /** https://github.com/frida/frida/releases */
-export const FRIDA_SERVER_VERSION = "16.1.5" as const;
+export const FRIDA_SERVER_VERSION = "16.1.6" as const;
 
 /** https://github.com/envoyproxy/envoy/releases */
 export const ENVOY_PROXY_VERSION = "1.28.0" as const;

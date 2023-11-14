@@ -6,25 +6,25 @@ import { DOCKER_IMAGE_TAG, SHARED_EMULATOR_DATA_VOLUME_NAME } from "../versions.
 /** The port bindings that all architect emulator containers must have. */
 export interface IArchitectPortBindings {
     /** Adb console port */
-    "5554/tcp": [Omit<Dockerode.PortBinding, "HostPort"> & { HostPort: number }];
+    "5554/tcp": readonly [Omit<Dockerode.PortBinding, "HostPort"> & { HostPort: number }];
 
     /** Adb port */
-    "5555/tcp": [Omit<Dockerode.PortBinding, "HostPort"> & { HostPort: number }];
+    "5555/tcp": readonly [Omit<Dockerode.PortBinding, "HostPort"> & { HostPort: number }];
 
     /** Mitmproxy web interface port */
-    "8080/tcp": [Omit<Dockerode.PortBinding, "HostPort"> & { HostPort: number }];
+    "8080/tcp": readonly [Omit<Dockerode.PortBinding, "HostPort"> & { HostPort: number }];
 
     /** Envoy proxy admin web interface port */
-    "8081/tcp": [Omit<Dockerode.PortBinding, "HostPort"> & { HostPort: number }];
+    "8081/tcp": readonly [Omit<Dockerode.PortBinding, "HostPort"> & { HostPort: number }];
 
     /** Emulator grpc port */
-    "8554/tcp": [Omit<Dockerode.PortBinding, "HostPort"> & { HostPort: number }];
+    "8554/tcp": readonly [Omit<Dockerode.PortBinding, "HostPort"> & { HostPort: number }];
 
     /** Emulator grpc web port */
-    "8555/tcp": [Omit<Dockerode.PortBinding, "HostPort"> & { HostPort: number }];
+    "8555/tcp": readonly [Omit<Dockerode.PortBinding, "HostPort"> & { HostPort: number }];
 
     /** Frida server port */
-    "27042/tcp": [Omit<Dockerode.PortBinding, "HostPort"> & { HostPort: number }];
+    "27042/tcp": readonly [Omit<Dockerode.PortBinding, "HostPort"> & { HostPort: number }];
 }
 
 /**
@@ -45,7 +45,7 @@ export const containerCreateOptions = ({
     environmentVariables: string[];
     command: Option.Option<string[]>;
     networkMode: Option.Option<string>;
-    portBindings: IArchitectPortBindings;
+    portBindings: Partial<IArchitectPortBindings>;
 }): Dockerode.ContainerCreateOptions => ({
     name: containerName,
     Image: DOCKER_IMAGE_TAG,
@@ -55,10 +55,12 @@ export const containerCreateOptions = ({
         ? environmentVariables
         : ["DISPLAY=:1", ...environmentVariables],
     HostConfig: {
-        PortBindings: portBindings,
         NetworkMode: Option.getOrElse(networkMode, () => "host"),
         DeviceRequests: [{ Count: -1, Driver: "nvidia", Capabilities: [["gpu"]] }],
         Devices: [{ CgroupPermissions: "mrw", PathInContainer: "/dev/kvm", PathOnHost: "/dev/kvm" }],
+        PortBindings: Object.fromEntries(
+            Object.entries(portBindings).map(([key, value]) => [key, value.map((x) => ({ HostPort: `${x.HostPort}` }))])
+        ),
         Binds: [
             "/tmp/.X11-unix:/tmp/.X11-unix",
             "/etc/timezone:/etc/timezone:ro",

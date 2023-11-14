@@ -1,7 +1,7 @@
 import Dockerode from "dockerode";
-import { Effect, Option } from "effect";
+import { Effect, Option, Scope } from "effect";
 
-import { DockerError } from "./all.js";
+import { dockerClient, DockerService, DockerError } from "../docker.js";
 import { containerCreateOptions, type IArchitectPortBindings } from "./0-shared-options.js";
 
 /**
@@ -11,19 +11,20 @@ import { containerCreateOptions, type IArchitectPortBindings } from "./0-shared-
  * times.
  */
 export const buildFreshContainer = ({
-    dockerode,
     containerName,
     networkMode,
     portBindings,
     environmentVariables,
 }: {
-    dockerode: Dockerode;
     containerName: string;
     environmentVariables: string[];
     networkMode: Option.Option<string>;
-    portBindings: IArchitectPortBindings;
-}): Effect.Effect<never, DockerError, Dockerode.Container> =>
+    portBindings: Partial<IArchitectPortBindings>;
+}): Effect.Effect<DockerService | Scope.Scope, DockerError, Dockerode.Container> =>
     Effect.gen(function* (_: Effect.Adapter) {
+        const dockerode: Dockerode = yield* _(dockerClient());
+        const dockerService: DockerService = yield* _(DockerService);
+
         // Merge port bindings, 0 means pick a random unused port
         const PortBindings: IArchitectPortBindings = Object.assign(
             {},
@@ -39,6 +40,8 @@ export const buildFreshContainer = ({
             portBindings
         );
 
+        console.log(PortBindings);
+
         const containerOptions: Dockerode.ContainerCreateOptions = containerCreateOptions({
             networkMode,
             containerName,
@@ -46,12 +49,14 @@ export const buildFreshContainer = ({
             command: Option.none(),
             portBindings: PortBindings,
         });
+        const container: Dockerode.Container = yield* _(dockerService.createContainer(dockerode, containerOptions));
 
-        const container: Dockerode.Container = yield* _(
-            Effect.promise(() => dockerode.createContainer(containerOptions))
+        yield* _(
+            Effect.tryPromise({
+                try: () => container.start(),
+                catch: (error) => new DockerError({ message: `${error}` }),
+            })
         );
-
-        yield* _(Effect.promise(() => container.start()));
         return container;
     });
 
