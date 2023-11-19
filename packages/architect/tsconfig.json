@@ -8,6 +8,5 @@
         "types": ["node", "heft-jest"],
         "plugins": [{ "name": "@effect/language-service" }]
     },
-    "exclude": ["src/cli.ts"],
     "include": ["src/**/*.ts", "test/**/*.ts"]
 }

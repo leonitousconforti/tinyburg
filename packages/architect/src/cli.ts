@@ -1,14 +1,14 @@
 #!/usr/bin/env node
 
+import { Effect, Option } from "effect";
+import { CliApp, Command, Options } from "@effect/cli";
+import * as NodeContext from "@effect/platform-node/NodeContext";
+
 import { architectEffect } from "./index.js";
 import { DockerServiceLive } from "./docker.js";
 
-import { Effect, Option } from "effect";
-import { CliApp, Command, Options } from "@effect/cli";
-import * as Node from "@effect/platform-node/Runtime";
-
 const makePortOption = (name: string) =>
-    Options.integer(name)
+    Options.text(name)
         .pipe(Options.optional)
         .pipe(Options.map(Option.map((p) => [{ HostPort: p }] as const)))
         .pipe(Options.map(Option.getOrUndefined));
@@ -16,7 +16,7 @@ const makePortOption = (name: string) =>
 const cli = CliApp.make({
     name: "Architect",
     version: "0.0.0",
-    command: Command.make("architect", {
+    command: Command.standard("architect", {
         options: Options.all({
             "5554/tcp": makePortOption("console-port"),
             "5555/tcp": makePortOption("adb-port"),
@@ -29,7 +29,7 @@ const cli = CliApp.make({
     }),
 });
 
-const main = CliApp.run(cli, process.argv.slice(2), ({ options }) =>
+CliApp.run(cli, process.argv.slice(2), ({ options }) =>
     architectEffect({
         // So ugly but it makes the types work out
         portBindings: {
@@ -44,7 +44,7 @@ const main = CliApp.run(cli, process.argv.slice(2), ({ options }) =>
     })
 )
     .pipe(Effect.scoped)
+    .pipe(Effect.provide(NodeContext.layer))
     .pipe(Effect.provide(DockerServiceLive))
-    .pipe(Effect.tapErrorCause(Effect.logError));
-
-Node.runMain(main);
+    .pipe(Effect.tapErrorCause(Effect.logError))
+    .pipe(Effect.runFork);

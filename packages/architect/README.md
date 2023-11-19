@@ -19,10 +19,11 @@ My initial idea included support for running on any system, local or via ssh. Bu
 
 ## Infrastructure
 
-1. Install ubuntu 22.04 with additional drivers (if you have a gpu installed)
+1. Install ubuntu 22.04 DESKTOP. You must install ubuntu desktop unless you want to wrangle your own xserver install. You can do the minimal installation, but make sure to check 'with additional drivers' if you have a discrete gpu installed. After the install finishes, you can update packages but don't run auto-remove or purge anything.
 2. Follow <https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository> to install docker
 3. Follow <https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html> to install the nvidia container toolkit
 4. You can check if your docker installation can find your nvidia gpus with: `docker run --rm --gpus all nvidia/cuda:12.2.0-devel-ubuntu20.04 nvidia-smi`
+5. You might need to make your xserver is accessible to docker, I just use `xhost +local:<username>`
 
 ## Why are only google apis and play store images supported?
 

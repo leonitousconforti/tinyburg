@@ -7,7 +7,7 @@ export PULSE_SERVER=unix:/tmp/pulse-socket
 pulseaudio -D --log-target=newfile:/tmp/pulseverbose.log --exit-idle-time=-1
 
 # Start mitmproxy
-/usr/local/bin/mitmweb --set listen_port=7999 --set web_host="0.0.0.0" --set web_port=8080 --set web_open_browser=false &
+/usr/local/bin/mitmweb --set listen_port=7999 --set web_host="0.0.0.0" --set web_port=8082 --set web_open_browser=false &
 sleep 3s
 hashed_name=`openssl x509 -inform PEM -subject_hash_old -in ~/.mitmproxy/mitmproxy-ca-cert.cer | head -1`
 cp ~/.mitmproxy/mitmproxy-ca-cert.cer ~/.mitmproxy/$hashed_name.0

@@ -1,6 +1,5 @@
 import tar from "tar-fs";
 import url from "node:url";
-import Dockerode from "dockerode";
 import { Effect, Option, Scope } from "effect";
 
 import {
@@ -13,7 +12,7 @@ import {
     EMULATOR_SYSTEM_IMAGE_VERSION,
     EMULATOR_SYSTEM_IMAGE_VERSION_SHORT,
 } from "../versions.js";
-import { dockerClient, DockerError, DockerService, DockerStreamResponse } from "../docker.js";
+import { DockerError, DockerService, DockerStreamResponse } from "../docker.js";
 
 /** Build arguments that must be provided for the architect docker image */
 export interface IArchitectDockerImageBuildArguments {
@@ -37,7 +36,6 @@ export const buildImage = ({
     onProgress: Option.Option<(object: DockerStreamResponse) => void>;
 }): Effect.Effect<Scope.Scope | DockerService, DockerError, DockerStreamResponse[]> =>
     Effect.gen(function* (_: Effect.Adapter) {
-        const dockerode: Dockerode = yield* _(dockerClient());
         const dockerService: DockerService = yield* _(DockerService);
 
         const context: url.URL = new URL("../../emulator", import.meta.url);
@@ -50,7 +48,7 @@ export const buildImage = ({
         );
 
         const buildStream: NodeJS.ReadableStream = yield* _(
-            dockerService.buildImage(dockerode, tarStream, {
+            dockerService.buildImage(tarStream, {
                 t: DOCKER_IMAGE_TAG,
                 buildargs: {
                     EMULATOR_VERSION,
@@ -64,7 +62,7 @@ export const buildImage = ({
             })
         );
 
-        return yield* _(dockerService.followProgress(dockerode, buildStream, onProgress));
+        return yield* _(dockerService.followProgress(buildStream, onProgress));
     });
 
 export default buildImage;

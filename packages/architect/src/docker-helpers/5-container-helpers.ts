@@ -1,12 +1,13 @@
 import tar from "tar-fs";
 import path from "node:path";
+import { Effect } from "effect";
 import Stream from "node:stream";
 import Dockerode from "dockerode";
-import { Effect, Schedule } from "effect";
+
 import { DockerError } from "../docker.js";
 
-/** Runs a command in a container and returns immediately after it starts. */
-export const runCommandNonBlocking = ({
+/** Runs a command in a container and returns immediately after. */
+export const execNonBlocking = ({
     container,
     command,
 }: {
@@ -22,7 +23,7 @@ export const runCommandNonBlocking = ({
     });
 
 /** Runs a command in a container and returns the stdout. */
-export const runCommandBlocking = ({
+export const execBlocking = ({
     container,
     command,
 }: {
@@ -89,41 +90,7 @@ export const installApk = ({
             })
         );
         const command: string[] = installApkCommand(`/android/apks/${path.basename(apk)}`);
-        const output: string = yield* _(runCommandBlocking({ container, command }));
+        const output: string = yield* _(execBlocking({ container, command }));
         if (!output.includes("Success")) yield* _(new DockerError({ message: "Failed to install APK" }));
         yield* _(Effect.log("Done installing apk"));
     }).pipe(Effect.withLogSpan("installAPk"));
-
-export const inspectContainer = (
-    container: Dockerode.Container
-): Effect.Effect<never, DockerError, Dockerode.ContainerInspectInfo> =>
-    Effect.tryPromise({
-        try: () => container.inspect(),
-        catch: (error) => new DockerError({ message: `${error}` }),
-    });
-
-/** Determines if a container is healthy or not by polling its status. */
-export const isContainerHealthy = (container: Dockerode.Container): Effect.Effect<never, DockerError, boolean> =>
-    Effect.gen(function* (_: Effect.Adapter) {
-        const containerInspect: Dockerode.ContainerInspectInfo = yield* _(inspectContainer(container));
-        yield* _(
-            Effect.log(`Waiting for container to report healthy: status=${containerInspect.State.Health?.Status}`)
-        );
-
-        if (!containerInspect.State.Running) yield* _(new DockerError({ message: "Container died prematurely" }));
-        if (containerInspect.State.Health?.Status === "unhealthy")
-            yield* _(new DockerError({ message: "Timed out while waiting for container to become healthy" }));
-
-        return containerInspect.State.Health?.Status === "healthy";
-    });
-
-// Wait for the container to become healthy
-export const waitForContainerToBeHealthy = (container: Dockerode.Container): Effect.Effect<never, DockerError, void> =>
-    Effect.retry(
-        isContainerHealthy(container).pipe(
-            Effect.map((isHealthy) =>
-                isHealthy ? Effect.succeed(true) : new DockerError({ message: "Container is not healthy" })
-            )
-        ),
-        Schedule.addDelay(Schedule.recurs(45), () => 2000)
-    );

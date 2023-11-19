@@ -1,5 +1,5 @@
 import Dockerode from "dockerode";
-import { Effect, Context, Layer, Data, Option } from "effect";
+import { Effect, Context, Layer, Data, Option, Scope } from "effect";
 
 /**
  * Custom Docker options type for dockerode that allows us to specify the ssh
@@ -9,114 +9,129 @@ export type DockerConnectionOptions = Omit<Dockerode.DockerOptions, "sshAuthAgen
     sshOptions?: { agent?: string | undefined };
 };
 
-/** Docker stream response type */
-export type DockerStreamResponse = Readonly<{ stream: string } | { aux: { ID: string } }>;
+/** Docker stream response type. */
+export type DockerStreamResponse = Readonly<
+    { stream: string } & { aux: { ID: string } } & { error: string; errorDetail: { code: number; message: string } }
+>;
 
-export class DockerError extends Data.TaggedError("Docker")<{ message: string }> {}
+/** Generic docker error. */
+export class DockerError extends Data.TaggedError("DockerError")<{ message: string }> {}
 
+/** How to acquire a docker client. */
 const acquireDockerClient = (
     dockerConnectionOptions?: DockerConnectionOptions | undefined
 ): Effect.Effect<never, DockerError, Dockerode> =>
     Effect.try({
         try: () => new Dockerode(dockerConnectionOptions),
-        catch: (error) => new DockerError({ message: `${error}` }),
+        catch: (error) => new DockerError({ message: `AcquireDockerClientError ${error}` }),
     });
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export const dockerClient = (dockerConnectionOptions?: DockerConnectionOptions | undefined) =>
-    Effect.acquireRelease(acquireDockerClient(dockerConnectionOptions), (_client) => Effect.succeed(1));
+/** Scoped docker client resource */
+export const dockerClient = (
+    dockerConnectionOptions?: DockerConnectionOptions | undefined
+): Effect.Effect<Scope.Scope, DockerError, Dockerode> =>
+    Effect.acquireRelease(acquireDockerClient(dockerConnectionOptions), (_client) =>
+        Effect.succeed(1 as unknown as void)
+    );
 
+/** Wraps a dockerode function in an effect try promise call. */
+const effectDockerAsyncWrapper = <
+    /* eslint-disable @typescript-eslint/no-explicit-any */
+    DockerodeFunctions extends {
+        [K in keyof Dockerode as Dockerode[K] extends (...arguments_: any[]) => any ? K : never]: Dockerode[K];
+    },
+    T extends keyof DockerodeFunctions,
+    U extends DockerodeFunctions[T] extends (...arguments_: any[]) => any ? DockerodeFunctions[T] : never,
+>(
+    functionName: T,
+    ...arguments_: DockerodeFunctions[T] extends (...arguments_: infer A) => any ? A : never
+    /* eslint-enable @typescript-eslint/no-explicit-any */
+): Effect.Effect<Scope.Scope, DockerError, Awaited<ReturnType<U>>> => {
+    return dockerClient().pipe(
+        Effect.flatMap((client) =>
+            Effect.tryPromise({
+                try: () => (client[functionName as keyof Dockerode] as U)(...arguments_),
+                catch: (error) => new DockerError({ message: `${String(functionName)} ${error}` }),
+            })
+        )
+    );
+};
+
+/** Docker service interface that defines what is available */
 export interface DockerService {
-    readonly getVolume: (client: Dockerode, name: string) => Effect.Effect<never, DockerError, Dockerode.Volume>;
-    readonly getContainer: (client: Dockerode, name: string) => Effect.Effect<never, DockerError, Dockerode.Container>;
-
+    readonly getVolume: (name: string) => Effect.Effect<Scope.Scope, DockerError, Dockerode.Volume>;
+    readonly getContainer: (name: string) => Effect.Effect<Scope.Scope, DockerError, Dockerode.Container>;
+    readonly listContainers: (options: unknown) => Effect.Effect<Scope.Scope, DockerError, Dockerode.ContainerInfo[]>;
     readonly listVolumes: (
-        client: Dockerode,
         options: unknown
-    ) => Effect.Effect<never, DockerError, Dockerode.VolumeInspectInfo[]>;
-    readonly listContainers: (
-        client: Dockerode,
-        options: unknown
-    ) => Effect.Effect<never, DockerError, Dockerode.ContainerInfo[]>;
+    ) => Effect.Effect<Scope.Scope, DockerError, { Volumes: Dockerode.VolumeInspectInfo[] }>;
+
+    readonly inspectContainer: (
+        container: Dockerode.Container
+    ) => Effect.Effect<never, DockerError, Dockerode.ContainerInspectInfo>;
 
     readonly createContainer: (
-        client: Dockerode,
         options: Dockerode.ContainerCreateOptions
-    ) => Effect.Effect<never, DockerError, Dockerode.Container>;
+    ) => Effect.Effect<Scope.Scope, DockerError, Dockerode.Container>;
     readonly createVolume: (
-        client: Dockerode,
         options: Dockerode.VolumeCreateOptions
-    ) => Effect.Effect<never, DockerError, Dockerode.VolumeCreateResponse>;
+    ) => Effect.Effect<Scope.Scope, DockerError, Dockerode.VolumeCreateResponse>;
 
     readonly buildImage: (
-        client: Dockerode,
         file: string | NodeJS.ReadableStream | Dockerode.ImageBuildContext,
         options?: Dockerode.ImageBuildOptions | undefined
-    ) => Effect.Effect<never, DockerError, NodeJS.ReadableStream>;
+    ) => Effect.Effect<Scope.Scope, DockerError, NodeJS.ReadableStream>;
     readonly followProgress: (
-        client: Dockerode,
         buildStream: NodeJS.ReadableStream,
         onProgress: Option.Option<(object: DockerStreamResponse) => void>
-    ) => Effect.Effect<never, DockerError, DockerStreamResponse[]>;
+    ) => Effect.Effect<Scope.Scope, DockerError, DockerStreamResponse[]>;
 }
 
-// eslint-disable-next-line @typescript-eslint/typedef
-export const DockerService = Context.Tag<DockerService>();
+/** Docker service tag */
+export const DockerService: Context.Tag<DockerService, DockerService> = Context.Tag<DockerService>();
 
-// eslint-disable-next-line @typescript-eslint/typedef
-export const DockerServiceLive = Layer.succeed(
+/** Docker service implementation */
+export const DockerServiceLive: Layer.Layer<never, never, DockerService> = Layer.succeed(
     DockerService,
     DockerService.of({
-        getVolume: (client, name) =>
-            Effect.try({
-                try: () => client.getVolume(name),
-                catch: (error) => new DockerError({ message: `${error}` }),
-            }),
-        getContainer: (client, name) =>
-            Effect.try({
-                try: () => client.getContainer(name),
+        getVolume: (name) => effectDockerAsyncWrapper("getVolume", name),
+        getContainer: (name) => effectDockerAsyncWrapper("getContainer", name),
+        createVolume: (options) => effectDockerAsyncWrapper("createVolume", options),
+        createContainer: (options) => effectDockerAsyncWrapper("createContainer", options),
+        listVolumes: (options) => effectDockerAsyncWrapper("listVolumes", options as {}),
+        listContainers: (options) => effectDockerAsyncWrapper("listContainers", options as {}),
+        buildImage: (file, options) => effectDockerAsyncWrapper("buildImage", file, options),
+
+        inspectContainer: (container) =>
+            Effect.tryPromise({
+                try: () => container.inspect(),
                 catch: (error) => new DockerError({ message: `${error}` }),
             }),
 
-        listVolumes: (client, options) =>
-            Effect.tryPromise({
-                try: () => client.listVolumes(options as {}).then((data) => data.Volumes),
-                catch: (error) => new DockerError({ message: `${error}` }),
-            }),
-        listContainers: (client, options) =>
-            Effect.tryPromise({
-                try: () => client.listContainers(options as {}),
-                catch: (error) => new DockerError({ message: `${error}` }),
-            }),
+        /** Streams the build progress */
+        followProgress: (buildStream, onProgress) =>
+            Effect.gen(function* (_: Effect.Adapter) {
+                const client: Dockerode = yield* _(dockerClient());
 
-        createContainer: (client, options) =>
-            Effect.tryPromise({
-                try: () => client.createContainer(options),
-                catch: (error) => new DockerError({ message: `${error}` }),
-            }),
-        createVolume: (client, options) =>
-            Effect.tryPromise({
-                try: () => client.createVolume(options),
-                catch: (error) => new DockerError({ message: `${error}` }),
-            }),
-
-        buildImage: (client, file, options) =>
-            Effect.tryPromise({
-                try: () => client.buildImage(file, options),
-                catch: (error) => new DockerError({ message: `${error}` }),
-            }),
-        followProgress: (client, buildStream, onProgress) =>
-            Effect.tryPromise({
-                try: () =>
+                const followProgressPromise = (): Promise<DockerStreamResponse[]> =>
                     new Promise((resolve, reject) => {
                         client.modem.followProgress(
                             buildStream,
                             (error: Error | null, responses: DockerStreamResponse[]) =>
-                                error ? reject(error) : resolve(responses),
+                                error || responses.at(-1)?.error
+                                    ? reject(error || responses.at(-1)?.error)
+                                    : resolve(responses),
                             Option.getOrUndefined(onProgress)
                         );
-                    }),
-                catch: (error) => new DockerError({ message: `${error}` }),
+                    });
+
+                const followProgressEffect: Effect.Effect<never, DockerError, DockerStreamResponse[]> =
+                    Effect.tryPromise({
+                        try: followProgressPromise,
+                        catch: (error) => new DockerError({ message: `FollowProgressError ${error}` }),
+                    });
+
+                return yield* _(followProgressEffect);
             }),
     })
 );

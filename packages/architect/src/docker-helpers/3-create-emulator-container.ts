@@ -1,7 +1,7 @@
 import Dockerode from "dockerode";
-import { Effect, Option, Scope } from "effect";
+import { Effect, Option, Scope, pipe } from "effect";
 
-import { dockerClient, DockerService, DockerError } from "../docker.js";
+import { DockerService, DockerError } from "../docker.js";
 import { containerCreateOptions, type IArchitectPortBindings } from "./0-shared-options.js";
 
 /**
@@ -22,20 +22,19 @@ export const buildFreshContainer = ({
     portBindings: Partial<IArchitectPortBindings>;
 }): Effect.Effect<DockerService | Scope.Scope, DockerError, Dockerode.Container> =>
     Effect.gen(function* (_: Effect.Adapter) {
-        const dockerode: Dockerode = yield* _(dockerClient());
         const dockerService: DockerService = yield* _(DockerService);
 
         // Merge port bindings, 0 means pick a random unused port
         const PortBindings: IArchitectPortBindings = Object.assign(
             {},
             {
-                "5554/tcp": [{ HostPort: 0 }],
-                "5555/tcp": [{ HostPort: 0 }],
-                "8080/tcp": [{ HostPort: 0 }],
-                "8081/tcp": [{ HostPort: 0 }],
-                "8554/tcp": [{ HostPort: 0 }],
-                "8555/tcp": [{ HostPort: 0 }],
-                "27042/tcp": [{ HostPort: 0 }],
+                "5554/tcp": [{ HostPort: "0" }],
+                "5555/tcp": [{ HostPort: "0" }],
+                "8080/tcp": [{ HostPort: "0" }],
+                "8081/tcp": [{ HostPort: "0" }],
+                "8554/tcp": [{ HostPort: "0" }],
+                "8555/tcp": [{ HostPort: "0" }],
+                "27042/tcp": [{ HostPort: "0" }],
             } satisfies IArchitectPortBindings,
             portBindings
         );
@@ -48,15 +47,36 @@ export const buildFreshContainer = ({
             command: Option.none(),
             portBindings: PortBindings,
         });
-        const container: Dockerode.Container = yield* _(dockerService.createContainer(dockerode, containerOptions));
+        const container: Dockerode.Container = yield* _(dockerService.createContainer(containerOptions));
 
         yield* _(Effect.log(`Starting container ${container.id}`));
         yield* _(
             Effect.tryPromise({
                 try: () => container.start(),
-                catch: (error) => new DockerError({ message: `${error}` }),
+                catch: (error) => new DockerError({ message: `StartingContainer ${error}` }),
             })
         );
+
+        // Wait for Container to become healthy
+        yield* _(
+            Effect.retryWhileEffect(
+                pipe(
+                    dockerService.inspectContainer(container),
+                    Effect.tap(({ State }) =>
+                        Effect.log(`Waiting for container to report healthy: status=${State.Health?.Status}`)
+                    ),
+                    Effect.map(({ State }) => State.Health?.Status === "healthy"),
+                    Effect.flatMap((isHealthy) =>
+                        isHealthy ? Effect.unit : new DockerError({ message: "Container is not healthy" })
+                    )
+                ),
+                () =>
+                    dockerService
+                        .inspectContainer(container)
+                        .pipe(Effect.map(({ State }) => State.Running && State.Health?.Status !== "unhealthy"))
+            )
+        );
+
         return container;
     });
 

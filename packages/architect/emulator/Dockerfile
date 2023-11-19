@@ -53,11 +53,6 @@ COPY --from=dependency-preparer "/tmp/sysimg/" "/android/sdk/system-images/andro
 COPY --from=dependency-preparer "/tmp/envoy-${ENVOY_PROXY_VERSION}-linux-x86_64" "/usr/local/bin/envoy"
 COPY --from=dependency-preparer "/tmp/frida-server-${FRIDA_SERVER_VERSION}-android-x86_64" "/android/frida/frida-server"
 
-# TODO: Reduce this to only exactly what needs to be installed
-RUN apt-get update && \
-    # spell-checker: disable-next-line
-    apt-get install -yq --no-install-recommends libasound2 libatk1.0-0 libc6 libcairo2 libcups2 libdbus-1-3 libexpat1 libfontconfig1 libgcc1 libgconf-2-4 libgdk-pixbuf2.0-0 libglib2.0-0 libgtk-3-0 libnspr4 libpango-1.0-0 libpangocairo-1.0-0 libstdc++6 libx11-6 libx11-xcb1 libxcb1 libxcursor1 libxdamage1 libxext6 libxfixes3 libxi6 libxrandr2 libxrender1 libxss1 libxtst6 libnss3 pulseaudio libpulse0 libtinfo5
-
 ADD avd/ /android/avd-home
 COPY entrypoint.sh /android/sdk/
 COPY make-snapshot.sh /android/sdk/
@@ -66,18 +61,30 @@ COPY envoy.yaml /etc/envoy/envoy.yaml
 COPY default.pulse-audio /etc/pulse/default.pa
 COPY emulator_access.json /android/sdk/emulator/lib/emulator_access.json
 
-RUN gpasswd -a root audio && \
+RUN apt-get update && \
+    # spell-checker: disable
+    apt-get install \
+        -y \
+        --force-yes \
+        -o Dpkg::Options::="--force-confold" \
+        --no-install-recommends \
+    socat tzdata openssl libasound2 libatk1.0-0 libc6 libcairo2 \
+    libcups2 libdbus-1-3 libexpat1 libfontconfig1 libgcc1 libgconf-2-4 \
+    libgdk-pixbuf2.0-0 libglib2.0-0 libgtk-3-0 libnspr4 libpango-1.0-0 \
+    libpangocairo-1.0-0 libstdc++6 libx11-6 libx11-xcb1 libxcb1 libx11-xcb1 \
+    libxcursor1 libxdamage1 libxext6 libxfixes3 libxi6 libxrandr2 nginx \
+    libxrender1 libxss1 libxtst6 libnss3 pulseaudio libpulse0 libtinfo5 && \
+    # spell-checker: enable
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
+    gpasswd -a root audio && \
     chmod +x /usr/local/bin/envoy && \
     chmod +x /usr/local/bin/mitmweb && \
     chmod +x /usr/local/bin/mitmdump && \
     chmod +x /usr/local/bin/mitmproxy && \
     chmod +x /android/sdk/entrypoint.sh && \
     chmod +x /android/sdk/make-snapshot.sh && \
-    chmod +x /android/sdk/platform-tools/adb && \
-    apt-get update && \
-    apt-get install -y --no-install-recommends socat tzdata openssl && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+    chmod +x /android/sdk/platform-tools/adb
 
 EXPOSE 5554 5555 8080 8081 8554 8555 27042
 CMD ["/android/sdk/entrypoint.sh"]

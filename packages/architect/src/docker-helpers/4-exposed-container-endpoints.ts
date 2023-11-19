@@ -2,11 +2,10 @@ import Dockerode from "dockerode";
 import DockerModem from "docker-modem";
 import { Effect, Scope } from "effect";
 
-import { dockerClient, DockerError } from "../docker.js";
-import { inspectContainer } from "./5-container-helpers.js";
+import { dockerClient, DockerError, DockerService } from "../docker.js";
 import type { IArchitectPortBindings } from "./0-shared-options.js";
 
-/** The endpoints that an architect container exposes. */
+/** The endpoints that an architect container has. */
 export interface IArchitectEndpoints {
     dockerHostAddress: string;
     emulatorContainerAddress: string | undefined;
@@ -19,6 +18,10 @@ export interface IArchitectEndpoints {
     mitmWebInterfaceAddress: string;
 }
 
+export type IExposedArchitectEndpoints =
+    | [usingHostNetworking: IArchitectEndpoints]
+    | [usingHostNetworking: IArchitectEndpoints, usingContainersIPv4Networking: IArchitectEndpoints];
+
 /**
  * Retrieves all the endpoints exposed by the container. If the endpoints are
  * meant to be consumed in a browser, they will be prefixed with "http" or
@@ -28,15 +31,13 @@ export const getExposedEmulatorEndpoints = ({
     emulatorContainer,
 }: {
     emulatorContainer: Dockerode.Container;
-}): Effect.Effect<
-    Scope.Scope,
-    DockerError,
-    | [usingHostNetworking: IArchitectEndpoints]
-    | [usingHostNetworking: IArchitectEndpoints, usingContainersIPv4Networking: IArchitectEndpoints]
-> =>
+}): Effect.Effect<Scope.Scope | DockerService, DockerError, IExposedArchitectEndpoints> =>
     Effect.gen(function* (_: Effect.Adapter) {
         const dockerode: Dockerode = yield* _(dockerClient());
-        const inspectResults: Dockerode.ContainerInspectInfo = yield* _(inspectContainer(emulatorContainer));
+        const dockerService: DockerService = yield* _(DockerService);
+        const inspectResults: Dockerode.ContainerInspectInfo = yield* _(
+            dockerService.inspectContainer(emulatorContainer)
+        );
 
         // Addresses of the container and the docker host
         const dockerHostAddress: string = (dockerode.modem as DockerModem.ConstructorOptions).host || "localhost";
@@ -46,13 +47,13 @@ export const getExposedEmulatorEndpoints = ({
         const exposedEmulatorContainerPorts: IArchitectPortBindings =
             inspectResults.HostConfig.NetworkMode === "host"
                 ? ({
-                      "5554/tcp": [{ HostPort: 5554 }],
-                      "5555/tcp": [{ HostPort: 5555 }],
-                      "8080/tcp": [{ HostPort: 8080 }],
-                      "8081/tcp": [{ HostPort: 8081 }],
-                      "8554/tcp": [{ HostPort: 8554 }],
-                      "8555/tcp": [{ HostPort: 8555 }],
-                      "27042/tcp": [{ HostPort: 27_042 }],
+                      "5554/tcp": [{ HostPort: "5554" }],
+                      "5555/tcp": [{ HostPort: "5555" }],
+                      "8080/tcp": [{ HostPort: "8080" }],
+                      "8081/tcp": [{ HostPort: "8081" }],
+                      "8554/tcp": [{ HostPort: "8554" }],
+                      "8555/tcp": [{ HostPort: "8555" }],
+                      "27042/tcp": [{ HostPort: "27042" }],
                   } satisfies IArchitectPortBindings)
                 : (inspectResults.NetworkSettings.Ports as unknown as IArchitectPortBindings);
 
@@ -88,13 +89,12 @@ export const getExposedEmulatorEndpoints = ({
          * endpoints accessible over the docker host's networking and the docker
          * container's networking.
          */
-        const endpointsToReturn:
-            | [usingHostNetworking: IArchitectEndpoints]
-            | [usingHostNetworking: IArchitectEndpoints, usingContainersIPv4Networking: IArchitectEndpoints] =
+        const endpointsToReturn: IExposedArchitectEndpoints =
             inspectResults.HostConfig.NetworkMode === "host"
                 ? [exposedEndpointsUsingHostsNetworking]
                 : [exposedEndpointsUsingHostsNetworking, exposedEndpointsUsingContainersNetworking];
 
-        yield* _(Effect.log(`Container endpoints are: ${endpointsToReturn}`));
+        yield* _(Effect.log(`Host networking container endpoints are: ${JSON.stringify(endpointsToReturn[0])}`));
+        yield* _(Effect.log(`Container ipv4 networking endpoints are: ${JSON.stringify(endpointsToReturn[1])}`));
         return endpointsToReturn;
     });

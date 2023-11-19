@@ -1,3 +1,5 @@
+// TODO: Keep these versions up to date
+
 /** https://github.com/mitmproxy/mitmproxy/releases */
 export const MITM_PROXY_VERSION = "10.1.4" as const;
 
@@ -8,7 +10,7 @@ export const FRIDA_SERVER_VERSION = "16.1.6" as const;
 export const ENVOY_PROXY_VERSION = "1.28.0" as const;
 
 /** https://developer.android.com/studio/emulator_archive */
-export const EMULATOR_VERSION = "11009885" as const;
+export const EMULATOR_VERSION = "10696886" as const;
 
 /** https://developer.android.com/tools/releases/platform-tools */
 export const ANDROID_SDK_TOOLS_VERSION = "34.0.5" as const;

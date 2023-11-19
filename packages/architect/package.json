@@ -47,26 +47,28 @@
     "dependencies": {
         "@bufbuild/protobuf": "~1.4.2",
         "dockerode": "~4.0.0",
-        "frida": "~16.1.6",
+        "frida": "~16.1.7",
         "tar-fs": "~3.0.4"
     },
     "devDependencies": {
         "@bufbuild/buf": "1.28.0",
         "@bufbuild/protoc-gen-es": "1.4.2",
         "@connectrpc/protoc-gen-connect-es": "1.1.3",
+        "@effect/cli": "0.22.0",
         "@effect/eslint-plugin": "0.1.2",
         "@effect/language-service": "0.0.21",
-        "@effect/platform": "0.29.1",
-        "@effect/platform-node": "0.30.1",
-        "@effect/printer": "0.22.1",
-        "@effect/printer-ansi": "0.22.1",
-        "@effect/schema": "0.47.7",
-        "@effect/typeclass": "0.14.1",
+        "@effect/platform": "0.30.1",
+        "@effect/platform-node": "0.31.1",
+        "@effect/printer": "0.23.1",
+        "@effect/printer-ansi": "0.23.1",
+        "@effect/schema": "0.48.0",
+        "@effect/typeclass": "0.15.0",
         "@rushstack/eslint-config": "3.4.1",
         "@rushstack/heft": "0.63.2",
         "@rushstack/heft-jest-plugin": "0.10.4",
         "@rushstack/heft-lint-plugin": "0.2.12",
         "@rushstack/heft-typescript-plugin": "0.2.12",
+        "@tinyburg/archive": "workspace:*",
         "@tinyburg/tsconfig-rig": "workspace:*",
         "@types/docker-modem": "3.0.6",
         "@types/dockerode": "3.3.23",
@@ -74,7 +76,7 @@
         "@types/node": "20.9.0",
         "@types/tar-fs": "2.0.4",
         "dotenv": "~16.3.1",
-        "effect": "2.0.0-next.54",
+        "effect": "2.0.0-next.55",
         "eslint": "8.53.0",
         "eslint-config-prettier": "9.0.0",
         "eslint-plugin-prettier": "5.0.1",
@@ -85,9 +87,9 @@
         "typescript": "5.2.2"
     },
     "peerDependencies": {
-        "@effect/platform": "~0.29.1",
-        "@effect/platform-node": "~0.30.1",
-        "effect": "~2.0.0-next.54"
+        "@effect/platform": "~0.30.1",
+        "@effect/platform-node": "~0.31.1",
+        "effect": "~2.0.0-next.55"
     },
     "engines": {
         "node": ">=16"

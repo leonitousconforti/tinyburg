@@ -1,17 +1,25 @@
 import Dockerode from "dockerode";
+import DockerModem from "docker-modem";
 import { Effect, Option, Scope } from "effect";
 
 import {
+    dockerClient,
+    DockerServiceLive,
+    type DockerError,
+    type DockerService,
+    type DockerStreamResponse,
+    type DockerConnectionOptions,
+} from "./docker.js";
+
+import {
+    installApk,
     buildImage,
     populateSharedDataVolume,
     buildFreshContainer,
     getExposedEmulatorEndpoints,
-    installApk,
-    type IArchitectEndpoints,
     type IArchitectPortBindings,
+    type IExposedArchitectEndpoints,
 } from "./docker-helpers/all.js";
-import { DockerConnectionOptions, DockerService, DockerError, dockerClient, DockerServiceLive } from "./docker.js";
-import { waitForContainerToBeHealthy } from "./docker-helpers/5-container-helpers.js";
 
 // Possibly Override the docker host environment variable
 if (process.env["ARCHITECT_DOCKER_HOST"] !== undefined) {
@@ -19,32 +27,38 @@ if (process.env["ARCHITECT_DOCKER_HOST"] !== undefined) {
 }
 
 /** @internal */
-export const architectEffect = (
-    options?:
-        | {
-              // Configurable parts of the container
-              networkMode?: string | undefined;
-              environmentVariables?: string[] | undefined;
-              portBindings?: Partial<IArchitectPortBindings> | undefined;
+interface IArchitectOptions {
+    // Configurable parts of the container
+    networkMode?: string | undefined;
+    environmentVariables?: string[] | undefined;
+    portBindings?: Partial<IArchitectPortBindings> | undefined;
+    onBuildProgress?: ((object: DockerStreamResponse) => void) | undefined;
 
-              // Docker host things
-              dockerConnectionOptions?: DockerConnectionOptions | undefined;
-          }
-        | undefined
-): Effect.Effect<
-    Scope.Scope | DockerService,
-    DockerError,
-    {
-        emulatorContainer: Dockerode.Container;
-        installApk: (apk: string) => Promise<void>;
-        containerEndpoints: Effect.Effect.Success<ReturnType<typeof getExposedEmulatorEndpoints>>;
-    }
-> =>
+    // Docker host things
+    dockerConnectionOptions?: DockerConnectionOptions | undefined;
+}
+
+/** @internal */
+interface IArchitectReturnType {
+    emulatorContainer: Dockerode.Container;
+    installApk: (apk: string) => Promise<void>;
+    containerEndpoints: IExposedArchitectEndpoints;
+}
+
+/** @internal */
+export const architectEffect = (
+    options?: IArchitectOptions | undefined
+): Effect.Effect<Scope.Scope | DockerService, DockerError, IArchitectReturnType> =>
     Effect.gen(function* (_: Effect.Adapter) {
         // Generate a random container name which will be architectXXXXXX
         const containerName: string = `architect${Math.floor(Math.random() * (999_999 - 100_000 + 1)) + 100_000}`;
-        yield* _(dockerClient(options?.dockerConnectionOptions));
-        yield* _(buildImage({ onProgress: Option.none() }));
+        const docker: Dockerode = yield* _(dockerClient(options?.dockerConnectionOptions));
+        const dockerHost: string = (docker.modem as DockerModem.ConstructorOptions).host || "localhost";
+        const dockerDaemon: string =
+            (docker.modem as DockerModem.ConstructorOptions).socketPath || "/var/run/docker.sock";
+
+        yield* _(Effect.log(`Connected to docker daemon ${dockerDaemon} @ ${dockerHost}`));
+        yield* _(buildImage({ onProgress: Option.fromNullable(options?.onBuildProgress) }));
         yield* _(populateSharedDataVolume());
 
         const emulatorContainer: Dockerode.Container = yield* _(
@@ -56,15 +70,9 @@ export const architectEffect = (
             })
         );
 
-        const containerEndpoints:
-            | [usingHostNetworking: IArchitectEndpoints]
-            | [usingHostNetworking: IArchitectEndpoints, usingContainersIPv4Networking: IArchitectEndpoints] = yield* _(
-            getExposedEmulatorEndpoints({
-                emulatorContainer,
-            })
+        const containerEndpoints: IExposedArchitectEndpoints = yield* _(
+            getExposedEmulatorEndpoints({ emulatorContainer })
         );
-
-        yield* _(waitForContainerToBeHealthy(emulatorContainer));
 
         return {
             emulatorContainer,
@@ -73,23 +81,7 @@ export const architectEffect = (
         };
     });
 
-export const architect = (
-    options?:
-        | {
-              // Configurable parts of the container
-              networkMode?: string | undefined;
-              environmentVariables?: string[] | undefined;
-              portBindings?: Partial<IArchitectPortBindings> | undefined;
-
-              // Docker host things
-              dockerConnectionOptions?: DockerConnectionOptions | undefined;
-          }
-        | undefined
-): Promise<{
-    emulatorContainer: Dockerode.Container;
-    installApk: (apk: string) => Promise<void>;
-    containerEndpoints: Effect.Effect.Success<ReturnType<typeof getExposedEmulatorEndpoints>>;
-}> =>
+export const architect = (options?: IArchitectOptions | undefined): Promise<IArchitectReturnType> =>
     architectEffect(options)
         .pipe(Effect.scoped)
         .pipe(Effect.provide(DockerServiceLive))
