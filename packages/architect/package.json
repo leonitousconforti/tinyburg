@@ -68,7 +68,6 @@
         "@rushstack/heft-jest-plugin": "0.10.4",
         "@rushstack/heft-lint-plugin": "0.2.12",
         "@rushstack/heft-typescript-plugin": "0.2.12",
-        "@tinyburg/archive": "workspace:*",
         "@tinyburg/tsconfig-rig": "workspace:*",
         "@types/docker-modem": "3.0.6",
         "@types/dockerode": "3.3.23",
