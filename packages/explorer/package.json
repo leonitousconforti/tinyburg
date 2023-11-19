@@ -20,23 +20,23 @@
         "_phase:build": "frida-compile agent.ts --compress --output dist/agent.js --",
         "build": "frida-compile agent.ts --compress --output dist/agent.js",
         "compile": "frida-compile agent.ts --watch --output dist/agent.js",
-        "inject": "frida --host localhost:27042 -f com.nimblebit.tinytower --realm emulated --load dist/agent.js"
+        "inject": "frida --host ci.internal.tinyburg.app:27042 -f com.nimblebit.tinytower --realm emulated --load dist/agent.js"
     },
     "dependencies": {
         "@tinyburg/insight": "workspace:*",
-        "frida": "~16.1.0",
+        "frida": "~16.1.7",
         "frida-il2cpp-bridge": "~0.9.0"
     },
     "devDependencies": {
         "@rushstack/eslint-config": "3.4.1",
         "@tinyburg/tsconfig-rig": "workspace:*",
-        "@types/frida-gum": "~18.4.0",
-        "eslint": "8.52.0",
-        "eslint-config-prettier": "~9.0.0",
-        "eslint-plugin-prettier": "~5.0.1",
-        "eslint-plugin-unicorn": "~48.0.1",
-        "frida-compile": "~16.3.0",
-        "prettier": "~3.0.3",
+        "@types/frida-gum": "~18.4.5",
+        "eslint": "8.53.0",
+        "eslint-config-prettier": "9.0.0",
+        "eslint-plugin-prettier": "5.0.1",
+        "eslint-plugin-unicorn": "49.0.0",
+        "frida-compile": "~16.4.1",
+        "prettier": "3.1.0",
         "typescript": "5.2.2"
     },
     "engines": {

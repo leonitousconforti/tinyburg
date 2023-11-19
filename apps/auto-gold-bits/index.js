@@ -57,9 +57,9 @@ async function processGifts() {
         // requesting a particular floor so we can set the dream job index
         // automatically
         const friend = await bitFarm.pullFriendMeta({ friendId: bitizenGift.gift_from });
-        const fridaMeta = friend.meta[bitizenGift.gift_from];
-        if (fridaMeta && fridaMeta.reqFID !== -1) {
-            bitizen.dreamJobIndex = fridaMeta.reqFID;
+        const friendMeta = friend.meta[bitizenGift.gift_from];
+        if (friendMeta && friendMeta.reqFID !== -1) {
+            bitizen.dreamJobIndex = friendMeta.reqFID;
         }
 
         // There are a number of transformations we need to perform before we

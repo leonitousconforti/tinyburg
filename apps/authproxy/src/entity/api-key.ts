@@ -2,7 +2,7 @@ import "reflect-metadata";
 
 import type { Scope } from "../auth/scope-permission.js";
 
-import { v4 as uuidv4 } from "uuid";
+import { v4 as uuidV4 } from "uuid";
 import { Entity, PrimaryGeneratedColumn, Column, BaseEntity, Generated, CreateDateColumn } from "typeorm";
 
 @Entity()
@@ -33,9 +33,11 @@ export class ApiKey extends BaseEntity {
     public apiKey: string;
 
     public async roll(): Promise<string> {
-        this.apiKey = uuidv4();
+        this.apiKey = uuidV4();
         this.lastUsed = undefined;
         await this.save();
         return this.apiKey;
     }
 }
+
+export default ApiKey;

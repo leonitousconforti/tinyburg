@@ -3,12 +3,17 @@ import type { Scope } from "../../auth/scope-permission.js";
 
 import crypto from "node:crypto";
 import { secretSalt } from "../../constants.js";
-import { serverEndpoints } from "@tinyburg/core/contact-server";
 import { hasScopePermission } from "../../auth/scope-permission.js";
+
+import { parseSalt } from "@tinyburg/core/validation/salt";
+import { serverEndpoints } from "@tinyburg/core/contact-server";
+import { parseEndpoint } from "@tinyburg/core/validation/endpoint";
+import { parsePlayerId } from "@tinyburg/core/validation/player-id";
+import { parsePlayerSs } from "@tinyburg/core/validation/player-ss";
 
 // Pre-handler hook to parse query params
 export const preHandler = async function (request: Request, reply: Reply): Promise<void> {
-    request.log.debug({ req: request }, "perHandler hook fired");
+    request.log.debug({ req: request }, "preHandler hook fired");
 
     // Parse query params
     const hash = request.query.hash;
@@ -18,25 +23,19 @@ export const preHandler = async function (request: Request, reply: Reply): Promi
     // Check the hash split array
     const hashSplit = hash.split("/");
     if (hashSplit.length !== 3) {
-        return reply.badRequest(`Expected 3 parts in hash param, received: ${hashSplit.length} parts`);
+        return reply.status(400).send(new Error(`Expected 3 parts in hash param, received: ${hashSplit.length} parts`));
     }
 
     // Parse playerId, playerSs, and salt from the hash
-    const playerId = hashSplit[1]!;
-    const playerSs = hashSplit[2]!.slice(-36);
-    const salt = hashSplit[2]!.replace(playerSs, "").match(/^-?\d+/gim)?.[0];
+    const playerId = parsePlayerId(hashSplit[1]!);
+    const playerSs = parsePlayerSs(hashSplit[2]!.slice(-36));
+    const salt = parseSalt(hashSplit[2]!.replace(playerSs, "").match(/^-?\d+/gim)?.[0]);
     request.log.info({ playerId, playerSs }, "Parsed playerId + playerSs");
 
-    // Check that the salt param is a 32bit signed integer
-    request.log.info({ salt }, "Testing salt...");
-    if (!salt || Number.parseInt(salt) < -2_147_483_648 || Number.parseInt(salt) > 2_147_483_647) {
-        return reply.badRequest("Salt param was not a valid 32bit signed integer");
-    }
-    const saltNumber = Number.parseInt(salt);
-    request.log.info({ req: request, saltNumber }, "Salt was a 32-bit signed integer");
-
     // Parse the nimblebit url from the endpoint by removing the salt and playerId
-    const nimblebitEndpoint = endpoint.replace(playerId, "").replace(saltNumber.toString(), "").replace("//", "/");
+    const nimblebitEndpoint = parseEndpoint(
+        endpoint.replace(playerId, "").replace(salt.toString(), "").replace("//", "/")
+    );
     request.log.info({ req: request, nimblebitEndpoint }, "Crafting nimblebit target endpoint...");
 
     // Check the scope
@@ -46,12 +45,12 @@ export const preHandler = async function (request: Request, reply: Reply): Promi
         const finalUrl = "https://sync.nimblebit.com" + endpoint + "/" + finalHash;
 
         request.nimblebitData = {
-            salt: saltNumber,
-            endpoint: nimblebitEndpoint,
+            salt,
             playerId,
             playerSs,
             finalUrl,
             finalHash,
+            endpoint: nimblebitEndpoint,
         };
         request.log.info({ req: request }, "Success! sending nimblebit data to handler");
     } else {

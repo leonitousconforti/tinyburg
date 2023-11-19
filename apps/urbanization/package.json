@@ -3,10 +3,10 @@
     "version": "0.0.0",
     "private": true,
     "dependencies": {
-        "@tinyburg/apks": "workspace:*",
         "@tinyburg/architect": "workspace:*",
+        "@tinyburg/archive": "workspace:*",
         "@tinyburg/bitprints": "workspace:*",
         "@tinyburg/doorman": "workspace:*",
-        "@tinyburg/spectator": "workspace:*"
+        "@tinyburg/window": "workspace:*"
     }
 }

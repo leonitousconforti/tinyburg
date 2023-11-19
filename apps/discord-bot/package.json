@@ -13,17 +13,17 @@
     },
     "devDependencies": {
         "@rushstack/eslint-config": "3.4.1",
-        "@rushstack/heft": "0.62.3",
-        "@rushstack/heft-jest-plugin": "0.10.0",
-        "@rushstack/heft-lint-plugin": "~0.2.9",
-        "@rushstack/heft-typescript-plugin": "~0.2.9",
+        "@rushstack/heft": "0.63.2",
+        "@rushstack/heft-jest-plugin": "0.10.4",
+        "@rushstack/heft-lint-plugin": "0.2.12",
+        "@rushstack/heft-typescript-plugin": "0.2.12",
         "@tinyburg/tsconfig-rig": "workspace:*",
-        "@types/node": "20.8.8",
-        "eslint": "8.52.0",
-        "eslint-config-prettier": "~9.0.0",
-        "eslint-plugin-prettier": "~5.0.1",
-        "eslint-plugin-unicorn": "~48.0.1",
-        "prettier": "~3.0.3",
+        "@types/node": "20.9.0",
+        "eslint": "8.53.0",
+        "eslint-config-prettier": "9.0.0",
+        "eslint-plugin-prettier": "5.0.1",
+        "eslint-plugin-unicorn": "49.0.0",
+        "prettier": "3.1.0",
         "typescript": "5.2.2"
     }
 }

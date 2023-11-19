@@ -1,0 +1,10 @@
+{
+    "extends": "@tinyburg/tsconfig-rig/profile/default/config/tsconfig.json",
+    "compilerOptions": {
+        "noEmit": false,
+        "sourceMap": true,
+        "declaration": true,
+        "outDir": "./dist"
+    },
+    "include": ["./src/**/*.ts"]
+}

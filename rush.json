@@ -416,13 +416,13 @@
 
         // Packages (do get published)
         {
-            "packageName": "@tinyburg/apks",
-            "projectFolder": "packages/apks",
+            "packageName": "@tinyburg/architect",
+            "projectFolder": "packages/architect",
             "shouldPublish": true
         },
         {
-            "packageName": "@tinyburg/architect",
-            "projectFolder": "packages/architect",
+            "packageName": "@tinyburg/archive",
+            "projectFolder": "packages/archive",
             "shouldPublish": true
         },
         {
@@ -431,28 +431,8 @@
             "shouldPublish": true
         },
         {
-            "packageName": "@tinyburg/bots",
-            "projectFolder": "packages/bots",
-            "shouldPublish": true
-        },
-        {
-            "packageName": "@tinyburg/cli",
-            "projectFolder": "packages/cli",
-            "shouldPublish": true
-        },
-        {
-            "packageName": "@tinyburg/core",
-            "projectFolder": "packages/core",
-            "shouldPublish": true
-        },
-        {
             "packageName": "@tinyburg/doorman",
             "projectFolder": "packages/doorman",
-            "shouldPublish": true
-        },
-        {
-            "packageName": "@tinyburg/economy",
-            "projectFolder": "packages/economy",
             "shouldPublish": true
         },
         {
@@ -466,8 +446,18 @@
             "shouldPublish": true
         },
         {
-            "packageName": "@tinyburg/spectator",
-            "projectFolder": "packages/spectator",
+            "packageName": "@tinyburg/nucleus",
+            "projectFolder": "packages/nucleus",
+            "shouldPublish": true
+        },
+        {
+            "packageName": "@tinyburg/treasurer",
+            "projectFolder": "packages/treasurer",
+            "shouldPublish": true
+        },
+        {
+            "packageName": "@tinyburg/window",
+            "projectFolder": "packages/window",
             "shouldPublish": true
         },
 
@@ -483,18 +473,8 @@
             "shouldPublish": false
         },
         {
-            "packageName": "@tinyburg/bank",
-            "projectFolder": "apps/bank",
-            "shouldPublish": false
-        },
-        {
             "packageName": "@tinyburg/discord-bot",
             "projectFolder": "apps/discord-bot",
-            "shouldPublish": false
-        },
-        {
-            "packageName": "@tinyburg/repl.it-demo",
-            "projectFolder": "apps/repl.it-demo",
             "shouldPublish": false
         },
         {
@@ -505,43 +485,6 @@
         {
             "packageName": "@tinyburg/urbanization",
             "projectFolder": "apps/urbanization",
-            "shouldPublish": false
-        },
-
-        // Integration examples (do not get published)
-        {
-            "packageName": "@tinyburg/architect-apks-integration",
-            "projectFolder": "packages/integrations/architect+apks",
-            "shouldPublish": false
-        },
-        {
-            "packageName": "@tinyburg/architect-spectator-integration",
-            "projectFolder": "packages/integrations/architect+spectator",
-            "shouldPublish": false
-        },
-        {
-            "packageName": "@tinyburg/core-authproxy-integration",
-            "projectFolder": "packages/integrations/core+authproxy",
-            "shouldPublish": false
-        },
-        {
-            "packageName": "@tinyburg/doorman-architect-apks-integration",
-            "projectFolder": "packages/integrations/doorman+architect+apks",
-            "shouldPublish": false
-        },
-        {
-            "packageName": "@tinyburg/doorman-bitprints-integration",
-            "projectFolder": "packages/integrations/doorman+bitprints",
-            "shouldPublish": false
-        },
-        {
-            "packageName": "@tinyburg/explorer-architect-apks-integration",
-            "projectFolder": "packages/integrations/explorer+architect+apks",
-            "shouldPublish": false
-        },
-        {
-            "packageName": "@tinyburg/insight-architect-apks-integration",
-            "projectFolder": "packages/integrations/insight+architect+apks",
             "shouldPublish": false
         },
 

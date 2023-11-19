@@ -1,3 +1,4 @@
+// spell-checker: disable
 {
     "name": "Node.js & TypeScript",
     "image": "mcr.microsoft.com/devcontainers/base:bullseye",
@@ -36,7 +37,6 @@
                 "Prisma.prisma",
                 "bradlc.vscode-tailwindcss",
                 "RushStack.rushstack",
-                "redhat.ansible",
                 "william-voyek.vscode-nginx"
             ],
             "settings": {

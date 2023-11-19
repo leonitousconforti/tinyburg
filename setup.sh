@@ -19,7 +19,6 @@ rush update-autoinstaller --name rush-github-action-cache
 
 echo "🩹 Running some python setup scripts"
 pip3 install -r packages/explorer/requirements.txt
-pip3 install -r packages/architect/requirements.txt
 pip3 install -r packages/doorman/assets/requirements.txt
 
 echo "🏗️ Building all packages..."
