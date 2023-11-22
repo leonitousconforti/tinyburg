@@ -1,7 +1,6 @@
 import os from "node:os";
 import fs from "node:fs";
 import path from "node:path";
-import { HashMap, Option } from "effect";
 
 import { loadApk, patchApk, Games } from "./index.js";
 import { RelativeVersion, SemanticVersion } from "./types.js";
@@ -28,7 +27,7 @@ describe("Apks tests", () => {
     // eslint-disable-next-line unicorn/consistent-function-scoping
     const latestSemanticVersion = async (game: Games): Promise<SemanticVersion> => {
         const smvbrv = await getSemanticVersionsByRelativeVersions(game);
-        return HashMap.get(smvbrv, "latest version").pipe(Option.getOrThrow).semanticVersion;
+        return smvbrv.get("latest version")!.semanticVersion;
     };
 
     // Helper function that asserts that an apk was loaded from

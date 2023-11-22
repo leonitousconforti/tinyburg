@@ -421,11 +421,6 @@
             "shouldPublish": true
         },
         {
-            "packageName": "@tinyburg/archive",
-            "projectFolder": "packages/archive",
-            "shouldPublish": true
-        },
-        {
             "packageName": "@tinyburg/bitprints",
             "projectFolder": "packages/bitprints",
             "shouldPublish": true
@@ -438,6 +433,11 @@
         {
             "packageName": "@tinyburg/explorer",
             "projectFolder": "packages/explorer",
+            "shouldPublish": true
+        },
+        {
+            "packageName": "@tinyburg/fount",
+            "projectFolder": "packages/fount",
             "shouldPublish": true
         },
         {

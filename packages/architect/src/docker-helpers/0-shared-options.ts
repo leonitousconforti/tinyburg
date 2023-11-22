@@ -44,7 +44,7 @@ export const containerCreateOptions = ({
     containerName: string;
     environmentVariables: string[];
     command: Option.Option<string[]>;
-    networkMode: Option.Option<string>;
+    networkMode: string | undefined;
     portBindings: Partial<IArchitectPortBindings>;
 }): Dockerode.ContainerCreateOptions => ({
     name: containerName,
@@ -55,7 +55,7 @@ export const containerCreateOptions = ({
         ? environmentVariables
         : ["DISPLAY=:0", ...environmentVariables],
     HostConfig: {
-        NetworkMode: Option.getOrElse(networkMode, () => "host"),
+        NetworkMode: networkMode,
         DeviceRequests: [{ Count: -1, Driver: "nvidia", Capabilities: [["gpu"]] }],
         Devices: [{ CgroupPermissions: "mrw", PathInContainer: "/dev/kvm", PathOnHost: "/dev/kvm" }],
         PortBindings: portBindings,
@@ -72,10 +72,3 @@ export const containerCreateOptions = ({
 });
 
 export default containerCreateOptions;
-
-// docker run --gpus all \
-//     -e DISPLAY -e NVIDIA_DRIVER_CAPABILITIES=all --net host \
-//     -v /usr/share/vulkan/icd.d/nvidia_icd.json:/usr/share/vulkan/icd.d/nvidia_icd.json \
-//     -v /usr/share/vulkan/implicit_layer.d/nvidia_layers.json:/usr/share/vulkan/implicit_layer.d/nvidia_layers.json \
-//     -v /usr/share/glvnd/egl_vendor.d/10_nvidia.json:/usr/share/glvnd/egl_vendor.d/10_nvidia.json \
-//     -it nvidia/vulkan:1.3-470

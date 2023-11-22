@@ -1,10 +1,13 @@
 // TODO: Keep these versions up to date
 
 /** https://github.com/mitmproxy/mitmproxy/releases */
-export const MITM_PROXY_VERSION = "10.1.4" as const;
+export const MITM_PROXY_VERSION = "10.1.5" as const;
 
+// Stuck at 16.0.19, related issues:
+// https://github.com/frida/frida-gum/issues/757
+// https://github.com/vfsfitvnm/frida-il2cpp-bridge/issues/439
 /** https://github.com/frida/frida/releases */
-export const FRIDA_SERVER_VERSION = "16.1.6" as const;
+export const FRIDA_SERVER_VERSION = "16.0.19" as const;
 
 /** https://github.com/envoyproxy/envoy/releases */
 export const ENVOY_PROXY_VERSION = "1.28.0" as const;

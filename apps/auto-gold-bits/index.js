@@ -5,10 +5,10 @@
  * to the DYNO bot
  */
 
-import tinyburg from "@tinyburg/core";
-import { bitizenBlocks } from "@tinyburg/core/parsing-structs/bitizen";
-import { SyncItemType } from "@tinyburg/core/parsing-structs/sync-item";
-import { parseDataToType, typedDataToBlock } from "@tinyburg/core/modify-save";
+import tinyburg from "@tinyburg/nucleus";
+import { bitizenBlocks } from "@tinyburg/nucleus/parsing-structs/bitizen";
+import { SyncItemType } from "@tinyburg/nucleus/parsing-structs/sync-item";
+import { parseDataToType, typedDataToBlock } from "@tinyburg/nucleus/modify-save";
 
 // Create the bot
 const bitFarm = tinyburg.fromPlayerId(

@@ -4,9 +4,9 @@
     "private": true,
     "dependencies": {
         "@tinyburg/architect": "workspace:*",
-        "@tinyburg/archive": "workspace:*",
         "@tinyburg/bitprints": "workspace:*",
         "@tinyburg/doorman": "workspace:*",
+        "@tinyburg/fount": "workspace:*",
         "@tinyburg/window": "workspace:*"
     }
 }

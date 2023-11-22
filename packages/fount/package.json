@@ -1,5 +1,5 @@
 {
-    "name": "@tinyburg/archive",
+    "name": "@tinyburg/fount",
     "version": "0.0.1",
     "description": "fetches any version of any of Nimblebit's Android apks directly from the playstore",
     "keywords": [
@@ -12,7 +12,7 @@
     "repository": {
         "type": "git",
         "url": "https://github.com/leonitousconforti/tinyburg.git",
-        "directory": "packages/archive"
+        "directory": "packages/fount"
     },
     "license": "MIT",
     "author": "Leo Conforti <leo@leoconforti.us> (https://leoconforti.us)",

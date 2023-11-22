@@ -25,9 +25,9 @@ const sourceCodeBanner = `/**
 `;
 
 module.exports.runAsync = async () => {
-    const { loadApk } = await import("@tinyburg/apks");
+    const apks = await import("@tinyburg/fount");
     const { architect } = await import("@tinyburg/architect");
-    const { getSemanticVersionsByRequestedVersions } = await import("@tinyburg/apks/versions");
+    const { getSemanticVersionsByRelativeVersions } = await import("@tinyburg/fount/versions");
     const { bootstrapAgentOnRemote, cleanupAgent, GetterAgents } = await import("@tinyburg/insight");
 
     // Find editorconfig and prettier formatting files
@@ -48,7 +48,11 @@ module.exports.runAsync = async () => {
         "./roofs.ts": GetterAgents.RoofAgent,
     };
 
-    const latestVersion = (await getSemanticVersionsByRequestedVersions("TinyTower")).get("0 versions before latest");
+    // eslint-disable-next-line unicorn/no-await-expression-member
+    const latestVersion = (await getSemanticVersionsByRelativeVersions(apks.Games.TinyTower)).get("latest version")[
+        "semanticVersion"
+    ];
+    console.log(latestVersion);
     const alreadyGenerateForLatestVersion = await Promise.all(
         Object.keys(AgentOutputFileMap).map(async (file) => {
             const outputPath = path.join(__dirname, file);
@@ -62,12 +66,15 @@ module.exports.runAsync = async () => {
     }
 
     // Create a container to extract information from
-    const apk = await loadApk("TinyTower", "latest version");
-    const { fridaAddress, emulatorContainer, installApk } = await architect();
+    const apk = await apks.loadApk(apks.Games.TinyTower);
+    const { containerEndpoints, emulatorContainer, installApk } = await architect();
     await installApk(apk);
 
     for (const [outputDestination, agent] of Object.entries(AgentOutputFileMap)) {
-        const { runAgentMain, ...agentDetails } = await bootstrapAgentOnRemote(agent, fridaAddress);
+        const { runAgentMain, ...agentDetails } = await bootstrapAgentOnRemote(
+            agent,
+            containerEndpoints[0].fridaAddress
+        );
 
         const result = await runAgentMain();
         await cleanupAgent(agentDetails);

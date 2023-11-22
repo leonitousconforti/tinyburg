@@ -40,6 +40,7 @@ interface IArchitectOptions {
 
 /** @internal */
 interface IArchitectReturnType {
+    sharedVolume: Dockerode.Volume;
     emulatorContainer: Dockerode.Container;
     installApk: (apk: string) => Promise<void>;
     containerEndpoints: IExposedArchitectEndpoints;
@@ -59,13 +60,14 @@ export const architectEffect = (
 
         yield* _(Effect.log(`Connected to docker daemon ${dockerDaemon} @ ${dockerHost}`));
         yield* _(buildImage({ onProgress: Option.fromNullable(options?.onBuildProgress) }));
-        yield* _(populateSharedDataVolume());
+
+        const sharedVolume: Dockerode.Volume = yield* _(populateSharedDataVolume());
 
         const emulatorContainer: Dockerode.Container = yield* _(
             buildFreshContainer({
                 containerName,
+                networkMode: options?.networkMode,
                 portBindings: options?.portBindings || {},
-                networkMode: Option.fromNullable(options?.networkMode),
                 environmentVariables: options?.environmentVariables || [],
             })
         );
@@ -75,6 +77,7 @@ export const architectEffect = (
         );
 
         return {
+            sharedVolume,
             emulatorContainer,
             containerEndpoints: containerEndpoints,
             installApk: (apk: string) => Effect.runPromise(installApk({ apk, container: emulatorContainer })),

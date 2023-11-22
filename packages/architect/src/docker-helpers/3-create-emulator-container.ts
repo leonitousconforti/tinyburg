@@ -18,7 +18,7 @@ export const buildFreshContainer = ({
 }: {
     containerName: string;
     environmentVariables: string[];
-    networkMode: Option.Option<string>;
+    networkMode: string | undefined;
     portBindings: Partial<IArchitectPortBindings>;
 }): Effect.Effect<DockerService | Scope.Scope, DockerError, Dockerode.Container> =>
     Effect.gen(function* (_: Effect.Adapter) {

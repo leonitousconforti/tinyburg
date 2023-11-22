@@ -100,5 +100,11 @@ export const getSemanticVersionsByRelativeVersionsEffect = (
  * Retrieves a map of semantic versions like "1.2.3" by relative versions like
  * "2 versions before latest" from an apksupport versions page.
  */
-export const getSemanticVersionsByRelativeVersions = (game: Games): Promise<SemanticVersionsByRelativeVersions> =>
-    getSemanticVersionsByRelativeVersionsEffect(game).pipe(Effect.orDie).pipe(Effect.runPromise);
+export const getSemanticVersionsByRelativeVersions = (
+    game: Games
+): Promise<Map<RelativeVersion, SemanticVersionAndAppVersionCode>> =>
+    getSemanticVersionsByRelativeVersionsEffect(game)
+        .pipe(Effect.orDie)
+        .pipe(Effect.map(HashMap.toEntries))
+        .pipe(Effect.map((entries) => new Map(entries)))
+        .pipe(Effect.runPromise);

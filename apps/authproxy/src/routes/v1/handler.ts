@@ -1,13 +1,13 @@
 import type { Request, Reply } from "../types/api_v1.js";
-import type { IDownloadSave } from "@tinyburg/core/endpoints/download-save";
-import type { INimblebitResponse } from "@tinyburg/core/endpoints/nimblebit-response";
-import type { ICheckForNewerSave } from "@tinyburg/core/endpoints/check-for-newer-save";
+import type { IDownloadSave } from "@tinyburg/nucleus/endpoints/download-save";
+import type { INimblebitResponse } from "@tinyburg/nucleus/endpoints/nimblebit-response";
+import type { ICheckForNewerSave } from "@tinyburg/nucleus/endpoints/check-for-newer-save";
 
 import got from "got";
 import { secretSalt } from "../../constants.js";
-import { serverEndpoints, defaultHeaders } from "@tinyburg/core/contact-server";
-import { computeDownloadSaveValidationHash } from "@tinyburg/core/endpoints/download-save";
-import { computeCheckForNewerSaveValidationHash } from "@tinyburg/core/endpoints/check-for-newer-save";
+import { serverEndpoints, defaultHeaders } from "@tinyburg/nucleus/contact-server";
+import { computeDownloadSaveValidationHash } from "@tinyburg/nucleus/endpoints/download-save";
+import { computeCheckForNewerSaveValidationHash } from "@tinyburg/nucleus/endpoints/check-for-newer-save";
 
 // Handles the request by proxying to nimblebit's server
 export const handler = async function (request: Request, reply: Reply): Promise<void> {

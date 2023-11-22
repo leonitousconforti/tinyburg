@@ -1,4 +1,4 @@
-import { getRandomBurnerBot } from "@tinyburg/bots/burnbots.js";
+import { getRandomBurnerBot } from "./burnbots.js";
 
 export interface IConfig {
     nimblebitHost: string | URL;

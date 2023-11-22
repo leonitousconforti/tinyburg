@@ -1,6 +1,6 @@
 import type Dockerode from "dockerode";
 
-import apks from "@tinyburg/archive";
+import apks from "@tinyburg/fount";
 import architect from "@tinyburg/architect";
 import { bootstrapAgentOnRemote, AllAgents, cleanupAgent } from "../src/index.js";
 
@@ -15,16 +15,16 @@ const MissionAgent = AllAgents["MissionAgent"];
 const PetAgent = AllAgents["PetAgent"];
 const RoofAgent = AllAgents["RoofAgent"];
 
-// Timeout tests after 2 minutes and prep after 5 minutes
-const INSIGHT_TEST_TIMEOUT_MS = Number.parseInt(process.env["INSIGHT_TEST_TIMEOUT_MS"] as string) || 1000 * 60 * 2;
-const INSIGHT_PREP_TIMEOUT_MS = Number.parseInt(process.env["INSIGHT_PREP_TIMEOUT_MS"] as string) || 1000 * 60 * 5;
+// Timeout tests after 3 minutes and prep after 6 minutes
+const INSIGHT_TEST_TIMEOUT_MS = Number.parseInt(process.env["INSIGHT_TEST_TIMEOUT_MS"] as string) || 1000 * 60 * 3;
+const INSIGHT_PREP_TIMEOUT_MS = Number.parseInt(process.env["INSIGHT_PREP_TIMEOUT_MS"] as string) || 1000 * 60 * 6;
 
 describe("All important agents should return something and not throw any errors", () => {
     let fridaAddress: string;
     let emulatorContainer: Dockerode.Container;
 
     beforeAll(async () => {
-        const apk = await apks.loadApk(apks.Games.TinyTower, "4.27.1");
+        const apk = await apks.loadApk(apks.Games.TinyTower);
         const architectResult = await architect();
         await architectResult.installApk(apk);
         fridaAddress = architectResult.containerEndpoints[0].fridaAddress;
@@ -47,7 +47,7 @@ describe("All important agents should return something and not throw any errors"
         INSIGHT_TEST_TIMEOUT_MS
     );
 
-    it.skip(
+    it(
         "BadAgent should not produce data and throwing an error",
         async () => {
             const { runAgentMain } = await bootstrapAgentOnRemote(BadAgent, fridaAddress);
@@ -56,7 +56,7 @@ describe("All important agents should return something and not throw any errors"
         INSIGHT_TEST_TIMEOUT_MS
     );
 
-    it.skip(
+    it(
         "BitbookAgent should produce data without throwing any errors",
         async () => {
             const { runAgentMain, ...agentDetails } = await bootstrapAgentOnRemote(BitbookAgent, fridaAddress);
@@ -67,7 +67,7 @@ describe("All important agents should return something and not throw any errors"
         INSIGHT_TEST_TIMEOUT_MS
     );
 
-    it.skip(
+    it(
         "BitizenAgent should produce data without throwing any errors",
         async () => {
             const { runAgentMain, ...agentDetails } = await bootstrapAgentOnRemote(BitizenAgent, fridaAddress);
@@ -78,7 +78,7 @@ describe("All important agents should return something and not throw any errors"
         INSIGHT_TEST_TIMEOUT_MS
     );
 
-    it.skip(
+    it(
         "CostumeAgent should produce data without throwing any errors",
         async () => {
             const { runAgentMain, ...agentDetails } = await bootstrapAgentOnRemote(CostumeAgent, fridaAddress);
@@ -89,7 +89,7 @@ describe("All important agents should return something and not throw any errors"
         INSIGHT_TEST_TIMEOUT_MS
     );
 
-    it.skip(
+    it(
         "ElevatorAgent should produce data without throwing any errors",
         async () => {
             const { runAgentMain, ...agentDetails } = await bootstrapAgentOnRemote(ElevatorAgent, fridaAddress);
@@ -100,7 +100,7 @@ describe("All important agents should return something and not throw any errors"
         INSIGHT_TEST_TIMEOUT_MS
     );
 
-    it.skip(
+    it(
         "FloorAgent should produce data without throwing any errors",
         async () => {
             const { runAgentMain, ...agentDetails } = await bootstrapAgentOnRemote(FloorAgent, fridaAddress);
@@ -111,7 +111,7 @@ describe("All important agents should return something and not throw any errors"
         INSIGHT_TEST_TIMEOUT_MS
     );
 
-    it.skip(
+    it(
         "MissionAgent should produce data without throwing any errors",
         async () => {
             const { runAgentMain, ...agentDetails } = await bootstrapAgentOnRemote(MissionAgent, fridaAddress);
@@ -122,7 +122,7 @@ describe("All important agents should return something and not throw any errors"
         INSIGHT_TEST_TIMEOUT_MS
     );
 
-    it.skip(
+    it(
         "PetAgent should produce data without throwing any errors",
         async () => {
             const { runAgentMain, ...agentDetails } = await bootstrapAgentOnRemote(PetAgent, fridaAddress);
@@ -133,7 +133,7 @@ describe("All important agents should return something and not throw any errors"
         INSIGHT_TEST_TIMEOUT_MS
     );
 
-    it.skip(
+    it(
         "RoofAgent should produce data without throwing any errors",
         async () => {
             const { runAgentMain, ...agentDetails } = await bootstrapAgentOnRemote(RoofAgent, fridaAddress);

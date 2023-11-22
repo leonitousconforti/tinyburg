@@ -68,7 +68,7 @@
         "@rushstack/heft-lint-plugin": "0.2.12",
         "@rushstack/heft-typescript-plugin": "0.2.12",
         "@tinyburg/architect": "workspace:*",
-        "@tinyburg/archive": "workspace:*",
+        "@tinyburg/fount": "workspace:*",
         "@tinyburg/insight": "workspace:*",
         "@tinyburg/tsconfig-rig": "workspace:*",
         "@types/debug": "~4.1.12",

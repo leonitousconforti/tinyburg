@@ -1,8 +1,8 @@
 import type { ILogger } from "./logger.js";
 import type { IConfig } from "./config.js";
-import type { DecompressedSave } from "./decompress-save.js";
+// import type { DecompressedSave } from "./decompress-save.js";
 import type { IPushSnapshot } from "./endpoints/snapshots.js";
-import type { INimblebitJsonSave } from "./parsing-structs/blocks.js";
+// import type { INimblebitJsonSave } from "./parsing-structs/blocks.js";
 
 import fs from "node:fs/promises";
 import { DebugLogger } from "./logger.js";
@@ -83,38 +83,40 @@ export const localBackup = async ({
     return false;
 };
 
-export async function applicationLevelBackup<
-    T extends BackupType,
-    U extends T extends BackupType.COMPRESSED
-        ? string
-        : T extends BackupType.DECOMPRESSED
-        ? DecompressedSave
-        : INimblebitJsonSave,
->({ config, type, logger = debug }: BackupParameters & { type: T }): Promise<U> {
-    // Setup logging
-    const passLogger = logger === debug ? undefined : logger;
-    logger.info("Starting application backup process with type: %s for player: %s", type, config.player.playerId);
+// export async function applicationLevelBackup<
+//     T extends BackupType,
+//     U extends T extends BackupType.COMPRESSED
+//         ? string
+//         : T extends BackupType.DECOMPRESSED
+//         ? DecompressedSave
+//         : T extends BackupType.JSON
+//         ? INimblebitJsonSave
+//         : never,
+// >({ config, type, logger = debug }: BackupParameters & { type: T }): Promise<U> {
+//     // Setup logging
+//     const passLogger = logger === debug ? undefined : logger;
+//     logger.info("Starting application backup process with type: %s for player: %s", type, config.player.playerId);
 
-    // Player must be authenticated
-    if (!config.authenticated) {
-        return logger.fatal(new Error("Player not authenticated"));
-    }
+//     // Player must be authenticated
+//     if (!config.authenticated) {
+//         return logger.fatal(new Error("Player not authenticated"));
+//     }
 
-    // Download the current tower data and get it ready to format
-    const saveData = await downloadSave(config, passLogger);
+//     // Download the current tower data and get it ready to format
+//     const saveData = await downloadSave(config, passLogger);
 
-    switch (type) {
-        case BackupType.COMPRESSED: {
-            return compressSave(saveData, passLogger) as U;
-        }
-        case BackupType.DECOMPRESSED: {
-            return saveData.toString() as U;
-        }
-        case BackupType.JSON: {
-            return parseSaveToJson(saveData, false, passLogger) as Promise<U>;
-        }
-        default: {
-            throw new Error("Invalid backup type");
-        }
-    }
-}
+//     switch (type) {
+//         case BackupType.COMPRESSED: {
+//             return compressSave(saveData, passLogger) as U;
+//         }
+//         case BackupType.DECOMPRESSED: {
+//             return saveData.toString() as U;
+//         }
+//         case BackupType.JSON: {
+//             return parseSaveToJson(saveData, false, passLogger) as Promise<U>;
+//         }
+//         default: {
+//             throw new Error("Invalid backup type");
+//         }
+//     }
+// }

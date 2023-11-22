@@ -56,9 +56,9 @@ COPY --from=dependency-preparer "/tmp/frida-server-${FRIDA_SERVER_VERSION}-andro
 ADD avd/ /android/avd-home
 COPY entrypoint.sh /android/sdk/
 COPY make-snapshot.sh /android/sdk/
-COPY nginx.conf /etc/nginx/nginx.conf
 COPY envoy.yaml /etc/envoy/envoy.yaml
 COPY default.pulse-audio /etc/pulse/default.pa
+COPY nginx.conf /etc/nginx/sites-enabled/default
 COPY emulator_access.json /android/sdk/emulator/lib/emulator_access.json
 
 RUN apt-get update && \

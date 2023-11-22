@@ -5,11 +5,11 @@ import crypto from "node:crypto";
 import { secretSalt } from "../../constants.js";
 import { hasScopePermission } from "../../auth/scope-permission.js";
 
-import { parseSalt } from "@tinyburg/core/validation/salt";
-import { serverEndpoints } from "@tinyburg/core/contact-server";
-import { parseEndpoint } from "@tinyburg/core/validation/endpoint";
-import { parsePlayerId } from "@tinyburg/core/validation/player-id";
-import { parsePlayerSs } from "@tinyburg/core/validation/player-ss";
+import { parseSalt } from "@tinyburg/nucleus/validation/salt";
+import { serverEndpoints } from "@tinyburg/nucleus/contact-server";
+import { parseEndpoint } from "@tinyburg/nucleus/validation/endpoint";
+import { parsePlayerId } from "@tinyburg/nucleus/validation/player-id";
+import { parsePlayerSs } from "@tinyburg/nucleus/validation/player-ss";
 
 // Pre-handler hook to parse query params
 export const preHandler = async function (request: Request, reply: Reply): Promise<void> {

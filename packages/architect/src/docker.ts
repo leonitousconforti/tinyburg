@@ -26,7 +26,7 @@ const acquireDockerClient = (
         catch: (error) => new DockerError({ message: `AcquireDockerClientError ${error}` }),
     });
 
-/** Scoped docker client resource */
+/** Scoped docker client resource. */
 export const dockerClient = (
     dockerConnectionOptions?: DockerConnectionOptions | undefined
 ): Effect.Effect<Scope.Scope, DockerError, Dockerode> =>
@@ -35,8 +35,7 @@ export const dockerClient = (
     );
 
 /** Wraps a dockerode function in an effect try promise call. */
-const effectDockerAsyncWrapper = <
-    /* eslint-disable @typescript-eslint/no-explicit-any */
+const effectDockerWrapper = <
     DockerodeFunctions extends {
         [K in keyof Dockerode as Dockerode[K] extends (...arguments_: any[]) => any ? K : never]: Dockerode[K];
     },
@@ -45,15 +44,20 @@ const effectDockerAsyncWrapper = <
 >(
     functionName: T,
     ...arguments_: DockerodeFunctions[T] extends (...arguments_: infer A) => any ? A : never
-    /* eslint-enable @typescript-eslint/no-explicit-any */
 ): Effect.Effect<Scope.Scope, DockerError, Awaited<ReturnType<U>>> => {
     return dockerClient().pipe(
-        Effect.flatMap((client) =>
-            Effect.tryPromise({
-                try: () => (client[functionName as keyof Dockerode] as U)(...arguments_),
-                catch: (error) => new DockerError({ message: `${String(functionName)} ${error}` }),
-            })
-        )
+        Effect.flatMap((client) => {
+            const result: Promise<any> | any = (client[functionName as keyof Dockerode] as U)(...arguments_);
+            return result instanceof Promise
+                ? Effect.tryPromise({
+                      try: () => result,
+                      catch: (error) => new DockerError({ message: `${String(functionName)} ${error}` }),
+                  })
+                : Effect.try({
+                      try: () => result,
+                      catch: (error) => new DockerError({ message: `${String(functionName)} ${error}` }),
+                  });
+        })
     );
 };
 
@@ -94,13 +98,13 @@ export const DockerService: Context.Tag<DockerService, DockerService> = Context.
 export const DockerServiceLive: Layer.Layer<never, never, DockerService> = Layer.succeed(
     DockerService,
     DockerService.of({
-        getVolume: (name) => effectDockerAsyncWrapper("getVolume", name),
-        getContainer: (name) => effectDockerAsyncWrapper("getContainer", name),
-        createVolume: (options) => effectDockerAsyncWrapper("createVolume", options),
-        createContainer: (options) => effectDockerAsyncWrapper("createContainer", options),
-        listVolumes: (options) => effectDockerAsyncWrapper("listVolumes", options as {}),
-        listContainers: (options) => effectDockerAsyncWrapper("listContainers", options as {}),
-        buildImage: (file, options) => effectDockerAsyncWrapper("buildImage", file, options),
+        getVolume: (name) => effectDockerWrapper("getVolume", name),
+        getContainer: (name) => effectDockerWrapper("getContainer", name),
+        createVolume: (options) => effectDockerWrapper("createVolume", options),
+        createContainer: (options) => effectDockerWrapper("createContainer", options),
+        listVolumes: (options) => effectDockerWrapper("listVolumes", options as {}),
+        listContainers: (options) => effectDockerWrapper("listContainers", options as {}),
+        buildImage: (file, options) => effectDockerWrapper("buildImage", file, options),
 
         inspectContainer: (container) =>
             Effect.tryPromise({

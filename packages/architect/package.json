@@ -47,7 +47,6 @@
     "dependencies": {
         "@bufbuild/protobuf": "~1.4.2",
         "dockerode": "~4.0.0",
-        "frida": "~16.1.7",
         "tar-fs": "~3.0.4"
     },
     "devDependencies": {
