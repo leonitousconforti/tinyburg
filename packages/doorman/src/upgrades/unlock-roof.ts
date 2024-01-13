@@ -1,11 +1,11 @@
 import type { IUpgrade } from "./base-upgrade.js";
-import type { Roof } from "@tinyburg/core/data/roofs";
+import type { Roof } from "@tinyburg/nucleus/data/roofs";
 import type { Image } from "../image-operations/image.js";
 import type { PromiseClient } from "@connectrpc/connect";
 import type { EmulatorController } from "@tinyburg/architect/protobuf/emulator_controller_connect";
 
 import Debug from "debug";
-import { roofs } from "@tinyburg/core/data/roofs";
+// import { roofs } from "@tinyburg/nucleus/data/roofs";
 import { getScreenshot } from "../grpc/get-screenshots.js";
 import { cropImage } from "../image-operations/crop-image.js";
 import { NeedsVersion } from "../decorators/needs-version.js";
@@ -32,7 +32,8 @@ export class UnlockRoof implements IUpgrade {
     @EnterLog(debug)
     @ExitLog(debug, { withReturnValue: true })
     public canAfford(): boolean {
-        return roofs.find(({ name }) => name === this._roofToBuy)!.buxcost < 10;
+        // return roofs.find(({ name }) => name === this._roofToBuy)!.buxcost < 10;
+        return false;
     }
 
     @EnterLog(debug)

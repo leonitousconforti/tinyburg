@@ -1,5 +1,29 @@
 {
     "name": "@tinyburg/discord-bot",
-    "version": "0.0.1-alpha",
-    "private": true
+    "version": "0.0.1",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "_phase:build": "heft run --only build -- --clean",
+        "build": "NODE_OPTIONS=\"--experimental-vm-modules --no-warnings\" heft build --clean"
+    },
+    "dependencies": {
+        "debug": "~4.3.4",
+        "discord.js": "~14.13.0"
+    },
+    "devDependencies": {
+        "@rushstack/eslint-config": "3.4.1",
+        "@rushstack/heft": "0.63.2",
+        "@rushstack/heft-jest-plugin": "0.10.4",
+        "@rushstack/heft-lint-plugin": "0.2.12",
+        "@rushstack/heft-typescript-plugin": "0.2.12",
+        "@tinyburg/tsconfig-rig": "workspace:*",
+        "@types/node": "20.9.0",
+        "eslint": "8.53.0",
+        "eslint-config-prettier": "9.0.0",
+        "eslint-plugin-prettier": "5.0.1",
+        "eslint-plugin-unicorn": "49.0.0",
+        "prettier": "3.1.0",
+        "typescript": "5.2.2"
+    }
 }

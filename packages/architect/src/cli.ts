@@ -1,34 +1,50 @@
 #!/usr/bin/env node
 
-import yargs from "yargs";
-import architect from "./index.js";
+import { Effect, Option } from "effect";
+import { CliApp, Command, Options } from "@effect/cli";
+import * as NodeContext from "@effect/platform-node/NodeContext";
 
-await yargs(process.argv.slice(2))
-    .scriptName("architect")
-    .command(
-        "$0",
-        "the default command",
-        (yargs) =>
-            yargs.options({
-                "adb-port": { type: "string", demandOption: false, default: "0" },
-                "grpc-port": { type: "string", demandOption: false, default: "0" },
-                "frida-port": { type: "string", demandOption: false, default: "0" },
-                "console-port": { type: "string", demandOption: false, default: "0" },
-                "grpc-web-port": { type: "string", demandOption: false, default: "0" },
-                "envoy-admin-port": { type: "string", demandOption: false, default: "0" },
-            }),
-        async (argv) => {
-            await architect({
-                portBindings: {
-                    "5554/tcp": [{ HostPort: argv["console-port"] }],
-                    "5555/tcp": [{ HostPort: argv["adb-port"] }],
-                    "8081/tcp": [{ HostPort: argv["envoy-admin-port"] }],
-                    "8554/tcp": [{ HostPort: argv["grpc-port"] }],
-                    "8555/tcp": [{ HostPort: argv["grpc-web-port"] }],
-                    "27042/tcp": [{ HostPort: argv["frida-port"] }],
-                },
-            });
-        }
-    )
-    .help()
-    .parseAsync();
+import { architectEffect } from "./index.js";
+import { DockerServiceLive } from "./docker.js";
+
+const makePortOption = (name: string) =>
+    Options.text(name)
+        .pipe(Options.optional)
+        .pipe(Options.map(Option.map((p) => [{ HostPort: p }] as const)))
+        .pipe(Options.map(Option.getOrUndefined));
+
+const cli = CliApp.make({
+    name: "Architect",
+    version: "0.0.0",
+    command: Command.standard("architect", {
+        options: Options.all({
+            "5554/tcp": makePortOption("console-port"),
+            "5555/tcp": makePortOption("adb-port"),
+            "8080/tcp": makePortOption("mitm-web-port"),
+            "8081/tcp": makePortOption("envoy-admin-port"),
+            "8554/tcp": makePortOption("grpc-port"),
+            "8555/tcp": makePortOption("grpc-web-port"),
+            "27042/tcp": makePortOption("frida-port"),
+        }),
+    }),
+});
+
+CliApp.run(cli, process.argv.slice(2), ({ options }) =>
+    architectEffect({
+        // So ugly but it makes the types work out
+        portBindings: {
+            ...(options["5554/tcp"] ? { "5554/tcp": options["5554/tcp"] } : {}),
+            ...(options["5555/tcp"] ? { "5555/tcp": options["5555/tcp"] } : {}),
+            ...(options["8080/tcp"] ? { "8080/tcp": options["8080/tcp"] } : {}),
+            ...(options["8081/tcp"] ? { "8081/tcp": options["8081/tcp"] } : {}),
+            ...(options["8554/tcp"] ? { "8554/tcp": options["8554/tcp"] } : {}),
+            ...(options["8555/tcp"] ? { "8555/tcp": options["8555/tcp"] } : {}),
+            ...(options["27042/tcp"] ? { "27042/tcp": options["27042/tcp"] } : {}),
+        },
+    })
+)
+    .pipe(Effect.scoped)
+    .pipe(Effect.provide(NodeContext.layer))
+    .pipe(Effect.provide(DockerServiceLive))
+    .pipe(Effect.tapErrorCause(Effect.logError))
+    .pipe(Effect.runFork);

@@ -1,6 +1,6 @@
 import type Dockerode from "dockerode";
 
-import loadApk from "@tinyburg/apks";
+import apks from "@tinyburg/fount";
 import architect from "@tinyburg/architect";
 import { bootstrapAgentOnRemote, AllAgents, cleanupAgent } from "../src/index.js";
 
@@ -15,19 +15,19 @@ const MissionAgent = AllAgents["MissionAgent"];
 const PetAgent = AllAgents["PetAgent"];
 const RoofAgent = AllAgents["RoofAgent"];
 
-// Timeout tests after 2 minutes and prep after 5 minutes
-const INSIGHT_TEST_TIMEOUT_MS = Number.parseInt(process.env["INSIGHT_TEST_TIMEOUT_MS"] as string) || 1000 * 60 * 2;
-const INSIGHT_PREP_TIMEOUT_MS = Number.parseInt(process.env["INSIGHT_PREP_TIMEOUT_MS"] as string) || 1000 * 60 * 5;
+// Timeout tests after 3 minutes and prep after 6 minutes
+const INSIGHT_TEST_TIMEOUT_MS = Number.parseInt(process.env["INSIGHT_TEST_TIMEOUT_MS"] as string) || 1000 * 60 * 3;
+const INSIGHT_PREP_TIMEOUT_MS = Number.parseInt(process.env["INSIGHT_PREP_TIMEOUT_MS"] as string) || 1000 * 60 * 6;
 
 describe("All important agents should return something and not throw any errors", () => {
     let fridaAddress: string;
     let emulatorContainer: Dockerode.Container;
 
     beforeAll(async () => {
-        const apk = await loadApk("TinyTower");
+        const apk = await apks.loadApk(apks.Games.TinyTower);
         const architectResult = await architect();
         await architectResult.installApk(apk);
-        fridaAddress = architectResult.fridaAddress;
+        fridaAddress = architectResult.containerEndpoints[0].fridaAddress;
         emulatorContainer = architectResult.emulatorContainer;
     }, INSIGHT_PREP_TIMEOUT_MS);
 

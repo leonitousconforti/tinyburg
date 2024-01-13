@@ -45,7 +45,7 @@ Tinyburg works by utilizing the cloud sync feature in Tiny Tower; without it Tin
 -   cloud gifts feed (a feed where nimblebit can send gifts to everyone)
 -   Registering cloud sync email, verifying cloud sync email (used for the cloud sync sign in process and authentication workflow)
 -   Extracted data about all in game items (floors, roofs, lobbies, elevators, costumes, pets, etc)
--   Send gifts to yourself by proxing them through a burn-bot
+-   Send gifts to yourself by proxying them through a burn-bot
 -   Configurable logging (pino, debug, or bring your own logger)
 
 see [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the features/architecture of all the other projects in this repo

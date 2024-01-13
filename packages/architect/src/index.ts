@@ -1,85 +1,94 @@
-import dotenv from "dotenv";
-dotenv.config({ override: false, path: new URL("../.env", import.meta.url) });
-
-import Debug from "debug";
 import Dockerode from "dockerode";
 import DockerModem from "docker-modem";
+import { Effect, Option, Scope } from "effect";
+
 import {
+    dockerClient,
+    DockerServiceLive,
+    type DockerError,
+    type DockerService,
+    type DockerStreamResponse,
+    type DockerConnectionOptions,
+} from "./docker.js";
+
+import {
+    installApk,
     buildImage,
     populateSharedDataVolume,
     buildFreshContainer,
     getExposedEmulatorEndpoints,
-    isContainerHealthy,
-    installApk,
-    type IArchitectEndpoints,
     type IArchitectPortBindings,
+    type IExposedArchitectEndpoints,
 } from "./docker-helpers/all.js";
 
-// Override the docker host environment variable
+// Possibly Override the docker host environment variable
 if (process.env["ARCHITECT_DOCKER_HOST"] !== undefined) {
     process.env["DOCKER_HOST"] = process.env["ARCHITECT_DOCKER_HOST"];
 }
 
-/**
- * Custom Docker options type for dockerode that allows us to specify the ssh
- * agent correctly.
- */
-export type DockerConnectionOptions = Omit<Dockerode.DockerOptions, "sshAuthAgent"> & {
-    sshOptions?: { agent?: string | undefined };
-};
-
-/**
- * Allocates an emulator container on a local or remote docker host that has kvm
- * acceleration enabled.
- */
-export const architect = async (options?: {
+/** @internal */
+interface IArchitectOptions {
+    // Configurable parts of the container
+    networkMode?: string | undefined;
+    environmentVariables?: string[] | undefined;
     portBindings?: Partial<IArchitectPortBindings> | undefined;
+    onBuildProgress?: ((object: DockerStreamResponse) => void) | undefined;
+
+    // Docker host things
     dockerConnectionOptions?: DockerConnectionOptions | undefined;
-}): Promise<
-    {
-        emulatorContainer: Dockerode.Container;
-        installApk: (apk: string) => Promise<void>;
-    } & IArchitectEndpoints
-> => {
-    const containerName = `architect${Math.floor(Math.random() * (999_999 - 100_000 + 1)) + 100_000}`;
-    const logger: Debug.Debugger = Debug.debug(`tinyburg:architect:${containerName}`);
+}
 
-    const dockerConnectionOptions = Object.assign(
-        { socketPath: "/var/run/docker.sock" },
-        options?.dockerConnectionOptions || {}
-    );
-    const dockerode: Dockerode = new Dockerode(dockerConnectionOptions);
-    const dockerHost = (dockerode.modem as DockerModem.ConstructorOptions).host || "localhost";
-    logger("Connected to docker daemon %s @ %s", dockerConnectionOptions.socketPath, dockerHost);
+/** @internal */
+interface IArchitectReturnType {
+    sharedVolume: Dockerode.Volume;
+    emulatorContainer: Dockerode.Container;
+    installApk: (apk: string) => Promise<void>;
+    containerEndpoints: IExposedArchitectEndpoints;
+}
 
-    const start = performance.now();
-    await buildImage({ dockerode, logger });
-    await populateSharedDataVolume({ dockerode, logger });
-    const emulatorContainer = await buildFreshContainer({
-        dockerode,
-        logger,
-        containerName,
-        portBindings: options?.portBindings,
+/** @internal */
+export const architectEffect = (
+    options?: IArchitectOptions | undefined
+): Effect.Effect<Scope.Scope | DockerService, DockerError, IArchitectReturnType> =>
+    Effect.gen(function* (_: Effect.Adapter) {
+        // Generate a random container name which will be architectXXXXXX
+        const containerName: string = `architect${Math.floor(Math.random() * (999_999 - 100_000 + 1)) + 100_000}`;
+        const docker: Dockerode = yield* _(dockerClient(options?.dockerConnectionOptions));
+        const dockerHost: string = (docker.modem as DockerModem.ConstructorOptions).host || "localhost";
+        const dockerDaemon: string =
+            (docker.modem as DockerModem.ConstructorOptions).socketPath || "/var/run/docker.sock";
+
+        yield* _(Effect.log(`Connected to docker daemon ${dockerDaemon} @ ${dockerHost}`));
+        yield* _(buildImage({ onProgress: Option.fromNullable(options?.onBuildProgress) }));
+
+        const sharedVolume: Dockerode.Volume = yield* _(populateSharedDataVolume());
+
+        const emulatorContainer: Dockerode.Container = yield* _(
+            buildFreshContainer({
+                containerName,
+                networkMode: options?.networkMode,
+                portBindings: options?.portBindings || {},
+                environmentVariables: options?.environmentVariables || [],
+            })
+        );
+
+        const containerEndpoints: IExposedArchitectEndpoints = yield* _(
+            getExposedEmulatorEndpoints({ emulatorContainer })
+        );
+
+        return {
+            sharedVolume,
+            emulatorContainer,
+            containerEndpoints: containerEndpoints,
+            installApk: (apk: string) => Effect.runPromise(installApk({ apk, container: emulatorContainer })),
+        };
     });
 
-    const emulatorEndpoints = await getExposedEmulatorEndpoints({ dockerode, logger, emulatorContainer });
-    let emulatorContainerHealth = await isContainerHealthy({ logger, container: emulatorContainer });
-    while (!emulatorContainerHealth) {
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        emulatorContainerHealth = await isContainerHealthy({ logger, container: emulatorContainer });
-    }
-    const end = performance.now();
-
-    logger(
-        "Everything reported healthy after %ss, you can start interacting with the emulator+frida now!",
-        ((end - start) / 1000).toFixed(2)
-    );
-
-    return {
-        emulatorContainer,
-        ...emulatorEndpoints,
-        installApk: (apk: string) => installApk({ apk, logger, container: emulatorContainer }),
-    };
-};
+export const architect = (options?: IArchitectOptions | undefined): Promise<IArchitectReturnType> =>
+    architectEffect(options)
+        .pipe(Effect.scoped)
+        .pipe(Effect.provide(DockerServiceLive))
+        .pipe(Effect.orDie)
+        .pipe(Effect.runPromise);
 
 export default architect;

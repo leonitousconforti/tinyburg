@@ -1,61 +1,83 @@
-import Debug from "debug";
 import Dockerode from "dockerode";
+import { Effect, Option, Schedule, Scope } from "effect";
 
-import { couldNotPopulateShareVolume } from "../errors.js";
 import { containerCreateOptions } from "./0-shared-options.js";
-import { SHARED_EMULATOR_DATA_VOLUME_NAME, SHARED_VOLUME_CONTAINER_HELPER_NAME } from "./constants.js";
+import { DockerError, DockerService } from "../docker.js";
+import { SHARED_EMULATOR_DATA_VOLUME_NAME, SHARED_VOLUME_CONTAINER_HELPER_NAME } from "../versions.js";
 
-export const populateSharedDataVolume = async ({
-    dockerode,
-    logger,
-}: {
-    dockerode: Dockerode;
-    logger: Debug.Debugger;
-}): Promise<void> => {
-    logger("Populating shared emulator data volume...");
+/**
+ * If the architect emulator shared volume does not exists on the docker host,
+ * then this will create a new docker volume and run the architect docker image
+ * to populate the shared volume then return it. If it finds a container already
+ * populating the shared volume then it will wait until that container exists.
+ * If the shared volume already exists and there is no container populating it,
+ * then it returns immediately because there is no work to do.
+ *
+ * @internal
+ */
+export const populateSharedDataVolume = (): Effect.Effect<Scope.Scope | DockerService, DockerError, Dockerode.Volume> =>
+    Effect.gen(function* (_: Effect.Adapter) {
+        const dockerService: DockerService = yield* _(DockerService);
+        yield* _(Effect.logInfo("Populating shared emulator data volume..."));
 
-    // Check for the container building the existing emulator data volume
-    let containers = await dockerode.listContainers({
-        filters: JSON.stringify({ name: [SHARED_VOLUME_CONTAINER_HELPER_NAME] }),
-    });
-    while (containers.length > 0) {
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        containers = await dockerode.listContainers({
-            filters: JSON.stringify({ name: [SHARED_VOLUME_CONTAINER_HELPER_NAME] }),
+        // Wait for any existing containers to be gone
+        yield* _(
+            Effect.retry(
+                Effect.gen(function* (_: Effect.Adapter) {
+                    const anyContainers: Dockerode.ContainerInfo[] = yield* _(
+                        dockerService.listContainers({
+                            filters: JSON.stringify({ name: [SHARED_VOLUME_CONTAINER_HELPER_NAME] }),
+                        })
+                    );
+
+                    if (anyContainers.length > 0) {
+                        yield* _(Effect.fail(new Error("Containers still exist")));
+                    }
+                }),
+                Schedule.addDelay(Schedule.recurs(60), () => 5000)
+            )
+        );
+
+        // Check for the existing emulator data volume
+        const maybeVolume: Dockerode.VolumeInspectInfo[] | undefined = yield* _(
+            dockerService
+                .listVolumes({
+                    filters: JSON.stringify({ name: [SHARED_EMULATOR_DATA_VOLUME_NAME] }),
+                })
+                .pipe(Effect.map(({ Volumes }) => Volumes))
+        );
+
+        // If the volume exists then we do not have to repopulate it
+        if (maybeVolume?.[0]) {
+            yield* _(Effect.log("Volume already existed, so no work needed to be done"));
+            return yield* _(dockerService.getVolume(SHARED_EMULATOR_DATA_VOLUME_NAME));
+        }
+
+        // Create the helper container and run the make-snapshot.sh script
+        yield* _(dockerService.createVolume({ Driver: "local", Name: SHARED_EMULATOR_DATA_VOLUME_NAME }));
+        const createOptions: Dockerode.ContainerCreateOptions = containerCreateOptions({
+            portBindings: {},
+            networkMode: undefined,
+            environmentVariables: [],
+            containerName: SHARED_VOLUME_CONTAINER_HELPER_NAME,
+            command: Option.some(["/android/sdk/make-snapshot.sh"]),
         });
-    }
+        const volumeHelperContainer: Dockerode.Container = yield* _(dockerService.createContainer(createOptions));
+        yield* _(Effect.promise(() => volumeHelperContainer.start()));
 
-    // Check for the existing emulator data volume
-    const volumeExists = await dockerode
-        .listVolumes({ filters: JSON.stringify({ name: [SHARED_EMULATOR_DATA_VOLUME_NAME] }) })
-        .then((data) => data.Volumes[0]);
+        // Wait for the container to exit and handle errors
+        const exitCode: { StatusCode: number } = yield* _(Effect.promise(() => volumeHelperContainer.wait()));
+        const volume: Dockerode.Volume = yield* _(dockerService.getVolume(SHARED_EMULATOR_DATA_VOLUME_NAME));
+        if (exitCode.StatusCode !== 0) {
+            yield* _(Effect.promise(() => volumeHelperContainer.stop()));
+            yield* _(Effect.promise(() => volumeHelperContainer.remove()));
+            yield* _(Effect.promise(() => volume.remove()));
+            yield* _(new DockerError({ message: "An error ocurred when populating the shared emulator data volume" }));
+        }
 
-    // If the volume exists then we do not have to repopulate it
-    if (volumeExists) {
-        logger("Volume already existed, so no work needed to be done");
-        return;
-    }
-
-    // TODO: all user to specify volume options
-    await dockerode.createVolume({ Driver: "local", Name: SHARED_EMULATOR_DATA_VOLUME_NAME });
-
-    // Create the helper container and run the make-snapshot.sh script
-    const createOptions = containerCreateOptions({
-        containerName: SHARED_VOLUME_CONTAINER_HELPER_NAME,
-        command: ["/android/sdk/make-snapshot.sh"],
-    });
-    const volumeHelperContainer: Dockerode.Container = await dockerode.createContainer(createOptions);
-    await volumeHelperContainer.start();
-
-    // Wait for the container to exit and handle errors
-    const exitCode: { StatusCode: number } = await volumeHelperContainer.wait();
-    if (exitCode.StatusCode !== 0) {
-        await volumeHelperContainer.remove();
-        throw new Error(couldNotPopulateShareVolume(SHARED_VOLUME_CONTAINER_HELPER_NAME));
-    }
-
-    logger("Shared emulator data volume population complete!");
-    await volumeHelperContainer.remove();
-};
+        yield* _(Effect.logInfo("Shared emulator data volume population complete"));
+        yield* _(Effect.promise(() => volumeHelperContainer.remove()));
+        return volume;
+    }).pipe(Effect.catchAll((error: unknown) => new DockerError({ message: `${error}` })));
 
 export default populateSharedDataVolume;

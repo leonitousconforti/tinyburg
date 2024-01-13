@@ -17,7 +17,7 @@ import type { QuerystringSchema as QuerystringSchemaInterface } from "../types/q
 
 // Fastify routing for api v1
 // eslint-disable-next-line @rushstack/typedef-var
-const api_v1 = fp<{ url: string }>(
+export const api_v1 = fp<{ url: string }>(
     async (fastify: FastifyInstance, options: { url: string | undefined }): Promise<void> => {
         fastify.route<{
             Querystring: QuerystringSchemaInterface;
