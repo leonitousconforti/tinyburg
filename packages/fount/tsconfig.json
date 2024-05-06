@@ -5,10 +5,8 @@
         "noEmit": false,
         "sourceMap": true,
         "declaration": true,
-
-        "checkJs": true,
         "types": ["node", "heft-jest"],
         "plugins": [{ "name": "@effect/language-service" }]
     },
-    "include": ["src/**/*.ts", "src/**/*.cjs"]
+    "include": ["src/**/*.ts"]
 }

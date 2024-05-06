@@ -10,12 +10,13 @@ module.exports = {
         "plugin:@effect/recommended",
         "plugin:prettier/recommended",
     ],
-    plugins: ["unicorn", "prettier"],
+    plugins: ["unicorn", "prettier", "effect"],
     env: { node: true, es2022: true },
     parserOptions: { tsconfigRootDir: __dirname, project: ["./tsconfig.json"] },
     rules: {
         "no-console": "warn",
         "@effect/dprint": "off",
+        "unicorn/import-style": "off",
         "unicorn/no-array-callback-reference": "off",
         "@typescript-eslint/naming-convention": [
             "error",
@@ -23,10 +24,6 @@ module.exports = {
         ],
     },
     overrides: [
-        {
-            files: ["src/download-latest-apks.cjs"],
-            rules: { "@typescript-eslint/naming-convention": "off" },
-        },
         {
             files: ["src/types.ts"],
             rules: { "@typescript-eslint/consistent-type-definitions": "off" },

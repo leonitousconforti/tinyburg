@@ -1,11 +1,11 @@
-import { HashMap } from "effect";
+import * as HashMap from "effect/HashMap";
 import { trackedVersions } from "./versions.js";
 
 export enum Games {
     BitCity = "com.nimblebit.bitcity",
     TinyTower = "com.nimblebit.tinytower",
     LegoTower = "com.nimblebit.legotower",
-    TinyTowerVegas = "com.nimblebit.vegas",
+    // TinyTowerVegas = "com.nimblebit.vegas",
     PocketFrogs = "com.nimblebit.pocketfrogs",
     PocketPlanes = "com.nimblebit.pocketplanes",
     PocketTrains = "com.nimblebit.pockettrains",
