@@ -58,3 +58,7 @@ const legoTower = await loadApk(Games.LegoTower);
 const patchedTinyTower = await patchApk(Games.TinyTower);
 const patchedTinyTower2 = await patchApk(Games.TinyTower, "4 versions before latest");
 ```
+
+## TODO
+
+[ ] - replace execa with @effect/platform command executor
