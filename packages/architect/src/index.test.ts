@@ -1,3 +1,4 @@
+import * as NodeContext from "@effect/platform-node/NodeContext";
 import * as Effect from "effect/Effect";
 import * as MobyApi from "the-moby-effect/Moby";
 import * as architect from "../src/index.js";
@@ -17,6 +18,7 @@ describe("Architect tests", () => {
             expect(sharedVolume.Name).toBeDefined();
             await architect
                 .cleanup({ emulatorContainer, sharedVolume })
+                .pipe(Effect.provide(NodeContext.layer))
                 .pipe(Effect.provide(MobyApi.fromDockerHostEnvironmentVariable))
                 .pipe(Effect.runPromise);
         },
@@ -54,6 +56,7 @@ describe("Architect tests", () => {
             expect(sharedVolume.Name).toBeDefined();
             await architect
                 .cleanup({ emulatorContainer, sharedVolume })
+                .pipe(Effect.provide(NodeContext.layer))
                 .pipe(Effect.provide(MobyApi.fromDockerHostEnvironmentVariable))
                 .pipe(Effect.runPromise);
         },

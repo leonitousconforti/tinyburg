@@ -67,7 +67,7 @@ export const buildImage = (): Effect.Effect<void, MobyApi.Images.ImagesError, Mo
                 ),
             });
 
-        yield* Stream.runCollect(buildStream);
+        yield* Stream.runDrain(buildStream);
     }).pipe(Effect.scoped);
 
 export default buildImage;

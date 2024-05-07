@@ -13,17 +13,17 @@ WORKDIR /tmp
 RUN wget "https://dl.google.com/android/repository/emulator-linux_x64-${EMULATOR_VERSION}.zip" && \
     wget "https://dl.google.com/android/repository/sys-img/${EMULATOR_SYSTEM_IMAGE_VERSION}.zip" && \
     wget "https://dl.google.com/android/repository/platform-tools_r${ANDROID_SDK_TOOLS_VERSION}-linux.zip" && \
-    wget "https://downloads.mitmproxy.org/${MITM_PROXY_VERSION}/mitmproxy-${MITM_PROXY_VERSION}-linux.tar.gz" && \
+    wget "https://downloads.mitmproxy.org/${MITM_PROXY_VERSION}/mitmproxy-${MITM_PROXY_VERSION}-linux-x86_64.tar.gz" && \
     wget "https://github.com/envoyproxy/envoy/releases/download/v${ENVOY_PROXY_VERSION}/envoy-${ENVOY_PROXY_VERSION}-linux-x86_64" && \
     wget "https://github.com/frida/frida/releases/download/${FRIDA_SERVER_VERSION}/frida-server-${FRIDA_SERVER_VERSION}-android-x86_64.xz" && \
-    tar -xzf "mitmproxy-${MITM_PROXY_VERSION}-linux.tar.gz" && \
+    tar -xzf "mitmproxy-${MITM_PROXY_VERSION}-linux-x86_64.tar.gz" && \
     unzip -u -o "emulator-linux_x64-${EMULATOR_VERSION}.zip" && \
     unzip -u -o "platform-tools_r${ANDROID_SDK_TOOLS_VERSION}-linux.zip" && \
     unzip -u -o "${EMULATOR_SYSTEM_IMAGE_VERSION_SHORT}" -d sysimg && \
     xz --decompress "frida-server-${FRIDA_SERVER_VERSION}-android-x86_64.xz" && \
     rm -f "${EMULATOR_SYSTEM_IMAGE_VERSION_SHORT}" && \
     rm -f "emulator-linux_x64-${EMULATOR_VERSION}.zip" && \
-    rm -f "mitmproxy-${MITM_PROXY_VERSION}-linux.tar.gz" && \
+    rm -f "mitmproxy-${MITM_PROXY_VERSION}-linux-x86_64.tar.gz" && \
     rm -f "platform-tools_r${ANDROID_SDK_TOOLS_VERSION}-linux.zip" && \
     rm -f "frida-server-${FRIDA_SERVER_VERSION}-android-x86_64.xz"
 
@@ -74,6 +74,7 @@ RUN apt-get update && \
     libpangocairo-1.0-0 libstdc++6 libx11-6 libx11-xcb1 libxcb1 libx11-xcb1 \
     libxcursor1 libxdamage1 libxext6 libxfixes3 libxi6 libxrandr2 nginx \
     libxrender1 libxss1 libxtst6 libnss3 pulseaudio libpulse0 libtinfo5 && \
+    libxkbfile-dev libx11-dev libxkbfile1 x11proto-dev && \
     # spell-checker: enable
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
