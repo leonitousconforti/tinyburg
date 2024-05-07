@@ -54,4 +54,4 @@ runs:
 
     - name: Rush build and test
       shell: bash
-      run: node common/scripts/install-run-rush.js test --timeline --production ${{ inputs.BUILD_PARAMETERS }}
+      run: node common/scripts/install-run-rush.js build --timeline --production ${{ inputs.BUILD_PARAMETERS }}
