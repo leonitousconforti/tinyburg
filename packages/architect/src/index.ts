@@ -1,5 +1,6 @@
 import * as Socket from "@effect/platform/Socket";
 import * as Effect from "effect/Effect";
+import * as Schedule from "effect/Schedule";
 import * as MobyApi from "the-moby-effect";
 
 import {
@@ -68,7 +69,10 @@ export const architect = (
             sharedVolume,
             emulatorContainer,
             containerEndpoints: containerEndpoints,
-            installApk: (apk: string) => installApk({ apk, containerId: emulatorContainer.Id! }),
+            installApk: (apk: string) =>
+                installApk({ apk, containerId: emulatorContainer.Id! }).pipe(
+                    Effect.retry({ schedule: Schedule.recurs(3).pipe(Schedule.addDelay(() => "5 seconds")) })
+                ),
         };
     });
 
