@@ -1,47 +1,47 @@
 import deepExtend from "deep-extend";
 
 // Closures
-import { createLoggerClosure } from "./closures/logger.js";
 import { loggerConfigClosure } from "./closures/logger-config.js";
+import { createLoggerClosure } from "./closures/logger.js";
 
 // Validation functions
 import { isValidPlayerId } from "./validation/player-id.js";
 
 // Library configs
-import { type IConfig, defaultConfig } from "./config.js";
+import { defaultConfig, type IConfig } from "./config.js";
 
 // Library methods to expose
-import { saveConfig } from "./save-config.js";
+import { makeSaveBetterThan, whichSaveIsBetter } from "./compare-saves.js";
 import { compressSave } from "./compress-save.js";
-import { safeModifySave } from "./modify-save.js";
 import { decompressSave } from "./decompress-save.js";
-import { whichSaveIsBetter, makeSaveBetterThan } from "./compare-saves.js";
-import { concatJsonToBlock, parseSaveToJson, appendToBlock } from "./save-parser.js";
+import { safeModifySave } from "./modify-save.js";
+import { saveConfig } from "./save-config.js";
+import { appendToBlock, concatJsonToBlock, parseSaveToJson } from "./save-parser.js";
 
 // Endpoint methods to expose (sorted by their filenames)
 import { pullBitbookPostCloudFeed } from "./endpoints/bitbook-cloud-feed.js";
 import { checkForNewerSave, computeCheckForNewerSaveValidationHash } from "./endpoints/check-for-newer-save.js";
 import { pullCloudGiftFeed } from "./endpoints/cloud-gift-feed.js";
-import { downloadSave, computeDownloadSaveValidationHash } from "./endpoints/download-save.js";
+import { computeDownloadSaveValidationHash, downloadSave } from "./endpoints/download-save.js";
 import {
     addFriend,
-    pullFriendMeta,
-    retrieveFriendSnapshotList,
-    pullFriendTower,
     computePullFriendTowerValidationHash,
+    pullFriendMeta,
+    pullFriendTower,
+    retrieveFriendSnapshotList,
 } from "./endpoints/friends.js";
 import { getGifts, receiveGift } from "./endpoints/gifts.js";
 import { newUser } from "./endpoints/new-user.js";
 import { playerDetails } from "./endpoints/player-details.js";
 import { raffleDetails } from "./endpoints/raffle-details.js";
-import { enterRaffle, enterMultiRaffle, checkEnteredRaffle } from "./endpoints/raffle.js";
+import { checkEnteredRaffle, enterMultiRaffle, enterRaffle } from "./endpoints/raffle.js";
 import { registerEmail } from "./endpoints/register-email.js";
 import { sendItem } from "./endpoints/send-item.js";
 import {
-    retrieveSnapshotList,
-    pushSnapshot,
-    pullSnapshot,
     computePullSnapshotValidationHash,
+    pullSnapshot,
+    pushSnapshot,
+    retrieveSnapshotList,
 } from "./endpoints/snapshots.js";
 import { uploadSave } from "./endpoints/upload-save.js";
 import { verifyDevice } from "./endpoints/verify-device.js";
@@ -51,7 +51,7 @@ import { getVisits, visitFriend } from "./endpoints/visits.js";
 import { DebugLogger, type ILogger } from "./logger.js";
 const debug: ILogger = new DebugLogger("tinyburg:core");
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
 export const fromConfig = (
     partialConfig: Pick<Partial<IConfig>, "burnBot" | "proxy"> &
         Omit<IConfig, "game" | "burnBot" | "proxy"> & { game: string },

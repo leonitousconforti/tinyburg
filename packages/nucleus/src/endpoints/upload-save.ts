@@ -1,16 +1,16 @@
-import type { ILogger } from "../logger.js";
 import type { IConfig } from "../config.js";
 import type { DecompressedSave } from "../decompress-save.js";
-import type { INimblebitResponse } from "./nimblebit-response.js";
+import type { ILogger } from "../logger.js";
 import type { INimblebitJsonSave } from "../parsing-structs/blocks.js";
+import type { INimblebitResponse } from "./nimblebit-response.js";
 
 import prompts from "prompts";
+import { compressSave } from "../compress-save.js";
+import { postNetworkRequest, serverEndpoints } from "../contact-server.js";
+import { cryptoSalt } from "../crypto-salt.js";
 import { DebugLogger } from "../logger.js";
 import { extract } from "../modify-save.js";
-import { cryptoSalt } from "../crypto-salt.js";
-import { compressSave } from "../compress-save.js";
-import { parseSaveToJson, concatJsonToBlock } from "../save-parser.js";
-import { serverEndpoints, postNetworkRequest } from "../contact-server.js";
+import { concatJsonToBlock, parseSaveToJson } from "../save-parser.js";
 
 // Debug logger (will default to using this if no other logger is supplied).
 const loggingNamespace: string = "tinyburg:endpoints:upload_save";
@@ -62,14 +62,26 @@ export interface IUploadSave extends INimblebitResponse {
 }
 
 // Generates the meta data necessary when uploading save data either for pushing to the cloud or pushing a snapshot.
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export const generateUploadMetadata = async ({
     saveData,
     version,
     requestFloorId,
     platform = "Android",
     language = "en-us",
-}: GenerateUploadMetadataParameters) => {
+}: GenerateUploadMetadataParameters): Promise<{
+    metaData: {
+        saveData: string;
+        avatar: DecompressedSave;
+        saveVersion: number | undefined;
+        level: number;
+        reqFID: number;
+        mg: number;
+        vip: number;
+        p: "IOS" | "Android";
+        l: string;
+    };
+    compressedSave: string;
+}> => {
     // We need two copies of the save data, one as json and one in block form
     let jsonSaveData: INimblebitJsonSave;
     let stringSaveData: DecompressedSave;

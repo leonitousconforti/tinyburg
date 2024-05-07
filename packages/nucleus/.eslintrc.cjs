@@ -40,6 +40,12 @@ module.exports = {
                 "@rushstack/typedef-var": "off",
             },
         },
+        {
+            files: ["src/data/update-common-data.cjs"],
+            rules: {
+                "unicorn/no-array-callback-reference": "off",
+            },
+        },
     ],
     ignorePatterns: ["dist/", "src/data/**/*.ts"],
 };

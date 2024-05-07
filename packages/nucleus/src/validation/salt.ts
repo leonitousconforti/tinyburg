@@ -3,6 +3,7 @@ import { z } from "zod";
 export const zodSalt: z.ZodNumber = z.coerce
     .number({
         required_error: "Random salt is required",
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         invalid_type_error: "Why are you trying to give me a string for the random salt?",
     })
     .int({ message: "Why is the random salt you gave me not an integer value" })

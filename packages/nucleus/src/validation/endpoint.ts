@@ -4,6 +4,7 @@ import { serverEndpoints } from "../contact-server.js";
 export const zodEndpoint: z.ZodEffects<z.ZodString, string, string> = z
     .string({
         required_error: "Endpoint is required",
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         invalid_type_error: "You tried to use something that was not a string as your endpoint",
     })
     .refine(
