@@ -1,0 +1,10 @@
+{
+    "changes": [
+        {
+            "packageName": "@tinyburg/explorer",
+            "comment": "Initial release",
+            "type": "major"
+        }
+    ],
+    "packageName": "@tinyburg/explorer"
+}

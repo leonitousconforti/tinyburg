@@ -1,0 +1,10 @@
+{
+    "changes": [
+        {
+            "packageName": "@tinyburg/insight",
+            "comment": "Initial release",
+            "type": "major"
+        }
+    ],
+    "packageName": "@tinyburg/insight"
+}

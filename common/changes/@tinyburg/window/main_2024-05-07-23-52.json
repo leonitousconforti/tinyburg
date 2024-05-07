@@ -1,0 +1,10 @@
+{
+    "changes": [
+        {
+            "packageName": "@tinyburg/window",
+            "comment": "Initial release",
+            "type": "major"
+        }
+    ],
+    "packageName": "@tinyburg/window"
+}

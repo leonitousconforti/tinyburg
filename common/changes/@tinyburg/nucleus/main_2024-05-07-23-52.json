@@ -1,0 +1,10 @@
+{
+    "changes": [
+        {
+            "packageName": "@tinyburg/nucleus",
+            "comment": "Initial release",
+            "type": "major"
+        }
+    ],
+    "packageName": "@tinyburg/nucleus"
+}

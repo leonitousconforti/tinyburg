@@ -1,0 +1,10 @@
+{
+    "changes": [
+        {
+            "packageName": "@tinyburg/architect",
+            "comment": "Initial release",
+            "type": "major"
+        }
+    ],
+    "packageName": "@tinyburg/architect"
+}
