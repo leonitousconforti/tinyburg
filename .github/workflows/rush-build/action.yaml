@@ -12,6 +12,11 @@ runs:
       with:
         node-version: 18
 
+    - uses: pnpm/action-setup@v4
+      with:
+        version: 7.33.5
+        run_install: false
+
     - if: runner.os == 'Linux'
       name: Start xvfb
       shell: bash
@@ -48,9 +53,6 @@ runs:
       shell: bash
       run: |
         node common/scripts/install-run-rush.js install
-        node common/scripts/install-run-rush.js update-autoinstaller --name rush-prettier
-        node common/scripts/install-run-rush.js update-autoinstaller --name rush-commitlint
-        node common/scripts/install-run-rush.js update-autoinstaller --name rush-github-action-cache
 
     - name: Rush build and test
       shell: bash
