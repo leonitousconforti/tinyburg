@@ -20,6 +20,7 @@
         "bufbuild",
         "buildargs",
         "Buildx",
+        "cacerts",
         "Checkin",
         "cloudinit",
         "codemetrics",
