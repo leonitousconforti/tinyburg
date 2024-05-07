@@ -6,7 +6,6 @@
     "features": {
         "ghcr.io/devcontainers/features/git:1": {},
         "ghcr.io/devcontainers/features/node:1": {},
-        "ghcr.io/devcontainers/features/rust:1": {},
         "ghcr.io/devcontainers/features/java:1": {},
         "ghcr.io/devcontainers/features/python:1": {},
         "ghcr.io/devcontainers/features/github-cli:1": {},
@@ -58,14 +57,15 @@
                     "editor.defaultFormatter": "Prisma.prisma"
                 },
                 "[python]": {
-                    "editor.wordBasedSuggestions": false,
-                    "editor.defaultFormatter": "ms-python.black-formatter",
-                    "editor.codeActionsOnSave": {
-                        "source.organizeImports": true
-                    }
+                    "editor.wordBasedSuggestions": "off",
+                    "editor.defaultFormatter": "ms-python.black-formatter"
                 },
                 "isort.args": ["--profile", "black"],
                 "files.associations": { "*.json": "jsonc", "package.json": "json", "cloudinit.conf": "plaintext" },
+                "editor.codeActionsOnSave": {
+                    "source.organizeImports": "always",
+                    "source.addMissingImports": "always"
+                },
                 "files.exclude": {
                     "**/.git": true,
                     "**/.svn": true,
@@ -93,5 +93,6 @@
     },
 
     "appPort": ["0.0.0.0:3000:3000"],
-    "postCreateCommand": "/bin/bash -i ./setup.sh"
+    "postCreateCommand": "/bin/bash -i ./setup.sh",
+    "runArgs": ["--security-opt", "seccomp=unconfined"]
 }
