@@ -47,16 +47,16 @@
     "dependencies": {
         "@bufbuild/protobuf": "~1.9.0",
         "tar-fs": "~3.0.6",
-        "the-moby-effect": "~1.45.0-alpha.3"
+        "the-moby-effect": "~1.45.0-alpha.4"
     },
     "devDependencies": {
         "@bufbuild/buf": "1.31.0",
         "@bufbuild/protoc-gen-es": "1.9.0",
         "@connectrpc/protoc-gen-connect-es": "1.4.0",
-        "@effect/cli": "0.36.18",
+        "@effect/cli": "0.36.19",
         "@effect/eslint-plugin": "0.1.2",
-        "@effect/platform": "0.52.3",
-        "@effect/platform-node": "0.48.4",
+        "@effect/platform": "0.53.0",
+        "@effect/platform-node": "0.49.0",
         "@effect/printer": "0.33.11",
         "@effect/printer-ansi": "0.33.11",
         "@effect/schema": "0.66.14",
@@ -82,10 +82,12 @@
         "ws": "8.17.0"
     },
     "peerDependencies": {
-        "@effect/platform": "0.52.3",
+        "@effect/platform": "0.53.0",
+        "@effect/platform-node": "0.49.0",
+        "@effect/schema": "0.66.14",
         "effect": "3.1.2"
     },
     "engines": {
-        "node": ">=16"
+        "node": ">=18"
     }
 }
