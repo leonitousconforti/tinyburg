@@ -1,19 +1,19 @@
-import type { Image } from "../src/image-operations/image.js";
 import type { ICropRegion } from "../src/image-operations/crop-image.js";
+import type { Image } from "../src/image-operations/image.js";
 
 import fs from "node:fs";
-import sharp from "sharp";
 import path from "node:url";
-import { maskImage } from "../src/image-operations/mask-image.js";
+import sharp from "sharp";
 import { addChannel } from "../src/image-operations/add-channels.js";
 import { dropChannel } from "../src/image-operations/drop-channel.js";
-import { thresholdImage } from "../src/image-operations/threshold-image.js";
 import { grayscaleImage } from "../src/image-operations/grayscale-image.js";
 import { ImageType, imageTypeFromChannelsForPng } from "../src/image-operations/image.js";
+import { maskImage } from "../src/image-operations/mask-image.js";
+import { thresholdImage } from "../src/image-operations/threshold-image.js";
 
 // Load the silkscreen image and metadata. These need to be extracted from the game's
 // resource files, there are lots of free open source tools out there that do this.
-import silkscreen from "./silkscreen.json" assert { type: "json" };
+import silkscreen from "./silkscreen.json";
 const silkscreenImage = sharp(path.fileURLToPath(new URL("silkscreen.png", import.meta.url)));
 const silkscreenMetadata = await silkscreenImage.metadata();
 

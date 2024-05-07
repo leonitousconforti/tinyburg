@@ -1,11 +1,11 @@
-import sharp from "sharp";
-import url from "node:url";
-import path from "node:path";
 import fs from "node:fs/promises";
+import path from "node:path";
+import url from "node:url";
+import sharp from "sharp";
 
 // Load the game sprite sheet and metadata. These need to be extracted from the game's
 // resource files, there are lots of free open source tools out there that do this.
-import sprites from "./game.json" assert { type: "json" };
+import sprites from "./game.json";
 const spritesImage = sharp(url.fileURLToPath(new URL("game.png", import.meta.url)));
 
 // Ensure that all output folders have been created

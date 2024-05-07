@@ -1,17 +1,17 @@
 import type { Transport } from "@connectrpc/connect";
 
-import React from "react";
-import { Box, Grid, Container } from "@mui/material";
 import { createPromiseClient } from "@connectrpc/connect";
 import { createGrpcWebTransport } from "@connectrpc/connect-web";
+import { Box, Container, Grid } from "@mui/material";
+import React from "react";
 
-import { Rtc } from "@tinyburg/architect/protobuf/rtc_service_connect";
 import { EmulatorController } from "@tinyburg/architect/protobuf/emulator_controller_connect";
+import { Rtc } from "@tinyburg/architect/protobuf/rtc_service_connect";
 
-import JsepProtocol from "../services/Jsep.js";
 import Copyright from "../components/Copyright.js";
 import WebRtcView from "../components/WebRtcView.js";
-import LogcatView from "../components/LogcatView.js";
+import JsepProtocol from "../services/Jsep.js";
+// import LogcatView from "../components/LogcatView.js";
 import WithMouseKeyHandler from "../components/InteractiveLayer.js";
 
 interface IEmulatorProps {

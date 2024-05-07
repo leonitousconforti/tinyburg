@@ -2,10 +2,12 @@ const sharp = require("sharp");
 const path = require("node:path");
 const fs = require("node:fs/promises");
 const exec = require("node:child_process");
+const Effect = require("effect/Effect");
+const NodeContext = require("@effect/platform-node/NodeContext");
 
 module.exports.runAsync = async () => {
     const { loadApk, Games } = await import("@tinyburg/fount");
-    const apkPath = await loadApk(Games.TinyTower);
+    const apkPath = await loadApk(Games.TinyTower).pipe(Effect.provide(NodeContext.layer)).pipe(Effect.runPromise);
     const pythonExtractScript = path.join(__dirname, "extract.py");
     const pipRequirements = path.join(__dirname, "requirements.txt");
     exec.execSync(`pip3 install -r ${pipRequirements}`);

@@ -1,10 +1,10 @@
-import prettier from "prettier";
 import fs from "node:fs/promises";
+import prettier from "prettier";
 
 // Load the game sprite sheet and silkscreen. This needs to be extracted from the game's
 // resource files, there are lots of free open source tools out there that do this.
-import sprites from "./game.json" assert { type: "json" };
-import silkscreen from "./silkscreen.json" assert { type: "json" };
+import sprites from "./game.json";
+import silkscreen from "./silkscreen.json";
 
 // Characters that need to be escaped before writing to the source code file
 // eslint-disable-next-line quotes

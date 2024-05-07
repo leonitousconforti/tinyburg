@@ -11,7 +11,8 @@
         "emitDecoratorMetadata": true,
         "experimentalDecorators": true,
         "noUncheckedIndexedAccess": false,
-        "exactOptionalPropertyTypes": false
+        "exactOptionalPropertyTypes": false,
+        "checkJs": true
     },
-    "include": ["src/**/*.ts", "templates/**/*.ts"]
+    "include": ["src/**/*.ts", "templates/**/*.ts", "assets/*.cjs"]
 }
