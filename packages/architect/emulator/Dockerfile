@@ -73,7 +73,7 @@ RUN apt-get update && \
     libgdk-pixbuf2.0-0 libglib2.0-0 libgtk-3-0 libnspr4 libpango-1.0-0 \
     libpangocairo-1.0-0 libstdc++6 libx11-6 libx11-xcb1 libxcb1 libx11-xcb1 \
     libxcursor1 libxdamage1 libxext6 libxfixes3 libxi6 libxrandr2 nginx \
-    libxrender1 libxss1 libxtst6 libnss3 pulseaudio libpulse0 libtinfo5 && \
+    libxrender1 libxss1 libxtst6 libnss3 pulseaudio libpulse0 libtinfo5 \
     libxkbfile-dev libx11-dev libxkbfile1 x11proto-dev && \
     # spell-checker: enable
     apt-get clean && \
