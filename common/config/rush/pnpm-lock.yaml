@@ -37,7 +37,7 @@ importers:
       eslint-plugin-unicorn: 52.0.0
       fastify: ~4.23.2
       fastify-plugin: ~4.5.0
-      got: ~13.0.0
+      got: ~14.2.1
       ioredis: ~5.3.2
       pg: ~8.11.0
       prettier: 3.2.5
@@ -61,7 +61,7 @@ importers:
       close-with-grace: 1.2.0
       fastify: 4.23.2
       fastify-plugin: 4.5.1
-      got: 13.0.0
+      got: 14.2.1
       ioredis: 5.3.2
       pg: 8.11.3
       reflect-metadata: 0.1.14
@@ -330,7 +330,7 @@ importers:
       '@tinyburg/tsconfig-rig': workspace:*
       '@types/debug': 4.1.12
       '@types/node': 20.12.10
-      '@types/semver': ~7.5.4
+      '@types/semver': ~7.5.8
       debug: ~4.3.4
       emittery: ~1.0.3
       eslint: 8.57.0
@@ -339,7 +339,7 @@ importers:
       eslint-plugin-unicorn: 52.0.0
       prettier: 3.2.5
       rimraf: ~5.0.5
-      semver: ~7.5.1
+      semver: ~7.6.1
       sharp: ~0.32.3
       ts-node: ~10.9.1
       typescript: 5.4.5
@@ -354,7 +354,7 @@ importers:
       '@tinyburg/nucleus': link:../nucleus
       debug: 4.3.4
       emittery: 1.0.3
-      semver: 7.5.4
+      semver: 7.6.1
     devDependencies:
       '@rushstack/eslint-config': 3.6.9_te743w6atip6hhlha3uq43n2xe
       '@rushstack/heft': 0.66.4_@types+node@20.12.10
@@ -364,7 +364,7 @@ importers:
       '@tinyburg/tsconfig-rig': link:../tsconfig-rig
       '@types/debug': 4.1.12
       '@types/node': 20.12.10
-      '@types/semver': 7.5.6
+      '@types/semver': 7.5.8
       eslint: 8.57.0
       eslint-config-prettier: 9.1.0_eslint@8.57.0
       eslint-plugin-prettier: 5.1.3_udeglvt2rvqfn252kbszwwr7nu
@@ -530,6 +530,9 @@ importers:
 
   ../../packages/nucleus:
     specifiers:
+      '@effect/platform': 0.53.0
+      '@effect/platform-node': 0.49.0
+      '@effect/schema': 0.66.14
       '@rushstack/eslint-config': 3.6.9
       '@rushstack/heft': 0.66.4
       '@rushstack/heft-jest-plugin': 0.11.25
@@ -543,30 +546,35 @@ importers:
       '@types/deep-extend': ~0.6.0
       '@types/node': 20.12.10
       '@types/prompts': ~2.4.5
-      '@types/semver': ~7.5.4
+      '@types/semver': ~7.5.8
       debug: ~4.3.4
       deep-extend: ~0.6.0
-      dotenv: ~16.3.1
+      effect: 3.1.2
       eslint: 8.57.0
       eslint-config-prettier: 9.1.0
       eslint-plugin-prettier: 5.1.3
       eslint-plugin-unicorn: 52.0.0
-      got: ~13.0.0
+      fast-check: 3.18.0
+      got: ~14.2.1
       prettier: 3.2.5
       prompts: ~2.4.2
-      semver: ~7.5.1
+      semver: ~7.6.1
       supports-color: ~9.4.0
+      the-moby-effect: ~1.45.0-alpha.5
       typescript: 5.4.5
-      zod: ~3.22.4
+      zod: ~3.23.7
     dependencies:
       debug: 4.3.4_supports-color@9.4.0
       deep-extend: 0.6.0
-      got: 13.0.0
+      got: 14.2.1
       prompts: 2.4.2
-      semver: 7.5.4
+      semver: 7.6.1
       supports-color: 9.4.0
-      zod: 3.22.4
+      zod: 3.23.7
     devDependencies:
+      '@effect/platform': 0.53.0_jwcwrjfoiq25fljfh56meuimqu
+      '@effect/platform-node': 0.49.0_n53rpryfwvhc4pj5kk5lzfqu5i
+      '@effect/schema': 0.66.14_tnuywgplkrdjri5qtwolkgl7cm
       '@rushstack/eslint-config': 3.6.9_wdzgoz7jlbvcfovmdeakphg7wu
       '@rushstack/heft': 0.66.4_@types+node@20.12.10
       '@rushstack/heft-jest-plugin': 0.11.25_j7txky4fjeculykgozzjswjnmi
@@ -580,13 +588,15 @@ importers:
       '@types/deep-extend': 0.6.2
       '@types/node': 20.12.10
       '@types/prompts': 2.4.9
-      '@types/semver': 7.5.6
-      dotenv: 16.3.1
+      '@types/semver': 7.5.8
+      effect: 3.1.2
       eslint: 8.57.0_supports-color@9.4.0
       eslint-config-prettier: 9.1.0_eslint@8.57.0
       eslint-plugin-prettier: 5.1.3_udeglvt2rvqfn252kbszwwr7nu
       eslint-plugin-unicorn: 52.0.0_sipcibisdd4zhe3xgryfjesmee
+      fast-check: 3.18.0
       prettier: 3.2.5
+      the-moby-effect: 1.45.0-alpha.5_ach6a3hqxdv6byfrfjt4ecn2ni
       typescript: 5.4.5
 
   ../../packages/treasurer:
@@ -2614,7 +2624,7 @@ packages:
       nopt: 5.0.0
       npmlog: 5.0.1
       rimraf: 3.0.2
-      semver: 7.5.4
+      semver: 7.6.1
       tar: 6.2.0
     transitivePeerDependencies:
       - encoding
@@ -3809,9 +3819,9 @@ packages:
     resolution: {integrity: sha512-+Fj43pSMwJs4KRrH/938Uf+uAELIgVBmQzg/q1YG10djyfA3TnrU8N8XzqCh/okZdszqBQTZf96idMfE5lnwTA==}
     dev: true
 
-  /@sindresorhus/is/5.6.0:
-    resolution: {integrity: sha512-TV7t8GKYaJWsn00tFDqBw8+Uqmr8A0fRU1tvTQhyZzGv0sJCGRQL3JGMI3ucuKo3XIZdUP+Lx7/gh2t3lewy7g==}
-    engines: {node: '>=14.16'}
+  /@sindresorhus/is/6.3.0:
+    resolution: {integrity: sha512-bOSPck7aIJjASXIg1qvXSIjXhVBpIEKdl2Wxg4pVqoTRPL8wWExKBrnGIh6CEnhkFQHfc36k7APhO3uXV4g5xg==}
+    engines: {node: '>=16'}
     dev: false
 
   /@sinonjs/commons/3.0.0:
@@ -4301,8 +4311,8 @@ packages:
   /@types/scheduler/0.16.8:
     resolution: {integrity: sha512-WZLiwShhwLRmeV6zH+GkbOFT6Z6VklCItrDioxUnv+u4Ll+8vKeFySoFyK/0ctcRpOmwAicELfmys1sDc/Rw+A==}
 
-  /@types/semver/7.5.6:
-    resolution: {integrity: sha512-dn1l8LaMea/IjDoHNd9J52uBbInB796CDffS6VdIxvqYCPSG0V0DzHp76GpaWnlhg88uYyPbXCDIowa86ybd5A==}
+  /@types/semver/7.5.8:
+    resolution: {integrity: sha512-I8EUhyrgfLrcTkzV3TSsGyl1tSuPrEDzr0yd5m90UgNxQkyDXULk3b6MlQqTCpZpNtWe1K0hzclnZkTcLBe2UQ==}
     dev: true
 
   /@types/send/0.17.4:
@@ -4409,7 +4419,7 @@ packages:
       grapheme-splitter: 1.0.4
       ignore: 5.3.0
       natural-compare-lite: 1.4.0
-      semver: 7.5.4
+      semver: 7.6.1
       tsutils: 3.21.0_typescript@5.0.4
       typescript: 5.0.4
     transitivePeerDependencies:
@@ -4438,7 +4448,7 @@ packages:
       graphemer: 1.4.0
       ignore: 5.3.0
       natural-compare: 1.4.0
-      semver: 7.5.4
+      semver: 7.6.1
       ts-api-utils: 1.0.3_typescript@5.4.5
       typescript: 5.4.5
     transitivePeerDependencies:
@@ -4467,7 +4477,7 @@ packages:
       graphemer: 1.4.0
       ignore: 5.3.0
       natural-compare: 1.4.0
-      semver: 7.5.4
+      semver: 7.6.1
       ts-api-utils: 1.0.3_typescript@5.4.5
       typescript: 5.4.5
     transitivePeerDependencies:
@@ -4683,7 +4693,7 @@ packages:
       debug: 4.3.4
       globby: 11.1.0
       is-glob: 4.0.3
-      semver: 7.5.4
+      semver: 7.6.1
       tsutils: 3.21.0_typescript@5.0.4
       typescript: 5.0.4
     transitivePeerDependencies:
@@ -4705,7 +4715,7 @@ packages:
       globby: 11.1.0
       is-glob: 4.0.3
       minimatch: 9.0.3
-      semver: 7.5.4
+      semver: 7.6.1
       ts-api-utils: 1.0.3_typescript@5.4.5
       typescript: 5.4.5
     transitivePeerDependencies:
@@ -4727,7 +4737,7 @@ packages:
       globby: 11.1.0
       is-glob: 4.0.3
       minimatch: 9.0.3
-      semver: 7.5.4
+      semver: 7.6.1
       ts-api-utils: 1.0.3_typescript@5.4.5
       typescript: 5.4.5
     transitivePeerDependencies:
@@ -4749,7 +4759,7 @@ packages:
       globby: 11.1.0
       is-glob: 4.0.3
       minimatch: 9.0.3
-      semver: 7.5.4
+      semver: 7.6.1
       ts-api-utils: 1.0.3_typescript@5.4.5
       typescript: 5.4.5
     transitivePeerDependencies:
@@ -4764,13 +4774,13 @@ packages:
     dependencies:
       '@eslint-community/eslint-utils': 4.4.0_eslint@8.7.0
       '@types/json-schema': 7.0.15
-      '@types/semver': 7.5.6
+      '@types/semver': 7.5.8
       '@typescript-eslint/scope-manager': 5.59.11
       '@typescript-eslint/types': 5.59.11
       '@typescript-eslint/typescript-estree': 5.59.11_typescript@5.0.4
       eslint: 8.7.0
       eslint-scope: 5.1.1
-      semver: 7.5.4
+      semver: 7.6.1
     transitivePeerDependencies:
       - supports-color
       - typescript
@@ -4784,12 +4794,12 @@ packages:
     dependencies:
       '@eslint-community/eslint-utils': 4.4.0_eslint@8.57.0
       '@types/json-schema': 7.0.15
-      '@types/semver': 7.5.6
+      '@types/semver': 7.5.8
       '@typescript-eslint/scope-manager': 6.19.1
       '@typescript-eslint/types': 6.19.1
       '@typescript-eslint/typescript-estree': 6.19.1_typescript@5.4.5
       eslint: 8.57.0
-      semver: 7.5.4
+      semver: 7.6.1
     transitivePeerDependencies:
       - supports-color
       - typescript
@@ -4803,12 +4813,12 @@ packages:
     dependencies:
       '@eslint-community/eslint-utils': 4.4.0_eslint@8.57.0
       '@types/json-schema': 7.0.15
-      '@types/semver': 7.5.6
+      '@types/semver': 7.5.8
       '@typescript-eslint/scope-manager': 6.19.1
       '@typescript-eslint/types': 6.19.1
       '@typescript-eslint/typescript-estree': 6.19.1_3335nqly2imnwag6hgkgzcxefy
       eslint: 8.57.0_supports-color@9.4.0
-      semver: 7.5.4
+      semver: 7.6.1
     transitivePeerDependencies:
       - supports-color
       - typescript
@@ -6285,7 +6295,7 @@ packages:
       postcss-modules-scope: 3.1.0_postcss@8.4.33
       postcss-modules-values: 4.0.0_postcss@8.4.33
       postcss-value-parser: 4.2.0
-      semver: 7.5.4
+      semver: 7.6.1
       webpack: 5.82.1_webpack-cli@5.1.4
     dev: true
 
@@ -6302,7 +6312,7 @@ packages:
       postcss-modules-scope: 3.1.0_postcss@8.4.33
       postcss-modules-values: 4.0.0_postcss@8.4.33
       postcss-value-parser: 4.2.0
-      semver: 7.5.4
+      semver: 7.6.1
       webpack: 5.82.1_webpack-cli@5.1.4
     dev: true
 
@@ -6822,6 +6832,7 @@ packages:
   /dotenv/16.3.1:
     resolution: {integrity: sha512-IPzF4w4/Rd94bA9imS68tZBaYyBWSCE47V1RGuMrB94iyTOIEwRmVL2x/4An+6mETpLrKJ5hQkB8W4kFAadeIQ==}
     engines: {node: '>=12'}
+    dev: false
 
   /duplexer/0.1.2:
     resolution: {integrity: sha512-jtD6YG370ZCIi/9GTaJKQxWTZD045+4R4hTk/x1UyoqadyJ9x9CgSi1RlVDQF8U2sxLLSnFkCaMihqljHIWgMg==}
@@ -7356,7 +7367,7 @@ packages:
       read-pkg-up: 7.0.1
       regexp-tree: 0.1.27
       regjsparser: 0.10.0
-      semver: 7.5.4
+      semver: 7.6.1
       strip-indent: 3.0.0
     transitivePeerDependencies:
       - supports-color
@@ -7383,7 +7394,7 @@ packages:
       read-pkg-up: 7.0.1
       regexp-tree: 0.1.27
       regjsparser: 0.10.0
-      semver: 7.5.4
+      semver: 7.6.1
       strip-indent: 3.0.0
     transitivePeerDependencies:
       - supports-color
@@ -7827,7 +7838,7 @@ packages:
       proxy-addr: 2.0.7
       rfdc: 1.3.0
       secure-json-parse: 2.7.0
-      semver: 7.5.4
+      semver: 7.6.1
       toad-cache: 3.7.0
     transitivePeerDependencies:
       - supports-color
@@ -7980,9 +7991,9 @@ packages:
       cross-spawn: 7.0.3
       signal-exit: 4.1.0
 
-  /form-data-encoder/2.1.4:
-    resolution: {integrity: sha512-yDYSgNMraqvnxiEXO4hi88+YZxaHC6QKzb5N84iRCTDeRO7ZALpir/lVmf/uXUhnwUr2O4HU8s/n6x+yNjQkHw==}
-    engines: {node: '>= 14.17'}
+  /form-data-encoder/4.0.2:
+    resolution: {integrity: sha512-KQVhvhK8ZkWzxKxOr56CPulAhH3dobtuQ4+hNQ+HekH/Wp5gSOafqRAeTphQUJAIk0GBvHZgJ2ZGRWd5kphMuw==}
+    engines: {node: '>= 18'}
     dev: false
 
   /form-data/4.0.0:
@@ -8333,20 +8344,20 @@ packages:
       get-intrinsic: 1.2.2
     dev: true
 
-  /got/13.0.0:
-    resolution: {integrity: sha512-XfBk1CxOOScDcMr9O1yKkNaQyy865NbYs+F7dr4H0LZMVgCj2Le59k6PqbNHoL5ToeaEQUYh6c6yMfVcc6SJxA==}
-    engines: {node: '>=16'}
+  /got/14.2.1:
+    resolution: {integrity: sha512-KOaPMremmsvx6l9BLC04LYE6ZFW4x7e4HkTe3LwBmtuYYQwpeS4XKqzhubTIkaQ1Nr+eXxeori0zuwupXMovBQ==}
+    engines: {node: '>=20'}
     dependencies:
-      '@sindresorhus/is': 5.6.0
+      '@sindresorhus/is': 6.3.0
       '@szmarczak/http-timer': 5.0.1
       cacheable-lookup: 7.0.0
       cacheable-request: 10.2.14
       decompress-response: 6.0.0
-      form-data-encoder: 2.1.4
-      get-stream: 6.0.1
+      form-data-encoder: 4.0.2
+      get-stream: 8.0.1
       http2-wrapper: 2.2.1
       lowercase-keys: 3.0.0
-      p-cancelable: 3.0.0
+      p-cancelable: 4.0.1
       responselike: 3.0.0
     dev: false
 
@@ -9158,7 +9169,7 @@ packages:
       jest-util: 29.7.0
       p-limit: 3.1.0
       pretty-format: 29.7.0
-      pure-rand: 6.0.4
+      pure-rand: 6.1.0
       slash: 3.0.0
       stack-utils: 2.0.6
     transitivePeerDependencies:
@@ -9187,7 +9198,7 @@ packages:
       jest-util: 29.7.0
       p-limit: 3.1.0
       pretty-format: 29.7.0
-      pure-rand: 6.0.4
+      pure-rand: 6.1.0
       slash: 3.0.0
       stack-utils: 2.0.6
     transitivePeerDependencies:
@@ -9668,7 +9679,7 @@ packages:
       jest-util: 29.7.0
       natural-compare: 1.4.0
       pretty-format: 29.7.0
-      semver: 7.5.4
+      semver: 7.6.1
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -9699,7 +9710,7 @@ packages:
       jest-util: 29.7.0
       natural-compare: 1.4.0
       pretty-format: 29.7.0
-      semver: 7.5.4
+      semver: 7.6.1
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -9727,7 +9738,7 @@ packages:
       jest-util: 29.7.0
       natural-compare: 1.4.0
       pretty-format: 29.7.0
-      semver: 7.5.4
+      semver: 7.6.1
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -9755,7 +9766,7 @@ packages:
       jest-util: 29.7.0
       natural-compare: 1.4.0
       pretty-format: 29.7.0
-      semver: 7.5.4
+      semver: 7.6.1
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -10275,7 +10286,7 @@ packages:
     resolution: {integrity: sha512-hXdUTZYIVOt1Ex//jAQi+wTZZpUpwBj/0QsOzqegb3rGMMeJiSEu5xLHnYfBrRV4RH2+OCSOO95Is/7x1WJ4bw==}
     engines: {node: '>=10'}
     dependencies:
-      semver: 7.5.4
+      semver: 7.6.1
     dev: true
 
   /make-error/1.3.6:
@@ -10613,7 +10624,7 @@ packages:
     resolution: {integrity: sha512-p7eGEiQil0YUV3ItH4/tBb781L5impVmmx2E9FRKF7d18XXzp4PGT2tdYMFY6wQqgxD0IwNZOiSJ0/K0fSi/OA==}
     engines: {node: '>=10'}
     dependencies:
-      semver: 7.5.4
+      semver: 7.6.1
 
   /node-addon-api/5.1.0:
     resolution: {integrity: sha512-eh0GgfEkpnoWDq+VY8OyvYhFEzBk6jIYbRKdIlyTiAXIVJ8PyBaKb0rp7oDtoddbdoHWhq8wwr+XZ81F1rpNdA==}
@@ -10896,9 +10907,9 @@ packages:
       type-check: 0.4.0
     dev: true
 
-  /p-cancelable/3.0.0:
-    resolution: {integrity: sha512-mlVgR3PGuzlo0MmTdk4cXqXWlwQDLnONTAg6sm62XkMJEiRxN3GL3SffkYvqwonbkJBcrI7Uvv5Zh9yjvn2iUw==}
-    engines: {node: '>=12.20'}
+  /p-cancelable/4.0.1:
+    resolution: {integrity: sha512-wBowNApzd45EIKdO1LaU+LrMBwAcjfPaYtVzV3lmfM3gf8Z4CHZsiIqlM8TZZ8okYvh5A1cP6gTfCRQtwUpaUg==}
+    engines: {node: '>=14.16'}
     dev: false
 
   /p-limit/2.3.0:
@@ -11327,7 +11338,7 @@ packages:
       cosmiconfig: 7.1.0
       klona: 2.0.6
       postcss: 8.4.33
-      semver: 7.5.4
+      semver: 7.6.1
       webpack: 5.82.1_webpack-cli@5.1.4
     dev: true
 
@@ -11892,10 +11903,6 @@ packages:
       - typescript
       - utf-8-validate
     dev: false
-
-  /pure-rand/6.0.4:
-    resolution: {integrity: sha512-LA0Y9kxMYv47GIPJy6MI84fqTd2HmYZI83W/kM/SkKfDlajnZYfmXFTxkbY+xSBPkLJxltMa9hIkmdc29eguMA==}
-    dev: true
 
   /pure-rand/6.1.0:
     resolution: {integrity: sha512-bVWawvoZoBYpp6yIoQtQXHZjmz35RSVHnUOTefl8Vcjr8snTPY1wnpSPMWekcFwbxI6gtmT7rSYPFvz71ldiOA==}
@@ -12529,6 +12536,7 @@ packages:
     hasBin: true
     dependencies:
       lru-cache: 6.0.0
+    dev: true
 
   /semver/7.6.0:
     resolution: {integrity: sha512-EnwXhrlwXMk9gKu5/flx5sv/an57AkRplG3hTK68W7FRDN+k+OWBj65M7719OkA82XLBxrcX0KSHj+X5COhOVg==}
@@ -12537,6 +12545,11 @@ packages:
     dependencies:
       lru-cache: 6.0.0
     dev: false
+
+  /semver/7.6.1:
+    resolution: {integrity: sha512-f/vbBsu+fOiYt+lmwZV0rVwJScl46HppnOA1ZvIuBWKOTlllpyJ3bfVax76/OrhCH38dyxoDIA8K7uB963IYgA==}
+    engines: {node: '>=10'}
+    hasBin: true
 
   /send/0.18.0:
     resolution: {integrity: sha512-qqWzuOjSFOuqPjFe4NOsMLafToQQwBSOEpS+FwEt3A2V3vKubTquT3vmLTQpFgMXp8AlFWFuP1qKaJZOtPpVXg==}
@@ -12644,7 +12657,7 @@ packages:
       detect-libc: 2.0.2
       node-addon-api: 6.1.0
       prebuild-install: 7.1.1
-      semver: 7.5.4
+      semver: 7.6.1
       simple-get: 4.0.1
       tar-fs: 3.0.6
       tunnel-agent: 0.6.0
@@ -14464,4 +14477,8 @@ packages:
 
   /zod/3.22.4:
     resolution: {integrity: sha512-iC+8Io04lddc+mVqQ9AZ7OQ2MrUKGN+oIQyq1vemgt46jwCwLfhq7/pwnBnNXXXZb8VTVLKwp9EDkx+ryxIWmg==}
+    dev: false
+
+  /zod/3.23.7:
+    resolution: {integrity: sha512-NBeIoqbtOiUMomACV/y+V3Qfs9+Okr18vR5c/5pHClPpufWOrsx8TENboDPe265lFdfewX2yBtNTLPvnmCxwog==}
     dev: false
