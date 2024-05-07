@@ -1,22 +1,20 @@
 // TODO: Keep these versions up to date
 
 /** https://github.com/mitmproxy/mitmproxy/releases */
-export const MITM_PROXY_VERSION = "10.1.5" as const;
+export const MITM_PROXY_VERSION = "10.3.0" as const;
 
 // Stuck at 16.0.19, related issues:
-// https://github.com/frida/frida-gum/issues/757
-// https://github.com/vfsfitvnm/frida-il2cpp-bridge/issues/439
 /** https://github.com/frida/frida/releases */
-export const FRIDA_SERVER_VERSION = "16.0.19" as const;
+export const FRIDA_SERVER_VERSION = "16.2.1" as const;
 
 /** https://github.com/envoyproxy/envoy/releases */
-export const ENVOY_PROXY_VERSION = "1.28.0" as const;
+export const ENVOY_PROXY_VERSION = "1.30.1" as const;
 
 /** https://developer.android.com/studio/emulator_archive */
-export const EMULATOR_VERSION = "10696886" as const;
+export const EMULATOR_VERSION = "11772612" as const; // 11150993
 
 /** https://developer.android.com/tools/releases/platform-tools */
-export const ANDROID_SDK_TOOLS_VERSION = "34.0.5" as const;
+export const ANDROID_SDK_TOOLS_VERSION = "35.0.1" as const;
 
 /** https://dl.google.com/android/repository/sys-img/google_apis/x86_64-30_r12.zip */
 export const EMULATOR_SYSTEM_IMAGE_VERSION = "google_apis/x86_64-30_r12" as const;

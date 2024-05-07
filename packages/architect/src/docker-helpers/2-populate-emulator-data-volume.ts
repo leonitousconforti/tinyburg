@@ -1,9 +1,10 @@
-import Dockerode from "dockerode";
-import { Effect, Option, Schedule, Scope } from "effect";
+import * as Effect from "effect/Effect";
+import * as Option from "effect/Option";
+import * as Schedule from "effect/Schedule";
+import * as MobyApi from "the-moby-effect";
 
-import { containerCreateOptions } from "./0-shared-options.js";
-import { DockerError, DockerService } from "../docker.js";
 import { SHARED_EMULATOR_DATA_VOLUME_NAME, SHARED_VOLUME_CONTAINER_HELPER_NAME } from "../versions.js";
+import { containerCreateOptions } from "./0-shared-options.js";
 
 /**
  * If the architect emulator shared volume does not exists on the docker host,
@@ -15,69 +16,71 @@ import { SHARED_EMULATOR_DATA_VOLUME_NAME, SHARED_VOLUME_CONTAINER_HELPER_NAME }
  *
  * @internal
  */
-export const populateSharedDataVolume = (): Effect.Effect<Scope.Scope | DockerService, DockerError, Dockerode.Volume> =>
-    Effect.gen(function* (_: Effect.Adapter) {
-        const dockerService: DockerService = yield* _(DockerService);
-        yield* _(Effect.logInfo("Populating shared emulator data volume..."));
+export const populateSharedDataVolume = (): Effect.Effect<
+    Readonly<MobyApi.Schemas.Volume>,
+    MobyApi.Volumes.VolumesError | MobyApi.Containers.ContainersError | Error,
+    MobyApi.Volumes.Volumes | MobyApi.Containers.Containers
+> =>
+    Effect.gen(function* () {
+        const volumes: MobyApi.Volumes.Volumes = yield* MobyApi.Volumes.Volumes;
+        const containers: MobyApi.Containers.Containers = yield* MobyApi.Containers.Containers;
+        yield* Effect.logInfo("Populating shared emulator data volume...");
 
         // Wait for any existing containers to be gone
-        yield* _(
-            Effect.retry(
-                Effect.gen(function* (_: Effect.Adapter) {
-                    const anyContainers: Dockerode.ContainerInfo[] = yield* _(
-                        dockerService.listContainers({
-                            filters: JSON.stringify({ name: [SHARED_VOLUME_CONTAINER_HELPER_NAME] }),
-                        })
-                    );
+        yield* Effect.retry(
+            Effect.gen(function* () {
+                const anyContainers: MobyApi.Schemas.VolumeListResponse = yield* volumes.list({
+                    filters: { name: [SHARED_VOLUME_CONTAINER_HELPER_NAME] },
+                });
 
-                    if (anyContainers.length > 0) {
-                        yield* _(Effect.fail(new Error("Containers still exist")));
-                    }
-                }),
-                Schedule.addDelay(Schedule.recurs(60), () => 5000)
-            )
+                if (anyContainers.Volumes && anyContainers.Volumes?.length > 0) {
+                    yield* Effect.fail(new Error("Helper containers still existed after timeout"));
+                }
+            }),
+            Schedule.addDelay(Schedule.recurs(60), () => 5000)
         );
 
         // Check for the existing emulator data volume
-        const maybeVolume: Dockerode.VolumeInspectInfo[] | undefined = yield* _(
-            dockerService
-                .listVolumes({
-                    filters: JSON.stringify({ name: [SHARED_EMULATOR_DATA_VOLUME_NAME] }),
-                })
-                .pipe(Effect.map(({ Volumes }) => Volumes))
-        );
+        const maybeVolume: MobyApi.Schemas.VolumeListResponse = yield* volumes.list({
+            filters: { name: [SHARED_EMULATOR_DATA_VOLUME_NAME] },
+        });
 
         // If the volume exists then we do not have to repopulate it
-        if (maybeVolume?.[0]) {
-            yield* _(Effect.log("Volume already existed, so no work needed to be done"));
-            return yield* _(dockerService.getVolume(SHARED_EMULATOR_DATA_VOLUME_NAME));
+        if (maybeVolume.Volumes && maybeVolume.Volumes[0]) {
+            const volume: MobyApi.Schemas.Volume = maybeVolume.Volumes[0];
+            yield* Effect.log(`Volume ${volume.Name} already existed, so no work needed to be done`);
+            return volume;
         }
 
         // Create the helper container and run the make-snapshot.sh script
-        yield* _(dockerService.createVolume({ Driver: "local", Name: SHARED_EMULATOR_DATA_VOLUME_NAME }));
-        const createOptions: Dockerode.ContainerCreateOptions = containerCreateOptions({
+        const volume: Readonly<MobyApi.Schemas.Volume> = yield* volumes.create({
+            Driver: "local",
+            Name: SHARED_EMULATOR_DATA_VOLUME_NAME,
+        });
+        const createOptions: MobyApi.Containers.ContainerCreateOptions = containerCreateOptions({
             portBindings: {},
             networkMode: undefined,
             environmentVariables: [],
             containerName: SHARED_VOLUME_CONTAINER_HELPER_NAME,
             command: Option.some(["/android/sdk/make-snapshot.sh"]),
         });
-        const volumeHelperContainer: Dockerode.Container = yield* _(dockerService.createContainer(createOptions));
-        yield* _(Effect.promise(() => volumeHelperContainer.start()));
+        const volumeHelperContainer: MobyApi.Schemas.ContainerCreateResponse = yield* containers.create(createOptions);
+        yield* containers.start({ id: volumeHelperContainer.Id });
 
         // Wait for the container to exit and handle errors
-        const exitCode: { StatusCode: number } = yield* _(Effect.promise(() => volumeHelperContainer.wait()));
-        const volume: Dockerode.Volume = yield* _(dockerService.getVolume(SHARED_EMULATOR_DATA_VOLUME_NAME));
+        const exitCode: MobyApi.Schemas.ContainerWaitResponse = yield* containers.wait({
+            id: volumeHelperContainer.Id,
+        });
+
         if (exitCode.StatusCode !== 0) {
-            yield* _(Effect.promise(() => volumeHelperContainer.stop()));
-            yield* _(Effect.promise(() => volumeHelperContainer.remove()));
-            yield* _(Effect.promise(() => volume.remove()));
-            yield* _(new DockerError({ message: "An error ocurred when populating the shared emulator data volume" }));
+            yield* containers.delete({ id: volumeHelperContainer.Id });
+            yield* volumes.delete({ name: volume.Name, force: true });
+            return yield* Effect.fail(new Error("An error ocurred when populating the shared emulator data volume"));
         }
 
-        yield* _(Effect.logInfo("Shared emulator data volume population complete"));
-        yield* _(Effect.promise(() => volumeHelperContainer.remove()));
+        yield* Effect.logInfo("Shared emulator data volume population complete");
+        yield* containers.delete({ id: volumeHelperContainer.Id });
         return volume;
-    }).pipe(Effect.catchAll((error: unknown) => new DockerError({ message: `${error}` })));
+    });
 
 export default populateSharedDataVolume;

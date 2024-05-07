@@ -7,7 +7,6 @@ module.exports = {
         "@rushstack/eslint-config/mixins/tsdoc",
         "@rushstack/eslint-config/mixins/friendly-locals",
         "plugin:unicorn/recommended",
-        "plugin:@effect/recommended",
         "plugin:prettier/recommended",
     ],
     plugins: ["unicorn", "prettier"],
@@ -16,6 +15,7 @@ module.exports = {
     rules: {
         "no-console": "warn",
         "@effect/dprint": "off",
+        "unicorn/import-style": "off",
         "unicorn/no-array-callback-reference": "off",
         "@typescript-eslint/naming-convention": [
             "error",

@@ -1,8 +1,6 @@
-import Dockerode from "dockerode";
-import DockerModem from "docker-modem";
-import { Effect, Scope } from "effect";
+import * as Effect from "effect/Effect";
 
-import { dockerClient, DockerError, DockerService } from "../docker.js";
+import * as MobyApi from "the-moby-effect";
 import type { IArchitectPortBindings } from "./0-shared-options.js";
 
 /** The endpoints that an architect container has. */
@@ -28,24 +26,18 @@ export type IExposedArchitectEndpoints =
  * "https" appropriately. Application endpoints will have no prefix.
  */
 export const getExposedEmulatorEndpoints = ({
+    dockerHostAddress,
     emulatorContainer,
 }: {
-    emulatorContainer: Dockerode.Container;
-}): Effect.Effect<Scope.Scope | DockerService, DockerError, IExposedArchitectEndpoints> =>
-    Effect.gen(function* (_: Effect.Adapter) {
-        const dockerode: Dockerode = yield* _(dockerClient());
-        const dockerService: DockerService = yield* _(DockerService);
-        const inspectResults: Dockerode.ContainerInspectInfo = yield* _(
-            dockerService.inspectContainer(emulatorContainer)
-        );
-
-        // Addresses of the container and the docker host
-        const dockerHostAddress: string = (dockerode.modem as DockerModem.ConstructorOptions).host || "localhost";
-        const emulatorContainerAddress: string | undefined = inspectResults.NetworkSettings.IPAddress || undefined;
+    dockerHostAddress: string;
+    emulatorContainer: MobyApi.Schemas.ContainerInspectResponse;
+}): Effect.Effect<IExposedArchitectEndpoints, never, never> =>
+    Effect.gen(function* () {
+        const emulatorContainerAddress: string | undefined = emulatorContainer.NetworkSettings?.IPAddress || undefined;
 
         // This is the port bindings the emulator container exposes
         const exposedEmulatorContainerPorts: IArchitectPortBindings =
-            inspectResults.HostConfig.NetworkMode === "host"
+            emulatorContainer.HostConfig?.NetworkMode === "host"
                 ? ({
                       "5554/tcp": [{ HostPort: "5554" }],
                       "5555/tcp": [{ HostPort: "5555" }],
@@ -55,7 +47,7 @@ export const getExposedEmulatorEndpoints = ({
                       "8555/tcp": [{ HostPort: "8555" }],
                       "27042/tcp": [{ HostPort: "27042" }],
                   } satisfies IArchitectPortBindings)
-                : (inspectResults.NetworkSettings.Ports as unknown as IArchitectPortBindings);
+                : (emulatorContainer.NetworkSettings?.Ports as unknown as IArchitectPortBindings);
 
         // How to reach these endpoints over the docker host's networking
         const exposedEndpointsUsingHostsNetworking: IArchitectEndpoints = {
@@ -90,11 +82,11 @@ export const getExposedEmulatorEndpoints = ({
          * container's networking.
          */
         const endpointsToReturn: IExposedArchitectEndpoints =
-            inspectResults.HostConfig.NetworkMode === "host"
+            emulatorContainer.HostConfig?.NetworkMode === "host"
                 ? [exposedEndpointsUsingHostsNetworking]
                 : [exposedEndpointsUsingHostsNetworking, exposedEndpointsUsingContainersNetworking];
 
-        yield* _(Effect.log(`Host networking container endpoints are: ${JSON.stringify(endpointsToReturn[0])}`));
-        yield* _(Effect.log(`Container ipv4 networking endpoints are: ${JSON.stringify(endpointsToReturn[1])}`));
+        yield* Effect.log(`Host networking container endpoints are: ${JSON.stringify(endpointsToReturn[0])}`);
+        yield* Effect.log(`Container ipv4 networking endpoints are: ${JSON.stringify(endpointsToReturn[1])}`);
         return endpointsToReturn;
     });

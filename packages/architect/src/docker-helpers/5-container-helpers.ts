@@ -1,53 +1,73 @@
-import tar from "tar-fs";
-import path from "node:path";
-import { Effect } from "effect";
-import Stream from "node:stream";
-import Dockerode from "dockerode";
+import * as path from "node:path";
+import * as tar from "tar-fs";
 
-import { DockerError } from "../docker.js";
+import * as Socket from "@effect/platform/Socket";
+import * as Chunk from "effect/Chunk";
+import * as Effect from "effect/Effect";
+import * as Sink from "effect/Sink";
+import * as Stream from "effect/Stream";
+import * as Containers from "the-moby-effect/Containers";
+import * as Demux from "the-moby-effect/Demux";
+import * as Execs from "the-moby-effect/Execs";
+import * as MobySchemas from "the-moby-effect/Schemas";
 
 /** Runs a command in a container and returns immediately after. */
 export const execNonBlocking = ({
-    container,
+    containerId,
     command,
 }: {
-    container: Dockerode.Container;
+    containerId: string;
     command: string[];
-}): Effect.Effect<never, DockerError, void> =>
-    Effect.tryPromise({
-        try: async () => {
-            const exec: Dockerode.Exec = await container.exec({ Cmd: command });
-            await exec.start({ Detach: true });
-        },
-        catch: (error) => new DockerError({ message: `${error}` }),
-    });
-
-/** Runs a command in a container and returns the stdout. */
-export const execBlocking = ({
-    container,
-    command,
-}: {
-    container: Dockerode.Container;
-    command: string[];
-}): Effect.Effect<never, DockerError, string> =>
-    Effect.tryPromise({
-        try: async () => {
-            const exec: Dockerode.Exec = await container.exec({
+}): Effect.Effect<void, Execs.ExecsError, Execs.Execs> =>
+    Effect.gen(function* () {
+        const execs: Execs.Execs = yield* Execs.Execs;
+        const execId: Readonly<MobySchemas.IdResponse> = yield* execs.container({
+            id: containerId,
+            execConfig: {
                 AttachStderr: true,
                 AttachStdout: true,
                 AttachStdin: false,
                 Cmd: command,
-            });
-            const execStream: Stream.Duplex = await exec.start({ Detach: false });
-            return new Promise<string>((resolve, reject) => {
-                const data: string[] = [];
-                execStream.on("error", (error) => reject(error));
-                execStream.on("data", (chunk) => data.push(chunk));
-                execStream.on("end", () => resolve(data.join("")));
-                execStream.on("close", () => resolve(data.join("")));
-            });
-        },
-        catch: (error) => new DockerError({ message: `${error}` }),
+            },
+        });
+        yield* execs.start({ id: execId.Id, execStartConfig: { Detach: true } });
+    });
+
+/** Runs a command in a container and returns the stdout. */
+export const execBlocking = ({
+    containerId,
+    command,
+}: {
+    containerId: string;
+    command: string[];
+}): Effect.Effect<string, Execs.ExecsError | Socket.SocketError, Execs.Execs> =>
+    Effect.gen(function* () {
+        const execs: Execs.Execs = yield* Execs.Execs;
+        const execId: Readonly<MobySchemas.IdResponse> = yield* execs.container({
+            id: containerId,
+            execConfig: {
+                AttachStderr: true,
+                AttachStdout: true,
+                AttachStdin: false,
+                Cmd: command,
+            },
+        });
+        const stream: Demux.MultiplexedStreamSocket | Demux.RawStreamSocket = yield* execs.start({
+            id: execId.Id,
+            execStartConfig: { Detach: false },
+        });
+        if (stream["content-type"] === "application/vnd.docker.raw-stream") {
+            const chunks: Chunk.Chunk<string> = yield* Demux.demuxSocket(stream, Stream.never, Sink.collectAll());
+            return Chunk.join("")(chunks);
+        } else {
+            const [stdout, stderr] = yield* Demux.demuxSocket(
+                stream,
+                Stream.never,
+                Sink.collectAll(),
+                Sink.collectAll()
+            );
+            return Chunk.appendAll(stdout, stderr).pipe(Chunk.join(""));
+        }
     });
 
 /**
@@ -75,22 +95,33 @@ export const installApkCommand = (apkLocation: string): string[] => [
  */
 export const installApk = ({
     apk,
-    container,
+    containerId,
 }: {
     apk: string;
-    container: Dockerode.Container;
-}): Effect.Effect<never, DockerError, void> =>
-    Effect.gen(function* (_: Effect.Adapter) {
-        yield* _(Effect.log(`Installing apk ${apk}`));
-        const tarball: tar.Pack = tar.pack(path.dirname(apk), { entries: [path.basename(apk)] });
-        yield* _(
-            Effect.tryPromise({
-                try: () => container.putArchive(tarball, { path: "/android/apks/" }),
-                catch: (error) => new DockerError({ message: `${error}` }),
-            })
-        );
+    containerId: string;
+}): Effect.Effect<
+    void,
+    Socket.SocketError | Execs.ExecsError | Containers.ContainersError,
+    Execs.Execs | Containers.Containers
+> =>
+    Effect.gen(function* () {
+        const containers: Containers.Containers = yield* Containers.Containers;
+        yield* Effect.log(`Installing apk ${apk}`);
+        yield* containers.putArchive({
+            id: containerId,
+            path: "/android/apks/",
+            stream: Stream.fromAsyncIterable(
+                tar.pack(path.dirname(apk), { entries: [path.basename(apk)] }),
+                () =>
+                    new Containers.ContainersError({
+                        method: "putArchiveStream",
+                        message: "error packing the put archive",
+                    })
+            ),
+        });
         const command: string[] = installApkCommand(`/android/apks/${path.basename(apk)}`);
-        const output: string = yield* _(execBlocking({ container, command }));
-        if (!output.includes("Success")) yield* _(new DockerError({ message: "Failed to install APK" }));
-        yield* _(Effect.log("Done installing apk"));
+        const output: string = yield* execBlocking({ containerId, command });
+        if (!output.includes("Success"))
+            yield* new Execs.ExecsError({ message: `Failed to install apk: ${output}`, method: "installApk" });
+        yield* Effect.log("Done installing apk");
     }).pipe(Effect.withLogSpan("installAPk"));

@@ -1,18 +1,20 @@
-import tar from "tar-fs";
-import url from "node:url";
-import { Effect, Option, Scope } from "effect";
+import * as url from "node:url";
+import * as tar from "tar-fs";
+
+import * as Effect from "effect/Effect";
+import * as Stream from "effect/Stream";
+import * as MobyApi from "the-moby-effect";
 
 import {
-    DOCKER_IMAGE_TAG,
-    EMULATOR_VERSION,
-    MITM_PROXY_VERSION,
-    ENVOY_PROXY_VERSION,
-    FRIDA_SERVER_VERSION,
     ANDROID_SDK_TOOLS_VERSION,
+    DOCKER_IMAGE_TAG,
     EMULATOR_SYSTEM_IMAGE_VERSION,
     EMULATOR_SYSTEM_IMAGE_VERSION_SHORT,
+    EMULATOR_VERSION,
+    ENVOY_PROXY_VERSION,
+    FRIDA_SERVER_VERSION,
+    MITM_PROXY_VERSION,
 } from "../versions.js";
-import { DockerError, DockerService, DockerStreamResponse } from "../docker.js";
 
 /** Build arguments that must be provided for the architect docker image */
 export interface IArchitectDockerImageBuildArguments {
@@ -30,39 +32,42 @@ export interface IArchitectDockerImageBuildArguments {
  *
  * @internal
  */
-export const buildImage = ({
-    onProgress,
-}: {
-    onProgress: Option.Option<(object: DockerStreamResponse) => void>;
-}): Effect.Effect<Scope.Scope | DockerService, DockerError, DockerStreamResponse[]> =>
-    Effect.gen(function* (_: Effect.Adapter) {
-        const dockerService: DockerService = yield* _(DockerService);
+export const buildImage = (): Effect.Effect<void, MobyApi.Images.ImagesError, MobyApi.Images.Images> =>
+    Effect.gen(function* () {
+        const images: MobyApi.Images.Images = yield* MobyApi.Images.Images;
 
         const context: url.URL = new URL("../../emulator", import.meta.url);
         const tarStream: tar.Pack = tar.pack(url.fileURLToPath(context));
 
-        yield* _(
-            Effect.logInfo(
-                `Building docker image from context ${context.toString()}, will tag image as ${DOCKER_IMAGE_TAG} when finished`
-            )
+        yield* Effect.logInfo(
+            `Building docker image from context ${context.toString()}, will tag image as ${DOCKER_IMAGE_TAG} when finished`
         );
 
-        const buildStream: NodeJS.ReadableStream = yield* _(
-            dockerService.buildImage(tarStream, {
+        const buildArguments: IArchitectDockerImageBuildArguments = {
+            EMULATOR_VERSION,
+            MITM_PROXY_VERSION,
+            ENVOY_PROXY_VERSION,
+            FRIDA_SERVER_VERSION,
+            ANDROID_SDK_TOOLS_VERSION,
+            EMULATOR_SYSTEM_IMAGE_VERSION,
+            EMULATOR_SYSTEM_IMAGE_VERSION_SHORT,
+        };
+
+        const buildStream: Stream.Stream<MobyApi.Schemas.BuildInfo, MobyApi.Images.ImagesError, never> =
+            yield* images.build({
                 t: DOCKER_IMAGE_TAG,
-                buildargs: {
-                    EMULATOR_VERSION,
-                    MITM_PROXY_VERSION,
-                    ENVOY_PROXY_VERSION,
-                    FRIDA_SERVER_VERSION,
-                    ANDROID_SDK_TOOLS_VERSION,
-                    EMULATOR_SYSTEM_IMAGE_VERSION,
-                    EMULATOR_SYSTEM_IMAGE_VERSION_SHORT,
-                } satisfies IArchitectDockerImageBuildArguments,
-            })
-        );
+                buildargs: JSON.stringify(buildArguments),
+                context: Stream.fromAsyncIterable(
+                    tarStream,
+                    () =>
+                        new MobyApi.Images.ImagesError({
+                            method: "Pack",
+                            message: "error packing the build context",
+                        })
+                ),
+            });
 
-        return yield* _(dockerService.followProgress(buildStream, onProgress));
-    });
+        yield* Stream.runCollect(buildStream);
+    }).pipe(Effect.scoped);
 
 export default buildImage;

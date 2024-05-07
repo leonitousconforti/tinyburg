@@ -1,22 +1,12 @@
-import Dockerode from "dockerode";
-import DockerModem from "docker-modem";
-import { Effect, Option, Scope } from "effect";
+import * as Effect from "effect/Effect";
+import * as MobyApi from "the-moby-effect";
 
 import {
-    dockerClient,
-    DockerServiceLive,
-    type DockerError,
-    type DockerService,
-    type DockerStreamResponse,
-    type DockerConnectionOptions,
-} from "./docker.js";
-
-import {
-    installApk,
-    buildImage,
-    populateSharedDataVolume,
     buildFreshContainer,
+    buildImage,
     getExposedEmulatorEndpoints,
+    installApk,
+    populateSharedDataVolume,
     type IArchitectPortBindings,
     type IExposedArchitectEndpoints,
 } from "./docker-helpers/all.js";
@@ -26,69 +16,75 @@ if (process.env["ARCHITECT_DOCKER_HOST"] !== undefined) {
     process.env["DOCKER_HOST"] = process.env["ARCHITECT_DOCKER_HOST"];
 }
 
-/** @internal */
 interface IArchitectOptions {
     // Configurable parts of the container
     networkMode?: string | undefined;
     environmentVariables?: string[] | undefined;
     portBindings?: Partial<IArchitectPortBindings> | undefined;
-    onBuildProgress?: ((object: DockerStreamResponse) => void) | undefined;
-
-    // Docker host things
-    dockerConnectionOptions?: DockerConnectionOptions | undefined;
 }
 
-/** @internal */
 interface IArchitectReturnType {
-    sharedVolume: Dockerode.Volume;
-    emulatorContainer: Dockerode.Container;
-    installApk: (apk: string) => Promise<void>;
+    sharedVolume: MobyApi.Schemas.Volume;
     containerEndpoints: IExposedArchitectEndpoints;
+    emulatorContainer: MobyApi.Schemas.ContainerInspectResponse;
+    installApk: (apk: string) => Promise<void>;
 }
 
-/** @internal */
-export const architectEffect = (
+export const architect = (
     options?: IArchitectOptions | undefined
-): Effect.Effect<Scope.Scope | DockerService, DockerError, IArchitectReturnType> =>
-    Effect.gen(function* (_: Effect.Adapter) {
+): Effect.Effect<
+    IArchitectReturnType,
+    MobyApi.Images.ImagesError | MobyApi.Volumes.VolumesError | MobyApi.Containers.ContainersError | Error,
+    MobyApi.Images.Images | MobyApi.Volumes.Volumes | MobyApi.Containers.Containers | MobyApi.Execs.Execs
+> =>
+    Effect.gen(function* () {
+        const execs: MobyApi.Execs.Execs = yield* MobyApi.Execs.Execs;
+        const containers: MobyApi.Containers.Containers = yield* MobyApi.Containers.Containers;
+
         // Generate a random container name which will be architectXXXXXX
         const containerName: string = `architect${Math.floor(Math.random() * (999_999 - 100_000 + 1)) + 100_000}`;
-        const docker: Dockerode = yield* _(dockerClient(options?.dockerConnectionOptions));
-        const dockerHost: string = (docker.modem as DockerModem.ConstructorOptions).host || "localhost";
-        const dockerDaemon: string =
-            (docker.modem as DockerModem.ConstructorOptions).socketPath || "/var/run/docker.sock";
 
-        yield* _(Effect.log(`Connected to docker daemon ${dockerDaemon} @ ${dockerHost}`));
-        yield* _(buildImage({ onProgress: Option.fromNullable(options?.onBuildProgress) }));
+        yield* buildImage();
 
-        const sharedVolume: Dockerode.Volume = yield* _(populateSharedDataVolume());
+        const sharedVolume: Readonly<MobyApi.Schemas.Volume> = yield* populateSharedDataVolume();
 
-        const emulatorContainer: Dockerode.Container = yield* _(
-            buildFreshContainer({
-                containerName,
-                networkMode: options?.networkMode,
-                portBindings: options?.portBindings || {},
-                environmentVariables: options?.environmentVariables || [],
-            })
-        );
+        const emulatorContainer: Readonly<MobyApi.Schemas.ContainerInspectResponse> = yield* buildFreshContainer({
+            containerName,
+            networkMode: options?.networkMode,
+            portBindings: options?.portBindings || {},
+            environmentVariables: options?.environmentVariables || [],
+        });
 
-        const containerEndpoints: IExposedArchitectEndpoints = yield* _(
-            getExposedEmulatorEndpoints({ emulatorContainer })
-        );
+        const containerEndpoints: IExposedArchitectEndpoints = yield* getExposedEmulatorEndpoints({
+            emulatorContainer,
+            dockerHostAddress: "",
+        });
 
         return {
             sharedVolume,
             emulatorContainer,
             containerEndpoints: containerEndpoints,
-            installApk: (apk: string) => Effect.runPromise(installApk({ apk, container: emulatorContainer })),
+            installApk: (apk: string) =>
+                installApk({ apk, containerId: emulatorContainer.Id! })
+                    .pipe(Effect.provideService(MobyApi.Execs.Execs, execs))
+                    .pipe(Effect.provideService(MobyApi.Containers.Containers, containers))
+                    .pipe(Effect.runPromise),
         };
     });
 
-export const architect = (options?: IArchitectOptions | undefined): Promise<IArchitectReturnType> =>
-    architectEffect(options)
-        .pipe(Effect.scoped)
-        .pipe(Effect.provide(DockerServiceLive))
-        .pipe(Effect.orDie)
-        .pipe(Effect.runPromise);
+export const cleanup = (options: {
+    sharedVolume: MobyApi.Schemas.Volume;
+    emulatorContainer: MobyApi.Schemas.ContainerInspectResponse;
+}): Effect.Effect<
+    void,
+    MobyApi.Containers.ContainersError | MobyApi.Volumes.VolumesError,
+    MobyApi.Containers.Containers | MobyApi.Volumes.Volumes
+> =>
+    Effect.gen(function* () {
+        const volumes: MobyApi.Moby.Volumes.Volumes = yield* MobyApi.Volumes.Volumes;
+        const containers: MobyApi.Containers.Containers = yield* MobyApi.Containers.Containers;
 
-export default architect;
+        yield* containers.kill({ id: options.emulatorContainer.Id! });
+        yield* containers.delete({ id: options.emulatorContainer.Id!, force: true, v: true });
+        yield* volumes.delete({ name: options.sharedVolume.Name });
+    });

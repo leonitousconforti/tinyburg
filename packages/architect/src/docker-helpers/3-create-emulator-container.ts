@@ -1,7 +1,11 @@
-import Dockerode from "dockerode";
-import { Effect, Option, Scope, pipe } from "effect";
+import * as url from "node:url";
+import * as tar from "tar-fs";
 
-import { DockerService, DockerError } from "../docker.js";
+import * as Effect from "effect/Effect";
+import * as Option from "effect/Option";
+import * as Stream from "effect/Stream";
+import * as MobyApi from "the-moby-effect";
+
 import { containerCreateOptions, type IArchitectPortBindings } from "./0-shared-options.js";
 
 /**
@@ -20,9 +24,15 @@ export const buildFreshContainer = ({
     environmentVariables: string[];
     networkMode: string | undefined;
     portBindings: Partial<IArchitectPortBindings>;
-}): Effect.Effect<DockerService | Scope.Scope, DockerError, Dockerode.Container> =>
-    Effect.gen(function* (_: Effect.Adapter) {
-        const dockerService: DockerService = yield* _(DockerService);
+}): Effect.Effect<
+    MobyApi.Schemas.ContainerInspectResponse,
+    MobyApi.Containers.ContainersError | MobyApi.Images.ImagesError,
+    MobyApi.Containers.Containers | MobyApi.Images.Images
+> =>
+    Effect.gen(function* () {
+        // For building the image
+        const context: url.URL = new URL("../../emulator", import.meta.url);
+        const tarStream: tar.Pack = tar.pack(url.fileURLToPath(context));
 
         // Merge port bindings, 0 means pick a random unused port
         const PortBindings: IArchitectPortBindings = Object.assign(
@@ -39,45 +49,29 @@ export const buildFreshContainer = ({
             portBindings
         );
 
-        yield* _(Effect.log("Creating emulator container from image with kvm acceleration enabled"));
-        const containerOptions: Dockerode.ContainerCreateOptions = containerCreateOptions({
+        yield* Effect.log("Creating emulator container from image with kvm acceleration enabled");
+        const containerOptions: MobyApi.Containers.ContainerCreateOptions = containerCreateOptions({
             networkMode,
             containerName,
             environmentVariables,
             command: Option.none(),
             portBindings: PortBindings,
         });
-        const container: Dockerode.Container = yield* _(dockerService.createContainer(containerOptions));
 
-        yield* _(Effect.log(`Starting container ${container.id}`));
-        yield* _(
-            Effect.tryPromise({
-                try: () => container.start(),
-                catch: (error) => new DockerError({ message: `StartingContainer ${error}` }),
-            })
-        );
-
-        // Wait for Container to become healthy
-        yield* _(
-            Effect.retryWhileEffect(
-                pipe(
-                    dockerService.inspectContainer(container),
-                    Effect.tap(({ State }) =>
-                        Effect.log(`Waiting for container to report healthy: status=${State.Health?.Status}`)
-                    ),
-                    Effect.map(({ State }) => State.Health?.Status === "healthy"),
-                    Effect.flatMap((isHealthy) =>
-                        isHealthy ? Effect.unit : new DockerError({ message: "Container is not healthy" })
-                    )
+        return yield* MobyApi.Docker.run({
+            containerOptions,
+            imageOptions: {
+                kind: "build",
+                context: Stream.fromAsyncIterable(
+                    tarStream,
+                    () =>
+                        new MobyApi.Images.ImagesError({
+                            method: "Pack",
+                            message: "error packing the build context",
+                        })
                 ),
-                () =>
-                    dockerService
-                        .inspectContainer(container)
-                        .pipe(Effect.map(({ State }) => State.Running && State.Health?.Status !== "unhealthy"))
-            )
-        );
-
-        return container;
+            },
+        }).pipe(Effect.scoped);
     });
 
 export default buildFreshContainer;
