@@ -7,10 +7,9 @@ module.exports = {
         "@rushstack/eslint-config/mixins/tsdoc",
         "@rushstack/eslint-config/mixins/friendly-locals",
         "plugin:unicorn/recommended",
-        "plugin:@effect/recommended",
         "plugin:prettier/recommended",
     ],
-    plugins: ["unicorn", "prettier", "effect"],
+    plugins: ["unicorn", "prettier"],
     env: { node: true, es2022: true },
     parserOptions: { tsconfigRootDir: __dirname, project: ["./tsconfig.json"] },
     rules: {
