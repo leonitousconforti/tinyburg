@@ -68,7 +68,7 @@ export const execBlocking = ({
             );
             return Chunk.appendAll(stdout, stderr).pipe(Chunk.join(""));
         }
-    });
+    }).pipe(Effect.scoped);
 
 /**
  * Given the path to an apk, will install it on the android emulator. Will

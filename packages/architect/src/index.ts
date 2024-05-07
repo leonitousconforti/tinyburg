@@ -1,3 +1,4 @@
+import * as Socket from "@effect/platform/Socket";
 import * as Effect from "effect/Effect";
 import * as MobyApi from "the-moby-effect";
 
@@ -27,7 +28,13 @@ interface IArchitectReturnType {
     sharedVolume: MobyApi.Schemas.Volume;
     containerEndpoints: IExposedArchitectEndpoints;
     emulatorContainer: MobyApi.Schemas.ContainerInspectResponse;
-    installApk: (apk: string) => Promise<void>;
+    installApk: (
+        apk: string
+    ) => Effect.Effect<
+        void,
+        MobyApi.Containers.ContainersError | Socket.SocketError | MobyApi.Execs.ExecsError,
+        MobyApi.Containers.Containers | MobyApi.Execs.Execs
+    >;
 }
 
 export const architect = (
@@ -35,12 +42,9 @@ export const architect = (
 ): Effect.Effect<
     IArchitectReturnType,
     MobyApi.Images.ImagesError | MobyApi.Volumes.VolumesError | MobyApi.Containers.ContainersError | Error,
-    MobyApi.Images.Images | MobyApi.Volumes.Volumes | MobyApi.Containers.Containers | MobyApi.Execs.Execs
+    MobyApi.Images.Images | MobyApi.Volumes.Volumes | MobyApi.Containers.Containers
 > =>
     Effect.gen(function* () {
-        const execs: MobyApi.Execs.Execs = yield* MobyApi.Execs.Execs;
-        const containers: MobyApi.Containers.Containers = yield* MobyApi.Containers.Containers;
-
         // Generate a random container name which will be architectXXXXXX
         const containerName: string = `architect${Math.floor(Math.random() * (999_999 - 100_000 + 1)) + 100_000}`;
 
@@ -64,11 +68,7 @@ export const architect = (
             sharedVolume,
             emulatorContainer,
             containerEndpoints: containerEndpoints,
-            installApk: (apk: string) =>
-                installApk({ apk, containerId: emulatorContainer.Id! })
-                    .pipe(Effect.provideService(MobyApi.Execs.Execs, execs))
-                    .pipe(Effect.provideService(MobyApi.Containers.Containers, containers))
-                    .pipe(Effect.runPromise),
+            installApk: (apk: string) => installApk({ apk, containerId: emulatorContainer.Id! }),
         };
     });
 
