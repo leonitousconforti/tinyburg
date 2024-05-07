@@ -94,5 +94,5 @@
 
     "appPort": ["0.0.0.0:3000:3000"],
     "postCreateCommand": "/bin/bash -i ./setup.sh",
-    "runArgs": ["--security-opt", "seccomp=unconfined"]
+    "runArgs": ["--security-opt", "seccomp=unconfined", "--add-host=host.docker.internal:host-gateway"]
 }
