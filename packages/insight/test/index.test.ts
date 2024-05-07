@@ -29,7 +29,6 @@ describe("All important agents should return something and not throw any errors"
     beforeAll(async () => {
         const apk = await apks
             .loadApk(apks.Games.TinyTower)
-            .pipe(Effect.scoped)
             .pipe(Effect.provide(NodeContext.layer))
             .pipe(Effect.runPromise);
 
