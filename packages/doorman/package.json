@@ -20,7 +20,7 @@
         "templates:gen": "ts-node --esm ./templates/generate-sprites.ts && ts-node --esm ./templates/generate-font-characters.ts && ts-node --esm ./templates/generate-typings.ts"
     },
     "dependencies": {
-        "@bufbuild/protobuf": "~1.4.2",
+        "@bufbuild/protobuf": "~1.9.0",
         "@connectrpc/connect": "~1.1.1",
         "@connectrpc/connect-node": "~1.1.1",
         "@tinyburg/architect": "workspace:*",
@@ -29,27 +29,27 @@
         "@tinyburg/insight": "workspace:*",
         "@tinyburg/nucleus": "workspace:*",
         "debug": "~4.3.4",
-        "emittery": "~1.0.1",
-        "semver": "~7.5.1"
+        "emittery": "~1.0.3",
+        "semver": "~7.6.1"
     },
     "devDependencies": {
-        "@rushstack/eslint-config": "3.4.1",
-        "@rushstack/heft": "0.63.2",
-        "@rushstack/heft-jest-plugin": "0.10.4",
-        "@rushstack/heft-lint-plugin": "0.2.12",
-        "@rushstack/heft-typescript-plugin": "0.2.12",
+        "@rushstack/eslint-config": "3.6.9",
+        "@rushstack/heft": "0.66.4",
+        "@rushstack/heft-jest-plugin": "0.11.25",
+        "@rushstack/heft-lint-plugin": "0.3.25",
+        "@rushstack/heft-typescript-plugin": "0.5.2",
         "@tinyburg/tsconfig-rig": "workspace:*",
-        "@types/debug": "~4.1.12",
-        "@types/node": "20.9.0",
-        "@types/semver": "~7.5.4",
-        "eslint": "8.53.0",
-        "eslint-config-prettier": "9.0.0",
-        "eslint-plugin-prettier": "5.0.1",
-        "eslint-plugin-unicorn": "49.0.0",
-        "prettier": "3.1.0",
+        "@types/debug": "4.1.12",
+        "@types/node": "20.12.10",
+        "@types/semver": "~7.5.8",
+        "eslint": "8.57.0",
+        "eslint-config-prettier": "9.1.0",
+        "eslint-plugin-prettier": "5.1.3",
+        "eslint-plugin-unicorn": "52.0.0",
+        "prettier": "3.2.5",
         "rimraf": "~5.0.5",
         "sharp": "~0.32.3",
         "ts-node": "~10.9.1",
-        "typescript": "5.2.2"
+        "typescript": "5.4.5"
     }
 }
