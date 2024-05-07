@@ -1,3 +1,4 @@
+// spell-checker: disable
 {
     "name": "Node.js & TypeScript",
     "image": "mcr.microsoft.com/devcontainers/base:bullseye",
@@ -5,12 +6,13 @@
     "features": {
         "ghcr.io/devcontainers/features/git:1": {},
         "ghcr.io/devcontainers/features/node:1": {},
-        "ghcr.io/devcontainers/features/rust:1": {},
+        "ghcr.io/devcontainers/features/java:1": {},
         "ghcr.io/devcontainers/features/python:1": {},
+        "ghcr.io/devcontainers/features/github-cli:1": {},
         "ghcr.io/devcontainers/features/common-utils:2": {},
         "ghcr.io/devcontainers/features/desktop-lite:1": {},
         "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {},
-        "ghcr.io/frntn/devcontainers-features/gitleaks:1": { "version": "v8.18.0" }
+        "ghcr.io/jsburckhardt/devcontainer-features/gitleaks:1": {}
     },
 
     "customizations": {
@@ -33,7 +35,8 @@
                 "zxh404.vscode-proto3",
                 "Prisma.prisma",
                 "bradlc.vscode-tailwindcss",
-                "RushStack.rushstack"
+                "RushStack.rushstack",
+                "william-voyek.vscode-nginx"
             ],
             "settings": {
                 "cSpell.enabled": true,
@@ -54,14 +57,15 @@
                     "editor.defaultFormatter": "Prisma.prisma"
                 },
                 "[python]": {
-                    "editor.wordBasedSuggestions": false,
-                    "editor.defaultFormatter": "ms-python.black-formatter",
-                    "editor.codeActionsOnSave": {
-                        "source.organizeImports": true
-                    }
+                    "editor.wordBasedSuggestions": "off",
+                    "editor.defaultFormatter": "ms-python.black-formatter"
                 },
                 "isort.args": ["--profile", "black"],
                 "files.associations": { "*.json": "jsonc", "package.json": "json", "cloudinit.conf": "plaintext" },
+                "editor.codeActionsOnSave": {
+                    "source.organizeImports": "always",
+                    "source.addMissingImports": "always"
+                },
                 "files.exclude": {
                     "**/.git": true,
                     "**/.svn": true,
@@ -83,69 +87,12 @@
                     "markdown-math",
                     "markdown_latex_combined",
                     "shellscript"
-                ],
-                "cSpell.words": [
-                    "anbox",
-                    "apkpure",
-                    "apkmirror",
-                    "apk",
-                    "apks",
-                    "adbkey",
-                    "anims",
-                    "authproxy",
-                    "backoff",
-                    "bitbook",
-                    "Bitizen",
-                    "bitizens",
-                    "bitprint",
-                    "bitprints",
-                    "buxcost",
-                    "cloudinit",
-                    "Conforti",
-                    "corlib",
-                    "coturn",
-                    "dockerode",
-                    "emittery",
-                    "envoymesh",
-                    "esbuild",
-                    "fastify",
-                    "Formbody",
-                    "frida",
-                    "gplaydl",
-                    "Grayscaled",
-                    "hostable",
-                    "Jsep",
-                    "klass",
-                    "leoconforti",
-                    "leonitousconforti",
-                    "logcat",
-                    "mediapath",
-                    "mediatype",
-                    "Nimblebit",
-                    "npmjs",
-                    "nonbrowser",
-                    "noreply",
-                    "Pino",
-                    "pnpmfile",
-                    "prodimgs",
-                    "proto",
-                    "protobuf",
-                    "proxied",
-                    "Proxying",
-                    "rushall",
-                    "rushstack",
-                    "spawnable",
-                    "stockall",
-                    "structs",
-                    "supermicro",
-                    "Thresholded",
-                    "tinyburg",
-                    "tinytower",
-                    "Upscaled"
                 ]
             }
         }
     },
 
-    "postCreateCommand": "/bin/bash ./setup.sh"
+    "appPort": ["0.0.0.0:3000:3000"],
+    "postCreateCommand": "/bin/bash -i ./setup.sh",
+    "runArgs": ["--security-opt", "seccomp=unconfined", "--add-host=host.docker.internal:host-gateway"]
 }

@@ -1,5 +1,5 @@
 import type { IUpgrade } from "./base-upgrade.js";
-import type { Floor } from "@tinyburg/core/data/floors";
+import type { Floor } from "@tinyburg/nucleus/data/floors";
 
 import Debug from "debug";
 // import { floors } from "@tinyburg/core/data/floors";

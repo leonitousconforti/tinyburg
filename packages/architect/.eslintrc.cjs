@@ -5,19 +5,22 @@ module.exports = {
     extends: [
         "@rushstack/eslint-config/profile/node",
         "@rushstack/eslint-config/mixins/tsdoc",
+        "@rushstack/eslint-config/mixins/friendly-locals",
         "plugin:unicorn/recommended",
         "plugin:prettier/recommended",
     ],
     plugins: ["unicorn", "prettier"],
-    env: {
-        node: true,
-        es2022: true,
-    },
-    parserOptions: {
-        tsconfigRootDir: __dirname,
-        project: ["./tsconfig.json"],
-        ecmaVersion: 2022,
-        sourceType: "module",
+    env: { node: true, es2022: true },
+    parserOptions: { tsconfigRootDir: __dirname, project: ["./tsconfig.json"] },
+    rules: {
+        "no-console": "warn",
+        "@effect/dprint": "off",
+        "unicorn/import-style": "off",
+        "unicorn/no-array-callback-reference": "off",
+        "@typescript-eslint/naming-convention": [
+            "error",
+            { format: null, selector: "parameter", filter: { regex: "^_", match: false } },
+        ],
     },
     overrides: [
         {
@@ -26,9 +29,13 @@ module.exports = {
                 "dot-notation": "off",
             },
         },
+        {
+            files: ["./src/cli.ts", "./src/versions.ts"],
+            rules: {
+                "@typescript-eslint/typedef": "off",
+                "@typescript-eslint/explicit-function-return-type": "off",
+            },
+        },
     ],
-    rules: {
-        "no-console": "warn",
-    },
     ignorePatterns: ["dist/"],
 };

@@ -1,5 +1,5 @@
 import type { ApiKey } from "../entity/api-key.js";
-import { serverEndpoints } from "@tinyburg/core/contact-server";
+import { serverEndpoints } from "@tinyburg/nucleus/contact-server";
 
 export type Scope = keyof typeof serverEndpoints;
 export const defaultAllowedScopes: Scope[] = [

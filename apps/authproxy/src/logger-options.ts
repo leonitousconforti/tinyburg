@@ -1,17 +1,19 @@
-import type { FastifyLoggerOptions } from "fastify";
+import type { ResSerializerReply } from "fastify/types/logger.js";
+import type { FastifyLoggerOptions, FastifyReply, FastifyRequest, RawServerDefault } from "fastify";
 
-const loggerOptions: FastifyLoggerOptions & { redact: string[] } = {
+export const loggerOptions: FastifyLoggerOptions & { redact: string[] } = {
     level: "trace",
     redact: ["req.headers.authorization"],
     serializers: {
-        // eslint-disable-next-line @typescript-eslint/typedef
-        res(reply) {
+        res(
+            reply: ResSerializerReply<RawServerDefault, FastifyReply>
+        ): ResSerializerReply<RawServerDefault, FastifyReply> {
             return {
                 statusCode: reply.statusCode,
             };
         },
-        // eslint-disable-next-line @typescript-eslint/typedef
-        req(request) {
+
+        req(request: FastifyRequest) {
             return {
                 method: request.method,
                 url: request.url,

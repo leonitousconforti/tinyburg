@@ -57,6 +57,9 @@ service EmulatorController {
             returns (stream PhysicalModelValue) {}
 
     // Atomically set/get the current primary clipboard data.
+    // Note that a call to setClipboard will result in an immediate
+    // event for those who made a call to streamClipboard and are
+    // on a different channel than the one used to set the clipboard.
     rpc setClipboard(ClipData) returns (google.protobuf.Empty) {}
     rpc getClipboard(google.protobuf.Empty) returns (ClipData) {}
 
@@ -90,7 +93,6 @@ service EmulatorController {
 
     // Send a keyboard event. Translating the event.
     rpc sendKey(KeyboardEvent) returns (google.protobuf.Empty) {}
-
     // Send touch/mouse events. Note that mouse events can be simulated
     // by touch events.
     rpc sendTouch(TouchEvent) returns (google.protobuf.Empty) {}
@@ -177,15 +179,13 @@ service EmulatorController {
     // already.
     rpc injectAudio(stream AudioPacket) returns (google.protobuf.Empty) {}
 
-    // Returns the last 128Kb of logcat output from the emulator
-    // Note that parsed logcat messages are only available after L (Api >23).
-    // it is possible that the logcat buffer gets overwritten, or falls behind.
-    rpc getLogcat(LogMessage) returns (LogMessage) {}
+    // Deprecated, please use the streamLogcat method instead.
+    rpc getLogcat(LogMessage) returns (LogMessage) {
+        option deprecated = true;
+    }
 
-    // Streams the logcat output from the emulator. The first call
-    // can retrieve up to 128Kb. This call will not return.
+    // Streams the logcat output from the emulator.
     // Note that parsed logcat messages are only available after L (Api >23)
-    // it is possible that the logcat buffer gets overwritten, or falls behind.
     rpc streamLogcat(LogMessage) returns (stream LogMessage) {}
 
     // Transition the virtual machine to the desired state. Note that
@@ -237,11 +237,9 @@ service EmulatorController {
     // RotationRadian is relative to the camera's current orientation.
     rpc rotateVirtualSceneCamera(RotationRadian)
             returns (google.protobuf.Empty) {}
-
     // Velocity is absolute
     rpc setVirtualSceneCameraVelocity(Velocity)
             returns (google.protobuf.Empty) {}
-
     // Set foldable posture
     rpc setPosture(Posture) returns (google.protobuf.Empty) {}
 
@@ -273,41 +271,39 @@ message VmRunState {
         // The emulator is in an unknown state. You cannot transition to this
         // state.
         UNKNOWN = 0;
-
         // Guest is actively running. You can transition to this state from the
         // paused state.
         RUNNING = 1;
-
         // Guest is paused to load a snapshot. You cannot transition to this
         // state.
         RESTORE_VM = 2;
-
         // Guest has been paused. Transitioning to this state will pause the
         // emulator the guest will not be consuming any cpu cycles.
         PAUSED = 3;
-
         // Guest is paused to take or export a snapshot. You cannot
         // transition to this state.
         SAVE_VM = 4;
-
         // System shutdown, note that it is similar to power off. It tries to
         // set the system status and notify guest. The system is likely going to
         // disappear soon and do proper cleanup of resources, possibly taking
         // a snapshot. This is the same behavior as closing the emulator by
         // clicking the X (close) in the user interface.
         SHUTDOWN = 5;
-
         // Immediately terminate the emulator. No resource cleanup will take
         // place. There is a good change to corrupt the system.
         TERMINATE = 7;
-
         // Will cause the emulator to reset. This is not a state you can
         // observe.
         RESET = 9;
-
         // Guest experienced some error state, you cannot transition to this
         // state.
         INTERNAL_ERROR = 10;
+        // Completely restart the emulator.
+        RESTART = 11;
+        // Resume a stopped emulator
+        START = 12;
+        // Stop (pause) a running emulator
+        STOP = 13;
     }
 
     RunState state = 1;
@@ -379,7 +375,6 @@ message PhysicalModelValue {
         // Wrist tilt gesture (1 = gaze, 0 = ungaze)
         WRIST_TILT = 19;
     }
-
     PhysicalType target = 1;
 
     // [Output Only]
@@ -405,36 +400,27 @@ message SensorValue {
         // on all three physical axes (x, y, and z), including the force of
         // gravity.
         ACCELERATION = 0;
-
         // Measures a device's rate of rotation in rad/s around each of the
         // three physical axes (x, y, and z).
         GYROSCOPE = 1;
-
         // Measures the ambient geomagnetic field for all three physical axes
         // (x, y, z) in μT.
         MAGNETIC_FIELD = 2;
-
         // Measures degrees of rotation that a device makes around all three
         // physical axes (x, y, z)
         ORIENTATION = 3;
-
         // Measures the temperature of the device in degrees Celsius (°C).
         TEMPERATURE = 4;
-
         // Measures the proximity of an object in cm relative to the view screen
         // of a device. This sensor is typically used to determine whether a
         // handset is being held up to a person's ear.
         PROXIMITY = 5;
-
         // Measures the ambient light level (illumination) in lx.
         LIGHT = 6;
-
         // Measures the ambient air pressure in hPa or mbar.
         PRESSURE = 7;
-
         // Measures the relative ambient humidity in percent (%).
         HUMIDITY = 8;
-
         MAGNETIC_FIELD_UNCALIBRATED = 9;
         GYROSCOPE_UNCALIBRATED = 10;
 
@@ -444,11 +430,9 @@ message SensorValue {
 
         // Measures the heart rate in bpm.
         HEART_RATE = 14;
-
         // Measures the ambient RGBC light intensity.
         // Values are in order (Red, Green, Blue, Clear).
         RGBC_LIGHT = 15;
-
         // WIRST_TILT (16) is skipped; clients should use get/setPhysicalModel()
         // instead.
         // Measures acceleration force and provides bias data.
@@ -496,17 +480,15 @@ message DisplayMode {
 message LogMessage {
     // [Output Only] The contents of the log output.
     string contents = 1;
-
     // The starting byte position of the output that was returned. This
     // should match the start parameter sent with the request. If the serial
     // console output exceeds the size of the buffer, older output will be
     // overwritten by newer content and the start values will be mismatched.
-    int64 start = 2;
-
+    int64 start = 2 [deprecated = true];
     //[Output Only] The position of the next byte of content from the serial
     // console output. Use this value in the next request as the start
     // parameter.
-    int64 next = 3;
+    int64 next = 3 [deprecated = true];
 
     // Set the sort of response you are interested it in.
     // It the type is "Parsed" the entries field will contain the parsed
@@ -653,6 +635,21 @@ message Touch {
     }
 
     EventExpiration expiration = 7;
+
+    // The orientation of the contact, if any.
+    int32 orientation = 8;
+}
+
+// A Pen is similar to a touch, with the addition
+// of button and rubber information.
+message Pen {
+    Touch location = 1;
+
+    // True if the button is pressed or not
+    bool button_pressed = 2;
+
+    // True if it is a rubber pointer.
+    bool rubber_pointer = 3;
 }
 
 // A TouchEvent contains a list of Touch objects that are in contact with
@@ -668,9 +665,15 @@ message TouchEvent {
 
     // The display device where the touch event occurred.
     // Omitting or using the value 0 indicates the main display.
-    //
-    // Touch events cannot be send to displays other than 0, due to
-    // https://issuetracker.google.com/issues/150699691
+    int32 display = 2;
+}
+
+message PenEvent {
+    // The list of Pen objects, note that these do not need to be unique
+    repeated Pen events = 1;
+
+    // The display device where the pen event occurred.
+    // Omitting or using the value 0 indicates the main display.
     int32 display = 2;
 }
 
@@ -814,10 +817,35 @@ message InputEvent {
         KeyboardEvent key_event = 1;
         TouchEvent touch_event = 2;
         MouseEvent mouse_event = 3;
+        AndroidEvent android_event = 4;
+        PenEvent pen_event = 5;
+        WheelEvent wheel_event = 6;
     }
+};
 
-}
-;
+// The android input event system is a framework for handling input from a
+// variety of devices by generating events that describe changes in the
+// state of the devices and forwarding them to user space applications.
+//
+// An AndroidEvents will be delivered directly to the kernel as is.
+message AndroidEvent {
+    // The type of the event. The types of the event are specified
+    // by the android kernel. Some examples are:
+    // EV_SYN, EV_KEY, EV_SW, etc..
+    // The exact definitions can be found in the input.h header file.
+    int32 type = 1;
+
+    // The actual code to be send to the kernel. The actual meaning
+    // of the code depends on the type definition.
+    int32 code = 2;
+
+    // The actual value of the event.
+    int32 value = 3;
+
+    // The display id associated with this input event.
+    int32 display = 4;
+};
+
 message Fingerprint {
     // True when the fingprint is touched.
     bool isTouching = 1;
@@ -1080,6 +1108,12 @@ message EmulatorStatus {
     // The hardware configuration of the running emulator as
     // key valure pairs.
     EntryList hardwareConfig = 5;
+
+    // Some guests will produce a heart beat, that can be used to
+    // detect if the guest is active.
+    // This is a monotonically increasing number that gets incremented
+    // around once a second.
+    uint64 heartbeat = 6;
 }
 
 message AudioFormat {
@@ -1098,14 +1132,12 @@ message AudioFormat {
         // packets. The client does not have to throttle and can push packets at
         // will. This can result in the client falling behind.
         MODE_UNSPECIFIED = 0;
-
         // Audio packets will be delivered in real time (when possible). The
         // audio queue will be overwritten with incoming data if data is made
         // available. This means the client needs to control timing properly, or
         // packets will get overwritten.
         MODE_REAL_TIME = 1;  //
     }
-
     // Sampling rate to use, defaulting to 44100 if this is not set.
     // Note, that android devices typically will not use a sampling
     // rate higher than 48kHz. See
@@ -1236,7 +1268,6 @@ message DisplayConfiguration {
     // The id can be used to get or stream a screenshot.
     uint32 display = 5;
 }
-
 // Provides information about all the displays that can be attached
 // to the emulator. The emulator will always have at least one display.
 //
@@ -1273,6 +1304,8 @@ message Notification {
         // the extended ui. This does not fire events when the display
         // is changed through the console or gRPC endpoint.
         DISPLAY_CONFIGURATIONS_CHANGED_UI = 2;
+
+        // Don't add new event types here, add them to "oneof type" below.
     }
 
     // Deprecated, use the type below to get detailed information
@@ -1286,8 +1319,8 @@ message Notification {
                 displayConfigurationsChangedNotification = 3;
         Posture posture = 4;
         BootCompletedNotication booted = 5;
+        BrightnessValue brightness = 6;
     }
-
 }
 
 message BootCompletedNotication {
@@ -1301,7 +1334,6 @@ message BootCompletedNotication {
 message CameraNotification {
     // Indicates whether the camera app was activated or deactivated.
     bool active = 1;
-
     // The display the camera app is associated with.
     int32 display = 2;
 }

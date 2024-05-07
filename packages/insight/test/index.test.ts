@@ -1,8 +1,10 @@
-import type Dockerode from "dockerode";
+import * as NodeContext from "@effect/platform-node/NodeContext";
+import * as architect from "@tinyburg/architect";
+import * as apks from "@tinyburg/fount";
+import * as Effect from "effect/Effect";
+import * as MobyApi from "the-moby-effect/Moby";
 
-import loadApk from "@tinyburg/apks";
-import architect from "@tinyburg/architect";
-import { bootstrapAgentOnRemote, AllAgents, cleanupAgent } from "../src/index.js";
+import { AllAgents, bootstrapAgentOnRemote, cleanupAgent } from "../src/index.js";
 
 const GoodAgent = AllAgents["GoodAgent"];
 const BadAgent = AllAgents["BadAgent"];
@@ -15,25 +17,42 @@ const MissionAgent = AllAgents["MissionAgent"];
 const PetAgent = AllAgents["PetAgent"];
 const RoofAgent = AllAgents["RoofAgent"];
 
-// Timeout tests after 2 minutes and prep after 5 minutes
-const INSIGHT_TEST_TIMEOUT_MS = Number.parseInt(process.env["INSIGHT_TEST_TIMEOUT_MS"] as string) || 1000 * 60 * 2;
-const INSIGHT_PREP_TIMEOUT_MS = Number.parseInt(process.env["INSIGHT_PREP_TIMEOUT_MS"] as string) || 1000 * 60 * 5;
+// Timeout tests after 3 minutes and prep after 10 minutes
+const INSIGHT_TEST_TIMEOUT_MS = Number.parseInt(process.env["INSIGHT_TEST_TIMEOUT_MS"] as string) || 1000 * 60 * 3;
+const INSIGHT_PREP_TIMEOUT_MS = Number.parseInt(process.env["INSIGHT_PREP_TIMEOUT_MS"] as string) || 1000 * 60 * 10;
 
 describe("All important agents should return something and not throw any errors", () => {
     let fridaAddress: string;
-    let emulatorContainer: Dockerode.Container;
+    let emulatorContainer: MobyApi.Schemas.ContainerInspectResponse;
 
     beforeAll(async () => {
-        const apk = await loadApk("TinyTower");
-        const architectResult = await architect();
-        await architectResult.installApk(apk);
-        fridaAddress = architectResult.fridaAddress;
+        const apk = await apks
+            .loadApk(apks.Games.TinyTower)
+            .pipe(Effect.provide(NodeContext.layer))
+            .pipe(Effect.runPromise);
+
+        const architectResult = await architect
+            .architect()
+            .pipe(Effect.provide(NodeContext.layer))
+            .pipe(Effect.provide(MobyApi.fromDockerHostEnvironmentVariable))
+            .pipe(Effect.runPromise);
+
+        await architectResult
+            .installApk(apk)
+            .pipe(Effect.provide(NodeContext.layer))
+            .pipe(Effect.provide(MobyApi.fromDockerHostEnvironmentVariable))
+            .pipe(Effect.runPromise);
+
         emulatorContainer = architectResult.emulatorContainer;
+        fridaAddress = `host.docker.internal${architectResult.containerEndpoints[0].fridaAddress}`;
     }, INSIGHT_PREP_TIMEOUT_MS);
 
     afterAll(async () => {
-        await emulatorContainer.stop();
-        await emulatorContainer.remove();
+        await architect
+            .cleanup({ emulatorContainer })
+            .pipe(Effect.provide(NodeContext.layer))
+            .pipe(Effect.provide(MobyApi.fromDockerHostEnvironmentVariable))
+            .pipe(Effect.runPromise);
     }, INSIGHT_PREP_TIMEOUT_MS);
 
     it(
@@ -51,7 +70,7 @@ describe("All important agents should return something and not throw any errors"
         "BadAgent should not produce data and throwing an error",
         async () => {
             const { runAgentMain } = await bootstrapAgentOnRemote(BadAgent, fridaAddress);
-            await expect(runAgentMain()).rejects.toThrowError("This is an error");
+            await expect(runAgentMain()).rejects.toThrow("This is an error");
         },
         INSIGHT_TEST_TIMEOUT_MS
     );

@@ -2,7 +2,7 @@
     "$schema": "https://developer.microsoft.com/json-schemas/heft/v0/heft.schema.json",
     "phasesByName": {
         "build": {
-            "cleanFiles": [{ "sourcePath": "dist" }, { "includeGlobs": ["protobuf/**/*.js", "protobuf/**/*.ts"] }],
+            "cleanFiles": [{ "sourcePath": "dist" }],
             "tasksByName": {
                 "typescript": {
                     "taskPlugin": {
@@ -22,6 +22,21 @@
                         "pluginName": "run-script-plugin",
                         "options": {
                             "scriptPath": "protobuf/gen.cjs"
+                        }
+                    }
+                },
+                "copy-emulator-docker-data": {
+                    "taskDependencies": ["lint"],
+                    "taskPlugin": {
+                        "pluginPackage": "@rushstack/heft",
+                        "pluginName": "copy-files-plugin",
+                        "options": {
+                            "copyOperations": [
+                                {
+                                    "destinationFolders": ["dist"],
+                                    "includeGlobs": ["emulator/**/*"]
+                                }
+                            ]
                         }
                     }
                 }

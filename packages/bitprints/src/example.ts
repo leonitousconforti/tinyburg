@@ -1,6 +1,6 @@
 import type { ITinyTowerRebuildEventData } from "./strategies/rebuild-every-x-floors.js";
 
-import { buildFloorCost } from "@tinyburg/core/data/floors";
+import { buildFloorCost } from "@tinyburg/nucleus/data/floors";
 import { useStrategy, TinyTowerRebuildAsapStrategyStates } from "./strategies/rebuild-every-x-floors.js";
 
 // eslint-disable-next-line @rushstack/typedef-var

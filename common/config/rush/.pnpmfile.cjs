@@ -32,5 +32,10 @@ function readPackage(packageJson, context) {
     //  packageJson.dependencies['log4js'] = '0.6.38';
     // }
 
+    if (packageJson.name === "@samverschueren/stream-to-observable") {
+        context.log("Fixed up dependencies for @samverschueren/stream-to-observable");
+        packageJson.dependencies["any-observable"] = "^0.5.1";
+    }
+
     return packageJson;
 }

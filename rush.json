@@ -16,7 +16,7 @@
      * path segment in the "$schema" field for all your Rush config files. This will ensure
      * correct error-underlining and tab-completion for editors such as VS Code.
      */
-    "rushVersion": "5.108.0",
+    "rushVersion": "5.123.0",
 
     /**
      * The next field selects which package manager should be installed and determines its version.
@@ -41,7 +41,7 @@
      * LTS schedule: https://nodejs.org/en/about/releases/
      * LTS versions: https://nodejs.org/en/download/releases/
      */
-    "nodeSupportedVersionRange": ">=16.13.0 <17.0.0 || >=18 <19 || >=20 <21",
+    "nodeSupportedVersionRange": ">=18 <19 || >=20 <21 || >=22 <23",
 
     /**
      * If the version check above fails, Rush will display a message showing the current
@@ -255,37 +255,6 @@
     },
 
     /**
-     * Installation variants allow you to maintain a parallel set of configuration files that can be
-     * used to build the entire monorepo with an alternate set of dependencies. For example, suppose
-     * you upgrade all your projects to use a new release of an important framework, but during a transition period
-     * you intend to maintain compatibility with the old release. In this situation, you probably want your
-     * CI validation to build the entire repo twice: once with the old release, and once with the new release.
-     *
-     * Rush "installation variants" correspond to sets of config files located under this folder:
-     *
-     *   common/config/rush/variants/<variant_name>
-     *
-     * The variant folder can contain an alternate common-versions.json file. Its "preferredVersions" field can be used
-     * to select older versions of dependencies (within a loose SemVer range specified in your package.json files).
-     * To install a variant, run "rush install --variant <variant_name>".
-     *
-     * For more details and instructions, see this article: https://rushjs.io/pages/advanced/installation_variants/
-     */
-    "variants": [
-        // {
-        //   /**
-        //    * The folder name for this variant.
-        //    */
-        //   "variantName": "old-sdk",
-        //
-        //   /**
-        //    * An informative description
-        //    */
-        //   "description": "Build this repo using the previous release of the SDK"
-        // }
-    ],
-
-    /**
      * Rush can collect anonymous telemetry about everyday developer activity such as
      * success/failure of installs, builds, and other operations. You can use this to identify
      * problems with your toolchain or Rush itself. THIS TELEMETRY IS NOT SHARED WITH MICROSOFT.
@@ -416,11 +385,6 @@
 
         // Packages (do get published)
         {
-            "packageName": "@tinyburg/apks",
-            "projectFolder": "packages/apks",
-            "shouldPublish": true
-        },
-        {
             "packageName": "@tinyburg/architect",
             "projectFolder": "packages/architect",
             "shouldPublish": true
@@ -431,28 +395,8 @@
             "shouldPublish": true
         },
         {
-            "packageName": "@tinyburg/bots",
-            "projectFolder": "packages/bots",
-            "shouldPublish": true
-        },
-        {
-            "packageName": "@tinyburg/cli",
-            "projectFolder": "packages/cli",
-            "shouldPublish": true
-        },
-        {
-            "packageName": "@tinyburg/core",
-            "projectFolder": "packages/core",
-            "shouldPublish": true
-        },
-        {
             "packageName": "@tinyburg/doorman",
             "projectFolder": "packages/doorman",
-            "shouldPublish": true
-        },
-        {
-            "packageName": "@tinyburg/economy",
-            "projectFolder": "packages/economy",
             "shouldPublish": true
         },
         {
@@ -461,13 +405,28 @@
             "shouldPublish": true
         },
         {
+            "packageName": "@tinyburg/fount",
+            "projectFolder": "packages/fount",
+            "shouldPublish": true
+        },
+        {
             "packageName": "@tinyburg/insight",
             "projectFolder": "packages/insight",
             "shouldPublish": true
         },
         {
-            "packageName": "@tinyburg/spectator",
-            "projectFolder": "packages/spectator",
+            "packageName": "@tinyburg/nucleus",
+            "projectFolder": "packages/nucleus",
+            "shouldPublish": true
+        },
+        {
+            "packageName": "@tinyburg/treasurer",
+            "projectFolder": "packages/treasurer",
+            "shouldPublish": true
+        },
+        {
+            "packageName": "@tinyburg/window",
+            "projectFolder": "packages/window",
             "shouldPublish": true
         },
 
@@ -483,18 +442,8 @@
             "shouldPublish": false
         },
         {
-            "packageName": "@tinyburg/bank",
-            "projectFolder": "apps/bank",
-            "shouldPublish": false
-        },
-        {
             "packageName": "@tinyburg/discord-bot",
             "projectFolder": "apps/discord-bot",
-            "shouldPublish": false
-        },
-        {
-            "packageName": "@tinyburg/repl.it-demo",
-            "projectFolder": "apps/repl.it-demo",
             "shouldPublish": false
         },
         {
@@ -505,43 +454,6 @@
         {
             "packageName": "@tinyburg/urbanization",
             "projectFolder": "apps/urbanization",
-            "shouldPublish": false
-        },
-
-        // Integration examples (do not get published)
-        {
-            "packageName": "@tinyburg/architect-apks-integration",
-            "projectFolder": "packages/integrations/architect+apks",
-            "shouldPublish": false
-        },
-        {
-            "packageName": "@tinyburg/architect-spectator-integration",
-            "projectFolder": "packages/integrations/architect+spectator",
-            "shouldPublish": false
-        },
-        {
-            "packageName": "@tinyburg/core-authproxy-integration",
-            "projectFolder": "packages/integrations/core+authproxy",
-            "shouldPublish": false
-        },
-        {
-            "packageName": "@tinyburg/doorman-architect-apks-integration",
-            "projectFolder": "packages/integrations/doorman+architect+apks",
-            "shouldPublish": false
-        },
-        {
-            "packageName": "@tinyburg/doorman-bitprints-integration",
-            "projectFolder": "packages/integrations/doorman+bitprints",
-            "shouldPublish": false
-        },
-        {
-            "packageName": "@tinyburg/explorer-architect-apks-integration",
-            "projectFolder": "packages/integrations/explorer+architect+apks",
-            "shouldPublish": false
-        },
-        {
-            "packageName": "@tinyburg/insight-architect-apks-integration",
-            "projectFolder": "packages/integrations/insight+architect+apks",
             "shouldPublish": false
         },
 

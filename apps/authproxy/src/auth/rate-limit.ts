@@ -1,15 +1,6 @@
 import type { Redis } from "ioredis";
+import type { FastifyRequest } from "fastify";
 import type { RateLimitPluginOptions } from "@fastify/rate-limit";
-
-declare module "@fastify/rate-limit" {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    interface errorResponseBuilderContext {
-        ban: boolean;
-        after: string;
-        max: number;
-        ttl: number;
-    }
-}
 
 export const buildRateLimitConfig = (redis: Redis): RateLimitPluginOptions => ({
     // Apply the rate limit setting to all routes within the encapsulation scope
@@ -49,8 +40,7 @@ export const buildRateLimitConfig = (redis: Redis): RateLimitPluginOptions => ({
     keyGenerator: (request) => request.apiKey?.id || request.ip,
 
     // The maximum number of requests a single client can perform inside a time window.
-    // eslint-disable-next-line @typescript-eslint/typedef
-    async max(request) {
+    async max(request: FastifyRequest) {
         const rl = request.apiKey?.rateLimitPerWindow || 5;
         request.log.debug(`This request is rate-limited to ${rl} requests per 2 minute window`);
 
@@ -81,3 +71,5 @@ export const buildRateLimitConfig = (redis: Redis): RateLimitPluginOptions => ({
         };
     },
 });
+
+export default buildRateLimitConfig;

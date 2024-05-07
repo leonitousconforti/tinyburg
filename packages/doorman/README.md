@@ -4,15 +4,23 @@ Your friendly TinyTower doorman. Helps you with tasks such as moving bitizens up
 
 ## Goals
 
--   move bitizens up the elevator
--   restock floors
+-   rebuild
 -   buy floors
+-   tech tree upgrades
+-   fulfill airport shipments
+-   upgrade the elevator speed
+-   dismiss bitbook notifications
+-   restock floors and upgrade floors
+-   unlock roofs, elevators, and lobbies
+-   move bitizens up the elevator to their desired floors
+-   Expose interfaces for implementing more complex handlers using something like @tinyburg/bitprints
+-   Use only video processing, no hooking into the game memory using frida (shouldn't be able to tell that this is a bot)
+-   Implement all image processing algorithms myself, no using opencv (I want to learn how they work and what they do)
 
 ## Non-goals
 
 -   enter raffle
--   performance - I am doing this in typescript, I know it is not going to be the fastest
+-   performance (I am doing this in typescript, I know it is not going to be the fastest)
+-   Decision making
 
-## Architecture
-
-look at the example.sh file to try to get an idea of how this projects is architected. The idea is, remote android emulators which doorman connects to and controls. The systems where the emulators are running are provisioned using ansible, see the playbook.yml file for that. The emulators are managed by avd-compose, see the avd-compose/create-testing-emulator.sh/delete-testing-emulator.sh for that. Doorman is can be deployed as an npm package or using a docker file. If you go the docker route, there are two additional containers that can be deployed alongside doorman to help manage and control the emulator remotely through a browser, see the docker-compose.yml file for that.
+@tinyburg/doorman's main goals can be summarized as performing actions in game (press elevator notification then move bitizen to desired floor), processing and relaying global game state (you now have x coins, y bux, ect), and providing interfaces and abstractions to promote easy extension by others so you can build your own custom handlers to do whatever you want! Doorman is really good at specifying HOW something gets done, but it will never control WHEN something gets done. If you want to build a complex game strategy that requires reacting to changes in game state and then performing actions you should consider using @tinyburg/bitprints to build your game strategy and then pass the generated blueprint to doorman.
