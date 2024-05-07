@@ -57,8 +57,8 @@ export const containerCreateOptions = ({
             : ["DISPLAY=:0", ...environmentVariables],
         HostConfig: {
             NetworkMode: networkMode || undefined,
-            // DeviceRequests: [{ Count: -1, Driver: "nvidia", Capabilities: [["gpu"]] }],
-            // Devices: [{ CgroupPermissions: "mrw", PathInContainer: "/dev/kvm", PathOnHost: "/dev/kvm" }],
+            DeviceRequests: [{ Count: -1, Driver: "nvidia", Capabilities: [["gpu"]] }],
+            Devices: [{ CgroupPermissions: "mrw", PathInContainer: "/dev/kvm", PathOnHost: "/dev/kvm" }],
             PortBindings: portBindings,
             Binds: [
                 "/tmp/.X11-unix:/tmp/.X11-unix",

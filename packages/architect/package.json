@@ -47,7 +47,7 @@
     "dependencies": {
         "@bufbuild/protobuf": "~1.9.0",
         "tar-fs": "~3.0.6",
-        "the-moby-effect": "~1.45.0-alpha.2"
+        "the-moby-effect": "~1.45.0-alpha.3"
     },
     "devDependencies": {
         "@bufbuild/buf": "1.31.0",
