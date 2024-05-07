@@ -68,7 +68,6 @@ describe("Apks tests", () => {
                 const apk4 = yield* ensureCacheHit(patchApk, game);
                 expect(apk4).toBe(apk3);
             })
-                .pipe(Effect.scoped)
                 .pipe(Effect.provide(NodeContext.layer))
                 .pipe(Effect.runPromise),
         TINYBURG_APKS_TEST_TIMEOUT
