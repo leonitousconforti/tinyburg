@@ -22,7 +22,6 @@ jobs:
 
   # Uses rush publish to publish all the packages to the npm registry.
   rush-publish:
-    needs: rush-pre-publish
     name: "Rush publish"
     environment: Publish
     runs-on: ubuntu-latest
