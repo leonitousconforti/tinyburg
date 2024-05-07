@@ -17,14 +17,13 @@ const MissionAgent = AllAgents["MissionAgent"];
 const PetAgent = AllAgents["PetAgent"];
 const RoofAgent = AllAgents["RoofAgent"];
 
-// Timeout tests after 3 minutes and prep after 6 minutes
+// Timeout tests after 3 minutes and prep after 10 minutes
 const INSIGHT_TEST_TIMEOUT_MS = Number.parseInt(process.env["INSIGHT_TEST_TIMEOUT_MS"] as string) || 1000 * 60 * 3;
-const INSIGHT_PREP_TIMEOUT_MS = Number.parseInt(process.env["INSIGHT_PREP_TIMEOUT_MS"] as string) || 1000 * 60 * 6;
+const INSIGHT_PREP_TIMEOUT_MS = Number.parseInt(process.env["INSIGHT_PREP_TIMEOUT_MS"] as string) || 1000 * 60 * 10;
 
 describe("All important agents should return something and not throw any errors", () => {
     let fridaAddress: string;
-    let emulatorContainer: string;
-    let sharedVolume: MobyApi.Schemas.Volume;
+    let emulatorContainer: MobyApi.Schemas.ContainerInspectResponse;
 
     beforeAll(async () => {
         const apk = await apks
@@ -38,15 +37,19 @@ describe("All important agents should return something and not throw any errors"
             .pipe(Effect.provide(MobyApi.fromDockerHostEnvironmentVariable))
             .pipe(Effect.runPromise);
 
-        await architectResult.installApk(apk);
-        fridaAddress = architectResult.containerEndpoints[0].fridaAddress;
-        sharedVolume = architectResult.sharedVolume;
-        emulatorContainer = architectResult.emulatorContainer.Id ?? "";
+        await architectResult
+            .installApk(apk)
+            .pipe(Effect.provide(NodeContext.layer))
+            .pipe(Effect.provide(MobyApi.fromDockerHostEnvironmentVariable))
+            .pipe(Effect.runPromise);
+
+        emulatorContainer = architectResult.emulatorContainer;
+        fridaAddress = `host.docker.internal${architectResult.containerEndpoints[0].fridaAddress}`;
     }, INSIGHT_PREP_TIMEOUT_MS);
 
     afterAll(async () => {
         await architect
-            .cleanup({ emulatorContainer, sharedVolume })
+            .cleanup({ emulatorContainer })
             .pipe(Effect.provide(NodeContext.layer))
             .pipe(Effect.provide(MobyApi.fromDockerHostEnvironmentVariable))
             .pipe(Effect.runPromise);
