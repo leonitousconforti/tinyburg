@@ -11,7 +11,6 @@ import * as Function from "effect/Function";
 import * as HashMap from "effect/HashMap";
 import * as Match from "effect/Match";
 import * as Option from "effect/Option";
-import * as Scope from "effect/Scope";
 import * as Stream from "effect/Stream";
 
 import { ApksupportScrapingError, IPuppeteerDetails, getApksupportDetails } from "./puppeteer.js";
@@ -51,7 +50,7 @@ export const loadApk = <T extends Games, U extends Extract<TrackedVersion<T>, An
 ): Effect.Effect<
     string,
     PlatformError.BadArgument | PlatformError.SystemError | HttpClient.error.HttpClientError | ApksupportScrapingError,
-    Scope.Scope | FileSystem.FileSystem
+    FileSystem.FileSystem
 > =>
     Effect.gen(function* () {
         // Obtain resources and ensure the cache directory exists
@@ -103,7 +102,7 @@ export const loadApk = <T extends Games, U extends Extract<TrackedVersion<T>, An
         yield* request.stream.pipe(Stream.run(fs.sink(downloadedFile)));
         yield* Effect.logInfo(`Successfully downloaded ${game} ${version} to ${downloadedFile}`);
         return `${cacheDirectory}/${desiredApkFilename}`;
-    });
+    }).pipe(Effect.scoped);
 
 /**
  * Loads the specific version of the desired game. If the apk is not already
@@ -119,7 +118,7 @@ export const patchApk = <T extends Games, U extends Extract<TrackedVersion<T>, A
 ): Effect.Effect<
     string,
     PlatformError.BadArgument | PlatformError.SystemError | HttpClient.error.HttpClientError | ApksupportScrapingError,
-    Scope.Scope | FileSystem.FileSystem
+    FileSystem.FileSystem
 > =>
     loadApk(game, version, cacheDirectory).pipe(
         Effect.andThen((apkPath) =>

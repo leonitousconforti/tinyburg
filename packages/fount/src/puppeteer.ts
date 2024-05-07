@@ -4,7 +4,6 @@ import * as Data from "effect/Data";
 import * as Effect from "effect/Effect";
 import * as Function from "effect/Function";
 import * as Schedule from "effect/Schedule";
-import * as Scope from "effect/Scope";
 import * as puppeteer from "puppeteer";
 
 import { browserResource } from "./resources.js";
@@ -23,7 +22,7 @@ export class ApksupportScrapingError extends Data.TaggedError("ApksupportScrappe
 export const getApksupportDetails = (
     game: Games,
     versionInfo: SemanticVersionAndAppVersionCode
-): Effect.Effect<readonly [downloadUrl: string, details: IPuppeteerDetails], ApksupportScrapingError, Scope.Scope> =>
+): Effect.Effect<readonly [downloadUrl: string, details: IPuppeteerDetails], ApksupportScrapingError, never> =>
     Effect.gen(function* () {
         const { appVersionCode, semanticVersion } = versionInfo;
         const browser: puppeteer.Browser = yield* browserResource;
@@ -77,4 +76,6 @@ export const getApksupportDetails = (
                 approximateFileSizeMB: Number.parseFloat(approximateFileSizeMB),
             },
         ] as const;
-    }).pipe(Effect.catchAll((error) => new ApksupportScrapingError({ message: `${error}` })));
+    })
+        .pipe(Effect.scoped)
+        .pipe(Effect.catchAll((error) => new ApksupportScrapingError({ message: `${error}` })));
