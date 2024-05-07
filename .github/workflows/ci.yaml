@@ -19,33 +19,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/workflows/rush-build
-        with:
-          SSH_KEY: ${{ secrets.SSH_KEY }}
-          KNOWN_HOSTS: ${{ secrets.KNOWN_HOSTS }}
-          TS_OAUTH_SECRET: ${{ secrets.TS_OAUTH_SECRET }}
-          TS_OAUTH_CLIENT_ID: ${{ secrets.TS_OAUTH_CLIENT_ID }}
-
-  # Before we publish, we should check if all the projects we built against
-  # the latest versions of TinyTower, LegoTower, and TinyTowerVegas to make
-  # sure that we never accidentally release a stale branch.
-  rush-pre-publish:
-    needs: rush-build
-    name: "Rush pre-publish checks"
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 2
-      - uses: ./.github/workflows/rush-build
-        with:
-          SSH_KEY: ${{ secrets.SSH_KEY }}
-          KNOWN_HOSTS: ${{ secrets.KNOWN_HOSTS }}
-          TS_OAUTH_SECRET: ${{ secrets.TS_OAUTH_SECRET }}
-          TS_OAUTH_CLIENT_ID: ${{ secrets.TS_OAUTH_CLIENT_ID }}
-      - name: Verify Change Logs
-        run: node common/scripts/install-run-rush.js change --verify
-      - name: Check for latest apks
-        run: echo "Hi, mom!"
 
   # Uses rush publish to publish all the packages to the npm registry.
   rush-publish:
@@ -55,12 +28,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: ./.github/workflows/rush-build
         with:
-          SSH_KEY: ${{ secrets.SSH_KEY }}
-          KNOWN_HOSTS: ${{ secrets.KNOWN_HOSTS }}
-          TS_OAUTH_SECRET: ${{ secrets.TS_OAUTH_SECRET }}
-          TS_OAUTH_CLIENT_ID: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          fetch-depth: 2
+      - uses: ./.github/workflows/rush-build
+      - name: Verify Change Logs
+        run: node common/scripts/install-run-rush.js change --verify
       - name: Rush publish
         run: rush publish --publish --apply --target-branch main --npm-auth-token ${{ secrets.NPM_AUTH_TOKEN }}
 
@@ -78,10 +50,6 @@ jobs:
       - uses: ./.github/workflows/rush-build
         with:
           BUILD_PARAMETERS: "--to @tinyburg/authproxy"
-          SSH_KEY: ${{ secrets.SSH_KEY }}
-          KNOWN_HOSTS: ${{ secrets.KNOWN_HOSTS }}
-          TS_OAUTH_SECRET: ${{ secrets.TS_OAUTH_SECRET }}
-          TS_OAUTH_CLIENT_ID: ${{ secrets.TS_OAUTH_CLIENT_ID }}
       - uses: ./.github/workflows/docker-build
         with:
           PROJECT: "authproxy"
@@ -99,10 +67,6 @@ jobs:
       - uses: ./.github/workflows/rush-build
         with:
           BUILD_PARAMETERS: "--to @tinyburg/auto-gold-bits"
-          SSH_KEY: ${{ secrets.SSH_KEY }}
-          KNOWN_HOSTS: ${{ secrets.KNOWN_HOSTS }}
-          TS_OAUTH_SECRET: ${{ secrets.TS_OAUTH_SECRET }}
-          TS_OAUTH_CLIENT_ID: ${{ secrets.TS_OAUTH_CLIENT_ID }}
       - uses: ./.github/workflows/docker-build
         with:
           PROJECT: "auto-gold-bits"
@@ -133,12 +97,3 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/workflows/dokku-deploy
-
-  # Because why not!
-  publish-announcement:
-    needs: [rush-publish, deploy-authproxy, deploy-auto-gold-bits]
-    if: ${{ github.ref == 'refs/heads/main' }}
-    name: "Successful publish announcement"
-    runs-on: ubuntu-latest
-    steps:
-      - run: echo "look Mom, look Mom!"
