@@ -73,7 +73,7 @@ export const architect = (
     });
 
 export const cleanup = (options: {
-    sharedVolume: MobyApi.Schemas.Volume;
+    sharedVolume?: MobyApi.Schemas.Volume | undefined;
     emulatorContainer: MobyApi.Schemas.ContainerInspectResponse;
 }): Effect.Effect<
     void,
@@ -86,5 +86,5 @@ export const cleanup = (options: {
 
         yield* containers.kill({ id: options.emulatorContainer.Id! });
         yield* containers.delete({ id: options.emulatorContainer.Id!, force: true, v: true });
-        yield* volumes.delete({ name: options.sharedVolume.Name });
+        if (options.sharedVolume) yield* volumes.delete({ name: options.sharedVolume.Name });
     });
