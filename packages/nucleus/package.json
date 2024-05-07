@@ -55,36 +55,41 @@
     "dependencies": {
         "debug": "~4.3.4",
         "deep-extend": "~0.6.0",
-        "got": "~13.0.0",
+        "got": "~14.2.1",
         "prompts": "~2.4.2",
-        "semver": "~7.5.1",
+        "semver": "~7.6.1",
         "supports-color": "~9.4.0",
-        "zod": "~3.22.4"
+        "zod": "~3.23.7"
     },
     "devDependencies": {
-        "@rushstack/eslint-config": "3.4.1",
-        "@rushstack/heft": "0.63.2",
-        "@rushstack/heft-jest-plugin": "0.10.4",
-        "@rushstack/heft-lint-plugin": "0.2.12",
-        "@rushstack/heft-typescript-plugin": "0.2.12",
+        "@effect/platform": "0.53.0",
+        "@effect/platform-node": "0.49.0",
+        "@effect/schema": "0.66.14",
+        "@rushstack/eslint-config": "3.6.9",
+        "@rushstack/heft": "0.66.4",
+        "@rushstack/heft-jest-plugin": "0.11.25",
+        "@rushstack/heft-lint-plugin": "0.3.25",
+        "@rushstack/heft-typescript-plugin": "0.5.2",
         "@tinyburg/architect": "workspace:*",
         "@tinyburg/fount": "workspace:*",
         "@tinyburg/insight": "workspace:*",
         "@tinyburg/tsconfig-rig": "workspace:*",
-        "@types/debug": "~4.1.12",
+        "@types/debug": "4.1.12",
         "@types/deep-extend": "~0.6.0",
-        "@types/node": "20.9.0",
+        "@types/node": "20.12.10",
         "@types/prompts": "~2.4.5",
-        "@types/semver": "~7.5.4",
-        "dotenv": "~16.3.1",
-        "eslint": "8.53.0",
-        "eslint-config-prettier": "9.0.0",
-        "eslint-plugin-prettier": "5.0.1",
-        "eslint-plugin-unicorn": "49.0.0",
-        "prettier": "3.1.0",
-        "typescript": "5.2.2"
+        "@types/semver": "~7.5.8",
+        "effect": "3.1.2",
+        "eslint": "8.57.0",
+        "eslint-config-prettier": "9.1.0",
+        "eslint-plugin-prettier": "5.1.3",
+        "eslint-plugin-unicorn": "52.0.0",
+        "fast-check": "3.18.0",
+        "prettier": "3.2.5",
+        "the-moby-effect": "~1.45.0-alpha.5",
+        "typescript": "5.4.5"
     },
     "engines": {
-        "node": ">=16.18.0"
+        "node": ">=18"
     }
 }

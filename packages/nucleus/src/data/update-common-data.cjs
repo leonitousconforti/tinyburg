@@ -1,6 +1,9 @@
-const dotenv = require("dotenv");
 const path = require("node:path");
-dotenv.config({ path: path.resolve(__dirname, "../../../../.env") });
+const Effect = require("effect/Effect");
+const HashMap = require("effect/HashMap");
+const Option = require("effect/Option");
+const MobyApi = require("the-moby-effect/Moby");
+const NodeContext = require("@effect/platform-node/NodeContext");
 
 /**
  * This script is automatically ran by heft during before typescript
@@ -9,7 +12,6 @@ dotenv.config({ path: path.resolve(__dirname, "../../../../.env") });
 
 const fs = require("node:fs/promises");
 const prettier = require("prettier");
-const debug = require("debug")("tinyburg:core:update-common-data");
 
 // Banner to put at the top of every data file
 const sourceCodeBanner = `/**
@@ -26,7 +28,7 @@ const sourceCodeBanner = `/**
 
 module.exports.runAsync = async () => {
     const apks = await import("@tinyburg/fount");
-    const { architect } = await import("@tinyburg/architect");
+    const { architect, cleanup } = await import("@tinyburg/architect");
     const { getSemanticVersionsByRelativeVersions } = await import("@tinyburg/fount/versions");
     const { bootstrapAgentOnRemote, cleanupAgent, GetterAgents } = await import("@tinyburg/insight");
 
@@ -39,7 +41,7 @@ module.exports.runAsync = async () => {
     // To know where to put the generated source code
     const AgentOutputFileMap = {
         "./bitbook-posts.ts": GetterAgents.BitbookAgent,
-        "./bitizen.ts": GetterAgents.BitizenAgent,
+        // "./bitizen.ts": GetterAgents.BitizenAgent,
         "./costumes.ts": GetterAgents.CostumeAgent,
         "./elevators.ts": GetterAgents.ElevatorAgent,
         "./floors.ts": GetterAgents.FloorAgent,
@@ -48,10 +50,12 @@ module.exports.runAsync = async () => {
         "./roofs.ts": GetterAgents.RoofAgent,
     };
 
-    // eslint-disable-next-line unicorn/no-await-expression-member
-    const latestVersion = (await getSemanticVersionsByRelativeVersions(apks.Games.TinyTower)).get("latest version")[
-        "semanticVersion"
-    ];
+    const latestVersion = await getSemanticVersionsByRelativeVersions(apks.Games.TinyTower)
+        .pipe(Effect.map(HashMap.get("latest version")))
+        .pipe(Effect.map(Option.getOrThrow))
+        .pipe(Effect.map(({ semanticVersion }) => semanticVersion))
+        .pipe(Effect.runPromise);
+
     console.log(latestVersion);
     const alreadyGenerateForLatestVersion = await Promise.all(
         Object.keys(AgentOutputFileMap).map(async (file) => {
@@ -66,14 +70,25 @@ module.exports.runAsync = async () => {
     }
 
     // Create a container to extract information from
-    const apk = await apks.loadApk(apks.Games.TinyTower);
-    const { containerEndpoints, emulatorContainer, installApk } = await architect();
-    await installApk(apk);
+    const apk = await apks
+        .loadApk(apks.Games.TinyTower)
+        .pipe(Effect.provide(NodeContext.layer))
+        .pipe(Effect.runPromise);
+
+    const { containerEndpoints, emulatorContainer, installApk } = await architect()
+        .pipe(Effect.provide(NodeContext.layer))
+        .pipe(Effect.provide(MobyApi.fromDockerHostEnvironmentVariable))
+        .pipe(Effect.runPromise);
+
+    await installApk(apk)
+        .pipe(Effect.provide(NodeContext.layer))
+        .pipe(Effect.provide(MobyApi.fromDockerHostEnvironmentVariable))
+        .pipe(Effect.runPromise);
 
     for (const [outputDestination, agent] of Object.entries(AgentOutputFileMap)) {
         const { runAgentMain, ...agentDetails } = await bootstrapAgentOnRemote(
             agent,
-            containerEndpoints[0].fridaAddress
+            `host.docker.internal${containerEndpoints[0].fridaAddress}`
         );
 
         const result = await runAgentMain();
@@ -91,6 +106,12 @@ module.exports.runAsync = async () => {
         await fs.writeFile(outputPath, formattedBanner + cleanedSource);
     }
 
-    await emulatorContainer.stop();
-    await emulatorContainer.remove();
+    await cleanup({ emulatorContainer })
+        .pipe(Effect.provide(NodeContext.layer))
+        .pipe(Effect.provide(MobyApi.fromDockerHostEnvironmentVariable))
+        .pipe(Effect.runPromise);
 };
+
+if (require.main === module) {
+    module.exports.runAsync().catch(console.error);
+}
