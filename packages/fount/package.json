@@ -1,6 +1,6 @@
 {
     "name": "@tinyburg/fount",
-    "version": "0.0.0",
+    "version": "1.0.0",
     "description": "fetches any version of any of Nimblebit's Android apks directly from the playstore",
     "keywords": [
         "tinyburg",
