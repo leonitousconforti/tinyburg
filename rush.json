@@ -397,7 +397,7 @@
         {
             "packageName": "@tinyburg/doorman",
             "projectFolder": "packages/doorman",
-            "shouldPublish": true
+            "shouldPublish": false
         },
         {
             "packageName": "@tinyburg/explorer",
