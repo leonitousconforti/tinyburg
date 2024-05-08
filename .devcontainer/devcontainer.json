@@ -93,6 +93,6 @@
     },
 
     "appPort": ["0.0.0.0:3000:3000"],
-    "postCreateCommand": "/bin/bash -i ./setup.sh",
+    "postCreateCommand": "/bin/bash -i ./.devcontainer/setup.sh",
     "runArgs": ["--security-opt", "seccomp=unconfined", "--add-host=host.docker.internal:host-gateway"]
 }
