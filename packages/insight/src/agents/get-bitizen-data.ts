@@ -2,21 +2,26 @@ import "frida-il2cpp-bridge";
 
 import type { IBitizenAgentExports } from "../shared/bitizen-agent-exports.js";
 
-import { TinyTowerFridaAgent } from "./base-frida-agent.js";
-import { copyListToJs } from "../helpers/copy-list-to-js.js";
 import { colorToObject } from "../helpers/color-to-object.js";
 import { copyArrayToJs } from "../helpers/copy-array-to-js.js";
+import { copyListToJs } from "../helpers/copy-list-to-js.js";
+import { TinyTowerFridaAgent } from "./base-frida-agent.js";
 
 export class GetBitizenData extends TinyTowerFridaAgent<GetBitizenData> {
     public loadDependencies() {
         const csharpAssembly = Il2Cpp.domain.assembly("Assembly-CSharp");
         const AppUtilClass = csharpAssembly.image.class("AppUtil");
         const VBitizenClass = csharpAssembly.image.class("VBitizen");
+        const LocalizationManagerClass = csharpAssembly.image.class("LocalizationManager");
         const skinColorsList = VBitizenClass.field<Il2Cpp.Object>("skinColors").value;
         const hairColorsList = VBitizenClass.field<Il2Cpp.Object>("hairColors").value;
-        const maleNamesArray = VBitizenClass.field<Il2Cpp.Array<Il2Cpp.String>>("maleNames").value;
-        const femaleNamesArray = VBitizenClass.field<Il2Cpp.Array<Il2Cpp.String>>("femaleNames").value;
-        const lastNamesArray = VBitizenClass.field<Il2Cpp.Array<Il2Cpp.String>>("lastNames").value;
+        const snapshot = Il2Cpp.MemorySnapshot.capture();
+        const instance = snapshot.objects.find(Il2Cpp.isExactly(LocalizationManagerClass));
+        if (!instance) throw new Error("Could not find LocalizationManager instance");
+        const maleNamesArray = instance.field<Il2Cpp.Array<Il2Cpp.String>>("maleNames").value;
+        const femaleNamesArray = instance.field<Il2Cpp.Array<Il2Cpp.String>>("femaleNames").value;
+        const maleLastNamesArray = instance.field<Il2Cpp.Array<Il2Cpp.String>>("lastMaleNames").value;
+        const femaleLastNamesArray = instance.field<Il2Cpp.Array<Il2Cpp.String>>("lastFemaleNames").value;
 
         return {
             csharpAssembly,
@@ -26,7 +31,8 @@ export class GetBitizenData extends TinyTowerFridaAgent<GetBitizenData> {
             hairColorsList,
             maleNamesArray,
             femaleNamesArray,
-            lastNamesArray,
+            maleLastNamesArray,
+            femaleLastNamesArray,
         };
     }
 
@@ -44,7 +50,8 @@ export class GetBitizenData extends TinyTowerFridaAgent<GetBitizenData> {
         // Extract all the males names, female names, and last names by enumerating over the arrays
         const maleNames = copyArrayToJs(this.dependencies.maleNamesArray).map((name) => name.toString());
         const femaleNames = copyArrayToJs(this.dependencies.femaleNamesArray).map((name) => name.toString());
-        const lastNames = copyArrayToJs(this.dependencies.lastNamesArray).map((name) => name.toString());
+        const maleLastNames = copyArrayToJs(this.dependencies.maleLastNamesArray).map((name) => name.toString());
+        const femaleLastNames = copyArrayToJs(this.dependencies.femaleLastNamesArray).map((name) => name.toString());
 
         // Extract all the skin colors by first enumerating over all the skin colors, then
         // enumerating over each color which is an array of three numbers; r, g, b. Finally
@@ -73,7 +80,8 @@ export class GetBitizenData extends TinyTowerFridaAgent<GetBitizenData> {
             skinColors,
             maleNames,
             femaleNames,
-            lastNames,
+            maleLastNames,
+            femaleLastNames,
         };
     }
 
@@ -113,11 +121,19 @@ export class GetBitizenData extends TinyTowerFridaAgent<GetBitizenData> {
 
         // Source code for the last names array. Lase names are in all caps, but I prefer
         // only first character capitalized.
-        const lastNamesArrayString = this.data.lastNames
+        const maleLastNamesArrayString = this.data.maleLastNames
             .map((name) => name.charAt(0) + name.charAt(1).toUpperCase() + name.slice(2).toLowerCase())
             .join(", ");
-        const lastNamesSourceTS = `export const lastNames = [${lastNamesArrayString}] as const;\n`;
-        const lastNameSourceTS = "export type LastName = typeof lastNames[number];\n";
+        const maleLastNamesSourceTS = `export const maleLastNames = [${maleLastNamesArrayString}] as const;\n`;
+        const maleLastNameSourceTS = "export type MaleLastName = typeof maleLastNames[number];\n";
+
+        // Source code for the last names array. Lase names are in all caps, but I prefer
+        // only first character capitalized.
+        const femaleLastNamesArrayString = this.data.femaleLastNames
+            .map((name) => name.charAt(0) + name.charAt(1).toUpperCase() + name.slice(2).toLowerCase())
+            .join(", ");
+        const femaleLastNamesSourceTS = `export const femaleLastNames = [${femaleLastNamesArrayString}] as const;\n`;
+        const femaleLastNameSourceTS = "export type FemaleLastName = typeof femaleLastNames[number];\n";
 
         return (
             `// TinyTower version: ${this.data.TTVersion}` +
@@ -140,8 +156,11 @@ export class GetBitizenData extends TinyTowerFridaAgent<GetBitizenData> {
             femaleNamesSourceTS +
             femaleNameSourceTS +
             "\n" +
-            lastNamesSourceTS +
-            lastNameSourceTS
+            maleLastNamesSourceTS +
+            maleLastNameSourceTS +
+            "\n" +
+            femaleLastNamesSourceTS +
+            femaleLastNameSourceTS
         );
     }
 }
