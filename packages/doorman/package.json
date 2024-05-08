@@ -1,6 +1,6 @@
 {
     "name": "@tinyburg/doorman",
-    "version": "4.0.0",
+    "version": "5.0.0",
     "description": "Your friendly TinyTower doorman. Helps you with tasks such as moving bitizens up your elevator, restocking floors, building floors, rebuilding, and much more",
     "keywords": [
         "Tiny Tower",
