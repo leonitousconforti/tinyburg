@@ -20,7 +20,7 @@
         "_phase:build": "frida-compile agent.ts --compress --output dist/agent.js --",
         "build": "frida-compile agent.ts --compress --output dist/agent.js",
         "compile": "frida-compile agent.ts --watch --output dist/agent.js",
-        "inject": "frida --host ci.internal.tinyburg.app:27042 -f com.nimblebit.tinytower --realm emulated --load dist/agent.js"
+        "inject": "frida --host ubuntu-22-dev.internal.leoconforti.us:27042 -f com.nimblebit.tinytower --realm emulated --load dist/agent.js"
     },
     "dependencies": {
         "@tinyburg/insight": "workspace:*",
