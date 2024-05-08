@@ -3,7 +3,7 @@ WORKDIR /workspace/tinyburg
 COPY common/deploy/authproxy.zip authproxy.zip
 RUN unzip authproxy.zip && rm authproxy.zip
 
-FROM node:18-slim
+FROM node:20-slim
 ARG GIT_SHA=""
 ENV GIT_SHA ${GIT_SHA}
 ENV NODE_ENV="production"
