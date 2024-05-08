@@ -34,7 +34,7 @@ jobs:
       - name: Verify Change Logs
         run: node common/scripts/install-run-rush.js change --verify
       - name: Rush publish
-        run: node common/scripts/install-run-rush.js publish --publish --apply --target-branch main --npm-auth-token ${{ secrets.NPM_AUTH_TOKEN }}
+        run: node common/scripts/install-run-rush.js publish --publish --apply --set-access-level public --target-branch main --npm-auth-token ${{ secrets.NPM_AUTH_TOKEN }}
 
   # In order to build the authproxy docker image, we first need to build it and
   # its dependencies (remember this will be really fast because we are caching
