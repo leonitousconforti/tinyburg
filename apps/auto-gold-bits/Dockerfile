@@ -3,7 +3,7 @@ WORKDIR /workspace/tinyburg
 COPY common/deploy/auto-gold-bits.zip auto-gold-bits.zip
 RUN unzip auto-gold-bits.zip && rm auto-gold-bits.zip
 
-FROM node:18-slim
+FROM node:20-slim
 ENV NODE_ENV="production"
 COPY --from=dependency-preparer /workspace/tinyburg /workspace/tinyburg
 RUN node /workspace/tinyburg/create-links.js create
