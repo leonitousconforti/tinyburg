@@ -6,7 +6,7 @@
  *
  * With TinyTower version: 5.2.1
  *
- * On: Tue, 07 May 2024 21:13:10 GMT
+ * On: Wed, 08 May 2024 23:06:46 GMT
  */
 
 export const buildFloorCost = (numFloors: number) => {
