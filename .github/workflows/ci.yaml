@@ -90,11 +90,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - run: echo "AUTO_GOLD_BITS_SHA=$(docker buildx imagetools inspect --format "{{json .Manifest.Digest}}" ghcr.io/leonitousconforti/tinyburg/authproxy:latest | xargs | sed 's/sha256://')" >> $GITHUB_ENV
       - uses: dokku/github-action@master
         with:
           ssh_private_key: ${{ secrets.AUTHPROXY_DOKKU_KEY }}
           git_remote_url: "ssh://dokku@authproxy.tinyburg.app:22/authproxy"
-          deploy_docker_image: ghcr.io/leonitousconforti/tinyburg/authproxy:latest
+          deploy_docker_image: ghcr.io/leonitousconforti/tinyburg/authproxy:${{ env.AUTO_GOLD_BITS_SHA }}
 
   # In order to deploy the auto-gold-bits docker image, we do the exact same
   # steps as we did for the authproxy docker image but using the auto-gold-bits.
@@ -106,8 +107,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - run: echo "AUTO_GOLD_BITS_SHA=$(docker buildx imagetools inspect --format "{{json .Manifest.Digest}}" ghcr.io/leonitousconforti/tinyburg/auto-gold-bits:latest | xargs | sed 's/sha256://')" >> $GITHUB_ENV
       - uses: dokku/github-action@master
         with:
           ssh_private_key: ${{ secrets.PLAYGROUND_DOKKU_KEY }}
           git_remote_url: "ssh://dokku@playground.tinyburg.app:22/auto-gold-bits"
-          deploy_docker_image: ghcr.io/leonitousconforti/tinyburg/auto-gold-bits:latest
+          deploy_docker_image: ghcr.io/leonitousconforti/tinyburg/auto-gold-bits:${{ env.AUTO_GOLD_BITS_SHA }}
