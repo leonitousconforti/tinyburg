@@ -6,9 +6,11 @@ import { onRequest } from "./on-request.js";
 import { preHandler } from "./pre-handler.js";
 
 // Import json schemas
-import HeadersSchema from "../schemas/headers_v1.json";
-import QuerystringSchema from "../schemas/querystring_v1.json";
-import ResponseSchema from "../schemas/response_v1.json";
+/* eslint-disable prettier/prettier */
+import HeadersSchema from "../schemas/headers_v1.json" assert { type: "json" };
+import QuerystringSchema from "../schemas/querystring_v1.json" assert { type: "json" };
+import ResponseSchema from "../schemas/response_v1.json" assert { type: "json" };
+/* eslint-enable prettier/prettier */
 
 // Import the generated interfaces
 import type { FastifyInstance } from "fastify";
