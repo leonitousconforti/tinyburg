@@ -45,6 +45,9 @@ jobs:
     needs: rush-build
     name: "Docker authproxy build"
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/rush-build
@@ -62,6 +65,9 @@ jobs:
     needs: rush-build
     name: "Docker auto-gold-bits build"
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/rush-build
