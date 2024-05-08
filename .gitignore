@@ -55,3 +55,7 @@ common/autoinstallers/*/.npmrc
 # Testing things
 **/playground*.ts
 **/TODO.txt
+
+# Infrastructure
+infra/*
+!infra/.gitkeep
