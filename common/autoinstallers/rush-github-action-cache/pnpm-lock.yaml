@@ -789,7 +789,7 @@ packages:
   /@types/keyv/3.1.4:
     resolution: {integrity: sha512-BQ5aZNSCpj7D6K2ksrRCTmKRLEpnPvWDiLPfoGyhZ++8YtiK9d/3DBKPJgry359X/P1PfruyYwvnvwFjuEiEIg==}
     dependencies:
-      '@types/node': 20.12.10
+      '@types/node': 20.12.11
     dev: false
 
   /@types/lodash/4.17.1:
@@ -807,19 +807,19 @@ packages:
   /@types/node-fetch/2.6.11:
     resolution: {integrity: sha512-24xFj9R5+rfQJLRyM56qh+wnVSYhyXC2tkoBndtY0U+vubqNsYXGjufB2nn8Q6gt0LrARwL6UBtMCSVCwl4B1g==}
     dependencies:
-      '@types/node': 20.12.10
+      '@types/node': 20.12.11
       form-data: 4.0.0
     dev: false
 
   /@types/node-fetch/2.6.2:
     resolution: {integrity: sha512-DHqhlq5jeESLy19TYhLakJ07kNumXWjcDdxXsLUMJZ6ue8VZJj4kLPQVE/2mdHh3xZziNF1xppu5lwmS53HR+A==}
     dependencies:
-      '@types/node': 20.12.10
+      '@types/node': 20.12.11
       form-data: 3.0.1
     dev: false
 
-  /@types/node/20.12.10:
-    resolution: {integrity: sha512-Eem5pH9pmWBHoGAT8Dr5fdc5rYA+4NAovdM4EktRPVAAiJhmWWfQrA0cFhAbOsQdSfIHjAud6YdkbL69+zSKjw==}
+  /@types/node/20.12.11:
+    resolution: {integrity: sha512-vDg9PZ/zi+Nqp6boSOT7plNuthRugEKixDv5sFTIpkE89MmNtEArAShI4mxuX2+UrLEe9pxC1vm2cjm9YlWbJw==}
     dependencies:
       undici-types: 5.26.5
     dev: false
@@ -835,19 +835,19 @@ packages:
   /@types/responselike/1.0.0:
     resolution: {integrity: sha512-85Y2BjiufFzaMIlvJDvTTB8Fxl2xfLo4HgmHzVBz08w4wDePCTjYw66PdrolO0kzli3yam/YCgRufyo1DdQVTA==}
     dependencies:
-      '@types/node': 20.12.10
+      '@types/node': 20.12.11
     dev: false
 
   /@types/responselike/1.0.3:
     resolution: {integrity: sha512-H/+L+UkTV33uf49PH5pCAUBVPNj2nDBXTN+qS1dOwyyg24l3CcicicCA7ca+HMvJBZcFgl5r8e+RR6elsb4Lyw==}
     dependencies:
-      '@types/node': 20.12.10
+      '@types/node': 20.12.11
     dev: false
 
   /@types/tunnel/0.0.3:
     resolution: {integrity: sha512-sOUTGn6h1SfQ+gbgqC364jLFBw2lnFqkgF3q0WovEHRLMrVD1sd5aufqi/aJObLekJO+Aq5z646U4Oxy6shXMA==}
     dependencies:
-      '@types/node': 20.12.10
+      '@types/node': 20.12.11
     dev: false
 
   /@verdaccio/auth/7.0.0-next-7.12:
