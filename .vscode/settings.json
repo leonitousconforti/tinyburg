@@ -130,6 +130,12 @@
         "**/logs": true,
         "**/CVS": true,
         "**/.DS_Store": true,
-        "**/Thumbs.db": true
+        "**/Thumbs.db": true,
+        "**/.cache": true,
+        "**/.heft": true,
+        "**/.rush": true,
+        "apps/**/temp": true,
+        "packages/**/temp": true,
+        "**/rush-logs": true
     }
 }
