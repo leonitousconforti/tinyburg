@@ -9,7 +9,7 @@ nvm install
 nvm use
 
 echo "📦 Installing Rush, Pnpm, and other global dependencies..."
-npm install -g pnpm @microsoft/rush vercel ts-node
+npm install -g pnpm @microsoft/rush vercel tsx @devcontainers/cli
 
 echo "📦 Installing monorepo dependencies..."
 rush install --purge

@@ -36,7 +36,9 @@
                 "Prisma.prisma",
                 "bradlc.vscode-tailwindcss",
                 "RushStack.rushstack",
-                "william-voyek.vscode-nginx"
+                "william-voyek.vscode-nginx",
+                "GitHub.vscode-github-actions",
+                "yoavbls.pretty-ts-errors"
             ],
             "settings": {
                 "cSpell.enabled": true,
@@ -65,20 +67,6 @@
                 "editor.codeActionsOnSave": {
                     "source.organizeImports": "always",
                     "source.addMissingImports": "always"
-                },
-                "files.exclude": {
-                    "**/.git": true,
-                    "**/.svn": true,
-                    "**/.hg": true,
-                    "**/CVS": true,
-                    "**/.DS_Store": true,
-                    "**/Thumbs.db": true,
-                    "**/.cache": true,
-                    "**/.heft": true,
-                    "**/.rush": true,
-                    "apps/**/temp": true,
-                    "packages/**/temp": true,
-                    "**/rush-logs": true
                 },
                 "cSpell.enableFiletypes": [
                     "dockercompose",
