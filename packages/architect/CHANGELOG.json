@@ -1,0 +1,17 @@
+{
+    "name": "@tinyburg/architect",
+    "entries": [
+        {
+            "version": "6.0.0",
+            "tag": "@tinyburg/architect_v6.0.0",
+            "date": "Wed, 08 May 2024 00:14:57 GMT",
+            "comments": {
+                "major": [
+                    {
+                        "comment": "Initial release"
+                    }
+                ]
+            }
+        }
+    ]
+}

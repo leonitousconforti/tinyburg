@@ -1,0 +1,22 @@
+{
+    "name": "@tinyburg/explorer",
+    "entries": [
+        {
+            "version": "6.0.0",
+            "tag": "@tinyburg/explorer_v6.0.0",
+            "date": "Wed, 08 May 2024 00:14:57 GMT",
+            "comments": {
+                "major": [
+                    {
+                        "comment": "Initial release"
+                    }
+                ],
+                "dependency": [
+                    {
+                        "comment": "Updating dependency \"@tinyburg/insight\" to `6.0.0`"
+                    }
+                ]
+            }
+        }
+    ]
+}

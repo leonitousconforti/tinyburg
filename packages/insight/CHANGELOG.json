@@ -1,0 +1,25 @@
+{
+    "name": "@tinyburg/insight",
+    "entries": [
+        {
+            "version": "6.0.0",
+            "tag": "@tinyburg/insight_v6.0.0",
+            "date": "Wed, 08 May 2024 00:14:57 GMT",
+            "comments": {
+                "major": [
+                    {
+                        "comment": "Initial release"
+                    }
+                ],
+                "dependency": [
+                    {
+                        "comment": "Updating dependency \"@tinyburg/architect\" to `6.0.0`"
+                    },
+                    {
+                        "comment": "Updating dependency \"@tinyburg/fount\" to `6.0.0`"
+                    }
+                ]
+            }
+        }
+    ]
+}
