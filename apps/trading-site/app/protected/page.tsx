@@ -16,7 +16,7 @@ export default async function ProtectedPage() {
 function SignOut() {
     return (
         <form
-            action={async () => {
+            onSubmit={async () => {
                 "use server";
                 await signOut();
             }}
