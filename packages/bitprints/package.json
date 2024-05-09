@@ -1,6 +1,6 @@
 {
     "name": "@tinyburg/bitprints",
-    "version": "5.0.0",
+    "version": "5.1.0",
     "description": "Blueprints for constructing a tower in TinyTower using finite state machines",
     "keywords": [
         "tinyburg",
