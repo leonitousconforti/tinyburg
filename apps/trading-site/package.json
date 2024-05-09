@@ -1,37 +1,32 @@
 {
     "name": "@tinyburg/trading-site",
-    "version": "0.0.1-alpha",
+    "version": "0.0.0",
     "private": true,
-    "type": "module",
     "scripts": {
-        "build": "prisma generate --schema=./db/schema.prisma && prisma db push --schema=./db/schema.prisma && next build",
-        "dev": "prisma generate --schema=./db/schema.prisma && next dev",
+        "build": "next build",
+        "dev": "next dev --turbo",
         "lint": "next lint",
-        "prisma": "prisma generate --schema=./db/schema.prisma",
         "start": "next start"
     },
     "dependencies": {
-        "@prisma/client": "~5.4.1",
-        "bcrypt": "~5.1.0",
-        "next": "~13.5.4",
-        "next-auth": "~4.23.2",
+        "bcrypt-ts": "^5.0.0",
+        "drizzle-orm": "^0.29.2",
+        "geist": "^1.2.0",
+        "next": "^14.0.4",
+        "next-auth": "5.0.0-beta.4",
+        "postgres": "^3.4.3",
         "react": "~18.3.1",
-        "react-dom": "~18.3.1",
-        "react-hot-toast": "~2.4.1"
+        "react-dom": "~18.3.1"
     },
     "devDependencies": {
-        "@tinyburg/tsconfig-rig": "workspace:*",
-        "@types/bcrypt": "~5.0.0",
         "@types/node": "20.12.10",
         "@types/react": "18.3.1",
         "@types/react-dom": "18.3.0",
-        "autoprefixer": "~10.4.14",
-        "csstype": "~3.1.2",
+        "autoprefixer": "10.4.16",
         "eslint": "8.57.0",
-        "eslint-config-next": "~13.5.4",
-        "postcss": "~8.4.31",
-        "prisma": "~5.4.1",
-        "tailwindcss": "~3.3.3",
+        "eslint-config-next": "14.0.4",
+        "postcss": "8.4.32",
+        "tailwindcss": "3.4.0",
         "typescript": "5.4.5"
     }
 }
