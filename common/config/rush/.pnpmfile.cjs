@@ -25,16 +25,21 @@ module.exports = {
  * contents for the package that is about to be installed. The `context`
  * parameter provides a log() function. The return value is the updated object.
  */
-function readPackage(packageJson, context) {
+function readPackage(packageJson, _context) {
     // // The karma types have a missing dependency on typings from the log4js package.
     // if (packageJson.name === '@types/karma') {
     //  context.log('Fixed up dependencies for @types/karma');
     //  packageJson.dependencies['log4js'] = '0.6.38';
     // }
 
+    // TODO: do I need need this
     if (packageJson.name === "@samverschueren/stream-to-observable") {
-        context.log("Fixed up dependencies for @samverschueren/stream-to-observable");
         packageJson.dependencies["any-observable"] = "^0.5.1";
+    }
+
+    // https://github.com/vercel/next.js/issues/38939
+    if (packageJson.name === "eslint-config-next") {
+        packageJson.dependencies["next"] = "*";
     }
 
     return packageJson;
