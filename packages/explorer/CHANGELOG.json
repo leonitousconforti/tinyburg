@@ -2,6 +2,23 @@
     "name": "@tinyburg/explorer",
     "entries": [
         {
+            "version": "6.1.0",
+            "tag": "@tinyburg/explorer_v6.1.0",
+            "date": "Thu, 09 May 2024 03:55:36 GMT",
+            "comments": {
+                "minor": [
+                    {
+                        "comment": "Update example agent"
+                    }
+                ],
+                "dependency": [
+                    {
+                        "comment": "Updating dependency \"@tinyburg/insight\" to `6.1.0`"
+                    }
+                ]
+            }
+        },
+        {
             "version": "6.0.0",
             "tag": "@tinyburg/explorer_v6.0.0",
             "date": "Wed, 08 May 2024 00:14:57 GMT",

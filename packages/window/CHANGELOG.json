@@ -2,6 +2,18 @@
     "name": "@tinyburg/window",
     "entries": [
         {
+            "version": "6.0.1",
+            "tag": "@tinyburg/window_v6.0.1",
+            "date": "Thu, 09 May 2024 03:55:36 GMT",
+            "comments": {
+                "dependency": [
+                    {
+                        "comment": "Updating dependency \"@tinyburg/architect\" to `6.1.0`"
+                    }
+                ]
+            }
+        },
+        {
             "version": "6.0.0",
             "tag": "@tinyburg/window_v6.0.0",
             "date": "Wed, 08 May 2024 00:14:57 GMT",

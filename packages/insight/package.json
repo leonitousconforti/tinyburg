@@ -1,6 +1,6 @@
 {
     "name": "@tinyburg/insight",
-    "version": "6.0.0",
+    "version": "6.1.0",
     "description": "Provides insight into the TinyTower game using frida agents",
     "keywords": [
         "tinyburg",
