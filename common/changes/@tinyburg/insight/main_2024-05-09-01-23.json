@@ -1,0 +1,10 @@
+{
+    "changes": [
+        {
+            "packageName": "@tinyburg/insight",
+            "comment": "Fix tests and bitizen agent",
+            "type": "patch"
+        }
+    ],
+    "packageName": "@tinyburg/insight"
+}

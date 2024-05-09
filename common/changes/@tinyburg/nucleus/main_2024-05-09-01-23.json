@@ -1,0 +1,10 @@
+{
+    "changes": [
+        {
+            "packageName": "@tinyburg/nucleus",
+            "comment": "Update common data",
+            "type": "patch"
+        }
+    ],
+    "packageName": "@tinyburg/nucleus"
+}

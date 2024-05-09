@@ -1,0 +1,10 @@
+{
+    "changes": [
+        {
+            "packageName": "@tinyburg/explorer",
+            "comment": "Update example agent",
+            "type": "patch"
+        }
+    ],
+    "packageName": "@tinyburg/explorer"
+}

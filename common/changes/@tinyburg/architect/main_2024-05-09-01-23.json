@@ -1,0 +1,10 @@
+{
+    "changes": [
+        {
+            "packageName": "@tinyburg/architect",
+            "comment": "Fix gpu acceleration",
+            "type": "patch"
+        }
+    ],
+    "packageName": "@tinyburg/architect"
+}
