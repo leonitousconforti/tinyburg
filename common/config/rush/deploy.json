@@ -17,7 +17,12 @@
      * If the main project should include other unrelated Rush projects, add it to the "projectSettings" section,
      * and then specify those projects in the "additionalProjectsToInclude" list.
      */
-    "deploymentProjectNames": ["@tinyburg/authproxy", "@tinyburg/auto-gold-bits"],
+    "deploymentProjectNames": [
+        "@tinyburg/archive",
+        "@tinyburg/authproxy",
+        "@tinyburg/auto-gold-bits",
+        "@tinyburg/discord-bot"
+    ],
 
     /**
      * When deploying a local Rush project, the package.json "devDependencies" are normally excluded.
