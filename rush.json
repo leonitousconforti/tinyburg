@@ -432,6 +432,11 @@
 
         // Apps (do not get published)
         {
+            "packageName": "@tinyburg/archive",
+            "projectFolder": "apps/archive",
+            "shouldPublish": false
+        },
+        {
             "packageName": "@tinyburg/authproxy",
             "projectFolder": "apps/authproxy",
             "shouldPublish": false
