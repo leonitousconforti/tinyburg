@@ -1,0 +1,17 @@
+{
+    "name": "@tinyburg/bitprints",
+    "entries": [
+        {
+            "version": "6.0.0",
+            "tag": "@tinyburg/bitprints_v6.0.0",
+            "date": "Thu, 09 May 2024 04:50:17 GMT",
+            "comments": {
+                "major": [
+                    {
+                        "comment": "Initial release"
+                    }
+                ]
+            }
+        }
+    ]
+}
