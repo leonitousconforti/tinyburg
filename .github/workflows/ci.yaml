@@ -26,10 +26,15 @@ jobs:
     name: "Rush publish"
     environment: Publish
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 2
+      - run: |
+          git config --global user.name "Leo Conforti"
+          git config --global user.email "leo@leoconforti.us"
       - uses: ./.github/actions/rush-build
       - name: Verify Change Logs
         run: node common/scripts/install-run-rush.js change --verify
