@@ -392,12 +392,12 @@
         {
             "packageName": "@tinyburg/bitprints",
             "projectFolder": "packages/bitprints",
-            "shouldPublish": false
+            "shouldPublish": true
         },
         {
             "packageName": "@tinyburg/doorman",
             "projectFolder": "packages/doorman",
-            "shouldPublish": false
+            "shouldPublish": true
         },
         {
             "packageName": "@tinyburg/explorer",
@@ -422,7 +422,7 @@
         {
             "packageName": "@tinyburg/treasurer",
             "projectFolder": "packages/treasurer",
-            "shouldPublish": false
+            "shouldPublish": true
         },
         {
             "packageName": "@tinyburg/window",
