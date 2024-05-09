@@ -3,7 +3,7 @@
         {
             "packageName": "@tinyburg/nucleus",
             "comment": "Update common data",
-            "type": "patch"
+            "type": "minor"
         }
     ],
     "packageName": "@tinyburg/nucleus"

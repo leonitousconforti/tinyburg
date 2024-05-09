@@ -3,7 +3,7 @@
         {
             "packageName": "@tinyburg/architect",
             "comment": "Fix gpu acceleration",
-            "type": "patch"
+            "type": "minor"
         }
     ],
     "packageName": "@tinyburg/architect"

@@ -3,7 +3,7 @@
         {
             "packageName": "@tinyburg/insight",
             "comment": "Fix tests and bitizen agent",
-            "type": "patch"
+            "type": "minor"
         }
     ],
     "packageName": "@tinyburg/insight"

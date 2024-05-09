@@ -3,7 +3,7 @@
         {
             "packageName": "@tinyburg/explorer",
             "comment": "Update example agent",
-            "type": "patch"
+            "type": "minor"
         }
     ],
     "packageName": "@tinyburg/explorer"
