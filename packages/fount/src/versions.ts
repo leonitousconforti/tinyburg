@@ -77,7 +77,7 @@ export const getSemanticVersionsByRelativeVersions = (
             ReadonlyArray.map(([_x, y, z]) => Tuple.make(y as SemanticVersion, z)),
 
             // If there are spillover versions somehow between the pages, get rid of them
-            ReadonlyArray.dedupeAdjacent,
+            ReadonlyArray.dedupeWith((x, y) => x[0] === y[0] && x[1] === y[1]),
 
             // Regex / array index could have returned undefined, so let's convert
             // to options and then zip the while object to an options as long as both
