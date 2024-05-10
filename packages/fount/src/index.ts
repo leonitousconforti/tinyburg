@@ -59,6 +59,19 @@ export const loadApk = <T extends Games, U extends Extract<TrackedVersion<T>, An
         yield* fs.makeDirectory(cacheDirectory, { recursive: true });
         yield* Effect.logInfo(`Using cache directory ${cacheDirectory}`);
 
+        // Quick short circuit to avoid needing to open puppeteer
+        const fileNames: readonly string[] = yield* fs.readDirectory(cacheDirectory);
+        if (isSemanticVersion(version)) {
+            const desiredApkFilename: string = `${game}_${version}.apk`;
+            const maybeCachedApk: string | undefined = fileNames.find((fileName) =>
+                fileName.includes(desiredApkFilename)
+            );
+            if (maybeCachedApk) {
+                yield* Effect.logInfo(`Found ${maybeCachedApk} in cache directory via quick short circuit`);
+                return path.join(cacheDirectory, maybeCachedApk);
+            }
+        }
+
         // Convert from whatever version was given to a semantic version
         const svbrv: SemanticVersionsByRelativeVersions = yield* getSemanticVersionsByRelativeVersions(game);
         const versionInfo: SemanticVersionAndAppVersionCode = Function.pipe(
@@ -83,7 +96,6 @@ export const loadApk = <T extends Games, U extends Extract<TrackedVersion<T>, An
         yield* Effect.logInfo(`Semantic version for ${version} = ${versionInfo.semanticVersion}`);
 
         // Check to see if the apk already exists in the cache directory
-        const fileNames: readonly string[] = yield* fs.readDirectory(cacheDirectory);
         const desiredApkFilename: string = `${game}_${versionInfo.semanticVersion}.apk`;
         const maybeCachedApk: string | undefined = fileNames.find((fileName) => fileName.includes(desiredApkFilename));
         if (maybeCachedApk) {
