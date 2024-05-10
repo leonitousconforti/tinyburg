@@ -108,7 +108,7 @@ const downloadUploadApk = (
         const filesystem: FileSystem.FileSystem = yield* FileSystem.FileSystem;
         const s3Client: S3ClientEffect.S3Service = yield* S3ClientEffect.S3Service;
 
-        return Effect.acquireUseRelease(
+        const localPath: string = yield* Effect.acquireUseRelease(
             Fount.loadApk(game, version, temporaryDirectory),
             (localPath) =>
                 s3Client
@@ -117,11 +117,12 @@ const downloadUploadApk = (
                         Body: fs.createReadStream(localPath),
                         Key: `apks/${path.basename(localPath)}`,
                     })
-                    .pipe(Effect.andThen(filesystem.writeFileString(localPath, "."))),
+                    .pipe(Effect.andThen(localPath)),
             (localPath) => filesystem.remove(localPath, { force: true }).pipe(Effect.orDie)
         );
+
+        yield* filesystem.writeFileString(localPath, ".");
     })
-        .pipe(Effect.flatten)
         .pipe(Effect.scoped)
         .pipe(Effect.catchAll(Effect.logError));
 
@@ -132,7 +133,7 @@ const downloadAll = (
     Effect.gen(function* () {
         const versions = yield* FountVersions.getSemanticVersionsByRelativeVersions(game);
         for (const relativeIndexVersion of versions.pipe(HashMap.keys)) {
-            yield* downloadUploadApk(Fount.Games.BitCity, relativeIndexVersion, temporaryDirectory);
+            yield* downloadUploadApk(game, relativeIndexVersion, temporaryDirectory);
             yield* Effect.sleep("3 seconds");
         }
     }).pipe(Effect.catchAll(Effect.logError));
