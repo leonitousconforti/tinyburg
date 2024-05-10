@@ -21,7 +21,8 @@
         "@tinyburg/archive",
         "@tinyburg/authproxy",
         "@tinyburg/auto-gold-bits",
-        "@tinyburg/discord-bot"
+        "@tinyburg/discord-bot",
+        "@tinyburg/personas"
     ],
 
     /**
