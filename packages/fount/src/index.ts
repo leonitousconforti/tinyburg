@@ -1,4 +1,3 @@
-import * as assert from "node:assert";
 import * as path from "node:path";
 import * as url from "node:url";
 
@@ -95,7 +94,9 @@ export const loadApk = <T extends Games, U extends Extract<TrackedVersion<T>, An
         // Not found in cache directory, need to download it
         const results: readonly [string, IPuppeteerDetails] = yield* getApksupportDetails(game, versionInfo);
         yield* Effect.logInfo(`Puppeteer scraping results: ${results[0]}`);
-        assert.ok(results[0].startsWith("https://play.googleapis.com/download/"));
+        if (!results[0].startsWith("https://play.googleapis.com/download/")) {
+            return yield* new ApksupportScrapingError({ message: "Not a googleapis download url" });
+        }
 
         // Stream the download directly to the downloads folder
         const downloadedFile: string = `${cacheDirectory}/${desiredApkFilename}`;
