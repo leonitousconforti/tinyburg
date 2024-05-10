@@ -84,6 +84,26 @@ jobs:
           DOCKERFILE: "./apps/auto-gold-bits/Dockerfile"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+  # In order to build the archive docker image, we do the same exact steps
+  # as we did for the authproxy docker image but using the archive project.
+  docker-archive:
+    needs: rush-build
+    name: "Docker archive build"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/rush-build
+        with:
+          BUILD_PARAMETERS: "--to @tinyburg/archive"
+      - uses: ./.github/actions/docker-build
+        with:
+          PROJECT: "archive"
+          DOCKERFILE: "./apps/archive/Dockerfile"
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
   # In order to deploy the authproxy docker image, we ssh into the digitalocean
   # droplet hosting dokku and then re deploy the dokku app which will pull the
   # latest docker image and restart the app.
@@ -118,3 +138,20 @@ jobs:
           ssh_private_key: ${{ secrets.PLAYGROUND_DOKKU_KEY }}
           git_remote_url: "ssh://dokku@playground.tinyburg.app:22/auto-gold-bits"
           deploy_docker_image: ghcr.io/leonitousconforti/tinyburg/auto-gold-bits@${{ env.AUTO_GOLD_BITS_SHA }}
+
+  # In order to deploy the archive docker image, we do the exact same
+  # steps as we did for the authproxy docker image but using the archive.
+  deploy-archive:
+    needs: docker-archive
+    if: ${{ github.ref == 'refs/heads/main' }}
+    name: "Deploy docker archive"
+    environment: Publish
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: echo "ARCHIVE_SHA=$(docker buildx imagetools inspect --format "{{json .Manifest.Digest}}" ghcr.io/leonitousconforti/tinyburg/archive:latest | xargs)" >> $GITHUB_ENV
+      - uses: dokku/github-action@master
+        with:
+          ssh_private_key: ${{ secrets.PLAYGROUND_DOKKU_KEY }}
+          git_remote_url: "ssh://dokku@playground.tinyburg.app:22/archivist"
+          deploy_docker_image: ghcr.io/leonitousconforti/tinyburg/archive@${{ env.ARCHIVE_SHA }}
