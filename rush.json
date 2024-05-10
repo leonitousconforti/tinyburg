@@ -452,6 +452,11 @@
             "shouldPublish": false
         },
         {
+            "packageName": "@tinyburg/personas",
+            "projectFolder": "apps/personas",
+            "shouldPublish": false
+        },
+        {
             "packageName": "@tinyburg/trading-site",
             "projectFolder": "apps/trading-site",
             "shouldPublish": false
