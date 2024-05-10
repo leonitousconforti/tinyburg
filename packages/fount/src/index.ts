@@ -1,7 +1,8 @@
-import { execa } from "execa";
 import * as path from "node:path";
 import * as url from "node:url";
 
+import * as Command from "@effect/platform/Command";
+import * as CommandExecutor from "@effect/platform/CommandExecutor";
 import * as PlatformError from "@effect/platform/Error";
 import * as FileSystem from "@effect/platform/FileSystem";
 import * as HttpClient from "@effect/platform/HttpClient";
@@ -118,12 +119,13 @@ export const patchApk = <T extends Games, U extends Extract<TrackedVersion<T>, A
 ): Effect.Effect<
     string,
     PlatformError.BadArgument | PlatformError.SystemError | HttpClient.error.HttpClientError | ApksupportScrapingError,
-    FileSystem.FileSystem
+    FileSystem.FileSystem | CommandExecutor.CommandExecutor
 > =>
     loadApk(game, version, cacheDirectory).pipe(
         Effect.andThen((apkPath) =>
             Effect.gen(function* () {
                 const fs: FileSystem.FileSystem = yield* FileSystem.FileSystem;
+                const commandExecutor: CommandExecutor.CommandExecutor = yield* CommandExecutor.CommandExecutor;
 
                 const parsedPath: path.ParsedPath = path.parse(apkPath);
                 const patchedApkFilename: string = path.join(
@@ -135,7 +137,19 @@ export const patchApk = <T extends Games, U extends Extract<TrackedVersion<T>, A
                     return patchedApkFilename;
                 }
 
-                yield* Effect.promise(() => execa("apk-mitm", [apkPath]));
+                const command: Command.Command = Command.make("apk-mitm", apkPath);
+                const exitCode: CommandExecutor.ExitCode = yield* commandExecutor.exitCode(command);
+                if (exitCode !== 0) {
+                    yield* Effect.fail(
+                        PlatformError.SystemError({
+                            method: "",
+                            reason: "Unknown",
+                            module: "Command",
+                            pathOrDescriptor: "apk-mitm",
+                            message: `Failed to patch apk: ${apkPath}`,
+                        })
+                    );
+                }
                 return patchedApkFilename;
             })
         )

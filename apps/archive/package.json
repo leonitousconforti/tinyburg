@@ -4,12 +4,22 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "_phase:build": "heft run --only build --"
+        "_phase:build": "heft run --only build -- --clean",
+        "build": "NODE_OPTIONS=\"--experimental-vm-modules --no-warnings\" heft build --clean"
     },
     "dependencies": {
-        "@tinyburg/fount": "workspace:*"
+        "@aws-sdk/client-s3": "3.572.0",
+        "@effect-aws/client-s3": "1.3.0",
+        "@effect/platform": "0.53.2",
+        "@effect/platform-node": "0.49.2",
+        "@effect/schema": "0.66.16",
+        "@tinyburg/fount": "workspace:*",
+        "effect": "3.1.3",
+        "fast-check": "3.18.0"
     },
     "devDependencies": {
+        "@effect/eslint-plugin": "0.1.2",
+        "@effect/language-service": "0.1.0",
         "@rushstack/eslint-config": "3.6.9",
         "@rushstack/heft": "0.66.5",
         "@rushstack/heft-lint-plugin": "0.3.26",
@@ -21,6 +31,7 @@
         "eslint-plugin-prettier": "5.1.3",
         "eslint-plugin-unicorn": "52.0.0",
         "prettier": "3.2.5",
+        "tsx": "4.9.3",
         "typescript": "5.4.5"
     }
 }

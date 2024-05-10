@@ -26,17 +26,17 @@ export const getApksupportDetails = (
     Effect.gen(function* () {
         const { appVersionCode, semanticVersion } = versionInfo;
         const browser: puppeteer.Browser = yield* browserResource;
-        const page: puppeteer.Page = yield* Effect.promise(() => browser.newPage());
+        const page: puppeteer.Page = yield* Effect.tryPromise(() => browser.newPage());
         const url: string = `https://apk.support/download-app/${game}/${appVersionCode}/${semanticVersion}`;
 
         yield* Effect.logInfo(`Navigating to ${url}`);
-        yield* Effect.promise(() => page.goto(url, { waitUntil: ["networkidle0", "load"] }));
-        yield* Effect.promise(() => page.waitForSelector("#apksubmit"));
+        yield* Effect.tryPromise(() => page.goto(url, { waitUntil: ["networkidle0", "load"] }));
+        yield* Effect.tryPromise(() => page.waitForSelector("#apksubmit"));
 
         const requestPlaystoreApk: Effect.Effect<void, ApksupportScrapingError, never> = Effect.retryOrElse(
             Function.pipe(
-                Effect.promise(() => page.click("#apksubmit")),
-                Effect.flatMap(() => Effect.promise(() => page.waitForNetworkIdle())),
+                Effect.tryPromise(() => page.click("#apksubmit")),
+                Effect.flatMap(() => Effect.tryPromise(() => page.waitForNetworkIdle())),
                 Effect.flatMap(() =>
                     Effect.tryPromise({
                         try: () => page.waitForSelector("#ssg > div > a", { timeout: 3000 }),
@@ -49,7 +49,10 @@ export const getApksupportDetails = (
         );
 
         const getSpanElementText = (selector: string): Effect.Effect<string, ApksupportScrapingError, never> =>
-            Effect.promise(() => page.$eval(selector, (span) => (span as HTMLSpanElement).textContent || ""));
+            Effect.tryPromise({
+                try: () => page.$eval(selector, (span) => (span as HTMLSpanElement).textContent || ""),
+                catch: (error) => new ApksupportScrapingError({ message: `${error}` }),
+            });
 
         const getAnchorElementLink = (selector: string): Effect.Effect<string, ApksupportScrapingError, never> =>
             Effect.tryPromise({

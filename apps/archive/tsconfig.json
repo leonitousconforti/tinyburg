@@ -1,8 +1,11 @@
 {
     "extends": "@tinyburg/tsconfig-rig/profile/default/config/tsconfig.json",
     "compilerOptions": {
-        "checkJs": true,
-        "outDir": "./dist"
+        "outDir": "./dist",
+        "noEmit": false,
+        "sourceMap": true,
+        "declaration": true,
+        "plugins": [{ "name": "@effect/language-service" }]
     },
-    "include": ["index.js"]
+    "include": ["index.ts"]
 }
