@@ -131,7 +131,7 @@ const downloadAll = (
 ): Effect.Effect<void, never, Path.Path | S3ClientEffect.S3Service | FileSystem.FileSystem> =>
     Effect.gen(function* () {
         const versions = yield* FountVersions.getSemanticVersionsByRelativeVersions(game);
-        for (const relativeIndexVersion of versions.pipe(HashMap.keySet)) {
+        for (const relativeIndexVersion of versions.pipe(HashMap.keys)) {
             yield* downloadUploadApk(Fount.Games.BitCity, relativeIndexVersion, temporaryDirectory);
             yield* Effect.sleep("3 seconds");
         }
