@@ -1,0 +1,26 @@
+{
+    "name": "@tinyburg/personas",
+    "version": "0.0.0",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "_phase:build": "heft run --only build -- --clean",
+        "build": "NODE_OPTIONS=\"--experimental-vm-modules --no-warnings\" heft build --clean"
+    },
+    "dependencies": {},
+    "devDependencies": {
+        "@rushstack/eslint-config": "3.6.9",
+        "@rushstack/heft": "0.66.5",
+        "@rushstack/heft-jest-plugin": "0.11.26",
+        "@rushstack/heft-lint-plugin": "0.3.26",
+        "@rushstack/heft-typescript-plugin": "0.5.3",
+        "@tinyburg/tsconfig-rig": "workspace:*",
+        "@types/node": "20.12.11",
+        "eslint": "8.57.0",
+        "eslint-config-prettier": "9.1.0",
+        "eslint-plugin-prettier": "5.1.3",
+        "eslint-plugin-unicorn": "52.0.0",
+        "prettier": "3.2.5",
+        "typescript": "5.4.5"
+    }
+}
