@@ -152,7 +152,7 @@ Effect.gen(function* () {
     yield* downloadAll(Fount.Games.TinyTower, temporaryDirectory);
 })
     .pipe(Effect.scoped)
-    .pipe(Effect.repeat(Schedule.spaced("1 day")))
+    .pipe(Effect.repeat(Schedule.spaced("2 days")))
     .pipe(Effect.provide(S3ClientEffect.BaseS3ServiceLayer))
     .pipe(Effect.provide(S3ClientInstanceLayer))
     .pipe(Effect.provide(NodeContext.layer))
