@@ -432,8 +432,8 @@
 
         // Apps (do not get published)
         {
-            "packageName": "@tinyburg/archive",
-            "projectFolder": "apps/archive",
+            "packageName": "@tinyburg/archivist",
+            "projectFolder": "apps/archivist",
             "shouldPublish": false
         },
         {
