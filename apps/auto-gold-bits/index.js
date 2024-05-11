@@ -6,9 +6,9 @@
  */
 
 import tinyburg from "@tinyburg/nucleus";
+import { parseDataToType, typedDataToBlock } from "@tinyburg/nucleus/modify-save";
 import { bitizenBlocks } from "@tinyburg/nucleus/parsing-structs/bitizen";
 import { SyncItemType } from "@tinyburg/nucleus/parsing-structs/sync-item";
-import { parseDataToType, typedDataToBlock } from "@tinyburg/nucleus/modify-save";
 
 // Create the bot
 const bitFarm = tinyburg.fromPlayerId(
