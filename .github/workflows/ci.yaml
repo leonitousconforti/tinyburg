@@ -84,11 +84,11 @@ jobs:
           DOCKERFILE: "./apps/auto-gold-bits/Dockerfile"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  # In order to build the archive docker image, we do the same exact steps
-  # as we did for the authproxy docker image but using the archive project.
-  docker-archive:
+  # In order to build the archivist docker image, we do the same exact steps
+  # as we did for the authproxy docker image but using the archivist project.
+  docker-archivist:
     needs: rush-build
-    name: "Docker archive build"
+    name: "Docker archivist build"
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -97,11 +97,11 @@ jobs:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/rush-build
         with:
-          BUILD_PARAMETERS: "--to @tinyburg/archive"
+          BUILD_PARAMETERS: "--to @tinyburg/archivist"
       - uses: ./.github/actions/docker-build
         with:
-          PROJECT: "archive"
-          DOCKERFILE: "./apps/archive/Dockerfile"
+          PROJECT: "archivist"
+          DOCKERFILE: "./apps/archivist/Dockerfile"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   # In order to deploy the authproxy docker image, we ssh into the digitalocean
@@ -139,19 +139,19 @@ jobs:
           git_remote_url: "ssh://dokku@playground.tinyburg.app:22/auto-gold-bits"
           deploy_docker_image: ghcr.io/leonitousconforti/tinyburg/auto-gold-bits@${{ env.AUTO_GOLD_BITS_SHA }}
 
-  # In order to deploy the archive docker image, we do the exact same
-  # steps as we did for the authproxy docker image but using the archive.
-  deploy-archive:
-    needs: docker-archive
+  # In order to deploy the archivist docker image, we do the exact same
+  # steps as we did for the authproxy docker image but using the archivist.
+  deploy-archivist:
+    needs: docker-archivist
     if: ${{ github.ref == 'refs/heads/main' }}
-    name: "Deploy docker archive"
+    name: "Deploy docker archivist"
     environment: Publish
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: echo "ARCHIVE_SHA=$(docker buildx imagetools inspect --format "{{json .Manifest.Digest}}" ghcr.io/leonitousconforti/tinyburg/archive:latest | xargs)" >> $GITHUB_ENV
+      - run: echo "ARCHIVIST_SHA=$(docker buildx imagetools inspect --format "{{json .Manifest.Digest}}" ghcr.io/leonitousconforti/tinyburg/archivist:latest | xargs)" >> $GITHUB_ENV
       - uses: dokku/github-action@master
         with:
           ssh_private_key: ${{ secrets.PLAYGROUND_DOKKU_KEY }}
           git_remote_url: "ssh://dokku@playground.tinyburg.app:22/archivist"
-          deploy_docker_image: ghcr.io/leonitousconforti/tinyburg/archive@${{ env.ARCHIVE_SHA }}
+          deploy_docker_image: ghcr.io/leonitousconforti/tinyburg/archivist@${{ env.ARCHIVIST_SHA }}
