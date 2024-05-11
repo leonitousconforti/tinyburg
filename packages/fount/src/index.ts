@@ -107,7 +107,7 @@ export const loadApk = <T extends Games, U extends Extract<TrackedVersion<T>, An
         const results: readonly [string, IPuppeteerDetails] = yield* getApksupportDetails(game, versionInfo);
         yield* Effect.logInfo(`Puppeteer scraping results: ${results[0]}`);
         if (!results[0].startsWith("https://play.googleapis.com/download/")) {
-            return yield* new ApksupportScrapingError({ message: "Not a googleapis download url" });
+            return yield* new ApksupportScrapingError({ message: `${results[0]} is not a googleapis download url` });
         }
 
         // Stream the download directly to the downloads folder
