@@ -8,7 +8,7 @@ importers:
   .:
     specifiers: {}
 
-  ../../apps/archive:
+  ../../apps/archivist:
     specifiers:
       '@aws-sdk/client-s3': 3.572.0
       '@effect-aws/client-s3': 1.3.0
@@ -202,23 +202,43 @@ importers:
 
   ../../apps/personas:
     specifiers:
+      '@aws-sdk/client-s3': 3.572.0
+      '@effect-aws/client-s3': 1.3.0
+      '@effect/eslint-plugin': 0.1.2
+      '@effect/language-service': 0.1.0
+      '@effect/platform': 0.53.2
+      '@effect/platform-node': 0.49.2
+      '@effect/schema': 0.66.16
       '@rushstack/eslint-config': 3.6.9
       '@rushstack/heft': 0.66.5
-      '@rushstack/heft-jest-plugin': 0.11.26
       '@rushstack/heft-lint-plugin': 0.3.26
       '@rushstack/heft-typescript-plugin': 0.5.3
+      '@tinyburg/fount': workspace:*
       '@tinyburg/tsconfig-rig': workspace:*
       '@types/node': 20.12.11
+      effect: 3.1.3
       eslint: 8.57.0
       eslint-config-prettier: 9.1.0
       eslint-plugin-prettier: 5.1.3
       eslint-plugin-unicorn: 52.0.0
+      fast-check: 3.18.0
       prettier: 3.2.5
+      tsx: 4.9.3
       typescript: 5.4.5
+    dependencies:
+      '@aws-sdk/client-s3': 3.572.0
+      '@effect-aws/client-s3': 1.3.0_effect@3.1.3
+      '@effect/platform': 0.53.2_n2mimlfnpenlnqnwux2fz3iv6m
+      '@effect/platform-node': 0.49.2_o2xdnhenb7vx6lozfhbt4sahfu
+      '@effect/schema': 0.66.16_pgzmwh53xhpn6akffg6j6bmprm
+      '@tinyburg/fount': link:../../packages/fount
+      effect: 3.1.3
+      fast-check: 3.18.0
     devDependencies:
+      '@effect/eslint-plugin': 0.1.2
+      '@effect/language-service': 0.1.0
       '@rushstack/eslint-config': 3.6.9_te743w6atip6hhlha3uq43n2xe
       '@rushstack/heft': 0.66.5_@types+node@20.12.11
-      '@rushstack/heft-jest-plugin': 0.11.26_eyhkzjfiqnur5neqshi6gc7sai
       '@rushstack/heft-lint-plugin': 0.3.26_eyhkzjfiqnur5neqshi6gc7sai
       '@rushstack/heft-typescript-plugin': 0.5.3_eyhkzjfiqnur5neqshi6gc7sai
       '@tinyburg/tsconfig-rig': link:../../packages/tsconfig-rig
@@ -228,6 +248,7 @@ importers:
       eslint-plugin-prettier: 5.1.3_udeglvt2rvqfn252kbszwwr7nu
       eslint-plugin-unicorn: 52.0.0_eslint@8.57.0
       prettier: 3.2.5
+      tsx: 4.9.3
       typescript: 5.4.5
 
   ../../apps/trading-site:
