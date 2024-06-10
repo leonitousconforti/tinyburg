@@ -41,8 +41,7 @@
     "scripts": {
         "_phase:build": "heft run --only build -- --clean",
         "_phase:test": "NODE_OPTIONS=\"--experimental-vm-modules --no-warnings\" heft run --only test -- --clean",
-        "build": "NODE_OPTIONS=\"--experimental-vm-modules --no-warnings\" heft test --clean",
-        "protobuf": "buf generate"
+        "build": "NODE_OPTIONS=\"--experimental-vm-modules --no-warnings\" heft test --clean"
     },
     "dependencies": {
         "@bufbuild/protobuf": "~1.9.0",

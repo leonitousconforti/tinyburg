@@ -5,13 +5,13 @@ export const MITM_PROXY_VERSION = "10.3.0" as const;
 
 // Stuck at 16.0.19, related issues:
 /** https://github.com/frida/frida/releases */
-export const FRIDA_SERVER_VERSION = "16.2.1" as const;
+export const FRIDA_SERVER_VERSION = "16.3.3" as const;
 
 /** https://github.com/envoyproxy/envoy/releases */
-export const ENVOY_PROXY_VERSION = "1.30.1" as const;
+export const ENVOY_PROXY_VERSION = "1.30.2" as const;
 
 /** https://developer.android.com/studio/emulator_archive */
-export const EMULATOR_VERSION = "11772612" as const;
+export const EMULATOR_VERSION = "11906825" as const;
 
 /** https://developer.android.com/tools/releases/platform-tools */
 export const ANDROID_SDK_TOOLS_VERSION = "35.0.1" as const;
