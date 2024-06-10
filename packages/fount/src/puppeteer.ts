@@ -1,5 +1,6 @@
 /// <reference lib="dom" />
 
+import * as Schema from "@effect/schema/Schema";
 import * as Data from "effect/Data";
 import * as Effect from "effect/Effect";
 import * as Function from "effect/Function";
@@ -7,16 +8,60 @@ import * as Schedule from "effect/Schedule";
 import * as puppeteer from "puppeteer";
 
 import { browserResource } from "./resources.js";
-import { Games, SemanticVersion, SemanticVersionAndAppVersionCode } from "./types.js";
+import {
+    AppVersionCode,
+    Games,
+    SemanticVersion,
+    SemanticVersionAndAppVersionCode,
+    type $AppVersionCode,
+    type $SemanticVersion,
+} from "./schemas.js";
 
-export interface IPuppeteerDetails {
-    name: string;
-    updatedDate: Date;
-    appVersionCode: string;
-    approximateFileSizeMB: number;
-    semanticVersion: SemanticVersion;
-}
+/**
+ * @since 1.0.0
+ * @category Api interface
+ */
+export interface $IPuppeteerDetails
+    extends Schema.Struct<{
+        name: Schema.$String;
+        appVersionCode: $AppVersionCode;
+        semanticVersion: $SemanticVersion;
+        updatedDate: Schema.DateFromString;
+        approximateFileSizeMB: Schema.NumberFromString;
+    }> {}
 
+/**
+ * @since 1.0.0
+ * @category Decoded types
+ */
+export type IPuppeteerDetails = Schema.Schema.Type<$IPuppeteerDetails>;
+
+/**
+ * @since 1.0.0
+ * @category Encoded types
+ */
+export type IPuppeteerDetailsEncoded = Schema.Schema.Encoded<$IPuppeteerDetails>;
+
+/**
+ * @since 1.0.0
+ * @category Schemas
+ */
+export const IPuppeteerDetails: $IPuppeteerDetails = Schema.Struct({
+    name: Schema.String,
+    appVersionCode: AppVersionCode,
+    semanticVersion: SemanticVersion,
+    updatedDate: Schema.DateFromString,
+    approximateFileSizeMB: Schema.NumberFromString.pipe(Schema.int()),
+}).annotations({
+    identifier: "IPuppeteerDetails",
+    title: "Puppeteer Details",
+    description: "Details about an app version scraped from a puppeteer page",
+});
+
+/**
+ * @since 1.0.0
+ * @category Errors
+ */
 export class ApksupportScrapingError extends Data.TaggedError("ApksupportScrapper")<{ message: string }> {}
 
 export const getApksupportDetails = (
@@ -69,16 +114,15 @@ export const getApksupportDetails = (
         const approximateFileSizeMB: string = yield* getSpanElementText(approximateFileSizeSelector);
         const downloadUrl: string = yield* Effect.firstSuccessOf(downloadLinks.map(getAnchorElementLink));
 
-        return [
-            downloadUrl,
-            {
-                name: game,
-                appVersionCode,
-                semanticVersion,
-                updatedDate: new Date(updatedDate),
-                approximateFileSizeMB: Number.parseFloat(approximateFileSizeMB),
-            },
-        ] as const;
+        const details: IPuppeteerDetails = yield* Schema.decode(IPuppeteerDetails)({
+            name: game,
+            semanticVersion,
+            updatedDate: updatedDate,
+            appVersionCode: String(appVersionCode),
+            approximateFileSizeMB: approximateFileSizeMB,
+        });
+
+        return [downloadUrl, details] as const;
     })
         .pipe(Effect.scoped)
         .pipe(Effect.catchAll((error) => new ApksupportScrapingError({ message: `${error}` })));

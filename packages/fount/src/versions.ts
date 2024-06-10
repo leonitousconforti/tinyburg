@@ -1,9 +1,10 @@
 import * as HttpClient from "@effect/platform/HttpClient";
+import * as ParseResult from "@effect/schema/ParseResult";
+import * as Schema from "@effect/schema/Schema";
 import * as ReadonlyArray from "effect/Array";
 import * as Chunk from "effect/Chunk";
 import * as Effect from "effect/Effect";
 import * as Function from "effect/Function";
-import * as HashMap from "effect/HashMap";
 import * as Option from "effect/Option";
 import * as Scope from "effect/Scope";
 import * as Stream from "effect/Stream";
@@ -15,34 +16,34 @@ import {
     SemanticVersion,
     SemanticVersionAndAppVersionCode,
     SemanticVersionsByRelativeVersions,
-} from "./types.js";
+} from "./schemas.js";
 
 // TODO: Record some actually interesting events/versions
 // eslint-disable-next-line @typescript-eslint/typedef
 export const trackedVersions = {
     [Games.BitCity]: {
-        a1: { semanticVersion: "0.0.0", appVersionCode: "0" },
-        a2: { semanticVersion: "0.0.0", appVersionCode: "0" },
+        a1: { semanticVersion: "0.0.0", appVersionCode: 0 },
+        a2: { semanticVersion: "0.0.0", appVersionCode: 0 },
     },
     [Games.TinyTower]: {
-        b1: { semanticVersion: "0.0.0", appVersionCode: "0" },
-        b2: { semanticVersion: "0.0.0", appVersionCode: "0" },
+        b1: { semanticVersion: "0.0.0", appVersionCode: 0 },
+        b2: { semanticVersion: "0.0.0", appVersionCode: 0 },
     },
     [Games.LegoTower]: {
-        c1: { semanticVersion: "0.0.0", appVersionCode: "0" },
-        c2: { semanticVersion: "0.0.0", appVersionCode: "0" },
+        c1: { semanticVersion: "0.0.0", appVersionCode: 0 },
+        c2: { semanticVersion: "0.0.0", appVersionCode: 0 },
     },
     [Games.PocketFrogs]: {
-        d1: { semanticVersion: "0.0.0", appVersionCode: "0" },
-        d2: { semanticVersion: "0.0.0", appVersionCode: "0" },
+        d1: { semanticVersion: "0.0.0", appVersionCode: 0 },
+        d2: { semanticVersion: "0.0.0", appVersionCode: 0 },
     },
     [Games.PocketPlanes]: {
-        e1: { semanticVersion: "0.0.0", appVersionCode: "0" },
-        e2: { semanticVersion: "0.0.0", appVersionCode: "0" },
+        e1: { semanticVersion: "0.0.0", appVersionCode: 0 },
+        e2: { semanticVersion: "0.0.0", appVersionCode: 0 },
     },
     [Games.PocketTrains]: {
-        f1: { semanticVersion: "0.0.0", appVersionCode: "0" },
-        f2: { semanticVersion: "0.0.0", appVersionCode: "0" },
+        f1: { semanticVersion: "0.0.0", appVersionCode: 0 },
+        f2: { semanticVersion: "0.0.0", appVersionCode: 0 },
     },
 } satisfies { [game in Games]: { [eventVersion: string]: SemanticVersionAndAppVersionCode } };
 
@@ -52,7 +53,11 @@ export const trackedVersions = {
  */
 export const getSemanticVersionsByRelativeVersions = (
     game: Games
-): Effect.Effect<SemanticVersionsByRelativeVersions, HttpClient.error.HttpClientError, never> =>
+): Effect.Effect<
+    SemanticVersionsByRelativeVersions,
+    HttpClient.error.HttpClientError | ParseResult.ParseError,
+    never
+> =>
     Effect.gen(function* () {
         // Helper to recursively fetch all paginated version feed pages
         const paginatedStream: Stream.Stream<string, HttpClient.error.HttpClientError, Scope.Scope> =
@@ -71,7 +76,7 @@ export const getSemanticVersionsByRelativeVersions = (
 
         const versionRegex: RegExp = new RegExp(/div class="stitle">[\s\w:\u00AE\-]*(\d+\.\d+\.\d+)\((\d+)\)<\/div/gim);
 
-        return Function.pipe(
+        return yield* Function.pipe(
             // Match all the versions in the paginated versions feed
             ReadonlyArray.fromIterable([...allResponses.matchAll(versionRegex)]),
             ReadonlyArray.map(([_x, y, z]) => Tuple.make(y as SemanticVersion, z)),
@@ -105,6 +110,6 @@ export const getSemanticVersionsByRelativeVersions = (
             ),
 
             // Convert to a hashmap
-            HashMap.fromIterable
+            (x) => Schema.decode(SemanticVersionsByRelativeVersions)(x)
         );
     });

@@ -14,6 +14,7 @@ module.exports = {
     parserOptions: { tsconfigRootDir: __dirname, project: ["./tsconfig.json"] },
     rules: {
         "no-console": "warn",
+        "tsdoc/syntax": "off",
         "@effect/dprint": "off",
         "unicorn/import-style": "off",
         "unicorn/no-array-callback-reference": "off",

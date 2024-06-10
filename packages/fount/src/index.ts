@@ -6,6 +6,8 @@ import * as CommandExecutor from "@effect/platform/CommandExecutor";
 import * as PlatformError from "@effect/platform/Error";
 import * as FileSystem from "@effect/platform/FileSystem";
 import * as HttpClient from "@effect/platform/HttpClient";
+import * as ParseResult from "@effect/schema/ParseResult";
+import * as Schema from "@effect/schema/Schema";
 import * as ReadonlyArray from "effect/Array";
 import * as Effect from "effect/Effect";
 import * as Function from "effect/Function";
@@ -19,16 +21,14 @@ import { getSemanticVersionsByRelativeVersions, trackedVersions } from "./versio
 
 import {
     Games,
-    isRelativeVersion,
-    isSemanticVersion,
+    RelativeVersion,
+    SemanticVersion,
     type AllTrackedVersions,
     type AnyVersion,
-    type RelativeVersion,
-    type SemanticVersion,
     type SemanticVersionAndAppVersionCode,
     type SemanticVersionsByRelativeVersions,
     type TrackedVersion,
-} from "./types.js";
+} from "./schemas.js";
 
 /** @internal */
 export const defaultCacheDirectory: string = url.fileURLToPath(new URL(`../downloads`, import.meta.url));
@@ -50,7 +50,11 @@ export const loadApk = <T extends Games, U extends Extract<TrackedVersion<T>, An
     cacheDirectory: string = defaultCacheDirectory
 ): Effect.Effect<
     string,
-    PlatformError.BadArgument | PlatformError.SystemError | HttpClient.error.HttpClientError | ApksupportScrapingError,
+    | ParseResult.ParseError
+    | PlatformError.BadArgument
+    | PlatformError.SystemError
+    | HttpClient.error.HttpClientError
+    | ApksupportScrapingError,
     FileSystem.FileSystem
 > =>
     Effect.gen(function* () {
@@ -61,7 +65,7 @@ export const loadApk = <T extends Games, U extends Extract<TrackedVersion<T>, An
 
         // Quick short circuit to avoid needing to open puppeteer
         const fileNames: readonly string[] = yield* fs.readDirectory(cacheDirectory);
-        if (isSemanticVersion(version)) {
+        if (Schema.is(SemanticVersion)(version)) {
             const desiredApkFilename: string = `${game}_${version}.apk`;
             const maybeCachedApk: string | undefined = fileNames.find((fileName) =>
                 fileName.includes(desiredApkFilename)
@@ -80,7 +84,7 @@ export const loadApk = <T extends Games, U extends Extract<TrackedVersion<T>, An
                 (v): v is AllTrackedVersions => Object.keys(trackedVersions[game]).includes(v),
                 (v) => trackedVersions[game][v as U] as SemanticVersionAndAppVersionCode
             ),
-            Match.when(isSemanticVersion, (v) =>
+            Match.when(Schema.is(SemanticVersion), (v) =>
                 svbrv.pipe(
                     HashMap.filter(({ semanticVersion }) => semanticVersion === v),
                     HashMap.values,
@@ -89,7 +93,7 @@ export const loadApk = <T extends Games, U extends Extract<TrackedVersion<T>, An
                     Option.getOrThrow
                 )
             ),
-            Match.when(isRelativeVersion, (v) => svbrv.pipe(HashMap.get(v), Option.getOrThrow)),
+            Match.when(Schema.is(RelativeVersion), (v) => svbrv.pipe(HashMap.get(v), Option.getOrThrow)),
             Match.exhaustive
         );
         yield* Effect.logInfo(`App version code for ${version} = ${versionInfo.appVersionCode}`);
@@ -133,7 +137,11 @@ export const patchApk = <T extends Games, U extends Extract<TrackedVersion<T>, A
     cacheDirectory: string = defaultCacheDirectory
 ): Effect.Effect<
     string,
-    PlatformError.BadArgument | PlatformError.SystemError | HttpClient.error.HttpClientError | ApksupportScrapingError,
+    | ParseResult.ParseError
+    | PlatformError.BadArgument
+    | PlatformError.SystemError
+    | HttpClient.error.HttpClientError
+    | ApksupportScrapingError,
     FileSystem.FileSystem | CommandExecutor.CommandExecutor
 > =>
     loadApk(game, version, cacheDirectory).pipe(
@@ -170,5 +178,5 @@ export const patchApk = <T extends Games, U extends Extract<TrackedVersion<T>, A
         )
     );
 
-export { Games } from "./types.js";
+export { Games } from "./schemas.js";
 export default { loadApk, patchApk, Games, defaultCacheDirectory };

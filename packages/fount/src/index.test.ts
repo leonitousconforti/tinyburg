@@ -8,7 +8,7 @@ import * as HashMap from "effect/HashMap";
 import * as Option from "effect/Option";
 
 import { Games, loadApk, patchApk } from "./index.js";
-import { RelativeVersion } from "./types.js";
+import { RelativeVersion } from "./schemas.js";
 import { getSemanticVersionsByRelativeVersions } from "./versions.js";
 
 // Timeout tests after 5 minutes, for a loadApk or patchApk call to be considered
