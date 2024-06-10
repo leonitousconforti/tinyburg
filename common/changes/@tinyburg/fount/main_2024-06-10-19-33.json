@@ -1,0 +1,10 @@
+{
+    "changes": [
+        {
+            "packageName": "@tinyburg/fount",
+            "comment": "switch to @effect/schema for domain modeling",
+            "type": "major"
+        }
+    ],
+    "packageName": "@tinyburg/fount"
+}
