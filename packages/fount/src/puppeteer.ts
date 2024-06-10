@@ -27,7 +27,7 @@ export interface $IPuppeteerDetails
         appVersionCode: $AppVersionCode;
         semanticVersion: $SemanticVersion;
         updatedDate: Schema.DateFromString;
-        approximateFileSizeMB: Schema.NumberFromString;
+        approximateFileSizeMB: Schema.$String;
     }> {}
 
 /**
@@ -51,7 +51,7 @@ export const IPuppeteerDetails: $IPuppeteerDetails = Schema.Struct({
     appVersionCode: AppVersionCode,
     semanticVersion: SemanticVersion,
     updatedDate: Schema.DateFromString,
-    approximateFileSizeMB: Schema.NumberFromString.pipe(Schema.int()),
+    approximateFileSizeMB: Schema.String,
 }).annotations({
     identifier: "IPuppeteerDetails",
     title: "Puppeteer Details",
