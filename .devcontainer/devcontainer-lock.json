@@ -6,9 +6,9 @@
       "integrity": "sha256:e9e1d402031416ed5fc500f242c27ffa1043a27b5ba612e6596ea62503c8ae70"
     },
     "ghcr.io/devcontainers/features/desktop-lite:1": {
-      "version": "1.0.8",
-      "resolved": "ghcr.io/devcontainers/features/desktop-lite@sha256:e7dc4d37ab9e3d6e7ebb221bac741f5bfe07dae47025399d038b17af2ed8ddb7",
-      "integrity": "sha256:e7dc4d37ab9e3d6e7ebb221bac741f5bfe07dae47025399d038b17af2ed8ddb7"
+      "version": "1.2.0",
+      "resolved": "ghcr.io/devcontainers/features/desktop-lite@sha256:3ae291711d296da3829948600f49c9acf26f58c14ff636f34240fbf240deaf43",
+      "integrity": "sha256:3ae291711d296da3829948600f49c9acf26f58c14ff636f34240fbf240deaf43"
     },
     "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {
       "version": "1.4.5",
