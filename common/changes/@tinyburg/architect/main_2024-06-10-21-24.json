@@ -1,0 +1,10 @@
+{
+    "changes": [
+        {
+            "packageName": "@tinyburg/architect",
+            "comment": "bump additional software versions",
+            "type": "patch"
+        }
+    ],
+    "packageName": "@tinyburg/architect"
+}
