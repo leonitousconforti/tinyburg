@@ -1,0 +1,10 @@
+{
+    "changes": [
+        {
+            "packageName": "@tinyburg/fount",
+            "comment": "fix peer deps",
+            "type": "patch"
+        }
+    ],
+    "packageName": "@tinyburg/fount"
+}
