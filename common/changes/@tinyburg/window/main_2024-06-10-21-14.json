@@ -1,0 +1,10 @@
+{
+    "changes": [
+        {
+            "packageName": "@tinyburg/window",
+            "comment": "bump deps",
+            "type": "patch"
+        }
+    ],
+    "packageName": "@tinyburg/window"
+}

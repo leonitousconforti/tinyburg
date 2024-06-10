@@ -1,0 +1,10 @@
+{
+    "changes": [
+        {
+            "packageName": "@tinyburg/insight",
+            "comment": "bump deps",
+            "type": "patch"
+        }
+    ],
+    "packageName": "@tinyburg/insight"
+}

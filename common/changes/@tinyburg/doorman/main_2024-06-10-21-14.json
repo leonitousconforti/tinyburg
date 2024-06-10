@@ -1,0 +1,10 @@
+{
+    "changes": [
+        {
+            "packageName": "@tinyburg/doorman",
+            "comment": "bump deps",
+            "type": "patch"
+        }
+    ],
+    "packageName": "@tinyburg/doorman"
+}

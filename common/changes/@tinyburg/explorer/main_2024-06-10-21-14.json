@@ -1,0 +1,10 @@
+{
+    "changes": [
+        {
+            "packageName": "@tinyburg/explorer",
+            "comment": "bump deps",
+            "type": "patch"
+        }
+    ],
+    "packageName": "@tinyburg/explorer"
+}
