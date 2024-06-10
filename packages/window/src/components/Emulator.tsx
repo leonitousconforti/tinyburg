@@ -9,10 +9,10 @@ import { EmulatorController } from "@tinyburg/architect/protobuf/emulator_contro
 import { Rtc } from "@tinyburg/architect/protobuf/rtc_service_connect";
 
 import Copyright from "../components/Copyright.js";
+import WithMouseKeyHandler from "../components/InteractiveLayer.js";
+import LogcatView from "../components/LogcatView.js";
 import WebRtcView from "../components/WebRtcView.js";
 import JsepProtocol from "../services/Jsep.js";
-// import LogcatView from "../components/LogcatView.js";
-import WithMouseKeyHandler from "../components/InteractiveLayer.js";
 
 interface IEmulatorProps {
     address: string;
@@ -36,7 +36,7 @@ export const Emulator: React.FunctionComponent<IEmulatorProps> = ({ address }) =
                     </Container>
                 </Grid>
                 <Grid item xs={12} sm={6}>
-                    {/* <LogcatView emulatorClient={emulatorClient} /> */}
+                    <LogcatView emulatorClient={emulatorClient} />
                 </Grid>
             </Grid>
             <Box mt={8}>

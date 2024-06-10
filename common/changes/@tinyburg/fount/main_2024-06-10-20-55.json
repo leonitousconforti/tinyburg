@@ -1,0 +1,10 @@
+{
+    "changes": [
+        {
+            "packageName": "@tinyburg/fount",
+            "comment": "small fix",
+            "type": "patch"
+        }
+    ],
+    "packageName": "@tinyburg/fount"
+}

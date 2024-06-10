@@ -17,7 +17,7 @@ describe("Architect tests", () => {
             expect(emulatorContainer.Id).toBeDefined();
             expect(sharedVolume.Name).toBeDefined();
             await architect
-                .cleanup({ emulatorContainer, sharedVolume })
+                .cleanup({ emulatorContainer })
                 .pipe(Effect.provide(NodeContext.layer))
                 .pipe(Effect.provide(MobyApi.fromDockerHostEnvironmentVariable))
                 .pipe(Effect.runPromise);
@@ -55,7 +55,7 @@ describe("Architect tests", () => {
             expect(emulatorContainer.Id).toBeDefined();
             expect(sharedVolume.Name).toBeDefined();
             await architect
-                .cleanup({ emulatorContainer, sharedVolume })
+                .cleanup({ emulatorContainer })
                 .pipe(Effect.provide(NodeContext.layer))
                 .pipe(Effect.provide(MobyApi.fromDockerHostEnvironmentVariable))
                 .pipe(Effect.runPromise);

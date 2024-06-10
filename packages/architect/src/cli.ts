@@ -32,6 +32,7 @@ const command = Command.make(
     },
     ({ ports }) =>
         architect.architect({
+            // networkMode: "host",
             // So ugly but it makes the types work out
             portBindings: {
                 ...(ports["5554/tcp"] ? { "5554/tcp": ports["5554/tcp"] } : {}),
