@@ -36,9 +36,9 @@
       "integrity": "sha256:6c4f444d8e3eb68594d60ec128bce76a80647edc2b9a94960ca377895855145f"
     },
     "ghcr.io/devcontainers/features/python:1": {
-      "version": "1.6.1",
-      "resolved": "ghcr.io/devcontainers/features/python@sha256:d449aea663ea23ac4a7968719d5920dd57128f0429cd8e216849d5afe67651fb",
-      "integrity": "sha256:d449aea663ea23ac4a7968719d5920dd57128f0429cd8e216849d5afe67651fb"
+      "version": "1.6.4",
+      "resolved": "ghcr.io/devcontainers/features/python@sha256:046a904b940e1793327369f57f4b0a7d89febbdd9e77086a70feffdfa564f888",
+      "integrity": "sha256:046a904b940e1793327369f57f4b0a7d89febbdd9e77086a70feffdfa564f888"
     },
     "ghcr.io/jsburckhardt/devcontainer-features/gitleaks:1": {
       "version": "1.0.0",
