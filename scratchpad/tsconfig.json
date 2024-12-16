@@ -1,0 +1,12 @@
+{
+    "extends": "@tinyburg/tsconfig-rig/profile/default/config/tsconfig.json",
+    "compilerOptions": {
+        "outDir": "./dist",
+        "noEmit": false,
+        "sourceMap": true,
+        "declaration": true,
+        "types": ["node", "heft-jest"],
+        "plugins": [{ "name": "@effect/language-service" }]
+    },
+    "include": ["src/**/*.ts"]
+}

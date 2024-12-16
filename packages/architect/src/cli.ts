@@ -32,7 +32,7 @@ const command = Command.make(
     },
     ({ ports }) =>
         architect.architect({
-            // networkMode: "host",
+            networkMode: "host",
             // So ugly but it makes the types work out
             portBindings: {
                 ...(ports["5554/tcp"] ? { "5554/tcp": ports["5554/tcp"] } : {}),
@@ -53,6 +53,12 @@ const cli = Command.run(command, {
 
 Effect.suspend(() => cli(process.argv.slice(2))).pipe(
     Effect.provide(NodeContext.layer),
-    Effect.provide(MobyApi.fromDockerHostEnvironmentVariable),
+    Effect.provide(
+        MobyApi.fromConnectionOptions({
+            connection: "http",
+            host: "gpu.internal.ltgk.net",
+            port: 2375,
+        })
+    ),
     NodeRuntime.runMain
 );

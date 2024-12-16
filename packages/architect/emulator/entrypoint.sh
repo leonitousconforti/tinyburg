@@ -14,20 +14,20 @@ cp ~/.mitmproxy/mitmproxy-ca-cert.cer ~/.mitmproxy/$hashed_name.0
 
 # Start adb and emulator
 /android/sdk/platform-tools/adb start-server
-/android/sdk/emulator/emulator -avd Pixel2 -gpu host -ports 5554,5555 -grpc 8554 -http-proxy "127.0.0.1:7999" -read-only -snapshot-list -debug-grpc &
+/android/sdk/emulator/emulator -avd Pixel2 -gpu swiftshader_indirect -ports 5554,5555 -grpc 8554 -http-proxy "127.0.0.1:7999" -read-only -snapshot-list -debug-grpc &
 /android/sdk/platform-tools/adb wait-for-device
 until /android/sdk/platform-tools/adb root; do echo "Failed to run adb root"; sleep 1s; done
 
 # Start frida server
-until /android/sdk/platform-tools/adb push /android/frida/frida-server /data/local/tmp/; do echo "Failed to push frida server"; sleep 1s; done
-until /android/sdk/platform-tools/adb shell "chmod 755 /data/local/tmp/frida-server"; do echo "Failed to make frida server executable"; sleep 1s; done
-/android/sdk/platform-tools/adb shell "/data/local/tmp/frida-server" &
-/android/sdk/platform-tools/adb forward tcp:27043 tcp:27042
-socat tcp-listen:27042,reuseaddr,fork tcp:127.0.0.1:27043 &
+# until /android/sdk/platform-tools/adb push /android/frida/frida-server /data/local/tmp/; do echo "Failed to push frida server"; sleep 1s; done
+# until /android/sdk/platform-tools/adb shell "chmod 755 /data/local/tmp/frida-server"; do echo "Failed to make frida server executable"; sleep 1s; done
+# /android/sdk/platform-tools/adb shell "/data/local/tmp/frida-server" &
+# /android/sdk/platform-tools/adb forward tcp:27043 tcp:27042
+# socat tcp-listen:27042,reuseaddr,fork tcp:127.0.0.1:27043 &
 
 # Finish setup mitm cert on android emulator
-/android/sdk/platform-tools/adb push ~/.mitmproxy/$hashed_name.0 /data/misc/user/0/cacerts-added/$hashed_name.0
-/android/sdk/platform-tools/adb shell "su 0 chmod 644 /data/misc/user/0/cacerts-added/$hashed_name.0"
+# /android/sdk/platform-tools/adb push ~/.mitmproxy/$hashed_name.0 /data/misc/user/0/cacerts-added/$hashed_name.0
+# /android/sdk/platform-tools/adb shell "su 0 chmod 644 /data/misc/user/0/cacerts-added/$hashed_name.0"
 
 # Start envoy proxy
 /usr/local/bin/envoy -c /etc/envoy/envoy.yaml &
