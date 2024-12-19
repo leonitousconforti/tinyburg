@@ -642,9 +642,6 @@ importers:
       '@rushstack/heft-jest-plugin': 0.11.39
       '@rushstack/heft-lint-plugin': 0.3.39
       '@rushstack/heft-typescript-plugin': 0.5.16
-      '@tinyburg/architect': workspace:*
-      '@tinyburg/fount': workspace:*
-      '@tinyburg/insight': workspace:*
       '@tinyburg/tsconfig-rig': workspace:*
       '@types/debug': 4.1.12
       '@types/deep-extend': ~0.6.0
@@ -684,9 +681,6 @@ importers:
       '@rushstack/heft-jest-plugin': 0.11.39_ci2rahtkndfsahri7mfpjpxuze
       '@rushstack/heft-lint-plugin': 0.3.39_wq2z7fxfcuwth2bewbz3eunxum
       '@rushstack/heft-typescript-plugin': 0.5.16_wq2z7fxfcuwth2bewbz3eunxum
-      '@tinyburg/architect': link:../architect
-      '@tinyburg/fount': link:../fount
-      '@tinyburg/insight': link:../insight
       '@tinyburg/tsconfig-rig': link:../tsconfig-rig
       '@types/debug': 4.1.12
       '@types/deep-extend': 0.6.2
