@@ -1,3 +1,3 @@
-import * as it from "@effect/vitest"
+import * as it from "@effect/vitest";
 
-it.addEqualityTesters()
+it.addEqualityTesters();
