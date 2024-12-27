@@ -1,9 +1,8 @@
 import type { ITinyTowerRebuildEventData } from "./strategies/rebuild-every-x-floors.js";
 
 import { buildFloorCost } from "@tinyburg/nucleus/data/floors";
-import { useStrategy, TinyTowerRebuildAsapStrategyStates } from "./strategies/rebuild-every-x-floors.js";
+import { TinyTowerRebuildAsapStrategyStates, useStrategy } from "./strategies/rebuild-every-x-floors.js";
 
-// eslint-disable-next-line @rushstack/typedef-var
 const rebuildAsapStrategy = useStrategy();
 
 rebuildAsapStrategy.on(TinyTowerRebuildAsapStrategyStates.BuildingNewFloor, async (from, event) => {
@@ -26,7 +25,7 @@ rebuildAsapStrategy.on(TinyTowerRebuildAsapStrategyStates.Rebuilding, async (fro
 let state: ITinyTowerRebuildEventData = { coins: 25_000, floors: 1 };
 setInterval(async () => {
     state.coins += 1000;
-    // eslint-disable-next-line require-atomic-updates
+
     state = (await rebuildAsapStrategy.feed(state)) ?? state;
     console.log(state);
 }, 1000 * 1);

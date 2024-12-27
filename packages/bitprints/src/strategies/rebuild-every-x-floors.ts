@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/naming-convention */
-
 import { buildFloorCost } from "@tinyburg/nucleus/data/floors";
 import { FiniteStateMachine } from "../fsm.js";
 

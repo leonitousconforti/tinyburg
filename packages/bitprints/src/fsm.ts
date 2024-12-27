@@ -2,8 +2,8 @@ import { DoublyLinkedList } from "./doubly-linked-list.js";
 
 /** Transition grouping to facilitate fluent api. */
 export class Transitions<State extends string | number | symbol, EventData> {
-    public toStates: State[] = [];
-    public fromStates: State[] = [];
+    public toStates: Array<State> = [];
+    public fromStates: Array<State> = [];
     public readonly fsm: FiniteStateMachine<State, EventData>;
 
     public constructor(fsm: FiniteStateMachine<State, EventData>) {
@@ -11,7 +11,7 @@ export class Transitions<State extends string | number | symbol, EventData> {
     }
 
     /** Specify the end state(s) of a transition function. */
-    public to(...states: State[]): void {
+    public to(...states: Array<State>): void {
         this.toStates = states;
         this.fsm.addTransitions(this);
     }
@@ -36,9 +36,9 @@ export class TransitionFunction<State extends string | number | symbol, EventDat
  */
 export class FiniteStateMachine<State extends string | number | symbol, EventData> {
     private _currentState: State;
-    private _transitionFunctions: TransitionFunction<State, EventData>[];
-    private _exitCallbacks: { [key in State]?: { (to: State, data: EventData): boolean }[] };
-    private _enterCallbacks: { [key in State]?: { (from: State, data: EventData): boolean }[] };
+    private _transitionFunctions: Array<TransitionFunction<State, EventData>>;
+    private _exitCallbacks: { [key in State]?: Array<{ (to: State, data: EventData): boolean }> };
+    private _enterCallbacks: { [key in State]?: Array<{ (from: State, data: EventData): boolean }> };
     private _onCallbacks: {
         [key in State]?: DoublyLinkedList<{
             callback: (from: State, data: EventData) => Promise<EventData | void>;
@@ -118,7 +118,7 @@ export class FiniteStateMachine<State extends string | number | symbol, EventDat
      * Declares the start state(s) of a transition function, must be followed
      * with a '.to(...endStates)'
      */
-    public from(...states: State[]): Transitions<State, EventData> {
+    public from(...states: Array<State>): Transitions<State, EventData> {
         const _transition = new Transitions<State, EventData>(this);
         _transition.fromStates = states;
         return _transition;
@@ -180,13 +180,11 @@ export class FiniteStateMachine<State extends string | number | symbol, EventDat
             this._onCallbacks[state] = DoublyLinkedList.from([]);
         }
 
-        // eslint-disable-next-line unicorn/no-array-reduce
         const canExit: boolean = this._exitCallbacks[this._currentState]!.reduce(
             (accumulator, exitCallback) => accumulator && exitCallback.call(this, this._currentState, data),
             true
         );
 
-        // eslint-disable-next-line unicorn/no-array-reduce
         const canEnter: boolean = this._enterCallbacks[state]!.reduce(
             (accumulator, enterCallback) => accumulator && enterCallback.call(this, state, data),
             true
