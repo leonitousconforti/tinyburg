@@ -42,5 +42,16 @@
   "editor.suggestSelection": "recentlyUsed",
   "editor.wordBasedSuggestions": "matchingDocuments",
   "editor.parameterHints.enabled": true,
-  "files.insertFinalNewline": true
+  "files.insertFinalNewline": true,
+  "cSpell.words": [
+    "apks",
+    "bitprints",
+    "codegen",
+    "codemod",
+    "direnv",
+    "dprint",
+    "jscodeshift",
+    "nimblebit",
+    "tinyburg"
+  ]
 }

@@ -34,7 +34,8 @@
         "ms-python.black-formatter",
         "bradlc.vscode-tailwindcss",
         "GitHub.vscode-github-actions",
-        "yoavbls.pretty-ts-errors"
+        "yoavbls.pretty-ts-errors",
+        "effectful-tech.effect-vscode"
       ],
       "settings": {
         "cSpell.enabled": true,
@@ -66,7 +67,5 @@
         }
       }
     }
-  },
-
-  "postCreateCommand": "/bin/bash -i ./.devcontainer/setup.sh"
+  }
 }

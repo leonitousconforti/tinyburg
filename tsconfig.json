@@ -2,8 +2,12 @@
   "extends": "./tsconfig.base.json",
   "include": [],
   "references": [
-    { "path": "packages/cli" },
-    { "path": "packages/domain" },
-    { "path": "packages/server" }
+    { "path": "packages/bitprints" },
+    { "path": "packages/doorman" },
+    { "path": "packages/explorer" },
+    { "path": "packages/fount" },
+    { "path": "packages/insight" },
+    { "path": "packages/nucleus" },
+    { "path": "packages/treasury" }
   ]
 }
