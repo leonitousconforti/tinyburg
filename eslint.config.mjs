@@ -1,9 +1,9 @@
-import { fixupPluginRules } from "@eslint/compat";
+// import { fixupPluginRules } from "@eslint/compat";
 import { FlatCompat } from "@eslint/eslintrc";
 import js from "@eslint/js";
 import tsParser from "@typescript-eslint/parser";
 import codegen from "eslint-plugin-codegen";
-import _import from "eslint-plugin-import";
+// import _import from "eslint-plugin-import";
 import simpleImportSort from "eslint-plugin-simple-import-sort";
 import sortDestructureKeys from "eslint-plugin-sort-destructure-keys";
 import path from "node:path";
@@ -29,7 +29,7 @@ export default [
     ),
     {
         plugins: {
-            import: fixupPluginRules(_import),
+            // import: fixupPluginRules(_import),
             "sort-destructure-keys": sortDestructureKeys,
             "simple-import-sort": simpleImportSort,
             codegen,

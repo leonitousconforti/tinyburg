@@ -14,7 +14,7 @@ import * as Stream from "effect/Stream";
 import * as Tuple from "effect/Tuple";
 
 import {
-    type AnyGame,
+    AnyGame,
     RelativeVersion,
     SemanticVersion,
     SemanticVersionAndAppVersionCode,

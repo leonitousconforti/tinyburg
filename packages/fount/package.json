@@ -1,43 +1,56 @@
 {
-  "name": "@tinyburg/fount",
-  "version": "0.0.0",
-  "type": "module",
-  "license": "MIT",
-  "description": "The server template",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/leonitousconforti/tinyburg.git",
-    "directory": "packages/fount"
-  },
-  "publishConfig": {
-    "access": "public",
-    "directory": "dist"
-  },
-  "scripts": {
-    "codegen": "build-utils prepare-v2",
-    "build": "pnpm build-esm && pnpm build-annotate && pnpm build-cjs && build-utils pack-v2",
-    "build-esm": "tsc -b tsconfig.build.json",
-    "build-cjs": "babel build/esm --plugins @babel/transform-export-namespace-from --plugins @babel/transform-modules-commonjs --out-dir build/cjs --source-maps",
-    "build-annotate": "babel build/esm --plugins annotate-pure-calls --out-dir build/esm --source-maps",
-    "check": "tsc -b tsconfig.json",
-    "test": "vitest",
-    "coverage": "vitest --coverage"
-  },
-  "dependencies": {
-    "@effect/platform": "latest",
-    "@effect/platform-node": "latest",
-    "effect": "latest"
-  },
-  "effect": {
-    "generateExports": {
-      "include": [
-        "**/*.ts"
-      ]
+    "name": "@tinyburg/fount",
+    "version": "0.0.0",
+    "description": "fetches any version of any of Nimblebit's Android apks directly from the Google playstore",
+    "keywords": [
+        "nimblebit",
+        "tinytower",
+        "tinytowers"
+    ],
+    "homepage": "https://github.com/leonitousconforti/tinyburg",
+    "bugs": {
+        "url": "https://github.com/leonitousconforti/tinyburg/issues",
+        "email": "leo@leoconforti.us"
     },
-    "generateIndex": {
-      "include": [
-        "**/*.ts"
-      ]
-    }
-  }
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/leonitousconforti/tinyburg.git",
+        "directory": "packages/fount"
+    },
+    "license": "GPL-3.0-only",
+    "author": "Leo Conforti <leo@leoconforti.us> (https://leoconforti.us)",
+    "type": "module",
+    "scripts": {
+        "build": "pnpm build-esm && pnpm build-annotate && pnpm build-cjs && build-utils pack-v2",
+        "build-annotate": "babel build/esm --plugins annotate-pure-calls --out-dir build/esm --source-maps",
+        "build-cjs": "babel build/esm --plugins @babel/transform-export-namespace-from --plugins @babel/transform-modules-commonjs --out-dir build/cjs --source-maps",
+        "build-esm": "tsc -b tsconfig.build.json",
+        "check": "tsc -b tsconfig.json",
+        "codegen": "build-utils prepare-v2",
+        "coverage": "vitest --coverage",
+        "dtslint": "dtslint dtslint",
+        "test": "vitest"
+    },
+    "dependencies": {
+        "@effect/platform": "0.72.0",
+        "@effect/platform-node": "0.68.0",
+        "apk-mitm": "~1.3.0",
+        "effect": "3.12.0",
+        "puppeteer": "~22.10.0"
+    },
+    "peerDependencies": {
+        "@effect/platform": "0.72.0",
+        "@effect/platform-node": "0.68.0",
+        "effect": "3.12.0"
+    },
+    "publishConfig": {
+        "access": "public",
+        "directory": "dist",
+        "provenance": true
+    },
+    "tags": [
+        "nimblebit",
+        "tinytower",
+        "tinytowers"
+    ]
 }

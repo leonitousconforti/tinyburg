@@ -45,6 +45,8 @@
     "files.insertFinalNewline": true,
     "cSpell.words": [
         "apks",
+        "Apksupport",
+        "bitcity",
         "Bitprint",
         "bitprints",
         "codegen",
@@ -54,8 +56,13 @@
         "dprint",
         "frida",
         "jscodeshift",
+        "legotower",
         "mikearnaldi",
         "nimblebit",
+        "playstore",
+        "pocketfrogs",
+        "pocketplanes",
+        "pockettrains",
         "tinyburg",
         "tinytower",
         "tinytowers"

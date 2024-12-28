@@ -6,7 +6,7 @@ import * as HashMap from "effect/HashMap";
 import * as Option from "effect/Option";
 
 import { Game, loadApk, patchApk } from "./index.js";
-import { AnyGame } from "./schemas.js";
+import type { AnyGame } from "./schemas.js";
 import { getSemanticVersionsByRelativeVersions } from "./versions.js";
 
 const TINYBURG_APKS_TEST_TIMEOUT = 5 * 60 * 1000;
