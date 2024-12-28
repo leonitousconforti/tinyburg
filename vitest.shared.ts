@@ -1,11 +1,12 @@
 import * as path from "node:path";
 import type { ViteUserConfig } from "vitest/config";
 
-const alias = (name: string) => {
+const alias = (pkg: string, dir = pkg) => {
+    const name = pkg === "tinyburg" ? "tinyburg" : `@tinyburg/${pkg}`;
     const target = process.env.TEST_DIST !== undefined ? "dist/dist/esm" : "src";
     return {
-        [`${name}/test`]: path.join(__dirname, "packages", name, "test"),
-        [`${name}`]: path.join(__dirname, "packages", name, target),
+        [`${name}/test`]: path.join(__dirname, "packages", dir, "test"),
+        [`${name}`]: path.join(__dirname, "packages", dir, target),
     };
 };
 
@@ -27,6 +28,12 @@ const config: ViteUserConfig = {
         },
         include: ["test/**/*.test.ts"],
         alias: {
+            ...alias("bitprints"),
+            ...alias("doorman"),
+            ...alias("explorer"),
+            ...alias("fount"),
+            ...alias("insight"),
+            ...alias("nucleus"),
             ...alias("treasury"),
         },
     },

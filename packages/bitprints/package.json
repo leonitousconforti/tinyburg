@@ -1,13 +1,24 @@
 {
     "name": "@tinyburg/bitprints",
     "version": "0.0.0",
-    "description": "The server template",
+    "description": "blueprints for constructing a tower in TinyTower using finite state machines!",
+    "keywords": [
+        "nimblebit",
+        "tinytower",
+        "tinytowers"
+    ],
+    "homepage": "https://github.com/leonitousconforti/tinyburg",
+    "bugs": {
+        "url": "https://github.com/leonitousconforti/tinyburg/issues",
+        "email": "leo@leoconforti.us"
+    },
     "repository": {
         "type": "git",
         "url": "https://github.com/leonitousconforti/tinyburg.git",
-        "directory": "packages/fount"
+        "directory": "packages/bitprints"
     },
-    "license": "MIT",
+    "license": "GPL-3.0-only",
+    "author": "Leo Conforti <leo@leoconforti.us> (https://leoconforti.us)",
     "type": "module",
     "scripts": {
         "build": "pnpm build-esm && pnpm build-annotate && pnpm build-cjs && build-utils pack-v2",
@@ -17,27 +28,22 @@
         "check": "tsc -b tsconfig.json",
         "codegen": "build-utils prepare-v2",
         "coverage": "vitest --coverage",
+        "dtslint": "dtslint dtslint",
         "test": "vitest"
     },
-    "dependencies": {
-        "@effect/platform": "latest",
-        "@effect/platform-node": "latest",
-        "effect": "latest"
+    "peerDependencies": {
+        "@effect/platform": "0.72.0",
+        "@effect/platform-node": "0.68.0",
+        "effect": "3.12.0"
     },
     "publishConfig": {
         "access": "public",
-        "directory": "dist"
+        "directory": "dist",
+        "provenance": true
     },
-    "effect": {
-        "generateExports": {
-            "include": [
-                "**/*.ts"
-            ]
-        },
-        "generateIndex": {
-            "include": [
-                "**/*.ts"
-            ]
-        }
-    }
+    "tags": [
+        "nimblebit",
+        "tinytower",
+        "tinytowers"
+    ]
 }

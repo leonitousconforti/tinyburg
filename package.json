@@ -2,8 +2,7 @@
     "private": true,
     "type": "module",
     "workspaces": [
-        "packages/fount",
-        "packages/treasury"
+        "packages/*"
     ],
     "scripts": {
         "build": "tsc -b tsconfig.build.json && pnpm --recursive --parallel run build",

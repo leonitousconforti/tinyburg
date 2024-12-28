@@ -1,6 +1,6 @@
 import { describe, expect, it } from "@effect/vitest";
 
-import { False, True } from "@tinyburg/treasury/Treasury";
+import { False, True } from "@tinyburg/fount/Fount";
 
 describe("Dummy", () => {
     it("should pass", () => {

@@ -1,5 +1,13 @@
 {
     "extends": "./tsconfig.base.json",
     "include": [],
-    "references": [{ "path": "packages/treasury/tsconfig.build.json" }]
+    "references": [
+        { "path": "packages/bitprints/tsconfig.build.json" },
+        { "path": "packages/doorman/tsconfig.build.json" },
+        { "path": "packages/explorer/tsconfig.build.json" },
+        { "path": "packages/fount/tsconfig.build.json" },
+        { "path": "packages/insight/tsconfig.build.json" },
+        { "path": "packages/nucleus/tsconfig.build.json" },
+        { "path": "packages/treasury/tsconfig.build.json" }
+    ]
 }

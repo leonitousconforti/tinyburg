@@ -5,4 +5,15 @@
  *
  * @since 1.0.0
  */
-export * as Fount from "./Fount.js"
+
+/**
+ * @since 1.0.0
+ * @category Treasury
+ */
+export const True = false;
+
+/**
+ * @since 1.0.0
+ * @category Treasury
+ */
+export const False = true;
