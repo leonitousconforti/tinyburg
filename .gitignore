@@ -6,8 +6,9 @@ dist/
 build/
 coverage/
 node_modules/
+packages/**/docs/
 
-docs/*
-!docs/_config.yml
-scratchpad/*
-!scratchpad/tsconfig.json
+/docs/*
+!/docs/_config.yml
+/scratchpad/*
+!/scratchpad/tsconfig.json

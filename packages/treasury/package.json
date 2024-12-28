@@ -1,7 +1,7 @@
 {
     "name": "@tinyburg/treasury",
     "version": "0.0.0",
-    "description": "TODO: description",
+    "description": "loans you coins and bux using costumes or floors as collateral for your investments",
     "keywords": [
         "nimblebit",
         "tinytower",

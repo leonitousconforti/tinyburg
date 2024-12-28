@@ -27,12 +27,6 @@ const config: ViteUserConfig = {
         },
         include: ["test/**/*.test.ts"],
         alias: {
-            ...alias("bitprints"),
-            ...alias("doorman"),
-            ...alias("explorer"),
-            ...alias("fount"),
-            ...alias("insight"),
-            ...alias("nucleus"),
             ...alias("treasury"),
         },
     },
