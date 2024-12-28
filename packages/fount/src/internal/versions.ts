@@ -31,10 +31,6 @@ export const trackedVersions = {
         b1: { semanticVersion: "0.0.0", appVersionCode: 0 },
         b2: { semanticVersion: "0.0.0", appVersionCode: 0 },
     },
-    ["com.nimblebit.legotower"]: {
-        c1: { semanticVersion: "0.0.0", appVersionCode: 0 },
-        c2: { semanticVersion: "0.0.0", appVersionCode: 0 },
-    },
     ["com.nimblebit.pocketfrogs"]: {
         d1: { semanticVersion: "0.0.0", appVersionCode: 0 },
         d2: { semanticVersion: "0.0.0", appVersionCode: 0 },
