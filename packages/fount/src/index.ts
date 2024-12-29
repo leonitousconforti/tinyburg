@@ -6,3 +6,10 @@
  * @since 1.0.0
  */
 export * as Fount from "./Fount.js"
+
+/**
+ * All the Nimblebit games that tinyburg supports.
+ *
+ * @since 1.0.0
+ */
+export * as Games from "./Games.js"
