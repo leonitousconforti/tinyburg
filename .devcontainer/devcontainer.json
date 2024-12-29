@@ -70,5 +70,6 @@
         }
     },
 
-    "runArgs": ["--security-opt", "seccomp=unconfined"]
+    "postCreateCommand": "bash -i -c './.devcontainer/setup.sh'",
+    "runArgs": ["--security-opt", "seccomp=unconfined", "--add-host=host.docker.internal:host-gateway"]
 }
