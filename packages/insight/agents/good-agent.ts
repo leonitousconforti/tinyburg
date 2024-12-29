@@ -1,6 +1,6 @@
 import "frida-il2cpp-bridge";
 
-import type { IGoodAgentExports } from "../shared/good-agent-exports.js";
+import type { IGoodAgentExports } from "../src/shared/good-agent-exports.js";
 import { TinyTowerFridaAgent } from "./base-frida-agent.js";
 
 export class GoodAgent extends TinyTowerFridaAgent<GoodAgent> {

@@ -21,14 +21,11 @@ Effect.gen(function* () {
     const apkTarball = MobyConvey.packBuildContextIntoTarballStream(
         HashMap.make(["com.nimblebit.tinytower.apk", Tuple.make(apkDetails.fileSizeBytes, apkStream)])
     );
-    // yield* Stream.run(apkTarball, fs.sink("com.nimblebit.tinytower.apk.tar"));
     yield* emulator.installApk("com.nimblebit.tinytower.apk", apkTarball);
 
-    const FridaDeviceLive = Frida.RemoteDeviceLayer(`http://emulator.ip:${emulator.ports.frida}`);
-    const result = yield* Effect.provide(
-        Insight.runAgent(Agents.TestingAgents.GoodAgent)("Leo Conforti"),
-        FridaDeviceLive
-    );
+    const FridaDeviceLive = Frida.RemoteDeviceLayer(`host.docker.internal:${emulator.ports.frida}`);
+    const agent = yield* Agents.TestingAgents.GoodAgent;
+    const result = yield* Effect.provide(Insight.runAgent(agent)("Leo Conforti"), FridaDeviceLive);
     yield* Effect.logInfo(result);
 })
     .pipe(Logger.withMinimumLogLevel(LogLevel.Debug))

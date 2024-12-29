@@ -1,10 +1,9 @@
 {
     "extends": "../../tsconfig.base.json",
-    "include": ["src/internal/agents/**/*.ts", "src/internal/helpers/**/*.ts", "src/internal/shared/**/*.ts"],
+    "include": ["agents", "src/shared"],
     "compilerOptions": {
         "types": ["frida-gum"],
-        "outDir": "build/src",
-        "tsBuildInfoFile": ".tsbuildinfo/src.tsbuildinfo",
-        "rootDir": "src"
+        "tsBuildInfoFile": ".tsbuildinfo/agents.tsbuildinfo",
+        "noEmit": true
     }
 }

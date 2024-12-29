@@ -1,11 +1,11 @@
 import "frida-il2cpp-bridge";
 
-import type { IBitbookAgentExports } from "../shared/bitbook-agent-exports.js";
+import type { IBitbookAgentExports } from "../src/shared/bitbook-agent-exports.js";
 
-import { readObject } from "../helpers/read.js";
-import { readEnumFields } from "../helpers/get-enum-fields.js";
 import { TinyTowerFridaAgent } from "./base-frida-agent.js";
-import { copyDictionaryToJs } from "../helpers/copy-dictionary-to-js.js";
+import { copyDictionaryToJs } from "./helpers/copy-dictionary-to-js.js";
+import { readEnumFields } from "./helpers/get-enum-fields.js";
+import { readObject } from "./helpers/read.js";
 
 export class GetBitbookData extends TinyTowerFridaAgent<GetBitbookData> {
     public loadDependencies() {

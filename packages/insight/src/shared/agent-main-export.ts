@@ -1,5 +1,5 @@
 export interface IAgent {
-    agentFile: string;
+    agentSource: string;
     rpcTypes: {
         main: TAgentMain<Array<any>, unknown>;
     };

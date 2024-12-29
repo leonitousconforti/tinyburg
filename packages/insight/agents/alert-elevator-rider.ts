@@ -1,4 +1,4 @@
-import type { IElevatorRiderAgentExports } from "../shared/elevator-rider.js";
+import type { IElevatorRiderAgentExports } from "../src/shared/elevator-rider.js";
 
 import { TinyTowerFridaAgent } from "./base-frida-agent.js";
 

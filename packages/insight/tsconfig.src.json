@@ -1,7 +1,6 @@
 {
     "extends": "../../tsconfig.base.json",
     "include": ["src"],
-    "exclude": ["src/internal/agents/**/*.ts", "src/internal/helpers/**/*.ts"],
     "compilerOptions": {
         "types": ["node"],
         "outDir": "build/src",

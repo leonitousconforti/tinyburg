@@ -1,6 +1,6 @@
 import "frida-il2cpp-bridge";
 
-import type { ITargetFpsAgentExports } from "../shared/target-fps-agent-exports.js";
+import type { ITargetFpsAgentExports } from "../src/shared/target-fps-agent-exports.js";
 
 import { TinyTowerFridaAgent } from "./base-frida-agent.js";
 

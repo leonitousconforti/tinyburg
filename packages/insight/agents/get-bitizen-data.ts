@@ -1,11 +1,11 @@
 import "frida-il2cpp-bridge";
 
-import type { IBitizenAgentExports } from "../shared/bitizen-agent-exports.js";
+import type { IBitizenAgentExports } from "../src/shared/bitizen-agent-exports.js";
 
-import { colorToObject } from "../helpers/color-to-object.js";
-import { copyArrayToJs } from "../helpers/copy-array-to-js.js";
-import { copyListToJs } from "../helpers/copy-list-to-js.js";
 import { TinyTowerFridaAgent } from "./base-frida-agent.js";
+import { colorToObject } from "./helpers/color-to-object.js";
+import { copyArrayToJs } from "./helpers/copy-array-to-js.js";
+import { copyListToJs } from "./helpers/copy-list-to-js.js";
 
 export class GetBitizenData extends TinyTowerFridaAgent<GetBitizenData> {
     public loadDependencies() {

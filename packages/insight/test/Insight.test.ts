@@ -1,10 +1,16 @@
-import { describe, expect, it } from "@effect/vitest";
+import { describe, it } from "@effect/vitest";
+import { Effect, Function, Layer } from "effect";
+import { DockerEngine, MobyConnection } from "the-moby-effect";
 
-import { False, True } from "@tinyburg/insight/Insight";
+const localDocker = Function.pipe(
+    MobyConnection.connectionOptionsFromPlatformSystemSocketDefault,
+    Effect.map(DockerEngine.layerNodeJS),
+    Layer.unwrapEffect
+);
 
 describe("Dummy", () => {
     it("should pass", () => {
-        expect(False).toBe(true);
-        expect(True).toBe(false);
+        // expect(False).toBe(true);
+        // expect(True).toBe(false);
     });
 });

@@ -1,9 +1,9 @@
 import "frida-il2cpp-bridge";
 
-import { type IGameStateAgentExports } from "../shared/game-state-exports.js";
+import { type IGameStateAgentExports } from "../src/shared/game-state-exports.js";
 
 import { TinyTowerFridaAgent } from "./base-frida-agent.js";
-import { copyArrayToJs } from "../helpers/copy-array-to-js.js";
+import { copyArrayToJs } from "./helpers/copy-array-to-js.js";
 
 export class GetGameState extends TinyTowerFridaAgent<GetGameState> {
     public loadDependencies() {

@@ -1,11 +1,11 @@
 import "frida-il2cpp-bridge";
 
-import type { IFloorAgentExports } from "../shared/floor-agent-exports.js";
+import type { IFloorAgentExports } from "../src/shared/floor-agent-exports.js";
 
-import { copyDictionaryToJs } from "../helpers/copy-dictionary-to-js.js";
-import { readEnumFields } from "../helpers/get-enum-fields.js";
-import { readObject } from "../helpers/read.js";
 import { TinyTowerFridaAgent } from "./base-frida-agent.js";
+import { copyDictionaryToJs } from "./helpers/copy-dictionary-to-js.js";
+import { readEnumFields } from "./helpers/get-enum-fields.js";
+import { readObject } from "./helpers/read.js";
 
 export class GetFloorData extends TinyTowerFridaAgent<GetFloorData> {
     public loadDependencies() {

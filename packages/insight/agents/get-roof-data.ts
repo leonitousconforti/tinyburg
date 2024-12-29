@@ -1,11 +1,11 @@
 import "frida-il2cpp-bridge";
 
-import type { IRoofAgentExports } from "../shared/roof-agent-exports.js";
+import type { IRoofAgentExports } from "../src/shared/roof-agent-exports.js";
 
-import { readObject } from "../helpers/read.js";
 import { TinyTowerFridaAgent } from "./base-frida-agent.js";
-import { copyArrayToJs } from "../helpers/copy-array-to-js.js";
-import { copyDictionaryToJs } from "../helpers/copy-dictionary-to-js.js";
+import { copyArrayToJs } from "./helpers/copy-array-to-js.js";
+import { copyDictionaryToJs } from "./helpers/copy-dictionary-to-js.js";
+import { readObject } from "./helpers/read.js";
 
 export class GetRoofData extends TinyTowerFridaAgent<GetRoofData> {
     public loadDependencies() {

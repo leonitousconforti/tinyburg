@@ -1,6 +1,6 @@
 import "frida-il2cpp-bridge";
 
-import type { IGetTowerCredentialsAgentExports } from "../shared/tower-credentials-agent-exports.js";
+import type { IGetTowerCredentialsAgentExports } from "../src/shared/tower-credentials-agent-exports.js";
 
 import { TinyTowerFridaAgent } from "./base-frida-agent.js";
 

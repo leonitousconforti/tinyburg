@@ -1,11 +1,11 @@
 import "frida-il2cpp-bridge";
 
-import type { IMissionAgentExports } from "../shared/mission-agent-exports.js";
+import type { IMissionAgentExports } from "../src/shared/mission-agent-exports.js";
 
-import { copyDictionaryToJs } from "../helpers/copy-dictionary-to-js.js";
-import { readEnumFields } from "../helpers/get-enum-fields.js";
-import { readField } from "../helpers/read.js";
 import { TinyTowerFridaAgent } from "./base-frida-agent.js";
+import { copyDictionaryToJs } from "./helpers/copy-dictionary-to-js.js";
+import { readEnumFields } from "./helpers/get-enum-fields.js";
+import { readField } from "./helpers/read.js";
 
 export class GetMissionData extends TinyTowerFridaAgent<GetMissionData> {
     public loadDependencies() {
