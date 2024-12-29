@@ -2,26 +2,6 @@ import * as Function from "effect/Function";
 import * as Schema from "effect/Schema";
 
 /**
- * All Nimblebit games that are supported by @tinyburg/fount.
- *
- * @since 1.0.0
- * @category Constants
- */
-export class Game extends Schema.Literal(
-    "com.nimblebit.bitcity" as const,
-    "com.nimblebit.tinytower" as const,
-    "com.nimblebit.pocketfrogs" as const,
-    "com.nimblebit.pocketplanes" as const,
-    "com.nimblebit.pockettrains" as const
-) {}
-
-/**
- * @since 1.0.0
- * @category Types
- */
-export type AnyGame = (typeof Game.literals)[number];
-
-/**
  * A positive integer used as an internal version number. This number helps
  * determine whether one version is more recent than another, with higher
  * numbers indicating more recent versions. This is not the version number shown

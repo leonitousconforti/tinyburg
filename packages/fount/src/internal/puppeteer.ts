@@ -6,8 +6,9 @@ import * as Function from "effect/Function";
 import * as Schedule from "effect/Schedule";
 import * as Schema from "effect/Schema";
 
+import { AnyGame } from "./games.js";
 import { browserResource } from "./resources.js";
-import { AppVersionCode, SemanticVersion, SemanticVersionAndAppVersionCode, type AnyGame } from "./schemas.js";
+import { AppVersionCode, SemanticVersion, SemanticVersionAndAppVersionCode } from "./schemas.js";
 
 /**
  * @since 1.0.0
@@ -18,7 +19,6 @@ export class IPuppeteerDetails extends Schema.Struct({
     appVersionCode: AppVersionCode,
     semanticVersion: SemanticVersion,
     updatedDate: Schema.DateFromString,
-    approximateFileSizeMB: Schema.String,
 }).annotations({
     identifier: "IPuppeteerDetails",
     title: "Puppeteer Details",
@@ -78,18 +78,15 @@ export const getApksupportDetails = (
 
         const downloadLinks = ["#ssg > div > a", "#sse > div > a"];
         const updatedDateSelector = "#ogdl > div > table > tbody > tr:nth-child(2) > td:nth-child(2)";
-        const approximateFileSizeSelector = "#ssg > div > a > span.der_size";
 
         yield* requestPlaystoreApk;
         const updatedDate = yield* getSpanElementText(updatedDateSelector);
-        const approximateFileSizeMB = yield* getSpanElementText(approximateFileSizeSelector);
         const downloadUrl = yield* Effect.firstSuccessOf(downloadLinks.map(getAnchorElementLink));
 
-        const details = yield* Schema.decode(IPuppeteerDetails)({
+        const details = yield* Schema.decodeUnknown(IPuppeteerDetails)({
             name: game,
             updatedDate,
             semanticVersion,
-            approximateFileSizeMB,
             appVersionCode: String(appVersionCode),
         });
 

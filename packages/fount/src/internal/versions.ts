@@ -13,8 +13,8 @@ import * as Scope from "effect/Scope";
 import * as Stream from "effect/Stream";
 import * as Tuple from "effect/Tuple";
 
+import { AnyGame } from "./games.js";
 import {
-    type AnyGame,
     RelativeVersion,
     SemanticVersion,
     SemanticVersionAndAppVersionCode,
@@ -32,16 +32,16 @@ export const trackedVersions = {
         b2: { semanticVersion: "0.0.0", appVersionCode: 0 },
     },
     ["com.nimblebit.pocketfrogs"]: {
+        c1: { semanticVersion: "0.0.0", appVersionCode: 0 },
+        c2: { semanticVersion: "0.0.0", appVersionCode: 0 },
+    },
+    ["com.nimblebit.pocketplanes"]: {
         d1: { semanticVersion: "0.0.0", appVersionCode: 0 },
         d2: { semanticVersion: "0.0.0", appVersionCode: 0 },
     },
-    ["com.nimblebit.pocketplanes"]: {
+    ["com.nimblebit.pockettrains"]: {
         e1: { semanticVersion: "0.0.0", appVersionCode: 0 },
         e2: { semanticVersion: "0.0.0", appVersionCode: 0 },
-    },
-    ["com.nimblebit.pockettrains"]: {
-        f1: { semanticVersion: "0.0.0", appVersionCode: 0 },
-        f2: { semanticVersion: "0.0.0", appVersionCode: 0 },
     },
 } as const satisfies {
     [game in AnyGame]: {

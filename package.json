@@ -49,6 +49,7 @@
         "@vitest/web-worker": "^2.1.8",
         "ast-types": "^0.14.2",
         "babel-plugin-annotate-pure-calls": "^0.4.0",
+        "effect": "^3.12.0",
         "eslint": "^9.17.0",
         "eslint-import-resolver-typescript": "^3.7.0",
         "eslint-plugin-codegen": "^0.29.0",

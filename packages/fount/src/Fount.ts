@@ -13,6 +13,7 @@ import * as FetchHttpClient from "@effect/platform/FetchHttpClient";
 import * as FileSystem from "@effect/platform/FileSystem";
 import * as HttpClient from "@effect/platform/HttpClient";
 import * as HttpClientError from "@effect/platform/HttpClientError";
+import * as Path from "@effect/platform/Path";
 import * as ReadonlyArray from "effect/Array";
 import * as Effect from "effect/Effect";
 import * as Function from "effect/Function";
@@ -25,9 +26,9 @@ import * as Scope from "effect/Scope";
 import * as Stream from "effect/Stream";
 import * as Tuple from "effect/Tuple";
 
-import * as path from "path";
+import { AnyGame } from "./internal/games.js";
 import { ApksupportScrapingError, getApksupportDetails, IPuppeteerDetails } from "./internal/puppeteer.js";
-import { AnyGame, RelativeVersion, SemanticVersion, SemanticVersionAndAppVersionCode } from "./internal/schemas.js";
+import { RelativeVersion, SemanticVersion, SemanticVersionAndAppVersionCode } from "./internal/schemas.js";
 import {
     AllTrackedVersions,
     getSemanticVersionsByRelativeVersions,
@@ -47,7 +48,7 @@ export const loadApk = <T extends AnyGame>(
         | Extract<TrackedVersion<T>, AllTrackedVersions> = "latest version"
 ): Effect.Effect<
     readonly [
-        scrapingDetails: typeof IPuppeteerDetails.Type,
+        scrapingDetails: typeof IPuppeteerDetails.Type & { fileSizeBytes: number },
         apk: Stream.Stream<Uint8Array, HttpClientError.ResponseError, never>,
     ],
     ParseResult.ParseError | HttpClientError.HttpClientError | ApksupportScrapingError,
@@ -87,7 +88,8 @@ export const loadApk = <T extends AnyGame>(
 
         // Stream the download directly to the downloads folder
         const response = yield* HttpClient.get(downloadUrl);
-        return Tuple.make(details, response.stream);
+        const contentLength = yield* Schema.decode(Schema.NumberFromString)(response.headers["content-length"]);
+        return Tuple.make({ ...details, fileSizeBytes: contentLength }, response.stream);
     }).pipe(Effect.provide(FetchHttpClient.layer));
 
 /**
@@ -107,9 +109,10 @@ export const patchApk = <T extends AnyGame>(
     | PlatformError.SystemError
     | HttpClientError.HttpClientError
     | ApksupportScrapingError,
-    FileSystem.FileSystem | CommandExecutor.CommandExecutor
+    Path.Path | FileSystem.FileSystem | CommandExecutor.CommandExecutor
 > =>
     Effect.gen(function* () {
+        const path: Path.Path = yield* Path.Path;
         const fs: FileSystem.FileSystem = yield* FileSystem.FileSystem;
         const commandExecutor: CommandExecutor.CommandExecutor = yield* CommandExecutor.CommandExecutor;
 

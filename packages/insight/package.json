@@ -31,9 +31,24 @@
         "dtslint": "dtslint dtslint",
         "test": "vitest"
     },
+    "dependencies": {
+        "emittery": "^1.0.3",
+        "frida": "^16.5.9",
+        "frida-compile": "^16.4.1",
+        "frida-il2cpp-bridge": "^0.9.1"
+    },
+    "devDependencies": {
+        "@bufbuild/protobuf": "2.2.3",
+        "@effect/platform": "^0.72.0",
+        "@effect/platform-node": "^0.68.0",
+        "@shocae/control": "0.0.1",
+        "@tinyburg/fount": "workspace:^",
+        "@types/frida-gum": "18.7.1",
+        "effect": "^3.12.0",
+        "the-moby-effect": "1.45.0-alpha.22"
+    },
     "peerDependencies": {
         "@effect/platform": "0.72.0",
-        "@effect/platform-node": "0.68.0",
         "effect": "3.12.0"
     },
     "publishConfig": {
