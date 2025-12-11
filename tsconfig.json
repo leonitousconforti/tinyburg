@@ -5,10 +5,8 @@
     "references": [
         { "path": "packages/bitprints" },
         { "path": "packages/doorman" },
-        { "path": "packages/explorer" },
-        { "path": "packages/fount" },
         { "path": "packages/insight" },
-        { "path": "packages/nucleus" },
-        { "path": "packages/treasury" }
+        { "path": "packages/tinytower-sdk" },
+        { "path": "packages/trading-sdk" },
     ]
 }
