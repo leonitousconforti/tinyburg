@@ -1,12 +1,12 @@
 {
     "$schema": "http://json.schemastore.org/tsconfig",
-    "extends": "./tsconfig.base.json",
+    "extends": "./tsconfig.base.jsonc",
     "include": [],
     "references": [
         { "path": "packages/bitprints" },
         { "path": "packages/doorman" },
         { "path": "packages/insight" },
         { "path": "packages/tinytower-sdk" },
-        { "path": "packages/trading-sdk" },
+        { "path": "packages/trading-sdk" }
     ]
 }
