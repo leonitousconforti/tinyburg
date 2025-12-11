@@ -1,7 +1,7 @@
 {
-    "name": "@tinyburg/tinytower-sdk",
+    "name": "@tinyburg/trading-sdk",
     "version": "0.0.0",
-    "description": "api for the mobile game TinyTower by Nimblebit",
+    "description": "trading sdk for tinyburg.app",
     "keywords": [
         "nimblebit",
         "tinytower",
@@ -11,7 +11,7 @@
     "repository": {
         "type": "git",
         "url": "https://github.com/leonitousconforti/tinyburg.git",
-        "directory": "packages/tinytower-sdk"
+        "directory": "packages/trading-sdk"
     },
     "license": "GPL-3.0-only",
     "author": "Leo Conforti <leo@leoconforti.us> (https://leoconforti.us)",

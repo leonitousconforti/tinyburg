@@ -1,9 +1,0 @@
-{
-    "extends": "../../tsconfig.base.json",
-    "include": ["agents", "src/shared"],
-    "compilerOptions": {
-        "types": ["frida-gum"],
-        "tsBuildInfoFile": ".tsbuildinfo/agents.tsbuildinfo",
-        "noEmit": true
-    }
-}
