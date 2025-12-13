@@ -117,7 +117,36 @@ importers:
 
   packages/insight: {}
 
-  packages/tinytower-sdk: {}
+  packages/tinytower-sdk:
+    dependencies:
+      effect-schemas:
+        specifier: 0.0.9
+        version: 0.0.9(effect@3.19.11)
+    devDependencies:
+      '@effect/cluster':
+        specifier: 0.55.0
+        version: 0.55.0(@effect/platform@0.93.6(effect@3.19.11))(@effect/rpc@0.72.2(@effect/platform@0.93.6(effect@3.19.11))(effect@3.19.11))(@effect/sql@0.48.6(@effect/experimental@0.57.11(@effect/platform@0.93.6(effect@3.19.11))(effect@3.19.11))(@effect/platform@0.93.6(effect@3.19.11))(effect@3.19.11))(@effect/workflow@0.15.2(@effect/experimental@0.57.11(@effect/platform@0.93.6(effect@3.19.11))(effect@3.19.11))(@effect/platform@0.93.6(effect@3.19.11))(@effect/rpc@0.72.2(@effect/platform@0.93.6(effect@3.19.11))(effect@3.19.11))(effect@3.19.11))(effect@3.19.11)
+      '@effect/experimental':
+        specifier: 0.57.11
+        version: 0.57.11(@effect/platform@0.93.6(effect@3.19.11))(effect@3.19.11)
+      '@effect/platform':
+        specifier: 0.93.6
+        version: 0.93.6(effect@3.19.11)
+      '@effect/platform-node':
+        specifier: 0.103.0
+        version: 0.103.0(@effect/cluster@0.55.0(@effect/platform@0.93.6(effect@3.19.11))(@effect/rpc@0.72.2(@effect/platform@0.93.6(effect@3.19.11))(effect@3.19.11))(@effect/sql@0.48.6(@effect/experimental@0.57.11(@effect/platform@0.93.6(effect@3.19.11))(effect@3.19.11))(@effect/platform@0.93.6(effect@3.19.11))(effect@3.19.11))(@effect/workflow@0.15.2(@effect/experimental@0.57.11(@effect/platform@0.93.6(effect@3.19.11))(effect@3.19.11))(@effect/platform@0.93.6(effect@3.19.11))(@effect/rpc@0.72.2(@effect/platform@0.93.6(effect@3.19.11))(effect@3.19.11))(effect@3.19.11))(effect@3.19.11))(@effect/platform@0.93.6(effect@3.19.11))(@effect/rpc@0.72.2(@effect/platform@0.93.6(effect@3.19.11))(effect@3.19.11))(@effect/sql@0.48.6(@effect/experimental@0.57.11(@effect/platform@0.93.6(effect@3.19.11))(effect@3.19.11))(@effect/platform@0.93.6(effect@3.19.11))(effect@3.19.11))(effect@3.19.11)
+      '@effect/rpc':
+        specifier: 0.72.2
+        version: 0.72.2(@effect/platform@0.93.6(effect@3.19.11))(effect@3.19.11)
+      '@effect/sql':
+        specifier: 0.48.6
+        version: 0.48.6(@effect/experimental@0.57.11(@effect/platform@0.93.6(effect@3.19.11))(effect@3.19.11))(@effect/platform@0.93.6(effect@3.19.11))(effect@3.19.11)
+      '@effect/workflow':
+        specifier: 0.15.2
+        version: 0.15.2(@effect/experimental@0.57.11(@effect/platform@0.93.6(effect@3.19.11))(effect@3.19.11))(@effect/platform@0.93.6(effect@3.19.11))(@effect/rpc@0.72.2(@effect/platform@0.93.6(effect@3.19.11))(effect@3.19.11))(effect@3.19.11)
+      effect:
+        specifier: 3.19.11
+        version: 3.19.11
 
   packages/trading-sdk: {}
 
@@ -1858,6 +1887,12 @@ packages:
 
   eastasianwidth@0.2.0:
     resolution: {integrity: sha512-I88TYZWc9XiYHRQ4/3c5rjjfgkjhLyW2luGIheGERbNQ6OY7yTybanSpDXZa8y7VUP9YmDcYa+eyq4ca7iLqWA==}
+
+  effect-schemas@0.0.9:
+    resolution: {integrity: sha512-cFhSB6XENx6J1ve9+X4DF3G9OQMxJxt5nMGf1kXqz/5j3/Gzz+yQzPzoldwMDk79iVBWakpqgyeU1o6wDR6tIw==}
+    engines: {node: '>=18.0.0'}
+    peerDependencies:
+      effect: 3.19.8
 
   effect@3.19.11:
     resolution: {integrity: sha512-UTEj3c1s41Ha3uzSPKKvFBZaDjZ8ez00Q2NYWVm2mKh2LXeX8j6LTg1HcQHnmdUhOjr79KHmhVWYB/zbegLO1A==}
@@ -5459,6 +5494,10 @@ snapshots:
       gopd: 1.2.0
 
   eastasianwidth@0.2.0: {}
+
+  effect-schemas@0.0.9(effect@3.19.11):
+    dependencies:
+      effect: 3.19.11
 
   effect@3.19.11:
     dependencies:

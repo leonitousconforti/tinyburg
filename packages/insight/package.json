@@ -15,8 +15,8 @@
     },
     "license": "GPL-3.0-only",
     "author": "Leo Conforti <leo@leoconforti.us> (https://leoconforti.us)",
-    "type": "module",
     "sideEffects": [],
+    "type": "module",
     "exports": {
         "./package.json": "./package.json",
         ".": "./src/index.ts",

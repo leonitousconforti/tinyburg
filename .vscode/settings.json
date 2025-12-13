@@ -9,8 +9,12 @@
 
     "cSpell.enabled": true,
     "cSpell.words": [
+        "Bitbook",
+        "Bitizen",
         "bitprints",
         "BUILDKIT",
+        "burnbot",
+        "burnbots",
         "cancelables",
         "codegen",
         "Conforti",
@@ -21,6 +25,7 @@
         "dind",
         "effectful",
         "efffrida",
+        "encodeable",
         "frida",
         "frontmost",
         "interruptible",
