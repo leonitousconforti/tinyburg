@@ -1,24 +1,31 @@
-import * as PlatformError from "@effect/platform/Error";
-import * as Predicate from "effect/Predicate";
+import * as internal from "./internal/nimblebitError.ts";
 
 /**
  * @since 1.0.0
- * @category Error
+ * @category Errors
  */
-export const NimblebitErrorTypeId = Symbol.for("@tinyburg/tinytower-sdk/NimblebitError");
+export const NimblebitErrorTypeId: unique symbol = internal.NimblebitErrorTypeId;
 
 /**
  * @since 1.0.0
- * @category Error
+ * @category Errors
  */
-export const isNimblebitError = (u: unknown): u is NimblebitError => Predicate.hasProperty(u, NimblebitErrorTypeId);
+export type NimblebitErrorTypeId = typeof NimblebitErrorTypeId;
 
 /**
  * @since 1.0.0
- * @category Error
+ * @category Errors
  */
-export class NimblebitError extends PlatformError.TypeIdError(NimblebitErrorTypeId, "NimblebitError")<{
-    method: string;
-    module: string;
-    cause: unknown;
-}> {}
+export const isNimblebitError: (u: unknown) => u is NimblebitError = internal.isNimblebitError;
+
+/**
+ * @since 1.0.0
+ * @category Errors
+ */
+export type NimblebitError = internal.NimblebitError;
+
+/**
+ * @since 1.0.0
+ * @category Errors
+ */
+export const NimblebitError: typeof internal.NimblebitError = internal.NimblebitError;
