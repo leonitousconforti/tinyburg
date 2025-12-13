@@ -61,12 +61,6 @@ export class NimblebitAuth extends Context.Tag("NimblebitAuth")<
         },
     ] as const;
 
-    private static readonly getBurnbot = Effect.sync(() => {
-        // const index = Math.floor(Math.random() * NimblebitAuth.burnbots.length);
-        // return NimblebitAuth.burnbots[index];
-        return this.burnbots[0];
-    });
-
     private static readonly NodeSalt: Effect.Effect<Schema.Schema.Type<EffectSchemas.Number.U32>, never, never> =
         Effect.map(
             Effect.promise(() => import("node:crypto")),
@@ -105,7 +99,7 @@ export class NimblebitAuth extends Context.Tag("NimblebitAuth")<
             authKey,
             host: "https://sync.nimblebit.com",
             salt: NimblebitAuth.NodeSalt,
-            burnbot: NimblebitAuth.getBurnbot,
+            burnbot: Effect.sync(() => this.burnbots[0]),
             sign: (data: string) => NimblebitAuth.NodeMD5(data + Redacted.value(authKey)),
         });
 
@@ -118,7 +112,7 @@ export class NimblebitAuth extends Context.Tag("NimblebitAuth")<
             authKey,
             host: "https://sync.nimblebit.com" as const,
             salt: NimblebitAuth.WebSalt,
-            burnbot: NimblebitAuth.getBurnbot,
+            burnbot: Effect.sync(() => this.burnbots[0]),
             sign: (data: string) => NimblebitAuth.WebMD5(data + Redacted.value(authKey)),
         });
 
@@ -139,10 +133,10 @@ export class NimblebitAuth extends Context.Tag("NimblebitAuth")<
     }): Layer.Layer<NimblebitAuth, never, never> =>
         Layer.succeed(this, {
             authKey,
-            salt: NimblebitAuth.NodeSalt,
-            burnbot: NimblebitAuth.getBurnbot,
-            sign: (data: string) => Effect.succeed(data),
             host: "https://authproxy.tinyburg.app" as const,
+            salt: NimblebitAuth.NodeSalt,
+            burnbot: Effect.sync(() => this.burnbots[0]),
+            sign: (data: string) => Effect.succeed(data + Redacted.value(authKey)),
         });
 
     static readonly WebTinyburgAuthProxy = ({
@@ -152,9 +146,9 @@ export class NimblebitAuth extends Context.Tag("NimblebitAuth")<
     }): Layer.Layer<NimblebitAuth, never, never> =>
         Layer.succeed(this, {
             authKey,
-            salt: NimblebitAuth.WebSalt,
-            burnbot: NimblebitAuth.getBurnbot,
-            sign: (data: string) => Effect.succeed(data),
             host: "https://authproxy.tinyburg.app" as const,
+            salt: NimblebitAuth.WebSalt,
+            burnbot: Effect.sync(() => this.burnbots[0]),
+            sign: (data: string) => Effect.succeed(data + Redacted.value(authKey)),
         });
 }
