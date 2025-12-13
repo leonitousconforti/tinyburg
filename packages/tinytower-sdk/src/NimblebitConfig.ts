@@ -33,8 +33,8 @@ export class PlayerAuthKeySchema extends Function.pipe(Schema.UUID, Schema.Redac
  * @category Schema
  */
 export class UnauthenticatedPlayerSchema extends Schema.Struct({
-    playerId: PlayerIdSchema,
     playerEmail: PlayerEmailSchema,
+    playerId: Schema.optionalWith(PlayerIdSchema, { nullable: true }),
 }) {}
 
 /**
@@ -88,8 +88,8 @@ export const PlayerAuthKeyConfig: Config.Config<Schema.Schema.Type<PlayerAuthKey
  * @category Config
  */
 export const UnauthenticatedPlayerConfig: Config.Config<Schema.Schema.Type<UnauthenticatedPlayerSchema>> = Config.all({
-    playerId: PlayerIdConfig,
     playerEmail: PlayerEmailConfig,
+    playerId: PlayerIdConfig.pipe(Config.orElse(() => Config.succeed(undefined))),
 });
 
 /**
