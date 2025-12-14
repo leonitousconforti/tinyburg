@@ -6,6 +6,7 @@ import * as HttpClient from "@effect/platform/HttpClient";
 import * as Effect from "effect/Effect";
 import * as Encoding from "effect/Encoding";
 import * as Redacted from "effect/Redacted";
+import * as Pako from "pako";
 
 import { Api } from "./internal/nimblebitEndpoints.ts";
 import { NimblebitAuth } from "./NimblebitAuth.ts";
@@ -179,7 +180,10 @@ export const pullSave = Effect.fnUntraced(function* ({
         });
     }
 
-    return response;
+    return {
+        ...response,
+        data: Pako.inflate(response.data).toString(),
+    };
 });
 
 export const enterRaffle = Effect.fnUntraced(function* ({

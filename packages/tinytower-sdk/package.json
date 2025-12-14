@@ -36,7 +36,8 @@
         "codegen": "build-utils prepare-v4"
     },
     "dependencies": {
-        "effect-schemas": "0.0.9"
+        "effect-schemas": "0.0.9",
+        "pako": "2.1.0"
     },
     "devDependencies": {
         "@effect/cluster": "0.55.0",
@@ -46,6 +47,7 @@
         "@effect/rpc": "0.72.2",
         "@effect/sql": "0.48.6",
         "@effect/workflow": "0.15.2",
+        "@types/pako": "2.0.4",
         "effect": "3.19.11"
     },
     "peerDependencies": {
