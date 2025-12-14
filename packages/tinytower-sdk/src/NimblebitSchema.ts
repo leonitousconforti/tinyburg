@@ -155,7 +155,7 @@ export const Floor = parseNimblebitObject(
             .pipe(Schema.propertySignature)
             .pipe(Schema.fromKey("Flst")),
         floorName: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Fn")),
-        floorPaint: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Fp")),
+        floorPaint: Schema.String.pipe(Schema.optional, Schema.fromKey("Fp")),
     })
 );
 
@@ -206,7 +206,7 @@ export const SaveData = parseNimblebitObject(
         roofs: Schema.split(",").pipe(Schema.propertySignature, Schema.fromKey("Prfs")),
         lifts: Schema.split(",").pipe(Schema.propertySignature, Schema.fromKey("Plfs")),
         lobbies: Schema.split(",").pipe(Schema.propertySignature, Schema.fromKey("Plbs")),
-        bannedFriends: Schema.split(",").pipe(Schema.propertySignature, Schema.fromKey("Pbf")),
+        bannedFriends: Schema.split(",").pipe(Schema.optional, Schema.fromKey("Pbf")),
         liftSpeed: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pls")),
         totalPoints: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Ptp")),
         lrc: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Plrc")),
@@ -227,7 +227,7 @@ export const SaveData = parseNimblebitObject(
         tmi: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Ptmi")),
         PVF: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("PVF")),
         PHP: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("PHP")),
-        mission: Mission.pipe(Schema.propertySignature, Schema.fromKey("Pmiss")),
+        mission: Mission.pipe(Schema.optional, Schema.fromKey("Pmiss")),
         doorman: Bitizen.pipe(Schema.propertySignature, Schema.fromKey("Pdrmn")),
         playerID: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Ppid")),
         playerRegistered: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Preg")),
