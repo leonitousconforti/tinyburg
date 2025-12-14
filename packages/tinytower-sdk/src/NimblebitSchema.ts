@@ -35,9 +35,7 @@ export const parseNimblebitOrderedList: <
         >["schema"];
     }>,
     Items[number]["schema"]["Context"]
-> =
-    // TODO: Fix this type issue
-    internal.parseNimblebitOrderedList as any;
+> = internal.parseNimblebitOrderedList as any;
 
 /**
  * @since 1.0.0
