@@ -182,7 +182,7 @@ export const pullSave = Effect.fnUntraced(function* ({
 
     return {
         ...response,
-        data: Pako.inflate(response.data).toString(),
+        data: Pako.inflate(response.data, { to: "string" }),
     };
 });
 
