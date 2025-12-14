@@ -36,11 +36,11 @@ export const parseNimblebitOrderedList = <
     const from = Schema.String;
     const to = Schema.Struct(fields);
 
-    const transform = Schema.transform(from, to, {
+    const transform = Schema.transformOrFail(from, to, {
         // { a: "123", b: "456" } -> "123,456"
         encode: (properties: {
             [K in keyof Schema.Struct.Encoded<Fields>]: Schema.Struct.Encoded<Fields>[K];
-        }): string => {
+        }): Effect.Effect<string, ParseResult.ParseIssue, never> => {
             const indexesByProperty = Function.pipe(
                 items,
                 Array.map((item, index) => [item.property, index] as const),
@@ -56,16 +56,49 @@ export const parseNimblebitOrderedList = <
                 .map(([_, value]) => value)
                 .join(separator);
 
-            return str;
+            return ParseResult.succeed(str);
         },
 
         // "123,456" -> { a: "123", b: "456" }
-        decode: (str: string): { [K in keyof Schema.Struct.Encoded<Fields>]: Schema.Struct.Encoded<Fields>[K] } => {
-            // TODO: Skip?
-            const splitted = str.split(separator).map((property, index) => [items[index].property, property] as const);
-            const obj = Object.fromEntries(splitted);
-            return obj as { [K in keyof Schema.Struct.Encoded<Fields>]: Schema.Struct.Encoded<Fields>[K] };
-        },
+        decode: (
+            str: string,
+            _options,
+            ast
+        ): Effect.Effect<
+            { [K in keyof Schema.Struct.Encoded<Fields>]: Schema.Struct.Encoded<Fields>[K] },
+            ParseResult.ParseIssue,
+            never
+        > =>
+            Effect.gen(function* () {
+                const splitted = str.split(separator);
+
+                if (splitted.length < items.length) {
+                    return yield* ParseResult.fail(
+                        new ParseResult.Type(
+                            ast,
+                            str,
+                            `Expected at least ${items.length} items, but got ${splitted.length}`
+                        )
+                    );
+                }
+
+                if (splitted.length > items.length) {
+                    yield* Effect.logWarning(
+                        `Expected at most ${items.length} items, but got ${splitted.length}. Extra items will not be decoded.`
+                    );
+                }
+
+                const properties = splitted
+                    .filter((_, index) => index < items.length)
+                    .map((property, index) => [items[index].property, property] as const);
+
+                const obj = Object.fromEntries(properties);
+                return yield* ParseResult.succeed(
+                    obj as {
+                        [K in keyof Schema.Struct.Encoded<Fields>]: Schema.Struct.Encoded<Fields>[K];
+                    }
+                );
+            }),
     });
 
     return transform;
@@ -74,7 +107,7 @@ export const parseNimblebitOrderedList = <
 /** @internal */
 export const parseNimblebitObject = <Fields extends Schema.Struct.Fields>(
     struct: Schema.Struct<Fields>
-): Schema.transform<typeof Schema.String, Schema.Struct<Fields>> => {
+): Schema.transformOrFail<typeof Schema.String, Schema.Struct<Fields>, never> => {
     const getPropertyName = (input: [property: string | number | symbol, u: unknown]): string | number | symbol => {
         if (Schema.isPropertySignature(input[1]) && input[1].ast._tag === "PropertySignatureTransformation") {
             return input[1].ast.from.fromKey ?? input[0];

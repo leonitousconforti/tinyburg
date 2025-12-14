@@ -82,7 +82,7 @@ export const BitizenAttributes = parseNimblebitOrderedList([
     { property: "skillRecreation", schema: Schema.NumberFromString },
     { property: "skillRetail", schema: Schema.NumberFromString },
     { property: "skillCreative", schema: Schema.NumberFromString },
-    { property: "unknown1", schema: Schema.Unknown },
+    // { property: "unknown1", schema: Schema.Unknown },
 ]);
 
 /**
