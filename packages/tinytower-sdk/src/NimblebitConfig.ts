@@ -1,3 +1,11 @@
+/**
+ * Configuration and schemas for authenticating with Nimblebit's cloud sync
+ * service.
+ *
+ * @since 1.0.0
+ * @category Config
+ */
+
 import * as Config from "effect/Config";
 import * as ConfigError from "effect/ConfigError";
 import * as Either from "effect/Either";

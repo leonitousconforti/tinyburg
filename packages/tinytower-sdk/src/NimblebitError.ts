@@ -1,3 +1,10 @@
+/**
+ * Nimblebit error schemas.
+ *
+ * @since 1.0.0
+ * @category Errors
+ */
+
 import * as internal from "./internal/nimblebitError.ts";
 
 /**

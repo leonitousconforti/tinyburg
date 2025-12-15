@@ -1,3 +1,10 @@
+/**
+ * Tiny Tower SDK for interacting with Nimblebit's cloud services.
+ *
+ * @since 1.0.0
+ * @category SDK
+ */
+
 import type * as Schema from "effect/Schema";
 import type * as NimblebitConfig from "./NimblebitConfig.ts";
 

@@ -1,3 +1,10 @@
+/**
+ * Schemas and parsers for decoding Nimblebit's custom data formats.
+ *
+ * @since 1.0.0
+ * @category Schemas
+ */
+
 import * as Schema from "effect/Schema";
 import * as internal from "./internal/nimblebitSchema.ts";
 

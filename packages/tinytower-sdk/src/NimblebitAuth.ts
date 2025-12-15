@@ -1,3 +1,10 @@
+/**
+ * Authentication providers for connecting to Nimblebit's servers.
+ *
+ * @since 1.0.0
+ * @category Auth
+ */
+
 import type * as Config from "effect/Config";
 import type * as ConfigError from "effect/ConfigError";
 import type * as Schema from "effect/Schema";
