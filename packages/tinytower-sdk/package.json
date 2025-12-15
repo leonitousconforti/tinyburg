@@ -1,6 +1,6 @@
 {
     "name": "@tinyburg/tinytower-sdk",
-    "version": "0.0.0",
+    "version": "0.0.1",
     "description": "api for the mobile game TinyTower by Nimblebit",
     "keywords": [
         "nimblebit",
@@ -42,17 +42,17 @@
     "devDependencies": {
         "@effect/cluster": "0.55.0",
         "@effect/experimental": "0.57.11",
-        "@effect/platform": "0.93.6",
+        "@effect/platform": "0.93.8",
         "@effect/platform-node": "0.103.0",
         "@effect/rpc": "0.72.2",
         "@effect/sql": "0.48.6",
         "@effect/workflow": "0.15.2",
         "@types/pako": "2.0.4",
-        "effect": "3.19.11"
+        "effect": "3.19.12"
     },
     "peerDependencies": {
-        "@effect/platform": "0.93.6",
-        "effect": "3.19.11"
+        "@effect/platform": "0.93.8",
+        "effect": "3.19.12"
     },
     "publishConfig": {
         "access": "public",

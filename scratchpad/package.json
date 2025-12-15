@@ -3,14 +3,17 @@
     "version": "0.0.0",
     "private": true,
     "type": "module",
+    "dependencies": {
+        "@tinyburg/tinytower-sdk": "workspace:*"
+    },
     "devDependencies": {
         "@effect/cluster": "0.55.0",
         "@effect/experimental": "0.57.11",
-        "@effect/platform": "0.93.6",
+        "@effect/platform": "0.93.8",
         "@effect/platform-node": "0.103.0",
         "@effect/rpc": "0.72.2",
         "@effect/sql": "0.48.6",
         "@effect/workflow": "0.15.2",
-        "effect": "3.19.11"
+        "effect": "3.19.12"
     }
 }

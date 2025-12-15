@@ -26,14 +26,19 @@ export const parseNimblebitOrderedList: <
     separator?: string | undefined
 ) => Schema.transformOrFail<
     typeof Schema.String,
-    Schema.Struct<{
-        [K in Items[number]["property"]]: Extract<
-            Items[number],
-            {
-                property: K;
-            }
-        >["schema"];
-    }>,
+    Schema.extend<
+        Schema.Struct<{
+            [K in Items[number]["property"]]: Extract<
+                Items[number],
+                {
+                    property: K;
+                }
+            >["schema"];
+        }>,
+        Schema.Struct<{
+            $unknown: Schema.Array$<typeof Schema.String>;
+        }>
+    >,
     Items[number]["schema"]["Context"]
 > = internal.parseNimblebitOrderedList as any;
 
@@ -43,7 +48,24 @@ export const parseNimblebitOrderedList: <
  */
 export const parseNimblebitObject: <Fields extends Schema.Struct.Fields>(
     struct: Schema.Struct<Fields>
-) => Schema.transform<typeof Schema.String, Schema.Struct<Fields>> = internal.parseNimblebitObject;
+) => Schema.transformOrFail<
+    typeof Schema.String,
+    Schema.extend<
+        Schema.Struct<Fields>,
+        Schema.Struct<{
+            $unknown: Schema.Record$<
+                typeof Schema.String,
+                Schema.Struct<{
+                    value: typeof Schema.String;
+                    $locationMetadata: Schema.Struct<{
+                        after: Schema.NullishOr<typeof Schema.String>;
+                    }>;
+                }>
+            >;
+        }>
+    >,
+    never
+> = internal.parseNimblebitObject;
 
 /**
  * How to decode a Bitizen's attributes from Nimblebit's ordered list format.
@@ -80,7 +102,6 @@ export const BitizenAttributes = parseNimblebitOrderedList([
     { property: "skillRecreation", schema: Schema.NumberFromString },
     { property: "skillRetail", schema: Schema.NumberFromString },
     { property: "skillCreative", schema: Schema.NumberFromString },
-    // { property: "unknown1", schema: Schema.Unknown },
 ]);
 
 /**
@@ -115,7 +136,27 @@ export const BitbookPost = parseNimblebitObject(
         _tid: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("bb_tid")),
         bitizen: Bitizen.pipe(Schema.propertySignature, Schema.fromKey("bb_bzn")),
         source_name: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("bb_sname")),
-        // date: Schema.Date.pipe(Schema.propertySignature, Schema.fromKey("bb_date")),
+        date: Schema.transform(
+            Schema.BigInt,
+            Schema.Union(
+                Schema.DateFromSelf,
+                Schema.Struct({
+                    date: Schema.DateFromSelf,
+                    extraTicks: Schema.BigIntFromSelf,
+                })
+            ),
+            {
+                encode: (input) => {
+                    const date = "date" in input ? input.date : input;
+                    const extraTicks = "extraTicks" in input ? input.extraTicks : 0n;
+                    return BigInt(date.getTime()) * 10_000n + 621_355_968_000_000_000n + extraTicks;
+                },
+                decode: (cSharpTicks) => {
+                    const ms = (cSharpTicks - 621_355_968_000_000_000n) / 10_000n;
+                    return { date: new Date(Number(ms)), extraTicks: cSharpTicks % 10_000n } as const;
+                },
+            }
+        ).pipe(Schema.propertySignature, Schema.fromKey("bb_date")),
         body: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("bb_txt")),
         media_type: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("bb_mt")),
         media_path: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("bb_mp")),
@@ -138,18 +179,15 @@ export const Floor = parseNimblebitObject(
         stockBaseTime: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Fsbt")),
         stockingTier: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Fsi")),
         stockingStartTime: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Fst")),
-        stocks: parseNimblebitOrderedList([
-            { property: "0", schema: Schema.NumberFromString },
-            { property: "1", schema: Schema.NumberFromString },
-            { property: "2", schema: Schema.NumberFromString },
-        ])
+        stocks: Schema.compose(Schema.split(","), Schema.Array(Schema.compose(Schema.NumberFromString, Schema.Int)))
+            .pipe(Schema.itemsCount(3))
             .pipe(Schema.propertySignature)
             .pipe(Schema.fromKey("Fstk")),
-        lastSaleTicks: parseNimblebitOrderedList([
-            { property: "0", schema: Schema.NumberFromString },
-            { property: "1", schema: Schema.NumberFromString },
-            { property: "2", schema: Schema.NumberFromString },
-        ])
+        lastSaleTicks: Schema.compose(
+            Schema.split(","),
+            Schema.Array(Schema.compose(Schema.NumberFromString, Schema.Int))
+        )
+            .pipe(Schema.itemsCount(3))
             .pipe(Schema.propertySignature)
             .pipe(Schema.fromKey("Flst")),
         floorName: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Fn")),
@@ -177,71 +215,84 @@ export const Mission = parseNimblebitObject(
     })
 );
 
-export const SaveData = parseNimblebitObject(
-    Schema.Struct({
-        coins: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pc")),
-        bux: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pb")),
-        Ppig: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Ppig")),
-        Pplim: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Pplim")),
-        maxGold: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pmg")),
-        gold: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pg")),
-        tip: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Ptip")),
-        needUpgrade: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pnu")),
-        ver: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Pver")),
-        roof: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pr")),
-        lift: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pe")),
-        lobby: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pl")),
-        buxBought: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pbxb")),
-        installTime: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("PiT")),
-        lastSaleTick: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("PlST")),
-        lobbyName: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Pln")),
-        raffleID: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Prf")),
-        vipTrialEnd: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pvte")),
-        costumes: Schema.split(",").pipe(Schema.propertySignature, Schema.fromKey("Pcos")),
-        pets: Schema.split(",").pipe(Schema.propertySignature, Schema.fromKey("Ppets")),
-        missionHist: Schema.split(",").pipe(Schema.propertySignature, Schema.fromKey("Pmhst")),
-        bbHist: Schema.split(",").pipe(Schema.propertySignature, Schema.fromKey("Pbhst")),
-        roofs: Schema.split(",").pipe(Schema.propertySignature, Schema.fromKey("Prfs")),
-        lifts: Schema.split(",").pipe(Schema.propertySignature, Schema.fromKey("Plfs")),
-        lobbies: Schema.split(",").pipe(Schema.propertySignature, Schema.fromKey("Plbs")),
-        bannedFriends: Schema.split(",").pipe(Schema.optional, Schema.fromKey("Pbf")),
-        liftSpeed: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pls")),
-        totalPoints: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Ptp")),
-        lrc: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Plrc")),
-        lfc: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Plfc")),
-        cfd: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Pcfd")),
-        lbc: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Plbc")),
-        lbbcp: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Plbbcp")),
-        lcmiss: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Plcmiss")),
-        lcg: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Plcg")),
-        sfx: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Psfx")),
-        mus: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pmus")),
-        notes: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pnts")),
-        autoLiftDisable: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pald")),
-        videos: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pvds")),
-        vidCheck: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pvdc")),
-        bbnotes: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pbbn")),
-        hidechat: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Phchat")),
-        tmi: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Ptmi")),
-        PVF: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("PVF")),
-        PHP: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("PHP")),
-        mission: Mission.pipe(Schema.optional, Schema.fromKey("Pmiss")),
-        doorman: Bitizen.pipe(Schema.propertySignature, Schema.fromKey("Pdrmn")),
-        playerID: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Ppid")),
-        playerRegistered: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Preg")),
-        bzns: Schema.compose(Schema.split("|"), Schema.Array(Bitizen)).pipe(
-            Schema.propertySignature,
-            Schema.fromKey("Pbits")
-        ),
-        stories: Schema.compose(Schema.split("|"), Schema.Array(Floor)).pipe(
-            Schema.propertySignature,
-            Schema.fromKey("Pstories")
-        ),
-        friends: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Pfrns")),
-        bbPosts: Schema.compose(Schema.split("|"), Schema.Array(BitbookPost)).pipe(
-            Schema.propertySignature,
-            Schema.fromKey("PBB")
-        ),
-        bbpost: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Plp")),
-    })
+/**
+ * How to decode a SaveData from Nimblebit's object format.
+ *
+ * @since 1.0.0
+ * @category Schemas
+ */
+export const SaveData = Schema.transform(
+    Schema.String,
+    parseNimblebitObject(
+        Schema.Struct({
+            coins: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pc")),
+            bux: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pb")),
+            Ppig: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Ppig")),
+            Pplim: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Pplim")),
+            maxGold: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pmg")),
+            gold: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pg")),
+            tip: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Ptip")),
+            needUpgrade: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pnu")),
+            ver: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Pver")),
+            roof: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pr")),
+            lift: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pe")),
+            lobby: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pl")),
+            buxBought: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pbxb")),
+            installTime: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("PiT")),
+            lastSaleTick: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("PlST")),
+            lobbyName: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Pln")),
+            raffleID: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Prf")),
+            vipTrialEnd: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pvte")),
+            costumes: Schema.split(",").pipe(Schema.propertySignature, Schema.fromKey("Pcos")),
+            pets: Schema.split(",").pipe(Schema.propertySignature, Schema.fromKey("Ppets")),
+            missionHist: Schema.split(",").pipe(Schema.propertySignature, Schema.fromKey("Pmhst")),
+            bbHist: Schema.split(",").pipe(Schema.propertySignature, Schema.fromKey("Pbhst")),
+            roofs: Schema.split(",").pipe(Schema.propertySignature, Schema.fromKey("Prfs")),
+            lifts: Schema.split(",").pipe(Schema.propertySignature, Schema.fromKey("Plfs")),
+            lobbies: Schema.split(",").pipe(Schema.propertySignature, Schema.fromKey("Plbs")),
+            bannedFriends: Schema.split(",").pipe(Schema.optional, Schema.fromKey("Pbf")),
+            liftSpeed: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pls")),
+            totalPoints: Schema.BigInt.pipe(Schema.propertySignature, Schema.fromKey("Ptp")),
+            lrc: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Plrc")),
+            lfc: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Plfc")),
+            cfd: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Pcfd")),
+            lbc: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Plbc")),
+            lbbcp: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Plbbcp")),
+            lcmiss: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Plcmiss")),
+            lcg: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Plcg")),
+            sfx: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Psfx")),
+            mus: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pmus")),
+            notes: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pnts")),
+            autoLiftDisable: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pald")),
+            videos: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pvds")),
+            vidCheck: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pvdc")),
+            bbnotes: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pbbn")),
+            hidechat: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Phchat")),
+            tmi: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Ptmi")),
+            PVF: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("PVF")),
+            PHP: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("PHP")),
+            mission: Mission.pipe(Schema.optional, Schema.fromKey("Pmiss")),
+            doorman: Bitizen.pipe(Schema.propertySignature, Schema.fromKey("Pdrmn")),
+            playerID: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Ppid")),
+            playerRegistered: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Preg")),
+            bzns: Schema.compose(Schema.split("|"), Schema.Array(Bitizen)).pipe(
+                Schema.propertySignature,
+                Schema.fromKey("Pbits")
+            ),
+            stories: Schema.compose(Schema.split("|"), Schema.Array(Floor)).pipe(
+                Schema.propertySignature,
+                Schema.fromKey("Pstories")
+            ),
+            friends: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Pfrns")),
+            bbPosts: Schema.compose(Schema.split("|"), Schema.Array(BitbookPost)).pipe(
+                Schema.propertySignature,
+                Schema.fromKey("PBB")
+            ),
+            bbpost: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Plp")),
+        })
+    ),
+    {
+        encode: (input) => `[_save]${input}[_save]`,
+        decode: (input) => input.slice(7, -7),
+    }
 );

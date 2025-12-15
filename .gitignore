@@ -14,10 +14,15 @@ node_modules/
 tmp/
 coverage/
 docs/examples/
-/test/fixtures/BeeMovieScript.tar
 
 # Banish DS_STORE
 .DS_Store
 
 # scratchpad files
 scratchpad/**/*.ts
+
+# Unity
+Assembly-CSharp.dll
+
+# env files
+.env

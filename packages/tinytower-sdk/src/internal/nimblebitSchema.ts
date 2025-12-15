@@ -1,18 +1,29 @@
 import type { ValidateNimblebitItemSchema } from "../NimblebitSchema.ts";
 
 import * as Array from "effect/Array";
+import * as Cache from "effect/Cache";
+import * as Duration from "effect/Duration";
 import * as Effect from "effect/Effect";
 import * as Function from "effect/Function";
+import * as GlobalValue from "effect/GlobalValue";
 import * as HashMap from "effect/HashMap";
 import * as Order from "effect/Order";
 import * as ParseResult from "effect/ParseResult";
+import * as Record from "effect/Record";
 import * as Schema from "effect/Schema";
 import * as Tuple from "effect/Tuple";
 
 /** @internal */
+type Entry = readonly [property: PropertyKey, value: unknown];
+
+/** @internal */
+const entryToString = ([property, value]: Entry): string =>
+    `[${String(property)}]${String(value)}[${String(property)}]`;
+
+/** @internal */
 export const parseNimblebitOrderedList = <
     const Items extends ReadonlyArray<{
-        property: string | number | symbol;
+        property: PropertyKey;
         schema: Schema.Schema.Any;
     }>,
 >(
@@ -20,43 +31,71 @@ export const parseNimblebitOrderedList = <
     separator: string | undefined = ","
 ): Schema.transformOrFail<
     typeof Schema.String,
-    Schema.Struct<{
-        [K in Items[number]["property"]]: Extract<
-            Items[number],
-            {
-                property: K;
-            }
-        >["schema"];
-    }>,
+    Schema.extend<
+        Schema.Struct<{
+            [K in Items[number]["property"]]: Extract<
+                Items[number],
+                {
+                    property: K;
+                }
+            >["schema"];
+        }>,
+        Schema.Struct<{
+            $unknown: Schema.Array$<typeof Schema.String>;
+        }>
+    >,
     Items[number]["schema"]["Context"]
 > => {
-    type Fields = { [K in Items[number]["property"]]: Extract<Items[number], { property: K }>["schema"] };
-    const fields = Object.fromEntries(items.map((item) => [item.property, item.schema] as const)) as Fields;
+    const indexesByProperty = Function.pipe(
+        items,
+        Array.map((item, index) => Tuple.make(item.property, index)),
+        HashMap.fromIterable<PropertyKey, number>
+    );
 
+    const order = Order.mapInput<Entry, PropertyKey>(Tuple.getFirst)(
+        Order.make((a, b) => {
+            const aIndex = HashMap.unsafeGet(indexesByProperty, a);
+            const bIndex = HashMap.unsafeGet(indexesByProperty, b);
+            if (aIndex < bIndex) return -1;
+            else if (aIndex > bIndex) return 1;
+            else return 0;
+        })
+    );
+
+    type Fields = { [K in Items[number]["property"]]: Extract<Items[number], { property: K }>["schema"] };
+    const fieldEntries = Object.fromEntries(items.map((item) => Tuple.make(item.property, item.schema))) as Fields;
+    const to = Schema.extend(Schema.Struct(fieldEntries), Schema.Struct({ $unknown: Schema.Array(Schema.String) }));
     const from = Schema.String;
-    const to = Schema.Struct(fields);
 
     const transform = Schema.transformOrFail(from, to, {
         // { a: "123", b: "456" } -> "123,456"
-        encode: (properties: {
-            [K in keyof Schema.Struct.Encoded<Fields>]: Schema.Struct.Encoded<Fields>[K];
-        }): Effect.Effect<string, ParseResult.ParseIssue, never> => {
-            const indexesByProperty = Function.pipe(
-                items,
-                Array.map((item, index) => [item.property, index] as const),
-                HashMap.fromIterable<string | number | symbol, number>
+        encode: (
+            properties: Schema.Schema.Encoded<typeof to>,
+            _options,
+            ast
+        ): Effect.Effect<string, ParseResult.ParseIssue, never> => {
+            const allEntries = Object.entries(properties);
+            const unknownEntries = properties["$unknown"];
+            const knownEntries = Array.filter(allEntries, ([key]) => HashMap.has(indexesByProperty, key));
+
+            if (knownEntries.length + unknownEntries.length < items.length) {
+                return ParseResult.fail(
+                    new ParseResult.Type(
+                        ast,
+                        properties,
+                        `Expected at least ${items.length} properties, but got ${knownEntries.length + unknownEntries.length}`
+                    )
+                );
+            }
+
+            return Function.pipe(
+                knownEntries,
+                Array.sort(order),
+                Array.map(([_, value]) => String(value)),
+                Array.appendAll(unknownEntries),
+                Array.join(separator),
+                ParseResult.succeed
             );
-
-            const str = Object.entries(properties)
-                .sort(([aKey], [bKey]) => {
-                    const aIndex = HashMap.unsafeGet(indexesByProperty, aKey);
-                    const bIndex = HashMap.unsafeGet(indexesByProperty, bKey);
-                    return aIndex - bIndex;
-                })
-                .map(([_, value]) => value)
-                .join(separator);
-
-            return ParseResult.succeed(str);
         },
 
         // "123,456" -> { a: "123", b: "456" }
@@ -64,51 +103,66 @@ export const parseNimblebitOrderedList = <
             str: string,
             _options,
             ast
-        ): Effect.Effect<
-            { [K in keyof Schema.Struct.Encoded<Fields>]: Schema.Struct.Encoded<Fields>[K] },
-            ParseResult.ParseIssue,
-            never
-        > =>
-            Effect.gen(function* () {
-                const splitted = str.split(separator);
-
-                if (splitted.length < items.length) {
-                    return yield* ParseResult.fail(
-                        new ParseResult.Type(
-                            ast,
-                            str,
-                            `Expected at least ${items.length} items, but got ${splitted.length}`
-                        )
-                    );
-                }
-
-                if (splitted.length > items.length) {
-                    yield* Effect.logWarning(
-                        `Expected at most ${items.length} items, but got ${splitted.length}. Extra items will not be decoded.`
-                    );
-                }
-
-                const properties = splitted
-                    .filter((_, index) => index < items.length)
-                    .map((property, index) => [items[index].property, property] as const);
-
-                const obj = Object.fromEntries(properties);
-                return yield* ParseResult.succeed(
-                    obj as {
-                        [K in keyof Schema.Struct.Encoded<Fields>]: Schema.Struct.Encoded<Fields>[K];
-                    }
+        ): Effect.Effect<Schema.Schema.Encoded<typeof to>, ParseResult.ParseIssue, never> => {
+            const splitted = str.split(separator);
+            if (splitted.length < items.length) {
+                return ParseResult.fail(
+                    new ParseResult.Type(
+                        ast,
+                        str,
+                        `Expected at least ${items.length} items, but got ${splitted.length}`
+                    )
                 );
-            }),
+            }
+
+            const unknownProperties = ["$unknown", splitted.slice(items.length)] as const;
+            const knownProperties = splitted
+                .slice(0, items.length)
+                .map((property, index) => [items[index].property, property] as const);
+
+            const properties = [...knownProperties, unknownProperties];
+            const obj = Object.fromEntries(properties) as Schema.Schema.Encoded<typeof to>;
+            return ParseResult.succeed(obj);
+        },
     });
 
     return transform;
 };
 
 /** @internal */
+const decodeRegexCache = GlobalValue.globalValue("@tinyburg/tinytower-sdk/NimblebitSchemas/DecodeRegexCache", () =>
+    Effect.runSync(
+        Cache.make({
+            capacity: 200,
+            timeToLive: Duration.minutes(10),
+            lookup: (key: PropertyKey): Effect.Effect<RegExp, never, never> =>
+                Effect.sync(() => new RegExp(`\\[${String(key)}\\]([\\s\\S]*?)\\[${String(key)}\\]`, "m")),
+        })
+    )
+);
+
+/** @internal */
 export const parseNimblebitObject = <Fields extends Schema.Struct.Fields>(
     struct: Schema.Struct<Fields>
-): Schema.transformOrFail<typeof Schema.String, Schema.Struct<Fields>, never> => {
-    const getPropertyName = (input: [property: string | number | symbol, u: unknown]): string | number | symbol => {
+): Schema.transformOrFail<
+    typeof Schema.String,
+    Schema.extend<
+        Schema.Struct<Fields>,
+        Schema.Struct<{
+            $unknown: Schema.Record$<
+                typeof Schema.String,
+                Schema.Struct<{
+                    value: typeof Schema.String;
+                    $locationMetadata: Schema.Struct<{
+                        after: Schema.NullishOr<typeof Schema.String>;
+                    }>;
+                }>
+            >;
+        }>
+    >,
+    never
+> => {
+    const getPropertyName = (input: readonly [property: PropertyKey, u: unknown]): PropertyKey => {
         if (Schema.isPropertySignature(input[1]) && input[1].ast._tag === "PropertySignatureTransformation") {
             return input[1].ast.from.fromKey ?? input[0];
         } else {
@@ -116,76 +170,132 @@ export const parseNimblebitObject = <Fields extends Schema.Struct.Fields>(
         }
     };
 
+    const indexesByProperty = Function.pipe(
+        Object.entries(struct.fields),
+        Array.map((entry, index) => Tuple.make(getPropertyName(entry), index)),
+        HashMap.fromIterable<PropertyKey, number>
+    );
+
+    const order = Order.mapInput<Entry, PropertyKey>(Tuple.getFirst)(
+        Order.make((a, b) => {
+            const aIndex = HashMap.unsafeGet(indexesByProperty, a);
+            const bIndex = HashMap.unsafeGet(indexesByProperty, b);
+            if (aIndex < bIndex) return -1;
+            else if (aIndex > bIndex) return 1;
+            else return 0;
+        })
+    );
+
+    const filter = Effect.filter<Entry, never, never>(([key, value]) =>
+        Effect.gen(function* () {
+            const discard = value === undefined || value === null;
+            if (discard) yield* Effect.logTrace(`Discarding property ${String(key)}`);
+            return !discard;
+        })
+    );
+
+    const fieldEntries = Object.entries(struct.fields);
     const from = Schema.String;
-    const to = struct;
+    const to = Schema.extend(
+        struct,
+        Schema.Struct({
+            $unknown: Schema.Record({
+                key: Schema.String,
+                value: Schema.Struct({
+                    value: Schema.String,
+                    $locationMetadata: Schema.Struct({
+                        after: Schema.NullishOr(Schema.String),
+                    }),
+                }),
+            }),
+        })
+    );
 
     return Schema.transformOrFail(from, to, {
         // { a: "123", b: "456" } -> "[a]123[a][b]456[b]"
-        encode: (properties: {
-            [K in keyof Schema.Struct.Encoded<Fields>]: Schema.Struct.Encoded<Fields>[K];
-        }): Effect.Effect<string, ParseResult.ParseIssue, never> => {
-            const indexesByProperty = Function.pipe(
-                Object.entries(struct.fields),
-                Array.map((entry, index) => [getPropertyName(entry), index] as const),
-                HashMap.fromIterable<string | number | symbol, number>
-            );
+        encode: (
+            properties: Schema.Schema.Encoded<typeof to>
+        ): Effect.Effect<string, ParseResult.ParseIssue, never> => {
+            const { $unknown, ...knownProperties } = properties;
 
-            const order = Order.mapInput<
-                readonly [property: string | number | symbol, value: unknown],
-                string | number | symbol
-            >(Tuple.getFirst)(
-                Order.make<string | number | symbol>((a, b) => {
-                    const aIndex = HashMap.unsafeGet(indexesByProperty, a);
-                    const bIndex = HashMap.unsafeGet(indexesByProperty, b);
-                    if (aIndex < bIndex) return -1;
-                    else if (aIndex > bIndex) return 1;
-                    else return 0;
-                })
-            );
-
-            const filter = Effect.filter<readonly [key: string | number | symbol, value: unknown], never, never>(
-                ([key, value]) =>
-                    Effect.gen(function* () {
-                        const discard = value === undefined || value === null;
-                        if (discard) yield* Effect.logWarning(`Discarding property ${String(key)}`);
-                        return !discard;
-                    })
-            );
-
-            const toString = ([property, value]: readonly [property: string | number | symbol, value: unknown]) =>
-                `[${String(property)}]${String(value)}[${String(property)}]`;
+            const unknownPropertiesByAfter = Array.reduce(
+                Object.entries($unknown),
+                { accumulator: {}, lastAfterInserted: null, lastAfter: null } as {
+                    lastAfter: string | null | undefined;
+                    lastAfterInserted: string | null | undefined;
+                    accumulator: Record<string, Array.NonEmptyReadonlyArray<readonly [string, string]>>;
+                },
+                ({ accumulator, lastAfter, lastAfterInserted }, [key, { $locationMetadata, value }]) => {
+                    const after = $locationMetadata.after ?? "";
+                    if (after === lastAfter) {
+                        return {
+                            lastAfter: key,
+                            lastAfterInserted,
+                            accumulator: Record.modify(
+                                accumulator,
+                                lastAfterInserted!,
+                                Array.append(Tuple.make(key, value))
+                            ),
+                        };
+                    } else {
+                        return {
+                            lastAfter: key,
+                            lastAfterInserted: after,
+                            accumulator: { ...accumulator, [after]: [Tuple.make(key, value)] as const },
+                        };
+                    }
+                }
+            ).accumulator;
 
             return Function.pipe(
-                Object.entries(properties),
+                Object.entries(knownProperties),
                 Array.sort(order),
+                Array.flatMap((entry) => [entry, ...(unknownPropertiesByAfter[String(entry[0])] ?? [])]),
                 filter,
-                Effect.map(Array.map(toString)),
+                Effect.map(Array.map(entryToString)),
                 Effect.map(Array.join(""))
             );
         },
 
         // "[a]123[a][b]456[b]" -> { a: "123", b: "456" }
-        decode: (
+        decode: Effect.fnUntraced(function* (
             str: string
-        ): Effect.Effect<
-            { [K in keyof Schema.Struct.Encoded<Fields>]: Schema.Struct.Encoded<Fields>[K] },
-            ParseResult.ParseIssue,
-            never
-        > => {
-            const extracted = Object.entries(struct.fields)
-                .map(getPropertyName)
-                .map((key) => {
-                    const matcher = new RegExp(`\\[${String(key)}\\]([\\s\\S]*?)\\[${String(key)}\\]`, "gm");
+        ): Effect.fn.Return<Schema.Schema.Encoded<typeof to>, ParseResult.ParseIssue, never> {
+            const outEntries = yield* Effect.forEach(fieldEntries, (field) =>
+                Effect.gen(function* () {
+                    const key = getPropertyName(field);
+                    const matcher = yield* decodeRegexCache.get(key);
                     const match = matcher.exec(str);
                     const value = match ? match[1] : undefined;
-                    return [key, value] as const;
-                });
-
-            return ParseResult.succeed(
-                Object.fromEntries(extracted) as {
-                    [K in keyof Schema.Struct.Encoded<Fields>]: Schema.Struct.Encoded<Fields>[K];
-                }
+                    return Tuple.make(key, value);
+                })
             );
-        },
+
+            const knownProperties = new Set(outEntries.map(([key]) => key));
+            const unknownMatcher = new RegExp(`\\[([^\\]]+)\\]([\\s\\S]*?)\\[\\1\\]`, "gm");
+            const unknownEntries: Record<
+                string,
+                { value: string; $locationMetadata: { after: string | null | undefined } }
+            > = {};
+
+            let lastKey: string | null = null;
+            let match: RegExpExecArray | null = null;
+            while ((match = unknownMatcher.exec(str)) !== null) {
+                const key = match[1];
+                const value = match[2];
+                if (!knownProperties.has(key)) {
+                    unknownEntries[key] = {
+                        value,
+                        $locationMetadata: {
+                            after: lastKey,
+                        },
+                    };
+                }
+                lastKey = key;
+            }
+
+            const allEntries = [...outEntries, ["$unknown", unknownEntries]];
+            return Object.fromEntries(allEntries) as Schema.Schema.Encoded<typeof to>;
+        }),
     });
 };
