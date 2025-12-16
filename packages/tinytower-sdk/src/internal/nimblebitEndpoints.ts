@@ -2,17 +2,24 @@ import * as HttpApi from "@effect/platform/HttpApi";
 import * as HttpApiEndpoint from "@effect/platform/HttpApiEndpoint";
 import * as HttpApiError from "@effect/platform/HttpApiError";
 import * as HttpApiGroup from "@effect/platform/HttpApiGroup";
+import * as HttpApiSchema from "@effect/platform/HttpApiSchema";
 import * as EffectSchemas from "effect-schemas";
 import * as Schema from "effect/Schema";
 
-import * as HttpApiSchema from "@effect/platform/HttpApiSchema";
 import * as NimblebitConfig from "../NimblebitConfig.ts";
+import * as NimblebitSchema from "../NimblebitSchema.ts";
 
 /** @internal */
 export const hashParam = HttpApiSchema.param("hash", Schema.String);
 
 /** @internal */
 export const playerIdParam = HttpApiSchema.param("playerId", NimblebitConfig.PlayerIdSchema);
+
+/** @internal */
+export const friendIdParam = HttpApiSchema.param("friendId", NimblebitConfig.PlayerIdSchema);
+
+/** @internal */
+export const snapshotIdParam = HttpApiSchema.param("snapshotId", Schema.compose(Schema.NumberFromString, Schema.Int));
 
 /** @internal */
 export const saltParam = HttpApiSchema.param("salt", Schema.compose(Schema.NumberFromString, EffectSchemas.Number.U32));
@@ -30,258 +37,347 @@ export const salt2Param = HttpApiSchema.param(
 );
 
 /** @internal */
-export const NewUserEndpoint = HttpApiEndpoint.get(
-    "NewUser"
-)`/register/tt/${salt1Param}/${salt2Param}/${hashParam}`.addSuccess(
-    Schema.Union(
-        Schema.Struct({
-            player_id: Schema.String,
-            player_ss: Schema.String,
-        }),
-        Schema.Struct({
-            error: Schema.String,
-        })
-    ),
-    { status: 200 }
+export const ErrorResponse = Schema.Struct({ error: Schema.String }).annotations(
+    HttpApiSchema.annotations({ status: 200 })
 );
 
 /** @internal */
-export const PlayerDetailsEndpoint = HttpApiEndpoint.get(
-    "PlayerDetails"
-)`/player_details/tt/${playerIdParam}/${saltParam}/${hashParam}`.addSuccess(
-    Schema.Union(
-        Schema.Struct({
-            player: Schema.Struct({
-                email: Schema.String,
-                player_id: Schema.String,
-                registered: Schema.compose(Schema.NumberFromString, Schema.BooleanFromUnknown),
-                blacklisted: Schema.compose(Schema.NumberFromString, Schema.BooleanFromUnknown),
-                id: Schema.optionalWith(Schema.NumberFromString, { nullable: true }),
-                h: Schema.String,
-            }),
-        }),
-        Schema.Struct({
-            error: Schema.String,
-        })
-    ),
-    { status: 200 }
+export const FoundResponse = Schema.Struct({ success: Schema.Literal("Found") }).annotations(
+    HttpApiSchema.annotations({ status: 200 })
 );
 
 /** @internal */
-export const VerifyDeviceEndpoint = HttpApiEndpoint.get(
-    "VerifyDevice"
-)`/verify_device/tt/${playerIdParam}/:${HttpApiSchema.param("verificationCode", Schema.String)}`.addSuccess(
-    Schema.Union(
-        Schema.Struct({
-            success: Schema.Literal("NewDevice"),
-            player_ss: Schema.String,
-            player_email: Schema.String,
-            player_id: NimblebitConfig.PlayerIdSchema,
-            player_photo: Schema.optionalWith(Schema.String, { nullable: true }),
-            player_nickname: Schema.optionalWith(Schema.String, { nullable: true }),
-        }),
-        Schema.Struct({
-            error: Schema.String,
-        })
-    )
+export const NotFoundResponse = Schema.Struct({ success: Schema.Literal("NotFound") }).annotations(
+    HttpApiSchema.annotations({ status: 200 })
 );
 
 /** @internal */
-export const RegisterEmail = HttpApiEndpoint.post(
-    "RegisterEmail"
-)`/register_email/tt/${playerIdParam}/${saltParam}/${hashParam}`
-    .setPayload(
-        Schema.Struct({
-            promote: Schema.Literal(1),
-            email: Schema.Redacted(Schema.String),
-        })
-    )
+export const SavedResponse = Schema.Struct({ success: Schema.Literal("Saved") }).annotations(
+    HttpApiSchema.annotations({ status: 200 })
+);
+
+/** @internal */
+export const NotSavedResponse = Schema.Struct({ success: Schema.Literal("NotSaved") }).annotations(
+    HttpApiSchema.annotations({ status: 200 })
+);
+
+/** @internal */
+export const EnteredResponse = Schema.Struct({ success: Schema.Literal("Entered") }).annotations(
+    HttpApiSchema.annotations({ status: 200 })
+);
+
+/** @internal */
+export const NotEnteredResponse = Schema.Struct({ success: Schema.Literal("NotEntered") }).annotations(
+    HttpApiSchema.annotations({ status: 200 })
+);
+
+/** @internal */
+export const DeviceNewPlayerEndpoint = HttpApiEndpoint.get(
+    "DeviceNewPlayer"
+)`/register/tt/${salt1Param}/${salt2Param}/${hashParam}`
+    .addSuccess(ErrorResponse)
     .addSuccess(
-        Schema.Union(
+        Schema.rename(
             Schema.Struct({
-                success: Schema.Literal("NewDevice", "NewEmail"),
+                player_id: NimblebitConfig.PlayerIdSchema,
+                player_ss: NimblebitConfig.PlayerAuthKeySchema,
             }),
-            Schema.Struct({
-                error: Schema.String,
-            })
-        )
+            {
+                player_id: "playerId",
+                player_ss: "playerSs",
+            }
+        ),
+        { status: 200 }
     );
 
 /** @internal */
-export const PullSaveEndpoint = HttpApiEndpoint.get(
-    "PullSave"
-)`/sync/pull/tt/${playerIdParam}/${saltParam}/${hashParam}`.addSuccess(
-    Schema.Union(
+export const DevicePlayerDetailsEndpoint = HttpApiEndpoint.get(
+    "DevicePlayerDetails"
+)`/player_details/tt/${playerIdParam}/${saltParam}/${hashParam}`
+    .addSuccess(ErrorResponse)
+    .addSuccess(
+        Schema.Struct({
+            player: Schema.rename(
+                Schema.Struct({
+                    email: NimblebitConfig.PlayerEmailSchema,
+                    player_id: NimblebitConfig.PlayerIdSchema,
+                    registered: Schema.compose(Schema.NumberFromString, Schema.BooleanFromUnknown),
+                    blacklisted: Schema.compose(Schema.NumberFromString, Schema.BooleanFromUnknown),
+                    id: Schema.optionalWith(Schema.NumberFromString, { nullable: true }),
+                }),
+                {
+                    email: "playerEmail",
+                    player_id: "playerId",
+                }
+            ),
+        }),
+        { status: 200 }
+    );
+
+/** @internal */
+export const DeviceVerifyDeviceEndpoint = HttpApiEndpoint.get(
+    "DeviceVerifyDevice"
+)`/verify_device/tt/${playerIdParam}/:${HttpApiSchema.param("verificationCode", Schema.String)}`
+    .addSuccess(ErrorResponse)
+    .addSuccess(
+        Schema.rename(
+            Schema.Struct({
+                success: Schema.Literal("NewDevice"),
+                player_id: NimblebitConfig.PlayerIdSchema,
+                player_ss: NimblebitConfig.PlayerAuthKeySchema,
+                player_email: NimblebitConfig.PlayerEmailSchema,
+                player_photo: Schema.optionalWith(Schema.String, { nullable: true }),
+                player_nickname: Schema.optionalWith(Schema.String, { nullable: true }),
+            }),
+            {
+                player_id: "playerId",
+                player_ss: "playerAuthKey",
+                player_email: "playerEmail",
+                player_photo: "playerPhoto",
+                player_nickname: "playerNickname",
+            }
+        ),
+        { status: 200 }
+    );
+
+/** @internal */
+export const DeviceRegisterEmailEndpoint = HttpApiEndpoint.post(
+    "DeviceRegisterEmail"
+)`/register_email/tt/${playerIdParam}/${saltParam}/${hashParam}`
+    .addSuccess(ErrorResponse)
+    .addSuccess(Schema.Struct({ success: Schema.Literal("NewEmail") }), { status: 200 })
+    .addSuccess(Schema.Struct({ success: Schema.Literal("NewDevice") }), { status: 200 })
+    .setPayload(Schema.Struct({ promote: Schema.Literal(1), email: Schema.Redacted(Schema.String) }));
+
+/** @internal */
+export const SyncPullSaveEndpoint = HttpApiEndpoint.get(
+    "SyncPullSave"
+)`/sync/pull/tt/${playerIdParam}/${saltParam}/${hashParam}`
+    .addSuccess(ErrorResponse)
+    .addSuccess(NotFoundResponse)
+    .addSuccess(
         Schema.Struct({
             success: Schema.Literal("Found"),
             data: Schema.Uint8ArrayFromBase64,
             checksum: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("h")),
             saveId: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("id")),
         }),
-        Schema.Struct({
-            success: Schema.Literal("NotFound"),
-        }),
-        Schema.Struct({
-            error: Schema.String,
-        })
-    ),
-    { status: 200 }
-);
+        { status: 200 }
+    );
 
 /** @internal */
-export const PushSaveEndpoint = HttpApiEndpoint.post(
-    "PushSave"
-)`/sync/push/tt/${playerIdParam}/${saltParam}/${hashParam}`;
+export const SyncPushSaveEndpoint = HttpApiEndpoint.post(
+    "SyncPushSave"
+)`/sync/push/tt/${playerIdParam}/${saltParam}/${hashParam}`
+    .addSuccess(ErrorResponse)
+    .addSuccess(SavedResponse)
+    .addSuccess(NotSavedResponse);
 
 /** @internal */
-export const CheckForNewerSaveEndpoint = HttpApiEndpoint.get(
-    "CheckForNewerSave"
-)`/sync/current_version/tt/${playerIdParam}/${saltParam}/${hashParam}`.addSuccess(
-    Schema.Union(
+export const SyncCheckForNewerSaveEndpoint = HttpApiEndpoint.get(
+    "SyncCheckForNewerSave"
+)`/sync/current_version/tt/${playerIdParam}/${saltParam}/${hashParam}`
+    .addSuccess(ErrorResponse)
+    .addSuccess(NotFoundResponse)
+    .addSuccess(
         Schema.Struct({
-            success: Schema.Literal("Found", "NotFound"),
-            saveId: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("id")),
+            success: Schema.Literal("Found"),
             checksum: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("h")),
+            saveId: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("id")),
         }),
+        { status: 200 }
+    );
+
+/** @internal */
+export const SyncPullSnapshotEndpoint = HttpApiEndpoint.get(
+    "SyncPullSnapshot"
+)`/sync/pull_snapshot/tt/${playerIdParam}/${snapshotIdParam}/${saltParam}/${hashParam}`
+    .addSuccess(ErrorResponse)
+    .addSuccess(NotFoundResponse)
+    .addSuccess(
         Schema.Struct({
-            error: Schema.String,
-        })
-    ),
-    { status: 200 }
-);
-
-/** @internal */
-export const PushSnapshotEndpoint = HttpApiEndpoint.post(
-    "PushSnapshot"
-)`/sync/push_snapshot/tt/${playerIdParam}/${saltParam}/${hashParam}`;
-
-/** @internal */
-export const PullSnapshotEndpoint = HttpApiEndpoint.get(
-    "PullSnapshot"
-)`/sync/pull_snapshot/tt/${playerIdParam}/${saltParam}/${hashParam}`;
-
-/** @internal */
-export const RetrieveSnapshotListEndpoint = HttpApiEndpoint.get(
-    "RetrieveSnapshotList"
-)`/sync/current_snapshots/tt/${playerIdParam}/${saltParam}/${hashParam}`;
-
-/** @internal */
-export const RetrieveFriendsSnapshotListEndpoint = HttpApiEndpoint.get(
-    "RetrieveFriendsSnapshotList"
-)`/sync/current_player_snapshots/tt/${playerIdParam}/${saltParam}/${hashParam}`;
-
-/** @internal */
-export const EnterRaffleEndpoint = HttpApiEndpoint.post(
-    "EnterRaffle"
-)`/raffle/enter/tt/${playerIdParam}/${saltParam}/${hashParam}`.addSuccess(
-    Schema.Union(
-        Schema.Struct({
-            success: Schema.Literal("Entered", "NotEntered"),
+            success: Schema.Literal("Found"),
+            data: Schema.Uint8ArrayFromBase64,
+            checksum: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("h")),
+            saveId: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("id")),
         }),
-        Schema.Struct({
-            error: Schema.String,
-        })
-    ),
-    { status: 200 }
-);
+        { status: 200 }
+    );
 
 /** @internal */
-export const EnterMultiRaffleEndpoint = HttpApiEndpoint.post(
-    "EnterMultiRaffle"
-)`/raffle/enter_multi/tt/${playerIdParam}/${saltParam}/${hashParam}`.addSuccess(
-    Schema.Union(
+export const SyncPushSnapshotEndpoint = HttpApiEndpoint.post(
+    "SyncPushSnapshot"
+)`/sync/push_snapshot/tt/${playerIdParam}/${saltParam}/${hashParam}`
+    .addSuccess(ErrorResponse)
+    .addSuccess(SavedResponse)
+    .addSuccess(NotSavedResponse);
+
+/** @internal */
+export const SyncRetrieveSnapshotListEndpoint = HttpApiEndpoint.get(
+    "SyncRetrieveSnapshotList"
+)`/sync/current_snapshots/tt/${playerIdParam}/${saltParam}/${hashParam}`
+    .addSuccess(ErrorResponse)
+    .addSuccess(NotFoundResponse)
+    .addSuccess(
         Schema.Struct({
-            success: Schema.Literal("Entered", "NotEntered"),
+            success: Schema.Literal("Found"),
+            saves: Schema.Array(
+                Schema.Struct({
+                    id: Schema.compose(Schema.NumberFromString, Schema.Int),
+                    timestamp: Schema.BigInt,
+                    meta: NimblebitSchema.PlayerMetaData,
+                })
+            ),
         }),
-        Schema.Struct({
-            error: Schema.String,
-        })
-    ),
-    { status: 200 }
-);
+        { status: 200 }
+    );
 
 /** @internal */
-export const EnteredCurrentEndpoint = HttpApiEndpoint.get(
-    "EnteredCurrent"
-)`/raffle/entered_current/tt/${playerIdParam}/${saltParam}/${hashParam}`.addSuccess(
-    Schema.Union(
-        Schema.Struct({
-            success: Schema.Literal("Entered", "NotEntered"),
-        }),
-        Schema.Struct({
-            error: Schema.String,
-        })
-    ),
-    { status: 200 }
-);
+export const RaffleEnterEndpoint = HttpApiEndpoint.post(
+    "RaffleEnter"
+)`/raffle/enter/tt/${playerIdParam}/${saltParam}/${hashParam}`
+    .addSuccess(ErrorResponse)
+    .addSuccess(EnteredResponse)
+    .addSuccess(NotEnteredResponse);
 
 /** @internal */
-export const SendItemEndpoint = HttpApiEndpoint.post(
-    "SendItem"
+export const RaffleEnterMultiEndpoint = HttpApiEndpoint.post(
+    "RaffleEnterMulti"
+)`/raffle/enter_multi/tt/${playerIdParam}/${saltParam}/${hashParam}`
+    .addSuccess(ErrorResponse)
+    .addSuccess(EnteredResponse)
+    .addSuccess(NotEnteredResponse);
+
+/** @internal */
+export const RaffleCheckEnteredCurrentEndpoint = HttpApiEndpoint.get(
+    "RaffleCheckEnteredCurrent"
+)`/raffle/entered_current/tt/${playerIdParam}/${saltParam}/${hashParam}`
+    .addSuccess(ErrorResponse)
+    .addSuccess(EnteredResponse)
+    .addSuccess(NotEnteredResponse);
+
+/** @internal */
+export const SocialSendItemEndpoint = HttpApiEndpoint.post(
+    "SocialSendItem"
 )`/send_item/tt/${playerIdParam}/${saltParam}/${hashParam}`;
 
 /** @internal */
-export const GetGiftsEndpoint = HttpApiEndpoint.get(
-    "GetGifts"
+export const SocialGetGiftsEndpoint = HttpApiEndpoint.get(
+    "SocialGetGifts"
 )`/get_gifts/tt/${playerIdParam}/${saltParam}/${hashParam}`;
 
 /** @internal */
-export const ReceiveGiftEndpoint = HttpApiEndpoint.post(
-    "ReceiveGift"
+export const SocialReceiveGiftEndpoint = HttpApiEndpoint.post(
+    "SocialReceiveGift"
 )`/receive_item/tt/${playerIdParam}/${saltParam}/${hashParam}`;
 
 /** @internal */
-export const FriendPullMetaEndpoint = HttpApiEndpoint.get(
-    "FriendPullMeta"
-)`/friend/pull_meta/tt/${playerIdParam}/${saltParam}/${hashParam}`;
+export const SocialPullFriendMetaEndpoint = HttpApiEndpoint.get(
+    "SocialPullMeta"
+)`/friend/pull_meta/tt/${playerIdParam}/${saltParam}/${hashParam}`
+    .setPayload(Schema.Struct({ friends: Schema.Array(NimblebitConfig.PlayerIdSchema) }))
+    .addSuccess(ErrorResponse)
+    .addSuccess(NotFoundResponse)
+    .addSuccess(
+        Schema.Struct({
+            success: Schema.Literal("Found"),
+            meta: Schema.Record({
+                key: NimblebitConfig.PlayerIdSchema,
+                value: NimblebitSchema.PlayerMetaData,
+            }),
+        }),
+        { status: 200 }
+    );
 
 /** @internal */
-export const FriendPullTowerEndpoint = HttpApiEndpoint.get(
-    "FriendPullTower"
-)`/friend/pull_game/tt/${playerIdParam}/${saltParam}/${hashParam}`;
+export const SocialPullFriendTowerEndpoint = HttpApiEndpoint.get(
+    "SocialPullFriendTower"
+)`/friend/pull_game/tt/${playerIdParam}/${friendIdParam}/${saltParam}/${hashParam}`
+    .addSuccess(ErrorResponse)
+    .addSuccess(NotFoundResponse)
+    .addSuccess(
+        Schema.Struct({
+            success: Schema.Literal("Found"),
+            data: Schema.Uint8ArrayFromBase64,
+            checksum: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("h")),
+            saveId: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("id")),
+            playerId: NimblebitConfig.PlayerIdSchema.pipe(Schema.propertySignature, Schema.fromKey("player_id")),
+        }),
+        { status: 200 }
+    );
 
 /** @internal */
-export const GetVisitsEndpoint = HttpApiEndpoint.get(
-    "GetVisits"
-)`/get_visits/tt/${playerIdParam}/${saltParam}/${hashParam}`;
+export const SocialRetrieveFriendsSnapshotListEndpoint = HttpApiEndpoint.get(
+    "SocialRetrieveFriendsSnapshotList"
+)`/sync/current_player_snapshots/tt/${playerIdParam}/${friendIdParam}/${saltParam}/${hashParam}`
+    .addSuccess(ErrorResponse)
+    .addSuccess(NotFoundResponse)
+    .addSuccess(
+        Schema.Struct({
+            success: Schema.Literal("Found"),
+            saves: Schema.Array(
+                Schema.Struct({
+                    id: Schema.compose(Schema.NumberFromString, Schema.Int),
+                    created: Schema.BigInt,
+                    meta: NimblebitSchema.PlayerMetaData,
+                })
+            ),
+        }),
+        { status: 200 }
+    );
 
 /** @internal */
-export const PlayerManagementGroup = HttpApiGroup.make("PlayerManagementGroup")
-    .add(NewUserEndpoint)
-    .add(PlayerDetailsEndpoint)
-    .add(VerifyDeviceEndpoint)
-    .add(RegisterEmail);
+export const SocialGetVisitsEndpoint = HttpApiEndpoint.get(
+    "SocialGetVisits"
+)`/get_visits/tt/${playerIdParam}/${saltParam}/${hashParam}`
+    .addSuccess(ErrorResponse)
+    .addSuccess(NotFoundResponse)
+    .addSuccess(
+        Schema.Struct({
+            success: Schema.Literal("Found"),
+            gifts: Schema.Array(NimblebitSchema.Gift),
+            total: Schema.Int,
+        }),
+        { status: 200 }
+    );
 
 /** @internal */
-export const SaveManagementGroup = HttpApiGroup.make("SaveManagementGroup")
-    .add(PullSaveEndpoint)
-    .add(PushSaveEndpoint)
-    .add(CheckForNewerSaveEndpoint)
-    .add(PushSnapshotEndpoint)
-    .add(PullSnapshotEndpoint)
-    .add(RetrieveSnapshotListEndpoint)
-    .add(RetrieveFriendsSnapshotListEndpoint);
+export const DeviceManagementGroup = HttpApiGroup.make("DeviceManagementGroup")
+    .add(DeviceNewPlayerEndpoint)
+    .add(DevicePlayerDetailsEndpoint)
+    .add(DeviceVerifyDeviceEndpoint)
+    .add(DeviceRegisterEmailEndpoint);
+
+/** @internal */
+export const SyncManagementGroup = HttpApiGroup.make("SyncManagementGroup")
+    .add(SyncPullSaveEndpoint)
+    .add(SyncPushSaveEndpoint)
+    .add(SyncCheckForNewerSaveEndpoint)
+    .add(SyncPushSnapshotEndpoint)
+    .add(SyncPullSnapshotEndpoint)
+    .add(SyncRetrieveSnapshotListEndpoint);
 
 /** @internal */
 export const RaffleGroup = HttpApiGroup.make("RaffleGroup")
-    .add(EnterRaffleEndpoint)
-    .add(EnterMultiRaffleEndpoint)
-    .add(EnteredCurrentEndpoint);
+    .add(RaffleEnterEndpoint)
+    .add(RaffleEnterMultiEndpoint)
+    .add(RaffleCheckEnteredCurrentEndpoint);
 
 /** @internal */
-export const FriendsGroup = HttpApiGroup.make("FriendsGroup")
-    .add(SendItemEndpoint)
-    .add(GetGiftsEndpoint)
-    .add(ReceiveGiftEndpoint)
-    .add(FriendPullMetaEndpoint)
-    .add(FriendPullTowerEndpoint)
-    .add(GetVisitsEndpoint);
+export const SocialGroup = HttpApiGroup.make("SocialGroup")
+    .add(SocialSendItemEndpoint)
+    .add(SocialGetGiftsEndpoint)
+    .add(SocialReceiveGiftEndpoint)
+    .add(SocialPullFriendMetaEndpoint)
+    .add(SocialPullFriendTowerEndpoint)
+    .add(SocialRetrieveFriendsSnapshotListEndpoint)
+    .add(SocialGetVisitsEndpoint);
 
 /** @internal */
 export const Api = HttpApi.make("TinyTowerApi")
     .addError(HttpApiError.BadRequest)
     .addError(HttpApiError.InternalServerError)
-    .add(PlayerManagementGroup)
-    .add(SaveManagementGroup)
+    .add(DeviceManagementGroup)
+    .add(SyncManagementGroup)
     .add(RaffleGroup)
-    .add(FriendsGroup);
+    .add(SocialGroup);

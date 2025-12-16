@@ -6,6 +6,8 @@
  */
 
 import * as Schema from "effect/Schema";
+
+import * as NimblebitConfig from "./NimblebitConfig.ts";
 import * as internal from "./internal/nimblebitSchema.ts";
 
 /**
@@ -303,3 +305,105 @@ export const SaveData = Schema.transform(
         decode: (input) => input.slice(7, -7),
     }
 );
+
+/**
+ * Player metadata associated with save data and snapshots.
+ *
+ * @since 1.0.0
+ * @category Schemas
+ */
+export const PlayerMetaData = Schema.Struct({
+    /**
+     * Number of stories/floors, counted the same as they are on the elevator
+     * shaft.
+     */
+    stories: Schema.compose(Schema.NumberFromString, Schema.Int).pipe(
+        Schema.propertySignature,
+        Schema.fromKey("level")
+    ),
+
+    /**
+     * Doorman bitizen, shows as avatar in friend list. Can be any valid
+     * bitizen.
+     */
+    doorman: Bitizen.pipe(Schema.propertySignature, Schema.fromKey("avatar")),
+
+    /** All time number of golden tickets they have. */
+    maxGold: Schema.compose(Schema.NumberFromString, Schema.Int).pipe(Schema.propertySignature, Schema.fromKey("mg")),
+
+    /**
+     * If they are requesting bitizen for a particular floor, this is that floor
+     * id. You can lookup the name of the floor using the floor blocks.
+     */
+    requestedFloorId: Schema.compose(Schema.NumberFromString, Schema.Int).pipe(
+        Schema.propertySignature,
+        Schema.fromKey("reqFID")
+    ),
+
+    /** Bitbook post? not 100% sure */
+    bitbook: BitbookPost.pipe(Schema.propertySignature, Schema.fromKey("bb")),
+
+    /** Unknown */
+    ts: Schema.String,
+
+    /** Indicates that they are vip. */
+    vip: Schema.Boolean,
+});
+
+/**
+ * Types of sync items.
+ *
+ * @since 1.0.0
+ * @category Schemas
+ */
+export const SyncItemType = Schema.Enums({
+    /** Unused? */
+    None: "None",
+
+    /** This is the type for when someone sends you a bitizen, short for player? */
+    Play: "Play",
+
+    /** Not sure, haven't seen used. */
+    Gift: "Gift",
+
+    /**
+     * Sometimes there might be gifts that come out of thin air, like nimblebit
+     * might do a giveaway or something.
+     */
+    Cloud: "Cloud",
+
+    /** A raffle gift. */
+    Raffle: "Raffle",
+
+    /** A visit from a friend. */
+    Visit: "Visit",
+} as const);
+
+/**
+ * Gift schema.
+ *
+ * @since 1.0.0
+ * @category Schemas
+ */
+export const Gift = Schema.Struct({
+    /** Unique id for the gift. */
+    id: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("gift_id")),
+
+    /** Who the gift was sent to (should be you!). */
+    to: NimblebitConfig.PlayerIdSchema.pipe(Schema.propertySignature, Schema.fromKey("gift_to")),
+
+    /** Who the gift was sent from. */
+    from: NimblebitConfig.PlayerIdSchema.pipe(Schema.propertySignature, Schema.fromKey("gift_from")),
+
+    /** The type of the gift. */
+    type: SyncItemType.pipe(Schema.propertySignature, Schema.fromKey("gift_type")),
+
+    /** The contents of the gift. */
+    contents: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("gift_str")),
+
+    /** Validation hash for the gift, unsure how to compute. */
+    checksum: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("h")),
+
+    /** Not sure. */
+    c: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("c")),
+});
