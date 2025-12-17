@@ -328,7 +328,7 @@ export const SocialGetGiftsEndpoint = HttpApiEndpoint.get(
             gifts: Schema.Array(NimblebitSchema.Gift),
             total: Schema.Int,
         }),
-        { status: 2000 }
+        { status: 200 }
     );
 
 /** @internal */
