@@ -188,14 +188,11 @@ export const Floor = parseNimblebitObject(
         stockBaseTime: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Fsbt")),
         stockingTier: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Fsi")),
         stockingStartTime: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Fst")),
-        stocks: Schema.compose(Schema.split(","), Schema.Array(Schema.compose(Schema.NumberFromString, Schema.Int)))
+        stocks: Schema.compose(Schema.split(","), Schema.Array(Schema.BigInt))
             .pipe(Schema.itemsCount(3))
             .pipe(Schema.propertySignature)
             .pipe(Schema.fromKey("Fstk")),
-        lastSaleTicks: Schema.compose(
-            Schema.split(","),
-            Schema.Array(Schema.compose(Schema.NumberFromString, Schema.Int))
-        )
+        lastSaleTicks: Schema.compose(Schema.split(","), Schema.Array(Schema.BigInt))
             .pipe(Schema.itemsCount(3))
             .pipe(Schema.propertySignature)
             .pipe(Schema.fromKey("Flst")),
@@ -236,8 +233,8 @@ export const SaveData = Schema.transform(
         Schema.Struct({
             coins: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pc")),
             bux: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pb")),
-            Ppig: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Ppig")),
-            Pplim: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Pplim")),
+            Ppig: Schema.String.pipe(Schema.optional, Schema.fromKey("Ppig")),
+            Pplim: Schema.String.pipe(Schema.optional, Schema.fromKey("Pplim")),
             maxGold: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pmg")),
             gold: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pg")),
             tip: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Ptip")),
@@ -251,16 +248,16 @@ export const SaveData = Schema.transform(
             lastSaleTick: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("PlST")),
             lobbyName: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Pln")),
             raffleID: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Prf")),
-            vipTrialEnd: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pvte")),
+            vipTrialEnd: Schema.BigInt.pipe(Schema.propertySignature, Schema.fromKey("Pvte")),
             costumes: Schema.split(",").pipe(Schema.propertySignature, Schema.fromKey("Pcos")),
-            pets: Schema.split(",").pipe(Schema.propertySignature, Schema.fromKey("Ppets")),
-            missionHist: Schema.split(",").pipe(Schema.propertySignature, Schema.fromKey("Pmhst")),
+            pets: Schema.split(",").pipe(Schema.optional, Schema.fromKey("Ppets")),
+            missionHist: Schema.split(",").pipe(Schema.optional, Schema.fromKey("Pmhst")),
             bbHist: Schema.split(",").pipe(Schema.propertySignature, Schema.fromKey("Pbhst")),
             roofs: Schema.split(",").pipe(Schema.propertySignature, Schema.fromKey("Prfs")),
             lifts: Schema.split(",").pipe(Schema.propertySignature, Schema.fromKey("Plfs")),
             lobbies: Schema.split(",").pipe(Schema.propertySignature, Schema.fromKey("Plbs")),
             bannedFriends: Schema.split(",").pipe(Schema.optional, Schema.fromKey("Pbf")),
-            liftSpeed: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pls")),
+            liftSpeed: Schema.NumberFromString.pipe(Schema.optional, Schema.fromKey("Pls")),
             totalPoints: Schema.BigInt.pipe(Schema.propertySignature, Schema.fromKey("Ptp")),
             lrc: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Plrc")),
             lfc: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Plfc")),
@@ -278,8 +275,8 @@ export const SaveData = Schema.transform(
             bbnotes: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pbbn")),
             hidechat: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Phchat")),
             tmi: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Ptmi")),
-            PVF: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("PVF")),
-            PHP: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("PHP")),
+            PVF: Schema.String.pipe(Schema.optional, Schema.fromKey("PVF")),
+            PHP: Schema.String.pipe(Schema.optional, Schema.fromKey("PHP")),
             mission: Mission.pipe(Schema.optional, Schema.fromKey("Pmiss")),
             doorman: Bitizen.pipe(Schema.propertySignature, Schema.fromKey("Pdrmn")),
             playerID: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Ppid")),
@@ -302,7 +299,7 @@ export const SaveData = Schema.transform(
     ),
     {
         encode: (input) => `[_save]${input}[_save]`,
-        decode: (input) => input.slice(7, -7),
+        decode: (input) => (input.startsWith('"') ? input.slice(8, -8) : input.slice(7, -7)),
     }
 );
 
@@ -341,13 +338,13 @@ export const PlayerMetaData = Schema.Struct({
     ),
 
     /** Bitbook post? not 100% sure */
-    bitbook: BitbookPost.pipe(Schema.propertySignature, Schema.fromKey("bb")),
+    bitbook: Schema.String.pipe(Schema.optional, Schema.fromKey("bb")),
 
     /** Unknown */
     ts: Schema.String,
 
     /** Indicates that they are vip. */
-    vip: Schema.Boolean,
+    vip: Schema.compose(Schema.NumberFromString, Schema.BooleanFromUnknown),
 });
 
 /**
@@ -387,7 +384,7 @@ export const SyncItemType = Schema.Enums({
  */
 export const Gift = Schema.Struct({
     /** Unique id for the gift. */
-    id: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("gift_id")),
+    id: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("gift_id")),
 
     /** Who the gift was sent to (should be you!). */
     to: NimblebitConfig.PlayerIdSchema.pipe(Schema.propertySignature, Schema.fromKey("gift_to")),

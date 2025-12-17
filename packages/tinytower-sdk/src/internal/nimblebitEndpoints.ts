@@ -19,6 +19,12 @@ export const playerIdParam = HttpApiSchema.param("playerId", NimblebitConfig.Pla
 export const friendIdParam = HttpApiSchema.param("friendId", NimblebitConfig.PlayerIdSchema);
 
 /** @internal */
+export const syncItemTypeParam = HttpApiSchema.param("syncItemType", NimblebitSchema.SyncItemType);
+
+/** @internal */
+export const giftIdParam = HttpApiSchema.param("giftId", Schema.compose(Schema.NumberFromString, Schema.Int));
+
+/** @internal */
 export const snapshotIdParam = HttpApiSchema.param("snapshotId", Schema.compose(Schema.NumberFromString, Schema.Int));
 
 /** @internal */
@@ -72,6 +78,26 @@ export const NotEnteredResponse = Schema.Struct({ success: Schema.Literal("NotEn
 );
 
 /** @internal */
+export const ReceivedResponse = Schema.Struct({ success: Schema.Literal("Received") }).annotations(
+    HttpApiSchema.annotations({ status: 200 })
+);
+
+/** @internal */
+export const NotReceivedResponse = Schema.Struct({ success: Schema.Literal("NotReceived") }).annotations(
+    HttpApiSchema.annotations({ status: 200 })
+);
+
+/** @internal */
+export const SentResponse = Schema.Struct({ success: Schema.Literal("Sent") }).annotations(
+    HttpApiSchema.annotations({ status: 200 })
+);
+
+/** @internal */
+export const NotSentResponse = Schema.Struct({ success: Schema.Literal("NotSent") }).annotations(
+    HttpApiSchema.annotations({ status: 200 })
+);
+
+/** @internal */
 export const DeviceNewPlayerEndpoint = HttpApiEndpoint.get(
     "DeviceNewPlayer"
 )`/register/tt/${salt1Param}/${salt2Param}/${hashParam}`
@@ -103,7 +129,6 @@ export const DevicePlayerDetailsEndpoint = HttpApiEndpoint.get(
                     player_id: NimblebitConfig.PlayerIdSchema,
                     registered: Schema.compose(Schema.NumberFromString, Schema.BooleanFromUnknown),
                     blacklisted: Schema.compose(Schema.NumberFromString, Schema.BooleanFromUnknown),
-                    id: Schema.optionalWith(Schema.NumberFromString, { nullable: true }),
                 }),
                 {
                     email: "playerEmail",
@@ -169,6 +194,19 @@ export const SyncPullSaveEndpoint = HttpApiEndpoint.get(
 export const SyncPushSaveEndpoint = HttpApiEndpoint.post(
     "SyncPushSave"
 )`/sync/push/tt/${playerIdParam}/${saltParam}/${hashParam}`
+    .setPayload(
+        Schema.Struct({
+            data: Schema.Uint8ArrayFromBase64.pipe(Schema.propertySignature, Schema.fromKey("saveData")),
+            doorman: NimblebitSchema.Bitizen.pipe(Schema.propertySignature, Schema.fromKey("avatar")),
+            saveVersion: Schema.compose(Schema.NumberFromString, Schema.Int),
+            level: Schema.compose(Schema.NumberFromString, Schema.Int),
+            reqFID: Schema.compose(Schema.NumberFromString, Schema.Int),
+            mg: Schema.compose(Schema.NumberFromString, Schema.Int),
+            vip: Schema.BooleanFromString,
+            p: Schema.Literal("IOS", "Android"),
+            l: Schema.String,
+        })
+    )
     .addSuccess(ErrorResponse)
     .addSuccess(SavedResponse)
     .addSuccess(NotSavedResponse);
@@ -199,7 +237,7 @@ export const SyncPullSnapshotEndpoint = HttpApiEndpoint.get(
             success: Schema.Literal("Found"),
             data: Schema.Uint8ArrayFromBase64,
             checksum: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("h")),
-            saveId: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("id")),
+            snapshotId: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("id")),
         }),
         { status: 200 }
     );
@@ -208,6 +246,19 @@ export const SyncPullSnapshotEndpoint = HttpApiEndpoint.get(
 export const SyncPushSnapshotEndpoint = HttpApiEndpoint.post(
     "SyncPushSnapshot"
 )`/sync/push_snapshot/tt/${playerIdParam}/${saltParam}/${hashParam}`
+    .setPayload(
+        Schema.Struct({
+            data: Schema.Uint8ArrayFromBase64.pipe(Schema.propertySignature, Schema.fromKey("snapshotData")),
+            doorman: NimblebitSchema.Bitizen.pipe(Schema.propertySignature, Schema.fromKey("avatar")),
+            saveVersion: Schema.compose(Schema.NumberFromString, Schema.Int),
+            level: Schema.compose(Schema.NumberFromString, Schema.Int),
+            reqFID: Schema.compose(Schema.NumberFromString, Schema.Int),
+            mg: Schema.compose(Schema.NumberFromString, Schema.Int),
+            vip: Schema.BooleanFromString,
+            p: Schema.Literal("IOS", "Android"),
+            l: Schema.String,
+        })
+    )
     .addSuccess(ErrorResponse)
     .addSuccess(SavedResponse)
     .addSuccess(NotSavedResponse);
@@ -259,23 +310,40 @@ export const RaffleCheckEnteredCurrentEndpoint = HttpApiEndpoint.get(
 /** @internal */
 export const SocialSendItemEndpoint = HttpApiEndpoint.post(
     "SocialSendItem"
-)`/send_item/tt/${playerIdParam}/${saltParam}/${hashParam}`;
+)`/send_item/tt/${syncItemTypeParam}/${playerIdParam}/${friendIdParam}/${saltParam}/${hashParam}`
+    .setPayload(Schema.Struct({ itemStr: Schema.String }))
+    .addSuccess(ErrorResponse)
+    .addSuccess(SentResponse)
+    .addSuccess(NotSentResponse);
 
 /** @internal */
 export const SocialGetGiftsEndpoint = HttpApiEndpoint.get(
     "SocialGetGifts"
-)`/get_gifts/tt/${playerIdParam}/${saltParam}/${hashParam}`;
+)`/get_gifts/tt/${playerIdParam}/${saltParam}/${hashParam}`
+    .addSuccess(ErrorResponse)
+    .addSuccess(NotFoundResponse)
+    .addSuccess(
+        Schema.Struct({
+            success: Schema.Literal("Found"),
+            gifts: Schema.Array(NimblebitSchema.Gift),
+            total: Schema.Int,
+        }),
+        { status: 2000 }
+    );
 
 /** @internal */
 export const SocialReceiveGiftEndpoint = HttpApiEndpoint.post(
     "SocialReceiveGift"
-)`/receive_item/tt/${playerIdParam}/${saltParam}/${hashParam}`;
+)`/receive_item/tt/${playerIdParam}/${giftIdParam}/${saltParam}/${hashParam}`
+    .addSuccess(ErrorResponse)
+    .addSuccess(ReceivedResponse)
+    .addSuccess(NotReceivedResponse);
 
 /** @internal */
-export const SocialPullFriendMetaEndpoint = HttpApiEndpoint.get(
-    "SocialPullMeta"
+export const SocialPullFriendMetaEndpoint = HttpApiEndpoint.post(
+    "SocialPullFriendMeta"
 )`/friend/pull_meta/tt/${playerIdParam}/${saltParam}/${hashParam}`
-    .setPayload(Schema.Struct({ friends: Schema.Array(NimblebitConfig.PlayerIdSchema) }))
+    .setPayload(Schema.Struct({ friends: NimblebitConfig.PlayerIdSchema }))
     .addSuccess(ErrorResponse)
     .addSuccess(NotFoundResponse)
     .addSuccess(
@@ -317,8 +385,17 @@ export const SocialRetrieveFriendsSnapshotListEndpoint = HttpApiEndpoint.get(
             success: Schema.Literal("Found"),
             saves: Schema.Array(
                 Schema.Struct({
-                    id: Schema.compose(Schema.NumberFromString, Schema.Int),
-                    created: Schema.BigInt,
+                    snapshotId: Schema.compose(Schema.NumberFromString, Schema.Int).pipe(
+                        Schema.propertySignature,
+                        Schema.fromKey("id")
+                    ),
+                    created: Schema.compose(
+                        Schema.transform(Schema.NumberFromString, Schema.Int, {
+                            encode: (n) => n / 1000,
+                            decode: (n) => n * 1000,
+                        }),
+                        Schema.DateFromNumber
+                    ),
                     meta: NimblebitSchema.PlayerMetaData,
                 })
             ),

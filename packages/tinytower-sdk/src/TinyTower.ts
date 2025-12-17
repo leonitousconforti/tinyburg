@@ -5,7 +5,6 @@
  * @category SDK
  */
 
-import type * as Schema from "effect/Schema";
 import type * as NimblebitConfig from "./NimblebitConfig.ts";
 
 import * as HttpApiClient from "@effect/platform/HttpApiClient";
@@ -13,11 +12,13 @@ import * as HttpClient from "@effect/platform/HttpClient";
 import * as Effect from "effect/Effect";
 import * as Encoding from "effect/Encoding";
 import * as Redacted from "effect/Redacted";
+import * as Schema from "effect/Schema";
 import * as Pako from "pako";
 
 import { Api } from "./internal/nimblebitEndpoints.ts";
 import { NimblebitAuth } from "./NimblebitAuth.ts";
 import { NimblebitError } from "./NimblebitError.ts";
+import { Bitizen, SaveData, SyncItemType } from "./NimblebitSchema.ts";
 
 /**
  * Requests a new player from the Nimblebit servers.
@@ -229,7 +230,60 @@ export const sync_pullSave = Effect.fn("sync_pullSave")(function* ({
  * @since 1.0.0
  * @category SDK
  */
-export const sync_pushSave = {};
+export const sync_pushSave = Effect.fn("sync_pushSave")(function* ({
+    data,
+    playerAuthKey,
+    playerId,
+}: Schema.Schema.Type<NimblebitConfig.AuthenticatedPlayerSchema> & { data: Schema.Schema.Type<typeof SaveData> }) {
+    const nimblebitAuth = yield* NimblebitAuth;
+    const httpClient = yield* HttpClient.HttpClient;
+
+    const endpoint = yield* HttpApiClient.endpoint(Api, {
+        baseUrl: nimblebitAuth.host,
+        group: "SyncManagementGroup",
+        endpoint: "SyncPushSave",
+        httpClient,
+    });
+
+    const salt = yield* nimblebitAuth.salt;
+    const dataAsUint8Array = Pako.deflate(yield* Schema.encode(SaveData)(data));
+    const dataAsBase64 = Encoding.encodeBase64(dataAsUint8Array);
+    const hash = yield* nimblebitAuth.sign(`tt/${playerId}/${salt}${dataAsBase64}${Redacted.value(playerAuthKey)}`);
+    const saveVersion = yield* sync_checkForNewerSave({ playerAuthKey, playerId });
+
+    const response = yield* endpoint({
+        path: { playerId, salt, hash },
+        payload: {
+            mg: data.maxGold,
+            doorman: data.doorman,
+            data: dataAsUint8Array,
+            level: data.stories.length,
+            saveVersion: saveVersion + 1,
+            reqFID: -1, // TODO: pass as parameter
+            vip: true,
+            p: "Android",
+            l: "en-us",
+        },
+    });
+
+    if ("error" in response) {
+        return yield* new NimblebitError({
+            method: "SyncPushSave",
+            module: "SyncManagementGroup",
+            cause: response.error,
+        });
+    }
+
+    if (response.success === "NotSaved") {
+        return yield* new NimblebitError({
+            method: "SyncPushSave",
+            module: "SyncManagementGroup",
+            cause: "Save data could not be saved",
+        });
+    }
+
+    return yield* Effect.void;
+});
 
 /**
  * Checks what the latest save version is on the Nimblebit servers.
@@ -329,7 +383,7 @@ export const sync_pullSnapshot = Effect.fn("sync_pullSnapshot")(function* ({
 
     const dataAsBase64 = Encoding.encodeBase64(response.data);
     const checksum = yield* nimblebitAuth.sign(
-        playerId + salt + response.saveId + dataAsBase64 + Redacted.value(playerAuthKey)
+        playerId + salt + response.snapshotId + dataAsBase64 + Redacted.value(playerAuthKey)
     );
 
     if (checksum !== response.checksum) {
@@ -341,7 +395,7 @@ export const sync_pullSnapshot = Effect.fn("sync_pullSnapshot")(function* ({
     }
 
     return {
-        saveId: response.saveId,
+        snapshotId: response.snapshotId,
         data: Pako.inflate(response.data, { to: "string" }),
     };
 });
@@ -352,7 +406,60 @@ export const sync_pullSnapshot = Effect.fn("sync_pullSnapshot")(function* ({
  * @since 1.0.0
  * @category SDK
  */
-export const sync_pushSnapshot = {};
+export const sync_pushSnapshot = Effect.fn("sync_pushSnapshot")(function* ({
+    data,
+    playerAuthKey,
+    playerId,
+}: Schema.Schema.Type<NimblebitConfig.AuthenticatedPlayerSchema> & { data: Schema.Schema.Type<typeof SaveData> }) {
+    const nimblebitAuth = yield* NimblebitAuth;
+    const httpClient = yield* HttpClient.HttpClient;
+
+    const endpoint = yield* HttpApiClient.endpoint(Api, {
+        baseUrl: nimblebitAuth.host,
+        group: "SyncManagementGroup",
+        endpoint: "SyncPushSnapshot",
+        httpClient,
+    });
+
+    const salt = yield* nimblebitAuth.salt;
+    const dataAsUint8Array = Pako.deflate(yield* Schema.encode(SaveData)(data));
+    const dataAsBase64 = Encoding.encodeBase64(dataAsUint8Array);
+    const hash = yield* nimblebitAuth.sign(`tt/${playerId}/${salt}${dataAsBase64}${Redacted.value(playerAuthKey)}`);
+    const saveVersion = yield* sync_checkForNewerSave({ playerAuthKey, playerId });
+
+    const response = yield* endpoint({
+        path: { playerId, salt, hash },
+        payload: {
+            mg: data.maxGold,
+            doorman: data.doorman,
+            data: dataAsUint8Array,
+            level: data.stories.length,
+            saveVersion,
+            reqFID: -1, // TODO: pass as parameter
+            vip: true,
+            p: "Android",
+            l: "en-us",
+        },
+    });
+
+    if ("error" in response) {
+        return yield* new NimblebitError({
+            method: "SyncPushSnapshot",
+            module: "SyncManagementGroup",
+            cause: response.error,
+        });
+    }
+
+    if (response.success === "NotSaved") {
+        return yield* new NimblebitError({
+            method: "SyncPushSnapshot",
+            module: "SyncManagementGroup",
+            cause: "Snapshot data could not be saved",
+        });
+    }
+
+    return yield* Effect.void;
+});
 
 /**
  * Retrieves a list of snapshots from the Nimblebit servers.
@@ -524,15 +631,101 @@ export const raffle_checkEnteredCurrent = Effect.fn("raffle_checkEnteredCurrent"
  * @since 1.0.0
  * @category SDK
  */
-export const social_sendItem = {};
+export const social_sendItem = Effect.fn("social_sendItem")(function* ({
+    friendId,
+    itemStr,
+    itemType,
+    playerAuthKey,
+    playerId,
+}: Schema.Schema.Type<NimblebitConfig.AuthenticatedPlayerSchema> & {
+    itemStr: string;
+    itemType: Schema.Schema.Type<typeof SyncItemType>;
+    friendId: Schema.Schema.Type<NimblebitConfig.PlayerIdSchema>;
+}) {
+    const nimblebitAuth = yield* NimblebitAuth;
+    const httpClient = yield* HttpClient.HttpClient;
+
+    const endpoint = yield* HttpApiClient.endpoint(Api, {
+        baseUrl: nimblebitAuth.host,
+        group: "SocialGroup",
+        endpoint: "SocialSendItem",
+        httpClient,
+    });
+
+    const salt = yield* nimblebitAuth.salt;
+    const hash = yield* nimblebitAuth.sign(
+        `tt/${itemType}/${playerId}/${salt}${itemStr}${Redacted.value(playerAuthKey)}`
+    );
+
+    const response = yield* endpoint({
+        payload: { itemStr },
+        path: { playerId, friendId, salt, hash, syncItemType: itemType },
+    });
+
+    if ("error" in response) {
+        return yield* new NimblebitError({
+            method: "SocialSendItem",
+            module: "SocialGroup",
+            cause: response.error,
+        });
+    }
+
+    if (response.success === "NotSent") {
+        return yield* new NimblebitError({
+            method: "SocialSendItem",
+            module: "SocialGroup",
+            cause: "Item could not be sent",
+        });
+    }
+
+    return yield* Effect.void;
+});
 
 /**
- * Retrieves gifts sent to the player.
+ * Retrieves gifts sent to the player but does not mark them as received.
  *
  * @since 1.0.0
  * @category SDK
  */
-export const social_getGifts = {};
+export const social_getGifts = Effect.fn("social_getGifts")(function* ({
+    playerAuthKey,
+    playerId,
+}: Schema.Schema.Type<NimblebitConfig.AuthenticatedPlayerSchema>) {
+    const nimblebitAuth = yield* NimblebitAuth;
+    const httpClient = yield* HttpClient.HttpClient;
+
+    const endpoint = yield* HttpApiClient.endpoint(Api, {
+        baseUrl: nimblebitAuth.host,
+        group: "SocialGroup",
+        endpoint: "SocialGetGifts",
+        httpClient,
+    });
+
+    const salt = yield* nimblebitAuth.salt;
+    const hash = yield* nimblebitAuth.sign(`tt/${playerId}/${salt}${Redacted.value(playerAuthKey)}`);
+    const response = yield* endpoint({ path: { playerId, salt, hash } });
+
+    if ("error" in response) {
+        return yield* new NimblebitError({
+            method: "SocialGetGifts",
+            module: "SocialGroup",
+            cause: response.error,
+        });
+    }
+
+    if (response.success === "NotFound") {
+        return yield* new NimblebitError({
+            method: "SocialGetGifts",
+            module: "SocialGroup",
+            cause: "Gifts could not be found",
+        });
+    }
+
+    return {
+        total: response.total,
+        gifts: response.gifts,
+    };
+});
 
 /**
  * Marks a gift sent to the player as received.
@@ -540,7 +733,43 @@ export const social_getGifts = {};
  * @since 1.0.0
  * @category SDK
  */
-export const social_receiveGift = {};
+export const social_receiveGift = Effect.fn("social_receiveGift")(function* ({
+    giftId,
+    playerAuthKey,
+    playerId,
+}: Schema.Schema.Type<NimblebitConfig.AuthenticatedPlayerSchema> & { giftId: number }) {
+    const nimblebitAuth = yield* NimblebitAuth;
+    const httpClient = yield* HttpClient.HttpClient;
+
+    const endpoint = yield* HttpApiClient.endpoint(Api, {
+        baseUrl: nimblebitAuth.host,
+        group: "SocialGroup",
+        endpoint: "SocialReceiveGift",
+        httpClient,
+    });
+
+    const salt = yield* nimblebitAuth.salt;
+    const hash = yield* nimblebitAuth.sign(`tt/${playerId}/${giftId}/${salt}${Redacted.value(playerAuthKey)}`);
+    const response = yield* endpoint({ path: { playerId, giftId, salt, hash } });
+
+    if ("error" in response) {
+        return yield* new NimblebitError({
+            method: "SocialReceiveGift",
+            module: "SocialGroup",
+            cause: response.error,
+        });
+    }
+
+    if (response.success === "NotReceived") {
+        return yield* new NimblebitError({
+            method: "SocialReceiveGift",
+            module: "SocialGroup",
+            cause: "Gift could not be received",
+        });
+    }
+
+    return yield* Effect.void;
+});
 
 /**
  * Pulls metadata about a friend's tower from the Nimblebit servers.
@@ -548,7 +777,45 @@ export const social_receiveGift = {};
  * @since 1.0.0
  * @category SDK
  */
-export const social_pullFriendMeta = {};
+export const social_pullFriendMeta = Effect.fn("social_pullFriendMeta")(function* ({
+    friendId,
+    playerAuthKey,
+    playerId,
+}: Schema.Schema.Type<NimblebitConfig.AuthenticatedPlayerSchema> & {
+    friendId: Schema.Schema.Type<NimblebitConfig.PlayerIdSchema>;
+}) {
+    const nimblebitAuth = yield* NimblebitAuth;
+    const httpClient = yield* HttpClient.HttpClient;
+
+    const endpoint = yield* HttpApiClient.endpoint(Api, {
+        baseUrl: nimblebitAuth.host,
+        group: "SocialGroup",
+        endpoint: "SocialPullFriendMeta",
+        httpClient,
+    });
+
+    const salt = yield* nimblebitAuth.salt;
+    const hash = yield* nimblebitAuth.sign(`tt/${playerId}/${salt}${friendId}${Redacted.value(playerAuthKey)}`);
+    const response = yield* endpoint({ path: { playerId, salt, hash }, payload: { friends: friendId } });
+
+    if ("error" in response) {
+        return yield* new NimblebitError({
+            method: "SocialPullFriendMeta",
+            module: "SocialGroup",
+            cause: response.error,
+        });
+    }
+
+    if (response.success === "NotFound") {
+        return yield* new NimblebitError({
+            method: "SocialPullFriendMeta",
+            module: "SocialGroup",
+            cause: "Friend tower not found",
+        });
+    }
+
+    return response.meta[friendId];
+});
 
 /**
  * Pulls a friend's tower save data from the Nimblebit servers.
@@ -702,4 +969,29 @@ export const social_getVisits = Effect.fn("social_getVisits")(function* ({
         total: response.total,
         visits: response.gifts,
     };
+});
+
+/**
+ * Sends a visit to a friend's tower.
+ *
+ * @since 1.0.0
+ * @category SDK
+ */
+export const social_visit = Effect.fn("social_visit")(function* ({
+    friendId,
+    playerAuthKey,
+    playerId,
+}: Schema.Schema.Type<NimblebitConfig.AuthenticatedPlayerSchema> & {
+    friendId: Schema.Schema.Type<NimblebitConfig.PlayerIdSchema>;
+}) {
+    const { data: saveData } = yield* sync_pullSave({ playerAuthKey, playerId });
+    const { doorman } = yield* Schema.decode(SaveData)(saveData);
+    const doormanItemStr = yield* Schema.encode(Bitizen)(doorman);
+    yield* social_sendItem({
+        playerId,
+        playerAuthKey,
+        friendId,
+        itemStr: doormanItemStr,
+        itemType: SyncItemType.enums.Visit,
+    });
 });

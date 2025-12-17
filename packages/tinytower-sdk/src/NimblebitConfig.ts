@@ -19,7 +19,8 @@ import * as Schema from "effect/Schema";
  */
 export class PlayerIdSchema extends Function.pipe(
     Schema.String,
-    Schema.length(5),
+    Schema.minLength(1),
+    Schema.maxLength(5),
     Schema.pattern(/^([\dA-Z]*)$/gm),
     Schema.brand("PlayerId")
 ) {}

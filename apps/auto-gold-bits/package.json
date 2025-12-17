@@ -1,0 +1,20 @@
+{
+    "name": "@tinyburg/auto-gold-bits",
+    "version": "0.0.0",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "dev": "node --experimental-strip-types"
+    },
+    "dependencies": {
+        "@effect/cluster": "0.55.0",
+        "@effect/experimental": "0.57.11",
+        "@effect/platform": "0.93.8",
+        "@effect/platform-node": "0.103.0",
+        "@effect/rpc": "0.72.2",
+        "@effect/sql": "0.48.6",
+        "@effect/workflow": "0.15.2",
+        "@tinyburg/tinytower-sdk": "workspace:*",
+        "effect": "3.19.12"
+    }
+}
