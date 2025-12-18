@@ -7,6 +7,9 @@
         { "path": "packages/doorman" },
         { "path": "packages/insight" },
         { "path": "packages/tinytower-sdk" },
-        { "path": "packages/trading-sdk" }
+        { "path": "packages/trading-sdk" },
+        { "path": "apps/archivist" },
+        { "path": "apps/authproxy" },
+        { "path": "apps/auto-gold-bits" }
     ]
 }

@@ -111,6 +111,39 @@ importers:
         specifier: 4.0.15
         version: 4.0.15(tsx@4.21.0)
 
+  apps/archivist:
+    dependencies:
+      '@bufbuild/protobuf':
+        specifier: 2.10.2
+        version: 2.10.2
+      '@effect/cluster':
+        specifier: 0.55.0
+        version: 0.55.0(@effect/platform@0.93.8(effect@3.19.12))(@effect/rpc@0.72.2(@effect/platform@0.93.8(effect@3.19.12))(effect@3.19.12))(@effect/sql@0.48.6(@effect/experimental@0.57.11(@effect/platform@0.93.8(effect@3.19.12))(effect@3.19.12))(@effect/platform@0.93.8(effect@3.19.12))(effect@3.19.12))(@effect/workflow@0.15.2(@effect/experimental@0.57.11(@effect/platform@0.93.8(effect@3.19.12))(effect@3.19.12))(@effect/platform@0.93.8(effect@3.19.12))(@effect/rpc@0.72.2(@effect/platform@0.93.8(effect@3.19.12))(effect@3.19.12))(effect@3.19.12))(effect@3.19.12)
+      '@effect/experimental':
+        specifier: 0.57.11
+        version: 0.57.11(@effect/platform@0.93.8(effect@3.19.12))(effect@3.19.12)
+      '@effect/platform':
+        specifier: 0.93.8
+        version: 0.93.8(effect@3.19.12)
+      '@effect/platform-node':
+        specifier: 0.103.0
+        version: 0.103.0(@effect/cluster@0.55.0(@effect/platform@0.93.8(effect@3.19.12))(@effect/rpc@0.72.2(@effect/platform@0.93.8(effect@3.19.12))(effect@3.19.12))(@effect/sql@0.48.6(@effect/experimental@0.57.11(@effect/platform@0.93.8(effect@3.19.12))(effect@3.19.12))(@effect/platform@0.93.8(effect@3.19.12))(effect@3.19.12))(@effect/workflow@0.15.2(@effect/experimental@0.57.11(@effect/platform@0.93.8(effect@3.19.12))(effect@3.19.12))(@effect/platform@0.93.8(effect@3.19.12))(@effect/rpc@0.72.2(@effect/platform@0.93.8(effect@3.19.12))(effect@3.19.12))(effect@3.19.12))(effect@3.19.12))(@effect/platform@0.93.8(effect@3.19.12))(@effect/rpc@0.72.2(@effect/platform@0.93.8(effect@3.19.12))(effect@3.19.12))(@effect/sql@0.48.6(@effect/experimental@0.57.11(@effect/platform@0.93.8(effect@3.19.12))(effect@3.19.12))(@effect/platform@0.93.8(effect@3.19.12))(effect@3.19.12))(effect@3.19.12)
+      '@effect/rpc':
+        specifier: 0.72.2
+        version: 0.72.2(@effect/platform@0.93.8(effect@3.19.12))(effect@3.19.12)
+      '@effect/sql':
+        specifier: 0.48.6
+        version: 0.48.6(@effect/experimental@0.57.11(@effect/platform@0.93.8(effect@3.19.12))(effect@3.19.12))(@effect/platform@0.93.8(effect@3.19.12))(effect@3.19.12)
+      '@effect/workflow':
+        specifier: 0.15.2
+        version: 0.15.2(@effect/experimental@0.57.11(@effect/platform@0.93.8(effect@3.19.12))(effect@3.19.12))(@effect/platform@0.93.8(effect@3.19.12))(@effect/rpc@0.72.2(@effect/platform@0.93.8(effect@3.19.12))(effect@3.19.12))(effect@3.19.12)
+      '@efffrida/gplayapi':
+        specifier: 0.0.2
+        version: 0.0.2(@bufbuild/protobuf@2.10.2)(@effect/platform@0.93.8(effect@3.19.12))(effect@3.19.12)
+      effect:
+        specifier: 3.19.12
+        version: 3.19.12
+
   apps/authproxy:
     dependencies:
       '@effect/cluster':
@@ -363,6 +396,9 @@ packages:
     resolution: {integrity: sha512-6zABk/ECA/QYSCQ1NGiVwwbQerUCZ+TQbp64Q3AgmfNvurHH0j8TtXa1qbShXA6qqkpAj4V5W8pP6mLe1mcMqA==}
     engines: {node: '>=18'}
 
+  '@bufbuild/protobuf@2.10.2':
+    resolution: {integrity: sha512-uFsRXwIGyu+r6AMdz+XijIIZJYpoWeYzILt5yZ2d3mCjQrWUTVpVD9WL/jZAbvp+Ed04rOhrsk7FiTcEDseB5A==}
+
   '@changesets/apply-release-plan@7.0.14':
     resolution: {integrity: sha512-ddBvf9PHdy2YY0OUiEl3TV78mH9sckndJR14QAt87KLEbIov81XO0q0QAmvooBxXlqRRP8I9B7XOzZwQG7JkWA==}
 
@@ -516,6 +552,13 @@ packages:
       '@effect/platform': ^0.93.6
       '@effect/rpc': ^0.72.2
       effect: ^3.19.10
+
+  '@efffrida/gplayapi@0.0.2':
+    resolution: {integrity: sha512-AZ2J85vhbul7/wKEd/82lUEbzLK3XfG9dUzAo9lg0bcPjPxRl9fgsr4uol9+p8JA4kTCVLvTM5IVWll8jqYMZw==}
+    peerDependencies:
+      '@bufbuild/protobuf': 2.10.1
+      '@effect/platform': 0.93.5
+      effect: 3.19.8
 
   '@emnapi/core@1.7.1':
     resolution: {integrity: sha512-o1uhUASyo921r2XtHYOHy7gdkGLge8ghBEQHMWmyJFoXlpU58kIrhhN3w26lpQb6dspetweapMn2CSNwQ8I4wg==}
@@ -3035,6 +3078,9 @@ packages:
   process-nextick-args@2.0.1:
     resolution: {integrity: sha512-3ouUOpQhtgrbOa17J7+uxOTpITYWaGP7/AhoR3+A+/1e9skrzelGi/dXzEYyvbxubEF6Wn2ypscTKiKJFFn1ag==}
 
+  properties-file@3.6.3:
+    resolution: {integrity: sha512-T0BLq5U7vMtfoHMAyirR386h/PkS9rva/EQIvy3yFmkYIjc485tgxN7eHgbtJx48O28A94MUYuRGF/iyC/L54A==}
+
   punycode@2.3.1:
     resolution: {integrity: sha512-vYt7UD1U9Wg6138shLtLOvdAu+8DsC/ilFtEVHcH+wydcSpNE20AfSOduf6MkRFahL5FY7X1oU7nKVZFtfq8Fg==}
     engines: {node: '>=6'}
@@ -3861,6 +3907,8 @@ snapshots:
 
   '@bcoe/v8-coverage@1.0.2': {}
 
+  '@bufbuild/protobuf@2.10.2': {}
+
   '@changesets/apply-release-plan@7.0.14':
     dependencies:
       '@changesets/config': 3.1.2
@@ -4127,6 +4175,13 @@ snapshots:
       '@effect/platform': 0.93.8(effect@3.19.12)
       '@effect/rpc': 0.72.2(@effect/platform@0.93.8(effect@3.19.12))(effect@3.19.12)
       effect: 3.19.12
+
+  '@efffrida/gplayapi@0.0.2(@bufbuild/protobuf@2.10.2)(@effect/platform@0.93.8(effect@3.19.12))(effect@3.19.12)':
+    dependencies:
+      '@bufbuild/protobuf': 2.10.2
+      '@effect/platform': 0.93.8(effect@3.19.12)
+      effect: 3.19.12
+      properties-file: 3.6.3
 
   '@emnapi/core@1.7.1':
     dependencies:
@@ -6748,6 +6803,8 @@ snapshots:
       parse-ms: 2.1.0
 
   process-nextick-args@2.0.1: {}
+
+  properties-file@3.6.3: {}
 
   punycode@2.3.1: {}
 

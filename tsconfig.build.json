@@ -10,6 +10,9 @@
         { "path": "packages/doorman/tsconfig.build.json" },
         { "path": "packages/insight/tsconfig.build.json" },
         { "path": "packages/tinytower-sdk/tsconfig.build.json" },
-        { "path": "packages/trading-sdk/tsconfig.build.json" }
+        { "path": "packages/trading-sdk/tsconfig.build.json" },
+        { "path": "apps/archivist/tsconfig.json" },
+        { "path": "apps/authproxy/tsconfig.json" },
+        { "path": "apps/auto-gold-bits/tsconfig.json" }
     ]
 }
