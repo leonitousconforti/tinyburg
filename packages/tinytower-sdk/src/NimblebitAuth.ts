@@ -33,6 +33,10 @@ export class NimblebitAuth extends Context.Tag("NimblebitAuth")<
               readonly host: "https://authproxy.tinyburg.app";
               readonly authKey: Redacted.Redacted<string>;
           }
+        | {
+              readonly host: string;
+              readonly authKey: Redacted.Redacted<string>;
+          }
     ) & {
         readonly sign: (data: string) => Effect.Effect<string, never, never>;
         readonly salt: Effect.Effect<Schema.Schema.Type<EffectSchemas.Number.U32>, never, never>;
@@ -133,31 +137,49 @@ export class NimblebitAuth extends Context.Tag("NimblebitAuth")<
     ): Layer.Layer<NimblebitAuth, ConfigError.ConfigError, never> =>
         Effect.map(config, (authKey) => NimblebitAuth.WebDirect({ authKey })).pipe(Layer.unwrapEffect);
 
+    public static readonly NodeCustomHost = ({
+        authKey,
+        host,
+    }: {
+        host: string;
+        authKey: Redacted.Redacted<string>;
+    }): Layer.Layer<NimblebitAuth, never, never> =>
+        Layer.succeed(this, {
+            host,
+            authKey,
+            salt: NimblebitAuth.NodeSalt,
+            burnbot: Effect.sync(() => this.burnbots[0]),
+            sign: (data: string) => Effect.succeed(data + Redacted.value(authKey)),
+        });
+
+    public static readonly WebCustomHost = ({
+        authKey,
+        host,
+    }: {
+        host: string;
+        authKey: Redacted.Redacted<string>;
+    }): Layer.Layer<NimblebitAuth, never, never> =>
+        Layer.succeed(this, {
+            host,
+            authKey,
+            salt: NimblebitAuth.WebSalt,
+            burnbot: Effect.sync(() => this.burnbots[0]),
+            sign: (data: string) => Effect.succeed(data + Redacted.value(authKey)),
+        });
+
     public static readonly NodeTinyburgAuthProxy = ({
         authKey,
     }: {
         authKey: Redacted.Redacted<string>;
     }): Layer.Layer<NimblebitAuth, never, never> =>
-        Layer.succeed(this, {
-            authKey,
-            host: "https://authproxy.tinyburg.app" as const,
-            salt: NimblebitAuth.NodeSalt,
-            burnbot: Effect.sync(() => this.burnbots[0]),
-            sign: (data: string) => Effect.succeed(data + Redacted.value(authKey)),
-        });
+        NimblebitAuth.NodeCustomHost({ host: "https://authproxy.tinyburg.app", authKey });
 
     public static readonly WebTinyburgAuthProxy = ({
         authKey,
     }: {
         authKey: Redacted.Redacted<string>;
     }): Layer.Layer<NimblebitAuth, never, never> =>
-        Layer.succeed(this, {
-            authKey,
-            host: "https://authproxy.tinyburg.app" as const,
-            salt: NimblebitAuth.WebSalt,
-            burnbot: Effect.sync(() => this.burnbots[0]),
-            sign: (data: string) => Effect.succeed(data + Redacted.value(authKey)),
-        });
+        NimblebitAuth.WebCustomHost({ host: "https://authproxy.tinyburg.app", authKey });
 }
 
 /**
@@ -195,6 +217,30 @@ export const layerNodeDirectConfig: (
 export const layerWebDirectConfig: (
     config: Config.Config<Schema.Schema.Type<NimblebitConfig.NimblebitAuthKeySchema>>
 ) => Layer.Layer<NimblebitAuth, ConfigError.ConfigError, never> = NimblebitAuth.WebDirectConfig;
+
+/**
+ * @since 1.0.0
+ * @category Layer
+ */
+export const layerNodeCustomHost: ({
+    authKey,
+    host,
+}: {
+    host: string;
+    authKey: Redacted.Redacted<string>;
+}) => Layer.Layer<NimblebitAuth, never, never> = NimblebitAuth.NodeCustomHost;
+
+/**
+ * @since 1.0.0
+ * @category Layer
+ */
+export const layerWebCustomHost: ({
+    authKey,
+    host,
+}: {
+    host: string;
+    authKey: Redacted.Redacted<string>;
+}) => Layer.Layer<NimblebitAuth, never, never> = NimblebitAuth.WebCustomHost;
 
 /**
  * @since 1.0.0
