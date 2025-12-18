@@ -453,6 +453,7 @@ export const SocialGroup = HttpApiGroup.make("SocialGroup")
 /** @internal */
 export const Api = HttpApi.make("TinyTowerApi")
     .addError(HttpApiError.BadRequest)
+    .addError(HttpApiError.Unauthorized)
     .addError(HttpApiError.InternalServerError)
     .add(DeviceManagementGroup)
     .add(SyncManagementGroup)

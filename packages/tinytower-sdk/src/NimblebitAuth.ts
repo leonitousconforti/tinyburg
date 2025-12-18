@@ -97,7 +97,7 @@ export class NimblebitAuth extends Context.Tag("NimblebitAuth")<
             return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
         });
 
-    static readonly NodeDirect = ({
+    public static readonly NodeDirect = ({
         authKey,
     }: {
         authKey: Schema.Schema.Type<NimblebitConfig.NimblebitAuthKeySchema>;
@@ -110,7 +110,7 @@ export class NimblebitAuth extends Context.Tag("NimblebitAuth")<
             sign: (data: string) => NimblebitAuth.NodeMD5(data + Redacted.value(authKey)),
         });
 
-    static readonly WebDirect = ({
+    public static readonly WebDirect = ({
         authKey,
     }: {
         authKey: Schema.Schema.Type<NimblebitConfig.NimblebitAuthKeySchema>;
@@ -123,17 +123,17 @@ export class NimblebitAuth extends Context.Tag("NimblebitAuth")<
             sign: (data: string) => NimblebitAuth.WebMD5(data + Redacted.value(authKey)),
         });
 
-    static readonly NodeDirectConfig = (
+    public static readonly NodeDirectConfig = (
         config: Config.Config<Schema.Schema.Type<NimblebitConfig.NimblebitAuthKeySchema>>
     ): Layer.Layer<NimblebitAuth, ConfigError.ConfigError, never> =>
         Effect.map(config, (authKey) => NimblebitAuth.NodeDirect({ authKey })).pipe(Layer.unwrapEffect);
 
-    static readonly WebDirectConfig = (
+    public static readonly WebDirectConfig = (
         config: Config.Config<Schema.Schema.Type<NimblebitConfig.NimblebitAuthKeySchema>>
     ): Layer.Layer<NimblebitAuth, ConfigError.ConfigError, never> =>
         Effect.map(config, (authKey) => NimblebitAuth.WebDirect({ authKey })).pipe(Layer.unwrapEffect);
 
-    static readonly NodeTinyburgAuthProxy = ({
+    public static readonly NodeTinyburgAuthProxy = ({
         authKey,
     }: {
         authKey: Redacted.Redacted<string>;
@@ -146,7 +146,7 @@ export class NimblebitAuth extends Context.Tag("NimblebitAuth")<
             sign: (data: string) => Effect.succeed(data + Redacted.value(authKey)),
         });
 
-    static readonly WebTinyburgAuthProxy = ({
+    public static readonly WebTinyburgAuthProxy = ({
         authKey,
     }: {
         authKey: Redacted.Redacted<string>;
