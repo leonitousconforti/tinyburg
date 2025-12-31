@@ -13,6 +13,8 @@
         { "path": "packages/trading-sdk/tsconfig.build.json" },
         { "path": "apps/archivist/tsconfig.json" },
         { "path": "apps/authproxy/tsconfig.json" },
-        { "path": "apps/auto-gold-bits/tsconfig.json" }
+        { "path": "apps/auto-gold-bits/tsconfig.json" },
+        { "path": "apps/personas/tsconfig.json" },
+        { "path": "apps/social-circles/tsconfig.json" }
     ]
 }

@@ -14,12 +14,14 @@
         "Bitizen",
         "bitizens",
         "bitprints",
+        "bufbuild",
         "BUILDKIT",
         "burnbot",
         "burnbots",
         "cancelables",
         "codegen",
         "Conforti",
+        "corlib",
         "crosspath",
         "DBSYSTEMVALUES",
         "dedupe",
@@ -30,7 +32,9 @@
         "encodeable",
         "frida",
         "frontmost",
+        "gplayapi",
         "interruptible",
+        "klass",
         "leoconforti",
         "leonitousconforti",
         "Millis",
@@ -44,6 +48,8 @@
         "tinytower",
         "tinytowers",
         "Transferables",
+        "tupled",
+        "untupled",
         "vitest"
     ]
 }

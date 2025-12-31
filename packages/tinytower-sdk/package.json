@@ -36,19 +36,19 @@
         "codegen": "build-utils prepare-v4"
     },
     "dependencies": {
-        "effect-schemas": "0.0.9",
+        "effect-schemas": "0.0.10",
         "pako": "2.1.0"
     },
     "devDependencies": {
-        "@effect/cluster": "0.55.0",
-        "@effect/experimental": "0.57.11",
-        "@effect/platform": "0.93.8",
-        "@effect/platform-node": "0.103.0",
-        "@effect/rpc": "0.72.2",
-        "@effect/sql": "0.48.6",
-        "@effect/workflow": "0.15.2",
+        "@effect/cluster": "0.56.0",
+        "@effect/experimental": "0.58.0",
+        "@effect/platform": "0.94.0",
+        "@effect/platform-node": "0.104.0",
+        "@effect/rpc": "0.73.0",
+        "@effect/sql": "0.49.0",
+        "@effect/workflow": "0.16.0",
         "@types/pako": "2.0.4",
-        "effect": "3.19.12"
+        "effect": "3.19.13"
     },
     "peerDependencies": {
         "@effect/platform": "0.93.8",

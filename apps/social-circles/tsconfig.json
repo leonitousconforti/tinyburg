@@ -1,0 +1,10 @@
+{
+    "extends": "../../tsconfig.base.jsonc",
+    "compilerOptions": {
+        "noEmit": true,
+        "declaration": false,
+        "declarationMap": false,
+        "composite": false,
+        "incremental": false
+    }
+}
