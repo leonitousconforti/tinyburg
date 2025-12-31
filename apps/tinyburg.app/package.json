@@ -1,0 +1,27 @@
+{
+    "name": "tinyburg.app",
+    "version": "0.0.0",
+    "private": true,
+    "scripts": {
+        "build": "next build",
+        "dev": "next dev",
+        "lint": "eslint",
+        "start": "next start"
+    },
+    "dependencies": {
+        "next": "16.1.1",
+        "react": "19.2.3",
+        "react-dom": "19.2.3"
+    },
+    "devDependencies": {
+        "@tailwindcss/postcss": "^4",
+        "@types/node": "^25.0.3",
+        "@types/react": "^19",
+        "@types/react-dom": "^19",
+        "eslint": "^9",
+        "eslint-config-next": "16.1.1",
+        "minimatch": "10.1.1",
+        "tailwindcss": "^4",
+        "typescript": "^5"
+    }
+}
