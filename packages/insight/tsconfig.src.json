@@ -5,7 +5,7 @@
     "compilerOptions": {
         "tsBuildInfoFile": ".tsbuildinfo/src.tsbuildinfo",
         "outDir": ".tsbuildinfo/src",
-        "types": ["node"],
+        "types": ["frida-gum"],
         "rootDir": "src"
     }
 }

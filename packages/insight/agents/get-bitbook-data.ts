@@ -1,7 +1,5 @@
 import "frida-il2cpp-bridge";
 
-import type { IBitbookAgentExports } from "../src/shared/bitbook-agent-exports.js";
-
 import { TinyTowerFridaAgent } from "./base-frida-agent.js";
 import { copyDictionaryToJs } from "./helpers/copy-dictionary-to-js.js";
 import { readEnumFields } from "./helpers/get-enum-fields.js";
@@ -80,12 +78,3 @@ export class GetBitbookData extends TinyTowerFridaAgent<GetBitbookData> {
         );
     }
 }
-
-// Main entry point exported for when this file is compiled as a frida agent
-const rpcExports: IBitbookAgentExports = {
-    main: async () => {
-        const instance = await new GetBitbookData().start();
-        return instance.transformToSourceCode();
-    },
-};
-rpc.exports = rpcExports as unknown as RpcExports;

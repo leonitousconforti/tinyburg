@@ -35,6 +35,26 @@
         "check": "tsc -b tsconfig.json",
         "codegen": "build-utils prepare-v4"
     },
+    "dependencies": {
+        "@efffrida/frida-tools": "0.0.23",
+        "@efffrida/il2cpp-bridge": "0.0.20",
+        "@efffrida/platform": "0.0.15",
+        "@efffrida/polyfills": "0.0.2",
+        "@efffrida/rpc": "0.0.23",
+        "frida": "17.5.1",
+        "frida-il2cpp-bridge": "0.12.1"
+    },
+    "devDependencies": {
+        "@effect/platform": "0.94.0",
+        "@effect/rpc": "0.73.0",
+        "@types/frida-gum": "19.0.1",
+        "effect": "3.19.13"
+    },
+    "peerDependencies": {
+        "@effect/platform": "0.93.8",
+        "@effect/rpc": "0.72.2",
+        "effect": "3.19.12"
+    },
     "publishConfig": {
         "access": "public",
         "exports": {
