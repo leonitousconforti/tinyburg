@@ -9,19 +9,18 @@ export class TowerCredentials extends Schema.Class<TowerCredentials>("TowerCrede
 }) {}
 
 export class GameState extends Schema.Class<GameState>("GameState")({
-    version: Schema.String,
-    bux: Schema.Number,
-    coins: Schema.Number,
+    bux: Schema.Int,
+    coins: Schema.Int,
     elevatorSpeed: Schema.Number,
-    goldenTickets: Schema.Number,
-    allTimeGoldenTickets: Schema.Number,
-    numberOfFloors: Schema.Number,
-    numberOfBitizens: Schema.Number,
-    numberOfRoofsUnlocked: Schema.Number,
-    numberOfLobbiesUnlocked: Schema.Number,
-    numberOfCostumesUnlocked: Schema.Number,
-    numberOfElevatorsUnlocked: Schema.Number,
-    gameScreen: Schema.String,
+    goldenTickets: Schema.Int,
+    // allTimeGoldenTickets: Schema.Number,
+    // numberOfFloors: Schema.Number,
+    // numberOfBitizens: Schema.Number,
+    // numberOfRoofsUnlocked: Schema.Number,
+    // numberOfLobbiesUnlocked: Schema.Number,
+    // numberOfCostumesUnlocked: Schema.Number,
+    // numberOfElevatorsUnlocked: Schema.Number,
+    // gameScreen: Schema.String,
 }) {}
 
 export class Rpcs extends RpcGroup.make(
@@ -34,8 +33,120 @@ export class Rpcs extends RpcGroup.make(
     Rpc.make("SetTowerCredentials", {
         payload: TowerCredentials,
         success: TowerCredentials,
+    }),
+    Rpc.make("GetGameState", {
+        success: GameState,
+    }),
+    Rpc.make("GetAllFloors", {
+        success: Schema.Struct({
+            floors: Schema.Record({
+                key: Schema.String,
+                value: Schema.Struct({
+                    index: Schema.String,
+                    type: Schema.String,
+                }),
+            }),
+            types: Schema.Record({
+                key: Schema.String,
+                value: Schema.String,
+            }),
+        }),
+    }),
+    Rpc.make("GetAllElevators", {
+        success: Schema.Record({
+            key: Schema.String,
+            value: Schema.Struct({
+                index: Schema.String,
+            }),
+        }),
+    }),
+    Rpc.make("GetAllRoofs", {
+        success: Schema.Record({
+            key: Schema.String,
+            value: Schema.Struct({
+                index: Schema.String,
+            }),
+        }),
+    }),
+    Rpc.make("GetAllCostumes", {
+        success: Schema.Record({
+            key: Schema.String,
+            value: Schema.Record({
+                key: Schema.String,
+                value: Schema.String,
+            }),
+        }),
+    }),
+    Rpc.make("GetAllBitbookPosts", {
+        success: Schema.Struct({
+            eventTypes: Schema.Record({
+                key: Schema.String,
+                value: Schema.String,
+            }),
+            mediaTypes: Schema.Record({
+                key: Schema.String,
+                value: Schema.String,
+            }),
+            posts: Schema.Record({
+                key: Schema.String,
+                value: Schema.Record({
+                    key: Schema.String,
+                    value: Schema.String,
+                }),
+            }),
+        }),
+    }),
+    Rpc.make("GetAllBitizenData", {
+        success: Schema.Struct({
+            numberHairAccessories: Schema.Int,
+            numberGlasses: Schema.Int,
+            numberFemaleHats: Schema.Int,
+            numberMaleHats: Schema.Int,
+            numberBiHats: Schema.Int,
+            maleNames: Schema.Array(Schema.String),
+            femaleNames: Schema.Array(Schema.String),
+            maleLastNames: Schema.Array(Schema.String),
+            femaleLastNames: Schema.Array(Schema.String),
+            skinColors: Schema.Array(Schema.String),
+            hairColors: Schema.Array(Schema.String),
+        }),
+    }),
+    Rpc.make("GetAllMissions", {
+        success: Schema.Struct({
+            types: Schema.Record({
+                key: Schema.String,
+                value: Schema.String,
+            }),
+            tutorialMissions: Schema.Record({
+                key: Schema.String,
+                value: Schema.Record({
+                    key: Schema.String,
+                    value: Schema.String,
+                }),
+            }),
+            tipMissions: Schema.Record({
+                key: Schema.String,
+                value: Schema.Record({
+                    key: Schema.String,
+                    value: Schema.String,
+                }),
+            }),
+            missions: Schema.Record({
+                key: Schema.String,
+                value: Schema.Record({
+                    key: Schema.String,
+                    value: Schema.String,
+                }),
+            }),
+        }),
+    }),
+    Rpc.make("GetAllPets", {
+        success: Schema.Record({
+            key: Schema.String,
+            value: Schema.Record({
+                key: Schema.String,
+                value: Schema.String,
+            }),
+        }),
     })
-    // Rpc.make("GetGameState", {
-    //     success: GameState,
-    // })
 ) {}
