@@ -1,8 +1,9 @@
-import { FileSystem, Path } from "@effect/platform";
+import { Command, FileSystem, Path } from "@effect/platform";
 import { NodeContext, NodeRuntime } from "@effect/platform-node";
 import { RpcClient } from "@effect/rpc";
-import { FridaDevice } from "@efffrida/frida-tools";
-import { Array, Effect, Layer, Logger, LogLevel, Order, pipe, Record } from "effect";
+import { FridaDevice, FridaDeviceAcquisitionError } from "@efffrida/frida-tools";
+import { GooglePlayApi } from "@efffrida/gplayapi";
+import { Array, Cause, Context, Effect, Layer, Logger, LogLevel, Order, pipe, Record, String, Tuple } from "effect";
 
 import { AgentLive } from "@tinyburg/insight/node/index";
 import { Rpcs } from "@tinyburg/insight/shared/Rpcs";
@@ -50,7 +51,7 @@ const program = Effect.gen(function* () {
      */
     `;
 
-    yield* Effect.logInfo("Generating Bitbook posts data");
+    yield* Effect.logInfo("Generating bitbook posts data");
     const { eventTypes, mediaTypes, posts } = yield* client.GetAllBitbookPosts();
     yield* fileSystem.writeFileString(
         path.join(internalDir, "tinytowerBitbookPosts.ts"),
@@ -64,7 +65,32 @@ const program = Effect.gen(function* () {
         `
     );
 
-    // yield* client.GetAllBitizenData();
+    yield* Effect.logInfo("Generating bitizen data");
+    const {
+        femaleLastNames,
+        femaleNames,
+        maleLastNames,
+        maleNames,
+        numberBiHats,
+        numberFemaleHats,
+        numberGlasses,
+        numberHairAccessories,
+        numberMaleHats,
+    } = yield* client.GetAllBitizenData();
+    yield* fileSystem.writeFileString(
+        path.join(internalDir, "tinytowerBitizens.ts"),
+        `${banner}
+        export const numberBiHats = ${numberBiHats} as const;
+        export const numberFemaleHats = ${numberFemaleHats} as const;
+        export const numberGlasses = ${numberGlasses} as const;
+        export const numberHairAccessories = ${numberHairAccessories} as const;
+        export const numberMaleHats = ${numberMaleHats} as const;\n
+        export const maleNames = ${JSON.stringify(femaleNames)} as const;\n
+        export const maleLastNames = ${JSON.stringify(femaleLastNames)} as const;\n
+        export const femaleNames = ${JSON.stringify(maleNames)} as const;\n
+        export const femaleLastNames = ${JSON.stringify(maleLastNames)} as const;\n
+        `
+    );
 
     yield* Effect.logInfo("Generating costumes data");
     const costumes = yield* client.GetAllCostumes();
@@ -139,51 +165,51 @@ const DeviceLive = pipe(
     FridaDevice.layerAndroidEmulatorDeviceConfig("Small_Phone", {
         fridaExecutable: "/data/local/tmp/frida-server-17.5.2-android-arm64",
         extraEmulatorArgs: ["-gpu", "swiftshader_indirect"],
-    })
-    // Layer.tap(
-    //     Effect.fnUntraced(
-    //         function* (deviceCtx: Context.Context<FridaDevice.FridaDevice>) {
-    //             const device = Context.get(deviceCtx, FridaDevice.FridaDevice);
-    //             const emulatorName = String.replace("android-emulator://", "")(device.host);
-    //             const apks = yield* Effect.provide(
-    //                 GooglePlayApi.download("com.nimblebit.tinytower"),
-    //                 GooglePlayApi.defaultHttpClient
-    //             );
+    }),
+    Layer.tap(
+        Effect.fnUntraced(
+            function* (deviceCtx: Context.Context<FridaDevice.FridaDevice>) {
+                const device = Context.get(deviceCtx, FridaDevice.FridaDevice);
+                const emulatorName = String.replace("android-emulator://", "")(device.host);
+                const apks = yield* Effect.provide(
+                    GooglePlayApi.download("com.nimblebit.tinytower"),
+                    GooglePlayApi.defaultHttpClient
+                );
 
-    //             yield* Effect.annotateCurrentSpan({
-    //                 "apk.path": apks,
-    //                 "emulator.name": emulatorName,
-    //             });
+                yield* Effect.annotateCurrentSpan({
+                    "apk.path": apks,
+                    "emulator.name": emulatorName,
+                });
 
-    //             const installCommand = Command.make(
-    //                 "/Users/leo.conforti/Library/Android/sdk/platform-tools/adb",
-    //                 "-s",
-    //                 emulatorName,
-    //                 "install-multiple",
-    //                 "-r", // Replace existing application (if present)
-    //                 "-t", // Allow test packages
-    //                 "-g", // Grant all runtime permissions
-    //                 "-d", // Allow downgrade
-    //                 ...apks.map((apk) => apk.file)
-    //             );
+                const installCommand = Command.make(
+                    "/Users/leo.conforti/Library/Android/sdk/platform-tools/adb",
+                    "-s",
+                    emulatorName,
+                    "install-multiple",
+                    "-r", // Replace existing application (if present)
+                    "-t", // Allow test packages
+                    "-g", // Grant all runtime permissions
+                    "-d", // Allow downgrade
+                    ...apks.map((apk) => apk.file)
+                );
 
-    //             const exitCode = yield* Command.exitCode(installCommand);
-    //             if (exitCode !== 0) {
-    //                 return yield* new FridaDeviceAcquisitionError.FridaDeviceAcquisitionError({
-    //                     attempts: 1,
-    //                     acquisitionMethod: "android-emulator",
-    //                     cause: new Cause.RuntimeException(`Failed to install APK. Exit code: ${exitCode}`),
-    //                 });
-    //             }
-    //         },
-    //         Effect.scoped,
-    //         Effect.timed,
-    //         Effect.map(Tuple.getFirst),
-    //         Effect.flatMap((time) => Effect.logDebug(`APK downloading and installing took ${time}`)),
-    //         Effect.asVoid
-    //     )
-    // ),
-    // Layer.provide(NodeContext.layer)
+                const exitCode = yield* Command.exitCode(installCommand);
+                if (exitCode !== 0) {
+                    return yield* new FridaDeviceAcquisitionError.FridaDeviceAcquisitionError({
+                        attempts: 1,
+                        acquisitionMethod: "android-emulator",
+                        cause: new Cause.RuntimeException(`Failed to install APK. Exit code: ${exitCode}`),
+                    });
+                }
+            },
+            Effect.scoped,
+            Effect.timed,
+            Effect.map(Tuple.getFirst),
+            Effect.flatMap((time) => Effect.logDebug(`APK downloading and installing took ${time}`)),
+            Effect.asVoid
+        )
+    ),
+    Layer.provide(NodeContext.layer)
 );
 
 const Live = pipe(

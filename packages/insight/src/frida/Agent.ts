@@ -18,6 +18,15 @@ export const liftNimblebitDSO = (object: Il2Cpp.Object): Extensions.Dictionary<I
 };
 
 /** @internal */
+export const readString = (object: Il2Cpp.Field.Type): Option.Option<string> => {
+    if (object instanceof Il2Cpp.String) {
+        return Option.fromNullable(object.isNull() ? null : object.content);
+    } else {
+        return Option.some(object.toString());
+    }
+};
+
+/** @internal */
 export const objectReadAllFields = (object: Il2Cpp.Object): Record<string, string> =>
     pipe(
         object.class.fields,
@@ -25,12 +34,7 @@ export const objectReadAllFields = (object: Il2Cpp.Object): Record<string, strin
         Array.filter((field) => !field.name.startsWith("_")),
         Array.filterMap((classField) => {
             const objectField = object.field(classField.name);
-            return Option.product(
-                Option.some(objectField.name),
-                objectField.value instanceof Il2Cpp.String
-                    ? Option.fromNullable(objectField.value.content)
-                    : Option.some(objectField.value.toString())
-            );
+            return Option.product(Option.some(objectField.name), readString(objectField.value));
         }),
         Record.fromEntries
     );
@@ -292,10 +296,10 @@ const RpcsLive = Rpcs.toLayer(
             const NumBiHatsField = yield* tryFieldCached<number>(VBitizenClass, "numBHats");
 
             type StringArray = Il2Cpp.Array<Il2Cpp.String>;
-            const readStringArray = Function.flow(Array.fromIterable<Il2Cpp.Field.Type>, Array.map(String));
+            const readStringArray = Function.flow(Array.fromIterable<Il2Cpp.Field.Type>, Array.filterMap(readString));
             const readObjectList = Function.compose(Extensions.List.lift<Il2Cpp.Object>, readStringArray);
 
-            const LocalizationManagerInstance = LocalizationManager.new();
+            const LocalizationManagerInstance = Il2Cpp.gc.choose(LocalizationManager)[0];
             const MaleNamesField = LocalizationManagerInstance.field<StringArray>("maleNames");
             const FemaleNamesField = LocalizationManagerInstance.field<StringArray>("femaleNames");
             const MaleLastNamesField = LocalizationManagerInstance.field<StringArray>("lastMaleNames");
