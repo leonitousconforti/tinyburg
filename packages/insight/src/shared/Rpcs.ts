@@ -2,12 +2,6 @@ import * as Rpc from "@effect/rpc/Rpc";
 import * as RpcGroup from "@effect/rpc/RpcGroup";
 import * as Schema from "effect/Schema";
 
-// export class TowerCredentials extends Schema.Class<TowerCredentials>("TowerCredentials")({
-//     playerId: Schema.String,
-//     playerAuthKey: Schema.String,
-//     playerEmail: Schema.Option(Schema.String),
-// }) {}
-
 export const TowerCredentials = Schema.Struct({
     playerId: Schema.String,
     playerAuthKey: Schema.String,
