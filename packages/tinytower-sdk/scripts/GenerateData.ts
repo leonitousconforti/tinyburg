@@ -20,12 +20,13 @@ const sortIndexable = <T extends Readonly<{ index: string }>>(
 
 const replaceEnumTypeFields = (
     stringified: string,
+    fieldname: string,
     enums: Readonly<Record<string, string>>,
     typeName: string
 ): string => {
     return stringified.replace(
-        new RegExp(`"(${Object.keys(enums).join("|")})"`, "g"),
-        (_match, p1) => `${typeName}.${p1}`
+        new RegExp(`"${fieldname}":\\s*"(${Object.keys(enums).join("|")})"`, "g"),
+        (_match, p1) => `"${fieldname}": ${typeName}.${p1}`
     );
 };
 
@@ -36,7 +37,7 @@ const program = Effect.gen(function* () {
 
     const client = yield* RpcClient.make(Rpcs);
     yield* client.SetFps(1);
-
+    yield* Effect.sleep("5 seconds");
     const version = yield* client.Version();
     yield* Effect.logInfo(`Tiny Tower version: ${version}`);
 
@@ -49,6 +50,7 @@ const program = Effect.gen(function* () {
      */
     `;
 
+    yield* Effect.logInfo("Generating Bitbook posts data");
     const { eventTypes, mediaTypes, posts } = yield* client.GetAllBitbookPosts();
     yield* fileSystem.writeFileString(
         path.join(internalDir, "tinytowerBitbookPosts.ts"),
@@ -57,13 +59,14 @@ const program = Effect.gen(function* () {
         export type EventType = keyof typeof eventTypes;\n\n
         export const mediaTypes = ${JSON.stringify(mediaTypes)} as const;\n
         export type MediaType = keyof typeof mediaTypes;\n\n
-        export const posts = ${replaceEnumTypeFields(replaceEnumTypeFields(JSON.stringify(posts), mediaTypes, "mediaTypes"), eventTypes, "eventTypes")} as const;\n
+        export const posts = ${replaceEnumTypeFields(replaceEnumTypeFields(JSON.stringify(posts), "mediatype", mediaTypes, "mediaTypes"), "event", eventTypes, "eventTypes")} as const;\n
         export type Post = (typeof posts)[number];
         `
     );
 
     // yield* client.GetAllBitizenData();
 
+    yield* Effect.logInfo("Generating costumes data");
     const costumes = yield* client.GetAllCostumes();
     yield* fileSystem.writeFileString(
         path.join(internalDir, "tinytowerCostumes.ts"),
@@ -73,6 +76,7 @@ const program = Effect.gen(function* () {
         `
     );
 
+    yield* Effect.logInfo("Generating elevators data");
     const elevators = yield* client.GetAllElevators();
     yield* fileSystem.writeFileString(
         path.join(internalDir, "tinytowerElevators.ts"),
@@ -82,32 +86,35 @@ const program = Effect.gen(function* () {
         `
     );
 
+    yield* Effect.logInfo("Generating floors data");
     const { floors, types: floorTypes } = yield* client.GetAllFloors();
     yield* fileSystem.writeFileString(
         path.join(internalDir, "tinytowerFloors.ts"),
         `${banner}
         export const floorType = ${JSON.stringify(floorTypes)} as const;\n
         export type FloorType = keyof typeof floorType;\n\n
-        export const floors = ${replaceEnumTypeFields(JSON.stringify(sortIndexable(floors)), floorTypes, "floorType")} as const;\n
+        export const floors = ${replaceEnumTypeFields(JSON.stringify(sortIndexable(floors)), "type", floorTypes, "floorType")} as const;\n
         export type Floor = (typeof floors)[number];
         `
     );
 
+    yield* Effect.logInfo("Generating missions data");
     const { missions, tipMissions, tutorialMissions, types: missionTypes } = yield* client.GetAllMissions();
     yield* fileSystem.writeFileString(
         path.join(internalDir, "tinytowerMissions.ts"),
         `${banner}
         export const missionType = ${JSON.stringify(missionTypes)} as const;\n
         export type MissionType = keyof typeof missionType;\n\n
-        export const tutorialMissions = ${replaceEnumTypeFields(JSON.stringify(tutorialMissions), missionTypes, "missionType")} as const;\n
+        export const tutorialMissions = ${replaceEnumTypeFields(JSON.stringify(tutorialMissions), "mType", missionTypes, "missionType")} as const;\n
         export type TutorialMission = (typeof tutorialMissions)[number];\n\n
-        export const tipMissions = ${replaceEnumTypeFields(JSON.stringify(tipMissions), missionTypes, "missionType")} as const;\n
+        export const tipMissions = ${replaceEnumTypeFields(JSON.stringify(tipMissions), "mType", missionTypes, "missionType")} as const;\n
         export type TipMission = (typeof tipMissions)[number];\n\n
-        export const missions = ${replaceEnumTypeFields(JSON.stringify(missions), missionTypes, "missionType")} as const;\n
+        export const missions = ${replaceEnumTypeFields(JSON.stringify(missions), "mType", missionTypes, "missionType")} as const;\n
         export type Mission = (typeof missions)[number];
         `
     );
 
+    yield* Effect.logInfo("Generating pets data");
     const pets = yield* client.GetAllPets();
     yield* fileSystem.writeFileString(
         path.join(internalDir, "tinytowerPets.ts"),
@@ -117,6 +124,7 @@ const program = Effect.gen(function* () {
         `
     );
 
+    yield* Effect.logInfo("Generating roofs data");
     const roofs = yield* client.GetAllRoofs();
     yield* fileSystem.writeFileString(
         path.join(internalDir, "tinytowerRoofs.ts"),
