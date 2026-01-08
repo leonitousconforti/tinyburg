@@ -2,11 +2,17 @@ import * as Rpc from "@effect/rpc/Rpc";
 import * as RpcGroup from "@effect/rpc/RpcGroup";
 import * as Schema from "effect/Schema";
 
-export class TowerCredentials extends Schema.Class<TowerCredentials>("TowerCredentials")({
+// export class TowerCredentials extends Schema.Class<TowerCredentials>("TowerCredentials")({
+//     playerId: Schema.String,
+//     playerAuthKey: Schema.String,
+//     playerEmail: Schema.Option(Schema.String),
+// }) {}
+
+export const TowerCredentials = Schema.Struct({
     playerId: Schema.String,
-    playerSalt: Schema.String,
+    playerAuthKey: Schema.String,
     playerEmail: Schema.Option(Schema.String),
-}) {}
+});
 
 export class GameState extends Schema.Class<GameState>("GameState")({
     bux: Schema.Int,
@@ -26,6 +32,10 @@ export class GameState extends Schema.Class<GameState>("GameState")({
 export class Rpcs extends RpcGroup.make(
     Rpc.make("Version", {
         success: Schema.String,
+    }),
+    Rpc.make("SetFps", {
+        payload: Schema.Number,
+        success: Schema.Void,
     }),
     Rpc.make("GetTowerCredentials", {
         success: TowerCredentials,
@@ -53,27 +63,17 @@ export class Rpcs extends RpcGroup.make(
         }),
     }),
     Rpc.make("GetAllElevators", {
-        success: Schema.Record({
-            key: Schema.String,
-            value: Schema.Struct({
-                index: Schema.String,
-            }),
-        }),
+        success: Schema.Array(Schema.String),
     }),
     Rpc.make("GetAllRoofs", {
-        success: Schema.Record({
-            key: Schema.String,
-            value: Schema.Struct({
-                index: Schema.String,
-            }),
-        }),
+        success: Schema.Array(Schema.String),
     }),
     Rpc.make("GetAllCostumes", {
         success: Schema.Record({
             key: Schema.String,
             value: Schema.Record({
                 key: Schema.String,
-                value: Schema.String,
+                value: Schema.Union(Schema.String, Schema.Number, Schema.Boolean),
             }),
         }),
     }),
@@ -87,13 +87,12 @@ export class Rpcs extends RpcGroup.make(
                 key: Schema.String,
                 value: Schema.String,
             }),
-            posts: Schema.Record({
-                key: Schema.String,
-                value: Schema.Record({
+            posts: Schema.Array(
+                Schema.Record({
                     key: Schema.String,
-                    value: Schema.String,
-                }),
-            }),
+                    value: Schema.Union(Schema.String, Schema.Number, Schema.Boolean),
+                })
+            ),
         }),
     }),
     Rpc.make("GetAllBitizenData", {
@@ -117,27 +116,24 @@ export class Rpcs extends RpcGroup.make(
                 key: Schema.String,
                 value: Schema.String,
             }),
-            tutorialMissions: Schema.Record({
-                key: Schema.String,
-                value: Schema.Record({
+            tutorialMissions: Schema.Array(
+                Schema.Record({
                     key: Schema.String,
-                    value: Schema.String,
-                }),
-            }),
-            tipMissions: Schema.Record({
-                key: Schema.String,
-                value: Schema.Record({
+                    value: Schema.Union(Schema.String, Schema.Number, Schema.Boolean),
+                })
+            ),
+            tipMissions: Schema.Array(
+                Schema.Record({
                     key: Schema.String,
-                    value: Schema.String,
-                }),
-            }),
-            missions: Schema.Record({
-                key: Schema.String,
-                value: Schema.Record({
+                    value: Schema.Union(Schema.String, Schema.Number, Schema.Boolean),
+                })
+            ),
+            missions: Schema.Array(
+                Schema.Record({
                     key: Schema.String,
-                    value: Schema.String,
-                }),
-            }),
+                    value: Schema.Union(Schema.String, Schema.Number, Schema.Boolean),
+                })
+            ),
         }),
     }),
     Rpc.make("GetAllPets", {
@@ -145,7 +141,7 @@ export class Rpcs extends RpcGroup.make(
             key: Schema.String,
             value: Schema.Record({
                 key: Schema.String,
-                value: Schema.String,
+                value: Schema.Union(Schema.String, Schema.Number, Schema.Boolean),
             }),
         }),
     })

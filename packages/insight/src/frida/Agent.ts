@@ -2,13 +2,47 @@ import "@efffrida/polyfills";
 import "frida-il2cpp-bridge";
 
 import { RpcSerialization, RpcServer } from "@effect/rpc";
-import { Assembly, Class, FridaIl2cppBridge } from "@efffrida/il2cpp-bridge";
+import { Assembly, Class, Extensions, FridaIl2cppBridge } from "@efffrida/il2cpp-bridge";
 import { FridaRuntime } from "@efffrida/platform";
 import { FridaRpcServer } from "@efffrida/rpc/frida";
-import { Array, Cause, Effect, Layer, Option, pipe, Record, Schedule, Schema, Tuple } from "effect";
+import { Array, Cause, Effect, Function, Layer, Option, pipe, Record, Schedule, Schema, Tuple } from "effect";
 
-import { GameState, Rpcs, type TowerCredentials } from "../shared/Rpcs.ts";
-import { Dictionary, List } from "./Wrappers.ts";
+import { GameState, Rpcs, TowerCredentials } from "../shared/Rpcs.ts";
+
+/** @internal */
+export const liftNimblebitDSO = (object: Il2Cpp.Object): Extensions.Dictionary<Il2Cpp.String, Il2Cpp.Object> => {
+    const dictionary = Extensions.Dictionary.lift<Il2Cpp.String, Il2Cpp.Object>(object);
+    dictionary.class.generics[0] = Il2Cpp.corlib.class("System.String");
+    dictionary.class.generics[1] = Il2Cpp.corlib.class("System.Object");
+    return dictionary;
+};
+
+/** @internal */
+export const objectReadAllFields = (object: Il2Cpp.Object): Record<string, string> =>
+    pipe(
+        object.class.fields,
+        Array.filter((field) => !field.isStatic),
+        Array.filter((field) => !field.name.startsWith("_")),
+        Array.filterMap((classField) => {
+            const objectField = object.field(classField.name);
+            return Option.product(
+                Option.some(objectField.name),
+                objectField.value instanceof Il2Cpp.String
+                    ? Option.fromNullable(objectField.value.content)
+                    : Option.some(objectField.value.toString())
+            );
+        }),
+        Record.fromEntries
+    );
+
+/** @internal */
+export const readEnum = (enumClass: Il2Cpp.Class): Record<string, string> =>
+    pipe(
+        enumClass.fields,
+        Array.filter((field) => field.type.class === enumClass),
+        Array.map((field) => Tuple.make(field.name, field.value.toString())),
+        Record.fromEntries
+    );
 
 const RpcsLive = Rpcs.toLayer(
     Effect.gen(function* () {
@@ -21,7 +55,7 @@ const RpcsLive = Rpcs.toLayer(
         // Helper to wait for instance fields
         const waitForInstance = <R = never>(
             className: string,
-            instanceFieldName: string = "instance",
+            instanceFieldName: string | undefined = "instance",
             policy: Schedule.Schedule<unknown, Cause.NoSuchElementException, R> | undefined = Schedule.addDelay(
                 Schedule.recurs(3),
                 () => "2 seconds"
@@ -36,8 +70,8 @@ const RpcsLive = Rpcs.toLayer(
                     (field) =>
                         !field.isNull() &&
                         !field.value.isNull() &&
-                        !field.handle.equals(0x0) &&
-                        !field.value.handle.equals(0x0),
+                        !field.handle.equals(ptr(0x0)) &&
+                        !field.value.handle.equals(ptr(0x0)),
                     () => new Cause.NoSuchElementException(`${className}.${instanceFieldName} is null`)
                 ),
                 Effect.tap((field) =>
@@ -49,14 +83,13 @@ const RpcsLive = Rpcs.toLayer(
                 Effect.retry(policy)
             );
 
-        // Loading (will get access violations if you don't wait for these)
+        // Loading necessary classes
         yield* waitForInstance("VGame");
         yield* waitForInstance("VPlayer");
-        yield* waitForInstance("VPetTable", "_instance");
-        yield* waitForInstance("VCostumeTable", "_instance");
 
         // Global assemblies
         const CSharpAssembly = yield* assemblyCached("Assembly-CSharp");
+        const CoreEngineAssembly = yield* assemblyCached("UnityEngine.CoreModule");
 
         // Version implementation
         const version = Effect.fnUntraced(function* () {
@@ -66,9 +99,16 @@ const RpcsLive = Rpcs.toLayer(
                 "get_parsedVersion"
             );
 
-            const decode = Schema.decodeUnknown(Schema.Tuple(Schema.Int, Schema.Int, Schema.Int));
             const versionParts = Array.fromIterable(VersionStringMethod.invoke());
+            const decode = Schema.decodeUnknown(Schema.Tuple(Schema.Int, Schema.Int, Schema.Int));
             return yield* Effect.map(decode(versionParts), ([major, minor, patch]) => `${major}.${minor}.${patch}`);
+        }, Effect.orDie);
+
+        // SetFps implementation
+        const setFps = Effect.fnUntraced(function* (fps: number) {
+            const ApplicationClass = yield* tryClassCached(CoreEngineAssembly.image, "UnityEngine.Application");
+            const setTargetFpsMethod = yield* tryMethodCached<void>(ApplicationClass, "set_targetFrameRate", 1);
+            return setTargetFpsMethod.invoke(fps);
         }, Effect.orDie);
 
         // GetTowerCredentials implementation
@@ -79,23 +119,27 @@ const RpcsLive = Rpcs.toLayer(
             const PlayerEmailField = yield* tryMethodCached<Il2Cpp.String>(NBSyncClass, "get_playerEmail");
             const PlayerAuthKeyField = yield* tryMethodCached<Il2Cpp.String>(NBSyncClass, "get_playerSalt");
 
-            return {
-                playerId: PlayerIdField.invoke().content!,
-                playerSalt: PlayerAuthKeyField.invoke().content!,
-                playerEmail: PlayerRegistered.invoke()
-                    ? Option.some(PlayerEmailField.invoke().content!)
-                    : Option.none(),
-            };
+            const playerId = PlayerIdField.invoke().content;
+            const playerAuthKey = PlayerAuthKeyField.invoke().content;
+            const playerEmail = PlayerRegistered.invoke()
+                ? Option.some(PlayerEmailField.invoke().content)
+                : Option.none();
+
+            return yield* Schema.decodeUnknown(TowerCredentials)({
+                playerId,
+                playerAuthKey,
+                playerEmail,
+            });
         }, Effect.orDie);
 
         // SetTowerCredentials implementation
-        const setTowerCredentials = Effect.fnUntraced(function* (payload: TowerCredentials) {
+        const setTowerCredentials = Effect.fnUntraced(function* (payload: Schema.Schema.Type<typeof TowerCredentials>) {
             const NBSyncClass = yield* tryClassCached(CSharpAssembly.image, "NBSync");
             const SwitchRegisteredPlaterMethod = yield* tryMethodCached<void>(NBSyncClass, "switchRegisteredPlater", 4);
 
             SwitchRegisteredPlaterMethod.invoke(
                 Il2Cpp.string(payload.playerId),
-                Il2Cpp.string(payload.playerSalt),
+                Il2Cpp.string(payload.playerAuthKey),
                 Il2Cpp.string(Option.getOrNull(payload.playerEmail)),
                 Option.isSome(payload.playerEmail)
             );
@@ -121,25 +165,20 @@ const RpcsLive = Rpcs.toLayer(
 
         // Get all floors implementation
         const getAllFloors = Effect.fnUntraced(function* () {
+            yield* waitForInstance("VFloorData");
             const FloorTypeClass = yield* tryClassCached(CSharpAssembly.image, "FloorType");
             const VFloorDataClass = yield* tryClassCached(CSharpAssembly.image, "VFloorData");
             const FloorsField = yield* tryFieldCached<Il2Cpp.Object>(VFloorDataClass, "info");
 
-            const types = pipe(
-                FloorTypeClass.fields,
-                Array.filter((field) => field.type.class === FloorTypeClass),
-                Array.map((field) => Tuple.make(field.name, field.value.toString())),
-                Record.fromEntries
-            );
-
+            const types = readEnum(FloorTypeClass);
             const floors = pipe(
                 FloorsField.value,
-                Dictionary.lift<number, Il2Cpp.Object>,
+                Extensions.Dictionary.lift<number, Il2Cpp.Object>,
                 (floorInfo) => floorInfo.entries,
                 Array.filter(([floorIndex]) => floorIndex >= 0),
                 Array.map(([floorIndex, floorObject]) => {
                     const index = floorIndex.toString();
-                    const floor = Dictionary.liftNimblebitDSO(floorObject);
+                    const floor = liftNimblebitDSO(floorObject);
                     const name = floor.get(Il2Cpp.string("name")).toString();
                     const type = floor.get(Il2Cpp.string("type")).toString();
                     return Tuple.make(name, { index, type });
@@ -152,6 +191,7 @@ const RpcsLive = Rpcs.toLayer(
 
         // Get all elevators implementation
         const getAllElevators = Effect.fnUntraced(function* () {
+            yield* waitForInstance("VElevatorData");
             const VElevatorDataClass = yield* tryClassCached(CSharpAssembly.image, "VElevatorData");
             const NumElevatorsField = yield* tryFieldCached<number>(VElevatorDataClass, "NUM_ELEVATORS");
             const ElevatorsField = yield* tryFieldCached<Il2Cpp.Array<Il2Cpp.Object>>(VElevatorDataClass, "info");
@@ -160,18 +200,15 @@ const RpcsLive = Rpcs.toLayer(
             const elevators = pipe(
                 ElevatorsField.value,
                 Array.fromIterable,
-                Array.map((elevatorObject, elevatorIndex) => {
-                    const index = elevatorIndex.toString();
-                    const elevator = Dictionary.liftNimblebitDSO(elevatorObject);
-                    const name = elevator.get(Il2Cpp.string("name")).toString();
-                    return Tuple.make(name, { index });
-                }),
-                Record.fromEntries
+                Array.map((elevatorObject) => {
+                    const elevator = liftNimblebitDSO(elevatorObject);
+                    return elevator.get(Il2Cpp.string("name")).toString();
+                })
             );
 
-            if (Record.keys(elevators).length !== numElevators) {
+            if (elevators.length !== numElevators) {
                 return yield* Effect.dieMessage(
-                    `Expected ${numElevators} elevators, but found ${Record.keys(elevators).length} instead`
+                    `Expected to read ${numElevators} elevators, but only read ${elevators.length} instead`
                 );
             }
 
@@ -180,6 +217,7 @@ const RpcsLive = Rpcs.toLayer(
 
         // Get all roofs implementation
         const getAllRoofs = Effect.fnUntraced(function* () {
+            yield* waitForInstance("VRoofData");
             const VRoofDataClass = yield* tryClassCached(CSharpAssembly.image, "VRoofData");
             const NumRoofsField = yield* tryFieldCached<number>(VRoofDataClass, "NUM_ROOFS");
             const RoofsField = yield* tryFieldCached<Il2Cpp.Array<Il2Cpp.Object>>(VRoofDataClass, "info");
@@ -188,18 +226,15 @@ const RpcsLive = Rpcs.toLayer(
             const roofs = pipe(
                 RoofsField.value,
                 Array.fromIterable,
-                Array.map((roofObject, roofIndex) => {
-                    const index = roofIndex.toString();
-                    const roof = Dictionary.liftNimblebitDSO(roofObject);
-                    const name = roof.get(Il2Cpp.string("name")).toString();
-                    return Tuple.make(name, { index });
-                }),
-                Record.fromEntries
+                Array.map((roofObject) => {
+                    const roof = liftNimblebitDSO(roofObject);
+                    return roof.get(Il2Cpp.string("name")).toString();
+                })
             );
 
-            if (Record.keys(roofs).length !== numRoofs) {
+            if (roofs.length !== numRoofs) {
                 return yield* Effect.dieMessage(
-                    `Expected ${numRoofs} roofs, but found ${Record.keys(roofs).length} instead`
+                    `Expected to read ${numRoofs} roofs, but only read ${roofs.length} instead`
                 );
             }
 
@@ -208,29 +243,16 @@ const RpcsLive = Rpcs.toLayer(
 
         // Get all costumes implementation
         const getAllCostumes = Effect.fnUntraced(function* () {
-            const VCostumeClass = yield* tryClassCached(CSharpAssembly.image, "VCostume");
+            yield* waitForInstance("VCostumeTable", "_instance");
             const VCostumeTableClass = yield* tryClassCached(CSharpAssembly.image, "VCostumeTable");
             const VCostumeTableInstanceField = yield* tryFieldCached<Il2Cpp.Object>(VCostumeTableClass, "_instance");
             const CostumesField = VCostumeTableInstanceField.value.field<Il2Cpp.Object>("costumes");
 
-            const costumeFields = Array.map(VCostumeClass.fields, (field) => field.name);
-            const readCostume = (costumeObject: Il2Cpp.Object): Record<string, string> =>
-                pipe(
-                    costumeFields,
-                    Array.map((field) => {
-                        const fieldValue = costumeObject.field(field).value.toString();
-                        return Tuple.make(field, fieldValue);
-                    }),
-                    Record.fromEntries
-                );
-
             const costumes = pipe(
                 CostumesField.value,
-                Dictionary.liftNimblebitDSO,
-                (costumeInfo) => costumeInfo.entries,
-                Array.map(Tuple.mapFirst((name) => name.content!)),
-                Array.map(Tuple.mapSecond((costumeObject) => readCostume(costumeObject))),
-                Record.fromEntries
+                liftNimblebitDSO,
+                (costumeDict) => costumeDict.toRecord(),
+                Record.map(objectReadAllFields)
             );
 
             return costumes;
@@ -238,44 +260,20 @@ const RpcsLive = Rpcs.toLayer(
 
         // Get all bitbook posts implementation
         const getAllBitbookPosts = Effect.fnUntraced(function* () {
+            yield* waitForInstance("VBitbookPostData");
             const BBEventTypeClass = yield* tryClassCached(CSharpAssembly.image, "BBEventType");
             const PostMediaTypeClass = yield* tryClassCached(CSharpAssembly.image, "PostMediaType");
             const VBitbookPostDataClass = yield* tryClassCached(CSharpAssembly.image, "VBitbookPostData");
             const PostsField = yield* tryFieldCached<Il2Cpp.Object>(VBitbookPostDataClass, "posts");
 
-            const eventTypes = pipe(
-                BBEventTypeClass.fields,
-                Array.filter((field) => field.type.class === BBEventTypeClass),
-                Array.map((field) => Tuple.make(field.name, field.value.toString())),
-                Record.fromEntries
-            );
-
-            const mediaTypes = pipe(
-                PostMediaTypeClass.fields,
-                Array.filter((field) => field.type.class === PostMediaTypeClass),
-                Array.map((field) => Tuple.make(field.name, field.value.toString())),
-                Record.fromEntries
-            );
-
-            const readPost = (postObject: Il2Cpp.Object): Record<string, string> =>
-                pipe(
-                    postObject,
-                    Dictionary.liftNimblebitDSO,
-                    (postDict) => postDict.entries,
-                    Array.map(Tuple.mapFirst((key) => key.toString())),
-                    Array.map(Tuple.mapSecond((value) => value.toString())),
-                    Record.fromEntries
-                );
-
+            const eventTypes = readEnum(BBEventTypeClass);
+            const mediaTypes = readEnum(PostMediaTypeClass);
             const posts = pipe(
                 PostsField.value,
-                Dictionary.lift<number, Il2Cpp.Object>,
-                (postsDict) => postsDict.entries,
-                Array.map(([postId, postObject]) => {
-                    const index = postId.toString();
-                    return Tuple.make(index, readPost(postObject));
-                }),
-                Record.fromEntries
+                Extensions.Dictionary.lift<number, Il2Cpp.Object>,
+                (postDict) => postDict.values,
+                Array.map((postObject) => liftNimblebitDSO(postObject).toRecord()),
+                Array.map(Record.map((object) => object.toString()))
             );
 
             return { eventTypes, mediaTypes, posts };
@@ -284,7 +282,7 @@ const RpcsLive = Rpcs.toLayer(
         // Get all bitizen attributes implementation
         const getAllBitizenData = Effect.fnUntraced(function* () {
             const VBitizenClass = yield* tryClassCached(CSharpAssembly.image, "VBitizen");
-            const LocalizationManagerClass = yield* tryClassCached(CSharpAssembly.image, "LocalizationManager");
+            const LocalizationManager = yield* tryClassCached(CSharpAssembly.image, "LocalizationManager");
             const SkinColorsField = yield* tryFieldCached<Il2Cpp.Object>(VBitizenClass, "skinColors");
             const HairColorsField = yield* tryFieldCached<Il2Cpp.Object>(VBitizenClass, "hairColors");
             const NumHairAccessoriesField = yield* tryFieldCached<number>(VBitizenClass, "numHairAcc");
@@ -293,66 +291,15 @@ const RpcsLive = Rpcs.toLayer(
             const NumMaleHatsField = yield* tryFieldCached<number>(VBitizenClass, "numMHats");
             const NumBiHatsField = yield* tryFieldCached<number>(VBitizenClass, "numBHats");
 
-            const snapshot = Il2Cpp.MemorySnapshot.capture();
-            const LocalizationManagerInstance = snapshot.objects.find(Il2Cpp.isExactly(LocalizationManagerClass));
-            if (!LocalizationManagerInstance) {
-                return yield* Effect.dieMessage("Could not find LocalizationManager instance");
-            }
+            type StringArray = Il2Cpp.Array<Il2Cpp.String>;
+            const readStringArray = Function.flow(Array.fromIterable<Il2Cpp.Field.Type>, Array.map(String));
+            const readObjectList = Function.compose(Extensions.List.lift<Il2Cpp.Object>, readStringArray);
 
-            const MaleNamesField = yield* tryFieldCached<Il2Cpp.Array<Il2Cpp.String>>(
-                LocalizationManagerClass,
-                "maleNames"
-            );
-            const FemaleNamesField = yield* tryFieldCached<Il2Cpp.Array<Il2Cpp.String>>(
-                LocalizationManagerClass,
-                "femaleNames"
-            );
-            const MaleLastNamesField = yield* tryFieldCached<Il2Cpp.Array<Il2Cpp.String>>(
-                LocalizationManagerClass,
-                "lastMaleNames"
-            );
-            const FemaleLastNamesField = yield* tryFieldCached<Il2Cpp.Array<Il2Cpp.String>>(
-                LocalizationManagerClass,
-                "lastFemaleNames"
-            );
-
-            const maleNames = pipe(
-                MaleNamesField.value,
-                Array.fromIterable,
-                Array.map((name) => name.content!)
-            );
-
-            const femaleNames = pipe(
-                FemaleNamesField.value,
-                Array.fromIterable,
-                Array.map((name) => name.content!)
-            );
-
-            const maleLastNames = pipe(
-                MaleLastNamesField.value,
-                Array.fromIterable,
-                Array.map((name) => name.content!)
-            );
-
-            const femaleLastNames = pipe(
-                FemaleLastNamesField.value,
-                Array.fromIterable,
-                Array.map((name) => name.content!)
-            );
-
-            const skinColors = pipe(
-                SkinColorsField.value,
-                List.lift<Il2Cpp.Object>,
-                Array.fromIterable,
-                Array.map((color) => color.toString())
-            );
-
-            const hairColors = pipe(
-                HairColorsField.value,
-                List.lift<Il2Cpp.Object>,
-                Array.fromIterable,
-                Array.map((color) => color.toString())
-            );
+            const LocalizationManagerInstance = LocalizationManager.new();
+            const MaleNamesField = LocalizationManagerInstance.field<StringArray>("maleNames");
+            const FemaleNamesField = LocalizationManagerInstance.field<StringArray>("femaleNames");
+            const MaleLastNamesField = LocalizationManagerInstance.field<StringArray>("lastMaleNames");
+            const FemaleLastNamesField = LocalizationManagerInstance.field<StringArray>("lastFemaleNames");
 
             return {
                 numberHairAccessories: NumHairAccessoriesField.value,
@@ -360,104 +307,51 @@ const RpcsLive = Rpcs.toLayer(
                 numberFemaleHats: NumFemaleHatsField.value,
                 numberMaleHats: NumMaleHatsField.value,
                 numberBiHats: NumBiHatsField.value,
-                maleNames,
-                femaleNames,
-                maleLastNames,
-                femaleLastNames,
-                skinColors,
-                hairColors,
+                maleNames: readStringArray(MaleNamesField.value),
+                femaleNames: readStringArray(FemaleNamesField.value),
+                maleLastNames: readStringArray(MaleLastNamesField.value),
+                femaleLastNames: readStringArray(FemaleLastNamesField.value),
+                skinColors: readObjectList(SkinColorsField.value),
+                hairColors: readObjectList(HairColorsField.value),
             };
         }, Effect.orDie);
 
         // Get all missions implementation
         const getAllMissions = Effect.fnUntraced(function* () {
-            const VMissionClass = yield* tryClassCached(CSharpAssembly.image, "VMission");
+            yield* waitForInstance("VMissionData");
             const MissionTypeClass = yield* tryClassCached(CSharpAssembly.image, "MissionType");
             const VMissionDataClass = yield* tryClassCached(CSharpAssembly.image, "VMissionData");
-
             const MissionsField = yield* tryFieldCached<Il2Cpp.Object>(VMissionDataClass, "missions");
             const TipMissionsField = yield* tryFieldCached<Il2Cpp.Object>(VMissionDataClass, "tipMissions");
             const TutorialMissionsField = yield* tryFieldCached<Il2Cpp.Object>(VMissionDataClass, "tutMissions");
+            const values = Function.compose(Extensions.Dictionary.lift<number, Il2Cpp.Object>, (dict) => dict.values);
 
-            const missionFields = pipe(
-                VMissionClass.fields,
-                Array.filter((field) => !field.isStatic),
-                Array.filter((field) => !field.name.startsWith("_")),
-                Array.map((field) => field.name)
-            );
-
-            const readMission = (missionObject: Il2Cpp.Object): Record<string, string> =>
-                pipe(
-                    missionFields,
-                    Array.map((field) => {
-                        const fieldValue = missionObject.field(field).value.toString();
-                        return Tuple.make(field, fieldValue);
-                    }),
-                    Record.fromEntries
-                );
-
-            const types = pipe(
-                MissionTypeClass.fields,
-                Array.filter((field) => field.type.class === MissionTypeClass),
-                Array.map((field) => Tuple.make(field.name, field.value.toString())),
-                Record.fromEntries
-            );
-
-            const tutorialMissions = pipe(
-                TutorialMissionsField.value,
-                Dictionary.lift<number, Il2Cpp.Object>,
-                (missionsDict) => missionsDict.entries,
-                Array.map(([missionId, missionObject]) => {
-                    const index = missionId.toString();
-                    return Tuple.make(index, readMission(missionObject));
-                }),
-                Record.fromEntries
-            );
-
-            const tipMissions = pipe(
-                TipMissionsField.value,
-                Dictionary.lift<number, Il2Cpp.Object>,
-                (missionsDict) => missionsDict.entries,
-                Array.map(([missionId, missionObject]) => {
-                    const index = missionId.toString();
-                    return Tuple.make(index, readMission(missionObject));
-                }),
-                Record.fromEntries
-            );
-
-            const missions = pipe(
-                MissionsField.value,
-                Dictionary.lift<number, Il2Cpp.Object>,
-                (missionsDict) => missionsDict.entries,
-                Array.map(([missionId, missionObject]) => {
-                    const index = missionId.toString();
-                    return Tuple.make(index, readMission(missionObject));
-                }),
-                Record.fromEntries
-            );
-
-            return { types, tutorialMissions, tipMissions, missions };
+            const types = readEnum(MissionTypeClass);
+            const missions = Array.map(values(MissionsField.value), objectReadAllFields);
+            const tipMissions = Array.map(values(TipMissionsField.value), objectReadAllFields);
+            const tutorialMissions = Array.map(values(TutorialMissionsField.value), objectReadAllFields);
+            return { types, missions, tipMissions, tutorialMissions };
         }, Effect.orDie);
 
         // Get all pets implementation
         const getAllPets = Effect.fnUntraced(function* () {
+            yield* waitForInstance("VPetTable", "_instance");
             const VPetTableClass = yield* tryClassCached(CSharpAssembly.image, "VPetTable");
             const VPetTableInstanceField = yield* tryFieldCached<Il2Cpp.Object>(VPetTableClass, "_instance");
             const VPetTableDefinitionsField = VPetTableInstanceField.value.field<Il2Cpp.Object>("definitions");
 
+            const readPetObject = Function.flow(
+                liftNimblebitDSO,
+                (dict) => dict.toRecord([Il2Cpp.string("VIP")]),
+                Record.map((value) => value.toString()),
+                Record.map((boolean) => (boolean.toLowerCase() === "true" ? true : false))
+            );
+
             const pets = pipe(
                 VPetTableDefinitionsField.value,
-                Dictionary.liftNimblebitDSO,
-                (petDict) => petDict.entries,
-                Array.map(([petName, petObject]) => {
-                    const name = petName.content!;
-                    const pet = Dictionary.liftNimblebitDSO(petObject);
-                    const vip = pet.containsKey(Il2Cpp.string("VIP"))
-                        ? pet.get(Il2Cpp.string("VIP")).toString()
-                        : "false";
-                    return Tuple.make(name, { vip });
-                }),
-                Record.fromEntries
+                liftNimblebitDSO,
+                (petDict) => petDict.toRecord(),
+                Record.map(readPetObject)
             );
 
             return pets;
@@ -465,6 +359,7 @@ const RpcsLive = Rpcs.toLayer(
 
         return {
             Version: version,
+            SetFps: setFps,
             GetTowerCredentials: getTowerCredentials,
             SetTowerCredentials: setTowerCredentials,
             GetGameState: getGameState,
