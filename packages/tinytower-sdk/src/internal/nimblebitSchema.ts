@@ -1,5 +1,6 @@
 import type { ValidateNimblebitItemSchema } from "../NimblebitSchema.ts";
 
+import * as EffectSchemas from "effect-schemas";
 import * as Array from "effect/Array";
 import * as Cache from "effect/Cache";
 import * as Duration from "effect/Duration";
@@ -27,7 +28,7 @@ export const parseNimblebitOrderedList = <
         schema: Schema.Schema.Any;
     }>,
 >(
-    items: Items & ValidateNimblebitItemSchema<Items[number]["schema"]>,
+    items: ValidateNimblebitItemSchema<Items>,
     separator: string | undefined = ","
 ): Schema.transformOrFail<
     typeof Schema.String,
@@ -47,7 +48,7 @@ export const parseNimblebitOrderedList = <
     Items[number]["schema"]["Context"]
 > => {
     const indexesByProperty = Function.pipe(
-        items,
+        items as Items,
         Array.map((item, index) => Tuple.make(item.property, index)),
         HashMap.fromIterable<PropertyKey, number>
     );
@@ -299,3 +300,49 @@ export const parseNimblebitObject = <Fields extends Schema.Struct.Fields>(
         }),
     });
 };
+
+/** @internal */
+export const csharpDate = Schema.transform(
+    Schema.BigInt,
+    Schema.Union(
+        Schema.DateFromSelf,
+        Schema.Struct({
+            date: Schema.DateFromSelf,
+            extraTicks: Schema.BigIntFromSelf,
+        })
+    ),
+    {
+        encode: (input) => {
+            const date = "date" in input ? input.date : input;
+            const extraTicks = "extraTicks" in input ? input.extraTicks : 0n;
+            return BigInt(date.getTime()) * 10_000n + 621_355_968_000_000_000n + extraTicks;
+        },
+        decode: (cSharpTicks) => {
+            const ms = (cSharpTicks - 621_355_968_000_000_000n) / 10_000n;
+            return { date: new Date(Number(ms)), extraTicks: cSharpTicks % 10_000n } as const;
+        },
+    }
+);
+
+/** @internal */
+export const unityColor = Schema.Struct({
+    r: EffectSchemas.Number.U8,
+    g: EffectSchemas.Number.U8,
+    b: EffectSchemas.Number.U8,
+});
+
+/** @internal */
+export const unityColorFromString = Schema.transform(
+    Schema.TemplateLiteralParser(
+        Schema.compose(Schema.NumberFromString, Schema.NonNegativeInt),
+        ":",
+        Schema.compose(Schema.NumberFromString, Schema.NonNegativeInt),
+        ":",
+        Schema.compose(Schema.NumberFromString, Schema.NonNegativeInt)
+    ),
+    unityColor,
+    {
+        encode: (color) => [color.r, ":", color.g, ":", color.b] as const,
+        decode: (parts) => ({ r: parts[0], g: parts[2], b: parts[4] }) as const,
+    }
+);

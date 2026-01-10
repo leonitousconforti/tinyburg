@@ -5,21 +5,39 @@
  * @category Schemas
  */
 
+import type * as Effect from "effect/Effect";
+import type * as SchemaAST from "effect/SchemaAST";
+
+import * as Either from "effect/Either";
+import * as Function from "effect/Function";
+import * as ParseResult from "effect/ParseResult";
 import * as Schema from "effect/Schema";
 
+import * as Array from "effect/Array";
+import * as Option from "effect/Option";
 import * as NimblebitConfig from "./NimblebitConfig.ts";
 import * as internal from "./internal/nimblebitSchema.ts";
+import * as internalBitizen from "./internal/tinytowerBitizens.ts";
 
 /**
  * @since 1.0.0
  * @category Types
  */
-export type ValidateNimblebitItemSchema<S extends Schema.Schema.Any> =
-    S extends Schema.Schema<infer _A, infer _I, infer _R>
+export type ValidateNimblebitItemSchema<
+    Items extends ReadonlyArray<{
+        property: PropertyKey;
+        schema: Schema.Schema.Any;
+    }>,
+> = {
+    [K in keyof Items]: Items[K] extends {
+        property: infer P;
+        schema: Schema.Schema<infer _A, infer _I, infer _R>;
+    }
         ? [_I] extends [string | Readonly<string>]
-            ? {}
-            : `Nimblebit ordered list items schemas must be encodeable to strings`
-        : {};
+            ? { property: P; schema: Items[K]["schema"] }
+            : { property: P; schema: `Nimblebit ordered list items schemas must be encodeable to strings` }
+        : Items[K];
+};
 
 /**
  * @since 1.0.0
@@ -27,11 +45,11 @@ export type ValidateNimblebitItemSchema<S extends Schema.Schema.Any> =
  */
 export const parseNimblebitOrderedList: <
     const Items extends ReadonlyArray<{
-        property: string | number | symbol;
+        property: PropertyKey;
         schema: Schema.Schema.Any;
     }>,
 >(
-    items: Items & ValidateNimblebitItemSchema<Items[number]["schema"]>,
+    items: ValidateNimblebitItemSchema<Items>,
     separator?: string | undefined
 ) => Schema.transformOrFail<
     typeof Schema.String,
@@ -49,7 +67,7 @@ export const parseNimblebitOrderedList: <
         }>
     >,
     Items[number]["schema"]["Context"]
-> = internal.parseNimblebitOrderedList as any;
+> = internal.parseNimblebitOrderedList;
 
 /**
  * @since 1.0.0
@@ -82,36 +100,236 @@ export const parseNimblebitObject: <Fields extends Schema.Struct.Fields>(
  * @since 1.0.0
  * @category Schemas
  */
-export const BitizenAttributes = parseNimblebitOrderedList([
-    { property: "male", schema: Schema.transformLiterals(["0", false], ["1", true]) },
-    { property: "firstNameIndex", schema: Schema.NumberFromString },
-    { property: "lastNameIndex", schema: Schema.NumberFromString },
-    { property: "birthMonth", schema: Schema.NumberFromString },
-    { property: "birthDay", schema: Schema.NumberFromString },
-    { property: "skinColorIndex", schema: Schema.NumberFromString },
-    { property: "hairColorIndex", schema: Schema.NumberFromString },
-    { property: "showColorIndex", schema: Schema.NumberFromString },
-    { property: "pantColor", schema: Schema.String },
-    { property: "shirtColor", schema: Schema.String },
-    { property: "hasGlasses", schema: Schema.transformLiterals(["0", false], ["1", true]) },
-    { property: "glasses", schema: Schema.NumberFromString },
-    { property: "hasTie", schema: Schema.transformLiterals(["0", false], ["1", true]) },
-    { property: "tieColor", schema: Schema.String },
-    { property: "hasHairAcc", schema: Schema.transformLiterals(["0", false], ["1", true]) },
-    { property: "hairAcc", schema: Schema.NumberFromString },
-    { property: "hasBHat", schema: Schema.transformLiterals(["0", false], ["1", true]) },
-    { property: "hasMHat", schema: Schema.transformLiterals(["0", false], ["1", true]) },
-    { property: "hasFHat", schema: Schema.transformLiterals(["0", false], ["1", true]) },
-    { property: "hat", schema: Schema.NumberFromString },
-    { property: "hatColor", schema: Schema.String },
-    { property: "hasEarrings", schema: Schema.transformLiterals(["0", false], ["1", true]) },
-    { property: "EarringsColor", schema: Schema.String },
-    { property: "skillFood", schema: Schema.NumberFromString },
-    { property: "skillService", schema: Schema.NumberFromString },
-    { property: "skillRecreation", schema: Schema.NumberFromString },
-    { property: "skillRetail", schema: Schema.NumberFromString },
-    { property: "skillCreative", schema: Schema.NumberFromString },
-]);
+export const BitizenAttributes = Schema.suspend(() => {
+    class Skill extends Function.pipe(Schema.Int, Schema.between(0, 9)) {}
+    class BirthDay extends Function.pipe(Schema.Int, Schema.between(1, 31)) {}
+    class BirthMonth extends Function.pipe(Schema.Int, Schema.between(1, 31)) {}
+    class BooleanFromOneOrZero extends Schema.transformLiterals(["0", false], ["1", true]) {}
+    class IndexFromString extends Schema.compose(Schema.NumberFromString, Schema.NonNegativeInt) {}
+
+    const to = Schema.Struct({
+        $unknown: Schema.Array(Schema.String),
+        gender: Schema.Literal("female", "male"),
+        name: Schema.String,
+        birthday: Schema.Tuple(BirthMonth, BirthDay),
+        designColors: Schema.Struct({
+            pantColor: internal.unityColor,
+            shirtColor: internal.unityColor,
+            skinColorIndex: Schema.NonNegativeInt,
+            hairColorIndex: Schema.NonNegativeInt,
+            shoeColorIndex: Schema.NonNegativeInt,
+        }),
+        accessories: Schema.Struct({
+            tie: Schema.EitherFromSelf({ left: internal.unityColor, right: internal.unityColor }),
+            earrings: Schema.EitherFromSelf({ left: internal.unityColor, right: internal.unityColor }),
+            glasses: Schema.EitherFromSelf({ left: Schema.NonNegativeInt, right: Schema.NonNegativeInt }),
+            hairAccessory: Schema.EitherFromSelf({ left: Schema.NonNegativeInt, right: Schema.NonNegativeInt }),
+            hat: Schema.EitherFromSelf({
+                left: Schema.Struct({
+                    color: internal.unityColor,
+                    index: Schema.NonNegativeInt,
+                }),
+                right: Schema.Struct({
+                    color: internal.unityColor,
+                    index: Schema.NonNegativeInt,
+                    gender: Schema.Literal("female", "male", "unisex"),
+                }),
+            }),
+        }),
+        skills: Schema.Struct({
+            food: Skill,
+            retail: Skill,
+            service: Skill,
+            creative: Skill,
+            recreation: Skill,
+        }),
+    });
+
+    const from = parseNimblebitOrderedList([
+        { property: "male", schema: BooleanFromOneOrZero },
+        { property: "firstNameIndex", schema: IndexFromString },
+        { property: "lastNameIndex", schema: IndexFromString },
+        { property: "birthMonth", schema: Schema.compose(Schema.NumberFromString, BirthMonth) },
+        { property: "birthDay", schema: Schema.compose(Schema.NumberFromString, BirthDay) },
+        { property: "skinColorIndex", schema: IndexFromString }, // TODO: What do these index?
+        { property: "hairColorIndex", schema: IndexFromString }, // TODO: What do these index?
+        { property: "shoeColorIndex", schema: IndexFromString }, // TODO: What do these index?
+        { property: "pantColor", schema: internal.unityColorFromString },
+        { property: "shirtColor", schema: internal.unityColorFromString },
+        { property: "hasGlasses", schema: BooleanFromOneOrZero },
+        { property: "glassesIndex", schema: IndexFromString }, // TODO: What does this index
+        { property: "hasTie", schema: BooleanFromOneOrZero },
+        { property: "tieColor", schema: internal.unityColorFromString },
+        { property: "hasHairAccessory", schema: BooleanFromOneOrZero },
+        { property: "hairAccessoryIndex", schema: IndexFromString }, // TODO: What does this index
+        { property: "hasBiHat", schema: BooleanFromOneOrZero },
+        { property: "hasMaleHat", schema: BooleanFromOneOrZero },
+        { property: "hasFemaleHat", schema: BooleanFromOneOrZero },
+        { property: "hatIndex", schema: IndexFromString }, // TODO: What does this index
+        { property: "hatColor", schema: internal.unityColorFromString },
+        { property: "hasEarrings", schema: BooleanFromOneOrZero },
+        { property: "earringsColor", schema: internal.unityColorFromString },
+        { property: "skillFood", schema: Schema.compose(Schema.NumberFromString, Skill) },
+        { property: "skillService", schema: Schema.compose(Schema.NumberFromString, Skill) },
+        { property: "skillRecreation", schema: Schema.compose(Schema.NumberFromString, Skill) },
+        { property: "skillRetail", schema: Schema.compose(Schema.NumberFromString, Skill) },
+        { property: "skillCreative", schema: Schema.compose(Schema.NumberFromString, Skill) },
+    ]);
+
+    return Schema.transformOrFail(from, to, {
+        encode: (
+            custom: Schema.Schema.Encoded<typeof to>,
+            _options: SchemaAST.ParseOptions,
+            ast: SchemaAST.AST,
+            toA: Schema.Schema.Type<typeof to>
+        ): Effect.Effect<Schema.Schema.Type<typeof from>, ParseResult.ParseIssue, never> => {
+            const isMale = custom.gender === "male";
+            const [firstName, lastName] = custom.name.split(" ");
+
+            const firstNameIndex = Function.pipe(
+                isMale ? internalBitizen.maleNames : internalBitizen.femaleNames,
+                Array.fromIterable,
+                Array.findFirstIndex((name) => name === firstName)
+            );
+
+            const lastNameIndex = Function.pipe(
+                isMale ? internalBitizen.maleLastNames : internalBitizen.femaleLastNames,
+                Array.fromIterable,
+                Array.findFirstIndex((name) => name === lastName)
+            );
+
+            if (Option.isNone(firstNameIndex) || Option.isNone(lastNameIndex)) {
+                return ParseResult.fail(
+                    new ParseResult.Type(
+                        ast,
+                        custom.name,
+                        `Bitizen name ${custom.name} not found in internal lists, cannot encode`
+                    )
+                );
+            }
+
+            return ParseResult.succeed({
+                male: isMale,
+                firstNameIndex: firstNameIndex.value,
+                lastNameIndex: lastNameIndex.value,
+                birthMonth: custom.birthday[0],
+                birthDay: custom.birthday[1],
+                skinColorIndex: custom.designColors.skinColorIndex,
+                hairColorIndex: custom.designColors.hairColorIndex,
+                shoeColorIndex: custom.designColors.shoeColorIndex,
+                pantColor: toA.designColors.pantColor,
+                shirtColor: toA.designColors.shirtColor,
+                hasGlasses: Either.isRight(custom.accessories.glasses),
+                glassesIndex: Either.merge(custom.accessories.glasses),
+                hasTie: Either.isRight(custom.accessories.tie),
+                tieColor: Either.merge(toA.accessories.tie),
+                hasHairAccessory: Either.isRight(custom.accessories.hairAccessory),
+                hairAccessoryIndex: Either.merge(custom.accessories.hairAccessory),
+                hasBiHat: Either.getOrElse(
+                    Either.map(custom.accessories.hat, ({ gender }) => gender === "unisex"),
+                    Function.constFalse
+                ),
+                hasMaleHat: Either.getOrElse(
+                    Either.map(custom.accessories.hat, ({ gender }) => gender === "male"),
+                    Function.constFalse
+                ),
+                hasFemaleHat: Either.getOrElse(
+                    Either.map(custom.accessories.hat, ({ gender }) => gender === "female"),
+                    Function.constFalse
+                ),
+                hatIndex: Either.merge(custom.accessories.hat).index,
+                hatColor: Either.merge(toA.accessories.hat).color,
+                hasEarrings: Either.isRight(custom.accessories.earrings),
+                earringsColor: Either.merge(toA.accessories.earrings),
+                skillFood: custom.skills.food,
+                skillService: custom.skills.service,
+                skillRecreation: custom.skills.recreation,
+                skillRetail: custom.skills.retail,
+                skillCreative: custom.skills.creative,
+                $unknown: custom.$unknown,
+            });
+        },
+        decode: (
+            nimblebit: Schema.Schema.Type<typeof from>,
+            _options: SchemaAST.ParseOptions,
+            _ast: SchemaAST.AST
+        ): Effect.Effect<Schema.Schema.Encoded<typeof to>, ParseResult.ParseIssue, never> => {
+            const gender = nimblebit.male ? "male" : "female";
+
+            const firstName = Function.pipe(
+                gender === "female" ? internalBitizen.femaleNames : internalBitizen.maleNames,
+                Array.fromIterable,
+                Array.get(nimblebit.firstNameIndex)
+            );
+
+            const lastName = Function.pipe(
+                gender === "female" ? internalBitizen.femaleLastNames : internalBitizen.maleLastNames,
+                Array.fromIterable,
+                Array.get(nimblebit.lastNameIndex)
+            );
+
+            if (Option.isNone(firstName) || Option.isNone(lastName)) {
+                return ParseResult.fail(
+                    new ParseResult.Type(
+                        _ast,
+                        nimblebit,
+                        `Bitizen name indexes ${nimblebit.firstNameIndex},${nimblebit.lastNameIndex} not found in internal lists, cannot decode`
+                    )
+                );
+            }
+
+            const tie = nimblebit.hasTie ? Either.right(nimblebit.tieColor) : Either.left(nimblebit.tieColor);
+            const glasses = nimblebit.hasGlasses
+                ? Either.right(nimblebit.glassesIndex)
+                : Either.left(nimblebit.glassesIndex);
+            const hairAccessory = nimblebit.hasHairAccessory
+                ? Either.right(nimblebit.hairAccessoryIndex)
+                : Either.left(nimblebit.hairAccessoryIndex);
+            const earrings = nimblebit.hasEarrings
+                ? Either.right(nimblebit.earringsColor)
+                : Either.left(nimblebit.earringsColor);
+            const hat =
+                nimblebit.hasBiHat || nimblebit.hasMaleHat || nimblebit.hasFemaleHat
+                    ? Either.right({
+                          index: nimblebit.hatIndex,
+                          color: nimblebit.hatColor,
+                          gender: nimblebit.hasBiHat ? "unisex" : nimblebit.hasMaleHat ? "male" : "female",
+                      } as const)
+                    : Either.left({
+                          index: nimblebit.hatIndex,
+                          color: nimblebit.hatColor,
+                      } as const);
+
+            return ParseResult.succeed({
+                $unknown: nimblebit.$unknown,
+                gender,
+                name: `${firstName.value} ${lastName.value}`,
+                birthday: [nimblebit.birthMonth, nimblebit.birthDay],
+                designColors: {
+                    skinColorIndex: nimblebit.skinColorIndex,
+                    hairColorIndex: nimblebit.hairColorIndex,
+                    shoeColorIndex: nimblebit.shoeColorIndex,
+                    pantColor: nimblebit.pantColor,
+                    shirtColor: nimblebit.shirtColor,
+                },
+                accessories: {
+                    tie,
+                    glasses,
+                    hairAccessory,
+                    earrings,
+                    hat,
+                },
+                skills: {
+                    food: nimblebit.skillFood,
+                    service: nimblebit.skillService,
+                    recreation: nimblebit.skillRecreation,
+                    retail: nimblebit.skillRetail,
+                    creative: nimblebit.skillCreative,
+                },
+            });
+        },
+    });
+});
 
 /**
  * How to decode a Bitizen from Nimblebit's object format.
@@ -121,15 +339,40 @@ export const BitizenAttributes = parseNimblebitOrderedList([
  */
 export const Bitizen = parseNimblebitObject(
     Schema.Struct({
-        homeIndex: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("h")),
-        workIndex: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("w")),
+        homeIndex: Schema.NumberFromString.pipe(
+            Schema.compose(Schema.Int),
+            Schema.propertySignature,
+            Schema.fromKey("h")
+        ),
+        workIndex: Schema.NumberFromString.pipe(
+            Schema.compose(Schema.Int),
+            Schema.propertySignature,
+            Schema.fromKey("w")
+        ),
         placedDreamJob: Schema.transformLiterals(["0", false], ["1", true]).pipe(
             Schema.propertySignature,
             Schema.fromKey("d")
         ),
-        dreamJobIndex: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("j")),
+        dreamJobIndex: Schema.NumberFromString.pipe(
+            Schema.compose(Schema.Int),
+            Schema.propertySignature,
+            Schema.fromKey("j")
+        ),
         costume: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("c")),
-        vip: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("v")),
+        vip: Schema.Union(
+            Schema.transformLiterals(
+                ["0", "None"],
+                ["1", "Engineer"],
+                ["2", "TravelAgent"],
+                ["3", "Deliveryman"],
+                ["4", "BigSpender"],
+                ["5", "Celebrity"],
+                ["6", "GiftBit"]
+            ),
+            Schema.compose(Schema.NumberFromString, Schema.Int)
+        ).pipe(Schema.propertySignature, Schema.fromKey("v")),
+        customName: Schema.String.pipe(Schema.optional, Schema.fromKey("cn")),
+        pet: Schema.String.pipe(Schema.optional, Schema.fromKey("p")),
         attributes: BitizenAttributes.pipe(Schema.propertySignature, Schema.fromKey("BA")),
     })
 );
@@ -145,27 +388,7 @@ export const BitbookPost = parseNimblebitObject(
         _tid: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("bb_tid")),
         bitizen: Bitizen.pipe(Schema.propertySignature, Schema.fromKey("bb_bzn")),
         source_name: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("bb_sname")),
-        date: Schema.transform(
-            Schema.BigInt,
-            Schema.Union(
-                Schema.DateFromSelf,
-                Schema.Struct({
-                    date: Schema.DateFromSelf,
-                    extraTicks: Schema.BigIntFromSelf,
-                })
-            ),
-            {
-                encode: (input) => {
-                    const date = "date" in input ? input.date : input;
-                    const extraTicks = "extraTicks" in input ? input.extraTicks : 0n;
-                    return BigInt(date.getTime()) * 10_000n + 621_355_968_000_000_000n + extraTicks;
-                },
-                decode: (cSharpTicks) => {
-                    const ms = (cSharpTicks - 621_355_968_000_000_000n) / 10_000n;
-                    return { date: new Date(Number(ms)), extraTicks: cSharpTicks % 10_000n } as const;
-                },
-            }
-        ).pipe(Schema.propertySignature, Schema.fromKey("bb_date")),
+        date: internal.csharpDate.pipe(Schema.propertySignature, Schema.fromKey("bb_date")),
         body: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("bb_txt")),
         media_type: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("bb_mt")),
         media_path: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("bb_mp")),
@@ -184,7 +407,7 @@ export const Floor = parseNimblebitObject(
         storyHeight: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Fs")),
         floorId: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Ff")),
         level: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Fl")),
-        openDate: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Fod")),
+        openDate: internal.csharpDate.pipe(Schema.propertySignature, Schema.fromKey("Fod")),
         stockBaseTime: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Fsbt")),
         stockingTier: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Fsi")),
         stockingStartTime: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Fst")),
@@ -192,7 +415,7 @@ export const Floor = parseNimblebitObject(
             .pipe(Schema.itemsCount(3))
             .pipe(Schema.propertySignature)
             .pipe(Schema.fromKey("Fstk")),
-        lastSaleTicks: Schema.compose(Schema.split(","), Schema.Array(Schema.BigInt))
+        lastSaleTicks: Schema.compose(Schema.split(","), Schema.Array(internal.csharpDate))
             .pipe(Schema.itemsCount(3))
             .pipe(Schema.propertySignature)
             .pipe(Schema.fromKey("Flst")),
