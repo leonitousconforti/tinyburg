@@ -141,8 +141,8 @@ importers:
         specifier: 0.16.0
         version: 0.16.0(@effect/experimental@0.58.0(@effect/platform@0.94.0(effect@3.19.13))(effect@3.19.13))(@effect/platform@0.94.0(effect@3.19.13))(@effect/rpc@0.73.0(@effect/platform@0.94.0(effect@3.19.13))(effect@3.19.13))(effect@3.19.13)
       '@efffrida/gplayapi':
-        specifier: 0.0.4
-        version: 0.0.4(@bufbuild/protobuf@2.10.2)(@effect/platform@0.94.0(effect@3.19.13))(effect@3.19.13)
+        specifier: 0.0.5
+        version: 0.0.5(@bufbuild/protobuf@2.10.2)(@effect/platform@0.94.0(effect@3.19.13))(effect@3.19.13)
       effect:
         specifier: 3.19.13
         version: 3.19.13
@@ -315,8 +315,8 @@ importers:
         specifier: 0.0.23
         version: 0.0.23(@effect/platform@0.94.0(effect@3.19.13))(effect@3.19.13)
       '@efffrida/il2cpp-bridge':
-        specifier: 0.0.20
-        version: 0.0.20(effect@3.19.13)
+        specifier: 0.0.22
+        version: 0.0.22(effect@3.19.13)
       '@efffrida/platform':
         specifier: 0.0.15
         version: 0.0.15(@effect/platform@0.94.0(effect@3.19.13))(effect@3.19.13)
@@ -355,6 +355,9 @@ importers:
         specifier: 2.1.0
         version: 2.1.0
     devDependencies:
+      '@bufbuild/protobuf':
+        specifier: 2.10.2
+        version: 2.10.2
       '@effect/cluster':
         specifier: 0.56.0
         version: 0.56.0(@effect/platform@0.94.0(effect@3.19.13))(@effect/rpc@0.73.0(@effect/platform@0.94.0(effect@3.19.13))(effect@3.19.13))(@effect/sql@0.49.0(@effect/experimental@0.58.0(@effect/platform@0.94.0(effect@3.19.13))(effect@3.19.13))(@effect/platform@0.94.0(effect@3.19.13))(effect@3.19.13))(@effect/workflow@0.16.0(@effect/experimental@0.58.0(@effect/platform@0.94.0(effect@3.19.13))(effect@3.19.13))(@effect/platform@0.94.0(effect@3.19.13))(@effect/rpc@0.73.0(@effect/platform@0.94.0(effect@3.19.13))(effect@3.19.13))(effect@3.19.13))(effect@3.19.13)
@@ -376,6 +379,15 @@ importers:
       '@effect/workflow':
         specifier: 0.16.0
         version: 0.16.0(@effect/experimental@0.58.0(@effect/platform@0.94.0(effect@3.19.13))(effect@3.19.13))(@effect/platform@0.94.0(effect@3.19.13))(@effect/rpc@0.73.0(@effect/platform@0.94.0(effect@3.19.13))(effect@3.19.13))(effect@3.19.13)
+      '@efffrida/frida-tools':
+        specifier: 0.0.23
+        version: 0.0.23(@effect/platform@0.94.0(effect@3.19.13))(effect@3.19.13)
+      '@efffrida/gplayapi':
+        specifier: 0.0.5
+        version: 0.0.5(@bufbuild/protobuf@2.10.2)(@effect/platform@0.94.0(effect@3.19.13))(effect@3.19.13)
+      '@tinyburg/insight':
+        specifier: workspace:*
+        version: link:../insight
       '@types/pako':
         specifier: 2.0.4
         version: 2.0.4
@@ -422,8 +434,8 @@ importers:
         specifier: 0.0.23
         version: 0.0.23(@effect/platform@0.94.0(effect@3.19.13))(effect@3.19.13)
       '@efffrida/gplayapi':
-        specifier: 0.0.4
-        version: 0.0.4(@bufbuild/protobuf@2.10.2)(@effect/platform@0.94.0(effect@3.19.13))(effect@3.19.13)
+        specifier: 0.0.5
+        version: 0.0.5(@bufbuild/protobuf@2.10.2)(@effect/platform@0.94.0(effect@3.19.13))(effect@3.19.13)
       effect:
         specifier: 3.19.13
         version: 3.19.13
@@ -888,15 +900,15 @@ packages:
       '@effect/platform': 0.94.0
       effect: 3.19.13
 
-  '@efffrida/gplayapi@0.0.4':
-    resolution: {integrity: sha512-xtNvISQstyLyChDTr/TI9eEGDsHOvBqy+Si9eseJD9P90+fWCRj8itfNighwQGyRMOfxZbuLvokbouTCTsLFMQ==}
+  '@efffrida/gplayapi@0.0.5':
+    resolution: {integrity: sha512-5xRCWwIr6Ihor2FvgCCm5rOOk08avsQ3CLF3Up4rHr3P3PR250+WD4trE25LgnjWOiHJ5fo1GnOYW/tBJaQWdA==}
     peerDependencies:
       '@bufbuild/protobuf': 2.10.2
       '@effect/platform': 0.94.0
       effect: 3.19.13
 
-  '@efffrida/il2cpp-bridge@0.0.20':
-    resolution: {integrity: sha512-61jXL0ef+xkNoEFNPUefdIJ4m8GjaVd/tZoo8zqDVOvLupJjIeWN3ziHceo+zOLxhy56jvk0fZXBfW9dleeDMg==}
+  '@efffrida/il2cpp-bridge@0.0.22':
+    resolution: {integrity: sha512-NBUhF1hkD8yCvVjEwfVYugrHn8NNbGNPNoBLSyywOhYkXt3cAwNLDt22HDqUCZZ/UZ7WUeitoDNFXIydrg5/NA==}
     peerDependencies:
       effect: 3.19.13
 
@@ -6337,14 +6349,14 @@ snapshots:
       effect: 3.19.13
       frida: 17.5.1
 
-  '@efffrida/gplayapi@0.0.4(@bufbuild/protobuf@2.10.2)(@effect/platform@0.94.0(effect@3.19.13))(effect@3.19.13)':
+  '@efffrida/gplayapi@0.0.5(@bufbuild/protobuf@2.10.2)(@effect/platform@0.94.0(effect@3.19.13))(effect@3.19.13)':
     dependencies:
       '@bufbuild/protobuf': 2.10.2
       '@effect/platform': 0.94.0(effect@3.19.13)
       effect: 3.19.13
       properties-file: 3.6.3
 
-  '@efffrida/il2cpp-bridge@0.0.20(effect@3.19.13)':
+  '@efffrida/il2cpp-bridge@0.0.22(effect@3.19.13)':
     dependencies:
       effect: 3.19.13
       frida-il2cpp-bridge: 0.12.1

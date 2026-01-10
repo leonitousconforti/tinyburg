@@ -17,7 +17,7 @@
         "@effect/sql": "0.49.0",
         "@effect/workflow": "0.16.0",
         "@efffrida/frida-tools": "0.0.23",
-        "@efffrida/gplayapi": "0.0.4",
+        "@efffrida/gplayapi": "0.0.5",
         "effect": "3.19.13"
     }
 }

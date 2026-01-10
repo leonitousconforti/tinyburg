@@ -37,7 +37,7 @@
     },
     "dependencies": {
         "@efffrida/frida-tools": "0.0.23",
-        "@efffrida/il2cpp-bridge": "0.0.21",
+        "@efffrida/il2cpp-bridge": "0.0.22",
         "@efffrida/platform": "0.0.15",
         "@efffrida/polyfills": "0.0.2",
         "@efffrida/rpc": "0.0.23",

@@ -16,7 +16,7 @@
         "@effect/rpc": "0.73.0",
         "@effect/sql": "0.49.0",
         "@effect/workflow": "0.16.0",
-        "@efffrida/gplayapi": "0.0.4",
+        "@efffrida/gplayapi": "0.0.5",
         "effect": "3.19.13"
     }
 }
