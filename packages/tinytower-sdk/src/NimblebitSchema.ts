@@ -8,16 +8,19 @@
 import type * as Effect from "effect/Effect";
 import type * as SchemaAST from "effect/SchemaAST";
 
+import * as Array from "effect/Array";
 import * as Either from "effect/Either";
 import * as Function from "effect/Function";
+import * as Option from "effect/Option";
 import * as ParseResult from "effect/ParseResult";
+import * as Record from "effect/Record";
 import * as Schema from "effect/Schema";
 
-import * as Array from "effect/Array";
-import * as Option from "effect/Option";
 import * as NimblebitConfig from "./NimblebitConfig.ts";
 import * as internal from "./internal/nimblebitSchema.ts";
 import * as internalBitizen from "./internal/tinytowerBitizens.ts";
+import * as internalCostume from "./internal/tinytowerCostumes.ts";
+import * as internalPet from "./internal/tinytowerPets.ts";
 
 /**
  * @since 1.0.0
@@ -358,7 +361,14 @@ export const Bitizen = parseNimblebitObject(
             Schema.propertySignature,
             Schema.fromKey("j")
         ),
-        costume: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("c")),
+        costume: Schema.requiredToOptional(
+            Schema.Union(Schema.Literal(""), Schema.Literal(...Record.keys(internalCostume.costumes)), Schema.String),
+            Schema.Union(Schema.Literal(...Record.keys(internalCostume.costumes)), Schema.String),
+            {
+                encode: Option.getOrElse(() => "" as const),
+                decode: (costume) => (costume === "" ? Option.none() : Option.some(costume)),
+            }
+        ).pipe(Schema.fromKey("c")),
         vip: Schema.Union(
             Schema.transformLiterals(
                 ["0", "None"],
@@ -372,7 +382,7 @@ export const Bitizen = parseNimblebitObject(
             Schema.compose(Schema.NumberFromString, Schema.Int)
         ).pipe(Schema.propertySignature, Schema.fromKey("v")),
         customName: Schema.String.pipe(Schema.optional, Schema.fromKey("cn")),
-        pet: Schema.String.pipe(Schema.optional, Schema.fromKey("p")),
+        pet: Schema.Literal(...Record.keys(internalPet.pets)).pipe(Schema.optional, Schema.fromKey("p")),
         attributes: BitizenAttributes.pipe(Schema.propertySignature, Schema.fromKey("BA")),
     })
 );
