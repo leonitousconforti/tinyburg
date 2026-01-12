@@ -18,9 +18,10 @@ import * as Schema from "effect/Schema";
 import * as Pako from "pako";
 
 import { Api } from "./internal/nimblebitEndpoints.ts";
+import { SyncItemType } from "./internal/tinytowerSyncItemType.ts";
 import { NimblebitAuth } from "./NimblebitAuth.ts";
 import { NimblebitError } from "./NimblebitError.ts";
-import { Bitizen, SaveData, SyncItemType } from "./NimblebitSchema.ts";
+import { Bitizen, SaveData } from "./NimblebitSchema.ts";
 
 export {
     /**
@@ -714,7 +715,7 @@ export const social_sendItem = Effect.fn("social_sendItem")(function* ({
     playerId,
 }: Schema.Schema.Type<NimblebitConfig.AuthenticatedPlayerSchema> & {
     itemStr: string;
-    itemType: Schema.Schema.Type<typeof SyncItemType>;
+    itemType: (typeof SyncItemType)[keyof typeof SyncItemType];
     friendId: Schema.Schema.Type<NimblebitConfig.PlayerIdSchema>;
 }) {
     const nimblebitAuth = yield* NimblebitAuth;
@@ -1102,6 +1103,6 @@ export const social_visit = Effect.fn("social_visit")(function* ({
         playerAuthKey,
         friendId,
         itemStr: doormanItemStr,
-        itemType: SyncItemType.enums.Visit,
+        itemType: SyncItemType.Visit,
     });
 });

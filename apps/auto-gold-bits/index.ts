@@ -15,18 +15,19 @@ const program = Effect.gen(function* () {
 
     // Get all the gifts sent to us
     const gifts = yield* TinyTower.social_getGifts(authenticatedPlayer);
-    const bitizenGifts = Array.filter(gifts.gifts, (gift) => gift.type === NimblebitSchema.SyncItemType.enums.Play);
+    const bitizenGifts = Array.filter(gifts.gifts, (gift) => gift.type === NimblebitSchema.SyncItemType.Play);
     yield* Effect.logInfo(`Have ${gifts.total} gifts waiting, ${bitizenGifts.length} of which are bitizens to upgrade`);
 
     // For every bitizen gift...
     for (const bitizenGift of bitizenGifts) {
         // Upgrade their skills to 9s
         const bitizen = yield* Schema.decode(NimblebitSchema.Bitizen)(bitizenGift.contents);
-        (bitizen.attributes as Types.Mutable<typeof bitizen.attributes>).skillCreative = 9;
-        (bitizen.attributes as Types.Mutable<typeof bitizen.attributes>).skillFood = 9;
-        (bitizen.attributes as Types.Mutable<typeof bitizen.attributes>).skillRecreation = 9;
-        (bitizen.attributes as Types.Mutable<typeof bitizen.attributes>).skillRetail = 9;
-        (bitizen.attributes as Types.Mutable<typeof bitizen.attributes>).skillService = 9;
+        const skills = bitizen.attributes.skills as Types.Mutable<typeof bitizen.attributes.skills>;
+        skills.creative = 9;
+        skills.food = 9;
+        skills.recreation = 9;
+        skills.retail = 9;
+        skills.service = 9;
 
         // If they have a requested floor, set their dream job to that floor
         const friendMeta = yield* TinyTower.social_pullFriendMeta({
@@ -43,7 +44,7 @@ const program = Effect.gen(function* () {
         yield* TinyTower.social_sendItem({
             ...authenticatedPlayer,
             friendId: bitizenGift.from,
-            itemType: NimblebitSchema.SyncItemType.enums.Play,
+            itemType: NimblebitSchema.SyncItemType.Play,
             itemStr: encodedBitizen,
         });
 

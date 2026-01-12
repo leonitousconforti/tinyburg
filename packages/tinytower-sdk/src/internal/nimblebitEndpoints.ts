@@ -19,7 +19,7 @@ export const playerIdParam = HttpApiSchema.param("playerId", NimblebitConfig.Pla
 export const friendIdParam = HttpApiSchema.param("friendId", NimblebitConfig.PlayerIdSchema);
 
 /** @internal */
-export const syncItemTypeParam = HttpApiSchema.param("syncItemType", NimblebitSchema.SyncItemType);
+export const syncItemTypeParam = HttpApiSchema.param("syncItemType", Schema.Enums(NimblebitSchema.SyncItemType));
 
 /** @internal */
 export const giftIdParam = HttpApiSchema.param("giftId", Schema.compose(Schema.NumberFromString, Schema.Int));

@@ -21,6 +21,7 @@ import * as internal from "./internal/nimblebitSchema.ts";
 import * as internalBitizen from "./internal/tinytowerBitizens.ts";
 import * as internalCostume from "./internal/tinytowerCostumes.ts";
 import * as internalPet from "./internal/tinytowerPets.ts";
+import * as internalSyncItem from "./internal/tinytowerSyncItemType.ts";
 
 /**
  * @since 1.0.0
@@ -581,35 +582,6 @@ export const PlayerMetaData = Schema.Struct({
 });
 
 /**
- * Types of sync items.
- *
- * @since 1.0.0
- * @category Schemas
- */
-export const SyncItemType = Schema.Enums({
-    /** Unused? */
-    None: "None",
-
-    /** This is the type for when someone sends you a bitizen, short for player? */
-    Play: "Play",
-
-    /** Not sure, haven't seen used. */
-    Gift: "Gift",
-
-    /**
-     * Sometimes there might be gifts that come out of thin air, like nimblebit
-     * might do a giveaway or something.
-     */
-    Cloud: "Cloud",
-
-    /** A raffle gift. */
-    Raffle: "Raffle",
-
-    /** A visit from a friend. */
-    Visit: "Visit",
-} as const);
-
-/**
  * Gift schema.
  *
  * @since 1.0.0
@@ -626,7 +598,7 @@ export const Gift = Schema.Struct({
     from: NimblebitConfig.PlayerIdSchema.pipe(Schema.propertySignature, Schema.fromKey("gift_from")),
 
     /** The type of the gift. */
-    type: SyncItemType.pipe(Schema.propertySignature, Schema.fromKey("gift_type")),
+    type: Schema.Enums(internalSyncItem.SyncItemType).pipe(Schema.propertySignature, Schema.fromKey("gift_type")),
 
     /** The contents of the gift. */
     contents: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("gift_str")),
@@ -637,3 +609,11 @@ export const Gift = Schema.Struct({
     /** Not sure. */
     c: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("c")),
 });
+
+/**
+ * Sync item types.
+ *
+ * @since 1.0.0
+ * @category Schemas
+ */
+export const SyncItemType = internalSyncItem.SyncItemType;
