@@ -420,7 +420,7 @@ export const Floor = parseNimblebitObject(
         openDate: internal.csharpDate.pipe(Schema.propertySignature, Schema.fromKey("Fod")),
         stockBaseTime: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Fsbt")),
         stockingTier: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Fsi")),
-        stockingStartTime: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Fst")),
+        stockingStartTime: internal.csharpDate.pipe(Schema.propertySignature, Schema.fromKey("Fst")),
         stocks: Schema.compose(Schema.split(","), Schema.Array(Schema.BigInt))
             .pipe(Schema.itemsCount(3))
             .pipe(Schema.propertySignature)
