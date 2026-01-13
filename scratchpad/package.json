@@ -9,15 +9,15 @@
     },
     "devDependencies": {
         "@bufbuild/protobuf": "2.10.2",
-        "@effect/cluster": "0.56.0",
+        "@effect/cluster": "0.56.1",
         "@effect/experimental": "0.58.0",
-        "@effect/platform": "0.94.0",
+        "@effect/platform": "0.94.1",
         "@effect/platform-node": "0.104.0",
         "@effect/rpc": "0.73.0",
         "@effect/sql": "0.49.0",
         "@effect/workflow": "0.16.0",
-        "@efffrida/frida-tools": "0.0.23",
-        "@efffrida/gplayapi": "0.0.5",
-        "effect": "3.19.13"
+        "@efffrida/frida-tools": "0.0.24",
+        "@efffrida/gplayapi": "0.0.6",
+        "effect": "3.19.14"
     }
 }

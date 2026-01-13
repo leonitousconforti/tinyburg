@@ -1,6 +1,7 @@
 import { FetchHttpClient, PlatformConfigProvider } from "@effect/platform";
 import { NodeContext, NodeRuntime } from "@effect/platform-node";
-import { NimblebitAuth, NimblebitConfig, NimblebitSchema, TinyTower } from "@tinyburg/tinytower-sdk";
+import { NimblebitAuth, NimblebitConfig } from "@tinyburg/nimblebit-sdk";
+import { SyncItemType, TinyTower, Schema as TinyTowerSchema } from "@tinyburg/tinytower-sdk";
 import { Array, Effect, Layer, Schema, type Types } from "effect";
 
 const Live = Layer.merge(
@@ -15,13 +16,13 @@ const program = Effect.gen(function* () {
 
     // Get all the gifts sent to us
     const gifts = yield* TinyTower.social_getGifts(authenticatedPlayer);
-    const bitizenGifts = Array.filter(gifts.gifts, (gift) => gift.type === NimblebitSchema.SyncItemType.Play);
+    const bitizenGifts = Array.filter(gifts.gifts, (gift) => gift.type === SyncItemType.SyncItemType.Play);
     yield* Effect.logInfo(`Have ${gifts.total} gifts waiting, ${bitizenGifts.length} of which are bitizens to upgrade`);
 
     // For every bitizen gift...
     for (const bitizenGift of bitizenGifts) {
         // Upgrade their skills to 9s
-        const bitizen = yield* Schema.decode(NimblebitSchema.Bitizen)(bitizenGift.contents);
+        const bitizen = yield* Schema.decode(TinyTowerSchema.Bitizen)(bitizenGift.contents);
         const skills = bitizen.attributes.skills as Types.Mutable<typeof bitizen.attributes.skills>;
         skills.creative = 9;
         skills.food = 9;
@@ -40,11 +41,11 @@ const program = Effect.gen(function* () {
         }
 
         // Send the upgraded bitizen back to the friend
-        const encodedBitizen = yield* Schema.encode(NimblebitSchema.Bitizen)(bitizen);
+        const encodedBitizen = yield* Schema.encode(TinyTowerSchema.Bitizen)(bitizen);
         yield* TinyTower.social_sendItem({
             ...authenticatedPlayer,
             friendId: bitizenGift.from,
-            itemType: NimblebitSchema.SyncItemType.Play,
+            itemType: SyncItemType.SyncItemType.Play,
             itemStr: encodedBitizen,
         });
 

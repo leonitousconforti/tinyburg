@@ -5,7 +5,7 @@
  * @category SDK
  */
 
-import type * as NimblebitConfig from "./NimblebitConfig.ts";
+import type * as NimblebitConfig from "@tinyburg/nimblebit-sdk/NimblebitConfig";
 
 import * as HttpApiClient from "@effect/platform/HttpApiClient";
 import * as HttpClient from "@effect/platform/HttpClient";
@@ -17,11 +17,11 @@ import * as Redacted from "effect/Redacted";
 import * as Schema from "effect/Schema";
 import * as Pako from "pako";
 
-import { Api } from "./internal/nimblebitEndpoints.ts";
-import { SyncItemType } from "./internal/tinytowerSyncItemType.ts";
-import { NimblebitAuth } from "./NimblebitAuth.ts";
-import { NimblebitError } from "./NimblebitError.ts";
-import { Bitizen, SaveData } from "./NimblebitSchema.ts";
+import { NimblebitAuth } from "@tinyburg/nimblebit-sdk/NimblebitAuth";
+import { NimblebitError } from "@tinyburg/nimblebit-sdk/NimblebitError";
+import { Api } from "./Endpoints.ts";
+import { Bitizen, SaveData } from "./Schema.ts";
+import { SyncItemType } from "./SyncItemType.ts";
 
 export {
     /**

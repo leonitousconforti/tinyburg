@@ -14,7 +14,8 @@ import * as Redacted from "effect/Redacted";
 import * as Schema from "effect/Schema";
 import * as http from "node:http";
 
-import { NimblebitAuth, NimblebitConfig, TinyTower } from "@tinyburg/tinytower-sdk";
+import { NimblebitAuth, NimblebitConfig } from "@tinyburg/nimblebit-sdk";
+import { TinyTower } from "@tinyburg/tinytower-sdk";
 
 class Account extends Schema.Class<Account>("Account")({ scopes: Schema.Array(Schema.String) }) {}
 class CurrentAccount extends Context.Tag("CurrentAccount")<CurrentAccount, Account>() {}

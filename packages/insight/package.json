@@ -36,24 +36,24 @@
         "codegen": "build-utils prepare-v4"
     },
     "dependencies": {
-        "@efffrida/frida-tools": "0.0.23",
-        "@efffrida/il2cpp-bridge": "0.0.22",
-        "@efffrida/platform": "0.0.15",
-        "@efffrida/polyfills": "0.0.2",
-        "@efffrida/rpc": "0.0.23",
-        "frida": "17.5.1",
+        "@efffrida/frida-tools": "0.0.24",
+        "@efffrida/il2cpp-bridge": "0.0.23",
+        "@efffrida/platform": "0.0.16",
+        "@efffrida/polyfills": "0.0.3",
+        "@efffrida/rpc": "0.0.24",
+        "frida": "17.5.2",
         "frida-il2cpp-bridge": "0.12.1"
     },
     "devDependencies": {
-        "@effect/platform": "0.94.0",
+        "@effect/platform": "0.94.1",
         "@effect/rpc": "0.73.0",
         "@types/frida-gum": "19.0.1",
-        "effect": "3.19.13"
+        "effect": "3.19.14"
     },
     "peerDependencies": {
-        "@effect/platform": "0.93.8",
-        "@effect/rpc": "0.72.2",
-        "effect": "3.19.12"
+        "@effect/platform": "0.94.1",
+        "@effect/rpc": "0.73.0",
+        "effect": "3.19.14"
     },
     "publishConfig": {
         "access": "public",

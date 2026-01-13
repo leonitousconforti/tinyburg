@@ -1,0 +1,63 @@
+{
+    "name": "@tinyburg/nimblebit-sdk",
+    "version": "0.0.1",
+    "description": "general purpose SDK for connecting to Nimblebit's cloud services",
+    "keywords": [
+        "nimblebit",
+        "tinytower",
+        "tinytowers"
+    ],
+    "homepage": "https://github.com/leonitousconforti/tinyburg",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/leonitousconforti/tinyburg.git",
+        "directory": "packages/nimblebit-sdk"
+    },
+    "license": "GPL-3.0-only",
+    "author": "Leo Conforti <leo@leoconforti.us> (https://leoconforti.us)",
+    "sideEffects": [],
+    "type": "module",
+    "exports": {
+        "./package.json": "./package.json",
+        ".": "./src/index.ts",
+        "./*": "./src/*.ts",
+        "./internal/*": null
+    },
+    "files": [
+        "src/**/*.ts",
+        "dist/**/*.js",
+        "dist/**/*.js.map",
+        "dist/**/*.d.ts",
+        "dist/**/*.d.ts.map"
+    ],
+    "scripts": {
+        "build": "tsc -b tsconfig.build.json && babel dist --plugins annotate-pure-calls --out-dir dist --source-maps",
+        "check": "tsc -b tsconfig.json",
+        "codegen": "build-utils prepare-v4"
+    },
+    "dependencies": {
+        "effect-schemas": "0.0.11"
+    },
+    "devDependencies": {
+        "@effect/platform": "0.94.1",
+        "effect": "3.19.14"
+    },
+    "peerDependencies": {
+        "@effect/platform": "0.94.1",
+        "effect": "3.19.14"
+    },
+    "publishConfig": {
+        "access": "public",
+        "exports": {
+            "./package.json": "./package.json",
+            ".": "./dist/index.js",
+            "./*": "./dist/*.js",
+            "./internal/*": null
+        }
+    },
+    "tags": [
+        "nimblebit",
+        "tinytower",
+        "tinytowers"
+    ]
+}

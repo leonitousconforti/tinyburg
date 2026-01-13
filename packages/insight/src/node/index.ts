@@ -8,7 +8,16 @@ import { JsPlatform } from "frida";
 const NdJsonSerialization = RpcSerialization.layerNdjson;
 const ProtocolLive = Layer.provide(FridaRpcClient.layerProtocolFrida(), NdJsonSerialization);
 
+/**
+ * @since 1.0.0
+ * @category Frida
+ */
 export const SessionLive = FridaSession.layer("com.nimblebit.tinytower");
+
+/**
+ * @since 1.0.0
+ * @category Frida
+ */
 export const ScriptLive = Layer.provideMerge(
     FridaScript.layer(new URL("../frida/Agent.ts", import.meta.url), {
         platform: JsPlatform.Browser,
@@ -16,8 +25,16 @@ export const ScriptLive = Layer.provideMerge(
     SessionLive
 );
 
+/**
+ * @since 1.0.0
+ * @category Agent
+ */
 export const AgentLive = Layer.provideMerge(ProtocolLive, ScriptLive);
 
+/**
+ * @since 1.0.0
+ * @category Agent
+ */
 export const AgentWatched = <A, E, R>(
     effect: Effect.Effect<A, E, R>
 ): Stream.Stream<

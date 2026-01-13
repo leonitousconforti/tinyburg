@@ -1,5 +1,17 @@
 {
     "$schema": "../../node_modules/@effect/docgen/schema.json",
-    "exclude": ["src/internal/**/*.ts"],
+    "exclude": [
+        "src/index.ts",
+        "src/internal/**/*.ts",
+        "src/BitbookPosts.ts",
+        "src/Bitizens.ts",
+        "src/Costumes.ts",
+        "src/Elevators.ts",
+        "src/Floors.ts",
+        "src/Missions.ts",
+        "src/Pets.ts",
+        "src/Roofs.ts",
+        "src/SyncItemSchema.ts"
+    ],
     "projectHomepage": "https://github.com/leonitousconforti/tinyburg/packages/tinytower-sdk"
 }
