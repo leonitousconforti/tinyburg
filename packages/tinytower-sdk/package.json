@@ -34,7 +34,9 @@
         "build": "tsc -b tsconfig.build.json && babel dist --plugins annotate-pure-calls --out-dir dist --source-maps",
         "check": "tsc -b tsconfig.json",
         "codegen": "build-utils prepare-v4",
-        "generate": "node --experimental-strip-types ./scripts/GenerateData.ts && prettier --write 'src/internal/tinytower{BitbookPosts,Bitizens,Costumes,Elevators,Floors,Missions,Pets,Roofs}.ts'"
+        "coverage": "vitest --coverage",
+        "generate": "node --experimental-strip-types ./scripts/GenerateData.ts && prettier --write 'src/{BitbookPosts,Bitizens,Costumes,Elevators,Floors,Missions,Pets,Roofs}.ts'",
+        "test": "vitest"
     },
     "dependencies": {
         "@tinyburg/nimblebit-sdk": "workspace:*",
@@ -49,12 +51,14 @@
         "@effect/platform-node": "0.104.0",
         "@effect/rpc": "0.73.0",
         "@effect/sql": "0.49.0",
+        "@effect/vitest": "0.27.0",
         "@effect/workflow": "0.16.0",
         "@efffrida/frida-tools": "0.0.24",
         "@efffrida/gplayapi": "0.0.6",
         "@tinyburg/insight": "workspace:*",
         "@types/pako": "2.0.4",
-        "effect": "3.19.14"
+        "effect": "3.19.14",
+        "vitest": "3.2.4"
     },
     "peerDependencies": {
         "@effect/platform": "0.94.1",

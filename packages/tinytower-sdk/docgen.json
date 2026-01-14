@@ -8,10 +8,11 @@
         "src/Costumes.ts",
         "src/Elevators.ts",
         "src/Floors.ts",
+        "src/Gift.ts",
         "src/Missions.ts",
         "src/Pets.ts",
         "src/Roofs.ts",
-        "src/SyncItemSchema.ts"
+        "src/SyncItemType.ts"
     ],
     "projectHomepage": "https://github.com/leonitousconforti/tinyburg/packages/tinytower-sdk"
 }

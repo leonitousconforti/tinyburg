@@ -1,6 +1,6 @@
 ---
 title: TinyTower.ts
-nav_order: 4
+nav_order: 2
 parent: "@tinyburg/tinytower-sdk"
 ---
 
@@ -14,8 +14,6 @@ Since v1.0.0
 
 ## Exports Grouped by Category
 
-- [API](#api)
-  - [Api](#api-1)
 - [SDK](#sdk)
   - [device_newPlayer](#device_newplayer)
   - [device_playerDetails](#device_playerdetails)
@@ -38,1609 +36,10 @@ Since v1.0.0
   - [sync_pushSave](#sync_pushsave)
   - [sync_pushSnapshot](#sync_pushsnapshot)
   - [sync_retrieveSnapshotList](#sync_retrievesnapshotlist)
+- [Schemas](#schemas)
+  - [SaveData](#savedata)
 
 ---
-
-# API
-
-## Api
-
-**Signature**
-
-```ts
-declare const Api: HttpApi<
-  "TinyTowerApi",
-  | HttpApiGroup<
-      "DeviceManagementGroup",
-      | HttpApiEndpoint<
-          "DeviceNewPlayer",
-          "GET",
-          { readonly salt1: number & Brand<"U32">; readonly salt2: number & Brand<"U32">; readonly hash: string },
-          never,
-          never,
-          never,
-          | { readonly error: string }
-          | {
-              readonly playerId: string & Brand<"PlayerId">
-              readonly playerSs: Redacted.Redacted<string> & Brand<"PlayerAuthKey">
-            },
-          never,
-          never,
-          never
-        >
-      | HttpApiEndpoint<
-          "DevicePlayerDetails",
-          "GET",
-          {
-            readonly hash: string
-            readonly playerId: string & Brand<"PlayerId">
-            readonly salt: number & Brand<"U32">
-          },
-          never,
-          never,
-          never,
-          | { readonly error: string }
-          | {
-              readonly player: {
-                readonly playerId: string & Brand<"PlayerId">
-                readonly playerEmail: Redacted.Redacted<string> & Brand<"PlayerEmail">
-                readonly registered: boolean
-                readonly blacklisted: boolean
-              }
-            },
-          never,
-          never,
-          never
-        >
-      | HttpApiEndpoint<
-          "DeviceVerifyDevice",
-          "GET",
-          { readonly playerId: string & Brand<"PlayerId">; readonly verificationCode: string },
-          never,
-          never,
-          never,
-          | { readonly error: string }
-          | {
-              readonly playerId: string & Brand<"PlayerId">
-              readonly playerAuthKey: Redacted.Redacted<string> & Brand<"PlayerAuthKey">
-              readonly success: "NewDevice"
-              readonly playerEmail: Redacted.Redacted<string> & Brand<"PlayerEmail">
-              readonly playerPhoto?: string | undefined
-              readonly playerNickname?: string | undefined
-            },
-          never,
-          never,
-          never
-        >
-      | HttpApiEndpoint<
-          "DeviceRegisterEmail",
-          "POST",
-          {
-            readonly hash: string
-            readonly playerId: string & Brand<"PlayerId">
-            readonly salt: number & Brand<"U32">
-          },
-          never,
-          { readonly email: Redacted.Redacted<string>; readonly promote: 1 },
-          never,
-          { readonly error: string } | { readonly success: "NewEmail" } | { readonly success: "NewDevice" },
-          never,
-          never,
-          never
-        >,
-      never,
-      never,
-      false
-    >
-  | HttpApiGroup<
-      "SyncManagementGroup",
-      | HttpApiEndpoint<
-          "SyncPullSave",
-          "GET",
-          {
-            readonly hash: string
-            readonly playerId: string & Brand<"PlayerId">
-            readonly salt: number & Brand<"U32">
-          },
-          never,
-          never,
-          never,
-          | { readonly error: string }
-          | { readonly success: "NotFound" }
-          | {
-              readonly success: "Found"
-              readonly data: Uint8Array<ArrayBufferLike>
-              readonly checksum: string
-              readonly saveId: number
-            },
-          never,
-          never,
-          never
-        >
-      | HttpApiEndpoint<
-          "SyncPushSave",
-          "POST",
-          {
-            readonly hash: string
-            readonly playerId: string & Brand<"PlayerId">
-            readonly salt: number & Brand<"U32">
-          },
-          never,
-          {
-            readonly data: Uint8Array<ArrayBufferLike>
-            readonly vip: boolean
-            readonly p: "IOS" | "Android"
-            readonly doorman: {
-              readonly homeIndex: number
-              readonly workIndex: number
-              readonly placedDreamJob: boolean
-              readonly dreamJobIndex: number
-              readonly costume?: string | undefined
-              readonly vip:
-                | number
-                | "None"
-                | "Engineer"
-                | "TravelAgent"
-                | "Deliveryman"
-                | "BigSpender"
-                | "Celebrity"
-                | "GiftBit"
-              readonly customName?: string | undefined
-              readonly pet?:
-                | "bald_eagle"
-                | "bear"
-                | "bee"
-                | "chick"
-                | "chicken"
-                | "christmas_rudolph"
-                | "egg"
-                | "elephant"
-                | "frog"
-                | "horse"
-                | "kangaroo"
-                | "monkey"
-                | "panda"
-                | "raccoon"
-                | "sheep"
-                | "snowman"
-                | "unicorn"
-                | "robot"
-                | "ankylosaurus"
-                | "beaver"
-                | "butterfly_blue"
-                | "cactus"
-                | "cat"
-                | "camel"
-                | "capybara"
-                | "chipmunk"
-                | "cockatoo"
-                | "cougar"
-                | "cow"
-                | "coyote"
-                | "crocodile"
-                | "dino_toy"
-                | "diplodocus"
-                | "direwolf"
-                | "dog"
-                | "dragon"
-                | "eagle"
-                | "echidna"
-                | "elk"
-                | "fox"
-                | "giraffe"
-                | "goat"
-                | "gorilla"
-                | "griffin"
-                | "hippo"
-                | "koala"
-                | "lemur"
-                | "lion"
-                | "mammoth"
-                | "moose"
-                | "muskox"
-                | "opossum"
-                | "otter"
-                | "owl"
-                | "penguin"
-                | "pika"
-                | "pig"
-                | "pigeon"
-                | "platypus"
-                | "polar_bear"
-                | "rabbit"
-                | "rat"
-                | "rhino"
-                | "rock"
-                | "rover"
-                | "seal"
-                | "skunk"
-                | "snake"
-                | "spider"
-                | "squirrel"
-                | "stegosaurus"
-                | "tiger"
-                | "toucan"
-                | "tribble"
-                | "triceratops"
-                | "turtle"
-                | "tyrannosaur"
-                | "velociraptor"
-                | "walrus"
-                | "zebra"
-                | "black_panther"
-                | "chameleon"
-                | "duck"
-                | "chicks"
-                | "lamb"
-                | "crow"
-                | "iguana"
-                | "redpanda"
-                | "badger"
-                | "black_bear"
-                | "bluejay"
-                | "rattlesnake"
-                | "sloth"
-                | "thylacine"
-                | "ant_farm"
-                | "crab"
-                | "octopus"
-                | "sponge"
-                | "ibex"
-                | "porcupine"
-                | "bat"
-                | "dog_skeleton"
-                | "slime"
-                | "tentacle"
-                | "artic_fox"
-                | "saint_bernard"
-                | "husky"
-                | "box_pet"
-                | "elasmotherium"
-                | "lemming"
-                | "snow_leopard"
-                | "armadillo"
-                | "hyena"
-                | "kiwi"
-                | "vulture"
-                | "komodo"
-                | "turkey"
-                | "deer"
-                | "christmas_penguin"
-                | "cat_in_a_bag"
-                | undefined
-              readonly attributes: {
-                readonly birthday: readonly [number, number]
-                readonly $unknown: ReadonlyArray<string>
-                readonly gender: "male" | "female"
-                readonly name: string
-                readonly designColors: {
-                  readonly skinColorIndex: number
-                  readonly hairColorIndex: number
-                  readonly shoeColorIndex: number
-                  readonly pantColor: {
-                    readonly r: number & Brand<"U8">
-                    readonly g: number & Brand<"U8">
-                    readonly b: number & Brand<"U8">
-                  }
-                  readonly shirtColor: {
-                    readonly r: number & Brand<"U8">
-                    readonly g: number & Brand<"U8">
-                    readonly b: number & Brand<"U8">
-                  }
-                }
-                readonly accessories: {
-                  readonly tie: Either<
-                    {
-                      readonly r: number & Brand<"U8">
-                      readonly g: number & Brand<"U8">
-                      readonly b: number & Brand<"U8">
-                    },
-                    {
-                      readonly r: number & Brand<"U8">
-                      readonly g: number & Brand<"U8">
-                      readonly b: number & Brand<"U8">
-                    }
-                  >
-                  readonly earrings: Either<
-                    {
-                      readonly r: number & Brand<"U8">
-                      readonly g: number & Brand<"U8">
-                      readonly b: number & Brand<"U8">
-                    },
-                    {
-                      readonly r: number & Brand<"U8">
-                      readonly g: number & Brand<"U8">
-                      readonly b: number & Brand<"U8">
-                    }
-                  >
-                  readonly glasses: Either<number, number>
-                  readonly hairAccessory: Either<number, number>
-                  readonly hat: Either<
-                    {
-                      readonly gender: "male" | "female" | "unisex"
-                      readonly color: {
-                        readonly r: number & Brand<"U8">
-                        readonly g: number & Brand<"U8">
-                        readonly b: number & Brand<"U8">
-                      }
-                      readonly index: number
-                    },
-                    {
-                      readonly color: {
-                        readonly r: number & Brand<"U8">
-                        readonly g: number & Brand<"U8">
-                        readonly b: number & Brand<"U8">
-                      }
-                      readonly index: number
-                    }
-                  >
-                }
-                readonly skills: {
-                  readonly food: number
-                  readonly retail: number
-                  readonly service: number
-                  readonly creative: number
-                  readonly recreation: number
-                }
-              }
-            } & {
-              readonly $unknown: {
-                readonly [x: string]: {
-                  readonly value: string
-                  readonly $locationMetadata: { readonly after: string | null | undefined }
-                }
-              }
-            }
-            readonly saveVersion: number
-            readonly level: number
-            readonly reqFID: number
-            readonly mg: number
-            readonly l: string
-          },
-          never,
-          { readonly error: string } | { readonly success: "Saved" } | { readonly success: "NotSaved" },
-          never,
-          never,
-          never
-        >
-      | HttpApiEndpoint<
-          "SyncCheckForNewerSave",
-          "GET",
-          {
-            readonly hash: string
-            readonly playerId: string & Brand<"PlayerId">
-            readonly salt: number & Brand<"U32">
-          },
-          never,
-          never,
-          never,
-          | { readonly error: string }
-          | { readonly success: "NotFound" }
-          | { readonly success: "Found"; readonly checksum: string; readonly saveId: number },
-          never,
-          never,
-          never
-        >
-      | HttpApiEndpoint<
-          "SyncPushSnapshot",
-          "POST",
-          {
-            readonly hash: string
-            readonly playerId: string & Brand<"PlayerId">
-            readonly salt: number & Brand<"U32">
-          },
-          never,
-          {
-            readonly data: Uint8Array<ArrayBufferLike>
-            readonly vip: boolean
-            readonly p: "IOS" | "Android"
-            readonly doorman: {
-              readonly homeIndex: number
-              readonly workIndex: number
-              readonly placedDreamJob: boolean
-              readonly dreamJobIndex: number
-              readonly costume?: string | undefined
-              readonly vip:
-                | number
-                | "None"
-                | "Engineer"
-                | "TravelAgent"
-                | "Deliveryman"
-                | "BigSpender"
-                | "Celebrity"
-                | "GiftBit"
-              readonly customName?: string | undefined
-              readonly pet?:
-                | "bald_eagle"
-                | "bear"
-                | "bee"
-                | "chick"
-                | "chicken"
-                | "christmas_rudolph"
-                | "egg"
-                | "elephant"
-                | "frog"
-                | "horse"
-                | "kangaroo"
-                | "monkey"
-                | "panda"
-                | "raccoon"
-                | "sheep"
-                | "snowman"
-                | "unicorn"
-                | "robot"
-                | "ankylosaurus"
-                | "beaver"
-                | "butterfly_blue"
-                | "cactus"
-                | "cat"
-                | "camel"
-                | "capybara"
-                | "chipmunk"
-                | "cockatoo"
-                | "cougar"
-                | "cow"
-                | "coyote"
-                | "crocodile"
-                | "dino_toy"
-                | "diplodocus"
-                | "direwolf"
-                | "dog"
-                | "dragon"
-                | "eagle"
-                | "echidna"
-                | "elk"
-                | "fox"
-                | "giraffe"
-                | "goat"
-                | "gorilla"
-                | "griffin"
-                | "hippo"
-                | "koala"
-                | "lemur"
-                | "lion"
-                | "mammoth"
-                | "moose"
-                | "muskox"
-                | "opossum"
-                | "otter"
-                | "owl"
-                | "penguin"
-                | "pika"
-                | "pig"
-                | "pigeon"
-                | "platypus"
-                | "polar_bear"
-                | "rabbit"
-                | "rat"
-                | "rhino"
-                | "rock"
-                | "rover"
-                | "seal"
-                | "skunk"
-                | "snake"
-                | "spider"
-                | "squirrel"
-                | "stegosaurus"
-                | "tiger"
-                | "toucan"
-                | "tribble"
-                | "triceratops"
-                | "turtle"
-                | "tyrannosaur"
-                | "velociraptor"
-                | "walrus"
-                | "zebra"
-                | "black_panther"
-                | "chameleon"
-                | "duck"
-                | "chicks"
-                | "lamb"
-                | "crow"
-                | "iguana"
-                | "redpanda"
-                | "badger"
-                | "black_bear"
-                | "bluejay"
-                | "rattlesnake"
-                | "sloth"
-                | "thylacine"
-                | "ant_farm"
-                | "crab"
-                | "octopus"
-                | "sponge"
-                | "ibex"
-                | "porcupine"
-                | "bat"
-                | "dog_skeleton"
-                | "slime"
-                | "tentacle"
-                | "artic_fox"
-                | "saint_bernard"
-                | "husky"
-                | "box_pet"
-                | "elasmotherium"
-                | "lemming"
-                | "snow_leopard"
-                | "armadillo"
-                | "hyena"
-                | "kiwi"
-                | "vulture"
-                | "komodo"
-                | "turkey"
-                | "deer"
-                | "christmas_penguin"
-                | "cat_in_a_bag"
-                | undefined
-              readonly attributes: {
-                readonly birthday: readonly [number, number]
-                readonly $unknown: ReadonlyArray<string>
-                readonly gender: "male" | "female"
-                readonly name: string
-                readonly designColors: {
-                  readonly skinColorIndex: number
-                  readonly hairColorIndex: number
-                  readonly shoeColorIndex: number
-                  readonly pantColor: {
-                    readonly r: number & Brand<"U8">
-                    readonly g: number & Brand<"U8">
-                    readonly b: number & Brand<"U8">
-                  }
-                  readonly shirtColor: {
-                    readonly r: number & Brand<"U8">
-                    readonly g: number & Brand<"U8">
-                    readonly b: number & Brand<"U8">
-                  }
-                }
-                readonly accessories: {
-                  readonly tie: Either<
-                    {
-                      readonly r: number & Brand<"U8">
-                      readonly g: number & Brand<"U8">
-                      readonly b: number & Brand<"U8">
-                    },
-                    {
-                      readonly r: number & Brand<"U8">
-                      readonly g: number & Brand<"U8">
-                      readonly b: number & Brand<"U8">
-                    }
-                  >
-                  readonly earrings: Either<
-                    {
-                      readonly r: number & Brand<"U8">
-                      readonly g: number & Brand<"U8">
-                      readonly b: number & Brand<"U8">
-                    },
-                    {
-                      readonly r: number & Brand<"U8">
-                      readonly g: number & Brand<"U8">
-                      readonly b: number & Brand<"U8">
-                    }
-                  >
-                  readonly glasses: Either<number, number>
-                  readonly hairAccessory: Either<number, number>
-                  readonly hat: Either<
-                    {
-                      readonly gender: "male" | "female" | "unisex"
-                      readonly color: {
-                        readonly r: number & Brand<"U8">
-                        readonly g: number & Brand<"U8">
-                        readonly b: number & Brand<"U8">
-                      }
-                      readonly index: number
-                    },
-                    {
-                      readonly color: {
-                        readonly r: number & Brand<"U8">
-                        readonly g: number & Brand<"U8">
-                        readonly b: number & Brand<"U8">
-                      }
-                      readonly index: number
-                    }
-                  >
-                }
-                readonly skills: {
-                  readonly food: number
-                  readonly retail: number
-                  readonly service: number
-                  readonly creative: number
-                  readonly recreation: number
-                }
-              }
-            } & {
-              readonly $unknown: {
-                readonly [x: string]: {
-                  readonly value: string
-                  readonly $locationMetadata: { readonly after: string | null | undefined }
-                }
-              }
-            }
-            readonly saveVersion: number
-            readonly level: number
-            readonly reqFID: number
-            readonly mg: number
-            readonly l: string
-          },
-          never,
-          { readonly error: string } | { readonly success: "Saved" } | { readonly success: "NotSaved" },
-          never,
-          never,
-          never
-        >
-      | HttpApiEndpoint<
-          "SyncPullSnapshot",
-          "GET",
-          {
-            readonly hash: string
-            readonly playerId: string & Brand<"PlayerId">
-            readonly salt: number & Brand<"U32">
-            readonly snapshotId: number
-          },
-          never,
-          never,
-          never,
-          | { readonly error: string }
-          | { readonly success: "NotFound" }
-          | {
-              readonly success: "Found"
-              readonly data: Uint8Array<ArrayBufferLike>
-              readonly checksum: string
-              readonly snapshotId: number
-            },
-          never,
-          never,
-          never
-        >
-      | HttpApiEndpoint<
-          "SyncRetrieveSnapshotList",
-          "GET",
-          {
-            readonly hash: string
-            readonly playerId: string & Brand<"PlayerId">
-            readonly salt: number & Brand<"U32">
-          },
-          never,
-          never,
-          never,
-          | { readonly error: string }
-          | { readonly success: "NotFound" }
-          | {
-              readonly success: "Found"
-              readonly saves: ReadonlyArray<{
-                readonly id: number
-                readonly timestamp: bigint
-                readonly meta: {
-                  readonly vip: boolean
-                  readonly doorman: {
-                    readonly homeIndex: number
-                    readonly workIndex: number
-                    readonly placedDreamJob: boolean
-                    readonly dreamJobIndex: number
-                    readonly costume?: string | undefined
-                    readonly vip:
-                      | number
-                      | "None"
-                      | "Engineer"
-                      | "TravelAgent"
-                      | "Deliveryman"
-                      | "BigSpender"
-                      | "Celebrity"
-                      | "GiftBit"
-                    readonly customName?: string | undefined
-                    readonly pet?:
-                      | "bald_eagle"
-                      | "bear"
-                      | "bee"
-                      | "chick"
-                      | "chicken"
-                      | "christmas_rudolph"
-                      | "egg"
-                      | "elephant"
-                      | "frog"
-                      | "horse"
-                      | "kangaroo"
-                      | "monkey"
-                      | "panda"
-                      | "raccoon"
-                      | "sheep"
-                      | "snowman"
-                      | "unicorn"
-                      | "robot"
-                      | "ankylosaurus"
-                      | "beaver"
-                      | "butterfly_blue"
-                      | "cactus"
-                      | "cat"
-                      | "camel"
-                      | "capybara"
-                      | "chipmunk"
-                      | "cockatoo"
-                      | "cougar"
-                      | "cow"
-                      | "coyote"
-                      | "crocodile"
-                      | "dino_toy"
-                      | "diplodocus"
-                      | "direwolf"
-                      | "dog"
-                      | "dragon"
-                      | "eagle"
-                      | "echidna"
-                      | "elk"
-                      | "fox"
-                      | "giraffe"
-                      | "goat"
-                      | "gorilla"
-                      | "griffin"
-                      | "hippo"
-                      | "koala"
-                      | "lemur"
-                      | "lion"
-                      | "mammoth"
-                      | "moose"
-                      | "muskox"
-                      | "opossum"
-                      | "otter"
-                      | "owl"
-                      | "penguin"
-                      | "pika"
-                      | "pig"
-                      | "pigeon"
-                      | "platypus"
-                      | "polar_bear"
-                      | "rabbit"
-                      | "rat"
-                      | "rhino"
-                      | "rock"
-                      | "rover"
-                      | "seal"
-                      | "skunk"
-                      | "snake"
-                      | "spider"
-                      | "squirrel"
-                      | "stegosaurus"
-                      | "tiger"
-                      | "toucan"
-                      | "tribble"
-                      | "triceratops"
-                      | "turtle"
-                      | "tyrannosaur"
-                      | "velociraptor"
-                      | "walrus"
-                      | "zebra"
-                      | "black_panther"
-                      | "chameleon"
-                      | "duck"
-                      | "chicks"
-                      | "lamb"
-                      | "crow"
-                      | "iguana"
-                      | "redpanda"
-                      | "badger"
-                      | "black_bear"
-                      | "bluejay"
-                      | "rattlesnake"
-                      | "sloth"
-                      | "thylacine"
-                      | "ant_farm"
-                      | "crab"
-                      | "octopus"
-                      | "sponge"
-                      | "ibex"
-                      | "porcupine"
-                      | "bat"
-                      | "dog_skeleton"
-                      | "slime"
-                      | "tentacle"
-                      | "artic_fox"
-                      | "saint_bernard"
-                      | "husky"
-                      | "box_pet"
-                      | "elasmotherium"
-                      | "lemming"
-                      | "snow_leopard"
-                      | "armadillo"
-                      | "hyena"
-                      | "kiwi"
-                      | "vulture"
-                      | "komodo"
-                      | "turkey"
-                      | "deer"
-                      | "christmas_penguin"
-                      | "cat_in_a_bag"
-                      | undefined
-                    readonly attributes: {
-                      readonly birthday: readonly [number, number]
-                      readonly $unknown: ReadonlyArray<string>
-                      readonly gender: "male" | "female"
-                      readonly name: string
-                      readonly designColors: {
-                        readonly skinColorIndex: number
-                        readonly hairColorIndex: number
-                        readonly shoeColorIndex: number
-                        readonly pantColor: {
-                          readonly r: number & Brand<"U8">
-                          readonly g: number & Brand<"U8">
-                          readonly b: number & Brand<"U8">
-                        }
-                        readonly shirtColor: {
-                          readonly r: number & Brand<"U8">
-                          readonly g: number & Brand<"U8">
-                          readonly b: number & Brand<"U8">
-                        }
-                      }
-                      readonly accessories: {
-                        readonly tie: Either<
-                          {
-                            readonly r: number & Brand<"U8">
-                            readonly g: number & Brand<"U8">
-                            readonly b: number & Brand<"U8">
-                          },
-                          {
-                            readonly r: number & Brand<"U8">
-                            readonly g: number & Brand<"U8">
-                            readonly b: number & Brand<"U8">
-                          }
-                        >
-                        readonly earrings: Either<
-                          {
-                            readonly r: number & Brand<"U8">
-                            readonly g: number & Brand<"U8">
-                            readonly b: number & Brand<"U8">
-                          },
-                          {
-                            readonly r: number & Brand<"U8">
-                            readonly g: number & Brand<"U8">
-                            readonly b: number & Brand<"U8">
-                          }
-                        >
-                        readonly glasses: Either<number, number>
-                        readonly hairAccessory: Either<number, number>
-                        readonly hat: Either<
-                          {
-                            readonly gender: "male" | "female" | "unisex"
-                            readonly color: {
-                              readonly r: number & Brand<"U8">
-                              readonly g: number & Brand<"U8">
-                              readonly b: number & Brand<"U8">
-                            }
-                            readonly index: number
-                          },
-                          {
-                            readonly color: {
-                              readonly r: number & Brand<"U8">
-                              readonly g: number & Brand<"U8">
-                              readonly b: number & Brand<"U8">
-                            }
-                            readonly index: number
-                          }
-                        >
-                      }
-                      readonly skills: {
-                        readonly food: number
-                        readonly retail: number
-                        readonly service: number
-                        readonly creative: number
-                        readonly recreation: number
-                      }
-                    }
-                  } & {
-                    readonly $unknown: {
-                      readonly [x: string]: {
-                        readonly value: string
-                        readonly $locationMetadata: { readonly after: string | null | undefined }
-                      }
-                    }
-                  }
-                  readonly stories: number
-                  readonly maxGold: number
-                  readonly requestedFloorId: number
-                  readonly bitbook?: string | undefined
-                  readonly ts: string
-                }
-              }>
-            },
-          never,
-          never,
-          never
-        >,
-      never,
-      never,
-      false
-    >
-  | HttpApiGroup<
-      "RaffleGroup",
-      | HttpApiEndpoint<
-          "RaffleEnter",
-          "POST",
-          {
-            readonly hash: string
-            readonly playerId: string & Brand<"PlayerId">
-            readonly salt: number & Brand<"U32">
-          },
-          never,
-          never,
-          never,
-          { readonly error: string } | { readonly success: "Entered" } | { readonly success: "NotEntered" },
-          never,
-          never,
-          never
-        >
-      | HttpApiEndpoint<
-          "RaffleEnterMulti",
-          "POST",
-          {
-            readonly hash: string
-            readonly playerId: string & Brand<"PlayerId">
-            readonly salt: number & Brand<"U32">
-          },
-          never,
-          never,
-          never,
-          { readonly error: string } | { readonly success: "Entered" } | { readonly success: "NotEntered" },
-          never,
-          never,
-          never
-        >
-      | HttpApiEndpoint<
-          "RaffleCheckEnteredCurrent",
-          "GET",
-          {
-            readonly hash: string
-            readonly playerId: string & Brand<"PlayerId">
-            readonly salt: number & Brand<"U32">
-          },
-          never,
-          never,
-          never,
-          { readonly error: string } | { readonly success: "Entered" } | { readonly success: "NotEntered" },
-          never,
-          never,
-          never
-        >,
-      never,
-      never,
-      false
-    >
-  | HttpApiGroup<
-      "SocialGroup",
-      | HttpApiEndpoint<
-          "SocialSendItem",
-          "POST",
-          {
-            readonly hash: string
-            readonly playerId: string & Brand<"PlayerId">
-            readonly salt: number & Brand<"U32">
-            readonly syncItemType: "None" | "Play" | "Gift" | "Cloud" | "Raffle" | "Visit"
-            readonly friendId: string & Brand<"PlayerId">
-          },
-          never,
-          { readonly itemStr: string },
-          never,
-          { readonly error: string } | { readonly success: "Sent" } | { readonly success: "NotSent" },
-          never,
-          never,
-          never
-        >
-      | HttpApiEndpoint<
-          "SocialGetGifts",
-          "GET",
-          {
-            readonly hash: string
-            readonly playerId: string & Brand<"PlayerId">
-            readonly salt: number & Brand<"U32">
-          },
-          never,
-          never,
-          never,
-          | { readonly error: string }
-          | { readonly success: "NotFound" }
-          | {
-              readonly success: "Found"
-              readonly gifts: ReadonlyArray<{
-                readonly from: string & Brand<"PlayerId">
-                readonly to: string & Brand<"PlayerId">
-                readonly checksum: string
-                readonly id: number
-                readonly c: string
-                readonly type: "None" | "Play" | "Gift" | "Cloud" | "Raffle" | "Visit"
-                readonly contents: string
-              }>
-              readonly total: number
-            },
-          never,
-          never,
-          never
-        >
-      | HttpApiEndpoint<
-          "SocialReceiveGift",
-          "POST",
-          {
-            readonly hash: string
-            readonly playerId: string & Brand<"PlayerId">
-            readonly salt: number & Brand<"U32">
-            readonly giftId: number
-          },
-          never,
-          never,
-          never,
-          { readonly error: string } | { readonly success: "Received" } | { readonly success: "NotReceived" },
-          never,
-          never,
-          never
-        >
-      | HttpApiEndpoint<
-          "SocialPullFriendMeta",
-          "POST",
-          {
-            readonly hash: string
-            readonly playerId: string & Brand<"PlayerId">
-            readonly salt: number & Brand<"U32">
-          },
-          never,
-          { readonly friends: string & Brand<"PlayerId"> },
-          never,
-          | { readonly error: string }
-          | { readonly success: "NotFound" }
-          | {
-              readonly success: "Found"
-              readonly meta: {
-                readonly [x: string & Brand<"PlayerId">]: {
-                  readonly vip: boolean
-                  readonly doorman: {
-                    readonly homeIndex: number
-                    readonly workIndex: number
-                    readonly placedDreamJob: boolean
-                    readonly dreamJobIndex: number
-                    readonly costume?: string | undefined
-                    readonly vip:
-                      | number
-                      | "None"
-                      | "Engineer"
-                      | "TravelAgent"
-                      | "Deliveryman"
-                      | "BigSpender"
-                      | "Celebrity"
-                      | "GiftBit"
-                    readonly customName?: string | undefined
-                    readonly pet?:
-                      | "bald_eagle"
-                      | "bear"
-                      | "bee"
-                      | "chick"
-                      | "chicken"
-                      | "christmas_rudolph"
-                      | "egg"
-                      | "elephant"
-                      | "frog"
-                      | "horse"
-                      | "kangaroo"
-                      | "monkey"
-                      | "panda"
-                      | "raccoon"
-                      | "sheep"
-                      | "snowman"
-                      | "unicorn"
-                      | "robot"
-                      | "ankylosaurus"
-                      | "beaver"
-                      | "butterfly_blue"
-                      | "cactus"
-                      | "cat"
-                      | "camel"
-                      | "capybara"
-                      | "chipmunk"
-                      | "cockatoo"
-                      | "cougar"
-                      | "cow"
-                      | "coyote"
-                      | "crocodile"
-                      | "dino_toy"
-                      | "diplodocus"
-                      | "direwolf"
-                      | "dog"
-                      | "dragon"
-                      | "eagle"
-                      | "echidna"
-                      | "elk"
-                      | "fox"
-                      | "giraffe"
-                      | "goat"
-                      | "gorilla"
-                      | "griffin"
-                      | "hippo"
-                      | "koala"
-                      | "lemur"
-                      | "lion"
-                      | "mammoth"
-                      | "moose"
-                      | "muskox"
-                      | "opossum"
-                      | "otter"
-                      | "owl"
-                      | "penguin"
-                      | "pika"
-                      | "pig"
-                      | "pigeon"
-                      | "platypus"
-                      | "polar_bear"
-                      | "rabbit"
-                      | "rat"
-                      | "rhino"
-                      | "rock"
-                      | "rover"
-                      | "seal"
-                      | "skunk"
-                      | "snake"
-                      | "spider"
-                      | "squirrel"
-                      | "stegosaurus"
-                      | "tiger"
-                      | "toucan"
-                      | "tribble"
-                      | "triceratops"
-                      | "turtle"
-                      | "tyrannosaur"
-                      | "velociraptor"
-                      | "walrus"
-                      | "zebra"
-                      | "black_panther"
-                      | "chameleon"
-                      | "duck"
-                      | "chicks"
-                      | "lamb"
-                      | "crow"
-                      | "iguana"
-                      | "redpanda"
-                      | "badger"
-                      | "black_bear"
-                      | "bluejay"
-                      | "rattlesnake"
-                      | "sloth"
-                      | "thylacine"
-                      | "ant_farm"
-                      | "crab"
-                      | "octopus"
-                      | "sponge"
-                      | "ibex"
-                      | "porcupine"
-                      | "bat"
-                      | "dog_skeleton"
-                      | "slime"
-                      | "tentacle"
-                      | "artic_fox"
-                      | "saint_bernard"
-                      | "husky"
-                      | "box_pet"
-                      | "elasmotherium"
-                      | "lemming"
-                      | "snow_leopard"
-                      | "armadillo"
-                      | "hyena"
-                      | "kiwi"
-                      | "vulture"
-                      | "komodo"
-                      | "turkey"
-                      | "deer"
-                      | "christmas_penguin"
-                      | "cat_in_a_bag"
-                      | undefined
-                    readonly attributes: {
-                      readonly birthday: readonly [number, number]
-                      readonly $unknown: ReadonlyArray<string>
-                      readonly gender: "male" | "female"
-                      readonly name: string
-                      readonly designColors: {
-                        readonly skinColorIndex: number
-                        readonly hairColorIndex: number
-                        readonly shoeColorIndex: number
-                        readonly pantColor: {
-                          readonly r: number & Brand<"U8">
-                          readonly g: number & Brand<"U8">
-                          readonly b: number & Brand<"U8">
-                        }
-                        readonly shirtColor: {
-                          readonly r: number & Brand<"U8">
-                          readonly g: number & Brand<"U8">
-                          readonly b: number & Brand<"U8">
-                        }
-                      }
-                      readonly accessories: {
-                        readonly tie: Either<
-                          {
-                            readonly r: number & Brand<"U8">
-                            readonly g: number & Brand<"U8">
-                            readonly b: number & Brand<"U8">
-                          },
-                          {
-                            readonly r: number & Brand<"U8">
-                            readonly g: number & Brand<"U8">
-                            readonly b: number & Brand<"U8">
-                          }
-                        >
-                        readonly earrings: Either<
-                          {
-                            readonly r: number & Brand<"U8">
-                            readonly g: number & Brand<"U8">
-                            readonly b: number & Brand<"U8">
-                          },
-                          {
-                            readonly r: number & Brand<"U8">
-                            readonly g: number & Brand<"U8">
-                            readonly b: number & Brand<"U8">
-                          }
-                        >
-                        readonly glasses: Either<number, number>
-                        readonly hairAccessory: Either<number, number>
-                        readonly hat: Either<
-                          {
-                            readonly gender: "male" | "female" | "unisex"
-                            readonly color: {
-                              readonly r: number & Brand<"U8">
-                              readonly g: number & Brand<"U8">
-                              readonly b: number & Brand<"U8">
-                            }
-                            readonly index: number
-                          },
-                          {
-                            readonly color: {
-                              readonly r: number & Brand<"U8">
-                              readonly g: number & Brand<"U8">
-                              readonly b: number & Brand<"U8">
-                            }
-                            readonly index: number
-                          }
-                        >
-                      }
-                      readonly skills: {
-                        readonly food: number
-                        readonly retail: number
-                        readonly service: number
-                        readonly creative: number
-                        readonly recreation: number
-                      }
-                    }
-                  } & {
-                    readonly $unknown: {
-                      readonly [x: string]: {
-                        readonly value: string
-                        readonly $locationMetadata: { readonly after: string | null | undefined }
-                      }
-                    }
-                  }
-                  readonly stories: number
-                  readonly maxGold: number
-                  readonly requestedFloorId: number
-                  readonly bitbook?: string | undefined
-                  readonly ts: string
-                }
-              }
-            },
-          never,
-          never,
-          never
-        >
-      | HttpApiEndpoint<
-          "SocialPullFriendTower",
-          "GET",
-          {
-            readonly hash: string
-            readonly playerId: string & Brand<"PlayerId">
-            readonly salt: number & Brand<"U32">
-            readonly friendId: string & Brand<"PlayerId">
-          },
-          never,
-          never,
-          never,
-          | { readonly error: string }
-          | { readonly success: "NotFound" }
-          | {
-              readonly playerId: string & Brand<"PlayerId">
-              readonly success: "Found"
-              readonly data: Uint8Array<ArrayBufferLike>
-              readonly checksum: string
-              readonly saveId: number
-            },
-          never,
-          never,
-          never
-        >
-      | HttpApiEndpoint<
-          "SocialRetrieveFriendsSnapshotList",
-          "GET",
-          {
-            readonly hash: string
-            readonly playerId: string & Brand<"PlayerId">
-            readonly salt: number & Brand<"U32">
-            readonly friendId: string & Brand<"PlayerId">
-          },
-          never,
-          never,
-          never,
-          | { readonly error: string }
-          | { readonly success: "NotFound" }
-          | {
-              readonly success: "Found"
-              readonly saves: ReadonlyArray<{
-                readonly snapshotId: number
-                readonly meta: {
-                  readonly vip: boolean
-                  readonly doorman: {
-                    readonly homeIndex: number
-                    readonly workIndex: number
-                    readonly placedDreamJob: boolean
-                    readonly dreamJobIndex: number
-                    readonly costume?: string | undefined
-                    readonly vip:
-                      | number
-                      | "None"
-                      | "Engineer"
-                      | "TravelAgent"
-                      | "Deliveryman"
-                      | "BigSpender"
-                      | "Celebrity"
-                      | "GiftBit"
-                    readonly customName?: string | undefined
-                    readonly pet?:
-                      | "bald_eagle"
-                      | "bear"
-                      | "bee"
-                      | "chick"
-                      | "chicken"
-                      | "christmas_rudolph"
-                      | "egg"
-                      | "elephant"
-                      | "frog"
-                      | "horse"
-                      | "kangaroo"
-                      | "monkey"
-                      | "panda"
-                      | "raccoon"
-                      | "sheep"
-                      | "snowman"
-                      | "unicorn"
-                      | "robot"
-                      | "ankylosaurus"
-                      | "beaver"
-                      | "butterfly_blue"
-                      | "cactus"
-                      | "cat"
-                      | "camel"
-                      | "capybara"
-                      | "chipmunk"
-                      | "cockatoo"
-                      | "cougar"
-                      | "cow"
-                      | "coyote"
-                      | "crocodile"
-                      | "dino_toy"
-                      | "diplodocus"
-                      | "direwolf"
-                      | "dog"
-                      | "dragon"
-                      | "eagle"
-                      | "echidna"
-                      | "elk"
-                      | "fox"
-                      | "giraffe"
-                      | "goat"
-                      | "gorilla"
-                      | "griffin"
-                      | "hippo"
-                      | "koala"
-                      | "lemur"
-                      | "lion"
-                      | "mammoth"
-                      | "moose"
-                      | "muskox"
-                      | "opossum"
-                      | "otter"
-                      | "owl"
-                      | "penguin"
-                      | "pika"
-                      | "pig"
-                      | "pigeon"
-                      | "platypus"
-                      | "polar_bear"
-                      | "rabbit"
-                      | "rat"
-                      | "rhino"
-                      | "rock"
-                      | "rover"
-                      | "seal"
-                      | "skunk"
-                      | "snake"
-                      | "spider"
-                      | "squirrel"
-                      | "stegosaurus"
-                      | "tiger"
-                      | "toucan"
-                      | "tribble"
-                      | "triceratops"
-                      | "turtle"
-                      | "tyrannosaur"
-                      | "velociraptor"
-                      | "walrus"
-                      | "zebra"
-                      | "black_panther"
-                      | "chameleon"
-                      | "duck"
-                      | "chicks"
-                      | "lamb"
-                      | "crow"
-                      | "iguana"
-                      | "redpanda"
-                      | "badger"
-                      | "black_bear"
-                      | "bluejay"
-                      | "rattlesnake"
-                      | "sloth"
-                      | "thylacine"
-                      | "ant_farm"
-                      | "crab"
-                      | "octopus"
-                      | "sponge"
-                      | "ibex"
-                      | "porcupine"
-                      | "bat"
-                      | "dog_skeleton"
-                      | "slime"
-                      | "tentacle"
-                      | "artic_fox"
-                      | "saint_bernard"
-                      | "husky"
-                      | "box_pet"
-                      | "elasmotherium"
-                      | "lemming"
-                      | "snow_leopard"
-                      | "armadillo"
-                      | "hyena"
-                      | "kiwi"
-                      | "vulture"
-                      | "komodo"
-                      | "turkey"
-                      | "deer"
-                      | "christmas_penguin"
-                      | "cat_in_a_bag"
-                      | undefined
-                    readonly attributes: {
-                      readonly birthday: readonly [number, number]
-                      readonly $unknown: ReadonlyArray<string>
-                      readonly gender: "male" | "female"
-                      readonly name: string
-                      readonly designColors: {
-                        readonly skinColorIndex: number
-                        readonly hairColorIndex: number
-                        readonly shoeColorIndex: number
-                        readonly pantColor: {
-                          readonly r: number & Brand<"U8">
-                          readonly g: number & Brand<"U8">
-                          readonly b: number & Brand<"U8">
-                        }
-                        readonly shirtColor: {
-                          readonly r: number & Brand<"U8">
-                          readonly g: number & Brand<"U8">
-                          readonly b: number & Brand<"U8">
-                        }
-                      }
-                      readonly accessories: {
-                        readonly tie: Either<
-                          {
-                            readonly r: number & Brand<"U8">
-                            readonly g: number & Brand<"U8">
-                            readonly b: number & Brand<"U8">
-                          },
-                          {
-                            readonly r: number & Brand<"U8">
-                            readonly g: number & Brand<"U8">
-                            readonly b: number & Brand<"U8">
-                          }
-                        >
-                        readonly earrings: Either<
-                          {
-                            readonly r: number & Brand<"U8">
-                            readonly g: number & Brand<"U8">
-                            readonly b: number & Brand<"U8">
-                          },
-                          {
-                            readonly r: number & Brand<"U8">
-                            readonly g: number & Brand<"U8">
-                            readonly b: number & Brand<"U8">
-                          }
-                        >
-                        readonly glasses: Either<number, number>
-                        readonly hairAccessory: Either<number, number>
-                        readonly hat: Either<
-                          {
-                            readonly gender: "male" | "female" | "unisex"
-                            readonly color: {
-                              readonly r: number & Brand<"U8">
-                              readonly g: number & Brand<"U8">
-                              readonly b: number & Brand<"U8">
-                            }
-                            readonly index: number
-                          },
-                          {
-                            readonly color: {
-                              readonly r: number & Brand<"U8">
-                              readonly g: number & Brand<"U8">
-                              readonly b: number & Brand<"U8">
-                            }
-                            readonly index: number
-                          }
-                        >
-                      }
-                      readonly skills: {
-                        readonly food: number
-                        readonly retail: number
-                        readonly service: number
-                        readonly creative: number
-                        readonly recreation: number
-                      }
-                    }
-                  } & {
-                    readonly $unknown: {
-                      readonly [x: string]: {
-                        readonly value: string
-                        readonly $locationMetadata: { readonly after: string | null | undefined }
-                      }
-                    }
-                  }
-                  readonly stories: number
-                  readonly maxGold: number
-                  readonly requestedFloorId: number
-                  readonly bitbook?: string | undefined
-                  readonly ts: string
-                }
-                readonly created: Date
-              }>
-            },
-          never,
-          never,
-          never
-        >
-      | HttpApiEndpoint<
-          "SocialGetVisits",
-          "GET",
-          {
-            readonly hash: string
-            readonly playerId: string & Brand<"PlayerId">
-            readonly salt: number & Brand<"U32">
-          },
-          never,
-          never,
-          never,
-          | { readonly error: string }
-          | { readonly success: "NotFound" }
-          | {
-              readonly success: "Found"
-              readonly gifts: ReadonlyArray<{
-                readonly from: string & Brand<"PlayerId">
-                readonly to: string & Brand<"PlayerId">
-                readonly checksum: string
-                readonly id: number
-                readonly c: string
-                readonly type: "None" | "Play" | "Gift" | "Cloud" | "Raffle" | "Visit"
-                readonly contents: string
-              }>
-              readonly total: number
-            },
-          never,
-          never,
-          never
-        >,
-      never,
-      never,
-      false
-    >,
-  HttpApiDecodeError | BadRequest | Unauthorized | InternalServerError,
-  never
->
-```
-
-[Source](https://github.com/leonitousconforti/tinyburg/packages/tinytower-sdk/blob/main/src/TinyTower.ts#L31)
-
-Since v1.0.0
 
 # SDK
 
@@ -1657,11 +56,11 @@ declare const device_newPlayer: Effect.Effect<
     readonly playerSs: Redacted.Redacted<string> & Brand<"PlayerAuthKey">
   },
   NimblebitError | HttpApiDecodeError | BadRequest | Unauthorized | InternalServerError | HttpClientError | ParseError,
-  NimblebitAuth | HttpClient.HttpClient
+  NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/tinytower-sdk/blob/main/src/TinyTower.ts#L40)
+[Source](https://github.com/leonitousconforti/tinyburg/packages/tinytower-sdk/blob/main/src/TinyTower.ts#L117)
 
 Since v1.0.0
 
@@ -1683,11 +82,11 @@ declare const device_playerDetails: (args_0: {
     readonly blacklisted: boolean
   },
   NimblebitError | HttpApiDecodeError | BadRequest | Unauthorized | InternalServerError | HttpClientError | ParseError,
-  NimblebitAuth | HttpClient.HttpClient
+  NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/tinytower-sdk/blob/main/src/TinyTower.ts#L78)
+[Source](https://github.com/leonitousconforti/tinyburg/packages/tinytower-sdk/blob/main/src/TinyTower.ts#L155)
 
 Since v1.0.0
 
@@ -1704,11 +103,11 @@ declare const device_registerEmail: (args_0: {
 }) => Effect.Effect<
   "NewDevice" | "NewEmail",
   NimblebitError | HttpApiDecodeError | BadRequest | Unauthorized | InternalServerError | HttpClientError | ParseError,
-  NimblebitAuth | HttpClient.HttpClient
+  NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/tinytower-sdk/blob/main/src/TinyTower.ts#L158)
+[Source](https://github.com/leonitousconforti/tinyburg/packages/tinytower-sdk/blob/main/src/TinyTower.ts#L235)
 
 Since v1.0.0
 
@@ -1731,11 +130,11 @@ declare const device_verifyDevice: (args_0: {
     readonly playerNickname?: string | undefined
   },
   NimblebitError | HttpApiDecodeError | BadRequest | Unauthorized | InternalServerError | HttpClientError | ParseError,
-  NimblebitAuth | HttpClient.HttpClient
+  NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/tinytower-sdk/blob/main/src/TinyTower.ts#L118)
+[Source](https://github.com/leonitousconforti/tinyburg/packages/tinytower-sdk/blob/main/src/TinyTower.ts#L195)
 
 Since v1.0.0
 
@@ -1752,11 +151,11 @@ declare const raffle_checkEnteredCurrent: (args_0: {
 }) => Effect.Effect<
   boolean,
   NimblebitError | HttpApiDecodeError | BadRequest | Unauthorized | InternalServerError | HttpClientError | ParseError,
-  NimblebitAuth | HttpClient.HttpClient
+  NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/tinytower-sdk/blob/main/src/TinyTower.ts#L670)
+[Source](https://github.com/leonitousconforti/tinyburg/packages/tinytower-sdk/blob/main/src/TinyTower.ts#L747)
 
 Since v1.0.0
 
@@ -1773,11 +172,11 @@ declare const raffle_enterMultiRaffle: (args_0: {
 }) => Effect.Effect<
   void,
   NimblebitError | HttpApiDecodeError | BadRequest | Unauthorized | InternalServerError | HttpClientError | ParseError,
-  NimblebitAuth | HttpClient.HttpClient
+  NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/tinytower-sdk/blob/main/src/TinyTower.ts#L622)
+[Source](https://github.com/leonitousconforti/tinyburg/packages/tinytower-sdk/blob/main/src/TinyTower.ts#L699)
 
 Since v1.0.0
 
@@ -1794,11 +193,11 @@ declare const raffle_enterRaffle: (args_0: {
 }) => Effect.Effect<
   void,
   NimblebitError | HttpApiDecodeError | BadRequest | Unauthorized | InternalServerError | HttpClientError | ParseError,
-  NimblebitAuth | HttpClient.HttpClient
+  NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/tinytower-sdk/blob/main/src/TinyTower.ts#L574)
+[Source](https://github.com/leonitousconforti/tinyburg/packages/tinytower-sdk/blob/main/src/TinyTower.ts#L651)
 
 Since v1.0.0
 
@@ -1818,19 +217,19 @@ declare const social_getGifts: (args_0: {
     gifts: ReadonlyArray<{
       readonly from: string & Brand<"PlayerId">
       readonly to: string & Brand<"PlayerId">
-      readonly checksum: string
       readonly id: number
       readonly c: string
+      readonly checksum: string
       readonly type: "None" | "Play" | "Gift" | "Cloud" | "Raffle" | "Visit"
       readonly contents: string
     }>
   },
   NimblebitError | HttpApiDecodeError | BadRequest | Unauthorized | InternalServerError | HttpClientError | ParseError,
-  NimblebitAuth | HttpClient.HttpClient
+  NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/tinytower-sdk/blob/main/src/TinyTower.ts#L771)
+[Source](https://github.com/leonitousconforti/tinyburg/packages/tinytower-sdk/blob/main/src/TinyTower.ts#L848)
 
 Since v1.0.0
 
@@ -1850,19 +249,19 @@ declare const social_getVisits: (args_0: {
     visits: ReadonlyArray<{
       readonly from: string & Brand<"PlayerId">
       readonly to: string & Brand<"PlayerId">
-      readonly checksum: string
       readonly id: number
       readonly c: string
+      readonly checksum: string
       readonly type: "None" | "Play" | "Gift" | "Cloud" | "Raffle" | "Visit"
       readonly contents: string
     }>
   },
   NimblebitError | HttpApiDecodeError | BadRequest | Unauthorized | InternalServerError | HttpClientError | ParseError,
-  NimblebitAuth | HttpClient.HttpClient
+  NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/tinytower-sdk/blob/main/src/TinyTower.ts#L1040)
+[Source](https://github.com/leonitousconforti/tinyburg/packages/tinytower-sdk/blob/main/src/TinyTower.ts#L1117)
 
 Since v1.0.0
 
@@ -1880,6 +279,7 @@ declare const social_pullFriendMeta: (
   } & { friendId: Schema.Schema.Type<NimblebitConfig.PlayerIdSchema> }
 ) => Effect.Effect<
   {
+    readonly maxGold: number
     readonly vip: boolean
     readonly doorman: {
       readonly homeIndex: number
@@ -2020,8 +420,8 @@ declare const social_pullFriendMeta: (
         | "cat_in_a_bag"
         | undefined
       readonly attributes: {
-        readonly birthday: readonly [number, number]
         readonly $unknown: ReadonlyArray<string>
+        readonly birthday: readonly [number, number]
         readonly gender: "male" | "female"
         readonly name: string
         readonly designColors: {
@@ -2052,7 +452,7 @@ declare const social_pullFriendMeta: (
           readonly hairAccessory: Either<number, number>
           readonly hat: Either<
             {
-              readonly gender: "male" | "female" | "unisex"
+              readonly gender: "male" | "female" | "bi"
               readonly color: {
                 readonly r: number & Brand<"U8">
                 readonly g: number & Brand<"U8">
@@ -2087,17 +487,16 @@ declare const social_pullFriendMeta: (
       }
     }
     readonly stories: number
-    readonly maxGold: number
     readonly requestedFloorId: number
     readonly bitbook?: string | undefined
     readonly ts: string
   },
   NimblebitError | HttpApiDecodeError | BadRequest | Unauthorized | InternalServerError | HttpClientError | ParseError,
-  NimblebitAuth | HttpClient.HttpClient
+  NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/tinytower-sdk/blob/main/src/TinyTower.ts#L871)
+[Source](https://github.com/leonitousconforti/tinyburg/packages/tinytower-sdk/blob/main/src/TinyTower.ts#L948)
 
 Since v1.0.0
 
@@ -2116,11 +515,11 @@ declare const social_pullFriendTower: (
 ) => Effect.Effect<
   { saveId: number; data: string },
   NimblebitError | HttpApiDecodeError | BadRequest | Unauthorized | InternalServerError | HttpClientError | ParseError,
-  NimblebitAuth | HttpClient.HttpClient
+  NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/tinytower-sdk/blob/main/src/TinyTower.ts#L922)
+[Source](https://github.com/leonitousconforti/tinyburg/packages/tinytower-sdk/blob/main/src/TinyTower.ts#L999)
 
 Since v1.0.0
 
@@ -2139,11 +538,11 @@ declare const social_receiveGift: (
 ) => Effect.Effect<
   void,
   NimblebitError | HttpApiDecodeError | BadRequest | Unauthorized | InternalServerError | HttpClientError | ParseError,
-  NimblebitAuth | HttpClient.HttpClient
+  NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/tinytower-sdk/blob/main/src/TinyTower.ts#L822)
+[Source](https://github.com/leonitousconforti/tinyburg/packages/tinytower-sdk/blob/main/src/TinyTower.ts#L899)
 
 Since v1.0.0
 
@@ -2163,6 +562,7 @@ declare const social_retrieveFriendsSnapshotList: (
   ReadonlyArray<{
     readonly snapshotId: number
     readonly meta: {
+      readonly maxGold: number
       readonly vip: boolean
       readonly doorman: {
         readonly homeIndex: number
@@ -2303,8 +703,8 @@ declare const social_retrieveFriendsSnapshotList: (
           | "cat_in_a_bag"
           | undefined
         readonly attributes: {
-          readonly birthday: readonly [number, number]
           readonly $unknown: ReadonlyArray<string>
+          readonly birthday: readonly [number, number]
           readonly gender: "male" | "female"
           readonly name: string
           readonly designColors: {
@@ -2335,7 +735,7 @@ declare const social_retrieveFriendsSnapshotList: (
             readonly hairAccessory: Either<number, number>
             readonly hat: Either<
               {
-                readonly gender: "male" | "female" | "unisex"
+                readonly gender: "male" | "female" | "bi"
                 readonly color: {
                   readonly r: number & Brand<"U8">
                   readonly g: number & Brand<"U8">
@@ -2370,7 +770,6 @@ declare const social_retrieveFriendsSnapshotList: (
         }
       }
       readonly stories: number
-      readonly maxGold: number
       readonly requestedFloorId: number
       readonly bitbook?: string | undefined
       readonly ts: string
@@ -2378,11 +777,11 @@ declare const social_retrieveFriendsSnapshotList: (
     readonly created: Date
   }>,
   NimblebitError | HttpApiDecodeError | BadRequest | Unauthorized | InternalServerError | HttpClientError | ParseError,
-  NimblebitAuth | HttpClient.HttpClient
+  NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/tinytower-sdk/blob/main/src/TinyTower.ts#L989)
+[Source](https://github.com/leonitousconforti/tinyburg/packages/tinytower-sdk/blob/main/src/TinyTower.ts#L1066)
 
 Since v1.0.0
 
@@ -2405,11 +804,11 @@ declare const social_sendItem: (
 ) => Effect.Effect<
   void,
   NimblebitError | HttpApiDecodeError | BadRequest | Unauthorized | InternalServerError | HttpClientError | ParseError,
-  NimblebitAuth | HttpClient.HttpClient
+  NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/tinytower-sdk/blob/main/src/TinyTower.ts#L710)
+[Source](https://github.com/leonitousconforti/tinyburg/packages/tinytower-sdk/blob/main/src/TinyTower.ts#L787)
 
 Since v1.0.0
 
@@ -2428,11 +827,11 @@ declare const social_visit: (
 ) => Effect.Effect<
   void,
   NimblebitError | HttpApiDecodeError | BadRequest | Unauthorized | InternalServerError | HttpClientError | ParseError,
-  NimblebitAuth | HttpClient.HttpClient
+  NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/tinytower-sdk/blob/main/src/TinyTower.ts#L1091)
+[Source](https://github.com/leonitousconforti/tinyburg/packages/tinytower-sdk/blob/main/src/TinyTower.ts#L1168)
 
 Since v1.0.0
 
@@ -2449,11 +848,11 @@ declare const sync_checkForNewerSave: (args_0: {
 }) => Effect.Effect<
   number,
   NimblebitError | HttpApiDecodeError | BadRequest | Unauthorized | InternalServerError | HttpClientError | ParseError,
-  NimblebitAuth | HttpClient.HttpClient
+  NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/tinytower-sdk/blob/main/src/TinyTower.ts#L335)
+[Source](https://github.com/leonitousconforti/tinyburg/packages/tinytower-sdk/blob/main/src/TinyTower.ts#L412)
 
 Since v1.0.0
 
@@ -2470,11 +869,11 @@ declare const sync_pullSave: (args_0: {
 }) => Effect.Effect<
   { saveId: number; data: string },
   NimblebitError | HttpApiDecodeError | BadRequest | Unauthorized | InternalServerError | HttpClientError | ParseError,
-  NimblebitAuth | HttpClient.HttpClient
+  NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/tinytower-sdk/blob/main/src/TinyTower.ts#L205)
+[Source](https://github.com/leonitousconforti/tinyburg/packages/tinytower-sdk/blob/main/src/TinyTower.ts#L282)
 
 Since v1.0.0
 
@@ -2493,11 +892,11 @@ declare const sync_pullSnapshot: (
 ) => Effect.Effect<
   { snapshotId: number; data: string },
   NimblebitError | HttpApiDecodeError | BadRequest | Unauthorized | InternalServerError | HttpClientError | ParseError,
-  NimblebitAuth | HttpClient.HttpClient
+  NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/tinytower-sdk/blob/main/src/TinyTower.ts#L395)
+[Source](https://github.com/leonitousconforti/tinyburg/packages/tinytower-sdk/blob/main/src/TinyTower.ts#L472)
 
 Since v1.0.0
 
@@ -2516,11 +915,11 @@ declare const sync_pushSave: (
 ) => Effect.Effect<
   void,
   NimblebitError | HttpApiDecodeError | BadRequest | Unauthorized | InternalServerError | HttpClientError | ParseError,
-  NimblebitAuth | HttpClient.HttpClient
+  NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/tinytower-sdk/blob/main/src/TinyTower.ts#L269)
+[Source](https://github.com/leonitousconforti/tinyburg/packages/tinytower-sdk/blob/main/src/TinyTower.ts#L346)
 
 Since v1.0.0
 
@@ -2539,11 +938,11 @@ declare const sync_pushSnapshot: (
 ) => Effect.Effect<
   void,
   NimblebitError | HttpApiDecodeError | BadRequest | Unauthorized | InternalServerError | HttpClientError | ParseError,
-  NimblebitAuth | HttpClient.HttpClient
+  NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/tinytower-sdk/blob/main/src/TinyTower.ts#L460)
+[Source](https://github.com/leonitousconforti/tinyburg/packages/tinytower-sdk/blob/main/src/TinyTower.ts#L537)
 
 Since v1.0.0
 
@@ -2562,6 +961,7 @@ declare const sync_retrieveSnapshotList: (args_0: {
     readonly id: number
     readonly timestamp: bigint
     readonly meta: {
+      readonly maxGold: number
       readonly vip: boolean
       readonly doorman: {
         readonly homeIndex: number
@@ -2702,8 +1102,8 @@ declare const sync_retrieveSnapshotList: (args_0: {
           | "cat_in_a_bag"
           | undefined
         readonly attributes: {
-          readonly birthday: readonly [number, number]
           readonly $unknown: ReadonlyArray<string>
+          readonly birthday: readonly [number, number]
           readonly gender: "male" | "female"
           readonly name: string
           readonly designColors: {
@@ -2734,7 +1134,7 @@ declare const sync_retrieveSnapshotList: (args_0: {
             readonly hairAccessory: Either<number, number>
             readonly hat: Either<
               {
-                readonly gender: "male" | "female" | "unisex"
+                readonly gender: "male" | "female" | "bi"
                 readonly color: {
                   readonly r: number & Brand<"U8">
                   readonly g: number & Brand<"U8">
@@ -2769,17 +1169,879 @@ declare const sync_retrieveSnapshotList: (args_0: {
         }
       }
       readonly stories: number
-      readonly maxGold: number
       readonly requestedFloorId: number
       readonly bitbook?: string | undefined
       readonly ts: string
     }
   }>,
   NimblebitError | HttpApiDecodeError | BadRequest | Unauthorized | InternalServerError | HttpClientError | ParseError,
-  NimblebitAuth | HttpClient.HttpClient
+  NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/tinytower-sdk/blob/main/src/TinyTower.ts#L526)
+[Source](https://github.com/leonitousconforti/tinyburg/packages/tinytower-sdk/blob/main/src/TinyTower.ts#L603)
+
+Since v1.0.0
+
+# Schemas
+
+## SaveData
+
+How to decode a SaveData from Nimblebit's object format.
+
+**Signature**
+
+```ts
+declare const SaveData: Schema.transform<
+  typeof Schema.String,
+  Schema.transformOrFail<
+    typeof Schema.String,
+    Schema.extend<
+      Schema.Struct<{
+        coins: Schema.PropertySignature<":", number, "Pc", ":", string, false, never>
+        bux: Schema.PropertySignature<":", number, "Pb", ":", string, false, never>
+        Ppig: Schema.PropertySignature<"?:", string | undefined, "Ppig", "?:", string | undefined, false, never>
+        Pplim: Schema.PropertySignature<"?:", string | undefined, "Pplim", "?:", string | undefined, false, never>
+        maxGold: Schema.PropertySignature<":", number, "Pmg", ":", string, false, never>
+        gold: Schema.PropertySignature<":", number, "Pg", ":", string, false, never>
+        tip: Schema.PropertySignature<":", number, "Ptip", ":", string, false, never>
+        needUpgrade: Schema.PropertySignature<":", number, "Pnu", ":", string, false, never>
+        ver: Schema.PropertySignature<":", string, "Pver", ":", string, false, never>
+        roof: Schema.PropertySignature<":", number, "Pr", ":", string, false, never>
+        lift: Schema.PropertySignature<":", number, "Pe", ":", string, false, never>
+        lobby: Schema.PropertySignature<":", number, "Pl", ":", string, false, never>
+        buxBought: Schema.PropertySignature<":", number, "Pbxb", ":", string, false, never>
+        installTime: Schema.PropertySignature<":", number, "PiT", ":", string, false, never>
+        lastSaleTick: Schema.PropertySignature<":", number, "PlST", ":", string, false, never>
+        lobbyName: Schema.PropertySignature<":", string, "Pln", ":", string, false, never>
+        raffleID: Schema.PropertySignature<":", number, "Prf", ":", string, false, never>
+        vipTrialEnd: Schema.PropertySignature<":", bigint, "Pvte", ":", string, false, never>
+        costumes: Schema.PropertySignature<":", ReadonlyArray<string>, "Pcos", ":", string, false, never>
+        pets: Schema.PropertySignature<
+          "?:",
+          ReadonlyArray<string> | undefined,
+          "Ppets",
+          "?:",
+          string | undefined,
+          false,
+          never
+        >
+        missionHist: Schema.PropertySignature<
+          "?:",
+          ReadonlyArray<string> | undefined,
+          "Pmhst",
+          "?:",
+          string | undefined,
+          false,
+          never
+        >
+        bbHist: Schema.PropertySignature<":", ReadonlyArray<string>, "Pbhst", ":", string, false, never>
+        roofs: Schema.PropertySignature<":", ReadonlyArray<string>, "Prfs", ":", string, false, never>
+        lifts: Schema.PropertySignature<":", ReadonlyArray<string>, "Plfs", ":", string, false, never>
+        lobbies: Schema.PropertySignature<":", ReadonlyArray<string>, "Plbs", ":", string, false, never>
+        bannedFriends: Schema.PropertySignature<
+          "?:",
+          ReadonlyArray<string> | undefined,
+          "Pbf",
+          "?:",
+          string | undefined,
+          false,
+          never
+        >
+        liftSpeed: Schema.PropertySignature<"?:", number | undefined, "Pls", "?:", string | undefined, false, never>
+        totalPoints: Schema.PropertySignature<":", bigint, "Ptp", ":", string, false, never>
+        lrc: Schema.PropertySignature<":", string, "Plrc", ":", string, false, never>
+        lfc: Schema.PropertySignature<":", string, "Plfc", ":", string, false, never>
+        cfd: Schema.PropertySignature<":", string, "Pcfd", ":", string, false, never>
+        lbc: Schema.PropertySignature<":", string, "Plbc", ":", string, false, never>
+        lbbcp: Schema.PropertySignature<":", string, "Plbbcp", ":", string, false, never>
+        lcmiss: Schema.PropertySignature<":", string, "Plcmiss", ":", string, false, never>
+        lcg: Schema.PropertySignature<":", string, "Plcg", ":", string, false, never>
+        sfx: Schema.PropertySignature<":", number, "Psfx", ":", string, false, never>
+        mus: Schema.PropertySignature<":", number, "Pmus", ":", string, false, never>
+        notes: Schema.PropertySignature<":", number, "Pnts", ":", string, false, never>
+        autoLiftDisable: Schema.PropertySignature<":", number, "Pald", ":", string, false, never>
+        videos: Schema.PropertySignature<":", number, "Pvds", ":", string, false, never>
+        vidCheck: Schema.PropertySignature<":", number, "Pvdc", ":", string, false, never>
+        bbnotes: Schema.PropertySignature<":", number, "Pbbn", ":", string, false, never>
+        hidechat: Schema.PropertySignature<":", number, "Phchat", ":", string, false, never>
+        tmi: Schema.PropertySignature<":", string, "Ptmi", ":", string, false, never>
+        PVF: Schema.PropertySignature<"?:", string | undefined, "PVF", "?:", string | undefined, false, never>
+        PHP: Schema.PropertySignature<"?:", string | undefined, "PHP", "?:", string | undefined, false, never>
+        mission: Schema.PropertySignature<
+          "?:",
+          | ({ readonly id: string } & {
+              readonly $unknown: {
+                readonly [x: string]: {
+                  readonly value: string
+                  readonly $locationMetadata: { readonly after: string | null | undefined }
+                }
+              }
+            })
+          | undefined,
+          "Pmiss",
+          "?:",
+          string | undefined,
+          false,
+          never
+        >
+        doorman: Schema.PropertySignature<
+          ":",
+          {
+            readonly homeIndex: number
+            readonly workIndex: number
+            readonly placedDreamJob: boolean
+            readonly dreamJobIndex: number
+            readonly costume?: string | undefined
+            readonly vip:
+              | number
+              | "None"
+              | "Engineer"
+              | "TravelAgent"
+              | "Deliveryman"
+              | "BigSpender"
+              | "Celebrity"
+              | "GiftBit"
+            readonly customName?: string | undefined
+            readonly pet?:
+              | "bald_eagle"
+              | "bear"
+              | "bee"
+              | "chick"
+              | "chicken"
+              | "christmas_rudolph"
+              | "egg"
+              | "elephant"
+              | "frog"
+              | "horse"
+              | "kangaroo"
+              | "monkey"
+              | "panda"
+              | "raccoon"
+              | "sheep"
+              | "snowman"
+              | "unicorn"
+              | "robot"
+              | "ankylosaurus"
+              | "beaver"
+              | "butterfly_blue"
+              | "cactus"
+              | "cat"
+              | "camel"
+              | "capybara"
+              | "chipmunk"
+              | "cockatoo"
+              | "cougar"
+              | "cow"
+              | "coyote"
+              | "crocodile"
+              | "dino_toy"
+              | "diplodocus"
+              | "direwolf"
+              | "dog"
+              | "dragon"
+              | "eagle"
+              | "echidna"
+              | "elk"
+              | "fox"
+              | "giraffe"
+              | "goat"
+              | "gorilla"
+              | "griffin"
+              | "hippo"
+              | "koala"
+              | "lemur"
+              | "lion"
+              | "mammoth"
+              | "moose"
+              | "muskox"
+              | "opossum"
+              | "otter"
+              | "owl"
+              | "penguin"
+              | "pika"
+              | "pig"
+              | "pigeon"
+              | "platypus"
+              | "polar_bear"
+              | "rabbit"
+              | "rat"
+              | "rhino"
+              | "rock"
+              | "rover"
+              | "seal"
+              | "skunk"
+              | "snake"
+              | "spider"
+              | "squirrel"
+              | "stegosaurus"
+              | "tiger"
+              | "toucan"
+              | "tribble"
+              | "triceratops"
+              | "turtle"
+              | "tyrannosaur"
+              | "velociraptor"
+              | "walrus"
+              | "zebra"
+              | "black_panther"
+              | "chameleon"
+              | "duck"
+              | "chicks"
+              | "lamb"
+              | "crow"
+              | "iguana"
+              | "redpanda"
+              | "badger"
+              | "black_bear"
+              | "bluejay"
+              | "rattlesnake"
+              | "sloth"
+              | "thylacine"
+              | "ant_farm"
+              | "crab"
+              | "octopus"
+              | "sponge"
+              | "ibex"
+              | "porcupine"
+              | "bat"
+              | "dog_skeleton"
+              | "slime"
+              | "tentacle"
+              | "artic_fox"
+              | "saint_bernard"
+              | "husky"
+              | "box_pet"
+              | "elasmotherium"
+              | "lemming"
+              | "snow_leopard"
+              | "armadillo"
+              | "hyena"
+              | "kiwi"
+              | "vulture"
+              | "komodo"
+              | "turkey"
+              | "deer"
+              | "christmas_penguin"
+              | "cat_in_a_bag"
+              | undefined
+            readonly attributes: {
+              readonly $unknown: ReadonlyArray<string>
+              readonly birthday: readonly [number, number]
+              readonly gender: "male" | "female"
+              readonly name: string
+              readonly designColors: {
+                readonly skinColorIndex: number
+                readonly hairColorIndex: number
+                readonly shoeColorIndex: number
+                readonly pantColor: {
+                  readonly r: number & Brand<"U8">
+                  readonly g: number & Brand<"U8">
+                  readonly b: number & Brand<"U8">
+                }
+                readonly shirtColor: {
+                  readonly r: number & Brand<"U8">
+                  readonly g: number & Brand<"U8">
+                  readonly b: number & Brand<"U8">
+                }
+              }
+              readonly accessories: {
+                readonly tie: Either<
+                  {
+                    readonly r: number & Brand<"U8">
+                    readonly g: number & Brand<"U8">
+                    readonly b: number & Brand<"U8">
+                  },
+                  {
+                    readonly r: number & Brand<"U8">
+                    readonly g: number & Brand<"U8">
+                    readonly b: number & Brand<"U8">
+                  }
+                >
+                readonly earrings: Either<
+                  {
+                    readonly r: number & Brand<"U8">
+                    readonly g: number & Brand<"U8">
+                    readonly b: number & Brand<"U8">
+                  },
+                  {
+                    readonly r: number & Brand<"U8">
+                    readonly g: number & Brand<"U8">
+                    readonly b: number & Brand<"U8">
+                  }
+                >
+                readonly glasses: Either<number, number>
+                readonly hairAccessory: Either<number, number>
+                readonly hat: Either<
+                  {
+                    readonly gender: "male" | "female" | "bi"
+                    readonly color: {
+                      readonly r: number & Brand<"U8">
+                      readonly g: number & Brand<"U8">
+                      readonly b: number & Brand<"U8">
+                    }
+                    readonly index: number
+                  },
+                  {
+                    readonly color: {
+                      readonly r: number & Brand<"U8">
+                      readonly g: number & Brand<"U8">
+                      readonly b: number & Brand<"U8">
+                    }
+                    readonly index: number
+                  }
+                >
+              }
+              readonly skills: {
+                readonly food: number
+                readonly retail: number
+                readonly service: number
+                readonly creative: number
+                readonly recreation: number
+              }
+            }
+          } & {
+            readonly $unknown: {
+              readonly [x: string]: {
+                readonly value: string
+                readonly $locationMetadata: { readonly after: string | null | undefined }
+              }
+            }
+          },
+          "Pdrmn",
+          ":",
+          string,
+          false,
+          never
+        >
+        playerID: Schema.PropertySignature<":", string, "Ppid", ":", string, false, never>
+        playerRegistered: Schema.PropertySignature<":", number, "Preg", ":", string, false, never>
+        bzns: Schema.PropertySignature<
+          ":",
+          ReadonlyArray<
+            {
+              readonly homeIndex: number
+              readonly workIndex: number
+              readonly placedDreamJob: boolean
+              readonly dreamJobIndex: number
+              readonly costume?: string | undefined
+              readonly vip:
+                | number
+                | "None"
+                | "Engineer"
+                | "TravelAgent"
+                | "Deliveryman"
+                | "BigSpender"
+                | "Celebrity"
+                | "GiftBit"
+              readonly customName?: string | undefined
+              readonly pet?:
+                | "bald_eagle"
+                | "bear"
+                | "bee"
+                | "chick"
+                | "chicken"
+                | "christmas_rudolph"
+                | "egg"
+                | "elephant"
+                | "frog"
+                | "horse"
+                | "kangaroo"
+                | "monkey"
+                | "panda"
+                | "raccoon"
+                | "sheep"
+                | "snowman"
+                | "unicorn"
+                | "robot"
+                | "ankylosaurus"
+                | "beaver"
+                | "butterfly_blue"
+                | "cactus"
+                | "cat"
+                | "camel"
+                | "capybara"
+                | "chipmunk"
+                | "cockatoo"
+                | "cougar"
+                | "cow"
+                | "coyote"
+                | "crocodile"
+                | "dino_toy"
+                | "diplodocus"
+                | "direwolf"
+                | "dog"
+                | "dragon"
+                | "eagle"
+                | "echidna"
+                | "elk"
+                | "fox"
+                | "giraffe"
+                | "goat"
+                | "gorilla"
+                | "griffin"
+                | "hippo"
+                | "koala"
+                | "lemur"
+                | "lion"
+                | "mammoth"
+                | "moose"
+                | "muskox"
+                | "opossum"
+                | "otter"
+                | "owl"
+                | "penguin"
+                | "pika"
+                | "pig"
+                | "pigeon"
+                | "platypus"
+                | "polar_bear"
+                | "rabbit"
+                | "rat"
+                | "rhino"
+                | "rock"
+                | "rover"
+                | "seal"
+                | "skunk"
+                | "snake"
+                | "spider"
+                | "squirrel"
+                | "stegosaurus"
+                | "tiger"
+                | "toucan"
+                | "tribble"
+                | "triceratops"
+                | "turtle"
+                | "tyrannosaur"
+                | "velociraptor"
+                | "walrus"
+                | "zebra"
+                | "black_panther"
+                | "chameleon"
+                | "duck"
+                | "chicks"
+                | "lamb"
+                | "crow"
+                | "iguana"
+                | "redpanda"
+                | "badger"
+                | "black_bear"
+                | "bluejay"
+                | "rattlesnake"
+                | "sloth"
+                | "thylacine"
+                | "ant_farm"
+                | "crab"
+                | "octopus"
+                | "sponge"
+                | "ibex"
+                | "porcupine"
+                | "bat"
+                | "dog_skeleton"
+                | "slime"
+                | "tentacle"
+                | "artic_fox"
+                | "saint_bernard"
+                | "husky"
+                | "box_pet"
+                | "elasmotherium"
+                | "lemming"
+                | "snow_leopard"
+                | "armadillo"
+                | "hyena"
+                | "kiwi"
+                | "vulture"
+                | "komodo"
+                | "turkey"
+                | "deer"
+                | "christmas_penguin"
+                | "cat_in_a_bag"
+                | undefined
+              readonly attributes: {
+                readonly $unknown: ReadonlyArray<string>
+                readonly birthday: readonly [number, number]
+                readonly gender: "male" | "female"
+                readonly name: string
+                readonly designColors: {
+                  readonly skinColorIndex: number
+                  readonly hairColorIndex: number
+                  readonly shoeColorIndex: number
+                  readonly pantColor: {
+                    readonly r: number & Brand<"U8">
+                    readonly g: number & Brand<"U8">
+                    readonly b: number & Brand<"U8">
+                  }
+                  readonly shirtColor: {
+                    readonly r: number & Brand<"U8">
+                    readonly g: number & Brand<"U8">
+                    readonly b: number & Brand<"U8">
+                  }
+                }
+                readonly accessories: {
+                  readonly tie: Either<
+                    {
+                      readonly r: number & Brand<"U8">
+                      readonly g: number & Brand<"U8">
+                      readonly b: number & Brand<"U8">
+                    },
+                    {
+                      readonly r: number & Brand<"U8">
+                      readonly g: number & Brand<"U8">
+                      readonly b: number & Brand<"U8">
+                    }
+                  >
+                  readonly earrings: Either<
+                    {
+                      readonly r: number & Brand<"U8">
+                      readonly g: number & Brand<"U8">
+                      readonly b: number & Brand<"U8">
+                    },
+                    {
+                      readonly r: number & Brand<"U8">
+                      readonly g: number & Brand<"U8">
+                      readonly b: number & Brand<"U8">
+                    }
+                  >
+                  readonly glasses: Either<number, number>
+                  readonly hairAccessory: Either<number, number>
+                  readonly hat: Either<
+                    {
+                      readonly gender: "male" | "female" | "bi"
+                      readonly color: {
+                        readonly r: number & Brand<"U8">
+                        readonly g: number & Brand<"U8">
+                        readonly b: number & Brand<"U8">
+                      }
+                      readonly index: number
+                    },
+                    {
+                      readonly color: {
+                        readonly r: number & Brand<"U8">
+                        readonly g: number & Brand<"U8">
+                        readonly b: number & Brand<"U8">
+                      }
+                      readonly index: number
+                    }
+                  >
+                }
+                readonly skills: {
+                  readonly food: number
+                  readonly retail: number
+                  readonly service: number
+                  readonly creative: number
+                  readonly recreation: number
+                }
+              }
+            } & {
+              readonly $unknown: {
+                readonly [x: string]: {
+                  readonly value: string
+                  readonly $locationMetadata: { readonly after: string | null | undefined }
+                }
+              }
+            }
+          >,
+          "Pbits",
+          ":",
+          string,
+          false,
+          never
+        >
+        stories: Schema.PropertySignature<
+          ":",
+          ReadonlyArray<
+            {
+              readonly storyHeight: number
+              readonly floorId: number
+              readonly level: number
+              readonly openDate: Date | { readonly date: Date; readonly extraTicks: bigint }
+              readonly stockBaseTime: string
+              readonly stockingTier: number
+              readonly stockingStartTime: Date | { readonly date: Date; readonly extraTicks: bigint }
+              readonly stocks: ReadonlyArray<bigint>
+              readonly lastSaleTicks: ReadonlyArray<Date | { readonly date: Date; readonly extraTicks: bigint }>
+              readonly floorName: string
+              readonly floorPaint?: string | undefined
+            } & {
+              readonly $unknown: {
+                readonly [x: string]: {
+                  readonly value: string
+                  readonly $locationMetadata: { readonly after: string | null | undefined }
+                }
+              }
+            }
+          >,
+          "Pstories",
+          ":",
+          string,
+          false,
+          never
+        >
+        friends: Schema.PropertySignature<":", string, "Pfrns", ":", string, false, never>
+        bbPosts: Schema.PropertySignature<
+          ":",
+          ReadonlyArray<
+            {
+              readonly date: Date | { readonly date: Date; readonly extraTicks: bigint }
+              readonly _tid: string
+              readonly bitizen: {
+                readonly homeIndex: number
+                readonly workIndex: number
+                readonly placedDreamJob: boolean
+                readonly dreamJobIndex: number
+                readonly costume?: string | undefined
+                readonly vip:
+                  | number
+                  | "None"
+                  | "Engineer"
+                  | "TravelAgent"
+                  | "Deliveryman"
+                  | "BigSpender"
+                  | "Celebrity"
+                  | "GiftBit"
+                readonly customName?: string | undefined
+                readonly pet?:
+                  | "bald_eagle"
+                  | "bear"
+                  | "bee"
+                  | "chick"
+                  | "chicken"
+                  | "christmas_rudolph"
+                  | "egg"
+                  | "elephant"
+                  | "frog"
+                  | "horse"
+                  | "kangaroo"
+                  | "monkey"
+                  | "panda"
+                  | "raccoon"
+                  | "sheep"
+                  | "snowman"
+                  | "unicorn"
+                  | "robot"
+                  | "ankylosaurus"
+                  | "beaver"
+                  | "butterfly_blue"
+                  | "cactus"
+                  | "cat"
+                  | "camel"
+                  | "capybara"
+                  | "chipmunk"
+                  | "cockatoo"
+                  | "cougar"
+                  | "cow"
+                  | "coyote"
+                  | "crocodile"
+                  | "dino_toy"
+                  | "diplodocus"
+                  | "direwolf"
+                  | "dog"
+                  | "dragon"
+                  | "eagle"
+                  | "echidna"
+                  | "elk"
+                  | "fox"
+                  | "giraffe"
+                  | "goat"
+                  | "gorilla"
+                  | "griffin"
+                  | "hippo"
+                  | "koala"
+                  | "lemur"
+                  | "lion"
+                  | "mammoth"
+                  | "moose"
+                  | "muskox"
+                  | "opossum"
+                  | "otter"
+                  | "owl"
+                  | "penguin"
+                  | "pika"
+                  | "pig"
+                  | "pigeon"
+                  | "platypus"
+                  | "polar_bear"
+                  | "rabbit"
+                  | "rat"
+                  | "rhino"
+                  | "rock"
+                  | "rover"
+                  | "seal"
+                  | "skunk"
+                  | "snake"
+                  | "spider"
+                  | "squirrel"
+                  | "stegosaurus"
+                  | "tiger"
+                  | "toucan"
+                  | "tribble"
+                  | "triceratops"
+                  | "turtle"
+                  | "tyrannosaur"
+                  | "velociraptor"
+                  | "walrus"
+                  | "zebra"
+                  | "black_panther"
+                  | "chameleon"
+                  | "duck"
+                  | "chicks"
+                  | "lamb"
+                  | "crow"
+                  | "iguana"
+                  | "redpanda"
+                  | "badger"
+                  | "black_bear"
+                  | "bluejay"
+                  | "rattlesnake"
+                  | "sloth"
+                  | "thylacine"
+                  | "ant_farm"
+                  | "crab"
+                  | "octopus"
+                  | "sponge"
+                  | "ibex"
+                  | "porcupine"
+                  | "bat"
+                  | "dog_skeleton"
+                  | "slime"
+                  | "tentacle"
+                  | "artic_fox"
+                  | "saint_bernard"
+                  | "husky"
+                  | "box_pet"
+                  | "elasmotherium"
+                  | "lemming"
+                  | "snow_leopard"
+                  | "armadillo"
+                  | "hyena"
+                  | "kiwi"
+                  | "vulture"
+                  | "komodo"
+                  | "turkey"
+                  | "deer"
+                  | "christmas_penguin"
+                  | "cat_in_a_bag"
+                  | undefined
+                readonly attributes: {
+                  readonly $unknown: ReadonlyArray<string>
+                  readonly birthday: readonly [number, number]
+                  readonly gender: "male" | "female"
+                  readonly name: string
+                  readonly designColors: {
+                    readonly skinColorIndex: number
+                    readonly hairColorIndex: number
+                    readonly shoeColorIndex: number
+                    readonly pantColor: {
+                      readonly r: number & Brand<"U8">
+                      readonly g: number & Brand<"U8">
+                      readonly b: number & Brand<"U8">
+                    }
+                    readonly shirtColor: {
+                      readonly r: number & Brand<"U8">
+                      readonly g: number & Brand<"U8">
+                      readonly b: number & Brand<"U8">
+                    }
+                  }
+                  readonly accessories: {
+                    readonly tie: Either<
+                      {
+                        readonly r: number & Brand<"U8">
+                        readonly g: number & Brand<"U8">
+                        readonly b: number & Brand<"U8">
+                      },
+                      {
+                        readonly r: number & Brand<"U8">
+                        readonly g: number & Brand<"U8">
+                        readonly b: number & Brand<"U8">
+                      }
+                    >
+                    readonly earrings: Either<
+                      {
+                        readonly r: number & Brand<"U8">
+                        readonly g: number & Brand<"U8">
+                        readonly b: number & Brand<"U8">
+                      },
+                      {
+                        readonly r: number & Brand<"U8">
+                        readonly g: number & Brand<"U8">
+                        readonly b: number & Brand<"U8">
+                      }
+                    >
+                    readonly glasses: Either<number, number>
+                    readonly hairAccessory: Either<number, number>
+                    readonly hat: Either<
+                      {
+                        readonly gender: "male" | "female" | "bi"
+                        readonly color: {
+                          readonly r: number & Brand<"U8">
+                          readonly g: number & Brand<"U8">
+                          readonly b: number & Brand<"U8">
+                        }
+                        readonly index: number
+                      },
+                      {
+                        readonly color: {
+                          readonly r: number & Brand<"U8">
+                          readonly g: number & Brand<"U8">
+                          readonly b: number & Brand<"U8">
+                        }
+                        readonly index: number
+                      }
+                    >
+                  }
+                  readonly skills: {
+                    readonly food: number
+                    readonly retail: number
+                    readonly service: number
+                    readonly creative: number
+                    readonly recreation: number
+                  }
+                }
+              } & {
+                readonly $unknown: {
+                  readonly [x: string]: {
+                    readonly value: string
+                    readonly $locationMetadata: { readonly after: string | null | undefined }
+                  }
+                }
+              }
+              readonly source_name: string
+              readonly body: string
+              readonly media_type: string
+              readonly media_path: string
+              readonly likes: number
+            } & {
+              readonly $unknown: {
+                readonly [x: string]: {
+                  readonly value: string
+                  readonly $locationMetadata: { readonly after: string | null | undefined }
+                }
+              }
+            }
+          >,
+          "PBB",
+          ":",
+          string,
+          false,
+          never
+        >
+        bbpost: Schema.PropertySignature<":", string, "Plp", ":", string, false, never>
+      }>,
+      Schema.Struct<{
+        $unknown: Schema.Record$<
+          typeof Schema.String,
+          Schema.Struct<{
+            value: typeof Schema.String
+            $locationMetadata: Schema.Struct<{ after: Schema.NullishOr<typeof Schema.String> }>
+          }>
+        >
+      }>
+    >,
+    never
+  >
+>
+```
+
+[Source](https://github.com/leonitousconforti/tinyburg/packages/tinytower-sdk/blob/main/src/TinyTower.ts#L35)
 
 Since v1.0.0

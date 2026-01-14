@@ -9,6 +9,7 @@
         { "path": "packages/bitprints/tsconfig.build.json" },
         { "path": "packages/doorman/tsconfig.build.json" },
         { "path": "packages/insight/tsconfig.build.json" },
+        { "path": "packages/nimblebit-sdk/tsconfig.build.json" },
         { "path": "packages/tinytower-sdk/tsconfig.build.json" },
         { "path": "packages/trading-sdk/tsconfig.build.json" },
         { "path": "apps/archivist/tsconfig.json" },

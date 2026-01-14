@@ -7,7 +7,7 @@
 
 import type * as Config from "effect/Config";
 import type * as ConfigError from "effect/ConfigError";
-import type * as Schema from "effect/Schema";
+import type * as ParseResult from "effect/ParseResult";
 
 import * as EffectSchemas from "effect-schemas";
 import * as Array from "effect/Array";
@@ -15,6 +15,7 @@ import * as Context from "effect/Context";
 import * as Effect from "effect/Effect";
 import * as Layer from "effect/Layer";
 import * as Redacted from "effect/Redacted";
+import * as Schema from "effect/Schema";
 
 import * as NimblebitConfig from "./NimblebitConfig.ts";
 
@@ -38,7 +39,7 @@ export class NimblebitAuth extends Context.Tag("NimblebitAuth")<
               readonly authKey: Redacted.Redacted<string>;
           }
     ) & {
-        readonly sign: (data: string) => Effect.Effect<string, never, never>;
+        readonly sign: (data: string) => Effect.Effect<string, ParseResult.ParseError, never>;
         readonly salt: Effect.Effect<Schema.Schema.Type<EffectSchemas.Number.U32>, never, never>;
         readonly burnbot: Effect.Effect<Schema.Schema.Type<NimblebitConfig.AuthenticatedPlayerSchema>, never, never>;
     }
@@ -149,7 +150,7 @@ export class NimblebitAuth extends Context.Tag("NimblebitAuth")<
             authKey,
             salt: NimblebitAuth.NodeSalt,
             burnbot: Effect.sync(() => this.burnbots[0]),
-            sign: (data: string) => Effect.succeed(data + Redacted.value(authKey)),
+            sign: Schema.encode(Schema.StringFromBase64Url),
         });
 
     public static readonly WebCustomHost = ({
@@ -164,7 +165,7 @@ export class NimblebitAuth extends Context.Tag("NimblebitAuth")<
             authKey,
             salt: NimblebitAuth.WebSalt,
             burnbot: Effect.sync(() => this.burnbots[0]),
-            sign: (data: string) => Effect.succeed(data + Redacted.value(authKey)),
+            sign: Schema.encode(Schema.StringFromBase64Url),
         });
 
     public static readonly NodeTinyburgAuthProxy = ({

@@ -31,10 +31,31 @@ const replaceEnumTypeFields = (
     );
 };
 
-const program = Effect.gen(function* () {
+const replaceGeneratedContent = (
+    filePath: string,
+    newContent: string
+): Effect.Effect<void, Error, FileSystem.FileSystem> =>
+    Effect.gen(function* () {
+        const fileSystem = yield* FileSystem.FileSystem;
+        const existingContent = yield* fileSystem.readFileString(filePath);
+        const SEPARATOR = "//////////////////////////////////////////////////////////////////";
+        const separatorPattern = new RegExp(`(${SEPARATOR})([\\s\\S]*?)(${SEPARATOR})`, "g");
+
+        if (!separatorPattern.test(existingContent)) {
+            return yield* Effect.dieMessage(`Expected two separators in file: ${filePath}`);
+        }
+
+        const updatedContent = existingContent.replace(
+            new RegExp(`(${SEPARATOR})([\\s\\S]*?)(${SEPARATOR})`),
+            `$1\n\n${newContent}\n\n$3`
+        );
+
+        yield* fileSystem.writeFileString(filePath, updatedContent);
+    });
+
+const generateData = Effect.gen(function* () {
     const path = yield* Path.Path;
-    const fileSystem = yield* FileSystem.FileSystem;
-    const internalDir = yield* path.fromFileUrl(new URL("../src/internal", import.meta.url));
+    const srcDir = yield* path.fromFileUrl(new URL("../src", import.meta.url));
 
     const client = yield* RpcClient.make(Rpcs);
     yield* client.SetFps(1);
@@ -53,8 +74,8 @@ const program = Effect.gen(function* () {
 
     yield* Effect.logInfo("Generating bitbook posts data");
     const { eventTypes, mediaTypes, posts } = yield* client.GetAllBitbookPosts();
-    yield* fileSystem.writeFileString(
-        path.join(internalDir, "tinytowerBitbookPosts.ts"),
+    yield* replaceGeneratedContent(
+        path.join(srcDir, "BitbookPosts.ts"),
         `${banner}
         export const eventTypes = ${JSON.stringify(eventTypes)} as const;\n
         export type EventType = keyof typeof eventTypes;\n\n
@@ -77,8 +98,8 @@ const program = Effect.gen(function* () {
         numberHairAccessories,
         numberMaleHats,
     } = yield* client.GetAllBitizenData();
-    yield* fileSystem.writeFileString(
-        path.join(internalDir, "tinytowerBitizens.ts"),
+    yield* replaceGeneratedContent(
+        path.join(srcDir, "Bitizens.ts"),
         `${banner}
         export const numberBiHats = ${numberBiHats} as const;
         export const numberFemaleHats = ${numberFemaleHats} as const;
@@ -94,8 +115,8 @@ const program = Effect.gen(function* () {
 
     yield* Effect.logInfo("Generating costumes data");
     const costumes = yield* client.GetAllCostumes();
-    yield* fileSystem.writeFileString(
-        path.join(internalDir, "tinytowerCostumes.ts"),
+    yield* replaceGeneratedContent(
+        path.join(srcDir, "Costumes.ts"),
         `${banner}
         export const costumes = ${JSON.stringify(costumes)} as const;\n
         export type Costume = keyof typeof costumes;
@@ -104,8 +125,8 @@ const program = Effect.gen(function* () {
 
     yield* Effect.logInfo("Generating elevators data");
     const elevators = yield* client.GetAllElevators();
-    yield* fileSystem.writeFileString(
-        path.join(internalDir, "tinytowerElevators.ts"),
+    yield* replaceGeneratedContent(
+        path.join(srcDir, "Elevators.ts"),
         `${banner}
         export const elevators = ${JSON.stringify(elevators)} as const;\n
         export type Elevator = (typeof elevators)[number];
@@ -114,8 +135,8 @@ const program = Effect.gen(function* () {
 
     yield* Effect.logInfo("Generating floors data");
     const { floors, types: floorTypes } = yield* client.GetAllFloors();
-    yield* fileSystem.writeFileString(
-        path.join(internalDir, "tinytowerFloors.ts"),
+    yield* replaceGeneratedContent(
+        path.join(srcDir, "Floors.ts"),
         `${banner}
         export const floorType = ${JSON.stringify(floorTypes)} as const;\n
         export type FloorType = keyof typeof floorType;\n\n
@@ -126,8 +147,8 @@ const program = Effect.gen(function* () {
 
     yield* Effect.logInfo("Generating missions data");
     const { missions, tipMissions, tutorialMissions, types: missionTypes } = yield* client.GetAllMissions();
-    yield* fileSystem.writeFileString(
-        path.join(internalDir, "tinytowerMissions.ts"),
+    yield* replaceGeneratedContent(
+        path.join(srcDir, "Missions.ts"),
         `${banner}
         export const missionType = ${JSON.stringify(missionTypes)} as const;\n
         export type MissionType = keyof typeof missionType;\n\n
@@ -142,8 +163,8 @@ const program = Effect.gen(function* () {
 
     yield* Effect.logInfo("Generating pets data");
     const pets = yield* client.GetAllPets();
-    yield* fileSystem.writeFileString(
-        path.join(internalDir, "tinytowerPets.ts"),
+    yield* replaceGeneratedContent(
+        path.join(srcDir, "Pets.ts"),
         `${banner}
         export const pets = ${JSON.stringify(pets)} as const;\n
         export type Pet = keyof typeof pets;
@@ -152,8 +173,8 @@ const program = Effect.gen(function* () {
 
     yield* Effect.logInfo("Generating roofs data");
     const roofs = yield* client.GetAllRoofs();
-    yield* fileSystem.writeFileString(
-        path.join(internalDir, "tinytowerRoofs.ts"),
+    yield* replaceGeneratedContent(
+        path.join(srcDir, "Roofs.ts"),
         `${banner}
         export const roofs = ${JSON.stringify(roofs)} as const;\n
         export type Roof = (typeof roofs)[number];
@@ -218,4 +239,41 @@ const Live = pipe(
     Layer.provideMerge(Layer.merge(Logger.minimumLogLevel(LogLevel.All), NodeContext.layer))
 );
 
-program.pipe(Effect.scoped, Effect.provide(Live), NodeRuntime.runMain);
+Effect.gen(function* () {
+    const path = yield* Path.Path;
+    const fileSystem = yield* FileSystem.FileSystem;
+    const srcDir = yield* path.fromFileUrl(new URL("../src", import.meta.url));
+
+    const details = yield* Effect.provide(
+        GooglePlayApi.details("com.nimblebit.tinytower"),
+        GooglePlayApi.defaultHttpClient
+    );
+
+    const version = details.item?.details?.appDetails?.versionString;
+    if (version === undefined) {
+        return yield* Effect.dieMessage("Could not fetch Tiny Tower version from Google Play");
+    }
+
+    const generatedFiles = Array.make(
+        path.join(srcDir, "BitbookPosts.ts"),
+        path.join(srcDir, "Bitizens.ts"),
+        path.join(srcDir, "Costumes.ts"),
+        path.join(srcDir, "Elevators.ts"),
+        path.join(srcDir, "Floors.ts"),
+        path.join(srcDir, "Missions.ts"),
+        path.join(srcDir, "Pets.ts"),
+        path.join(srcDir, "Roofs.ts")
+    );
+
+    yield* Effect.logInfo(`Most recent Tiny Tower version on GooglePlay: ${version}`);
+    yield* Effect.filterOrElse(
+        Effect.filter(generatedFiles, (filePath) =>
+            Effect.map(
+                fileSystem.readFileString(filePath),
+                (content) => !content.includes(`With Tiny Tower Version: ${version}`)
+            )
+        ),
+        Array.isEmptyArray,
+        () => generateData.pipe(Effect.scoped, Effect.provide(Live))
+    );
+}).pipe(Effect.provide(NodeContext.layer), NodeRuntime.runMain);

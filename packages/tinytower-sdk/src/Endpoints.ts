@@ -1,3 +1,8 @@
+/**
+ * @since 1.0.0
+ * @category Endpoints
+ */
+
 import * as HttpApi from "@effect/platform/HttpApi";
 import * as HttpApiEndpoint from "@effect/platform/HttpApiEndpoint";
 import * as HttpApiError from "@effect/platform/HttpApiError";
@@ -7,7 +12,8 @@ import * as NimblebitConfig from "@tinyburg/nimblebit-sdk/NimblebitConfig";
 import * as EffectSchemas from "effect-schemas";
 import * as Schema from "effect/Schema";
 
-import * as TinyTowerSchema from "./Schema.ts";
+import * as Bitizen from "./Bitizens.ts";
+import * as Gift from "./Gift.ts";
 import * as SyncItemType from "./SyncItemType.ts";
 
 /** @internal */
@@ -98,10 +104,58 @@ export const NotSentResponse = Schema.Struct({ success: Schema.Literal("NotSent"
     HttpApiSchema.annotations({ status: 200 })
 );
 
+/**
+ * Player metadata associated with save data and snapshots.
+ *
+ * @since 1.0.0
+ * @category Schemas
+ */
+export const PlayerMetaData = Schema.Struct({
+    /**
+     * Number of stories/floors, counted the same as they are on the elevator
+     * shaft.
+     */
+    stories: Schema.compose(Schema.NumberFromString, Schema.NonNegativeInt).pipe(
+        Schema.propertySignature,
+        Schema.fromKey("level")
+    ),
+
+    /**
+     * Doorman bitizen, shows as avatar in friend list. Can be any valid
+     * bitizen.
+     */
+    doorman: Bitizen.Bitizen.pipe(Schema.propertySignature, Schema.fromKey("avatar")),
+
+    /** All time number of golden tickets they have. */
+    maxGold: Schema.compose(Schema.NumberFromString, Schema.NonNegativeInt).pipe(
+        Schema.propertySignature,
+        Schema.fromKey("mg")
+    ),
+
+    /**
+     * If they are requesting bitizen for a particular floor, this is that floor
+     * id. You can lookup the name of the floor using the floor blocks.
+     */
+    requestedFloorId: Schema.compose(Schema.NumberFromString, Schema.Int).pipe(
+        Schema.propertySignature,
+        Schema.fromKey("reqFID")
+    ),
+
+    /** Bitbook post? not 100% sure */
+    bitbook: Schema.String.pipe(Schema.optional, Schema.fromKey("bb")),
+
+    /** Unknown */
+    ts: Schema.String,
+
+    /** Indicates that they are vip. */
+    vip: Schema.transformLiterals(["0", false], ["1", true]),
+});
+
 /** @internal */
 export const DeviceNewPlayerEndpoint = HttpApiEndpoint.get(
     "DeviceNewPlayer"
 )`/register/tt/${salt1Param}/${salt2Param}/${hashParam}`
+    .addError(HttpApiError.Forbidden)
     .addSuccess(ErrorResponse)
     .addSuccess(
         Schema.rename(
@@ -198,7 +252,7 @@ export const SyncPushSaveEndpoint = HttpApiEndpoint.post(
     .setPayload(
         Schema.Struct({
             data: Schema.Uint8ArrayFromBase64.pipe(Schema.propertySignature, Schema.fromKey("saveData")),
-            doorman: TinyTowerSchema.Bitizen.pipe(Schema.propertySignature, Schema.fromKey("avatar")),
+            doorman: Bitizen.Bitizen.pipe(Schema.propertySignature, Schema.fromKey("avatar")),
             saveVersion: Schema.compose(Schema.NumberFromString, Schema.Int),
             level: Schema.compose(Schema.NumberFromString, Schema.Int),
             reqFID: Schema.compose(Schema.NumberFromString, Schema.Int),
@@ -250,7 +304,7 @@ export const SyncPushSnapshotEndpoint = HttpApiEndpoint.post(
     .setPayload(
         Schema.Struct({
             data: Schema.Uint8ArrayFromBase64.pipe(Schema.propertySignature, Schema.fromKey("snapshotData")),
-            doorman: TinyTowerSchema.Bitizen.pipe(Schema.propertySignature, Schema.fromKey("avatar")),
+            doorman: Bitizen.Bitizen.pipe(Schema.propertySignature, Schema.fromKey("avatar")),
             saveVersion: Schema.compose(Schema.NumberFromString, Schema.Int),
             level: Schema.compose(Schema.NumberFromString, Schema.Int),
             reqFID: Schema.compose(Schema.NumberFromString, Schema.Int),
@@ -277,7 +331,7 @@ export const SyncRetrieveSnapshotListEndpoint = HttpApiEndpoint.get(
                 Schema.Struct({
                     id: Schema.compose(Schema.NumberFromString, Schema.Int),
                     timestamp: Schema.BigInt,
-                    meta: TinyTowerSchema.PlayerMetaData,
+                    meta: PlayerMetaData,
                 })
             ),
         }),
@@ -285,7 +339,7 @@ export const SyncRetrieveSnapshotListEndpoint = HttpApiEndpoint.get(
     );
 
 /** @internal */
-export const RaffleEnterEndpoint = HttpApiEndpoint.post(
+export const RaffleEnterEndpoint = HttpApiEndpoint.get(
     "RaffleEnter"
 )`/raffle/enter/tt/${playerIdParam}/${saltParam}/${hashParam}`
     .addSuccess(ErrorResponse)
@@ -293,7 +347,7 @@ export const RaffleEnterEndpoint = HttpApiEndpoint.post(
     .addSuccess(NotEnteredResponse);
 
 /** @internal */
-export const RaffleEnterMultiEndpoint = HttpApiEndpoint.post(
+export const RaffleEnterMultiEndpoint = HttpApiEndpoint.get(
     "RaffleEnterMulti"
 )`/raffle/enter_multi/tt/${playerIdParam}/${saltParam}/${hashParam}`
     .addSuccess(ErrorResponse)
@@ -326,7 +380,7 @@ export const SocialGetGiftsEndpoint = HttpApiEndpoint.get(
     .addSuccess(
         Schema.Struct({
             success: Schema.Literal("Found"),
-            gifts: Schema.Array(TinyTowerSchema.Gift),
+            gifts: Schema.Array(Gift.Gift),
             total: Schema.Int,
         }),
         { status: 200 }
@@ -352,7 +406,7 @@ export const SocialPullFriendMetaEndpoint = HttpApiEndpoint.post(
             success: Schema.Literal("Found"),
             meta: Schema.Record({
                 key: NimblebitConfig.PlayerIdSchema,
-                value: TinyTowerSchema.PlayerMetaData,
+                value: PlayerMetaData,
             }),
         }),
         { status: 200 }
@@ -397,7 +451,7 @@ export const SocialRetrieveFriendsSnapshotListEndpoint = HttpApiEndpoint.get(
                         }),
                         Schema.DateFromNumber
                     ),
-                    meta: TinyTowerSchema.PlayerMetaData,
+                    meta: PlayerMetaData,
                 })
             ),
         }),
@@ -413,7 +467,7 @@ export const SocialGetVisitsEndpoint = HttpApiEndpoint.get(
     .addSuccess(
         Schema.Struct({
             success: Schema.Literal("Found"),
-            gifts: Schema.Array(TinyTowerSchema.Gift),
+            gifts: Schema.Array(Gift.Gift),
             total: Schema.Int,
         }),
         { status: 200 }

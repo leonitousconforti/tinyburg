@@ -6,6 +6,7 @@
         { "path": "packages/bitprints" },
         { "path": "packages/doorman" },
         { "path": "packages/insight" },
+        { "path": "packages/nimblebit-sdk" },
         { "path": "packages/tinytower-sdk" },
         { "path": "packages/trading-sdk" },
         { "path": "apps/archivist" },

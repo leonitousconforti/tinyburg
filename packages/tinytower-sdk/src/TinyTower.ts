@@ -17,19 +17,96 @@ import * as Redacted from "effect/Redacted";
 import * as Schema from "effect/Schema";
 import * as Pako from "pako";
 
-import { NimblebitAuth } from "@tinyburg/nimblebit-sdk/NimblebitAuth";
-import { NimblebitError } from "@tinyburg/nimblebit-sdk/NimblebitError";
+import { NimblebitAuth, NimblebitError, NimblebitSchema } from "@tinyburg/nimblebit-sdk";
 import { Api } from "./Endpoints.ts";
-import { Bitizen, SaveData } from "./Schema.ts";
 import { SyncItemType } from "./SyncItemType.ts";
 
-export {
-    /**
-     * @since 1.0.0
-     * @category API
-     */
-    Api,
-};
+import * as BitbookPost from "./BitbookPosts.ts";
+import * as Bitizen from "./Bitizens.ts";
+import * as Floor from "./Floors.ts";
+import * as Mission from "./Missions.ts";
+
+/**
+ * How to decode a SaveData from Nimblebit's object format.
+ *
+ * @since 1.0.0
+ * @category Schemas
+ */
+export const SaveData = Schema.transform(
+    Schema.String,
+    NimblebitSchema.parseNimblebitObject(
+        Schema.Struct({
+            coins: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pc")),
+            bux: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pb")),
+            Ppig: Schema.String.pipe(Schema.optional, Schema.fromKey("Ppig")),
+            Pplim: Schema.String.pipe(Schema.optional, Schema.fromKey("Pplim")),
+            maxGold: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pmg")),
+            gold: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pg")),
+            tip: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Ptip")),
+            needUpgrade: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pnu")),
+            ver: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Pver")),
+            roof: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pr")),
+            lift: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pe")),
+            lobby: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pl")),
+            buxBought: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pbxb")),
+            installTime: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("PiT")),
+            lastSaleTick: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("PlST")),
+            lobbyName: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Pln")),
+            raffleID: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Prf")),
+            vipTrialEnd: Schema.BigInt.pipe(Schema.propertySignature, Schema.fromKey("Pvte")),
+            costumes: Schema.split(",").pipe(Schema.propertySignature, Schema.fromKey("Pcos")),
+            pets: Schema.split(",").pipe(Schema.optional, Schema.fromKey("Ppets")),
+            missionHist: Schema.split(",").pipe(Schema.optional, Schema.fromKey("Pmhst")),
+            bbHist: Schema.split(",").pipe(Schema.propertySignature, Schema.fromKey("Pbhst")),
+            roofs: Schema.split(",").pipe(Schema.propertySignature, Schema.fromKey("Prfs")),
+            lifts: Schema.split(",").pipe(Schema.propertySignature, Schema.fromKey("Plfs")),
+            lobbies: Schema.split(",").pipe(Schema.propertySignature, Schema.fromKey("Plbs")),
+            bannedFriends: Schema.split(",").pipe(Schema.optional, Schema.fromKey("Pbf")),
+            liftSpeed: Schema.NumberFromString.pipe(Schema.optional, Schema.fromKey("Pls")),
+            totalPoints: Schema.BigInt.pipe(Schema.propertySignature, Schema.fromKey("Ptp")),
+            lrc: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Plrc")),
+            lfc: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Plfc")),
+            cfd: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Pcfd")),
+            lbc: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Plbc")),
+            lbbcp: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Plbbcp")),
+            lcmiss: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Plcmiss")),
+            lcg: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Plcg")),
+            sfx: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Psfx")),
+            mus: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pmus")),
+            notes: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pnts")),
+            autoLiftDisable: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pald")),
+            videos: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pvds")),
+            vidCheck: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pvdc")),
+            bbnotes: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pbbn")),
+            hidechat: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Phchat")),
+            tmi: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Ptmi")),
+            PVF: Schema.String.pipe(Schema.optional, Schema.fromKey("PVF")),
+            PHP: Schema.String.pipe(Schema.optional, Schema.fromKey("PHP")),
+            mission: Mission.Mission.pipe(Schema.optional, Schema.fromKey("Pmiss")),
+            doorman: Bitizen.Bitizen.pipe(Schema.propertySignature, Schema.fromKey("Pdrmn")),
+            playerID: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Ppid")),
+            playerRegistered: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Preg")),
+            bzns: Schema.compose(Schema.split("|"), Schema.Array(Bitizen.Bitizen)).pipe(
+                Schema.propertySignature,
+                Schema.fromKey("Pbits")
+            ),
+            stories: Schema.compose(Schema.split("|"), Schema.Array(Floor.Floor)).pipe(
+                Schema.propertySignature,
+                Schema.fromKey("Pstories")
+            ),
+            friends: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Pfrns")),
+            bbPosts: Schema.compose(Schema.split("|"), Schema.Array(BitbookPost.BitbookPost)).pipe(
+                Schema.propertySignature,
+                Schema.fromKey("PBB")
+            ),
+            bbpost: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Plp")),
+        })
+    ),
+    {
+        encode: (input) => `[_save]${input}[_save]`,
+        decode: (input) => (input.startsWith('"') ? input.slice(8, -8) : input.slice(7, -7)),
+    }
+);
 
 /**
  * Requests a new player from the Nimblebit servers.
@@ -38,7 +115,7 @@ export {
  * @category SDK
  */
 export const device_newPlayer = Effect.gen(function* () {
-    const nimblebitAuth = yield* NimblebitAuth;
+    const nimblebitAuth = yield* NimblebitAuth.NimblebitAuth;
     const httpClient = yield* HttpClient.HttpClient;
 
     const maybeAddBearerToken =
@@ -59,7 +136,7 @@ export const device_newPlayer = Effect.gen(function* () {
     const response = yield* endpoint({ path: { salt1, salt2, hash } });
 
     if ("error" in response) {
-        return yield* new NimblebitError({
+        return yield* new NimblebitError.NimblebitError({
             method: "DeviceNewPlayer",
             module: "DeviceManagementGroup",
             cause: response.error,
@@ -79,7 +156,7 @@ export const device_playerDetails = Effect.fn("device_playerDetails")(function* 
     playerAuthKey,
     playerId,
 }: Schema.Schema.Type<NimblebitConfig.AuthenticatedPlayerSchema>) {
-    const nimblebitAuth = yield* NimblebitAuth;
+    const nimblebitAuth = yield* NimblebitAuth.NimblebitAuth;
     const httpClient = yield* HttpClient.HttpClient;
 
     const maybeAddBearerToken =
@@ -99,7 +176,7 @@ export const device_playerDetails = Effect.fn("device_playerDetails")(function* 
     const response = yield* endpoint({ path: { playerId, salt, hash } });
 
     if ("error" in response) {
-        return yield* new NimblebitError({
+        return yield* new NimblebitError.NimblebitError({
             method: "DevicePlayerDetails",
             module: "DeviceManagementGroup",
             cause: response.error,
@@ -120,7 +197,7 @@ export const device_verifyDevice = Effect.fn("device_verifyDevice")(function* ({
 }: {
     verificationCode: string;
 }) {
-    const nimblebitAuth = yield* NimblebitAuth;
+    const nimblebitAuth = yield* NimblebitAuth.NimblebitAuth;
     const httpClient = yield* HttpClient.HttpClient;
 
     const maybeAddBearerToken =
@@ -139,7 +216,7 @@ export const device_verifyDevice = Effect.fn("device_verifyDevice")(function* ({
     const response = yield* endpoint({ path: { playerId, verificationCode } });
 
     if ("error" in response) {
-        return yield* new NimblebitError({
+        return yield* new NimblebitError.NimblebitError({
             method: "DeviceVerifyDevice",
             module: "DeviceManagementGroup",
             cause: response.error,
@@ -158,7 +235,7 @@ export const device_verifyDevice = Effect.fn("device_verifyDevice")(function* ({
 export const device_registerEmail = Effect.fn("device_registerEmail")(function* ({
     playerEmail,
 }: Schema.Schema.Type<NimblebitConfig.UnauthenticatedPlayerSchema>) {
-    const nimblebitAuth = yield* NimblebitAuth;
+    const nimblebitAuth = yield* NimblebitAuth.NimblebitAuth;
     const httpClient = yield* HttpClient.HttpClient;
 
     const maybeAddBearerToken =
@@ -186,7 +263,7 @@ export const device_registerEmail = Effect.fn("device_registerEmail")(function* 
     });
 
     if ("error" in response) {
-        return yield* new NimblebitError({
+        return yield* new NimblebitError.NimblebitError({
             method: "DeviceRegisterEmail",
             module: "DeviceManagementGroup",
             cause: response.error,
@@ -206,7 +283,7 @@ export const sync_pullSave = Effect.fn("sync_pullSave")(function* ({
     playerAuthKey,
     playerId,
 }: Schema.Schema.Type<NimblebitConfig.AuthenticatedPlayerSchema>) {
-    const nimblebitAuth = yield* NimblebitAuth;
+    const nimblebitAuth = yield* NimblebitAuth.NimblebitAuth;
     const httpClient = yield* HttpClient.HttpClient;
 
     const maybeAddBearerToken =
@@ -226,7 +303,7 @@ export const sync_pullSave = Effect.fn("sync_pullSave")(function* ({
     const response = yield* endpoint({ path: { playerId, salt, hash } });
 
     if ("error" in response) {
-        return yield* new NimblebitError({
+        return yield* new NimblebitError.NimblebitError({
             method: "SyncPullSave",
             module: "SyncManagementGroup",
             cause: response.error,
@@ -234,7 +311,7 @@ export const sync_pullSave = Effect.fn("sync_pullSave")(function* ({
     }
 
     if (response.success === "NotFound") {
-        return yield* new NimblebitError({
+        return yield* new NimblebitError.NimblebitError({
             method: "SyncPullSave",
             module: "SyncManagementGroup",
             cause: "Player has no save data",
@@ -246,8 +323,8 @@ export const sync_pullSave = Effect.fn("sync_pullSave")(function* ({
         playerId + salt + response.saveId + dataAsBase64 + Redacted.value(playerAuthKey)
     );
 
-    if (checksum !== response.checksum) {
-        return yield* new NimblebitError({
+    if (checksum !== response.checksum && nimblebitAuth.host === "https://sync.nimblebit.com") {
+        return yield* new NimblebitError.NimblebitError({
             method: "SyncPullSave",
             module: "SyncManagementGroup",
             cause: "Checksum mismatch",
@@ -271,7 +348,7 @@ export const sync_pushSave = Effect.fn("sync_pushSave")(function* ({
     playerAuthKey,
     playerId,
 }: Schema.Schema.Type<NimblebitConfig.AuthenticatedPlayerSchema> & { data: Schema.Schema.Type<typeof SaveData> }) {
-    const nimblebitAuth = yield* NimblebitAuth;
+    const nimblebitAuth = yield* NimblebitAuth.NimblebitAuth;
     const httpClient = yield* HttpClient.HttpClient;
 
     const maybeAddBearerToken =
@@ -308,7 +385,7 @@ export const sync_pushSave = Effect.fn("sync_pushSave")(function* ({
     });
 
     if ("error" in response) {
-        return yield* new NimblebitError({
+        return yield* new NimblebitError.NimblebitError({
             method: "SyncPushSave",
             module: "SyncManagementGroup",
             cause: response.error,
@@ -316,7 +393,7 @@ export const sync_pushSave = Effect.fn("sync_pushSave")(function* ({
     }
 
     if (response.success === "NotSaved") {
-        return yield* new NimblebitError({
+        return yield* new NimblebitError.NimblebitError({
             method: "SyncPushSave",
             module: "SyncManagementGroup",
             cause: "Save data could not be saved",
@@ -336,7 +413,7 @@ export const sync_checkForNewerSave = Effect.fn("sync_checkForNewerSave")(functi
     playerAuthKey,
     playerId,
 }: Schema.Schema.Type<NimblebitConfig.AuthenticatedPlayerSchema>) {
-    const nimblebitAuth = yield* NimblebitAuth;
+    const nimblebitAuth = yield* NimblebitAuth.NimblebitAuth;
     const httpClient = yield* HttpClient.HttpClient;
 
     const maybeAddBearerToken =
@@ -356,7 +433,7 @@ export const sync_checkForNewerSave = Effect.fn("sync_checkForNewerSave")(functi
     const response = yield* endpoint({ path: { playerId, salt, hash } });
 
     if ("error" in response) {
-        return yield* new NimblebitError({
+        return yield* new NimblebitError.NimblebitError({
             method: "SyncCheckForNewerSave",
             module: "SyncManagementGroup",
             cause: response.error,
@@ -364,7 +441,7 @@ export const sync_checkForNewerSave = Effect.fn("sync_checkForNewerSave")(functi
     }
 
     if (response.success === "NotFound") {
-        return yield* new NimblebitError({
+        return yield* new NimblebitError.NimblebitError({
             method: "SyncCheckForNewerSave",
             module: "SyncManagementGroup",
             cause: "Player has no save data",
@@ -375,8 +452,8 @@ export const sync_checkForNewerSave = Effect.fn("sync_checkForNewerSave")(functi
         playerId + salt + String(response.saveId) + Redacted.value(playerAuthKey)
     );
 
-    if (checksum !== response.checksum) {
-        return yield* new NimblebitError({
+    if (checksum !== response.checksum && nimblebitAuth.host === "https://sync.nimblebit.com") {
+        return yield* new NimblebitError.NimblebitError({
             method: "SyncCheckForNewerSave",
             module: "SyncManagementGroup",
             cause: "Checksum mismatch",
@@ -397,7 +474,7 @@ export const sync_pullSnapshot = Effect.fn("sync_pullSnapshot")(function* ({
     playerId,
     snapshotId,
 }: Schema.Schema.Type<NimblebitConfig.AuthenticatedPlayerSchema> & { snapshotId: number }) {
-    const nimblebitAuth = yield* NimblebitAuth;
+    const nimblebitAuth = yield* NimblebitAuth.NimblebitAuth;
     const httpClient = yield* HttpClient.HttpClient;
 
     const maybeAddBearerToken =
@@ -417,7 +494,7 @@ export const sync_pullSnapshot = Effect.fn("sync_pullSnapshot")(function* ({
     const response = yield* endpoint({ path: { playerId, salt, hash, snapshotId } });
 
     if ("error" in response) {
-        return yield* new NimblebitError({
+        return yield* new NimblebitError.NimblebitError({
             method: "SyncPullSnapshot",
             module: "SyncManagementGroup",
             cause: response.error,
@@ -425,7 +502,7 @@ export const sync_pullSnapshot = Effect.fn("sync_pullSnapshot")(function* ({
     }
 
     if (response.success === "NotFound") {
-        return yield* new NimblebitError({
+        return yield* new NimblebitError.NimblebitError({
             method: "SyncPullSnapshot",
             module: "SyncManagementGroup",
             cause: "Snapshot not found",
@@ -437,8 +514,8 @@ export const sync_pullSnapshot = Effect.fn("sync_pullSnapshot")(function* ({
         playerId + salt + response.snapshotId + dataAsBase64 + Redacted.value(playerAuthKey)
     );
 
-    if (checksum !== response.checksum) {
-        return yield* new NimblebitError({
+    if (checksum !== response.checksum && nimblebitAuth.host === "https://sync.nimblebit.com") {
+        return yield* new NimblebitError.NimblebitError({
             method: "SyncPullSnapshot",
             module: "SyncManagementGroup",
             cause: "Checksum mismatch",
@@ -462,7 +539,7 @@ export const sync_pushSnapshot = Effect.fn("sync_pushSnapshot")(function* ({
     playerAuthKey,
     playerId,
 }: Schema.Schema.Type<NimblebitConfig.AuthenticatedPlayerSchema> & { data: Schema.Schema.Type<typeof SaveData> }) {
-    const nimblebitAuth = yield* NimblebitAuth;
+    const nimblebitAuth = yield* NimblebitAuth.NimblebitAuth;
     const httpClient = yield* HttpClient.HttpClient;
 
     const maybeAddBearerToken =
@@ -499,7 +576,7 @@ export const sync_pushSnapshot = Effect.fn("sync_pushSnapshot")(function* ({
     });
 
     if ("error" in response) {
-        return yield* new NimblebitError({
+        return yield* new NimblebitError.NimblebitError({
             method: "SyncPushSnapshot",
             module: "SyncManagementGroup",
             cause: response.error,
@@ -507,7 +584,7 @@ export const sync_pushSnapshot = Effect.fn("sync_pushSnapshot")(function* ({
     }
 
     if (response.success === "NotSaved") {
-        return yield* new NimblebitError({
+        return yield* new NimblebitError.NimblebitError({
             method: "SyncPushSnapshot",
             module: "SyncManagementGroup",
             cause: "Snapshot data could not be saved",
@@ -527,7 +604,7 @@ export const sync_retrieveSnapshotList = Effect.fn("sync_retrieveSnapshotList")(
     playerAuthKey,
     playerId,
 }: Schema.Schema.Type<NimblebitConfig.AuthenticatedPlayerSchema>) {
-    const nimblebitAuth = yield* NimblebitAuth;
+    const nimblebitAuth = yield* NimblebitAuth.NimblebitAuth;
     const httpClient = yield* HttpClient.HttpClient;
 
     const maybeAddBearerToken =
@@ -547,7 +624,7 @@ export const sync_retrieveSnapshotList = Effect.fn("sync_retrieveSnapshotList")(
     const response = yield* endpoint({ path: { playerId, salt, hash } });
 
     if ("error" in response) {
-        return yield* new NimblebitError({
+        return yield* new NimblebitError.NimblebitError({
             method: "SyncRetrieveSnapshotList",
             module: "SyncManagementGroup",
             cause: response.error,
@@ -555,7 +632,7 @@ export const sync_retrieveSnapshotList = Effect.fn("sync_retrieveSnapshotList")(
     }
 
     if (response.success === "NotFound") {
-        return yield* new NimblebitError({
+        return yield* new NimblebitError.NimblebitError({
             method: "SyncRetrieveSnapshotList",
             module: "SyncManagementGroup",
             cause: "Player has no snapshots",
@@ -575,7 +652,7 @@ export const raffle_enterRaffle = Effect.fn("raffle_enterRaffle")(function* ({
     playerAuthKey,
     playerId,
 }: Schema.Schema.Type<NimblebitConfig.AuthenticatedPlayerSchema>) {
-    const nimblebitAuth = yield* NimblebitAuth;
+    const nimblebitAuth = yield* NimblebitAuth.NimblebitAuth;
     const httpClient = yield* HttpClient.HttpClient;
 
     const maybeAddBearerToken =
@@ -595,7 +672,7 @@ export const raffle_enterRaffle = Effect.fn("raffle_enterRaffle")(function* ({
     const response = yield* endpoint({ path: { playerId, salt, hash } });
 
     if ("error" in response) {
-        return yield* new NimblebitError({
+        return yield* new NimblebitError.NimblebitError({
             method: "RaffleEnter",
             module: "RaffleGroup",
             cause: response.error,
@@ -603,7 +680,7 @@ export const raffle_enterRaffle = Effect.fn("raffle_enterRaffle")(function* ({
     }
 
     if (response.success === "NotEntered") {
-        return yield* new NimblebitError({
+        return yield* new NimblebitError.NimblebitError({
             method: "RaffleEnter",
             module: "RaffleGroup",
             cause: "Player could not be entered into the raffle",
@@ -623,7 +700,7 @@ export const raffle_enterMultiRaffle = Effect.fn("raffle_enterMultiRaffle")(func
     playerAuthKey,
     playerId,
 }: Schema.Schema.Type<NimblebitConfig.AuthenticatedPlayerSchema>) {
-    const nimblebitAuth = yield* NimblebitAuth;
+    const nimblebitAuth = yield* NimblebitAuth.NimblebitAuth;
     const httpClient = yield* HttpClient.HttpClient;
 
     const maybeAddBearerToken =
@@ -643,7 +720,7 @@ export const raffle_enterMultiRaffle = Effect.fn("raffle_enterMultiRaffle")(func
     const response = yield* endpoint({ path: { playerId, salt, hash } });
 
     if ("error" in response) {
-        return yield* new NimblebitError({
+        return yield* new NimblebitError.NimblebitError({
             method: "RaffleEnterMulti",
             module: "RaffleGroup",
             cause: response.error,
@@ -651,7 +728,7 @@ export const raffle_enterMultiRaffle = Effect.fn("raffle_enterMultiRaffle")(func
     }
 
     if (response.success === "NotEntered") {
-        return yield* new NimblebitError({
+        return yield* new NimblebitError.NimblebitError({
             method: "RaffleEnterMulti",
             module: "RaffleGroup",
             cause: "Player could not be entered into the raffles",
@@ -671,7 +748,7 @@ export const raffle_checkEnteredCurrent = Effect.fn("raffle_checkEnteredCurrent"
     playerAuthKey,
     playerId,
 }: Schema.Schema.Type<NimblebitConfig.AuthenticatedPlayerSchema>) {
-    const nimblebitAuth = yield* NimblebitAuth;
+    const nimblebitAuth = yield* NimblebitAuth.NimblebitAuth;
     const httpClient = yield* HttpClient.HttpClient;
 
     const maybeAddBearerToken =
@@ -691,7 +768,7 @@ export const raffle_checkEnteredCurrent = Effect.fn("raffle_checkEnteredCurrent"
     const response = yield* endpoint({ path: { playerId, salt, hash } });
 
     if ("error" in response) {
-        return yield* new NimblebitError({
+        return yield* new NimblebitError.NimblebitError({
             method: "RaffleCheckEnteredCurrent",
             module: "RaffleGroup",
             cause: response.error,
@@ -718,7 +795,7 @@ export const social_sendItem = Effect.fn("social_sendItem")(function* ({
     itemType: (typeof SyncItemType)[keyof typeof SyncItemType];
     friendId: Schema.Schema.Type<NimblebitConfig.PlayerIdSchema>;
 }) {
-    const nimblebitAuth = yield* NimblebitAuth;
+    const nimblebitAuth = yield* NimblebitAuth.NimblebitAuth;
     const httpClient = yield* HttpClient.HttpClient;
 
     const maybeAddBearerToken =
@@ -744,7 +821,7 @@ export const social_sendItem = Effect.fn("social_sendItem")(function* ({
     });
 
     if ("error" in response) {
-        return yield* new NimblebitError({
+        return yield* new NimblebitError.NimblebitError({
             method: "SocialSendItem",
             module: "SocialGroup",
             cause: response.error,
@@ -752,7 +829,7 @@ export const social_sendItem = Effect.fn("social_sendItem")(function* ({
     }
 
     if (response.success === "NotSent") {
-        return yield* new NimblebitError({
+        return yield* new NimblebitError.NimblebitError({
             method: "SocialSendItem",
             module: "SocialGroup",
             cause: "Item could not be sent",
@@ -772,7 +849,7 @@ export const social_getGifts = Effect.fn("social_getGifts")(function* ({
     playerAuthKey,
     playerId,
 }: Schema.Schema.Type<NimblebitConfig.AuthenticatedPlayerSchema>) {
-    const nimblebitAuth = yield* NimblebitAuth;
+    const nimblebitAuth = yield* NimblebitAuth.NimblebitAuth;
     const httpClient = yield* HttpClient.HttpClient;
 
     const maybeAddBearerToken =
@@ -792,7 +869,7 @@ export const social_getGifts = Effect.fn("social_getGifts")(function* ({
     const response = yield* endpoint({ path: { playerId, salt, hash } });
 
     if ("error" in response) {
-        return yield* new NimblebitError({
+        return yield* new NimblebitError.NimblebitError({
             method: "SocialGetGifts",
             module: "SocialGroup",
             cause: response.error,
@@ -800,7 +877,7 @@ export const social_getGifts = Effect.fn("social_getGifts")(function* ({
     }
 
     if (response.success === "NotFound") {
-        return yield* new NimblebitError({
+        return yield* new NimblebitError.NimblebitError({
             method: "SocialGetGifts",
             module: "SocialGroup",
             cause: "Gifts could not be found",
@@ -824,7 +901,7 @@ export const social_receiveGift = Effect.fn("social_receiveGift")(function* ({
     playerAuthKey,
     playerId,
 }: Schema.Schema.Type<NimblebitConfig.AuthenticatedPlayerSchema> & { giftId: number }) {
-    const nimblebitAuth = yield* NimblebitAuth;
+    const nimblebitAuth = yield* NimblebitAuth.NimblebitAuth;
     const httpClient = yield* HttpClient.HttpClient;
 
     const maybeAddBearerToken =
@@ -844,7 +921,7 @@ export const social_receiveGift = Effect.fn("social_receiveGift")(function* ({
     const response = yield* endpoint({ path: { playerId, giftId, salt, hash } });
 
     if ("error" in response) {
-        return yield* new NimblebitError({
+        return yield* new NimblebitError.NimblebitError({
             method: "SocialReceiveGift",
             module: "SocialGroup",
             cause: response.error,
@@ -852,7 +929,7 @@ export const social_receiveGift = Effect.fn("social_receiveGift")(function* ({
     }
 
     if (response.success === "NotReceived") {
-        return yield* new NimblebitError({
+        return yield* new NimblebitError.NimblebitError({
             method: "SocialReceiveGift",
             module: "SocialGroup",
             cause: "Gift could not be received",
@@ -875,7 +952,7 @@ export const social_pullFriendMeta = Effect.fn("social_pullFriendMeta")(function
 }: Schema.Schema.Type<NimblebitConfig.AuthenticatedPlayerSchema> & {
     friendId: Schema.Schema.Type<NimblebitConfig.PlayerIdSchema>;
 }) {
-    const nimblebitAuth = yield* NimblebitAuth;
+    const nimblebitAuth = yield* NimblebitAuth.NimblebitAuth;
     const httpClient = yield* HttpClient.HttpClient;
 
     const maybeAddBearerToken =
@@ -895,7 +972,7 @@ export const social_pullFriendMeta = Effect.fn("social_pullFriendMeta")(function
     const response = yield* endpoint({ path: { playerId, salt, hash }, payload: { friends: friendId } });
 
     if ("error" in response) {
-        return yield* new NimblebitError({
+        return yield* new NimblebitError.NimblebitError({
             method: "SocialPullFriendMeta",
             module: "SocialGroup",
             cause: response.error,
@@ -903,7 +980,7 @@ export const social_pullFriendMeta = Effect.fn("social_pullFriendMeta")(function
     }
 
     if (response.success === "NotFound") {
-        return yield* new NimblebitError({
+        return yield* new NimblebitError.NimblebitError({
             method: "SocialPullFriendMeta",
             module: "SocialGroup",
             cause: "Friend tower not found",
@@ -926,7 +1003,7 @@ export const social_pullFriendTower = Effect.fn("social_pullFriendTower")(functi
 }: Schema.Schema.Type<NimblebitConfig.AuthenticatedPlayerSchema> & {
     friendId: Schema.Schema.Type<NimblebitConfig.PlayerIdSchema>;
 }) {
-    const nimblebitAuth = yield* NimblebitAuth;
+    const nimblebitAuth = yield* NimblebitAuth.NimblebitAuth;
     const httpClient = yield* HttpClient.HttpClient;
 
     const maybeAddBearerToken =
@@ -946,7 +1023,7 @@ export const social_pullFriendTower = Effect.fn("social_pullFriendTower")(functi
     const response = yield* endpoint({ path: { playerId, friendId, salt, hash } });
 
     if ("error" in response) {
-        return yield* new NimblebitError({
+        return yield* new NimblebitError.NimblebitError({
             method: "SocialPullFriendTower",
             module: "SocialGroup",
             cause: response.error,
@@ -954,7 +1031,7 @@ export const social_pullFriendTower = Effect.fn("social_pullFriendTower")(functi
     }
 
     if (response.success === "NotFound") {
-        return yield* new NimblebitError({
+        return yield* new NimblebitError.NimblebitError({
             method: "SocialPullFriendTower",
             module: "SocialGroup",
             cause: "Friend tower not found",
@@ -966,8 +1043,8 @@ export const social_pullFriendTower = Effect.fn("social_pullFriendTower")(functi
         playerId + friendId + salt + response.saveId + dataAsBase64 + Redacted.value(playerAuthKey)
     );
 
-    if (checksum !== response.checksum) {
-        return yield* new NimblebitError({
+    if (checksum !== response.checksum && nimblebitAuth.host === "https://sync.nimblebit.com") {
+        return yield* new NimblebitError.NimblebitError({
             method: "SocialPullFriendTower",
             module: "SocialGroup",
             cause: "Checksum mismatch",
@@ -993,7 +1070,7 @@ export const social_retrieveFriendsSnapshotList = Effect.fn("social_retrieveFrie
 }: Schema.Schema.Type<NimblebitConfig.AuthenticatedPlayerSchema> & {
     friendId: Schema.Schema.Type<NimblebitConfig.PlayerIdSchema>;
 }) {
-    const nimblebitAuth = yield* NimblebitAuth;
+    const nimblebitAuth = yield* NimblebitAuth.NimblebitAuth;
     const httpClient = yield* HttpClient.HttpClient;
 
     const maybeAddBearerToken =
@@ -1013,7 +1090,7 @@ export const social_retrieveFriendsSnapshotList = Effect.fn("social_retrieveFrie
     const response = yield* endpoint({ path: { playerId, friendId, salt, hash } });
 
     if ("error" in response) {
-        return yield* new NimblebitError({
+        return yield* new NimblebitError.NimblebitError({
             method: "SocialRetrieveFriendsSnapshotList",
             module: "SocialGroup",
             cause: response.error,
@@ -1021,7 +1098,7 @@ export const social_retrieveFriendsSnapshotList = Effect.fn("social_retrieveFrie
     }
 
     if (response.success === "NotFound") {
-        return yield* new NimblebitError({
+        return yield* new NimblebitError.NimblebitError({
             method: "SocialRetrieveFriendsSnapshotList",
             module: "SocialGroup",
             cause: "Friend has no snapshots",
@@ -1041,7 +1118,7 @@ export const social_getVisits = Effect.fn("social_getVisits")(function* ({
     playerAuthKey,
     playerId,
 }: Schema.Schema.Type<NimblebitConfig.AuthenticatedPlayerSchema>) {
-    const nimblebitAuth = yield* NimblebitAuth;
+    const nimblebitAuth = yield* NimblebitAuth.NimblebitAuth;
     const httpClient = yield* HttpClient.HttpClient;
 
     const maybeAddBearerToken =
@@ -1061,7 +1138,7 @@ export const social_getVisits = Effect.fn("social_getVisits")(function* ({
     const response = yield* endpoint({ path: { playerId, salt, hash } });
 
     if ("error" in response) {
-        return yield* new NimblebitError({
+        return yield* new NimblebitError.NimblebitError({
             method: "SocialGetVisits",
             module: "SocialGroup",
             cause: response.error,
@@ -1069,7 +1146,7 @@ export const social_getVisits = Effect.fn("social_getVisits")(function* ({
     }
 
     if (response.success === "NotFound") {
-        return yield* new NimblebitError({
+        return yield* new NimblebitError.NimblebitError({
             method: "SocialGetVisits",
             module: "SocialGroup",
             cause: "Player visits not found",
@@ -1097,7 +1174,7 @@ export const social_visit = Effect.fn("social_visit")(function* ({
 }) {
     const { data: saveData } = yield* sync_pullSave({ playerAuthKey, playerId });
     const { doorman } = yield* Schema.decode(SaveData)(saveData);
-    const doormanItemStr = yield* Schema.encode(Bitizen)(doorman);
+    const doormanItemStr = yield* Schema.encode(Bitizen.Bitizen)(doorman);
     yield* social_sendItem({
         playerId,
         playerAuthKey,

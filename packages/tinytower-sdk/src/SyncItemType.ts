@@ -1,4 +1,9 @@
-/** @internal */
+/**
+ * The type of sync item.
+ *
+ * @since 1.0.0
+ * @category SyncItem
+ */
 export const SyncItemType = {
     /** Unused? */
     None: "None",

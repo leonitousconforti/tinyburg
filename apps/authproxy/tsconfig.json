@@ -1,5 +1,9 @@
 {
     "extends": "../../tsconfig.base.jsonc",
+    "references": [
+        { "path": "../../packages/nimblebit-sdk/tsconfig.src.json" },
+        { "path": "../../packages/tinytower-sdk/tsconfig.src.json" }
+    ],
     "compilerOptions": {
         "noEmit": true,
         "declaration": false,

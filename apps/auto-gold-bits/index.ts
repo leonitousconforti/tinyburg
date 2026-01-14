@@ -1,7 +1,7 @@
 import { FetchHttpClient, PlatformConfigProvider } from "@effect/platform";
 import { NodeContext, NodeRuntime } from "@effect/platform-node";
 import { NimblebitAuth, NimblebitConfig } from "@tinyburg/nimblebit-sdk";
-import { SyncItemType, TinyTower, Schema as TinyTowerSchema } from "@tinyburg/tinytower-sdk";
+import { Bitizens, SyncItemType, TinyTower } from "@tinyburg/tinytower-sdk";
 import { Array, Effect, Layer, Schema, type Types } from "effect";
 
 const Live = Layer.merge(
@@ -9,7 +9,7 @@ const Live = Layer.merge(
     NimblebitAuth.layerNodeDirectConfig(NimblebitConfig.NimblebitAuthKeyConfig)
 )
     .pipe(Layer.provide(PlatformConfigProvider.layerDotEnvAdd(".env")))
-    .pipe(Layer.provideMerge(NodeContext.layer));
+    .pipe(Layer.provide(NodeContext.layer));
 
 const program = Effect.gen(function* () {
     const authenticatedPlayer = yield* NimblebitConfig.AuthenticatedPlayerConfig;
@@ -22,7 +22,7 @@ const program = Effect.gen(function* () {
     // For every bitizen gift...
     for (const bitizenGift of bitizenGifts) {
         // Upgrade their skills to 9s
-        const bitizen = yield* Schema.decode(TinyTowerSchema.Bitizen)(bitizenGift.contents);
+        const bitizen = yield* Schema.decode(Bitizens.Bitizen)(bitizenGift.contents);
         const skills = bitizen.attributes.skills as Types.Mutable<typeof bitizen.attributes.skills>;
         skills.creative = 9;
         skills.food = 9;
@@ -41,7 +41,7 @@ const program = Effect.gen(function* () {
         }
 
         // Send the upgraded bitizen back to the friend
-        const encodedBitizen = yield* Schema.encode(TinyTowerSchema.Bitizen)(bitizen);
+        const encodedBitizen = yield* Schema.encode(Bitizens.Bitizen)(bitizen);
         yield* TinyTower.social_sendItem({
             ...authenticatedPlayer,
             friendId: bitizenGift.from,

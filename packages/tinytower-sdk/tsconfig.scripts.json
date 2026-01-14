@@ -1,0 +1,19 @@
+{
+    "$schema": "http://json.schemastore.org/tsconfig",
+    "extends": "../../tsconfig.base.jsonc",
+    "include": ["scripts/**/*.ts"],
+    "references": [{ "path": "tsconfig.src.json" }, { "path": "../insight/tsconfig.build.json" }],
+    "compilerOptions": {
+        "tsBuildInfoFile": ".tsbuildinfo/scripts.tsbuildinfo",
+        "outDir": ".tsbuildinfo/scripts",
+        "noEmit": true,
+        "baseUrl": ".",
+        "types": ["node"],
+        "plugins": [
+            {
+                "name": "@effect/language-service",
+                "namespaceImportPackages": []
+            }
+        ]
+    }
+}

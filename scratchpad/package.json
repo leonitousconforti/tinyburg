@@ -5,6 +5,7 @@
     "type": "module",
     "dependencies": {
         "@tinyburg/insight": "workspace:*",
+        "@tinyburg/nimblebit-sdk": "workspace:*",
         "@tinyburg/tinytower-sdk": "workspace:*"
     },
     "devDependencies": {
