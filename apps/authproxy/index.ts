@@ -1,6 +1,7 @@
 import { RateLimiter } from "@effect/experimental";
 import {
     FetchHttpClient,
+    Headers,
     HttpApiBuilder,
     HttpApiClient,
     HttpApiError,
@@ -157,8 +158,9 @@ const AuthProxyApiMiddleware = HttpLayerRouter.middleware(
         const consume = Effect.serviceFunctionEffect(
             HttpServerRequest.HttpServerRequest,
             (request: HttpServerRequest.HttpServerRequest) => {
-                const remoteAddress = request.remoteAddress;
-                const key = Option.getOrElse(remoteAddress, () => "unknown");
+                const headers = request.headers;
+                const doConnectingIp = Headers.get(headers, "do-connecting-ip");
+                const key = Option.getOrElse(doConnectingIp, () => "unknown");
                 return withRateLimiter({
                     key,
                     limit: 3,
