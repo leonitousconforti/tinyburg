@@ -19,6 +19,7 @@ import { NodeHttpServer, NodeRuntime } from "@effect/platform-node";
 import { NimblebitAuth } from "@tinyburg/nimblebit-sdk";
 import { TinyTower, Endpoints as TinyTowerEndpoints } from "@tinyburg/tinytower-sdk";
 import {
+    Array,
     Config,
     Context,
     Duration,
@@ -38,7 +39,7 @@ class CurrentAccount extends Context.Tag("CurrentAccount")<CurrentAccount, Accou
 
 class Authorization extends HttpApiMiddleware.Tag<Authorization>()("Authorization", {
     provides: CurrentAccount,
-    failure: HttpApiError.Unauthorized,
+    failure: Schema.Union(HttpApiError.Unauthorized, HttpApiError.Forbidden),
     security: {
         myBearer: HttpApiSecurity.bearer,
     },
@@ -51,7 +52,6 @@ const AuthorizationLive = Layer.effect(
             myBearer: Effect.fnUntraced(function* (bearerToken) {
                 yield* Effect.log(`checking bearer token ${Redacted.value(bearerToken)}`);
                 return new Account({ scopes: [] });
-                // return yield* new HttpApiError.Unauthorized();
             }),
         };
     })
@@ -65,6 +65,47 @@ class Client extends Effect.Service<Client>()("Client", {
 
 const ApiWithAuthorizationMiddleware = TinyTowerEndpoints.Api.middleware(Authorization);
 
+/** @internal */
+const withMaybe401or403 = <A, E, R>(
+    effect: Effect.Effect<A, E, R>
+): Effect.Effect<
+    A,
+    E | HttpApiError.Unauthorized | HttpApiError.Forbidden,
+    R | CurrentAccount | HttpServerRequest.HttpServerRequest
+> =>
+    Effect.gen(function* () {
+        const account = yield* Effect.serviceOption(CurrentAccount);
+        const request = yield* HttpServerRequest.HttpServerRequest;
+
+        const isAuthorized = Option.isSome(account);
+        const hasScope = isAuthorized && Array.some(account.value.scopes, String.startsWith(request.url));
+
+        if (!isAuthorized) return yield* new HttpApiError.Unauthorized();
+        else if (!hasScope) return yield* new HttpApiError.Forbidden();
+        else return yield* effect;
+    });
+
+/** @internal */
+const catchTo429 = <A, E, R>(
+    effect: Effect.Effect<A, E | RateLimiter.RateLimitExceeded, R>
+): Effect.Effect<A | HttpServerResponse.HttpServerResponse, E, R> =>
+    Effect.catchIf(
+        effect,
+        Schema.is(RateLimiter.RateLimitExceeded),
+        (rateLimitExceeded: RateLimiter.RateLimitExceeded) =>
+            HttpServerResponse.raw("", {
+                status: 429,
+                contentLength: 0,
+                statusText: "Too Many Requests",
+                headers: {
+                    "X-RateLimit-Limit": rateLimitExceeded.limit.toString(),
+                    "X-RateLimit-Remaining": rateLimitExceeded.remaining.toString(),
+                    "X-RateLimit-Reset": Duration.toSeconds(rateLimitExceeded.retryAfter).toString(),
+                },
+            })
+    );
+
+/** @internal */
 const catchTo500 = <A, E, R>(
     effect: Effect.Effect<A, E | ParseResult.ParseError | HttpClientError.HttpClientError, R>
 ): Effect.Effect<A, E | HttpApiError.InternalServerError, R> =>
@@ -79,9 +120,9 @@ const RaffleLive = HttpApiBuilder.group(
     "RaffleGroup",
     Effect.fnUntraced(function* (handlers) {
         const client = yield* Effect.map(Client, (client) => client.RaffleGroup);
-        const enterRaffle = Function.compose(client.RaffleEnter, catchTo500);
-        const enterMultiRaffle = Function.compose(client.RaffleEnterMulti, catchTo500);
-        const checkEnteredRaffle = Function.compose(client.RaffleCheckEnteredCurrent, catchTo500);
+        const enterRaffle = Function.flow(client.RaffleEnter, catchTo500, withMaybe401or403);
+        const enterMultiRaffle = Function.flow(client.RaffleEnterMulti, catchTo500, withMaybe401or403);
+        const checkEnteredRaffle = Function.flow(client.RaffleCheckEnteredCurrent, catchTo500, withMaybe401or403);
         return handlers
             .handle("RaffleEnter", enterRaffle)
             .handle("RaffleEnterMulti", enterMultiRaffle)
@@ -95,9 +136,9 @@ const DeviceManagementLive = HttpApiBuilder.group(
     Effect.fnUntraced(function* (handlers) {
         const client = yield* Effect.map(Client, (client) => client.DeviceManagementGroup);
         const newPlayer = () => Effect.fail(new HttpApiError.Forbidden());
-        const verifyDevice = Function.compose(client.DeviceVerifyDevice, catchTo500);
-        const registerEmail = Function.compose(client.DeviceRegisterEmail, catchTo500);
-        const playerDetails = Function.compose(client.DevicePlayerDetails, catchTo500);
+        const verifyDevice = Function.flow(client.DeviceVerifyDevice, catchTo500, withMaybe401or403);
+        const registerEmail = Function.flow(client.DeviceRegisterEmail, catchTo500, withMaybe401or403);
+        const playerDetails = Function.flow(client.DevicePlayerDetails, catchTo500, withMaybe401or403);
         return handlers
             .handle("DeviceNewPlayer", newPlayer)
             .handle("DeviceVerifyDevice", verifyDevice)
@@ -111,12 +152,12 @@ const SyncManagementLive = HttpApiBuilder.group(
     "SyncManagementGroup",
     Effect.fnUntraced(function* (handlers) {
         const client = yield* Effect.map(Client, (client) => client.SyncManagementGroup);
-        const checkForNewerSave = Function.compose(client.SyncCheckForNewerSave, catchTo500);
-        const pullSave = Function.compose(client.SyncPullSave, catchTo500);
-        const pullSnapshot = Function.compose(client.SyncPullSnapshot, catchTo500);
-        const pushSave = Function.compose(client.SyncPushSave, catchTo500);
-        const pushSnapshot = Function.compose(client.SyncPushSnapshot, catchTo500);
-        const retrieveSnapshotList = Function.compose(client.SyncRetrieveSnapshotList, catchTo500);
+        const checkForNewerSave = Function.flow(client.SyncCheckForNewerSave, catchTo500, withMaybe401or403);
+        const pullSave = Function.flow(client.SyncPullSave, catchTo500, withMaybe401or403);
+        const pullSnapshot = Function.flow(client.SyncPullSnapshot, catchTo500, withMaybe401or403);
+        const pushSave = Function.flow(client.SyncPushSave, catchTo500, withMaybe401or403);
+        const pushSnapshot = Function.flow(client.SyncPushSnapshot, catchTo500, withMaybe401or403);
+        const retrieveSnapshotList = Function.flow(client.SyncRetrieveSnapshotList, catchTo500, withMaybe401or403);
         return handlers
             .handle("SyncCheckForNewerSave", checkForNewerSave)
             .handle("SyncPullSave", pullSave)
@@ -132,13 +173,13 @@ const SocialGroupLive = HttpApiBuilder.group(
     "SocialGroup",
     Effect.fnUntraced(function* (handlers) {
         const client = yield* Effect.map(Client, (client) => client.SocialGroup);
-        const getGifts = Function.compose(client.SocialGetGifts, catchTo500);
-        const pullFriendTower = Function.compose(client.SocialPullFriendTower, catchTo500);
-        const getVisits = Function.compose(client.SocialGetVisits, catchTo500);
-        const pullFriendMeta = Function.compose(client.SocialPullFriendMeta, catchTo500);
-        const receiveGift = Function.compose(client.SocialReceiveGift, catchTo500);
-        const friendsSnapshots = Function.compose(client.SocialRetrieveFriendsSnapshotList, catchTo500);
-        const sendItem = Function.compose(client.SocialSendItem, catchTo500);
+        const getGifts = Function.flow(client.SocialGetGifts, catchTo500, withMaybe401or403);
+        const pullFriendTower = Function.flow(client.SocialPullFriendTower, catchTo500, withMaybe401or403);
+        const getVisits = Function.flow(client.SocialGetVisits, catchTo500, withMaybe401or403);
+        const pullFriendMeta = Function.flow(client.SocialPullFriendMeta, catchTo500, withMaybe401or403);
+        const receiveGift = Function.flow(client.SocialReceiveGift, catchTo500, withMaybe401or403);
+        const friendsSnapshots = Function.flow(client.SocialRetrieveFriendsSnapshotList, catchTo500, withMaybe401or403);
+        const sendItem = Function.flow(client.SocialSendItem, catchTo500, withMaybe401or403);
         return handlers
             .handle("SocialGetGifts", getGifts)
             .handle("SocialPullFriendTower", pullFriendTower)
@@ -170,25 +211,6 @@ const AuthProxyApiMiddleware = HttpLayerRouter.middleware(
                 });
             }
         );
-
-        const catchTo429 = <A, E, R>(
-            effect: Effect.Effect<A, E | RateLimiter.RateLimitExceeded, R>
-        ): Effect.Effect<A | HttpServerResponse.HttpServerResponse, E, R> =>
-            Effect.catchIf(
-                effect,
-                Schema.is(RateLimiter.RateLimitExceeded),
-                (rateLimitExceeded: RateLimiter.RateLimitExceeded) =>
-                    HttpServerResponse.raw("", {
-                        status: 429,
-                        contentLength: 0,
-                        statusText: "Too Many Requests",
-                        headers: {
-                            "X-RateLimit-Limit": rateLimitExceeded.limit.toString(),
-                            "X-RateLimit-Remaining": rateLimitExceeded.remaining.toString(),
-                            "X-RateLimit-Reset": Duration.toSeconds(rateLimitExceeded.retryAfter).toString(),
-                        },
-                    })
-            );
 
         const middleware = HttpMiddleware.make((httpAppMiddleware) =>
             Effect.gen(function* () {
