@@ -1,3 +1,4 @@
+import { RateLimiter } from "@effect/experimental";
 import {
     FetchHttpClient,
     HttpApiBuilder,
@@ -16,7 +17,19 @@ import {
 import { NodeHttpServer, NodeRuntime } from "@effect/platform-node";
 import { NimblebitAuth } from "@tinyburg/nimblebit-sdk";
 import { TinyTower, Endpoints as TinyTowerEndpoints } from "@tinyburg/tinytower-sdk";
-import { Config, Context, Effect, Function, Layer, Option, Redacted, Schema, String, type ParseResult } from "effect";
+import {
+    Config,
+    Context,
+    Duration,
+    Effect,
+    Function,
+    Layer,
+    Option,
+    Redacted,
+    Schema,
+    String,
+    type ParseResult,
+} from "effect";
 import { createServer } from "node:http";
 
 class Account extends Schema.Class<Account>("Account")({ scopes: Schema.Array(Schema.String) }) {}
@@ -51,7 +64,7 @@ class Client extends Effect.Service<Client>()("Client", {
 
 const ApiWithAuthorizationMiddleware = TinyTowerEndpoints.Api.middleware(Authorization);
 
-const catch500 = <A, E, R>(
+const catchTo500 = <A, E, R>(
     effect: Effect.Effect<A, E | ParseResult.ParseError | HttpClientError.HttpClientError, R>
 ): Effect.Effect<A, E | HttpApiError.InternalServerError, R> =>
     effect.pipe(
@@ -65,9 +78,9 @@ const RaffleLive = HttpApiBuilder.group(
     "RaffleGroup",
     Effect.fnUntraced(function* (handlers) {
         const client = yield* Effect.map(Client, (client) => client.RaffleGroup);
-        const enterRaffle = Function.compose(client.RaffleEnter, catch500);
-        const enterMultiRaffle = Function.compose(client.RaffleEnterMulti, catch500);
-        const checkEnteredRaffle = Function.compose(client.RaffleCheckEnteredCurrent, catch500);
+        const enterRaffle = Function.compose(client.RaffleEnter, catchTo500);
+        const enterMultiRaffle = Function.compose(client.RaffleEnterMulti, catchTo500);
+        const checkEnteredRaffle = Function.compose(client.RaffleCheckEnteredCurrent, catchTo500);
         return handlers
             .handle("RaffleEnter", enterRaffle)
             .handle("RaffleEnterMulti", enterMultiRaffle)
@@ -81,9 +94,9 @@ const DeviceManagementLive = HttpApiBuilder.group(
     Effect.fnUntraced(function* (handlers) {
         const client = yield* Effect.map(Client, (client) => client.DeviceManagementGroup);
         const newPlayer = () => Effect.fail(new HttpApiError.Forbidden());
-        const verifyDevice = Function.compose(client.DeviceVerifyDevice, catch500);
-        const registerEmail = Function.compose(client.DeviceRegisterEmail, catch500);
-        const playerDetails = Function.compose(client.DevicePlayerDetails, catch500);
+        const verifyDevice = Function.compose(client.DeviceVerifyDevice, catchTo500);
+        const registerEmail = Function.compose(client.DeviceRegisterEmail, catchTo500);
+        const playerDetails = Function.compose(client.DevicePlayerDetails, catchTo500);
         return handlers
             .handle("DeviceNewPlayer", newPlayer)
             .handle("DeviceVerifyDevice", verifyDevice)
@@ -97,12 +110,12 @@ const SyncManagementLive = HttpApiBuilder.group(
     "SyncManagementGroup",
     Effect.fnUntraced(function* (handlers) {
         const client = yield* Effect.map(Client, (client) => client.SyncManagementGroup);
-        const checkForNewerSave = Function.compose(client.SyncCheckForNewerSave, catch500);
-        const pullSave = Function.compose(client.SyncPullSave, catch500);
-        const pullSnapshot = Function.compose(client.SyncPullSnapshot, catch500);
-        const pushSave = Function.compose(client.SyncPushSave, catch500);
-        const pushSnapshot = Function.compose(client.SyncPushSnapshot, catch500);
-        const retrieveSnapshotList = Function.compose(client.SyncRetrieveSnapshotList, catch500);
+        const checkForNewerSave = Function.compose(client.SyncCheckForNewerSave, catchTo500);
+        const pullSave = Function.compose(client.SyncPullSave, catchTo500);
+        const pullSnapshot = Function.compose(client.SyncPullSnapshot, catchTo500);
+        const pushSave = Function.compose(client.SyncPushSave, catchTo500);
+        const pushSnapshot = Function.compose(client.SyncPushSnapshot, catchTo500);
+        const retrieveSnapshotList = Function.compose(client.SyncRetrieveSnapshotList, catchTo500);
         return handlers
             .handle("SyncCheckForNewerSave", checkForNewerSave)
             .handle("SyncPullSave", pullSave)
@@ -118,13 +131,13 @@ const SocialGroupLive = HttpApiBuilder.group(
     "SocialGroup",
     Effect.fnUntraced(function* (handlers) {
         const client = yield* Effect.map(Client, (client) => client.SocialGroup);
-        const getGifts = Function.compose(client.SocialGetGifts, catch500);
-        const pullFriendTower = Function.compose(client.SocialPullFriendTower, catch500);
-        const getVisits = Function.compose(client.SocialGetVisits, catch500);
-        const pullFriendMeta = Function.compose(client.SocialPullFriendMeta, catch500);
-        const receiveGift = Function.compose(client.SocialReceiveGift, catch500);
-        const friendsSnapshots = Function.compose(client.SocialRetrieveFriendsSnapshotList, catch500);
-        const sendItem = Function.compose(client.SocialSendItem, catch500);
+        const getGifts = Function.compose(client.SocialGetGifts, catchTo500);
+        const pullFriendTower = Function.compose(client.SocialPullFriendTower, catchTo500);
+        const getVisits = Function.compose(client.SocialGetVisits, catchTo500);
+        const pullFriendMeta = Function.compose(client.SocialPullFriendMeta, catchTo500);
+        const receiveGift = Function.compose(client.SocialReceiveGift, catchTo500);
+        const friendsSnapshots = Function.compose(client.SocialRetrieveFriendsSnapshotList, catchTo500);
+        const sendItem = Function.compose(client.SocialSendItem, catchTo500);
         return handlers
             .handle("SocialGetGifts", getGifts)
             .handle("SocialPullFriendTower", pullFriendTower)
@@ -137,8 +150,45 @@ const SocialGroupLive = HttpApiBuilder.group(
 );
 
 const AuthProxyApiMiddleware = HttpLayerRouter.middleware(
-    Effect.map(NimblebitAuth.NimblebitAuth, (auth) =>
-        HttpMiddleware.make((httpAppMiddleware) =>
+    Effect.gen(function* () {
+        const auth = yield* NimblebitAuth.NimblebitAuth;
+        const withRateLimiter = yield* RateLimiter.makeWithRateLimiter;
+
+        const consume = Effect.serviceFunctionEffect(
+            HttpServerRequest.HttpServerRequest,
+            (request: HttpServerRequest.HttpServerRequest) => {
+                const remoteAddress = request.remoteAddress;
+                const key = Option.getOrElse(remoteAddress, () => "unknown");
+                return withRateLimiter({
+                    key,
+                    limit: 3,
+                    window: "1 minute",
+                    onExceeded: "fail",
+                    algorithm: "fixed-window",
+                });
+            }
+        );
+
+        const catchTo429 = <A, E, R>(
+            effect: Effect.Effect<A, E | RateLimiter.RateLimitExceeded, R>
+        ): Effect.Effect<A | HttpServerResponse.HttpServerResponse, E, R> =>
+            Effect.catchIf(
+                effect,
+                Schema.is(RateLimiter.RateLimitExceeded),
+                (rateLimitExceeded: RateLimiter.RateLimitExceeded) =>
+                    HttpServerResponse.raw("", {
+                        status: 429,
+                        contentLength: 0,
+                        statusText: "Too Many Requests",
+                        headers: {
+                            "X-RateLimit-Limit": rateLimitExceeded.limit.toString(),
+                            "X-RateLimit-Remaining": rateLimitExceeded.remaining.toString(),
+                            "X-RateLimit-Reset": Duration.toSeconds(rateLimitExceeded.retryAfter).toString(),
+                        },
+                    })
+            );
+
+        const middleware = HttpMiddleware.make((httpAppMiddleware) =>
             Effect.gen(function* () {
                 const request = yield* HttpServerRequest.HttpServerRequest;
                 const lastSlashIndex = String.lastIndexOf("/")(request.url);
@@ -158,14 +208,18 @@ const AuthProxyApiMiddleware = HttpLayerRouter.middleware(
                     })
                 );
             })
-        )
-    )
+        );
+
+        return Function.flow(middleware, consume, catchTo429);
+    })
 );
 
 const AuthProxyApiRoutes = HttpLayerRouter.addHttpApi(ApiWithAuthorizationMiddleware).pipe(
     Layer.provide([RaffleLive, DeviceManagementLive, SyncManagementLive, SocialGroupLive, AuthorizationLive]),
     Layer.provide(Client.DefaultWithoutDependencies),
-    Layer.provide(AuthProxyApiMiddleware.layer)
+    Layer.provide(AuthProxyApiMiddleware.layer),
+    Layer.provide(RateLimiter.layer),
+    Layer.provide(RateLimiter.layerStoreMemory)
 );
 
 const HealthCheck = Effect.cachedWithTTL(
@@ -175,7 +229,7 @@ const HealthCheck = Effect.cachedWithTTL(
         Effect.as(HttpServerResponse.text("OK", { status: 200 })),
         Effect.orDie
     ),
-    "1 hour"
+    Duration.hours(1)
 );
 
 const HealthCheckRoute = HealthCheck.pipe(
