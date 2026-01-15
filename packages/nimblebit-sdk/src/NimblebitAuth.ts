@@ -129,12 +129,16 @@ export class NimblebitAuth extends Context.Tag("NimblebitAuth")<
         });
 
     public static readonly NodeDirectConfig = (
-        config: Config.Config<Schema.Schema.Type<NimblebitConfig.NimblebitAuthKeySchema>>
+        config: Config.Config<
+            Schema.Schema.Type<NimblebitConfig.NimblebitAuthKeySchema>
+        > = NimblebitConfig.NimblebitAuthKeyConfig
     ): Layer.Layer<NimblebitAuth, ConfigError.ConfigError, never> =>
         Effect.map(config, (authKey) => NimblebitAuth.NodeDirect({ authKey })).pipe(Layer.unwrapEffect);
 
     public static readonly WebDirectConfig = (
-        config: Config.Config<Schema.Schema.Type<NimblebitConfig.NimblebitAuthKeySchema>>
+        config: Config.Config<
+            Schema.Schema.Type<NimblebitConfig.NimblebitAuthKeySchema>
+        > = NimblebitConfig.NimblebitAuthKeyConfig
     ): Layer.Layer<NimblebitAuth, ConfigError.ConfigError, never> =>
         Effect.map(config, (authKey) => NimblebitAuth.WebDirect({ authKey })).pipe(Layer.unwrapEffect);
 
@@ -208,7 +212,7 @@ export const layerWebDirect: ({
  * @category Layer
  */
 export const layerNodeDirectConfig: (
-    config: Config.Config<Schema.Schema.Type<NimblebitConfig.NimblebitAuthKeySchema>>
+    config?: Config.Config<Schema.Schema.Type<NimblebitConfig.NimblebitAuthKeySchema>> | undefined
 ) => Layer.Layer<NimblebitAuth, ConfigError.ConfigError, never> = NimblebitAuth.NodeDirectConfig;
 
 /**
@@ -216,7 +220,7 @@ export const layerNodeDirectConfig: (
  * @category Layer
  */
 export const layerWebDirectConfig: (
-    config: Config.Config<Schema.Schema.Type<NimblebitConfig.NimblebitAuthKeySchema>>
+    config?: Config.Config<Schema.Schema.Type<NimblebitConfig.NimblebitAuthKeySchema>> | undefined
 ) => Layer.Layer<NimblebitAuth, ConfigError.ConfigError, never> = NimblebitAuth.WebDirectConfig;
 
 /**

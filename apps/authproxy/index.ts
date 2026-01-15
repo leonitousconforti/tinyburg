@@ -1,33 +1,23 @@
-import type * as HttpClientError from "@effect/platform/HttpClientError";
-import type * as ParseResult from "effect/ParseResult";
-
-import * as NodeContext from "@effect/platform-node/NodeContext";
-import * as NodeHttpServer from "@effect/platform-node/NodeHttpServer";
-import * as NodeRuntime from "@effect/platform-node/NodeRuntime";
-import * as FetchHttpClient from "@effect/platform/FetchHttpClient";
-import * as HttpApiBuilder from "@effect/platform/HttpApiBuilder";
-import * as HttpApiClient from "@effect/platform/HttpApiClient";
-import * as HttpApiError from "@effect/platform/HttpApiError";
-import * as HttpApiMiddleware from "@effect/platform/HttpApiMiddleware";
-import * as HttpApiSecurity from "@effect/platform/HttpApiSecurity";
-import * as HttpMiddleware from "@effect/platform/HttpMiddleware";
-import * as HttpServer from "@effect/platform/HttpServer";
-import * as HttpServerRequest from "@effect/platform/HttpServerRequest";
-import * as PlatformConfigProvider from "@effect/platform/PlatformConfigProvider";
-import * as Config from "effect/Config";
-import * as Context from "effect/Context";
-import * as Effect from "effect/Effect";
-import * as Either from "effect/Either";
-import * as Function from "effect/Function";
-import * as Layer from "effect/Layer";
-import * as Option from "effect/Option";
-import * as Redacted from "effect/Redacted";
-import * as Schema from "effect/Schema";
-import * as String from "effect/String";
-import * as http from "node:http";
-
-import { NimblebitAuth, NimblebitConfig } from "@tinyburg/nimblebit-sdk";
-import { Endpoints as TinyTowerEndpoints } from "@tinyburg/tinytower-sdk";
+import {
+    FetchHttpClient,
+    HttpApiBuilder,
+    HttpApiClient,
+    HttpApiError,
+    HttpApiMiddleware,
+    HttpApiSecurity,
+    HttpLayerRouter,
+    HttpMiddleware,
+    HttpRouter,
+    HttpServerRequest,
+    HttpServerResponse,
+    PlatformConfigProvider,
+    type HttpClientError,
+} from "@effect/platform";
+import { NodeHttpServer, NodeRuntime } from "@effect/platform-node";
+import { NimblebitAuth } from "@tinyburg/nimblebit-sdk";
+import { TinyTower, Endpoints as TinyTowerEndpoints } from "@tinyburg/tinytower-sdk";
+import { Config, Context, Effect, Function, Layer, Option, Redacted, Schema, String, type ParseResult } from "effect";
+import { createServer } from "node:http";
 
 class Account extends Schema.Class<Account>("Account")({ scopes: Schema.Array(Schema.String) }) {}
 class CurrentAccount extends Context.Tag("CurrentAccount")<CurrentAccount, Account>() {}
@@ -59,7 +49,7 @@ class Client extends Effect.Service<Client>()("Client", {
     effect: HttpApiClient.make(TinyTowerEndpoints.Api, { baseUrl: "https://sync.nimblebit.com" }),
 }) {}
 
-const ApiWithMiddleware = TinyTowerEndpoints.Api.middleware(Authorization);
+const ApiWithAuthorizationMiddleware = TinyTowerEndpoints.Api.middleware(Authorization);
 
 const catch500 = <A, E, R>(
     effect: Effect.Effect<A, E | ParseResult.ParseError | HttpClientError.HttpClientError, R>
@@ -71,13 +61,13 @@ const catch500 = <A, E, R>(
     );
 
 const RaffleLive = HttpApiBuilder.group(
-    ApiWithMiddleware,
+    ApiWithAuthorizationMiddleware,
     "RaffleGroup",
     Effect.fnUntraced(function* (handlers) {
         const client = yield* Effect.map(Client, (client) => client.RaffleGroup);
-        const enterRaffle = Function.compose(client.RaffleEnter<false>, catch500);
-        const enterMultiRaffle = Function.compose(client.RaffleEnterMulti<false>, catch500);
-        const checkEnteredRaffle = Function.compose(client.RaffleCheckEnteredCurrent<false>, catch500);
+        const enterRaffle = Function.compose(client.RaffleEnter, catch500);
+        const enterMultiRaffle = Function.compose(client.RaffleEnterMulti, catch500);
+        const checkEnteredRaffle = Function.compose(client.RaffleCheckEnteredCurrent, catch500);
         return handlers
             .handle("RaffleEnter", enterRaffle)
             .handle("RaffleEnterMulti", enterMultiRaffle)
@@ -86,33 +76,33 @@ const RaffleLive = HttpApiBuilder.group(
 );
 
 const DeviceManagementLive = HttpApiBuilder.group(
-    ApiWithMiddleware,
+    ApiWithAuthorizationMiddleware,
     "DeviceManagementGroup",
     Effect.fnUntraced(function* (handlers) {
         const client = yield* Effect.map(Client, (client) => client.DeviceManagementGroup);
         const newPlayer = () => Effect.fail(new HttpApiError.Forbidden());
-        const verifyDevice = Function.compose(client.DeviceVerifyDevice<false>, catch500);
-        const registerEmail = Function.compose(client.DeviceRegisterEmail<false>, catch500);
-        const playerDetails = Function.compose(client.DevicePlayerDetails<false>, catch500);
+        const verifyDevice = Function.compose(client.DeviceVerifyDevice, catch500);
+        const registerEmail = Function.compose(client.DeviceRegisterEmail, catch500);
+        const playerDetails = Function.compose(client.DevicePlayerDetails, catch500);
         return handlers
-            .handle("DeviceNewPlayer", Function.compose(newPlayer, catch500))
-            .handle("DeviceVerifyDevice", Function.compose(verifyDevice, catch500))
-            .handle("DeviceRegisterEmail", Function.compose(registerEmail, catch500))
-            .handle("DevicePlayerDetails", Function.compose(playerDetails, catch500));
+            .handle("DeviceNewPlayer", newPlayer)
+            .handle("DeviceVerifyDevice", verifyDevice)
+            .handle("DeviceRegisterEmail", registerEmail)
+            .handle("DevicePlayerDetails", playerDetails);
     })
 );
 
 const SyncManagementLive = HttpApiBuilder.group(
-    ApiWithMiddleware,
+    ApiWithAuthorizationMiddleware,
     "SyncManagementGroup",
     Effect.fnUntraced(function* (handlers) {
         const client = yield* Effect.map(Client, (client) => client.SyncManagementGroup);
-        const checkForNewerSave = Function.compose(client.SyncCheckForNewerSave<false>, catch500);
-        const pullSave = Function.compose(client.SyncPullSave<false>, catch500);
-        const pullSnapshot = Function.compose(client.SyncPullSnapshot<false>, catch500);
-        const pushSave = Function.compose(client.SyncPushSave<false>, catch500);
-        const pushSnapshot = Function.compose(client.SyncPushSnapshot<false>, catch500);
-        const retrieveSnapshotList = Function.compose(client.SyncRetrieveSnapshotList<false>, catch500);
+        const checkForNewerSave = Function.compose(client.SyncCheckForNewerSave, catch500);
+        const pullSave = Function.compose(client.SyncPullSave, catch500);
+        const pullSnapshot = Function.compose(client.SyncPullSnapshot, catch500);
+        const pushSave = Function.compose(client.SyncPushSave, catch500);
+        const pushSnapshot = Function.compose(client.SyncPushSnapshot, catch500);
+        const retrieveSnapshotList = Function.compose(client.SyncRetrieveSnapshotList, catch500);
         return handlers
             .handle("SyncCheckForNewerSave", checkForNewerSave)
             .handle("SyncPullSave", pullSave)
@@ -124,17 +114,17 @@ const SyncManagementLive = HttpApiBuilder.group(
 );
 
 const SocialGroupLive = HttpApiBuilder.group(
-    ApiWithMiddleware,
+    ApiWithAuthorizationMiddleware,
     "SocialGroup",
     Effect.fnUntraced(function* (handlers) {
         const client = yield* Effect.map(Client, (client) => client.SocialGroup);
-        const getGifts = Function.compose(client.SocialGetGifts<false>, catch500);
-        const pullFriendTower = Function.compose(client.SocialPullFriendTower<false>, catch500);
-        const getVisits = Function.compose(client.SocialGetVisits<false>, catch500);
-        const pullFriendMeta = Function.compose(client.SocialPullFriendMeta<false>, catch500);
-        const receiveGift = Function.compose(client.SocialReceiveGift<false>, catch500);
-        const friendsSnapshots = Function.compose(client.SocialRetrieveFriendsSnapshotList<false>, catch500);
-        const sendItem = Function.compose(client.SocialSendItem<false>, catch500);
+        const getGifts = Function.compose(client.SocialGetGifts, catch500);
+        const pullFriendTower = Function.compose(client.SocialPullFriendTower, catch500);
+        const getVisits = Function.compose(client.SocialGetVisits, catch500);
+        const pullFriendMeta = Function.compose(client.SocialPullFriendMeta, catch500);
+        const receiveGift = Function.compose(client.SocialReceiveGift, catch500);
+        const friendsSnapshots = Function.compose(client.SocialRetrieveFriendsSnapshotList, catch500);
+        const sendItem = Function.compose(client.SocialSendItem, catch500);
         return handlers
             .handle("SocialGetGifts", getGifts)
             .handle("SocialPullFriendTower", pullFriendTower)
@@ -146,56 +136,63 @@ const SocialGroupLive = HttpApiBuilder.group(
     })
 );
 
-const AuthProxyApiLive = HttpApiBuilder.api(ApiWithMiddleware).pipe(
-    Layer.provide(RaffleLive),
-    Layer.provide(DeviceManagementLive),
-    Layer.provide(SyncManagementLive),
-    Layer.provide(SocialGroupLive),
-    Layer.provide(AuthorizationLive),
-    Layer.provide(Client.Default)
+const AuthProxyApiMiddleware = HttpLayerRouter.middleware(
+    Effect.map(NimblebitAuth.NimblebitAuth, (auth) =>
+        HttpMiddleware.make((httpAppMiddleware) =>
+            Effect.gen(function* () {
+                const request = yield* HttpServerRequest.HttpServerRequest;
+                const lastSlashIndex = String.lastIndexOf("/")(request.url);
+                if (Option.isNone(lastSlashIndex)) return yield* new HttpApiError.BadRequest();
+
+                const encodedHash = request.url.substring(lastSlashIndex.value + 1);
+                const decodedHash = Schema.decodeOption(Schema.StringFromBase64Url)(encodedHash);
+                if (Option.isNone(decodedHash)) return yield* new HttpApiError.BadRequest();
+
+                const signedHash = yield* auth.sign(decodedHash.value).pipe(Effect.orDie);
+                return yield* Effect.updateService(
+                    httpAppMiddleware,
+                    HttpRouter.RouteContext,
+                    (previousRouteContext) => ({
+                        ...previousRouteContext,
+                        params: { ...previousRouteContext.params, hash: signedHash },
+                    })
+                );
+            })
+        )
+    )
 );
 
-const HttpAppMiddleware = HttpMiddleware.make((httpApp) =>
-    Effect.gen(function* () {
-        const auth = yield* NimblebitAuth.NimblebitAuth;
-        const request = yield* HttpServerRequest.HttpServerRequest;
-
-        const lastSlashIndex = String.lastIndexOf("/")(request.url);
-        if (Option.isNone(lastSlashIndex)) {
-            return yield* httpApp;
-        }
-
-        const encodedHash = request.url.substring(lastSlashIndex.value + 1);
-        const urlExcludingHash = request.url.substring(0, lastSlashIndex.value + 1);
-        const decodedHash = Schema.decodeOption(Schema.StringFromBase64Url)(encodedHash);
-        if (Option.isNone(decodedHash)) {
-            return yield* httpApp;
-        }
-
-        const signedHash = yield* Effect.either(auth.sign(decodedHash.value));
-        if (Either.isLeft(signedHash)) {
-            return yield* httpApp;
-        }
-
-        return yield* Effect.provideService(
-            httpApp,
-            HttpServerRequest.HttpServerRequest,
-            request.modify({ url: urlExcludingHash + signedHash.right })
-        );
-    })
+const AuthProxyApiRoutes = HttpLayerRouter.addHttpApi(ApiWithAuthorizationMiddleware).pipe(
+    Layer.provide([RaffleLive, DeviceManagementLive, SyncManagementLive, SocialGroupLive, AuthorizationLive]),
+    Layer.provide(Client.DefaultWithoutDependencies),
+    Layer.provide(AuthProxyApiMiddleware.layer)
 );
 
-const ServerLive = HttpApiBuilder.serve(Function.flow(HttpMiddleware.logger, HttpAppMiddleware)).pipe(
-    HttpServer.withLogAddress,
-    Layer.provide(AuthProxyApiLive),
-    Layer.provide(NimblebitAuth.layerNodeDirectConfig(NimblebitConfig.NimblebitAuthKeyConfig)),
-    Layer.provide(
-        NodeHttpServer.layerConfig(http.createServer, {
-            port: Config.orElse(Config.number("PORT"), () => Config.succeed(3000)),
-        })
+const HealthCheck = Effect.cachedWithTTL(
+    NimblebitAuth.NimblebitAuth.pipe(
+        Effect.flatMap((auth) => auth.burnbot),
+        Effect.flatMap(TinyTower.raffle_checkEnteredCurrent),
+        Effect.as(HttpServerResponse.text("OK", { status: 200 })),
+        Effect.orDie
     ),
-    Layer.provide(PlatformConfigProvider.layerDotEnvAdd(".env")),
-    Layer.provide(NodeContext.layer)
+    "1 hour"
 );
 
-Layer.launch(ServerLive).pipe(NodeRuntime.runMain);
+const HealthCheckRoute = HealthCheck.pipe(
+    Effect.map((execute) => HttpLayerRouter.add("GET", "/healthz", execute)),
+    Layer.unwrapEffect
+);
+
+const AllRoutes = Layer.mergeAll(AuthProxyApiRoutes, HealthCheckRoute).pipe(
+    Layer.provide(FetchHttpClient.layer),
+    Layer.provide(NimblebitAuth.layerNodeDirectConfig())
+);
+
+const Port = Config.number("PORT").pipe(Config.withDefault(3000));
+
+HttpLayerRouter.serve(AllRoutes).pipe(
+    Layer.provide(PlatformConfigProvider.layerDotEnvAdd(".env")),
+    Layer.provide(NodeHttpServer.layerConfig(createServer, { port: Port })),
+    Layer.launch,
+    NodeRuntime.runMain
+);

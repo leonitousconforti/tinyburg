@@ -4,10 +4,7 @@ import { NimblebitAuth, NimblebitConfig } from "@tinyburg/nimblebit-sdk";
 import { Bitizens, SyncItemType, TinyTower } from "@tinyburg/tinytower-sdk";
 import { Array, Effect, Layer, Schema, type Types } from "effect";
 
-const Live = Layer.merge(
-    FetchHttpClient.layer,
-    NimblebitAuth.layerNodeDirectConfig(NimblebitConfig.NimblebitAuthKeyConfig)
-)
+const Live = Layer.merge(FetchHttpClient.layer, NimblebitAuth.layerNodeDirectConfig())
     .pipe(Layer.provide(PlatformConfigProvider.layerDotEnvAdd(".env")))
     .pipe(Layer.provide(NodeContext.layer));
 
