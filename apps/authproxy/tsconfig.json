@@ -4,6 +4,7 @@
         { "path": "../../packages/nimblebit-sdk/tsconfig.src.json" },
         { "path": "../../packages/tinytower-sdk/tsconfig.src.json" }
     ],
+    "include": ["domain", "middleware", "migrations", "routes", "index.ts"],
     "compilerOptions": {
         "noEmit": true,
         "declaration": false,

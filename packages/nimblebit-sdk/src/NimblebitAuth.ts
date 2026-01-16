@@ -5,12 +5,12 @@
  * @category Auth
  */
 
-import type * as Config from "effect/Config";
 import type * as ConfigError from "effect/ConfigError";
 import type * as ParseResult from "effect/ParseResult";
 
 import * as EffectSchemas from "effect-schemas";
 import * as Array from "effect/Array";
+import * as Config from "effect/Config";
 import * as Context from "effect/Context";
 import * as Effect from "effect/Effect";
 import * as Layer from "effect/Layer";
@@ -102,11 +102,9 @@ export class NimblebitAuth extends Context.Tag("NimblebitAuth")<
             return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
         });
 
-    public static readonly NodeDirect = ({
-        authKey,
-    }: {
-        authKey: Schema.Schema.Type<NimblebitConfig.NimblebitAuthKeySchema>;
-    }): Layer.Layer<NimblebitAuth, never, never> =>
+    public static readonly NodeDirect = (
+        authKey: Schema.Schema.Type<NimblebitConfig.NimblebitAuthKeySchema>
+    ): Layer.Layer<NimblebitAuth, never, never> =>
         Layer.succeed(this, {
             authKey,
             host: "https://sync.nimblebit.com",
@@ -115,11 +113,9 @@ export class NimblebitAuth extends Context.Tag("NimblebitAuth")<
             sign: (data: string) => NimblebitAuth.NodeMD5(data + Redacted.value(authKey)),
         });
 
-    public static readonly WebDirect = ({
-        authKey,
-    }: {
-        authKey: Schema.Schema.Type<NimblebitConfig.NimblebitAuthKeySchema>;
-    }): Layer.Layer<NimblebitAuth, never, never> =>
+    public static readonly WebDirect = (
+        authKey: Schema.Schema.Type<NimblebitConfig.NimblebitAuthKeySchema>
+    ): Layer.Layer<NimblebitAuth, never, never> =>
         Layer.succeed(this, {
             authKey,
             host: "https://sync.nimblebit.com" as const,
@@ -133,14 +129,14 @@ export class NimblebitAuth extends Context.Tag("NimblebitAuth")<
             Schema.Schema.Type<NimblebitConfig.NimblebitAuthKeySchema>
         > = NimblebitConfig.NimblebitAuthKeyConfig
     ): Layer.Layer<NimblebitAuth, ConfigError.ConfigError, never> =>
-        Effect.map(config, (authKey) => NimblebitAuth.NodeDirect({ authKey })).pipe(Layer.unwrapEffect);
+        Effect.map(config, (authKey) => NimblebitAuth.NodeDirect(authKey)).pipe(Layer.unwrapEffect);
 
     public static readonly WebDirectConfig = (
         config: Config.Config<
             Schema.Schema.Type<NimblebitConfig.NimblebitAuthKeySchema>
         > = NimblebitConfig.NimblebitAuthKeyConfig
     ): Layer.Layer<NimblebitAuth, ConfigError.ConfigError, never> =>
-        Effect.map(config, (authKey) => NimblebitAuth.WebDirect({ authKey })).pipe(Layer.unwrapEffect);
+        Effect.map(config, (authKey) => NimblebitAuth.WebDirect(authKey)).pipe(Layer.unwrapEffect);
 
     public static readonly NodeCustomHost = ({
         authKey,
@@ -185,27 +181,33 @@ export class NimblebitAuth extends Context.Tag("NimblebitAuth")<
         authKey: Redacted.Redacted<string>;
     }): Layer.Layer<NimblebitAuth, never, never> =>
         NimblebitAuth.WebCustomHost({ host: "https://authproxy.tinyburg.app", authKey });
+
+    public static readonly NodeTinyburgAuthProxyConfig = (
+        options: Config.Config.Wrap<Parameters<typeof NimblebitAuth.NodeTinyburgAuthProxy>[0]>
+    ): Layer.Layer<NimblebitAuth, ConfigError.ConfigError, never> =>
+        Layer.unwrapEffect(Effect.map(Config.unwrap(options), NimblebitAuth.NodeTinyburgAuthProxy));
+
+    public static readonly WebTinyburgAuthProxyConfig = (
+        options: Config.Config.Wrap<Parameters<typeof NimblebitAuth.WebTinyburgAuthProxy>[0]>
+    ): Layer.Layer<NimblebitAuth, ConfigError.ConfigError, never> =>
+        Layer.unwrapEffect(Effect.map(Config.unwrap(options), NimblebitAuth.WebTinyburgAuthProxy));
 }
 
 /**
  * @since 1.0.0
  * @category Layer
  */
-export const layerNodeDirect: ({
-    authKey,
-}: {
-    authKey: Schema.Schema.Type<NimblebitConfig.NimblebitAuthKeySchema>;
-}) => Layer.Layer<NimblebitAuth, never, never> = NimblebitAuth.NodeDirect;
+export const layerNodeDirect: (
+    authKey: Schema.Schema.Type<NimblebitConfig.NimblebitAuthKeySchema>
+) => Layer.Layer<NimblebitAuth, never, never> = NimblebitAuth.NodeDirect;
 
 /**
  * @since 1.0.0
  * @category Layer
  */
-export const layerWebDirect: ({
-    authKey,
-}: {
-    authKey: Schema.Schema.Type<NimblebitConfig.NimblebitAuthKeySchema>;
-}) => Layer.Layer<NimblebitAuth, never, never> = NimblebitAuth.WebDirect;
+export const layerWebDirect: (
+    authKey: Schema.Schema.Type<NimblebitConfig.NimblebitAuthKeySchema>
+) => Layer.Layer<NimblebitAuth, never, never> = NimblebitAuth.WebDirect;
 
 /**
  * @since 1.0.0
@@ -227,10 +229,7 @@ export const layerWebDirectConfig: (
  * @since 1.0.0
  * @category Layer
  */
-export const layerNodeCustomHost: ({
-    authKey,
-    host,
-}: {
+export const layerNodeCustomHost: (options: {
     host: string;
     authKey: Redacted.Redacted<string>;
 }) => Layer.Layer<NimblebitAuth, never, never> = NimblebitAuth.NodeCustomHost;
@@ -239,10 +238,7 @@ export const layerNodeCustomHost: ({
  * @since 1.0.0
  * @category Layer
  */
-export const layerWebCustomHost: ({
-    authKey,
-    host,
-}: {
+export const layerWebCustomHost: (options: {
     host: string;
     authKey: Redacted.Redacted<string>;
 }) => Layer.Layer<NimblebitAuth, never, never> = NimblebitAuth.WebCustomHost;
@@ -251,9 +247,7 @@ export const layerWebCustomHost: ({
  * @since 1.0.0
  * @category Layer
  */
-export const layerNodeTinyburgAuthProxy: ({
-    authKey,
-}: {
+export const layerNodeTinyburgAuthProxy: (options: {
     authKey: Redacted.Redacted<string>;
 }) => Layer.Layer<NimblebitAuth, never, never> = NimblebitAuth.NodeTinyburgAuthProxy;
 
@@ -261,8 +255,22 @@ export const layerNodeTinyburgAuthProxy: ({
  * @since 1.0.0
  * @category Layer
  */
-export const layerWebTinyburgAuthProxy: ({
-    authKey,
-}: {
+export const layerWebTinyburgAuthProxy: (options: {
     authKey: Redacted.Redacted<string>;
 }) => Layer.Layer<NimblebitAuth, never, never> = NimblebitAuth.WebTinyburgAuthProxy;
+
+/**
+ * @since 1.0.0
+ * @category Layer
+ */
+export const layerNodeTinyburgAuthProxyConfig: (
+    options: Config.Config.Wrap<Parameters<typeof NimblebitAuth.NodeTinyburgAuthProxy>[0]>
+) => Layer.Layer<NimblebitAuth, ConfigError.ConfigError, never> = NimblebitAuth.NodeTinyburgAuthProxyConfig;
+
+/**
+ * @since 1.0.0
+ * @category Layer
+ */
+export const layerWebTinyburgAuthProxyConfig: (
+    options: Config.Config.Wrap<Parameters<typeof NimblebitAuth.WebTinyburgAuthProxy>[0]>
+) => Layer.Layer<NimblebitAuth, ConfigError.ConfigError, never> = NimblebitAuth.WebTinyburgAuthProxyConfig;

@@ -155,7 +155,6 @@ export const PlayerMetaData = Schema.Struct({
 export const DeviceNewPlayerEndpoint = HttpApiEndpoint.get(
     "DeviceNewPlayer"
 )`/register/tt/${salt1Param}/${salt2Param}/${hashParam}`
-    .addError(HttpApiError.Forbidden)
     .addSuccess(ErrorResponse)
     .addSuccess(
         Schema.rename(
@@ -507,6 +506,7 @@ export const SocialGroup = HttpApiGroup.make("SocialGroup")
 
 /** @internal */
 export const Api = HttpApi.make("TinyTowerApi")
+    .addError(HttpApiError.Forbidden)
     .addError(HttpApiError.BadRequest)
     .addError(HttpApiError.Unauthorized)
     .addError(HttpApiError.InternalServerError)

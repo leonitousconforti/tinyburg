@@ -15,7 +15,7 @@
         "codegen": "pnpm --recursive --parallel --filter \"./packages/**/*\" run codegen",
         "coverage": "vitest --coverage",
         "docgen": "pnpm --recursive --filter \"./packages/**/*\" exec docgen && node scripts/docs.mjs",
-        "lint": "eslint \"**/{src,test,examples,scripts,dtslint}/**/*.{ts,mjs}\"",
+        "lint": "eslint \"**/{src,test,examples,scripts,dtslint,domain,middleware,migrations,routes}/**/*.{ts,mjs}\"",
         "lint-fix": "pnpm lint --fix",
         "prepare": "effect-language-service patch",
         "test": "vitest"
