@@ -1,5 +1,5 @@
 import { RateLimiter } from "@effect/experimental";
-import { FetchHttpClient, HttpLayerRouter, Path, PlatformConfigProvider } from "@effect/platform";
+import { FetchHttpClient, HttpLayerRouter, Path } from "@effect/platform";
 import { NodeHttpServer, NodeRuntime } from "@effect/platform-node";
 import { PgClient, PgMigrator } from "@effect/sql-pg";
 import { NimblebitAuth } from "@tinyburg/nimblebit-sdk";
@@ -63,7 +63,6 @@ HttpLayerRouter.serve(AllRoutes).pipe(
     Layer.provide(Repository.Default),
     Layer.provide(MigratorLive),
     Layer.provide(SqlLive),
-    Layer.provide(PlatformConfigProvider.layerDotEnvAdd(".env")),
     Layer.provide(
         NodeHttpServer.layerConfig(createServer, {
             port: Config.number("PORT").pipe(Config.withDefault(3000)),

@@ -1,8 +1,6 @@
 import { Headers, HttpLayerRouter, HttpMiddleware, HttpServerRequest, HttpServerResponse } from "@effect/platform";
-import { Effect, Either, Encoding, Function, Option, Redacted, String } from "effect";
+import { Config, Effect, Either, Encoding, Function, Layer, Option, Redacted, String } from "effect";
 
-import * as Config from "effect/Config";
-import * as Layer from "effect/Layer";
 import { Account, Repository } from "../domain/model.ts";
 
 /** @internal */
