@@ -7,11 +7,11 @@ import { Config, Effect, Layer, String } from "effect";
 import { createServer } from "node:http";
 
 import { Repository } from "./domain/model.ts";
+import { HttpApiErrorMiddleware } from "./middleware/00_httpApiError.ts";
 import { AuthProxyApiAccountMiddleware } from "./middleware/10_account.ts";
 import { AuthProxyApiRatelimitMiddleware } from "./middleware/20_ratelimit.ts";
 import { AuthProxyApiAuthorizationMiddleware } from "./middleware/30_authorization.ts";
 import { AuthProxyApiDecodeHashMiddleware } from "./middleware/40_tinytowerDecode.ts";
-import { HttpApiErrorMiddleware } from "./middleware/50_httpApiError.ts";
 import { AuthorizeAccountRoute, MakeAccountRoute, RevokeAccountRoute, ViewAccountRoute } from "./routes/accounts.ts";
 import { HealthCheckRoute } from "./routes/health.ts";
 import { AllTinyTowerRoutes } from "./routes/tinytower.ts";
