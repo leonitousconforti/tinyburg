@@ -7,7 +7,7 @@ export default Effect.flatMap(
         CREATE TABLE IF NOT EXISTS accounts (
             id SERIAL PRIMARY KEY,                                  -- Auto incrementing ID
             created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),          -- Timestamp of creation
-            last_used_at TIMESTAMPTZ NOT NULL,                      -- Timestamp of last use
+            last_used_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),        -- Timestamp of last use
             key UUID UNIQUE NOT NULL DEFAULT gen_random_uuid(),     -- Unique account key
             revoked BOOLEAN NOT NULL DEFAULT FALSE,                 -- Revocation status
             scopes TEXT[] NOT NULL,                                 -- Permitted scopes
