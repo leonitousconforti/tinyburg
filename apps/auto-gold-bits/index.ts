@@ -1,12 +1,15 @@
-import { FetchHttpClient, PlatformConfigProvider } from "@effect/platform";
-import { NodeContext, NodeRuntime } from "@effect/platform-node";
+import { FetchHttpClient } from "@effect/platform";
+import { NodeRuntime } from "@effect/platform-node";
 import { NimblebitAuth, NimblebitConfig } from "@tinyburg/nimblebit-sdk";
 import { Bitizens, SyncItemType, TinyTower } from "@tinyburg/tinytower-sdk";
-import { Array, Effect, Layer, Schema, type Types } from "effect";
+import { Array, Config, Effect, Layer, Schema, type Types } from "effect";
 
-const Live = Layer.merge(FetchHttpClient.layer, NimblebitAuth.layerNodeDirectConfig())
-    .pipe(Layer.provide(PlatformConfigProvider.layerDotEnvAdd(".env")))
-    .pipe(Layer.provide(NodeContext.layer));
+const Live = Layer.merge(
+    FetchHttpClient.layer,
+    NimblebitAuth.layerNodeTinyburgAuthProxyConfig({
+        authKey: Config.redacted("AUTH_KEY"),
+    })
+);
 
 const program = Effect.gen(function* () {
     const authenticatedPlayer = yield* NimblebitConfig.AuthenticatedPlayerConfig;
