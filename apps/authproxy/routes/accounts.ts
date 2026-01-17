@@ -1,16 +1,17 @@
-import * as VariantSchema from "@effect/experimental/VariantSchema";
-import * as HttpApi from "@effect/platform/HttpApi";
-import * as HttpApiBuilder from "@effect/platform/HttpApiBuilder";
-import * as HttpApiEndpoint from "@effect/platform/HttpApiEndpoint";
-import * as HttpApiError from "@effect/platform/HttpApiError";
-import * as HttpApiGroup from "@effect/platform/HttpApiGroup";
-import * as HttpApiSchema from "@effect/platform/HttpApiSchema";
-import * as Effect from "effect/Effect";
-import * as Option from "effect/Option";
-import * as Schema from "effect/Schema";
+import {
+    HttpApi,
+    HttpApiBuilder,
+    HttpApiEndpoint,
+    HttpApiError,
+    HttpApiGroup,
+    HttpApiMiddleware,
+    HttpApiSchema,
+    HttpApiSecurity,
+    HttpLayerRouter,
+} from "@effect/platform";
+import { Model } from "@effect/sql";
+import { Config, Effect, Layer, Option, Redacted, Schema } from "effect";
 
-import { HttpLayerRouter } from "@effect/platform";
-import { Layer } from "effect";
 import { Account, Repository } from "../domain/model.ts";
 
 /** @internal */
@@ -89,10 +90,20 @@ export const AccountsGroup = HttpApiGroup.make("AccountsGroup")
 
 /**
  * @since 1.0.0
+ * @category Middlewares
+ */
+export class Authorization extends HttpApiMiddleware.Tag<Authorization>()("Authorization", {
+    failure: HttpApiError.Unauthorized,
+    security: { basic: HttpApiSecurity.basic },
+}) {}
+
+/**
+ * @since 1.0.0
  * @category Api
  */
 export const AccountsApi = HttpApi.make("AccountsApi")
     .add(AccountsGroup)
+    .middleware(Authorization)
     .addError(HttpApiError.NotFound)
     .addError(HttpApiError.BadRequest)
     .addError(HttpApiError.InternalServerError);
@@ -163,7 +174,7 @@ const RevokeHandler = HttpApiBuilder.handler(
         return yield* repo.update({
             ...account,
             revoked: true,
-            lastUsedAt: VariantSchema.Override(account.lastUsedAt),
+            lastUsedAt: Model.Override(account.lastUsedAt),
         });
     })
 );
@@ -189,7 +200,7 @@ const AuthorizeHandler = HttpApiBuilder.handler(
         return yield* repo.update({
             ...account,
             revoked: false,
-            lastUsedAt: VariantSchema.Override(account.lastUsedAt),
+            lastUsedAt: Model.Override(account.lastUsedAt),
         });
     })
 );
@@ -211,7 +222,7 @@ const ModifyScopesHandler = HttpApiBuilder.handler(
         return yield* repo.update({
             ...account,
             scopes,
-            lastUsedAt: VariantSchema.Override(account.lastUsedAt),
+            lastUsedAt: Model.Override(account.lastUsedAt),
         });
     })
 );
@@ -234,7 +245,7 @@ const ModifyRateLimitHandler = HttpApiBuilder.handler(
             ...account,
             rateLimitLimit: limit,
             rateLimitWindow: window,
-            lastUsedAt: VariantSchema.Override(account.lastUsedAt),
+            lastUsedAt: Model.Override(account.lastUsedAt),
         });
     })
 );
@@ -256,7 +267,7 @@ const ModifyDescriptionHandler = HttpApiBuilder.handler(
         return yield* repo.update({
             ...account,
             description,
-            lastUsedAt: VariantSchema.Override(account.lastUsedAt),
+            lastUsedAt: Model.Override(account.lastUsedAt),
         });
     })
 );
@@ -274,8 +285,33 @@ const AccountsGroupLive = HttpApiBuilder.group(AccountsApi, "AccountsGroup", (ha
         .handle("description", ModifyDescriptionHandler)
 );
 
+/** @internal */
+export const AuthorizationLive = Layer.effect(
+    Authorization,
+    Effect.gen(function* () {
+        const adminUsername = yield* Config.string("ADMIN_USERNAME");
+        const adminPassword = yield* Config.redacted("ADMIN_PASSWORD");
+
+        return {
+            basic: (credentials) => {
+                if (
+                    credentials.username !== adminUsername ||
+                    Redacted.value(credentials.password) !== Redacted.value(adminPassword)
+                ) {
+                    return Effect.fail(new HttpApiError.Unauthorized());
+                }
+
+                return Effect.void;
+            },
+        };
+    })
+);
+
 /**
  * @since 1.0.0
  * @category Routes
  */
-export const AllAccountsRoutes = HttpLayerRouter.addHttpApi(AccountsApi).pipe(Layer.provide(AccountsGroupLive));
+export const AllAccountsRoutes = Layer.provide(HttpLayerRouter.addHttpApi(AccountsApi), [
+    AccountsGroupLive,
+    AuthorizationLive,
+]);
