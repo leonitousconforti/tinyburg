@@ -25,6 +25,7 @@ export class Account extends Model.Class<Account>("Account")({
     key: Model.Generated(Schema.UUID),
     revoked: Model.Generated(Schema.Boolean),
     scopes: Schema.Array(Schema.String),
+    description: Schema.OptionFromNullishOr(Schema.String, null),
     rateLimitLimit: Schema.Int,
     rateLimitWindow: Schema.NumberFromString.pipe(
         Schema.compose(Schema.NonNegativeInt),
