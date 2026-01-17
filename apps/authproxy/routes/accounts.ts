@@ -344,6 +344,57 @@ export const RemoveScopeRoute = HttpLayerRouter.add(
 );
 
 /**
+ * Route to set the rate limit for an account by its key. Requires basic
+ * authentication with the admin username and password.
+ *
+ * @since 1.0.0
+ * @category Routes
+ */
+export const SetRateLimitRoute = HttpLayerRouter.add(
+    "GET",
+    "/accounts/set-rate-limit/:key/:limit/:window",
+    Effect.gen(function* () {
+        const repo = yield* Repository;
+        const route = yield* HttpLayerRouter.RouteContext;
+        const IntFromString = Schema.compose(Schema.NumberFromString, Schema.Int);
+
+        const accountKey = route.params["key"] ?? "";
+        const limitParam = route.params["limit"] ?? "";
+        const windowParam = route.params["window"] ?? "";
+
+        const limit = Schema.decodeOption(IntFromString)(limitParam);
+        const window = Schema.decodeOption(Schema.compose(IntFromString, Schema.DurationFromMillis))(windowParam);
+
+        if (Option.isNone(limit) || Option.isNone(window)) {
+            return HttpServerResponse.raw("", {
+                status: 400,
+                contentLength: 0,
+                statusText: "Bad Request",
+            });
+        }
+
+        const maybeAccount = yield* repo.findById(accountKey);
+        if (Option.isNone(maybeAccount)) {
+            return HttpServerResponse.raw("", {
+                status: 404,
+                contentLength: 0,
+                statusText: "Not Found",
+            });
+        }
+
+        const account = maybeAccount.value;
+        const updatedAccount = yield* repo.update({
+            ...account,
+            rateLimitLimit: limit.value,
+            rateLimitWindow: window.value,
+            lastUsedAt: VariantSchema.Override(account.lastUsedAt),
+        });
+
+        return yield* AccountResponseJson(updatedAccount);
+    })
+);
+
+/**
  * @since 1.0.0
  * @category Routes
  */
@@ -355,5 +406,6 @@ export const AllAccountsRoutes = Layer.mergeAll(
     RevokeAccountRoute,
     AuthorizeAccountRoute,
     AddScopeRoute,
-    RemoveScopeRoute
+    RemoveScopeRoute,
+    SetRateLimitRoute
 ).pipe(Layer.provide(DefaultAdminMiddleware));
