@@ -55,7 +55,14 @@ declare const device_newPlayer: Effect.Effect<
     readonly playerId: string & Brand<"PlayerId">
     readonly playerSs: Redacted.Redacted<string> & Brand<"PlayerAuthKey">
   },
-  NimblebitError | HttpApiDecodeError | BadRequest | Unauthorized | InternalServerError | HttpClientError | ParseError,
+  | NimblebitError
+  | HttpApiDecodeError
+  | Forbidden
+  | BadRequest
+  | Unauthorized
+  | InternalServerError
+  | ParseError
+  | HttpClientError,
   NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
 >
 ```
@@ -81,7 +88,14 @@ declare const device_playerDetails: (args_0: {
     readonly registered: boolean
     readonly blacklisted: boolean
   },
-  NimblebitError | HttpApiDecodeError | BadRequest | Unauthorized | InternalServerError | HttpClientError | ParseError,
+  | NimblebitError
+  | HttpApiDecodeError
+  | Forbidden
+  | BadRequest
+  | Unauthorized
+  | InternalServerError
+  | ParseError
+  | HttpClientError,
   NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
 >
 ```
@@ -102,7 +116,14 @@ declare const device_registerEmail: (args_0: {
   readonly playerEmail: Redacted.Redacted<string> & Brand<"PlayerEmail">
 }) => Effect.Effect<
   "NewDevice" | "NewEmail",
-  NimblebitError | HttpApiDecodeError | BadRequest | Unauthorized | InternalServerError | HttpClientError | ParseError,
+  | NimblebitError
+  | HttpApiDecodeError
+  | Forbidden
+  | BadRequest
+  | Unauthorized
+  | InternalServerError
+  | ParseError
+  | HttpClientError,
   NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
 >
 ```
@@ -129,7 +150,14 @@ declare const device_verifyDevice: (args_0: {
     readonly playerPhoto?: string | undefined
     readonly playerNickname?: string | undefined
   },
-  NimblebitError | HttpApiDecodeError | BadRequest | Unauthorized | InternalServerError | HttpClientError | ParseError,
+  | NimblebitError
+  | HttpApiDecodeError
+  | Forbidden
+  | BadRequest
+  | Unauthorized
+  | InternalServerError
+  | ParseError
+  | HttpClientError,
   NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
 >
 ```
@@ -150,7 +178,14 @@ declare const raffle_checkEnteredCurrent: (args_0: {
   readonly playerAuthKey: Redacted.Redacted<string> & Brand<"PlayerAuthKey">
 }) => Effect.Effect<
   boolean,
-  NimblebitError | HttpApiDecodeError | BadRequest | Unauthorized | InternalServerError | HttpClientError | ParseError,
+  | NimblebitError
+  | HttpApiDecodeError
+  | Forbidden
+  | BadRequest
+  | Unauthorized
+  | InternalServerError
+  | ParseError
+  | HttpClientError,
   NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
 >
 ```
@@ -171,7 +206,14 @@ declare const raffle_enterMultiRaffle: (args_0: {
   readonly playerAuthKey: Redacted.Redacted<string> & Brand<"PlayerAuthKey">
 }) => Effect.Effect<
   void,
-  NimblebitError | HttpApiDecodeError | BadRequest | Unauthorized | InternalServerError | HttpClientError | ParseError,
+  | NimblebitError
+  | HttpApiDecodeError
+  | Forbidden
+  | BadRequest
+  | Unauthorized
+  | InternalServerError
+  | ParseError
+  | HttpClientError,
   NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
 >
 ```
@@ -192,7 +234,14 @@ declare const raffle_enterRaffle: (args_0: {
   readonly playerAuthKey: Redacted.Redacted<string> & Brand<"PlayerAuthKey">
 }) => Effect.Effect<
   void,
-  NimblebitError | HttpApiDecodeError | BadRequest | Unauthorized | InternalServerError | HttpClientError | ParseError,
+  | NimblebitError
+  | HttpApiDecodeError
+  | Forbidden
+  | BadRequest
+  | Unauthorized
+  | InternalServerError
+  | ParseError
+  | HttpClientError,
   NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
 >
 ```
@@ -224,7 +273,14 @@ declare const social_getGifts: (args_0: {
       readonly contents: string
     }>
   },
-  NimblebitError | HttpApiDecodeError | BadRequest | Unauthorized | InternalServerError | HttpClientError | ParseError,
+  | NimblebitError
+  | HttpApiDecodeError
+  | Forbidden
+  | BadRequest
+  | Unauthorized
+  | InternalServerError
+  | ParseError
+  | HttpClientError,
   NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
 >
 ```
@@ -256,7 +312,14 @@ declare const social_getVisits: (args_0: {
       readonly contents: string
     }>
   },
-  NimblebitError | HttpApiDecodeError | BadRequest | Unauthorized | InternalServerError | HttpClientError | ParseError,
+  | NimblebitError
+  | HttpApiDecodeError
+  | Forbidden
+  | BadRequest
+  | Unauthorized
+  | InternalServerError
+  | ParseError
+  | HttpClientError,
   NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
 >
 ```
@@ -491,7 +554,14 @@ declare const social_pullFriendMeta: (
     readonly bitbook?: string | undefined
     readonly ts: string
   },
-  NimblebitError | HttpApiDecodeError | BadRequest | Unauthorized | InternalServerError | HttpClientError | ParseError,
+  | NimblebitError
+  | HttpApiDecodeError
+  | Forbidden
+  | BadRequest
+  | Unauthorized
+  | InternalServerError
+  | ParseError
+  | HttpClientError,
   NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
 >
 ```
@@ -514,7 +584,14 @@ declare const social_pullFriendTower: (
   } & { friendId: Schema.Schema.Type<NimblebitConfig.PlayerIdSchema> }
 ) => Effect.Effect<
   { saveId: number; data: string },
-  NimblebitError | HttpApiDecodeError | BadRequest | Unauthorized | InternalServerError | HttpClientError | ParseError,
+  | NimblebitError
+  | HttpApiDecodeError
+  | Forbidden
+  | BadRequest
+  | Unauthorized
+  | InternalServerError
+  | ParseError
+  | HttpClientError,
   NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
 >
 ```
@@ -537,7 +614,14 @@ declare const social_receiveGift: (
   } & { giftId: number }
 ) => Effect.Effect<
   void,
-  NimblebitError | HttpApiDecodeError | BadRequest | Unauthorized | InternalServerError | HttpClientError | ParseError,
+  | NimblebitError
+  | HttpApiDecodeError
+  | Forbidden
+  | BadRequest
+  | Unauthorized
+  | InternalServerError
+  | ParseError
+  | HttpClientError,
   NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
 >
 ```
@@ -776,7 +860,14 @@ declare const social_retrieveFriendsSnapshotList: (
     }
     readonly created: Date
   }>,
-  NimblebitError | HttpApiDecodeError | BadRequest | Unauthorized | InternalServerError | HttpClientError | ParseError,
+  | NimblebitError
+  | HttpApiDecodeError
+  | Forbidden
+  | BadRequest
+  | Unauthorized
+  | InternalServerError
+  | ParseError
+  | HttpClientError,
   NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
 >
 ```
@@ -803,7 +894,14 @@ declare const social_sendItem: (
   }
 ) => Effect.Effect<
   void,
-  NimblebitError | HttpApiDecodeError | BadRequest | Unauthorized | InternalServerError | HttpClientError | ParseError,
+  | NimblebitError
+  | HttpApiDecodeError
+  | Forbidden
+  | BadRequest
+  | Unauthorized
+  | InternalServerError
+  | ParseError
+  | HttpClientError,
   NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
 >
 ```
@@ -826,7 +924,14 @@ declare const social_visit: (
   } & { friendId: Schema.Schema.Type<NimblebitConfig.PlayerIdSchema> }
 ) => Effect.Effect<
   void,
-  NimblebitError | HttpApiDecodeError | BadRequest | Unauthorized | InternalServerError | HttpClientError | ParseError,
+  | NimblebitError
+  | HttpApiDecodeError
+  | Forbidden
+  | BadRequest
+  | Unauthorized
+  | InternalServerError
+  | ParseError
+  | HttpClientError,
   NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
 >
 ```
@@ -847,7 +952,14 @@ declare const sync_checkForNewerSave: (args_0: {
   readonly playerAuthKey: Redacted.Redacted<string> & Brand<"PlayerAuthKey">
 }) => Effect.Effect<
   number,
-  NimblebitError | HttpApiDecodeError | BadRequest | Unauthorized | InternalServerError | HttpClientError | ParseError,
+  | NimblebitError
+  | HttpApiDecodeError
+  | Forbidden
+  | BadRequest
+  | Unauthorized
+  | InternalServerError
+  | ParseError
+  | HttpClientError,
   NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
 >
 ```
@@ -868,7 +980,14 @@ declare const sync_pullSave: (args_0: {
   readonly playerAuthKey: Redacted.Redacted<string> & Brand<"PlayerAuthKey">
 }) => Effect.Effect<
   { saveId: number; data: string },
-  NimblebitError | HttpApiDecodeError | BadRequest | Unauthorized | InternalServerError | HttpClientError | ParseError,
+  | NimblebitError
+  | HttpApiDecodeError
+  | Forbidden
+  | BadRequest
+  | Unauthorized
+  | InternalServerError
+  | ParseError
+  | HttpClientError,
   NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
 >
 ```
@@ -891,7 +1010,14 @@ declare const sync_pullSnapshot: (
   } & { snapshotId: number }
 ) => Effect.Effect<
   { snapshotId: number; data: string },
-  NimblebitError | HttpApiDecodeError | BadRequest | Unauthorized | InternalServerError | HttpClientError | ParseError,
+  | NimblebitError
+  | HttpApiDecodeError
+  | Forbidden
+  | BadRequest
+  | Unauthorized
+  | InternalServerError
+  | ParseError
+  | HttpClientError,
   NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
 >
 ```
@@ -914,7 +1040,14 @@ declare const sync_pushSave: (
   } & { data: Schema.Schema.Type<typeof SaveData> }
 ) => Effect.Effect<
   void,
-  NimblebitError | HttpApiDecodeError | BadRequest | Unauthorized | InternalServerError | HttpClientError | ParseError,
+  | NimblebitError
+  | HttpApiDecodeError
+  | Forbidden
+  | BadRequest
+  | Unauthorized
+  | InternalServerError
+  | ParseError
+  | HttpClientError,
   NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
 >
 ```
@@ -937,7 +1070,14 @@ declare const sync_pushSnapshot: (
   } & { data: Schema.Schema.Type<typeof SaveData> }
 ) => Effect.Effect<
   void,
-  NimblebitError | HttpApiDecodeError | BadRequest | Unauthorized | InternalServerError | HttpClientError | ParseError,
+  | NimblebitError
+  | HttpApiDecodeError
+  | Forbidden
+  | BadRequest
+  | Unauthorized
+  | InternalServerError
+  | ParseError
+  | HttpClientError,
   NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
 >
 ```
@@ -1174,7 +1314,14 @@ declare const sync_retrieveSnapshotList: (args_0: {
       readonly ts: string
     }
   }>,
-  NimblebitError | HttpApiDecodeError | BadRequest | Unauthorized | InternalServerError | HttpClientError | ParseError,
+  | NimblebitError
+  | HttpApiDecodeError
+  | Forbidden
+  | BadRequest
+  | Unauthorized
+  | InternalServerError
+  | ParseError
+  | HttpClientError,
   NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
 >
 ```
