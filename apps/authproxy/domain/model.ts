@@ -24,7 +24,7 @@ export class Account extends Model.Class<Account>("Account")({
     lastUsedAt: Model.DateTimeUpdateFromDate,
     key: Model.Generated(Schema.UUID),
     revoked: Model.Generated(Schema.Boolean),
-    scopes: Schema.Array(Schema.String),
+    scopes: Schema.ReadonlySet(Schema.String),
     description: Schema.OptionFromNullishOr(Schema.String, null),
     rateLimitLimit: Schema.Int,
     rateLimitWindow: Schema.NumberFromString.pipe(

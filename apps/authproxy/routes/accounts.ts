@@ -1,411 +1,281 @@
-import { VariantSchema } from "@effect/experimental";
-import { Headers, HttpLayerRouter, HttpMiddleware, HttpServerRequest, HttpServerResponse } from "@effect/platform";
-import { Config, Effect, Either, Encoding, Function, Layer, Option, Redacted, Schema, String } from "effect";
+import * as VariantSchema from "@effect/experimental/VariantSchema";
+import * as HttpApi from "@effect/platform/HttpApi";
+import * as HttpApiBuilder from "@effect/platform/HttpApiBuilder";
+import * as HttpApiEndpoint from "@effect/platform/HttpApiEndpoint";
+import * as HttpApiError from "@effect/platform/HttpApiError";
+import * as HttpApiGroup from "@effect/platform/HttpApiGroup";
+import * as HttpApiSchema from "@effect/platform/HttpApiSchema";
+import * as Effect from "effect/Effect";
+import * as Option from "effect/Option";
+import * as Schema from "effect/Schema";
 
+import { HttpLayerRouter } from "@effect/platform";
+import { Layer } from "effect";
 import { Account, Repository } from "../domain/model.ts";
 
 /** @internal */
-const AccountResponseJson = HttpServerResponse.schemaJson(Account.json);
+const keyParam = HttpApiSchema.param("key", Schema.UUID);
 
 /** @internal */
-const BasicAuthMiddleware = (credentials: {
-    username: string;
-    password: Redacted.Redacted<string>;
-    realm?: string | undefined;
-}) =>
-    HttpLayerRouter.middleware(
-        HttpMiddleware.make((httpAppMiddleware) =>
-            Effect.gen(function* () {
-                const request = yield* HttpServerRequest.HttpServerRequest;
+const accountType = HttpApiSchema.param("accountType", Schema.Literal("none", "readonly"));
 
-                const maybeAuth = Function.pipe(
-                    request.headers,
-                    Headers.get("authorization"),
-                    Option.map(String.slice("Basic ".length)),
-                    Option.map(Encoding.decodeBase64String),
-                    Option.flatMap(Either.getRight),
-                    Option.getOrUndefined
-                );
+/**
+ * @since 1.0.0
+ * @category Endpoints
+ */
+export const CreateAccount = HttpApiEndpoint.post("create")`/accounts/new/${accountType}`.addSuccess(Account.json);
 
-                if (maybeAuth === undefined) {
-                    const realm = credentials.realm ? ` realm="${credentials.realm}"` : "";
-                    return HttpServerResponse.raw("", {
-                        status: 401,
-                        contentLength: 0,
-                        statusText: "Unauthorized",
-                        headers: { "WWW-Authenticate": `Basic${realm}` },
-                    });
-                }
+/**
+ * @since 1.0.0
+ * @category Endpoints
+ */
+export const ViewAccount = HttpApiEndpoint.get("view")`/accounts/view/${keyParam}`.addSuccess(Account.json);
 
-                const authParts = String.split(maybeAuth, ":");
+/**
+ * @since 1.0.0
+ * @category Endpoints
+ */
+export const ListAccounts = HttpApiEndpoint.get("list")`/accounts/list`.addSuccess(Schema.Array(Account.json));
 
-                if (
-                    authParts.length !== 2 ||
-                    authParts[0] !== credentials.username ||
-                    authParts[1] !== Redacted.value(credentials.password)
-                ) {
-                    return HttpServerResponse.raw("", {
-                        status: 403,
-                        contentLength: 0,
-                        statusText: "Forbidden",
-                    });
-                }
+/**
+ * @since 1.0.0
+ * @category Endpoints
+ */
+export const RevokeAccount = HttpApiEndpoint.put("revoke")`/accounts/revoke/${keyParam}`.addSuccess(Account.json);
 
-                return yield* httpAppMiddleware;
-            })
-        )
-    );
+/**
+ * @since 1.0.0
+ * @category Endpoints
+ */
+export const AuthorizeAccount = HttpApiEndpoint.put("authorize")`/accounts/grant/${keyParam}`.addSuccess(Account.json);
+
+/**
+ * @since 1.0.0
+ * @category Endpoints
+ */
+export const ModifyScopes = HttpApiEndpoint.patch("scopes")`/accounts/${keyParam}/scopes`
+    .setPayload(Schema.Struct({ scopes: Schema.ReadonlySet(Schema.String) }))
+    .addSuccess(Account.json);
+
+/**
+ * @since 1.0.0
+ * @category Endpoints
+ */
+export const ModifyRateLimit = HttpApiEndpoint.patch("rateLimit")`/accounts/${keyParam}/ratelimit`
+    .setPayload(Schema.Struct({ limit: Schema.Int, window: Schema.DurationFromMillis }))
+    .addSuccess(Account.json);
+
+/**
+ * @since 1.0.0
+ * @category Endpoints
+ */
+export const ModifyDescription = HttpApiEndpoint.patch("description")`/accounts/${keyParam}/description`
+    .setPayload(Schema.Struct({ description: Schema.OptionFromNullishOr(Schema.String, null) }))
+    .addSuccess(Account.json);
+
+/**
+ * @since 1.0.0
+ * @category Groups
+ */
+export const AccountsGroup = HttpApiGroup.make("AccountsGroup")
+    .add(CreateAccount)
+    .add(ViewAccount)
+    .add(ListAccounts)
+    .add(RevokeAccount)
+    .add(AuthorizeAccount)
+    .add(ModifyScopes)
+    .add(ModifyRateLimit)
+    .add(ModifyDescription);
+
+/**
+ * @since 1.0.0
+ * @category Api
+ */
+export const AccountsApi = HttpApi.make("AccountsApi")
+    .add(AccountsGroup)
+    .addError(HttpApiError.NotFound)
+    .addError(HttpApiError.BadRequest)
+    .addError(HttpApiError.InternalServerError);
 
 /** @internal */
-const DefaultAdminMiddleware = Layer.unwrapEffect(
-    Effect.gen(function* () {
-        const adminUsername = yield* Config.string("ADMIN_USERNAME");
-        const adminPassword = yield* Config.redacted("ADMIN_PASSWORD");
-        return BasicAuthMiddleware({
-            username: adminUsername,
-            password: adminPassword,
-            realm: "Tinyburg AuthProxy Admin",
-        }).layer;
-    })
-);
-
-/**
- * Route to create a new none account. Requires basic authentication with the
- * admin username and password.
- *
- * @since 1.0.0
- * @category Routes
- */
-export const MakeNoneAccountRoute = HttpLayerRouter.add(
-    "GET",
-    "/accounts/new/none",
-    Effect.gen(function* () {
+const CreateHandler = HttpApiBuilder.handler(
+    AccountsApi,
+    "AccountsGroup",
+    "create",
+    Effect.fnUntraced(function* ({ path: { accountType } }) {
         const repo = yield* Repository;
-        const newAccount = yield* repo.insert({
+        const seededAccount = accountType === "none" ? repo.seededNoneAccount : repo.seededReadonlyAccount;
+        return yield* repo.insert({
             createdAt: undefined,
             lastUsedAt: undefined,
-            scopes: repo.seededNoneAccount.scopes,
-            rateLimitLimit: repo.seededNoneAccount.rateLimitLimit,
-            rateLimitWindow: repo.seededNoneAccount.rateLimitWindow,
+            description: Option.none(),
+            scopes: seededAccount.scopes,
+            rateLimitLimit: seededAccount.rateLimitLimit,
+            rateLimitWindow: seededAccount.rateLimitWindow,
         });
-
-        return yield* AccountResponseJson(newAccount);
     })
 );
 
-/**
- * Route to create a new read-only account. Requires basic authentication with
- * the admin username and password.
- *
- * @since 1.0.0
- * @category Routes
- */
-export const MakeReadonlyAccountRoute = HttpLayerRouter.add(
-    "GET",
-    "/accounts/new/readonly",
-    Effect.gen(function* () {
+/** @internal */
+const ViewHandler = HttpApiBuilder.handler(
+    AccountsApi,
+    "AccountsGroup",
+    "view",
+    Effect.fnUntraced(function* ({ path: { key } }) {
         const repo = yield* Repository;
-        const newAccount = yield* repo.insert({
-            createdAt: undefined,
-            lastUsedAt: undefined,
-            scopes: repo.seededReadonlyAccount.scopes,
-            rateLimitLimit: repo.seededReadonlyAccount.rateLimitLimit,
-            rateLimitWindow: repo.seededReadonlyAccount.rateLimitWindow,
+        const maybeAccount = yield* repo.findById(key);
+        return yield* Option.match(maybeAccount, {
+            onNone: () => Effect.fail(new HttpApiError.NotFound()),
+            onSome: Effect.succeed,
         });
-
-        return yield* AccountResponseJson(newAccount);
     })
 );
 
-/**
- * Route to list all accounts. Requires basic authentication with the admin
- * username and password.
- *
- * @since 1.0.0
- * @category Routes
- */
-export const ListAccountsRoute = HttpLayerRouter.add(
-    "GET",
-    "/accounts/list",
-    Effect.gen(function* () {
+/** @internal */
+const ListHandler = HttpApiBuilder.handler(
+    AccountsApi,
+    "AccountsGroup",
+    "list",
+    Effect.fnUntraced(function* () {
         const repo = yield* Repository;
-        const accounts = yield* repo.listAll();
-        return yield* HttpServerResponse.schemaJson(Schema.Array(Account.json))(accounts);
-    })
+        return yield* repo.listAll();
+    }, Effect.orDie)
 );
 
-/**
- * Route to view an account by its key. Requires basic authentication with the
- * admin username and password.
- *
- * @since 1.0.0
- * @category Routes
- */
-export const ViewAccountRoute = HttpLayerRouter.add(
-    "GET",
-    "/accounts/view/:key",
-    Effect.gen(function* () {
+/** @internal */
+const RevokeHandler = HttpApiBuilder.handler(
+    AccountsApi,
+    "AccountsGroup",
+    "revoke",
+    Effect.fnUntraced(function* ({ path: { key } }) {
         const repo = yield* Repository;
-        const route = yield* HttpLayerRouter.RouteContext;
-
-        const accountKey = route.params["key"] ?? "";
-        const maybeAccount = yield* repo.findById(accountKey);
+        const maybeAccount = yield* repo.findById(key);
 
         if (Option.isNone(maybeAccount)) {
-            return HttpServerResponse.raw("", {
-                status: 404,
-                contentLength: 0,
-                statusText: "Not Found",
-            });
-        }
-
-        return yield* AccountResponseJson(maybeAccount.value);
-    })
-);
-
-/**
- * Route to revoke an account by its key. Requires basic authentication with the
- * admin username and password.
- *
- * @since 1.0.0
- * @category Routes
- */
-export const RevokeAccountRoute = HttpLayerRouter.add(
-    "GET",
-    "/accounts/revoke/:key",
-    Effect.gen(function* () {
-        const repo = yield* Repository;
-        const route = yield* HttpLayerRouter.RouteContext;
-
-        const accountKey = route.params["key"] ?? "";
-        const maybeAccount = yield* repo.findById(accountKey);
-
-        if (Option.isNone(maybeAccount)) {
-            return HttpServerResponse.raw("", {
-                status: 404,
-                contentLength: 0,
-                statusText: "Not Found",
-            });
+            return yield* new HttpApiError.NotFound();
         }
 
         const account = maybeAccount.value;
         if (account.revoked) {
-            return HttpServerResponse.raw("", {
-                status: 400,
-                contentLength: 0,
-                statusText: "Bad Request",
-            });
+            return yield* new HttpApiError.BadRequest();
         }
 
-        const revokedAccount = yield* repo.update({
+        return yield* repo.update({
             ...account,
             revoked: true,
             lastUsedAt: VariantSchema.Override(account.lastUsedAt),
         });
-
-        return yield* AccountResponseJson(revokedAccount);
     })
 );
 
-/**
- * Route to authorize an account by its key. Requires basic authentication with
- * the admin username and password.
- *
- * @since 1.0.0
- * @category Routes
- */
-export const AuthorizeAccountRoute = HttpLayerRouter.add(
-    "GET",
-    "/accounts/authorize/:key",
-    Effect.gen(function* () {
+/** @internal */
+const AuthorizeHandler = HttpApiBuilder.handler(
+    AccountsApi,
+    "AccountsGroup",
+    "authorize",
+    Effect.fnUntraced(function* ({ path: { key } }) {
         const repo = yield* Repository;
-        const route = yield* HttpLayerRouter.RouteContext;
-
-        const accountKey = route.params["key"] ?? "";
-        const maybeAccount = yield* repo.findById(accountKey);
+        const maybeAccount = yield* repo.findById(key);
 
         if (Option.isNone(maybeAccount)) {
-            return HttpServerResponse.raw("", {
-                status: 404,
-                contentLength: 0,
-                statusText: "Not Found",
-            });
+            return yield* new HttpApiError.NotFound();
         }
 
         const account = maybeAccount.value;
         if (!account.revoked) {
-            return HttpServerResponse.raw("", {
-                status: 400,
-                contentLength: 0,
-                statusText: "Bad Request",
-            });
+            return yield* new HttpApiError.BadRequest();
         }
 
-        const authorizedAccount = yield* repo.update({
+        return yield* repo.update({
             ...account,
             revoked: false,
             lastUsedAt: VariantSchema.Override(account.lastUsedAt),
         });
-
-        return yield* AccountResponseJson(authorizedAccount);
     })
 );
 
-/**
- * Route to add a scope to an account by its key. Requires basic authentication
- * with the admin username and password.
- *
- * @since 1.0.0
- * @category Routes
- */
-export const AddScopeRoute = HttpLayerRouter.add(
-    "GET",
-    "/accounts/add-scope/:key/:scope",
-    Effect.gen(function* () {
+/** @internal */
+const ModifyScopesHandler = HttpApiBuilder.handler(
+    AccountsApi,
+    "AccountsGroup",
+    "scopes",
+    Effect.fnUntraced(function* ({ path: { key }, payload: { scopes } }) {
         const repo = yield* Repository;
-        const route = yield* HttpLayerRouter.RouteContext;
+        const maybeAccount = yield* repo.findById(key);
 
-        const accountKey = route.params["key"] ?? "";
-        const scope = route.params["scope"] ?? "";
-        const scopeDecoded = yield* Encoding.decodeBase64UrlString(scope);
-
-        const maybeAccount = yield* repo.findById(accountKey);
         if (Option.isNone(maybeAccount)) {
-            return HttpServerResponse.raw("", {
-                status: 404,
-                contentLength: 0,
-                statusText: "Not Found",
-            });
+            return yield* new HttpApiError.NotFound();
         }
 
         const account = maybeAccount.value;
-        if (account.scopes.includes(scopeDecoded)) {
-            return HttpServerResponse.raw("", {
-                status: 400,
-                contentLength: 0,
-                statusText: "Bad Request",
-            });
-        }
-
-        const updatedAccount = yield* repo.update({
+        return yield* repo.update({
             ...account,
-            scopes: [...account.scopes, scopeDecoded],
+            scopes,
             lastUsedAt: VariantSchema.Override(account.lastUsedAt),
         });
-
-        return yield* AccountResponseJson(updatedAccount);
     })
 );
 
-/**
- * Route to remove a scope from an account by its key. Requires basic
- * authentication with the admin username and password.
- *
- * @since 1.0.0
- * @category Routes
- */
-export const RemoveScopeRoute = HttpLayerRouter.add(
-    "GET",
-    "/accounts/remove-scope/:key/:scope",
-    Effect.gen(function* () {
+/** @internal */
+const ModifyRateLimitHandler = HttpApiBuilder.handler(
+    AccountsApi,
+    "AccountsGroup",
+    "rateLimit",
+    Effect.fnUntraced(function* ({ path: { key }, payload: { limit, window } }) {
         const repo = yield* Repository;
-        const route = yield* HttpLayerRouter.RouteContext;
+        const maybeAccount = yield* repo.findById(key);
 
-        const accountKey = route.params["key"] ?? "";
-        const scope = route.params["scope"] ?? "";
-        const scopeToRemove = yield* Encoding.decodeBase64UrlString(scope);
-
-        const maybeAccount = yield* repo.findById(accountKey);
         if (Option.isNone(maybeAccount)) {
-            return HttpServerResponse.raw("", {
-                status: 404,
-                contentLength: 0,
-                statusText: "Not Found",
-            });
+            return yield* new HttpApiError.NotFound();
         }
 
         const account = maybeAccount.value;
-        if (!account.scopes.includes(scopeToRemove)) {
-            return HttpServerResponse.raw("", {
-                status: 400,
-                contentLength: 0,
-                statusText: "Bad Request",
-            });
-        }
-
-        const updatedAccount = yield* repo.update({
+        return yield* repo.update({
             ...account,
-            scopes: account.scopes.filter((scope) => scope !== scopeToRemove),
+            rateLimitLimit: limit,
+            rateLimitWindow: window,
             lastUsedAt: VariantSchema.Override(account.lastUsedAt),
         });
-
-        return yield* AccountResponseJson(updatedAccount);
     })
 );
 
-/**
- * Route to set the rate limit for an account by its key. Requires basic
- * authentication with the admin username and password.
- *
- * @since 1.0.0
- * @category Routes
- */
-export const SetRateLimitRoute = HttpLayerRouter.add(
-    "GET",
-    "/accounts/set-rate-limit/:key/:limit/:window",
-    Effect.gen(function* () {
+/** @internal */
+const ModifyDescriptionHandler = HttpApiBuilder.handler(
+    AccountsApi,
+    "AccountsGroup",
+    "description",
+    Effect.fnUntraced(function* ({ path: { key }, payload: { description } }) {
         const repo = yield* Repository;
-        const route = yield* HttpLayerRouter.RouteContext;
-        const IntFromString = Schema.compose(Schema.NumberFromString, Schema.Int);
+        const maybeAccount = yield* repo.findById(key);
 
-        const accountKey = route.params["key"] ?? "";
-        const limitParam = route.params["limit"] ?? "";
-        const windowParam = route.params["window"] ?? "";
-
-        const limit = Schema.decodeOption(IntFromString)(limitParam);
-        const window = Schema.decodeOption(Schema.compose(IntFromString, Schema.DurationFromMillis))(windowParam);
-
-        if (Option.isNone(limit) || Option.isNone(window)) {
-            return HttpServerResponse.raw("", {
-                status: 400,
-                contentLength: 0,
-                statusText: "Bad Request",
-            });
-        }
-
-        const maybeAccount = yield* repo.findById(accountKey);
         if (Option.isNone(maybeAccount)) {
-            return HttpServerResponse.raw("", {
-                status: 404,
-                contentLength: 0,
-                statusText: "Not Found",
-            });
+            return yield* new HttpApiError.NotFound();
         }
 
         const account = maybeAccount.value;
-        const updatedAccount = yield* repo.update({
+        return yield* repo.update({
             ...account,
-            rateLimitLimit: limit.value,
-            rateLimitWindow: window.value,
+            description,
             lastUsedAt: VariantSchema.Override(account.lastUsedAt),
         });
-
-        return yield* AccountResponseJson(updatedAccount);
     })
+);
+
+/** @internal */
+const AccountsGroupLive = HttpApiBuilder.group(AccountsApi, "AccountsGroup", (handlers) =>
+    handlers
+        .handle("create", CreateHandler)
+        .handle("view", ViewHandler)
+        .handle("list", ListHandler)
+        .handle("revoke", RevokeHandler)
+        .handle("authorize", AuthorizeHandler)
+        .handle("scopes", ModifyScopesHandler)
+        .handle("rateLimit", ModifyRateLimitHandler)
+        .handle("description", ModifyDescriptionHandler)
 );
 
 /**
  * @since 1.0.0
  * @category Routes
  */
-export const AllAccountsRoutes = Layer.mergeAll(
-    MakeNoneAccountRoute,
-    MakeReadonlyAccountRoute,
-    ListAccountsRoute,
-    ViewAccountRoute,
-    RevokeAccountRoute,
-    AuthorizeAccountRoute,
-    AddScopeRoute,
-    RemoveScopeRoute,
-    SetRateLimitRoute
-).pipe(Layer.provide(DefaultAdminMiddleware));
+export const AllAccountsRoutes = HttpLayerRouter.addHttpApi(AccountsApi).pipe(Layer.provide(AccountsGroupLive));

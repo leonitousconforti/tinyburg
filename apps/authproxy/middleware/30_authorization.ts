@@ -20,7 +20,7 @@ export const AuthProxyApiAuthorizationMiddleware = HttpLayerRouter.middleware(
                 const isAuthenticated = Option.isSome(account);
                 const isAuthorized =
                     isAuthenticated &&
-                    Array.some(account.value.scopes, (scope) => request.url.startsWith(scope)) &&
+                    Array.some(Array.fromIterable(account.value.scopes), (scope) => request.url.startsWith(scope)) &&
                     !account.value.revoked;
 
                 if (!isAuthenticated) return yield* new HttpApiError.Unauthorized();
