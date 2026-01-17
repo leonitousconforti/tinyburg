@@ -12,6 +12,7 @@
         "composite": false,
         "incremental": false,
         "types": ["node"],
+        "allowImportingTsExtensions": true,
         "rewriteRelativeImportExtensions": false
     }
 }

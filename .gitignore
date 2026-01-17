@@ -18,9 +18,6 @@ docs/examples/
 # Banish DS_STORE
 .DS_Store
 
-# scratchpad files
-scratchpad/**/*.ts
-
 # Unity
 Assembly-CSharp.dll
 

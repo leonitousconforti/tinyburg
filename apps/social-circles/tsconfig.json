@@ -6,6 +6,7 @@
         "declarationMap": false,
         "composite": false,
         "incremental": false,
+        "allowImportingTsExtensions": true,
         "rewriteRelativeImportExtensions": false
     }
 }
