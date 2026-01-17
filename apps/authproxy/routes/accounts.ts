@@ -70,6 +70,30 @@ const DefaultAdminMiddleware = Layer.unwrapEffect(
 );
 
 /**
+ * Route to create a new none account. Requires basic authentication with the
+ * admin username and password.
+ *
+ * @since 1.0.0
+ * @category Routes
+ */
+export const MakeNoneAccountRoute = HttpLayerRouter.add(
+    "GET",
+    "/accounts/new/none",
+    Effect.gen(function* () {
+        const repo = yield* Repository;
+        const newAccount = yield* repo.insert({
+            createdAt: undefined,
+            lastUsedAt: undefined,
+            scopes: repo.seededNoneAccount.scopes,
+            rateLimitLimit: repo.seededNoneAccount.rateLimitLimit,
+            rateLimitWindow: repo.seededNoneAccount.rateLimitWindow,
+        });
+
+        return yield* AccountResponseJson(newAccount);
+    })
+);
+
+/**
  * Route to create a new read-only account. Requires basic authentication with
  * the admin username and password.
  *
@@ -324,7 +348,9 @@ export const RemoveScopeRoute = HttpLayerRouter.add(
  * @category Routes
  */
 export const AllAccountsRoutes = Layer.mergeAll(
+    MakeNoneAccountRoute,
     MakeReadonlyAccountRoute,
+    ListAccountsRoute,
     ViewAccountRoute,
     RevokeAccountRoute,
     AuthorizeAccountRoute,
