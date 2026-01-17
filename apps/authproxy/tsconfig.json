@@ -11,6 +11,7 @@
         "declarationMap": false,
         "composite": false,
         "incremental": false,
-        "types": ["node"]
+        "types": ["node"],
+        "rewriteRelativeImportExtensions": false
     }
 }
