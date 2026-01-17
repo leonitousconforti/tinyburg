@@ -1,5 +1,6 @@
+import { VariantSchema } from "@effect/experimental";
 import { Headers, HttpLayerRouter, HttpMiddleware, HttpServerRequest, HttpServerResponse } from "@effect/platform";
-import { Config, Effect, Either, Encoding, Function, Layer, Option, Redacted, String } from "effect";
+import { Config, Effect, Either, Encoding, Function, Layer, Option, Redacted, Schema, String } from "effect";
 
 import { Account, Repository } from "../domain/model.ts";
 
@@ -75,7 +76,7 @@ const DefaultAdminMiddleware = Layer.unwrapEffect(
  * @since 1.0.0
  * @category Routes
  */
-export const MakeAccountRoute = HttpLayerRouter.add(
+export const MakeReadonlyAccountRoute = HttpLayerRouter.add(
     "GET",
     "/accounts/new/readonly",
     Effect.gen(function* () {
@@ -90,7 +91,24 @@ export const MakeAccountRoute = HttpLayerRouter.add(
 
         return yield* AccountResponseJson(newAccount);
     })
-).pipe(Layer.provide(DefaultAdminMiddleware));
+);
+
+/**
+ * Route to list all accounts. Requires basic authentication with the admin
+ * username and password.
+ *
+ * @since 1.0.0
+ * @category Routes
+ */
+export const ListAccountsRoute = HttpLayerRouter.add(
+    "GET",
+    "/accounts/list",
+    Effect.gen(function* () {
+        const repo = yield* Repository;
+        const accounts = yield* repo.listAll();
+        return yield* HttpServerResponse.schemaJson(Schema.Array(Account.json))(accounts);
+    })
+);
 
 /**
  * Route to view an account by its key. Requires basic authentication with the
@@ -119,7 +137,7 @@ export const ViewAccountRoute = HttpLayerRouter.add(
 
         return yield* AccountResponseJson(maybeAccount.value);
     })
-).pipe(Layer.provide(DefaultAdminMiddleware));
+);
 
 /**
  * Route to revoke an account by its key. Requires basic authentication with the
@@ -158,12 +176,12 @@ export const RevokeAccountRoute = HttpLayerRouter.add(
         const revokedAccount = yield* repo.update({
             ...account,
             revoked: true,
-            lastUsedAt: undefined,
+            lastUsedAt: VariantSchema.Override(account.lastUsedAt),
         });
 
         return yield* AccountResponseJson(revokedAccount);
     })
-).pipe(Layer.provide(DefaultAdminMiddleware));
+);
 
 /**
  * Route to authorize an account by its key. Requires basic authentication with
@@ -202,9 +220,114 @@ export const AuthorizeAccountRoute = HttpLayerRouter.add(
         const authorizedAccount = yield* repo.update({
             ...account,
             revoked: false,
-            lastUsedAt: undefined,
+            lastUsedAt: VariantSchema.Override(account.lastUsedAt),
         });
 
         return yield* AccountResponseJson(authorizedAccount);
     })
+);
+
+/**
+ * Route to add a scope to an account by its key. Requires basic authentication
+ * with the admin username and password.
+ *
+ * @since 1.0.0
+ * @category Routes
+ */
+export const AddScopeRoute = HttpLayerRouter.add(
+    "GET",
+    "/accounts/add-scope/:key/:scope",
+    Effect.gen(function* () {
+        const repo = yield* Repository;
+        const route = yield* HttpLayerRouter.RouteContext;
+
+        const accountKey = route.params["key"] ?? "";
+        const scope = route.params["scope"] ?? "";
+        const scopeDecoded = yield* Encoding.decodeBase64UrlString(scope);
+
+        const maybeAccount = yield* repo.findById(accountKey);
+        if (Option.isNone(maybeAccount)) {
+            return HttpServerResponse.raw("", {
+                status: 404,
+                contentLength: 0,
+                statusText: "Not Found",
+            });
+        }
+
+        const account = maybeAccount.value;
+        if (account.scopes.includes(scopeDecoded)) {
+            return HttpServerResponse.raw("", {
+                status: 400,
+                contentLength: 0,
+                statusText: "Bad Request",
+            });
+        }
+
+        const updatedAccount = yield* repo.update({
+            ...account,
+            scopes: [...account.scopes, scopeDecoded],
+            lastUsedAt: VariantSchema.Override(account.lastUsedAt),
+        });
+
+        return yield* AccountResponseJson(updatedAccount);
+    })
+);
+
+/**
+ * Route to remove a scope from an account by its key. Requires basic
+ * authentication with the admin username and password.
+ *
+ * @since 1.0.0
+ * @category Routes
+ */
+export const RemoveScopeRoute = HttpLayerRouter.add(
+    "GET",
+    "/accounts/remove-scope/:key/:scope",
+    Effect.gen(function* () {
+        const repo = yield* Repository;
+        const route = yield* HttpLayerRouter.RouteContext;
+
+        const accountKey = route.params["key"] ?? "";
+        const scope = route.params["scope"] ?? "";
+        const scopeToRemove = yield* Encoding.decodeBase64UrlString(scope);
+
+        const maybeAccount = yield* repo.findById(accountKey);
+        if (Option.isNone(maybeAccount)) {
+            return HttpServerResponse.raw("", {
+                status: 404,
+                contentLength: 0,
+                statusText: "Not Found",
+            });
+        }
+
+        const account = maybeAccount.value;
+        if (!account.scopes.includes(scopeToRemove)) {
+            return HttpServerResponse.raw("", {
+                status: 400,
+                contentLength: 0,
+                statusText: "Bad Request",
+            });
+        }
+
+        const updatedAccount = yield* repo.update({
+            ...account,
+            scopes: account.scopes.filter((scope) => scope !== scopeToRemove),
+            lastUsedAt: VariantSchema.Override(account.lastUsedAt),
+        });
+
+        return yield* AccountResponseJson(updatedAccount);
+    })
+);
+
+/**
+ * @since 1.0.0
+ * @category Routes
+ */
+export const AllAccountsRoutes = Layer.mergeAll(
+    MakeReadonlyAccountRoute,
+    ViewAccountRoute,
+    RevokeAccountRoute,
+    AuthorizeAccountRoute,
+    AddScopeRoute,
+    RemoveScopeRoute
 ).pipe(Layer.provide(DefaultAdminMiddleware));

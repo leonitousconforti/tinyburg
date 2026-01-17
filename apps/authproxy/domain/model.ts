@@ -1,4 +1,4 @@
-import { Model } from "@effect/sql";
+import { Model, SqlClient, SqlSchema } from "@effect/sql";
 import { Context, Effect, Schema } from "effect";
 
 /**
@@ -42,6 +42,14 @@ export class Repository extends Effect.Service<Repository>()("@tinyburg/authprox
     accessors: true,
     dependencies: [],
     effect: Effect.gen(function* () {
+        const sql = yield* SqlClient.SqlClient;
+
+        const listAll = SqlSchema.findAll({
+            Request: Schema.Void,
+            Result: Account.select,
+            execute: () => sql`SELECT * FROM accounts`,
+        });
+
         const repoById = yield* Model.makeRepository(Account, {
             idColumn: "id",
             tableName: "accounts",
@@ -59,6 +67,7 @@ export class Repository extends Effect.Service<Repository>()("@tinyburg/authprox
 
         return {
             ...repoByKey,
+            listAll,
 
             /** The none account will permit no scopes. */
             seededNoneAccount,

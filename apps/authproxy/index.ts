@@ -12,7 +12,7 @@ import { AuthProxyApiAccountMiddleware } from "./middleware/10_account.ts";
 import { AuthProxyApiRatelimitMiddleware } from "./middleware/20_ratelimit.ts";
 import { AuthProxyApiAuthorizationMiddleware } from "./middleware/30_authorization.ts";
 import { AuthProxyApiDecodeHashMiddleware } from "./middleware/40_tinytowerDecode.ts";
-import { AuthorizeAccountRoute, MakeAccountRoute, RevokeAccountRoute, ViewAccountRoute } from "./routes/accounts.ts";
+import { AllAccountsRoutes } from "./routes/accounts.ts";
 import { HealthCheckRoute } from "./routes/health.ts";
 import { AllTinyTowerRoutes } from "./routes/tinytower.ts";
 
@@ -34,17 +34,10 @@ const AuthProxyApiRoutes = AllTinyTowerRoutes.pipe(
     Layer.provide(RateLimiter.layerStoreMemory)
 );
 
-const AllRoutes = Layer.provide(
-    Layer.mergeAll(
-        AuthProxyApiRoutes,
-        HealthCheckRoute,
-        MakeAccountRoute,
-        ViewAccountRoute,
-        AuthorizeAccountRoute,
-        RevokeAccountRoute
-    ),
-    [NimblebitAuth.layerNodeDirectConfig(), FetchHttpClient.layer]
-);
+const AllRoutes = Layer.provide(Layer.mergeAll(AuthProxyApiRoutes, HealthCheckRoute, AllAccountsRoutes), [
+    NimblebitAuth.layerNodeDirectConfig(),
+    FetchHttpClient.layer,
+]);
 
 const SqlLive = PgClient.layerConfig({
     url: Config.redacted("DATABASE_URL"),
