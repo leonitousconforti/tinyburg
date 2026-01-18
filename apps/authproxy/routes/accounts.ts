@@ -30,6 +30,12 @@ export const CreateAccount = HttpApiEndpoint.post("create")`/accounts/new/${acco
  * @since 1.0.0
  * @category Endpoints
  */
+export const DeleteAccount = HttpApiEndpoint.del("delete")`/accounts/delete/${keyParam}`.addSuccess(Schema.Void);
+
+/**
+ * @since 1.0.0
+ * @category Endpoints
+ */
 export const ViewAccount = HttpApiEndpoint.get("view")`/accounts/view/${keyParam}`.addSuccess(Account.json);
 
 /**
@@ -54,7 +60,7 @@ export const AuthorizeAccount = HttpApiEndpoint.put("authorize")`/accounts/grant
  * @since 1.0.0
  * @category Endpoints
  */
-export const ModifyScopes = HttpApiEndpoint.patch("scopes")`/accounts/${keyParam}/scopes`
+export const ModifyScopes = HttpApiEndpoint.patch("scopes")`/accounts/scopes/${keyParam}`
     .setPayload(Schema.Struct({ scopes: Schema.ReadonlySet(Schema.String) }))
     .addSuccess(Account.json);
 
@@ -62,7 +68,7 @@ export const ModifyScopes = HttpApiEndpoint.patch("scopes")`/accounts/${keyParam
  * @since 1.0.0
  * @category Endpoints
  */
-export const ModifyRateLimit = HttpApiEndpoint.patch("rateLimit")`/accounts/${keyParam}/ratelimit`
+export const ModifyRateLimit = HttpApiEndpoint.patch("rateLimit")`/accounts/ratelimit/${keyParam}`
     .setPayload(Schema.Struct({ limit: Schema.Int, window: Schema.DurationFromMillis }))
     .addSuccess(Account.json);
 
@@ -70,7 +76,7 @@ export const ModifyRateLimit = HttpApiEndpoint.patch("rateLimit")`/accounts/${ke
  * @since 1.0.0
  * @category Endpoints
  */
-export const ModifyDescription = HttpApiEndpoint.patch("description")`/accounts/${keyParam}/description`
+export const ModifyDescription = HttpApiEndpoint.patch("description")`/accounts/description/${keyParam}`
     .setPayload(Schema.Struct({ description: Schema.OptionFromNullishOr(Schema.String, null) }))
     .addSuccess(Account.json);
 
@@ -80,6 +86,7 @@ export const ModifyDescription = HttpApiEndpoint.patch("description")`/accounts/
  */
 export const AccountsGroup = HttpApiGroup.make("AccountsGroup")
     .add(CreateAccount)
+    .add(DeleteAccount)
     .add(ViewAccount)
     .add(ListAccounts)
     .add(RevokeAccount)
@@ -123,6 +130,21 @@ const CreateHandler = HttpApiBuilder.handler(
             scopes: seededAccount.scopes,
             rateLimitLimit: seededAccount.rateLimitLimit,
             rateLimitWindow: seededAccount.rateLimitWindow,
+        });
+    })
+);
+
+/** @internal */
+const DeleteHandler = HttpApiBuilder.handler(
+    AccountsApi,
+    "AccountsGroup",
+    "delete",
+    Effect.fnUntraced(function* ({ path: { key } }) {
+        const repo = yield* Repository;
+        const maybeAccount = yield* repo.findById(key);
+        return yield* Option.match(maybeAccount, {
+            onNone: () => Effect.fail(new HttpApiError.NotFound()),
+            onSome: (account) => repo.delete(account.key),
         });
     })
 );
@@ -276,6 +298,7 @@ const ModifyDescriptionHandler = HttpApiBuilder.handler(
 const AccountsGroupLive = HttpApiBuilder.group(AccountsApi, "AccountsGroup", (handlers) =>
     handlers
         .handle("create", CreateHandler)
+        .handle("delete", DeleteHandler)
         .handle("view", ViewHandler)
         .handle("list", ListHandler)
         .handle("revoke", RevokeHandler)
