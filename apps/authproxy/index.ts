@@ -34,10 +34,11 @@ const AuthProxyApiRoutes = AllTinyTowerRoutes.pipe(
     Layer.provide(RateLimiter.layerStoreMemory)
 );
 
-const AllRoutes = Layer.provide(Layer.mergeAll(AuthProxyApiRoutes, HealthCheckRoute, AllAccountsRoutes), [
-    NimblebitAuth.layerNodeDirectConfig(),
-    FetchHttpClient.layer,
-]);
+const AllRoutes = AuthProxyApiRoutes.pipe(
+    Layer.merge(HealthCheckRoute),
+    Layer.merge(AllAccountsRoutes),
+    Layer.provide([NimblebitAuth.layerNodeDirectConfig(), FetchHttpClient.layer])
+);
 
 const SqlLive = PgClient.layerConfig({
     url: Config.redacted("DATABASE_URL"),
