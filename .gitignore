@@ -23,3 +23,4 @@ Assembly-CSharp.dll
 
 # env files
 .env
+.env.*
