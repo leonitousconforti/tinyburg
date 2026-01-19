@@ -51,20 +51,14 @@ export class Repository extends Effect.Service<Repository>()("@tinyburg/authprox
             execute: () => sql`SELECT * FROM accounts`,
         });
 
-        const repoById = yield* Model.makeRepository(Account, {
-            idColumn: "id",
-            tableName: "accounts",
-            spanPrefix: "@tinyburg/authproxy/model/RepositoryById",
-        });
-
         const repoByKey = yield* Model.makeRepository(Account, {
             idColumn: "key",
             tableName: "accounts",
             spanPrefix: "@tinyburg/authproxy/model/Repository/ByKey",
         });
 
-        const seededNoneAccount = yield* Effect.flatten(repoById.findById(1));
-        const seededReadonlyAccount = yield* Effect.flatten(repoById.findById(2));
+        const seededNoneAccount = yield* Effect.flatten(repoByKey.findById("00000000-0000-0000-0000-000000000001"));
+        const seededReadonlyAccount = yield* Effect.flatten(repoByKey.findById("00000000-0000-0000-0000-000000000002"));
 
         return {
             ...repoByKey,
