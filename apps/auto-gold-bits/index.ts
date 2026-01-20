@@ -1,8 +1,8 @@
-import { FetchHttpClient } from "@effect/platform";
+import { FetchHttpClient, HttpClient } from "@effect/platform";
 import { NodeRuntime } from "@effect/platform-node";
 import { NimblebitAuth, NimblebitConfig } from "@tinyburg/nimblebit-sdk";
 import { Bitizens, SyncItemType, TinyTower } from "@tinyburg/tinytower-sdk";
-import { Array, Config, Effect, Layer, Schema, type Types } from "effect";
+import { Array, Config, Effect, Layer, Redacted, Schema, type Types } from "effect";
 
 const Live = Layer.merge(
     FetchHttpClient.layer,
@@ -52,6 +52,10 @@ const program = Effect.gen(function* () {
         // Finally, mark the gift as received so Nimblebit doesn't think we still have it
         yield* TinyTower.social_receiveGift({ ...authenticatedPlayer, giftId: bitizenGift.id });
     }
+
+    // Heartbeat for monitoring
+    const heartbeatUrl = yield* Config.redacted("HEARTBEAT_URL");
+    yield* HttpClient.get(Redacted.value(heartbeatUrl));
 });
 
 program.pipe(Effect.provide(Live), NodeRuntime.runMain);
