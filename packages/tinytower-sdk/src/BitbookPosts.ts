@@ -1984,7 +1984,7 @@ export const BitbookPost = NimblebitSchema.parseNimblebitObject(
         _tid: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("bb_tid")),
         bitizen: Bitizen.Bitizen.pipe(Schema.propertySignature, Schema.fromKey("bb_bzn")),
         source_name: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("bb_sname")),
-        date: NimblebitSchema.csharpDate.pipe(Schema.propertySignature, Schema.fromKey("bb_date")),
+        date: NimblebitSchema.CSharpDate.pipe(Schema.propertySignature, Schema.fromKey("bb_date")),
         body: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("bb_txt")),
         media_type: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("bb_mt")),
         media_path: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("bb_mp")),

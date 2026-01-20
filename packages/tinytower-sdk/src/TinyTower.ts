@@ -5,8 +5,6 @@
  * @category SDK
  */
 
-import type * as NimblebitConfig from "@tinyburg/nimblebit-sdk/NimblebitConfig";
-
 import * as HttpApiClient from "@effect/platform/HttpApiClient";
 import * as HttpClient from "@effect/platform/HttpClient";
 import * as HttpClientRequest from "@effect/platform/HttpClientRequest";
@@ -17,14 +15,14 @@ import * as Redacted from "effect/Redacted";
 import * as Schema from "effect/Schema";
 import * as Pako from "pako";
 
-import { NimblebitAuth, NimblebitError, NimblebitSchema } from "@tinyburg/nimblebit-sdk";
-import { Api } from "./Endpoints.ts";
-import { SyncItemType } from "./SyncItemType.ts";
+import { NimblebitAuth, NimblebitConfig, NimblebitError, NimblebitSchema } from "@tinyburg/nimblebit-sdk";
 
 import * as BitbookPost from "./BitbookPosts.ts";
 import * as Bitizen from "./Bitizens.ts";
+import * as Endpoints from "./Endpoints.ts";
 import * as Floor from "./Floors.ts";
 import * as Mission from "./Missions.ts";
+import * as SyncItemType from "./SyncItemType.ts";
 
 /**
  * How to decode a SaveData from Nimblebit's object format.
@@ -94,7 +92,45 @@ export const SaveData = Schema.transform(
                 Schema.propertySignature,
                 Schema.fromKey("Pstories")
             ),
-            friends: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Pfrns")),
+            friends: Schema.compose(
+                Schema.split(","),
+                Schema.Array(
+                    Schema.Union(
+                        Schema.transform(
+                            Schema.TemplateLiteralParser(
+                                Schema.String,
+                                "|",
+                                NimblebitConfig.PlayerIdSchema,
+                                "|",
+                                NimblebitSchema.CSharpDate
+                            ),
+                            Schema.Struct({
+                                displayName: Schema.String,
+                                friendId: Schema.typeSchema(NimblebitConfig.PlayerIdSchema),
+                                addedAt: Schema.typeSchema(NimblebitSchema.CSharpDate),
+                            }),
+                            {
+                                encode: ({ addedAt, displayName, friendId }) =>
+                                    [displayName, "|", friendId, "|", addedAt] as const,
+                                decode: ([displayName, _, friendId, __, addedAt]) =>
+                                    ({ displayName, friendId, addedAt }) as const,
+                            }
+                        ),
+                        Schema.transform(
+                            Schema.TemplateLiteralParser(Schema.String, "|", NimblebitConfig.PlayerIdSchema),
+                            Schema.Struct({
+                                displayName: Schema.String,
+                                friendId: Schema.typeSchema(NimblebitConfig.PlayerIdSchema),
+                            }),
+                            {
+                                encode: ({ displayName, friendId }) => [displayName, "|", friendId] as const,
+                                decode: ([displayName, _, friendId]) => ({ displayName, friendId }) as const,
+                            }
+                        )
+                    )
+                )
+            ).pipe(Schema.propertySignature, Schema.fromKey("Pfrns")),
+
             bbPosts: Schema.compose(Schema.split("|"), Schema.Array(BitbookPost.BitbookPost)).pipe(
                 Schema.propertySignature,
                 Schema.fromKey("PBB")
@@ -123,7 +159,7 @@ export const device_newPlayer = Effect.gen(function* () {
             ? HttpClientRequest.bearerToken(nimblebitAuth.authKey)
             : Function.identity;
 
-    const endpoint = yield* HttpApiClient.endpoint(Api, {
+    const endpoint = yield* HttpApiClient.endpoint(Endpoints.Api, {
         baseUrl: nimblebitAuth.host,
         group: "DeviceManagementGroup",
         endpoint: "DeviceNewPlayer",
@@ -164,7 +200,7 @@ export const device_playerDetails = Effect.fn("device_playerDetails")(function* 
             ? HttpClientRequest.bearerToken(nimblebitAuth.authKey)
             : Function.identity;
 
-    const endpoint = yield* HttpApiClient.endpoint(Api, {
+    const endpoint = yield* HttpApiClient.endpoint(Endpoints.Api, {
         baseUrl: nimblebitAuth.host,
         group: "DeviceManagementGroup",
         endpoint: "DevicePlayerDetails",
@@ -205,7 +241,7 @@ export const device_verifyDevice = Effect.fn("device_verifyDevice")(function* ({
             ? HttpClientRequest.bearerToken(nimblebitAuth.authKey)
             : Function.identity;
 
-    const endpoint = yield* HttpApiClient.endpoint(Api, {
+    const endpoint = yield* HttpApiClient.endpoint(Endpoints.Api, {
         baseUrl: nimblebitAuth.host,
         group: "DeviceManagementGroup",
         endpoint: "DeviceVerifyDevice",
@@ -243,7 +279,7 @@ export const device_registerEmail = Effect.fn("device_registerEmail")(function* 
             ? HttpClientRequest.bearerToken(nimblebitAuth.authKey)
             : Function.identity;
 
-    const endpoint = yield* HttpApiClient.endpoint(Api, {
+    const endpoint = yield* HttpApiClient.endpoint(Endpoints.Api, {
         baseUrl: nimblebitAuth.host,
         group: "DeviceManagementGroup",
         endpoint: "DeviceRegisterEmail",
@@ -291,7 +327,7 @@ export const sync_pullSave = Effect.fn("sync_pullSave")(function* ({
             ? HttpClientRequest.bearerToken(nimblebitAuth.authKey)
             : Function.identity;
 
-    const endpoint = yield* HttpApiClient.endpoint(Api, {
+    const endpoint = yield* HttpApiClient.endpoint(Endpoints.Api, {
         baseUrl: nimblebitAuth.host,
         group: "SyncManagementGroup",
         endpoint: "SyncPullSave",
@@ -356,7 +392,7 @@ export const sync_pushSave = Effect.fn("sync_pushSave")(function* ({
             ? HttpClientRequest.bearerToken(nimblebitAuth.authKey)
             : Function.identity;
 
-    const endpoint = yield* HttpApiClient.endpoint(Api, {
+    const endpoint = yield* HttpApiClient.endpoint(Endpoints.Api, {
         baseUrl: nimblebitAuth.host,
         group: "SyncManagementGroup",
         endpoint: "SyncPushSave",
@@ -421,7 +457,7 @@ export const sync_checkForNewerSave = Effect.fn("sync_checkForNewerSave")(functi
             ? HttpClientRequest.bearerToken(nimblebitAuth.authKey)
             : Function.identity;
 
-    const endpoint = yield* HttpApiClient.endpoint(Api, {
+    const endpoint = yield* HttpApiClient.endpoint(Endpoints.Api, {
         baseUrl: nimblebitAuth.host,
         group: "SyncManagementGroup",
         endpoint: "SyncCheckForNewerSave",
@@ -482,7 +518,7 @@ export const sync_pullSnapshot = Effect.fn("sync_pullSnapshot")(function* ({
             ? HttpClientRequest.bearerToken(nimblebitAuth.authKey)
             : Function.identity;
 
-    const endpoint = yield* HttpApiClient.endpoint(Api, {
+    const endpoint = yield* HttpApiClient.endpoint(Endpoints.Api, {
         baseUrl: nimblebitAuth.host,
         group: "SyncManagementGroup",
         endpoint: "SyncPullSnapshot",
@@ -547,7 +583,7 @@ export const sync_pushSnapshot = Effect.fn("sync_pushSnapshot")(function* ({
             ? HttpClientRequest.bearerToken(nimblebitAuth.authKey)
             : Function.identity;
 
-    const endpoint = yield* HttpApiClient.endpoint(Api, {
+    const endpoint = yield* HttpApiClient.endpoint(Endpoints.Api, {
         baseUrl: nimblebitAuth.host,
         group: "SyncManagementGroup",
         endpoint: "SyncPushSnapshot",
@@ -612,7 +648,7 @@ export const sync_retrieveSnapshotList = Effect.fn("sync_retrieveSnapshotList")(
             ? HttpClientRequest.bearerToken(nimblebitAuth.authKey)
             : Function.identity;
 
-    const endpoint = yield* HttpApiClient.endpoint(Api, {
+    const endpoint = yield* HttpApiClient.endpoint(Endpoints.Api, {
         baseUrl: nimblebitAuth.host,
         group: "SyncManagementGroup",
         endpoint: "SyncRetrieveSnapshotList",
@@ -660,7 +696,7 @@ export const raffle_enterRaffle = Effect.fn("raffle_enterRaffle")(function* ({
             ? HttpClientRequest.bearerToken(nimblebitAuth.authKey)
             : Function.identity;
 
-    const endpoint = yield* HttpApiClient.endpoint(Api, {
+    const endpoint = yield* HttpApiClient.endpoint(Endpoints.Api, {
         baseUrl: nimblebitAuth.host,
         group: "RaffleGroup",
         endpoint: "RaffleEnter",
@@ -708,7 +744,7 @@ export const raffle_enterMultiRaffle = Effect.fn("raffle_enterMultiRaffle")(func
             ? HttpClientRequest.bearerToken(nimblebitAuth.authKey)
             : Function.identity;
 
-    const endpoint = yield* HttpApiClient.endpoint(Api, {
+    const endpoint = yield* HttpApiClient.endpoint(Endpoints.Api, {
         baseUrl: nimblebitAuth.host,
         group: "RaffleGroup",
         endpoint: "RaffleEnterMulti",
@@ -756,7 +792,7 @@ export const raffle_checkEnteredCurrent = Effect.fn("raffle_checkEnteredCurrent"
             ? HttpClientRequest.bearerToken(nimblebitAuth.authKey)
             : Function.identity;
 
-    const endpoint = yield* HttpApiClient.endpoint(Api, {
+    const endpoint = yield* HttpApiClient.endpoint(Endpoints.Api, {
         baseUrl: nimblebitAuth.host,
         group: "RaffleGroup",
         endpoint: "RaffleCheckEnteredCurrent",
@@ -792,7 +828,7 @@ export const social_sendItem = Effect.fn("social_sendItem")(function* ({
     playerId,
 }: Schema.Schema.Type<NimblebitConfig.AuthenticatedPlayerSchema> & {
     itemStr: string;
-    itemType: (typeof SyncItemType)[keyof typeof SyncItemType];
+    itemType: (typeof SyncItemType.SyncItemType)[keyof typeof SyncItemType.SyncItemType];
     friendId: Schema.Schema.Type<NimblebitConfig.PlayerIdSchema>;
 }) {
     const nimblebitAuth = yield* NimblebitAuth.NimblebitAuth;
@@ -803,7 +839,7 @@ export const social_sendItem = Effect.fn("social_sendItem")(function* ({
             ? HttpClientRequest.bearerToken(nimblebitAuth.authKey)
             : Function.identity;
 
-    const endpoint = yield* HttpApiClient.endpoint(Api, {
+    const endpoint = yield* HttpApiClient.endpoint(Endpoints.Api, {
         baseUrl: nimblebitAuth.host,
         group: "SocialGroup",
         endpoint: "SocialSendItem",
@@ -857,7 +893,7 @@ export const social_getGifts = Effect.fn("social_getGifts")(function* ({
             ? HttpClientRequest.bearerToken(nimblebitAuth.authKey)
             : Function.identity;
 
-    const endpoint = yield* HttpApiClient.endpoint(Api, {
+    const endpoint = yield* HttpApiClient.endpoint(Endpoints.Api, {
         baseUrl: nimblebitAuth.host,
         group: "SocialGroup",
         endpoint: "SocialGetGifts",
@@ -909,7 +945,7 @@ export const social_receiveGift = Effect.fn("social_receiveGift")(function* ({
             ? HttpClientRequest.bearerToken(nimblebitAuth.authKey)
             : Function.identity;
 
-    const endpoint = yield* HttpApiClient.endpoint(Api, {
+    const endpoint = yield* HttpApiClient.endpoint(Endpoints.Api, {
         baseUrl: nimblebitAuth.host,
         group: "SocialGroup",
         endpoint: "SocialReceiveGift",
@@ -960,7 +996,7 @@ export const social_pullFriendMeta = Effect.fn("social_pullFriendMeta")(function
             ? HttpClientRequest.bearerToken(nimblebitAuth.authKey)
             : Function.identity;
 
-    const endpoint = yield* HttpApiClient.endpoint(Api, {
+    const endpoint = yield* HttpApiClient.endpoint(Endpoints.Api, {
         baseUrl: nimblebitAuth.host,
         group: "SocialGroup",
         endpoint: "SocialPullFriendMeta",
@@ -1011,7 +1047,7 @@ export const social_pullFriendTower = Effect.fn("social_pullFriendTower")(functi
             ? HttpClientRequest.bearerToken(nimblebitAuth.authKey)
             : Function.identity;
 
-    const endpoint = yield* HttpApiClient.endpoint(Api, {
+    const endpoint = yield* HttpApiClient.endpoint(Endpoints.Api, {
         baseUrl: nimblebitAuth.host,
         group: "SocialGroup",
         endpoint: "SocialPullFriendTower",
@@ -1078,7 +1114,7 @@ export const social_retrieveFriendsSnapshotList = Effect.fn("social_retrieveFrie
             ? HttpClientRequest.bearerToken(nimblebitAuth.authKey)
             : Function.identity;
 
-    const endpoint = yield* HttpApiClient.endpoint(Api, {
+    const endpoint = yield* HttpApiClient.endpoint(Endpoints.Api, {
         baseUrl: nimblebitAuth.host,
         group: "SocialGroup",
         endpoint: "SocialRetrieveFriendsSnapshotList",
@@ -1126,7 +1162,7 @@ export const social_getVisits = Effect.fn("social_getVisits")(function* ({
             ? HttpClientRequest.bearerToken(nimblebitAuth.authKey)
             : Function.identity;
 
-    const endpoint = yield* HttpApiClient.endpoint(Api, {
+    const endpoint = yield* HttpApiClient.endpoint(Endpoints.Api, {
         baseUrl: nimblebitAuth.host,
         group: "SocialGroup",
         endpoint: "SocialGetVisits",
@@ -1180,6 +1216,6 @@ export const social_visit = Effect.fn("social_visit")(function* ({
         playerAuthKey,
         friendId,
         itemStr: doormanItemStr,
-        itemType: SyncItemType.Visit,
+        itemType: SyncItemType.SyncItemType.Visit,
     });
 });

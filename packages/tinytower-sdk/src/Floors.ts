@@ -401,15 +401,15 @@ export const Floor = NimblebitSchema.parseNimblebitObject(
         storyHeight: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Fs")),
         floorId: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Ff")),
         level: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Fl")),
-        openDate: NimblebitSchema.csharpDate.pipe(Schema.propertySignature, Schema.fromKey("Fod")),
+        openDate: NimblebitSchema.CSharpDate.pipe(Schema.propertySignature, Schema.fromKey("Fod")),
         stockBaseTime: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Fsbt")),
         stockingTier: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Fsi")),
-        stockingStartTime: NimblebitSchema.csharpDate.pipe(Schema.propertySignature, Schema.fromKey("Fst")),
+        stockingStartTime: NimblebitSchema.CSharpDate.pipe(Schema.propertySignature, Schema.fromKey("Fst")),
         stocks: Schema.compose(Schema.split(","), Schema.Array(Schema.BigInt))
             .pipe(Schema.itemsCount(3))
             .pipe(Schema.propertySignature)
             .pipe(Schema.fromKey("Fstk")),
-        lastSaleTicks: Schema.compose(Schema.split(","), Schema.Array(NimblebitSchema.csharpDate))
+        lastSaleTicks: Schema.compose(Schema.split(","), Schema.Array(NimblebitSchema.CSharpDate))
             .pipe(Schema.itemsCount(3))
             .pipe(Schema.propertySignature)
             .pipe(Schema.fromKey("Flst")),

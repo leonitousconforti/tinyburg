@@ -89,7 +89,7 @@ export const parseNimblebitObject: <Fields extends Schema.Struct.Fields>(
  * @since 1.0.0
  * @category Schemas
  */
-export const csharpDate = Schema.transform(
+export const CSharpDate = Schema.transform(
     Schema.BigInt,
     Schema.Union(
         Schema.DateFromSelf,
@@ -115,17 +115,7 @@ export const csharpDate = Schema.transform(
  * @since 1.0.0
  * @category Schemas
  */
-export const unityColor = Schema.Struct({
-    r: EffectSchemas.Number.U8,
-    g: EffectSchemas.Number.U8,
-    b: EffectSchemas.Number.U8,
-});
-
-/**
- * @since 1.0.0
- * @category Schemas
- */
-export const unityColorFromString = Schema.transform(
+export const UnityColor = Schema.transform(
     Schema.TemplateLiteralParser(
         Schema.compose(Schema.NumberFromString, Schema.NonNegativeInt),
         ":",
@@ -133,7 +123,11 @@ export const unityColorFromString = Schema.transform(
         ":",
         Schema.compose(Schema.NumberFromString, Schema.NonNegativeInt)
     ),
-    unityColor,
+    Schema.Struct({
+        r: EffectSchemas.Number.U8,
+        g: EffectSchemas.Number.U8,
+        b: EffectSchemas.Number.U8,
+    }),
     {
         encode: (color) => [color.r, ":", color.g, ":", color.b] as const,
         decode: (parts) => ({ r: parts[0], g: parts[2], b: parts[4] }) as const,

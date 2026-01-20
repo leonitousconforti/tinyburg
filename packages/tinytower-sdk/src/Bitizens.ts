@@ -1267,24 +1267,30 @@ export const BitizenAttributes = Schema.suspend(() => {
         name: Schema.String,
         birthday: Schema.Tuple(BirthMonth, BirthDay),
         designColors: Schema.Struct({
-            pantColor: NimblebitSchema.unityColor,
-            shirtColor: NimblebitSchema.unityColor,
+            pantColor: Schema.typeSchema(NimblebitSchema.UnityColor),
+            shirtColor: Schema.typeSchema(NimblebitSchema.UnityColor),
             skinColorIndex: Schema.NonNegativeInt,
             hairColorIndex: Schema.NonNegativeInt,
             shoeColorIndex: Schema.NonNegativeInt,
         }),
         accessories: Schema.Struct({
-            tie: Schema.EitherFromSelf({ left: NimblebitSchema.unityColor, right: NimblebitSchema.unityColor }),
-            earrings: Schema.EitherFromSelf({ left: NimblebitSchema.unityColor, right: NimblebitSchema.unityColor }),
+            tie: Schema.EitherFromSelf({
+                left: Schema.typeSchema(NimblebitSchema.UnityColor),
+                right: Schema.typeSchema(NimblebitSchema.UnityColor),
+            }),
+            earrings: Schema.EitherFromSelf({
+                left: Schema.typeSchema(NimblebitSchema.UnityColor),
+                right: Schema.typeSchema(NimblebitSchema.UnityColor),
+            }),
             glasses: Schema.EitherFromSelf({ left: Schema.NonNegativeInt, right: Schema.NonNegativeInt }),
             hairAccessory: Schema.EitherFromSelf({ left: Schema.NonNegativeInt, right: Schema.NonNegativeInt }),
             hat: Schema.EitherFromSelf({
                 left: Schema.Struct({
-                    color: NimblebitSchema.unityColor,
+                    color: Schema.typeSchema(NimblebitSchema.UnityColor),
                     index: Schema.NonNegativeInt,
                 }),
                 right: Schema.Struct({
-                    color: NimblebitSchema.unityColor,
+                    color: Schema.typeSchema(NimblebitSchema.UnityColor),
                     index: Schema.NonNegativeInt,
                     gender: Schema.Literal("female", "male", "bi"),
                 }),
@@ -1308,21 +1314,21 @@ export const BitizenAttributes = Schema.suspend(() => {
         { property: "skinColorIndex", schema: IndexFromString }, // TODO: What do these index?
         { property: "hairColorIndex", schema: IndexFromString }, // TODO: What do these index?
         { property: "shoeColorIndex", schema: IndexFromString }, // TODO: What do these index?
-        { property: "pantColor", schema: NimblebitSchema.unityColorFromString },
-        { property: "shirtColor", schema: NimblebitSchema.unityColorFromString },
+        { property: "pantColor", schema: NimblebitSchema.UnityColor },
+        { property: "shirtColor", schema: NimblebitSchema.UnityColor },
         { property: "hasGlasses", schema: BooleanFromOneOrZero },
         { property: "glassesIndex", schema: IndexFromString }, // TODO: What does this index
         { property: "hasTie", schema: BooleanFromOneOrZero },
-        { property: "tieColor", schema: NimblebitSchema.unityColorFromString },
+        { property: "tieColor", schema: NimblebitSchema.UnityColor },
         { property: "hasHairAccessory", schema: BooleanFromOneOrZero },
         { property: "hairAccessoryIndex", schema: IndexFromString }, // TODO: What does this index
         { property: "hasBiHat", schema: BooleanFromOneOrZero },
         { property: "hasMaleHat", schema: BooleanFromOneOrZero },
         { property: "hasFemaleHat", schema: BooleanFromOneOrZero },
         { property: "hatIndex", schema: IndexFromString }, // TODO: What does this index
-        { property: "hatColor", schema: NimblebitSchema.unityColorFromString },
+        { property: "hatColor", schema: NimblebitSchema.UnityColor },
         { property: "hasEarrings", schema: BooleanFromOneOrZero },
-        { property: "earringsColor", schema: NimblebitSchema.unityColorFromString },
+        { property: "earringsColor", schema: NimblebitSchema.UnityColor },
         { property: "skillFood", schema: Schema.compose(Schema.NumberFromString, Skill) },
         { property: "skillService", schema: Schema.compose(Schema.NumberFromString, Skill) },
         { property: "skillRecreation", schema: Schema.compose(Schema.NumberFromString, Skill) },
@@ -1334,8 +1340,7 @@ export const BitizenAttributes = Schema.suspend(() => {
         encode: (
             custom: Schema.Schema.Encoded<typeof to>,
             _options: SchemaAST.ParseOptions,
-            ast: SchemaAST.AST,
-            customA: Schema.Schema.Type<typeof to>
+            ast: SchemaAST.AST
         ): Effect.Effect<Schema.Schema.Type<typeof from>, ParseResult.ParseIssue, never> => {
             const isMale = custom.gender === "male";
             const [firstName, lastName] = custom.name.split(" ");
@@ -1371,12 +1376,12 @@ export const BitizenAttributes = Schema.suspend(() => {
                 skinColorIndex: custom.designColors.skinColorIndex,
                 hairColorIndex: custom.designColors.hairColorIndex,
                 shoeColorIndex: custom.designColors.shoeColorIndex,
-                pantColor: customA.designColors.pantColor,
-                shirtColor: customA.designColors.shirtColor,
+                pantColor: custom.designColors.pantColor,
+                shirtColor: custom.designColors.shirtColor,
                 hasGlasses: Either.isRight(custom.accessories.glasses),
                 glassesIndex: Either.merge(custom.accessories.glasses),
                 hasTie: Either.isRight(custom.accessories.tie),
-                tieColor: Either.merge(customA.accessories.tie),
+                tieColor: Either.merge(custom.accessories.tie),
                 hasHairAccessory: Either.isRight(custom.accessories.hairAccessory),
                 hairAccessoryIndex: Either.merge(custom.accessories.hairAccessory),
                 hasBiHat: Either.getOrElse(
@@ -1392,9 +1397,9 @@ export const BitizenAttributes = Schema.suspend(() => {
                     Function.constFalse
                 ),
                 hatIndex: Either.merge(custom.accessories.hat).index,
-                hatColor: Either.merge(customA.accessories.hat).color,
+                hatColor: Either.merge(custom.accessories.hat).color,
                 hasEarrings: Either.isRight(custom.accessories.earrings),
-                earringsColor: Either.merge(customA.accessories.earrings),
+                earringsColor: Either.merge(custom.accessories.earrings),
                 skillFood: custom.skills.food,
                 skillService: custom.skills.service,
                 skillRecreation: custom.skills.recreation,
