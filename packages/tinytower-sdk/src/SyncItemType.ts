@@ -25,4 +25,6 @@ export const SyncItemType = {
 
     /** A visit from a friend. */
     Visit: "Visit",
+
+    Leaderboards: "Leaderboards",
 } as const;

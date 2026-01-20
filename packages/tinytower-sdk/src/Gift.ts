@@ -34,5 +34,5 @@ export const Gift = Schema.Struct({
     checksum: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("h")),
 
     /** Not sure. */
-    c: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("c")),
+    c: Schema.Unknown.pipe(Schema.propertySignature, Schema.fromKey("c")),
 });
