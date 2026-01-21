@@ -46,7 +46,7 @@ const program = Effect.gen(function* () {
             ...authenticatedPlayer,
             friendId: bitizenGift.from,
             itemType: SyncItemType.SyncItemType.Play,
-            itemStr: encodedBitizen,
+            itemStr: `bit:${encodedBitizen}`,
         });
 
         // Finally, mark the gift as received so Nimblebit doesn't think we still have it
