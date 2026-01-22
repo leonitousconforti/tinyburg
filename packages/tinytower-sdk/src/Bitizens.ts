@@ -14,6 +14,7 @@ import * as Option from "effect/Option";
 import * as ParseResult from "effect/ParseResult";
 import * as Record from "effect/Record";
 import * as Schema from "effect/Schema";
+import * as String from "effect/String";
 
 import * as Costumes from "./Costumes.ts";
 import * as Pets from "./Pets.ts";
@@ -1522,7 +1523,7 @@ export const Bitizen = NimblebitSchema.parseNimblebitObject(
             Schema.Union(Schema.Literal(...Record.keys(Costumes.costumes)), Schema.String),
             {
                 encode: Option.getOrElse(() => "" as const),
-                decode: (costume) => (costume === "" ? Option.none() : Option.some(costume)),
+                decode: Option.liftPredicate(String.isNonEmpty),
             }
         ).pipe(Schema.fromKey("c")),
         vip: Schema.Union(

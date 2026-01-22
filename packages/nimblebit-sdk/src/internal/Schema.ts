@@ -7,6 +7,7 @@ import * as Effect from "effect/Effect";
 import * as Function from "effect/Function";
 import * as GlobalValue from "effect/GlobalValue";
 import * as HashMap from "effect/HashMap";
+import * as Option from "effect/Option";
 import * as Order from "effect/Order";
 import * as ParseResult from "effect/ParseResult";
 import * as Record from "effect/Record";
@@ -142,6 +143,9 @@ const decodeRegexCache = GlobalValue.globalValue("@tinyburg/tinytower-sdk/Nimble
 );
 
 /** @internal */
+const unknownMatcher = new RegExp(`\\[([^\\]]+)\\]([\\s\\S]*?)\\[\\1\\]`, "gm");
+
+/** @internal */
 export const parseNimblebitObject = <Fields extends Schema.Struct.Fields>(
     struct: Schema.Struct<Fields>
 ): Schema.transformOrFail<
@@ -261,18 +265,23 @@ export const parseNimblebitObject = <Fields extends Schema.Struct.Fields>(
         decode: Effect.fnUntraced(function* (
             str: string
         ): Effect.fn.Return<Schema.Schema.Encoded<typeof to>, ParseResult.ParseIssue, never> {
-            const outEntries = yield* Effect.forEach(fieldEntries, (field) =>
-                Effect.gen(function* () {
-                    const key = getPropertyName(field);
-                    const matcher = yield* decodeRegexCache.get(key);
-                    const match = matcher.exec(str);
-                    const value = match ? match[1] : undefined;
-                    return Tuple.make(key, value);
-                })
+            const outEntries = yield* Function.pipe(
+                fieldEntries,
+                Array.map((field) =>
+                    Effect.gen(function* () {
+                        const key = getPropertyName(field);
+                        const matcher = yield* decodeRegexCache.get(key);
+                        const match = matcher.exec(str);
+                        const value = match ? match[1] : undefined;
+                        return Tuple.make(key, value);
+                    })
+                ),
+                Effect.filterMap(([key, value]) =>
+                    value === undefined ? Option.none() : Option.some(Tuple.make(key, value))
+                )
             );
 
             const knownProperties = new Set(outEntries.map(([key]) => key));
-            const unknownMatcher = new RegExp(`\\[([^\\]]+)\\]([\\s\\S]*?)\\[\\1\\]`, "gm");
             const unknownEntries: Record<
                 string,
                 { value: string; $locationMetadata: { after: string | null | undefined } }

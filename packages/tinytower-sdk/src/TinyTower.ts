@@ -11,8 +11,10 @@ import * as HttpClientRequest from "@effect/platform/HttpClientRequest";
 import * as Effect from "effect/Effect";
 import * as Encoding from "effect/Encoding";
 import * as Function from "effect/Function";
+import * as Option from "effect/Option";
 import * as Redacted from "effect/Redacted";
 import * as Schema from "effect/Schema";
+import * as String from "effect/String";
 import * as Pako from "pako";
 
 import { NimblebitAuth, NimblebitConfig, NimblebitError, NimblebitSchema } from "@tinyburg/nimblebit-sdk";
@@ -30,119 +32,142 @@ import * as SyncItemType from "./SyncItemType.ts";
  * @since 1.0.0
  * @category Schemas
  */
-export const SaveData = Schema.transform(
-    Schema.String,
-    NimblebitSchema.parseNimblebitObject(
-        Schema.Struct({
-            coins: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pc")),
-            bux: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pb")),
-            Ppig: Schema.String.pipe(Schema.optional, Schema.fromKey("Ppig")),
-            Pplim: Schema.String.pipe(Schema.optional, Schema.fromKey("Pplim")),
-            maxGold: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pmg")),
-            gold: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pg")),
-            tip: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Ptip")),
-            needUpgrade: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pnu")),
-            ver: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Pver")),
-            roof: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pr")),
-            lift: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pe")),
-            lobby: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pl")),
-            buxBought: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pbxb")),
-            installTime: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("PiT")),
-            lastSaleTick: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("PlST")),
-            lobbyName: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Pln")),
-            raffleID: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Prf")),
-            vipTrialEnd: Schema.BigInt.pipe(Schema.propertySignature, Schema.fromKey("Pvte")),
-            costumes: Schema.split(",").pipe(Schema.propertySignature, Schema.fromKey("Pcos")),
-            pets: Schema.split(",").pipe(Schema.optional, Schema.fromKey("Ppets")),
-            missionHist: Schema.split(",").pipe(Schema.optional, Schema.fromKey("Pmhst")),
-            bbHist: Schema.split(",").pipe(Schema.propertySignature, Schema.fromKey("Pbhst")),
-            roofs: Schema.split(",").pipe(Schema.propertySignature, Schema.fromKey("Prfs")),
-            lifts: Schema.split(",").pipe(Schema.propertySignature, Schema.fromKey("Plfs")),
-            lobbies: Schema.split(",").pipe(Schema.propertySignature, Schema.fromKey("Plbs")),
-            bannedFriends: Schema.split(",").pipe(Schema.optional, Schema.fromKey("Pbf")),
-            liftSpeed: Schema.NumberFromString.pipe(Schema.optional, Schema.fromKey("Pls")),
-            totalPoints: Schema.BigInt.pipe(Schema.propertySignature, Schema.fromKey("Ptp")),
-            lrc: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Plrc")),
-            lfc: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Plfc")),
-            cfd: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Pcfd")),
-            lbc: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Plbc")),
-            lbbcp: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Plbbcp")),
-            lcmiss: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Plcmiss")),
-            lcg: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Plcg")),
-            sfx: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Psfx")),
-            mus: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pmus")),
-            notes: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pnts")),
-            autoLiftDisable: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pald")),
-            videos: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pvds")),
-            vidCheck: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pvdc")),
-            bbnotes: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pbbn")),
-            hidechat: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Phchat")),
-            tmi: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Ptmi")),
-            PVF: Schema.String.pipe(Schema.optional, Schema.fromKey("PVF")),
-            PHP: Schema.String.pipe(Schema.optional, Schema.fromKey("PHP")),
-            mission: Mission.Mission.pipe(Schema.optional, Schema.fromKey("Pmiss")),
-            doorman: Bitizen.Bitizen.pipe(Schema.propertySignature, Schema.fromKey("Pdrmn")),
-            playerID: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Ppid")),
-            playerRegistered: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Preg")),
-            bzns: Schema.compose(Schema.split("|"), Schema.Array(Bitizen.Bitizen)).pipe(
-                Schema.propertySignature,
-                Schema.fromKey("Pbits")
+export class SaveData extends Schema.suspend(() => {
+    const FriendSchema = Schema.Union(
+        Schema.transform(
+            Schema.TemplateLiteralParser(
+                Schema.String,
+                "|",
+                NimblebitConfig.PlayerIdSchema,
+                "|",
+                NimblebitSchema.CSharpDate
             ),
-            stories: Schema.compose(Schema.split("|"), Schema.Array(Floor.Floor)).pipe(
-                Schema.propertySignature,
-                Schema.fromKey("Pstories")
-            ),
-            friends: Schema.compose(
-                Schema.split(","),
-                Schema.Array(
-                    Schema.Union(
-                        Schema.transform(
-                            Schema.TemplateLiteralParser(
-                                Schema.String,
-                                "|",
-                                NimblebitConfig.PlayerIdSchema,
-                                "|",
-                                NimblebitSchema.CSharpDate
-                            ),
-                            Schema.Struct({
-                                displayName: Schema.String,
-                                friendId: Schema.typeSchema(NimblebitConfig.PlayerIdSchema),
-                                addedAt: Schema.typeSchema(NimblebitSchema.CSharpDate),
-                            }),
-                            {
-                                encode: ({ addedAt, displayName, friendId }) =>
-                                    [displayName, "|", friendId, "|", addedAt] as const,
-                                decode: ([displayName, _, friendId, __, addedAt]) =>
-                                    ({ displayName, friendId, addedAt }) as const,
-                            }
-                        ),
-                        Schema.transform(
-                            Schema.TemplateLiteralParser(Schema.String, "|", NimblebitConfig.PlayerIdSchema),
-                            Schema.Struct({
-                                displayName: Schema.String,
-                                friendId: Schema.typeSchema(NimblebitConfig.PlayerIdSchema),
-                            }),
-                            {
-                                encode: ({ displayName, friendId }) => [displayName, "|", friendId] as const,
-                                decode: ([displayName, _, friendId]) => ({ displayName, friendId }) as const,
-                            }
-                        )
-                    )
-                )
-            ).pipe(Schema.propertySignature, Schema.fromKey("Pfrns")),
+            Schema.Struct({
+                displayName: Schema.String,
+                friendId: Schema.typeSchema(NimblebitConfig.PlayerIdSchema),
+                timestamp: Schema.typeSchema(NimblebitSchema.CSharpDate),
+            }),
+            {
+                encode: ({ displayName, friendId, timestamp }) => [displayName, "|", friendId, "|", timestamp] as const,
+                decode: ([displayName, _, friendId, __, timestamp]) => ({ displayName, friendId, timestamp }) as const,
+            }
+        ),
+        Schema.transform(
+            Schema.TemplateLiteralParser(Schema.String, "|", NimblebitConfig.PlayerIdSchema),
+            Schema.Struct({
+                displayName: Schema.String,
+                friendId: Schema.typeSchema(NimblebitConfig.PlayerIdSchema),
+            }),
+            {
+                encode: ({ displayName, friendId }) => [displayName, "|", friendId] as const,
+                decode: ([displayName, _, friendId]) => ({ displayName, friendId }) as const,
+            }
+        )
+    );
 
-            bbPosts: Schema.compose(Schema.split("|"), Schema.Array(BitbookPost.BitbookPost)).pipe(
-                Schema.propertySignature,
-                Schema.fromKey("PBB")
-            ),
-            bbpost: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Plp")),
-        })
-    ),
-    {
-        encode: (input) => `[_save]${input}[_save]`,
-        decode: (input) => (input.startsWith('"') ? input.slice(8, -8) : input.slice(7, -7)),
-    }
-);
+    const FriendListSchema = Schema.compose(Schema.split(","), Schema.Array(FriendSchema));
+
+    return Schema.transform(
+        Schema.String,
+        NimblebitSchema.parseNimblebitObject(
+            Schema.Struct({
+                coins: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pc")),
+                bux: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pb")),
+                Ppig: Schema.String.pipe(Schema.optional, Schema.fromKey("Ppig")),
+                Pplim: Schema.String.pipe(Schema.optional, Schema.fromKey("Pplim")),
+                maxGold: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pmg")),
+                gold: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pg")),
+                tip: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Ptip")),
+                needUpgrade: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pnu")),
+                ver: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Pver")),
+                roof: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pr")),
+                lift: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pe")),
+                lobby: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pl")),
+                buxBought: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pbxb")),
+                installTime: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("PiT")),
+                lastSaleTick: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("PlST")),
+                lobbyName: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Pln")),
+                raffleID: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Prf")),
+                vipTrialEnd: Schema.BigInt.pipe(Schema.propertySignature, Schema.fromKey("Pvte")),
+                costumes: Schema.split(",").pipe(Schema.propertySignature, Schema.fromKey("Pcos")),
+                pets: Schema.split(",").pipe(Schema.optional, Schema.fromKey("Ppets")),
+                missionHist: Schema.split(",").pipe(Schema.optional, Schema.fromKey("Pmhst")),
+                bbHist: Schema.split(",").pipe(Schema.propertySignature, Schema.fromKey("Pbhst")),
+                roofs: Schema.split(",").pipe(Schema.propertySignature, Schema.fromKey("Prfs")),
+                lifts: Schema.split(",").pipe(Schema.propertySignature, Schema.fromKey("Plfs")),
+                lobbies: Schema.split(",").pipe(Schema.propertySignature, Schema.fromKey("Plbs")),
+                bannedFriends: Schema.optionalToOptional(
+                    Schema.Union(
+                        Schema.Literal(""),
+                        Schema.encodedSchema(
+                            Schema.compose(
+                                Schema.split(","),
+                                Schema.Array(Schema.Union(NimblebitConfig.PlayerIdSchema, Schema.String))
+                            )
+                        )
+                    ),
+                    Schema.compose(
+                        Schema.split(","),
+                        Schema.Array(Schema.Union(NimblebitConfig.PlayerIdSchema, Schema.String))
+                    ),
+                    {
+                        encode: Function.identity,
+                        decode: Option.filterMap(Option.liftPredicate(String.isNonEmpty)),
+                    }
+                ).pipe(Schema.fromKey("Pbf")),
+                liftSpeed: Schema.NumberFromString.pipe(Schema.optional, Schema.fromKey("Pls")),
+                totalPoints: Schema.BigInt.pipe(Schema.propertySignature, Schema.fromKey("Ptp")),
+                lrc: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Plrc")),
+                lfc: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Plfc")),
+                cfd: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Pcfd")),
+                lbc: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Plbc")),
+                lbbcp: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Plbbcp")),
+                lcmiss: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Plcmiss")),
+                lcg: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Plcg")),
+                sfx: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Psfx")),
+                mus: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pmus")),
+                notes: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pnts")),
+                autoLiftDisable: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pald")),
+                videos: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pvds")),
+                vidCheck: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pvdc")),
+                bbnotes: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pbbn")),
+                hidechat: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Phchat")),
+                tmi: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Ptmi")),
+                PVF: Schema.String.pipe(Schema.optional, Schema.fromKey("PVF")),
+                PHP: Schema.String.pipe(Schema.optional, Schema.fromKey("PHP")),
+                mission: Mission.Mission.pipe(Schema.optional, Schema.fromKey("Pmiss")),
+                doorman: Bitizen.Bitizen.pipe(Schema.propertySignature, Schema.fromKey("Pdrmn")),
+                playerID: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Ppid")),
+                playerRegistered: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Preg")),
+                bzns: Schema.compose(Schema.split("|"), Schema.Array(Bitizen.Bitizen)).pipe(
+                    Schema.propertySignature,
+                    Schema.fromKey("Pbits")
+                ),
+                stories: Schema.compose(Schema.split("|"), Schema.Array(Floor.Floor)).pipe(
+                    Schema.propertySignature,
+                    Schema.fromKey("Pstories")
+                ),
+                friends: Schema.requiredToOptional(
+                    Schema.Union(Schema.Literal(""), Schema.encodedSchema(FriendListSchema)),
+                    FriendListSchema,
+                    {
+                        encode: Option.getOrElse(() => "" as const),
+                        decode: Option.liftPredicate(String.isNonEmpty),
+                    }
+                ).pipe(Schema.fromKey("Pfrns")),
+                bbPosts: Schema.compose(Schema.split("|"), Schema.Array(BitbookPost.BitbookPost)).pipe(
+                    Schema.propertySignature,
+                    Schema.fromKey("PBB")
+                ),
+                bbpost: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Plp")),
+            })
+        ),
+        {
+            encode: (input) => `[_save]${input}[_save]`,
+            decode: (input) => (input.startsWith('"') ? input.slice(8, -8) : input.slice(7, -7)),
+        }
+    );
+}) {}
 
 /**
  * Requests a new player from the Nimblebit servers.
@@ -485,7 +510,7 @@ export const sync_checkForNewerSave = Effect.fn("sync_checkForNewerSave")(functi
     }
 
     const checksum = yield* nimblebitAuth.sign(
-        playerId + salt + String(response.saveId) + Redacted.value(playerAuthKey)
+        playerId + salt + response.saveId.toString() + Redacted.value(playerAuthKey)
     );
 
     if (checksum !== response.checksum && nimblebitAuth.host === "https://sync.nimblebit.com") {
