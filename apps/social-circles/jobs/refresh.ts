@@ -28,7 +28,7 @@ const program = Effect.gen(function* () {
 
         // Get friend's friends whom have also granted permission
         const friends = pipe(
-            friendSaveData.friends,
+            friendSaveData.friends ?? [],
             Array.map(({ friendId }) => friendId),
             Array.filter((id) => allPlayers.has(id))
         );
