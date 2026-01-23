@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+    <!-- TinyTower-inspired building favicon -->
+    <!-- Sky background -->
+    <rect width="128" height="128" fill="#4fa4d4"/>
+
+    <!-- Building -->
+    <rect x="34" y="16" width="60" height="100" fill="#1a3a5c"/>
+
+    <!-- Roof -->
+    <polygon points="34,16 64,4 94,16" fill="#8b4513"/>
+
+    <!-- Windows/Floors -->
+    <!-- Residential (yellow) -->
+    <rect x="38" y="22" width="52" height="10" fill="#ffeb99"/>
+
+    <!-- Food (orange) -->
+    <rect x="38" y="36" width="52" height="10" fill="#ff9966"/>
+
+    <!-- Retail (blue) -->
+    <rect x="38" y="50" width="52" height="10" fill="#66b3ff"/>
+
+    <!-- Service (purple) -->
+    <rect x="38" y="64" width="52" height="10" fill="#cc99ff"/>
+
+    <!-- Creative (pink) -->
+    <rect x="38" y="78" width="52" height="10" fill="#ff99cc"/>
+
+    <!-- Recreation (green) -->
+    <rect x="38" y="92" width="52" height="10" fill="#99ff99"/>
+
+    <!-- Lobby -->
+    <rect x="38" y="106" width="52" height="10" fill="#dddddd"/>
+
+    <!-- Door -->
+    <rect x="58" y="108" width="12" height="8" fill="#8b4513"/>
+
+    <!-- Gold border accent -->
+    <rect x="34" y="16" width="60" height="100" fill="none" stroke="#ffd700" stroke-width="2"/>
+</svg>

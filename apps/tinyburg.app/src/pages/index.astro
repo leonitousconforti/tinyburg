@@ -1,0 +1,789 @@
+---
+const features = [
+	{
+		icon: "🏢",
+		title: "Trade Bitizens",
+		description: "Find dream jobbers for your tower or trade away duplicates",
+	},
+	{
+		icon: "🎨",
+		title: "Costumes & Pets",
+		description: "Collect rare costumes and adorable pets for your bitizens",
+	},
+	{
+		icon: "🏆",
+		title: "Golden Tickets",
+		description: "Exchange resources and help fellow tower builders",
+	},
+	{
+		icon: "🤝",
+		title: "Community",
+		description: "Connect with thousands of active TinyTower players",
+	},
+];
+---
+
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<link rel="icon" href="/favicon.ico" />
+		<meta name="viewport" content="width=device-width" />
+		<meta name="generator" content={Astro.generator} />
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link
+			href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap"
+			rel="stylesheet"
+		/>
+		<title>TinyTower Trading | Trade Bitizens, Costumes & More</title>
+		<meta
+			name="description"
+			content="The community marketplace for TinyTower players. Trade bitizens, costumes, pets, and more with players worldwide."
+		/>
+	</head>
+	<body>
+		<!-- Animated pixel clouds in the background -->
+		<div class="clouds">
+			<div class="cloud cloud-1"></div>
+			<div class="cloud cloud-2"></div>
+			<div class="cloud cloud-3"></div>
+		</div>
+
+		<header>
+			<nav>
+				<a href="/" class="logo">
+					<span class="logo-icon">🏗️</span>
+					<span class="logo-text">Tinyburg</span>
+				</a>
+				<div class="nav-links">
+					<a href="/trades">Browse Trades</a>
+					<a href="/bitizens">Bitizens</a>
+					<a href="/costumes">Costumes</a>
+					<a href="/about">About</a>
+				</div>
+				<a href="/login" class="cta-button">Log In</a>
+			</nav>
+		</header>
+
+		<main>
+			<section class="hero">
+				<div class="hero-content">
+					<h1>
+						<span class="hero-emoji">🏢🏯🏡🏰</span>
+						<span class="hero-title">TinyTower Trading</span>
+					</h1>
+					<p class="hero-subtitle">
+						The community marketplace for trading bitizens, costumes, pets, and
+						more with TinyTower players worldwide
+					</p>
+					<div class="hero-actions">
+						<a href="/login" class="primary-button">Start Trading</a>
+						<a href="#features" class="secondary-button">Learn More</a>
+					</div>
+				</div>
+				<div class="hero-tower">
+					<div class="tower">
+						<div class="floor roof">🏗️</div>
+						<div class="floor food">🍕 Food</div>
+						<div class="floor retail">🛍️ Retail</div>
+						<div class="floor service">✂️ Service</div>
+						<div class="floor creative">🎨 Creative</div>
+						<div class="floor recreation">🎮 Recreation</div>
+						<div class="floor residential">🛏️ Residential</div>
+						<div class="floor lobby">🚪 Lobby</div>
+					</div>
+				</div>
+			</section>
+
+			<section id="features" class="features">
+				<h2>What Can You Trade?</h2>
+				<div class="features-grid">
+					{
+						features.map((feature) => (
+							<div class="feature-card">
+								<span class="feature-icon">{feature.icon}</span>
+								<h3>{feature.title}</h3>
+								<p>{feature.description}</p>
+							</div>
+						))
+					}
+				</div>
+			</section>
+
+			<section class="stats">
+				<div class="stat">
+					<span class="stat-number">10K+</span>
+					<span class="stat-label">Active Traders</span>
+				</div>
+				<div class="stat">
+					<span class="stat-number">50K+</span>
+					<span class="stat-label">Trades Completed</span>
+				</div>
+				<div class="stat">
+					<span class="stat-number">1M+</span>
+					<span class="stat-label">Bitizens Traded</span>
+				</div>
+			</section>
+
+			<section class="cta-section">
+				<h2>Ready to Build Your Dream Tower?</h2>
+				<p>Join thousands of players trading bitizens and items every day</p>
+				<a href="/login" class="primary-button large">Get Started Free</a>
+			</section>
+		</main>
+
+		<footer>
+			<div class="footer-content">
+				<div class="footer-section">
+					<h4>Tinyburg</h4>
+					<p>
+						A community-driven trading platform for TinyTower enthusiasts.
+						Not affiliated with NimbleBit.
+                        Source code is available on <a href="https://github.com/leonitousconforti/tinyburg" target="_blank" rel="noopener">GitHub</a>
+					</p>
+				</div>
+				<div class="footer-section">
+					<h4>Quick Links</h4>
+					<a href="/trades">Browse Trades</a>
+					<a href="/bitizens">Bitizens</a>
+					<a href="/costumes">Costumes</a>
+				</div>
+				<div class="footer-section">
+					<h4>Community</h4>
+					<a href="/discord">Discord</a>
+					<a href="/reddit">Reddit</a>
+					<a href="/twitter">Twitter</a>
+				</div>
+			</div>
+			<div class="footer-bottom">
+				<p>© 2026 Tinyburg. TinyTower is a trademark of NimbleBit LLC.</p>
+			</div>
+		</footer>
+	</body>
+</html>
+
+<style>
+	/* TinyTower-inspired color palette */
+	:root {
+		/* Sky colors from the game */
+		--sky-light: #87ceeb;
+		--sky-blue: #4fa4d4;
+		--sky-dark: #2d7bb3;
+
+		/* Floor type colors inspired by the game */
+		--food-orange: #ff9966;
+		--retail-blue: #66b3ff;
+		--service-purple: #cc99ff;
+		--creative-pink: #ff99cc;
+		--recreation-green: #99ff99;
+		--residential-yellow: #ffeb99;
+
+		/* UI colors */
+		--gold: #ffd700;
+		--gold-dark: #b8860b;
+		--dark-blue: #1a3a5c;
+		--text-dark: #2c3e50;
+		--text-light: #ffffff;
+		--card-bg: rgba(255, 255, 255, 0.95);
+
+		/* Pixel-style shadows */
+		--pixel-shadow: 4px 4px 0px rgba(0, 0, 0, 0.2);
+		--pixel-shadow-hover: 6px 6px 0px rgba(0, 0, 0, 0.25);
+	}
+
+	* {
+		margin: 0;
+		padding: 0;
+		box-sizing: border-box;
+	}
+
+	html {
+		scroll-behavior: smooth;
+	}
+
+	body {
+		font-family: "VT323", monospace;
+		background: linear-gradient(180deg, var(--sky-light) 0%, var(--sky-blue) 50%, var(--sky-dark) 100%);
+		min-height: 100vh;
+		color: var(--text-dark);
+		position: relative;
+		overflow-x: hidden;
+	}
+
+	/* Animated clouds */
+	.clouds {
+		position: fixed;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		pointer-events: none;
+		z-index: 0;
+		overflow: hidden;
+	}
+
+	.cloud {
+		position: absolute;
+		background: rgba(255, 255, 255, 0.8);
+		border-radius: 50px;
+		animation: float linear infinite;
+	}
+
+	.cloud::before,
+	.cloud::after {
+		content: "";
+		position: absolute;
+		background: rgba(255, 255, 255, 0.8);
+		border-radius: 50%;
+	}
+
+	.cloud-1 {
+		width: 120px;
+		height: 40px;
+		top: 10%;
+		animation-duration: 35s;
+	}
+
+	.cloud-1::before {
+		width: 50px;
+		height: 50px;
+		top: -25px;
+		left: 20px;
+	}
+
+	.cloud-1::after {
+		width: 60px;
+		height: 60px;
+		top: -30px;
+		left: 50px;
+	}
+
+	.cloud-2 {
+		width: 150px;
+		height: 50px;
+		top: 25%;
+		animation-duration: 45s;
+		animation-delay: -15s;
+	}
+
+	.cloud-2::before {
+		width: 60px;
+		height: 60px;
+		top: -30px;
+		left: 25px;
+	}
+
+	.cloud-2::after {
+		width: 70px;
+		height: 70px;
+		top: -35px;
+		left: 60px;
+	}
+
+	.cloud-3 {
+		width: 100px;
+		height: 35px;
+		top: 15%;
+		animation-duration: 40s;
+		animation-delay: -25s;
+	}
+
+	.cloud-3::before {
+		width: 40px;
+		height: 40px;
+		top: -20px;
+		left: 15px;
+	}
+
+	.cloud-3::after {
+		width: 50px;
+		height: 50px;
+		top: -25px;
+		left: 40px;
+	}
+
+	@keyframes float {
+		from {
+			left: -200px;
+		}
+		to {
+			left: 100%;
+		}
+	}
+
+	/* Header & Navigation */
+	header {
+		position: sticky;
+		top: 0;
+		z-index: 100;
+		background: rgba(26, 58, 92, 0.95);
+		backdrop-filter: blur(10px);
+		border-bottom: 4px solid var(--gold);
+	}
+
+	nav {
+		max-width: 1200px;
+		margin: 0 auto;
+		padding: 1rem 2rem;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+	}
+
+	.logo {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		text-decoration: none;
+		color: var(--text-light);
+	}
+
+	.logo-icon {
+		font-size: 2rem;
+	}
+
+	.logo-text {
+		font-family: "Press Start 2P", cursive;
+		font-size: 1.2rem;
+		color: var(--gold);
+	}
+
+	.nav-links {
+		display: flex;
+		gap: 2rem;
+	}
+
+	.nav-links a {
+		color: var(--text-light);
+		text-decoration: none;
+		font-size: 1.2rem;
+		transition: color 0.2s;
+	}
+
+	.nav-links a:hover {
+		color: var(--gold);
+	}
+
+	.cta-button {
+		font-family: "Press Start 2P", cursive;
+		font-size: 0.7rem;
+		padding: 0.75rem 1.5rem;
+		background: var(--gold);
+		color: var(--dark-blue);
+		border: none;
+		cursor: pointer;
+		box-shadow: var(--pixel-shadow);
+		transition: all 0.2s;
+		text-decoration: none;
+		display: inline-block;
+	}
+
+	.cta-button:hover {
+		transform: translate(-2px, -2px);
+		box-shadow: var(--pixel-shadow-hover);
+	}
+
+	/* Hero Section */
+	.hero {
+		position: relative;
+		z-index: 1;
+		max-width: 1200px;
+		margin: 0 auto;
+		padding: 4rem 2rem;
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 4rem;
+		align-items: center;
+		min-height: 80vh;
+	}
+
+	.hero-content {
+		text-align: left;
+	}
+
+	.hero-emoji {
+		display: block;
+		font-size: 3rem;
+		margin-bottom: 1rem;
+	}
+
+	.hero-title {
+		font-family: "Press Start 2P", cursive;
+		font-size: 2.5rem;
+		color: var(--text-light);
+		text-shadow: 4px 4px 0px var(--dark-blue);
+		line-height: 1.4;
+	}
+
+	.hero-subtitle {
+		font-size: 1.5rem;
+		color: var(--text-light);
+		margin-top: 1.5rem;
+		line-height: 1.6;
+		text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.3);
+	}
+
+	.hero-actions {
+		display: flex;
+		gap: 1rem;
+		margin-top: 2rem;
+	}
+
+	.primary-button {
+		font-family: "Press Start 2P", cursive;
+		font-size: 0.8rem;
+		padding: 1rem 2rem;
+		background: var(--gold);
+		color: var(--dark-blue);
+		border: none;
+		cursor: pointer;
+		box-shadow: var(--pixel-shadow);
+		transition: all 0.2s;
+		text-decoration: none;
+		display: inline-block;
+	}
+
+	.primary-button:hover {
+		transform: translate(-2px, -2px);
+		box-shadow: var(--pixel-shadow-hover);
+		background: #ffe44d;
+	}
+
+	.primary-button.large {
+		font-size: 1rem;
+		padding: 1.25rem 2.5rem;
+	}
+
+	.secondary-button {
+		font-family: "Press Start 2P", cursive;
+		font-size: 0.8rem;
+		padding: 1rem 2rem;
+		background: transparent;
+		color: var(--text-light);
+		border: 3px solid var(--text-light);
+		cursor: pointer;
+		box-shadow: var(--pixel-shadow);
+		transition: all 0.2s;
+		text-decoration: none;
+		display: inline-block;
+	}
+
+	.secondary-button:hover {
+		transform: translate(-2px, -2px);
+		box-shadow: var(--pixel-shadow-hover);
+		background: rgba(255, 255, 255, 0.1);
+	}
+
+	/* Tower Animation */
+	.hero-tower {
+		display: flex;
+		justify-content: center;
+	}
+
+	.tower {
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+		background: var(--dark-blue);
+		padding: 8px;
+		border-radius: 8px 8px 0 0;
+		box-shadow: var(--pixel-shadow-hover);
+	}
+
+	.floor {
+		font-family: "VT323", monospace;
+		font-size: 1.2rem;
+		padding: 1rem 2rem;
+		text-align: center;
+		min-width: 200px;
+		animation: floorPop 0.5s ease-out backwards;
+	}
+
+	.floor:nth-child(1) { animation-delay: 0.1s; }
+	.floor:nth-child(2) { animation-delay: 0.2s; }
+	.floor:nth-child(3) { animation-delay: 0.3s; }
+	.floor:nth-child(4) { animation-delay: 0.4s; }
+	.floor:nth-child(5) { animation-delay: 0.5s; }
+	.floor:nth-child(6) { animation-delay: 0.6s; }
+	.floor:nth-child(7) { animation-delay: 0.7s; }
+	.floor:nth-child(8) { animation-delay: 0.8s; }
+
+	@keyframes floorPop {
+		from {
+			opacity: 0;
+			transform: translateX(-20px);
+		}
+		to {
+			opacity: 1;
+			transform: translateX(0);
+		}
+	}
+
+	.floor.roof {
+		background: linear-gradient(135deg, #8b4513, #a0522d);
+		color: white;
+		border-radius: 8px 8px 0 0;
+	}
+
+	.floor.residential {
+		background: var(--residential-yellow);
+	}
+
+	.floor.food {
+		background: var(--food-orange);
+	}
+
+	.floor.retail {
+		background: var(--retail-blue);
+	}
+
+	.floor.service {
+		background: var(--service-purple);
+	}
+
+	.floor.creative {
+		background: var(--creative-pink);
+	}
+
+	.floor.recreation {
+		background: var(--recreation-green);
+	}
+
+	.floor.lobby {
+		background: #ddd;
+		border-radius: 0 0 4px 4px;
+	}
+
+	/* Features Section */
+	.features {
+		position: relative;
+		z-index: 1;
+		max-width: 1200px;
+		margin: 0 auto;
+		padding: 4rem 2rem;
+		text-align: center;
+	}
+
+	.features h2 {
+		font-family: "Press Start 2P", cursive;
+		font-size: 1.5rem;
+		color: var(--text-light);
+		text-shadow: 3px 3px 0px var(--dark-blue);
+		margin-bottom: 3rem;
+	}
+
+	.features-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+		gap: 2rem;
+	}
+
+	.feature-card {
+		background: var(--card-bg);
+		padding: 2rem;
+		border-radius: 8px;
+		box-shadow: var(--pixel-shadow);
+		transition: all 0.2s;
+	}
+
+	.feature-card:hover {
+		transform: translate(-4px, -4px);
+		box-shadow: 8px 8px 0px rgba(0, 0, 0, 0.2);
+	}
+
+	.feature-icon {
+		font-size: 3rem;
+		display: block;
+		margin-bottom: 1rem;
+	}
+
+	.feature-card h3 {
+		font-family: "Press Start 2P", cursive;
+		font-size: 0.9rem;
+		color: var(--dark-blue);
+		margin-bottom: 1rem;
+	}
+
+	.feature-card p {
+		font-size: 1.3rem;
+		color: var(--text-dark);
+		line-height: 1.5;
+	}
+
+	/* Stats Section */
+	.stats {
+		position: relative;
+		z-index: 1;
+		max-width: 1200px;
+		margin: 0 auto;
+		padding: 4rem 2rem;
+		display: flex;
+		justify-content: center;
+		gap: 4rem;
+		flex-wrap: wrap;
+	}
+
+	.stat {
+		text-align: center;
+		background: rgba(26, 58, 92, 0.9);
+		padding: 2rem 3rem;
+		border-radius: 8px;
+		box-shadow: var(--pixel-shadow);
+		border: 3px solid var(--gold);
+	}
+
+	.stat-number {
+		font-family: "Press Start 2P", cursive;
+		font-size: 2rem;
+		color: var(--gold);
+		display: block;
+	}
+
+	.stat-label {
+		font-size: 1.3rem;
+		color: var(--text-light);
+		margin-top: 0.5rem;
+		display: block;
+	}
+
+	/* CTA Section */
+	.cta-section {
+		position: relative;
+		z-index: 1;
+		max-width: 800px;
+		margin: 0 auto;
+		padding: 4rem 2rem;
+		text-align: center;
+		background: rgba(26, 58, 92, 0.95);
+		border-radius: 16px;
+		margin-bottom: 4rem;
+		box-shadow: var(--pixel-shadow-hover);
+		border: 4px solid var(--gold);
+	}
+
+	.cta-section h2 {
+		font-family: "Press Start 2P", cursive;
+		font-size: 1.3rem;
+		color: var(--gold);
+		margin-bottom: 1rem;
+		line-height: 1.6;
+	}
+
+	.cta-section p {
+		font-size: 1.4rem;
+		color: var(--text-light);
+		margin-bottom: 2rem;
+	}
+
+	/* Footer */
+	footer {
+		position: relative;
+		z-index: 1;
+		background: var(--dark-blue);
+		color: var(--text-light);
+		border-top: 4px solid var(--gold);
+	}
+
+	.footer-content {
+		max-width: 1200px;
+		margin: 0 auto;
+		padding: 3rem 2rem;
+		display: grid;
+		grid-template-columns: 2fr 1fr 1fr;
+		gap: 3rem;
+	}
+
+	.footer-section h4 {
+		font-family: "Press Start 2P", cursive;
+		font-size: 0.8rem;
+		color: var(--gold);
+		margin-bottom: 1rem;
+	}
+
+	.footer-section p {
+		font-size: 1.1rem;
+		line-height: 1.6;
+		opacity: 0.9;
+	}
+
+	.footer-section a {
+		display: block;
+		color: var(--text-light);
+		text-decoration: none;
+		font-size: 1.1rem;
+		margin-bottom: 0.5rem;
+		opacity: 0.9;
+		transition: opacity 0.2s;
+	}
+
+	.footer-section a:hover {
+		opacity: 1;
+		color: var(--gold);
+	}
+
+	.footer-bottom {
+		max-width: 1200px;
+		margin: 0 auto;
+		padding: 1.5rem 2rem;
+		border-top: 1px solid rgba(255, 255, 255, 0.1);
+		text-align: center;
+	}
+
+	.footer-bottom p {
+		font-size: 1rem;
+		opacity: 0.7;
+	}
+
+	/* Responsive Design */
+	@media (max-width: 900px) {
+		.hero {
+			grid-template-columns: 1fr;
+			text-align: center;
+			gap: 3rem;
+		}
+
+		.hero-content {
+			text-align: center;
+		}
+
+		.hero-actions {
+			justify-content: center;
+		}
+
+		.hero-title {
+			font-size: 1.8rem;
+		}
+
+		.nav-links {
+			display: none;
+		}
+
+		.footer-content {
+			grid-template-columns: 1fr;
+			text-align: center;
+		}
+	}
+
+	@media (max-width: 600px) {
+		.hero-title {
+			font-size: 1.4rem;
+		}
+
+		.hero-actions {
+			flex-direction: column;
+		}
+
+		.stats {
+			gap: 2rem;
+		}
+
+		.stat {
+			padding: 1.5rem 2rem;
+		}
+
+		.stat-number {
+			font-size: 1.5rem;
+		}
+	}
+</style>

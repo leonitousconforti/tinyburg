@@ -1,0 +1,246 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+
+<BaseLayout title="Terms of Service | Tinyburg">
+	<div class="legal-container">
+		<a href="/" class="back-link">← Back to Home</a>
+
+		<div class="legal-card">
+			<h1>Terms of Service</h1>
+			<p class="last-updated">Last updated: January 23, 2026</p>
+
+			<section>
+				<h2>1. Acceptance of Terms</h2>
+				<p>
+					By accessing or using Tinyburg ("the Service"), you agree to be bound
+					by these Terms of Service. If you do not agree to these terms, please
+					do not use the Service.
+				</p>
+			</section>
+
+			<section>
+				<h2>2. Description of Service</h2>
+				<p>
+					Tinyburg is a community-driven platform that facilitates trading of
+					in-game items, bitizens, costumes, and other virtual goods between
+					players of TinyTower, a mobile game developed by NimbleBit LLC.
+				</p>
+				<p>
+					<strong>Disclaimer:</strong> Tinyburg is not affiliated with, endorsed
+					by, or connected to NimbleBit LLC in any way. TinyTower is a trademark
+					of NimbleBit LLC.
+				</p>
+			</section>
+
+			<section>
+				<h2>3. User Accounts</h2>
+				<p>
+					To use certain features of the Service, you must create an account
+					using Google or Discord authentication. You are responsible for:
+				</p>
+				<ul>
+					<li>Maintaining the security of your account</li>
+					<li>All activities that occur under your account</li>
+					<li>Ensuring your account information is accurate</li>
+				</ul>
+			</section>
+
+			<section>
+				<h2>4. User Conduct</h2>
+				<p>You agree not to:</p>
+				<ul>
+					<li>Use the Service for any unlawful purpose</li>
+					<li>Harass, abuse, or harm other users</li>
+					<li>Attempt to scam or defraud other users in trades</li>
+					<li>Impersonate other users or entities</li>
+					<li>Interfere with the proper functioning of the Service</li>
+					<li>Use automated systems to access the Service without permission</li>
+				</ul>
+			</section>
+
+			<section>
+				<h2>5. Trading</h2>
+				<p>
+					Tinyburg facilitates connections between players for trading purposes.
+					We do not guarantee the completion of any trade. Users trade at their
+					own risk, and Tinyburg is not responsible for:
+				</p>
+				<ul>
+					<li>Failed or incomplete trades</li>
+					<li>Misrepresentation of items by other users</li>
+					<li>Any losses incurred through trading</li>
+				</ul>
+			</section>
+
+			<section>
+				<h2>6. Intellectual Property</h2>
+				<p>
+					The Service and its original content, features, and functionality are
+					owned by Tinyburg and are protected by applicable laws. TinyTower and
+					related game content are the property of NimbleBit LLC.
+				</p>
+			</section>
+
+			<section>
+				<h2>7. Termination</h2>
+				<p>
+					We reserve the right to terminate or suspend your account at any time,
+					without notice, for conduct that we believe violates these Terms or is
+					harmful to other users, us, or third parties.
+				</p>
+			</section>
+
+			<section>
+				<h2>8. Disclaimer of Warranties</h2>
+				<p>
+					The Service is provided "as is" without warranties of any kind. We do
+					not guarantee that the Service will be uninterrupted, secure, or
+					error-free.
+				</p>
+			</section>
+
+			<section>
+				<h2>9. Limitation of Liability</h2>
+				<p>
+					To the maximum extent permitted by law, Tinyburg shall not be liable
+					for any indirect, incidental, special, or consequential damages
+					arising from your use of the Service.
+				</p>
+			</section>
+
+			<section>
+				<h2>10. Changes to Terms</h2>
+				<p>
+					We may modify these Terms at any time. Continued use of the Service
+					after changes constitutes acceptance of the modified Terms.
+				</p>
+			</section>
+
+			<section>
+				<h2>11. Contact</h2>
+				<p>
+					If you have questions about these Terms, please contact us through our
+					community Discord server.
+				</p>
+			</section>
+		</div>
+	</div>
+</BaseLayout>
+
+<style>
+	.legal-container {
+		position: relative;
+		z-index: 1;
+		min-height: 100vh;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		padding: 2rem;
+		padding-top: 5rem;
+	}
+
+	.back-link {
+		position: fixed;
+		top: 2rem;
+		left: 2rem;
+		font-family: "Press Start 2P", cursive;
+		font-size: 0.7rem;
+		color: var(--text-light);
+		text-decoration: none;
+		padding: 0.75rem 1rem;
+		background: rgba(26, 58, 92, 0.9);
+		border-radius: 4px;
+		transition: all 0.2s;
+		box-shadow: var(--pixel-shadow);
+		z-index: 100;
+	}
+
+	.back-link:hover {
+		transform: translate(-2px, -2px);
+		box-shadow: var(--pixel-shadow-hover);
+		background: rgba(26, 58, 92, 0.95);
+	}
+
+	.legal-card {
+		background: var(--card-bg);
+		border-radius: 16px;
+		padding: 3rem;
+		width: 100%;
+		max-width: 800px;
+		box-shadow: var(--pixel-shadow-hover);
+		border: 4px solid var(--gold);
+		margin-bottom: 2rem;
+	}
+
+	h1 {
+		font-family: "Press Start 2P", cursive;
+		font-size: 1.2rem;
+		color: var(--dark-blue);
+		margin-bottom: 0.5rem;
+		line-height: 1.4;
+	}
+
+	.last-updated {
+		font-size: 1.1rem;
+		color: var(--text-dark);
+		opacity: 0.6;
+		margin-bottom: 2rem;
+		padding-bottom: 1rem;
+		border-bottom: 2px solid #eee;
+	}
+
+	section {
+		margin-bottom: 2rem;
+	}
+
+	h2 {
+		font-family: "Press Start 2P", cursive;
+		font-size: 0.75rem;
+		color: var(--dark-blue);
+		margin-bottom: 1rem;
+		line-height: 1.5;
+	}
+
+	p {
+		font-size: 1.3rem;
+		line-height: 1.6;
+		color: var(--text-dark);
+		margin-bottom: 1rem;
+	}
+
+	ul {
+		margin-left: 1.5rem;
+		margin-bottom: 1rem;
+	}
+
+	li {
+		font-size: 1.3rem;
+		line-height: 1.6;
+		color: var(--text-dark);
+		margin-bottom: 0.5rem;
+	}
+
+	strong {
+		color: var(--dark-blue);
+	}
+
+	@media (max-width: 600px) {
+		.legal-card {
+			padding: 1.5rem;
+		}
+
+		.back-link {
+			top: 1rem;
+			left: 1rem;
+		}
+
+		h1 {
+			font-size: 1rem;
+		}
+
+		h2 {
+			font-size: 0.65rem;
+		}
+	}
+</style>

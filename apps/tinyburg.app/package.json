@@ -1,0 +1,16 @@
+{
+    "name": "@tinyburg/tinyburg.app",
+    "version": "0.0.1",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "astro": "astro",
+        "build": "astro build",
+        "dev": "astro dev",
+        "preview": "astro preview"
+    },
+    "dependencies": {
+        "astro": "5.16.14",
+        "typescript": "5.9.3"
+    }
+}

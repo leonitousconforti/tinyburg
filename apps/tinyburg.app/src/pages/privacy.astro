@@ -1,0 +1,302 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+
+<BaseLayout title="Privacy Policy | Tinyburg">
+	<div class="legal-container">
+		<a href="/" class="back-link">← Back to Home</a>
+
+		<div class="legal-card">
+			<h1>Privacy Policy</h1>
+			<p class="last-updated">Last updated: January 23, 2026</p>
+
+			<section>
+				<h2>1. Introduction</h2>
+				<p>
+					This Privacy Policy explains how Tinyburg ("we", "us", or "our")
+					collects, uses, and protects your information when you use our
+					trading platform for TinyTower players.
+				</p>
+			</section>
+
+			<section>
+				<h2>2. Information We Collect</h2>
+
+				<h3>2.1 Account Information</h3>
+				<p>When you sign in using Google or Discord, we receive:</p>
+				<ul>
+					<li>Your display name or username</li>
+					<li>Your email address</li>
+					<li>Your profile picture (if available)</li>
+					<li>Your unique account identifier from the provider</li>
+				</ul>
+
+				<h3>2.2 TinyTower Information</h3>
+				<p>If you choose to link your TinyTower account, we may collect:</p>
+				<ul>
+					<li>Your TinyTower friend code</li>
+					<li>Your tower data (floors, bitizens, etc.)</li>
+					<li>Trading history within our platform</li>
+				</ul>
+
+				<h3>2.3 Usage Information</h3>
+				<p>We automatically collect:</p>
+				<ul>
+					<li>Pages visited and features used</li>
+					<li>Time and date of visits</li>
+					<li>Device and browser information</li>
+				</ul>
+			</section>
+
+			<section>
+				<h2>3. How We Use Your Information</h2>
+				<p>We use collected information to:</p>
+				<ul>
+					<li>Provide and maintain the Service</li>
+					<li>Facilitate trades between users</li>
+					<li>Display your profile to other traders</li>
+					<li>Send important service updates</li>
+					<li>Improve and optimize the Service</li>
+					<li>Prevent fraud and abuse</li>
+				</ul>
+			</section>
+
+			<section>
+				<h2>4. Information Sharing</h2>
+				<p>We do not sell your personal information. We may share information:</p>
+				<ul>
+					<li>
+						<strong>With other users:</strong> Your display name, profile picture,
+						and trading information are visible to facilitate trades
+					</li>
+					<li>
+						<strong>For legal reasons:</strong> When required by law or to protect
+						our rights
+					</li>
+					<li>
+						<strong>With service providers:</strong> Third parties that help us
+						operate the Service (hosting, analytics)
+					</li>
+				</ul>
+			</section>
+
+			<section>
+				<h2>5. Data Security</h2>
+				<p>
+					We implement appropriate security measures to protect your information.
+					However, no method of transmission over the Internet is 100% secure,
+					and we cannot guarantee absolute security.
+				</p>
+			</section>
+
+			<section>
+				<h2>6. Data Retention</h2>
+				<p>
+					We retain your information for as long as your account is active or as
+					needed to provide the Service. You may request deletion of your account
+					and associated data at any time.
+				</p>
+			</section>
+
+			<section>
+				<h2>7. Your Rights</h2>
+				<p>You have the right to:</p>
+				<ul>
+					<li>Access your personal information</li>
+					<li>Correct inaccurate information</li>
+					<li>Delete your account and data</li>
+					<li>Export your data</li>
+					<li>Opt out of non-essential communications</li>
+				</ul>
+			</section>
+
+			<section>
+				<h2>8. Cookies</h2>
+				<p>
+					We use essential cookies to maintain your session and preferences.
+					These are necessary for the Service to function properly.
+				</p>
+			</section>
+
+			<section>
+				<h2>9. Third-Party Services</h2>
+				<p>
+					Our Service uses Google and Discord for authentication. Please review
+					their respective privacy policies:
+				</p>
+				<ul>
+					<li>
+						<a href="https://policies.google.com/privacy" target="_blank" rel="noopener">
+							Google Privacy Policy
+						</a>
+					</li>
+					<li>
+						<a href="https://discord.com/privacy" target="_blank" rel="noopener">
+							Discord Privacy Policy
+						</a>
+					</li>
+				</ul>
+			</section>
+
+			<section>
+				<h2>10. Children's Privacy</h2>
+				<p>
+					The Service is not intended for children under 13. We do not knowingly
+					collect information from children under 13. If you believe a child has
+					provided us with personal information, please contact us.
+				</p>
+			</section>
+
+			<section>
+				<h2>11. Changes to This Policy</h2>
+				<p>
+					We may update this Privacy Policy from time to time. We will notify
+					you of significant changes by posting a notice on the Service or
+					sending you an email.
+				</p>
+			</section>
+
+			<section>
+				<h2>12. Contact Us</h2>
+				<p>
+					If you have questions about this Privacy Policy or your data, please
+					contact us through our community Discord server.
+				</p>
+			</section>
+		</div>
+	</div>
+</BaseLayout>
+
+<style>
+	.legal-container {
+		position: relative;
+		z-index: 1;
+		min-height: 100vh;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		padding: 2rem;
+		padding-top: 5rem;
+	}
+
+	.back-link {
+		position: fixed;
+		top: 2rem;
+		left: 2rem;
+		font-family: "Press Start 2P", cursive;
+		font-size: 0.7rem;
+		color: var(--text-light);
+		text-decoration: none;
+		padding: 0.75rem 1rem;
+		background: rgba(26, 58, 92, 0.9);
+		border-radius: 4px;
+		transition: all 0.2s;
+		box-shadow: var(--pixel-shadow);
+		z-index: 100;
+	}
+
+	.back-link:hover {
+		transform: translate(-2px, -2px);
+		box-shadow: var(--pixel-shadow-hover);
+		background: rgba(26, 58, 92, 0.95);
+	}
+
+	.legal-card {
+		background: var(--card-bg);
+		border-radius: 16px;
+		padding: 3rem;
+		width: 100%;
+		max-width: 800px;
+		box-shadow: var(--pixel-shadow-hover);
+		border: 4px solid var(--gold);
+		margin-bottom: 2rem;
+	}
+
+	h1 {
+		font-family: "Press Start 2P", cursive;
+		font-size: 1.2rem;
+		color: var(--dark-blue);
+		margin-bottom: 0.5rem;
+		line-height: 1.4;
+	}
+
+	.last-updated {
+		font-size: 1.1rem;
+		color: var(--text-dark);
+		opacity: 0.6;
+		margin-bottom: 2rem;
+		padding-bottom: 1rem;
+		border-bottom: 2px solid #eee;
+	}
+
+	section {
+		margin-bottom: 2rem;
+	}
+
+	h2 {
+		font-family: "Press Start 2P", cursive;
+		font-size: 0.75rem;
+		color: var(--dark-blue);
+		margin-bottom: 1rem;
+		line-height: 1.5;
+	}
+
+	h3 {
+		font-family: "VT323", monospace;
+		font-size: 1.4rem;
+		color: var(--dark-blue);
+		margin-bottom: 0.75rem;
+		margin-top: 1rem;
+	}
+
+	p {
+		font-size: 1.3rem;
+		line-height: 1.6;
+		color: var(--text-dark);
+		margin-bottom: 1rem;
+	}
+
+	ul {
+		margin-left: 1.5rem;
+		margin-bottom: 1rem;
+	}
+
+	li {
+		font-size: 1.3rem;
+		line-height: 1.6;
+		color: var(--text-dark);
+		margin-bottom: 0.5rem;
+	}
+
+	strong {
+		color: var(--dark-blue);
+	}
+
+	a {
+		color: var(--sky-dark);
+		text-decoration: none;
+	}
+
+	a:hover {
+		text-decoration: underline;
+	}
+
+	@media (max-width: 600px) {
+		.legal-card {
+			padding: 1.5rem;
+		}
+
+		.back-link {
+			top: 1rem;
+			left: 1rem;
+		}
+
+		h1 {
+			font-size: 1rem;
+		}
+
+		h2 {
+			font-size: 0.65rem;
+		}
+	}
+</style>
