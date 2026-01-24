@@ -65,11 +65,12 @@ jobs:
     needs: [build, types, lint, test]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     steps:
-      - name: Deploy to DigitalOcean App Platform
-        uses: digitalocean/app_action/deploy@f4c57e650e1dec6665ad5d3af739b67b9d31aab1
+      - name: Install doctl
+        uses: digitalocean/action-doctl@135ac0aa0eed4437d547c6f12c364d3006b42824 # v2.5.1
         with:
           token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
-          app_name: archivist
+      - name: Deploy to DigitalOcean App Platform
+        run: doctl apps create-deployment archivist --wait
 
   deploy-authproxy:
     name: Deploy Authproxy
@@ -78,11 +79,12 @@ jobs:
     needs: [build, types, lint, test]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     steps:
-      - name: Deploy to DigitalOcean App Platform
-        uses: digitalocean/app_action/deploy@f4c57e650e1dec6665ad5d3af739b67b9d31aab1
+      - name: Install doctl
+        uses: digitalocean/action-doctl@135ac0aa0eed4437d547c6f12c364d3006b42824 # v2.5.1
         with:
           token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
-          app_name: authproxy
+      - name: Deploy to DigitalOcean App Platform
+        run: doctl apps create-deployment authproxy --wait
 
   deploy-auto-gold-bits:
     name: Deploy Auto Gold Bits
@@ -91,11 +93,12 @@ jobs:
     needs: [build, types, lint, test]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     steps:
-      - name: Deploy to DigitalOcean App Platform
-        uses: digitalocean/app_action/deploy@f4c57e650e1dec6665ad5d3af739b67b9d31aab1
+      - name: Install doctl
+        uses: digitalocean/action-doctl@135ac0aa0eed4437d547c6f12c364d3006b42824 # v2.5.1
         with:
           token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
-          app_name: auto-gold-bits
+      - name: Deploy to DigitalOcean App Platform
+        run: doctl apps create-deployment auto-gold-bits --wait
 
   deploy-tinyburg:
     name: Deploy Tinyburg
@@ -104,8 +107,9 @@ jobs:
     needs: [build, types, lint, test]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     steps:
-      - name: Deploy to DigitalOcean App Platform
-        uses: digitalocean/app_action/deploy@f4c57e650e1dec6665ad5d3af739b67b9d31aab1
+      - name: Install doctl
+        uses: digitalocean/action-doctl@135ac0aa0eed4437d547c6f12c364d3006b42824 # v2.5.1
         with:
           token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
-          app_name: tinyburg
+      - name: Deploy to DigitalOcean App Platform
+        run: doctl apps create-deployment tinyburg --wait
