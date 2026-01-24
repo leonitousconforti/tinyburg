@@ -69,8 +69,6 @@ jobs:
         uses: digitalocean/app_action/deploy@f4c57e650e1dec6665ad5d3af739b67b9d31aab1
         with:
           token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
-          print_deploy_logs: true
-          print_build_logs: true
           app_name: archivist
 
   deploy-authproxy:
@@ -84,8 +82,6 @@ jobs:
         uses: digitalocean/app_action/deploy@f4c57e650e1dec6665ad5d3af739b67b9d31aab1
         with:
           token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
-          print_deploy_logs: true
-          print_build_logs: true
           app_name: authproxy
 
   deploy-auto-gold-bits:
@@ -99,8 +95,6 @@ jobs:
         uses: digitalocean/app_action/deploy@f4c57e650e1dec6665ad5d3af739b67b9d31aab1
         with:
           token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
-          print_deploy_logs: true
-          print_build_logs: true
           app_name: auto-gold-bits
 
   deploy-tinyburg:
@@ -114,6 +108,4 @@ jobs:
         uses: digitalocean/app_action/deploy@f4c57e650e1dec6665ad5d3af739b67b9d31aab1
         with:
           token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
-          print_deploy_logs: true
-          print_build_logs: true
           app_name: tinyburg
