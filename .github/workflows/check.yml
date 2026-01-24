@@ -70,7 +70,9 @@ jobs:
         with:
           token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
       - name: Deploy to DigitalOcean App Platform
-        run: doctl apps create-deployment archivist --wait
+        run: |
+          APP_ID=$(doctl apps list --format ID,Spec.Name --no-header | awk '$2 == "archivist" {print $1}')
+          doctl apps create-deployment "$APP_ID" --wait
 
   deploy-authproxy:
     name: Deploy Authproxy
@@ -84,7 +86,9 @@ jobs:
         with:
           token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
       - name: Deploy to DigitalOcean App Platform
-        run: doctl apps create-deployment authproxy --wait
+        run: |
+          APP_ID=$(doctl apps list --format ID,Spec.Name --no-header | awk '$2 == "authproxy" {print $1}')
+          doctl apps create-deployment "$APP_ID" --wait
 
   deploy-auto-gold-bits:
     name: Deploy Auto Gold Bits
@@ -98,7 +102,9 @@ jobs:
         with:
           token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
       - name: Deploy to DigitalOcean App Platform
-        run: doctl apps create-deployment auto-gold-bits --wait
+        run: |
+          APP_ID=$(doctl apps list --format ID,Spec.Name --no-header | awk '$2 == "auto-gold-bits" {print $1}')
+          doctl apps create-deployment "$APP_ID" --wait
 
   deploy-tinyburg:
     name: Deploy Tinyburg
@@ -112,4 +118,6 @@ jobs:
         with:
           token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
       - name: Deploy to DigitalOcean App Platform
-        run: doctl apps create-deployment tinyburg --wait
+        run: |
+          APP_ID=$(doctl apps list --format ID,Spec.Name --no-header | awk '$2 == "tinyburg" {print $1}')
+          doctl apps create-deployment "$APP_ID" --wait
