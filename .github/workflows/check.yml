@@ -57,3 +57,63 @@ jobs:
       - run: pnpm test
         env:
           NIMBLEBIT_AUTH_KEY: ${{ secrets.NIMBLEBIT_AUTH_KEY }}
+
+  deploy-archivist:
+    name: Deploy Archivist
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: [build, types, lint, test]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    steps:
+      - name: Deploy to DigitalOcean App Platform
+        uses: digitalocean/app_action/deploy@v2
+        with:
+          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+          print_deploy_logs: true
+          print_build_logs: true
+          app_name: archivist
+
+  deploy-authproxy:
+    name: Deploy Authproxy
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: [build, types, lint, test]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    steps:
+      - name: Deploy to DigitalOcean App Platform
+        uses: digitalocean/app_action/deploy@v2
+        with:
+          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+          print_deploy_logs: true
+          print_build_logs: true
+          app_name: authproxy
+
+  deploy-auto-gold-bits:
+    name: Deploy Auto Gold Bits
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: [build, types, lint, test]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    steps:
+      - name: Deploy to DigitalOcean App Platform
+        uses: digitalocean/app_action/deploy@v2
+        with:
+          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+          print_deploy_logs: true
+          print_build_logs: true
+          app_name: auto-gold-bits
+
+  deploy-tinyburg:
+    name: Deploy Tinyburg
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: [build, types, lint, test]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    steps:
+      - name: Deploy to DigitalOcean App Platform
+        uses: digitalocean/app_action/deploy@v2
+        with:
+          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+          print_deploy_logs: true
+          print_build_logs: true
+          app_name: tinyburg
