@@ -1,36 +1,43 @@
 import type { APIContext, APIRoute } from "astro";
 
-import { HttpApi, HttpApiBuilder, HttpApiEndpoint, HttpApiGroup, HttpServer } from "@effect/platform";
-import { Context, Effect, Layer, Schema } from "effect";
+import { HttpApi, HttpApiBuilder, HttpApiEndpoint, HttpApiGroup, HttpLayerRouter, HttpServer } from "@effect/platform";
+import { Config, Context, Effect, Layer, Schema } from "effect";
 
-/**
- * A Context Reference to access Astro's locals within Effect handlers.
- *
- * This allows us to read and modify the locals object that Astro provides for
- * each request, enabling us to share data between Astro and Effect handlers.
- */
-class AstroLocals extends Context.Reference<AstroLocals>()("AstroLocals", {
-    defaultValue: () => ({}) as APIContext["locals"],
-}) {}
+export const GoogleOAuthConfig = Config.all({
+    clientId: Config.string("GOOGLE_CLIENT_ID"),
+    clientSecret: Config.redacted("GOOGLE_CLIENT_SECRET"),
+    redirectUri: Config.string("GOOGLE_REDIRECT_URI").pipe(
+        Config.withDefault("http://localhost:4321/api/auth/google/callback")
+    ),
+});
+
+class AstroLocals extends Context.Tag("AstroLocals")<AstroLocals, APIContext["locals"]>() {}
 
 const api = HttpApi.make("myApi").add(
-    HttpApiGroup.make("group").add(HttpApiEndpoint.get("get", "/").addSuccess(Schema.String))
+    HttpApiGroup.make("group").add(HttpApiEndpoint.get("test", "/").addSuccess(Schema.String))
 );
 
 const groupLive = HttpApiBuilder.group(api, "group", (handlers) =>
-    handlers.handle("get", () =>
+    handlers.handle("test", () =>
         Effect.gen(function* () {
             const locals = yield* AstroLocals;
-            console.log("Astro Locals:", locals); // Log the locals to verify access
+            console.log("Astro Locals:", locals);
             return "Hello from Effect API!";
         })
     )
 );
 
-const MyApiLive = HttpApiBuilder.api(api).pipe(Layer.provide(groupLive));
-
-// Convert the API to a web handler
-const { dispose, handler } = HttpApiBuilder.toWebHandler(Layer.mergeAll(MyApiLive, HttpServer.layerContext));
+const { dispose, handler } = HttpLayerRouter.addHttpApi(api).pipe(
+    Layer.provide([groupLive, HttpServer.layerContext]),
+    (layer) =>
+        layer as Layer.Layer<
+            Layer.Layer.Success<typeof layer>,
+            Layer.Layer.Error<typeof layer>,
+            | Exclude<Layer.Layer.Context<typeof layer>, AstroLocals>
+            | HttpLayerRouter.Request.From<"Requires", AstroLocals>
+        >,
+    (layer) => HttpLayerRouter.toWebHandler(layer, { disableLogger: true })
+);
 
 // When the process is interrupted, we want to clean up resources
 process.on("SIGTERM", () => {
