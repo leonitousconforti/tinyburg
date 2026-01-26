@@ -1,6 +1,6 @@
 import { VariantSchema } from "@effect/experimental";
 import { Model, SqlClient, SqlSchema } from "@effect/sql";
-import { DateTime, Duration, Effect, Schema } from "effect";
+import { DateTime, Duration, Effect, Option, Schema } from "effect";
 
 /**
  * @since 1.0.0
@@ -27,14 +27,10 @@ export class User extends Model.Class<User>("User")({
  * @category Models
  */
 export class OAuthAccount extends Model.Class<OAuthAccount>("OAuthAccount")({
-    id: Model.Generated(Schema.UUID),
     userId: Schema.UUID,
     provider: OAuthProvider,
     providerAccountId: Schema.String,
     createdAt: Model.DateTimeInsertFromDate,
-    accessToken: Schema.OptionFromNullishOr(Schema.String, null),
-    refreshToken: Schema.OptionFromNullishOr(Schema.String, null),
-    expiresAt: Schema.OptionFromNullishOr(Model.DateTimeFromDate, null),
 }) {}
 
 /**
@@ -65,13 +61,6 @@ export class Repository extends Effect.Service<Repository>()("@tinyburg/tinyburg
             spanPrefix: "@tinyburg/tinyburg.app/domain/Repository/users",
         });
 
-        // OAuth account repository
-        const oauthAccounts = yield* Model.makeRepository(OAuthAccount, {
-            idColumn: "id",
-            tableName: "oauth_accounts",
-            spanPrefix: "@tinyburg/tinyburg.app/domain/Repository/oauthAccounts",
-        });
-
         // Session repository
         const sessions = yield* Model.makeRepository(Session, {
             idColumn: "id",
@@ -79,6 +68,7 @@ export class Repository extends Effect.Service<Repository>()("@tinyburg/tinyburg
             spanPrefix: "@tinyburg/tinyburg.app/domain/Repository/sessions",
         });
 
+        // Find a user by their OAuth provider and account ID
         const findUserByOAuthProvider = SqlSchema.findOne({
             Result: User,
             Request: Schema.Struct({
@@ -92,6 +82,7 @@ export class Repository extends Effect.Service<Repository>()("@tinyburg/tinyburg
             `,
         });
 
+        // Find a user by their session ID
         const findUserBySession = SqlSchema.findOne({
             Result: User,
             Request: Schema.Struct({
@@ -103,6 +94,55 @@ export class Repository extends Effect.Service<Repository>()("@tinyburg/tinyburg
                 WHERE sessions.id = ${sessionId} AND sessions.expires_at > NOW()
             `,
         });
+
+        const upsertUserFromOAuth = ({
+            provider,
+            providerAccountId,
+        }: {
+            provider: Schema.Schema.Type<typeof OAuthProvider>;
+            providerAccountId: string;
+            displayName: string;
+            email: Option.Option<string>;
+            avatarUrl: Option.Option<string>;
+        }) =>
+            Effect.gen(function* () {
+                const existingUser = yield* findUserByOAuthProvider({
+                    provider,
+                    providerAccountId,
+                });
+
+                if (Option.isSome(existingUser)) {
+                    const now = yield* DateTime.now;
+                    return yield* users.update({
+                        ...existingUser.value,
+                        lastLoginAt: VariantSchema.Override(now),
+                    });
+                }
+
+                const newUser = yield* users.insert({
+                    displayName: "",
+                    avatarUrl: Option.none(),
+                    createdAt: undefined,
+                    lastLoginAt: undefined,
+                });
+
+                const resolver = SqlSchema.single({
+                    Request: OAuthAccount.insert,
+                    Result: OAuthAccount,
+                    execute: (account) => sql`
+                        INSERT INTO oauth_accounts ${sql.insert(account).returning("*")}
+                    `,
+                });
+
+                yield* resolver({
+                    provider,
+                    providerAccountId,
+                    userId: newUser.id,
+                    createdAt: undefined,
+                });
+
+                return newUser;
+            });
 
         const createSession = (user: User, expiresIn: Duration.DurationInput = Duration.days(30)) => {
             const expiresAt = Effect.map(DateTime.now, DateTime.addDuration(expiresIn));
@@ -118,13 +158,8 @@ export class Repository extends Effect.Service<Repository>()("@tinyburg/tinyburg
         const deleteSession = (session: Session) => sessions.delete(session.id);
 
         return {
-            // OAuth account management
-            createOAuthAccount: oauthAccounts.insert,
-
             // User management
-            createUser: users.insert,
-            updateUser: users.update,
-            findUserByOAuthProvider,
+            upsertUserFromOAuth,
 
             // Session management
             createSession,
@@ -133,50 +168,3 @@ export class Repository extends Effect.Service<Repository>()("@tinyburg/tinyburg
         };
     }),
 }) {}
-
-// const upsertUserFromOAuth = ({
-//     provider,
-//     providerAccountId,
-// }: {
-//     provider: Schema.Schema.Type<typeof OAuthProvider>;
-//     providerAccountId: string;
-//     displayName: string;
-//     email: Option.Option<string>;
-//     avatarUrl: Option.Option<string>;
-//     accessToken: Option.Option<string>;
-//     refreshToken: Option.Option<string>;
-//     expiresAt: Option.Option<Date>;
-// }) =>
-//     Effect.gen(function* () {
-//         const existingUser = yield* findUserByOAuthProvider({
-//             provider,
-//             providerAccountId,
-//         });
-
-//         if (Option.isSome(existingUser)) {
-//             const now = yield* DateTime.now;
-//             return yield* users.update({
-//                 ...existingUser.value,
-//                 lastLoginAt: VariantSchema.Override(now),
-//             });
-//         }
-
-//         const newUser = yield* users.insert({
-//             displayName: "",
-//             avatarUrl: Option.none(),
-//             createdAt: undefined,
-//             lastLoginAt: undefined,
-//         });
-
-//         yield* oauthAccounts.insert({
-//             provider,
-//             providerAccountId,
-//             userId: newUser.id,
-//             createdAt: undefined,
-//             expiresAt: Option.none(),
-//             accessToken: Option.none(),
-//             refreshToken: Option.none(),
-//         });
-
-//         return newUser;
-//     });
