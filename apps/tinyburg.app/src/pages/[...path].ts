@@ -2,18 +2,21 @@ import type { APIContext, APIRoute } from "astro";
 
 import {
     Cookies,
+    FetchHttpClient,
     HttpApi,
     HttpApiBuilder,
     HttpApiEndpoint,
     HttpApiError,
     HttpApiGroup,
+    HttpBody,
+    HttpClient,
+    HttpClientRequest,
     HttpLayerRouter,
     HttpServer,
     HttpServerResponse,
     UrlParams,
 } from "@effect/platform";
-import { Config, Context, Effect, Either, Layer, Option, pipe, Schema } from "effect";
-import { Repository } from "../../domain/model";
+import { Config, Context, Effect, Either, Encoding, Layer, Option, pipe, Schema } from "effect";
 
 const GoogleOAuthConfig = Config.all({
     clientId: Config.string("GOOGLE_CLIENT_ID"),
@@ -49,10 +52,22 @@ const OauthGroupLive = HttpApiBuilder.group(API, "oauth", (handlers) =>
     handlers
         .handle("GoogleLogin", () =>
             Effect.gen(function* () {
-                const state = "asdf"; // FIXME: implement a proper random string generator
+                const randomStateGenerator = () =>
+                    Array.from(crypto.getRandomValues(new Uint8Array(32)), (byte) =>
+                        byte.toString(16).padStart(2, "0")
+                    ).join("");
+
+                const state = randomStateGenerator();
+                const codeVerifier = randomStateGenerator();
 
                 const config = yield* Effect.orDie(GoogleOAuthConfig);
                 const googleAuthUrl = "https://accounts.google.com/o/oauth2/v2/auth";
+
+                const Sha256CodeChallenge = (verifier: string) =>
+                    Effect.map(
+                        Effect.promise(() => crypto.subtle.digest("SHA-256", new TextEncoder().encode(verifier))),
+                        (hashBuffer) => Encoding.encodeBase64Url(new Uint8Array(hashBuffer))
+                    );
 
                 const redirectUrl = pipe(
                     UrlParams.empty,
@@ -61,51 +76,91 @@ const OauthGroupLive = HttpApiBuilder.group(API, "oauth", (handlers) =>
                     UrlParams.set("response_type", "code"),
                     UrlParams.set("scope", "openid email profile"),
                     UrlParams.set("state", state),
+                    UrlParams.set("code_challenge_method", "S256"),
+                    UrlParams.set("code_challenge", yield* Sha256CodeChallenge(codeVerifier)),
                     UrlParams.set("access_type", "offline"),
                     UrlParams.set("prompt", "consent"),
                     (urlParams) => UrlParams.makeUrl(googleAuthUrl, urlParams, Option.none()),
                     Either.getOrUndefined
                 );
 
-                if (redirectUrl === undefined) {
+                const stateCookie = Cookies.makeCookie("google_oauth_state", state, {
+                    maxAge: 60 * 10, // 10 minutes
+                    httpOnly: true,
+                    path: "/",
+                    secure: true, // only add when deploying with https (prod)
+                    sameSite: "lax", // optional - do not use "strict"
+                }).pipe(Either.getOrUndefined);
+
+                const codeVerifierCookie = Cookies.makeCookie("google_oauth_verifier", codeVerifier, {
+                    maxAge: 60 * 10, // 10 minutes
+                    httpOnly: true,
+                    path: "/",
+                    secure: true, // only add when deploying with https (prod)
+                    sameSite: "lax", // optional - do not use "strict"
+                }).pipe(Either.getOrUndefined);
+
+                if (redirectUrl === undefined || stateCookie === undefined || codeVerifierCookie === undefined) {
                     return yield* new HttpApiError.InternalServerError();
                 }
 
-                const cookies = pipe(
-                    Cookies.empty,
-                    Cookies.set("google_oauth_state", state, {
-                        maxAge: 60 * 10, // 10 minutes
-                        httpOnly: true,
-                        path: "/",
-                        secure: true, // only add when deploying with https (prod)
-                        sameSite: "lax", // optional - do not use "strict"
-                    }),
-                    Either.getOrUndefined
-                );
-
-                if (cookies === undefined) {
-                    return yield* new HttpApiError.InternalServerError();
-                }
-
-                return HttpServerResponse.redirect(redirectUrl, { cookies });
+                return HttpServerResponse.redirect(redirectUrl, {
+                    cookies: Cookies.fromIterable([stateCookie, codeVerifierCookie]),
+                });
             })
         )
         .handle("GoogleCallback", ({ request, urlParams }) =>
             Effect.gen(function* () {
+                const config = yield* Effect.orDie(GoogleOAuthConfig);
+
                 if ("error" in urlParams) {
                     return yield* new HttpApiError.InternalServerError();
                 }
 
                 const cookies = Cookies.fromSetCookie(Object.values(request.cookies));
                 const stateCookie = Cookies.get(cookies, "google_oauth_state").pipe(Option.getOrUndefined);
+                const codeVerifierCookie = Cookies.get(cookies, "google_oauth_verifier").pipe(Option.getOrUndefined);
 
-                if (stateCookie === undefined || stateCookie.value !== urlParams.state) {
+                if (
+                    stateCookie === undefined ||
+                    codeVerifierCookie === undefined ||
+                    stateCookie.value !== urlParams.state
+                ) {
                     return yield* new HttpApiError.InternalServerError();
                 }
 
-                yield* Repository.upsertUserFromOAuth({
-                    provider: "google",
-                });
+                const tokens = yield* HttpClientRequest.post("https://oauth2.googleapis.com/token", {
+                    headers: { "User-Agent": "TinyburgApp/1.0" },
+                    body: pipe(
+                        UrlParams.empty,
+                        UrlParams.set("grant_type", "authorization_code"),
+                        UrlParams.set("code", urlParams.code),
+                        UrlParams.set("redirect_uri", config.redirectUri),
+                        UrlParams.set("client_id", config.clientId),
+                        UrlParams.set("code_verifier", codeVerifierCookie.value),
+                        HttpBody.urlParams
+                    ),
+                }).pipe(
+                    HttpClientRequest.acceptJson,
+                    HttpClientRequest.basicAuth(config.clientId, config.clientSecret),
+                    HttpClient.execute,
+                    Effect.flatMap(({ json }) => json),
+                    Effect.orDie
+                );
+
+                console.log(tokens);
+
+                // const claims = decodeIdToken(tokens.idToken());
+                // const claimsParser = new ObjectParser(claims);
+
+                // const googleId = claimsParser.getString("sub");
+                // const name = claimsParser.getString("name");
+                // const picture = claimsParser.getString("picture");
+                // const email = claimsParser.getString("email");
+
+                // yield* Repository.upsertUserFromOAuth({
+                //     provider: "google",
+                // });
 
                 return HttpServerResponse.empty();
             })
@@ -113,7 +168,8 @@ const OauthGroupLive = HttpApiBuilder.group(API, "oauth", (handlers) =>
 );
 
 const { dispose, handler } = HttpLayerRouter.addHttpApi(API).pipe(
-    Layer.provide([OauthGroupLive, HttpServer.layerContext]),
+    Layer.provide(OauthGroupLive),
+    Layer.provide([HttpServer.layerContext, FetchHttpClient.layer]),
     (layer) =>
         layer as Layer.Layer<
             Layer.Layer.Success<typeof layer>,
