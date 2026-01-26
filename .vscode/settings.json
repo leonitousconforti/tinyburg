@@ -97,6 +97,7 @@
         "Transferables",
         "tupled",
         "untupled",
+        "upserted",
         "vitest"
     ]
 }

@@ -1,6 +1,5 @@
-import { VariantSchema } from "@effect/experimental";
 import { Model, SqlClient, SqlSchema } from "@effect/sql";
-import { DateTime, Duration, Effect, Option, Schema } from "effect";
+import { DateTime, Duration, Effect, Schema } from "effect";
 
 /**
  * @since 1.0.0
@@ -54,117 +53,92 @@ export class Repository extends Effect.Service<Repository>()("@tinyburg/tinyburg
     effect: Effect.gen(function* () {
         const sql = yield* SqlClient.SqlClient;
 
-        // User repository
-        const users = yield* Model.makeRepository(User, {
-            idColumn: "id",
-            tableName: "users",
-            spanPrefix: "@tinyburg/tinyburg.app/domain/Repository/users",
-        });
-
-        // Session repository
-        const sessions = yield* Model.makeRepository(Session, {
-            idColumn: "id",
-            tableName: "sessions",
-            spanPrefix: "@tinyburg/tinyburg.app/domain/Repository/sessions",
-        });
-
-        // Find a user by their OAuth provider and account ID
-        const findUserByOAuthProvider = SqlSchema.findOne({
-            Result: User,
+        const createSession = SqlSchema.single({
+            Result: Session,
             Request: Schema.Struct({
-                provider: OAuthProvider,
-                providerAccountId: Schema.String,
+                user: User,
+                expiresIn: Schema.optional(Schema.DurationFromSelf),
             }),
-            execute: ({ provider, providerAccountId }) => sql`
-                SELECT users.* FROM oauth_accounts
-                LEFT JOIN users ON oauth_accounts.user_id = users.id
-                WHERE oauth_accounts.provider = ${provider} AND oauth_accounts.provider_account_id = ${providerAccountId}
+            execute: Effect.fnUntraced(function* ({ expiresIn, user }) {
+                const now = yield* DateTime.now;
+                const expiresAt = DateTime.addDuration(now, expiresIn ?? Duration.days(30));
+                const session = Session.insert.make({ userId: user.id, expiresAt });
+                return yield* sql`INSERT INTO sessions ${sql.insert(session).returning("*")}`;
+            }),
+        });
+
+        const deleteSession = SqlSchema.void({
+            Request: Schema.Struct({
+                sessionId: Schema.UUID,
+            }),
+            execute: ({ sessionId }) => sql`
+                DELETE FROM sessions WHERE id = ${sessionId}
             `,
         });
 
-        // Find a user by their session ID
         const findUserBySession = SqlSchema.findOne({
             Result: User,
             Request: Schema.Struct({
-                sessionId: Schema.String,
+                sessionId: Schema.UUID,
             }),
             execute: ({ sessionId }) => sql`
                 SELECT users.* FROM sessions
-                LEFT JOIN users ON sessions.user_id = users.id
+                INNER JOIN users ON sessions.user_id = users.id
                 WHERE sessions.id = ${sessionId} AND sessions.expires_at > NOW()
             `,
         });
 
-        const upsertUserFromOAuth = ({
-            provider,
-            providerAccountId,
-        }: {
-            provider: Schema.Schema.Type<typeof OAuthProvider>;
-            providerAccountId: string;
-            displayName: string;
-            email: Option.Option<string>;
-            avatarUrl: Option.Option<string>;
-        }) =>
-            Effect.gen(function* () {
-                const existingUser = yield* findUserByOAuthProvider({
-                    provider,
-                    providerAccountId,
-                });
-
-                if (Option.isSome(existingUser)) {
-                    const now = yield* DateTime.now;
-                    return yield* users.update({
-                        ...existingUser.value,
-                        lastLoginAt: VariantSchema.Override(now),
-                    });
-                }
-
-                const newUser = yield* users.insert({
-                    displayName: "",
-                    avatarUrl: Option.none(),
-                    createdAt: undefined,
-                    lastLoginAt: undefined,
-                });
-
-                const resolver = SqlSchema.single({
-                    Request: OAuthAccount.insert,
-                    Result: OAuthAccount,
-                    execute: (account) => sql`
-                        INSERT INTO oauth_accounts ${sql.insert(account).returning("*")}
-                    `,
-                });
-
-                yield* resolver({
-                    provider,
-                    providerAccountId,
-                    userId: newUser.id,
-                    createdAt: undefined,
-                });
-
-                return newUser;
-            });
-
-        const createSession = (user: User, expiresIn: Duration.DurationInput = Duration.days(30)) => {
-            const expiresAt = Effect.map(DateTime.now, DateTime.addDuration(expiresIn));
-            return Effect.flatMap(expiresAt, (expiresAt) =>
-                sessions.insert({
-                    userId: user.id,
-                    createdAt: undefined,
-                    expiresAt: VariantSchema.Override(expiresAt),
-                })
-            );
-        };
-
-        const deleteSession = (session: Session) => sessions.delete(session.id);
+        const upsertUserFromOAuth = SqlSchema.single({
+            Result: User,
+            Request: Schema.Struct({
+                provider: OAuthProvider,
+                providerAccountId: Schema.String,
+                displayName: Schema.String,
+                avatarUrl: Schema.OptionFromNullishOr(Schema.String, null),
+            }),
+            execute: ({ avatarUrl, displayName, provider, providerAccountId }) => sql`
+                WITH existing_user AS (
+                    -- Try to find the user linked to this oauth account
+                    SELECT user.* FROM oauth_accounts oauth_account
+                    JOIN users user ON user.id = oauth_account.user_id
+                    WHERE oauth_account.provider = ${provider} AND oauth_account.provider_account_id = ${providerAccountId}
+                ),
+                updated_user AS (
+                    -- Update the existing user's profile if found
+                    UPDATE users SET
+                        display_name = ${displayName},
+                        avatar_url = ${avatarUrl},
+                        last_login_at = NOW()
+                    WHERE id = (SELECT id FROM existing_user)
+                    RETURNING *
+                ),
+                new_user AS (
+                    -- Insert a new user only if one wasn't found
+                    INSERT INTO users (display_name, avatar_url, last_login_at)
+                    SELECT ${displayName}, ${avatarUrl}, NOW()
+                    WHERE NOT EXISTS (SELECT 1 FROM existing_user)
+                    RETURNING *
+                ),
+                final_user AS (
+                    SELECT * FROM updated_user
+                    UNION ALL
+                    SELECT * FROM new_user
+                ),
+                linked_account AS (
+                    -- Link the oauth account to the new user (no-op if already linked)
+                    INSERT INTO oauth_accounts (provider, provider_account_id, user_id)
+                    SELECT ${provider}, ${providerAccountId}, id FROM new_user
+                    ON CONFLICT (provider, provider_account_id) DO NOTHING
+                )
+                SELECT * FROM final_user;
+            `,
+        });
 
         return {
-            // User management
-            upsertUserFromOAuth,
-
-            // Session management
             createSession,
             deleteSession,
             findUserBySession,
+            upsertUserFromOAuth,
         };
     }),
 }) {}
