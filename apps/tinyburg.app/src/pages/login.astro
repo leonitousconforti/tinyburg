@@ -1,5 +1,15 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+
+// Check for error messages from OAuth flow
+const errorParam = Astro.url.searchParams.get("error");
+const errorMessages: Record<string, string> = {
+	access_denied: "You cancelled the sign-in process.",
+	missing_params: "Missing required parameters. Please try again.",
+	invalid_state: "Invalid state. Please try again.",
+	oauth_failed: "Sign-in failed. Please try again.",
+};
+const errorMessage = errorParam ? errorMessages[errorParam] || "An error occurred. Please try again." : null;
 ---
 
 <BaseLayout title="Log In | Tinyburg">
@@ -13,8 +23,15 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 				<p>Sign in or create an account to start trading</p>
 			</div>
 
+			{errorMessage && (
+				<div class="error-message">
+					<span class="error-icon">⚠️</span>
+					<span>{errorMessage}</span>
+				</div>
+			)}
+
 			<div class="auth-providers">
-				<button class="provider-button google">
+				<a href="/api/auth/google/login" class="provider-button google">
 					<svg class="provider-icon" viewBox="0 0 24 24">
 						<path
 							fill="#4285F4"
@@ -34,9 +51,9 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 						></path>
 					</svg>
 					<span>Continue with Google</span>
-				</button>
+				</a>
 
-				<button class="provider-button discord">
+				<a href="/api/auth/discord/login" class="provider-button discord">
 					<svg class="provider-icon" viewBox="0 0 24 24">
 						<path
 							fill="currentColor"
@@ -44,7 +61,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 						></path>
 					</svg>
 					<span>Continue with Discord</span>
-				</button>
+				</a>
 			</div>
 
 			<div class="benefits">
@@ -159,6 +176,24 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 		gap: 1rem;
 	}
 
+	.error-message {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.5rem;
+		padding: 0.75rem 1rem;
+		margin-bottom: 1.5rem;
+		background: rgba(234, 67, 53, 0.1);
+		border: 2px solid rgba(234, 67, 53, 0.3);
+		border-radius: 8px;
+		color: #c62828;
+		font-size: 1.1rem;
+	}
+
+	.error-icon {
+		font-size: 1.2rem;
+	}
+
 	.provider-button {
 		display: flex;
 		align-items: center;
@@ -173,6 +208,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 		cursor: pointer;
 		transition: all 0.2s;
 		box-shadow: var(--pixel-shadow);
+		text-decoration: none;
 	}
 
 	.provider-button:hover {

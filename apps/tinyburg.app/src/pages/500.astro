@@ -1,0 +1,544 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+// Get error details from URL params or use defaults
+const errorCode = Astro.url.searchParams.get("code") || "Error";
+const errorMessage = Astro.url.searchParams.get("message") || "Something went wrong";
+
+// Common error messages
+const errorMessages: Record<string, { title: string; description: string }> = {
+	"400": { title: "Bad Request", description: "The request couldn't be understood." },
+	"401": { title: "Unauthorized", description: "You need to log in to access this." },
+	"403": { title: "Forbidden", description: "You don't have permission to access this." },
+	"404": { title: "Not Found", description: "This page doesn't exist in our tower." },
+	"500": { title: "Server Error", description: "Our tower is having some issues." },
+	"503": { title: "Service Unavailable", description: "We're doing some maintenance." },
+};
+
+const errorInfo = errorMessages[errorCode] || { title: errorCode, description: errorMessage };
+---
+
+<BaseLayout title={`${errorCode} - ${errorInfo.title} | Tinyburg`}>
+	<div class="error-container">
+		<a href="/" class="back-link">← Back to Home</a>
+
+		<div class="error-content">
+			<!-- Animated Tower -->
+			<div class="tower-scene">
+				<svg class="tower" viewBox="0 0 200 280" xmlns="http://www.w3.org/2000/svg">
+					<!-- Building base -->
+					<rect class="building-base" x="50" y="40" width="100" height="220" fill="#1a3a5c" />
+
+					<!-- Roof -->
+					<polygon class="roof" points="50,40 100,15 150,40" fill="#8b4513" />
+
+					<!-- Floors that will animate -->
+					<g class="floor floor-1">
+						<rect x="55" y="50" width="90" height="22" fill="#ffeb99" />
+						<rect x="60" y="54" width="12" height="14" fill="rgba(0,0,0,0.2)" />
+						<rect x="78" y="54" width="12" height="14" fill="rgba(0,0,0,0.2)" />
+						<rect x="96" y="54" width="12" height="14" fill="rgba(0,0,0,0.2)" />
+						<rect x="114" y="54" width="12" height="14" fill="rgba(0,0,0,0.2)" />
+						<rect x="132" y="54" width="8" height="14" fill="rgba(0,0,0,0.2)" />
+					</g>
+
+					<g class="floor floor-2">
+						<rect x="55" y="76" width="90" height="22" fill="#ff9966" />
+						<rect x="60" y="80" width="12" height="14" fill="rgba(0,0,0,0.2)" />
+						<rect x="78" y="80" width="12" height="14" fill="rgba(0,0,0,0.2)" />
+						<rect x="96" y="80" width="12" height="14" fill="rgba(0,0,0,0.2)" />
+						<rect x="114" y="80" width="12" height="14" fill="rgba(0,0,0,0.2)" />
+						<rect x="132" y="80" width="8" height="14" fill="rgba(0,0,0,0.2)" />
+					</g>
+
+					<g class="floor floor-3">
+						<rect x="55" y="102" width="90" height="22" fill="#66b3ff" />
+						<rect x="60" y="106" width="12" height="14" fill="rgba(0,0,0,0.2)" />
+						<rect x="78" y="106" width="12" height="14" fill="rgba(0,0,0,0.2)" />
+						<rect x="96" y="106" width="12" height="14" fill="rgba(0,0,0,0.2)" />
+						<rect x="114" y="106" width="12" height="14" fill="rgba(0,0,0,0.2)" />
+						<rect x="132" y="106" width="8" height="14" fill="rgba(0,0,0,0.2)" />
+					</g>
+
+					<g class="floor floor-4">
+						<rect x="55" y="128" width="90" height="22" fill="#cc99ff" />
+						<rect x="60" y="132" width="12" height="14" fill="rgba(0,0,0,0.2)" />
+						<rect x="78" y="132" width="12" height="14" fill="rgba(0,0,0,0.2)" />
+						<rect x="96" y="132" width="12" height="14" fill="rgba(0,0,0,0.2)" />
+						<rect x="114" y="132" width="12" height="14" fill="rgba(0,0,0,0.2)" />
+						<rect x="132" y="132" width="8" height="14" fill="rgba(0,0,0,0.2)" />
+					</g>
+
+					<g class="floor floor-5">
+						<rect x="55" y="154" width="90" height="22" fill="#ff99cc" />
+						<rect x="60" y="158" width="12" height="14" fill="rgba(0,0,0,0.2)" />
+						<rect x="78" y="158" width="12" height="14" fill="rgba(0,0,0,0.2)" />
+						<rect x="96" y="158" width="12" height="14" fill="rgba(0,0,0,0.2)" />
+						<rect x="114" y="158" width="12" height="14" fill="rgba(0,0,0,0.2)" />
+						<rect x="132" y="158" width="8" height="14" fill="rgba(0,0,0,0.2)" />
+					</g>
+
+					<g class="floor floor-6">
+						<rect x="55" y="180" width="90" height="22" fill="#99ff99" />
+						<rect x="60" y="184" width="12" height="14" fill="rgba(0,0,0,0.2)" />
+						<rect x="78" y="184" width="12" height="14" fill="rgba(0,0,0,0.2)" />
+						<rect x="96" y="184" width="12" height="14" fill="rgba(0,0,0,0.2)" />
+						<rect x="114" y="184" width="12" height="14" fill="rgba(0,0,0,0.2)" />
+						<rect x="132" y="184" width="8" height="14" fill="rgba(0,0,0,0.2)" />
+					</g>
+
+					<!-- Lobby (stays in place) -->
+					<g class="lobby">
+						<rect x="55" y="206" width="90" height="22" fill="#dddddd" />
+						<rect x="60" y="210" width="12" height="14" fill="rgba(0,0,0,0.2)" />
+						<rect x="78" y="210" width="12" height="14" fill="rgba(0,0,0,0.2)" />
+						<rect x="114" y="210" width="12" height="14" fill="rgba(0,0,0,0.2)" />
+						<rect x="132" y="210" width="8" height="14" fill="rgba(0,0,0,0.2)" />
+						<!-- Door -->
+						<rect x="92" y="212" width="16" height="16" fill="#8b4513" />
+					</g>
+
+					<!-- Ground -->
+					<rect x="30" y="228" width="140" height="30" fill="#7cb342" />
+
+					<!-- Gold border -->
+					<rect x="50" y="40" width="100" height="188" fill="none" stroke="#ffd700" stroke-width="2" />
+
+					<!-- Debris particles -->
+					<g class="debris">
+						<rect class="debris-1" x="70" y="100" width="6" height="6" fill="#ffeb99" />
+						<rect class="debris-2" x="120" y="120" width="4" height="4" fill="#ff9966" />
+						<rect class="debris-3" x="85" y="140" width="5" height="5" fill="#66b3ff" />
+						<rect class="debris-4" x="110" y="90" width="3" height="3" fill="#cc99ff" />
+						<rect class="debris-5" x="95" y="160" width="4" height="4" fill="#ff99cc" />
+					</g>
+				</svg>
+
+				<!-- Dust clouds -->
+				<div class="dust dust-1"></div>
+				<div class="dust dust-2"></div>
+				<div class="dust dust-3"></div>
+			</div>
+
+			<!-- Error Message -->
+			<div class="error-message">
+				<span class="error-code">{errorCode}</span>
+				<h1>{errorInfo.title}</h1>
+				<p>{errorInfo.description}</p>
+			</div>
+
+			<!-- Action buttons -->
+			<div class="error-actions">
+				<a href="/" class="action-button primary">
+					<span class="button-icon">🏠</span>
+					<span>Go Home</span>
+				</a>
+				<button class="action-button secondary" onclick="history.back()">
+					<span class="button-icon">↩️</span>
+					<span>Go Back</span>
+				</button>
+			</div>
+
+			<!-- Fun message -->
+			<p class="fun-message">
+				Looks like a floor got misplaced! Our bitizens are working on it.
+			</p>
+		</div>
+	</div>
+</BaseLayout>
+
+<style>
+	.error-container {
+		position: relative;
+		z-index: 1;
+		min-height: 100vh;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		padding: 2rem;
+	}
+
+	.back-link {
+		position: absolute;
+		top: 2rem;
+		left: 2rem;
+		font-family: "Press Start 2P", cursive;
+		font-size: 0.7rem;
+		color: var(--text-light);
+		text-decoration: none;
+		padding: 0.75rem 1rem;
+		background: rgba(26, 58, 92, 0.8);
+		border-radius: 4px;
+		transition: all 0.2s;
+		box-shadow: var(--pixel-shadow);
+	}
+
+	.back-link:hover {
+		transform: translate(-2px, -2px);
+		box-shadow: var(--pixel-shadow-hover);
+		background: rgba(26, 58, 92, 0.95);
+	}
+
+	.error-content {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		text-align: center;
+		max-width: 500px;
+	}
+
+	/* Tower Scene */
+	.tower-scene {
+		position: relative;
+		width: 200px;
+		height: 280px;
+		margin-bottom: 2rem;
+	}
+
+	.tower {
+		width: 100%;
+		height: 100%;
+		filter: drop-shadow(4px 4px 0 rgba(0, 0, 0, 0.2));
+	}
+
+	/* Floor animations - staggered wobble and fall */
+	.floor {
+		transform-origin: center center;
+		animation: wobble 3s ease-in-out infinite;
+	}
+
+	.floor-1 {
+		animation: floorFall1 4s ease-in-out infinite;
+	}
+
+	.floor-2 {
+		animation: floorFall2 4s ease-in-out infinite;
+		animation-delay: 0.2s;
+	}
+
+	.floor-3 {
+		animation: floorFall3 4s ease-in-out infinite;
+		animation-delay: 0.4s;
+	}
+
+	.floor-4 {
+		animation: wobble 2.5s ease-in-out infinite;
+		animation-delay: 0.1s;
+	}
+
+	.floor-5 {
+		animation: wobble 2.8s ease-in-out infinite;
+		animation-delay: 0.3s;
+	}
+
+	.floor-6 {
+		animation: wobble 2.2s ease-in-out infinite;
+		animation-delay: 0.5s;
+	}
+
+	@keyframes wobble {
+		0%,
+		100% {
+			transform: translateX(0) rotate(0deg);
+		}
+		25% {
+			transform: translateX(-2px) rotate(-0.5deg);
+		}
+		75% {
+			transform: translateX(2px) rotate(0.5deg);
+		}
+	}
+
+	@keyframes floorFall1 {
+		0%,
+		60% {
+			transform: translateX(0) translateY(0) rotate(0deg);
+			opacity: 1;
+		}
+		70% {
+			transform: translateX(-5px) translateY(5px) rotate(-8deg);
+			opacity: 1;
+		}
+		85% {
+			transform: translateX(-30px) translateY(100px) rotate(-25deg);
+			opacity: 0.5;
+		}
+		86%,
+		100% {
+			transform: translateX(0) translateY(0) rotate(0deg);
+			opacity: 1;
+		}
+	}
+
+	@keyframes floorFall2 {
+		0%,
+		65% {
+			transform: translateX(0) translateY(0) rotate(0deg);
+			opacity: 1;
+		}
+		75% {
+			transform: translateX(8px) translateY(8px) rotate(10deg);
+			opacity: 1;
+		}
+		88% {
+			transform: translateX(40px) translateY(80px) rotate(30deg);
+			opacity: 0.5;
+		}
+		89%,
+		100% {
+			transform: translateX(0) translateY(0) rotate(0deg);
+			opacity: 1;
+		}
+	}
+
+	@keyframes floorFall3 {
+		0%,
+		70% {
+			transform: translateX(0) translateY(0) rotate(0deg);
+			opacity: 1;
+		}
+		80% {
+			transform: translateX(-3px) translateY(10px) rotate(-5deg);
+			opacity: 1;
+		}
+		92% {
+			transform: translateX(-20px) translateY(60px) rotate(-15deg);
+			opacity: 0.5;
+		}
+		93%,
+		100% {
+			transform: translateX(0) translateY(0) rotate(0deg);
+			opacity: 1;
+		}
+	}
+
+	/* Debris animation */
+	.debris rect {
+		opacity: 0;
+	}
+
+	.debris-1 {
+		animation: debrisFall 4s ease-in infinite;
+		animation-delay: 2.8s;
+	}
+
+	.debris-2 {
+		animation: debrisFall 4s ease-in infinite;
+		animation-delay: 3s;
+	}
+
+	.debris-3 {
+		animation: debrisFall 4s ease-in infinite;
+		animation-delay: 3.2s;
+	}
+
+	.debris-4 {
+		animation: debrisFall 4s ease-in infinite;
+		animation-delay: 2.9s;
+	}
+
+	.debris-5 {
+		animation: debrisFall 4s ease-in infinite;
+		animation-delay: 3.1s;
+	}
+
+	@keyframes debrisFall {
+		0%,
+		70% {
+			opacity: 0;
+			transform: translateY(0);
+		}
+		75% {
+			opacity: 1;
+			transform: translateY(10px);
+		}
+		90% {
+			opacity: 0.5;
+			transform: translateY(100px);
+		}
+		91%,
+		100% {
+			opacity: 0;
+			transform: translateY(0);
+		}
+	}
+
+	/* Dust clouds */
+	.dust {
+		position: absolute;
+		bottom: 50px;
+		background: rgba(200, 200, 200, 0.6);
+		border-radius: 50%;
+		opacity: 0;
+	}
+
+	.dust-1 {
+		width: 30px;
+		height: 20px;
+		left: 40px;
+		animation: dustPuff 4s ease-out infinite;
+		animation-delay: 3.3s;
+	}
+
+	.dust-2 {
+		width: 40px;
+		height: 25px;
+		left: 80px;
+		animation: dustPuff 4s ease-out infinite;
+		animation-delay: 3.4s;
+	}
+
+	.dust-3 {
+		width: 25px;
+		height: 18px;
+		right: 40px;
+		animation: dustPuff 4s ease-out infinite;
+		animation-delay: 3.5s;
+	}
+
+	@keyframes dustPuff {
+		0%,
+		82% {
+			opacity: 0;
+			transform: scale(0.5) translateY(0);
+		}
+		85% {
+			opacity: 0.7;
+			transform: scale(1) translateY(-5px);
+		}
+		95% {
+			opacity: 0;
+			transform: scale(1.5) translateY(-20px);
+		}
+		96%,
+		100% {
+			opacity: 0;
+			transform: scale(0.5) translateY(0);
+		}
+	}
+
+	/* Error Message */
+	.error-message {
+		margin-bottom: 2rem;
+	}
+
+	.error-code {
+		font-family: "Press Start 2P", cursive;
+		font-size: 3rem;
+		color: var(--gold);
+		text-shadow:
+			3px 3px 0 var(--gold-dark),
+			-1px -1px 0 rgba(0, 0, 0, 0.3);
+		display: block;
+		margin-bottom: 0.5rem;
+	}
+
+	.error-message h1 {
+		font-family: "Press Start 2P", cursive;
+		font-size: 1.2rem;
+		color: var(--text-light);
+		margin-bottom: 1rem;
+		text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.3);
+	}
+
+	.error-message p {
+		font-size: 1.5rem;
+		color: var(--text-light);
+		opacity: 0.9;
+	}
+
+	/* Action Buttons */
+	.error-actions {
+		display: flex;
+		gap: 1rem;
+		margin-bottom: 2rem;
+	}
+
+	.action-button {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.75rem 1.5rem;
+		font-family: "VT323", monospace;
+		font-size: 1.3rem;
+		border: none;
+		border-radius: 8px;
+		cursor: pointer;
+		transition: all 0.2s;
+		box-shadow: var(--pixel-shadow);
+		text-decoration: none;
+	}
+
+	.action-button:hover {
+		transform: translate(-2px, -2px);
+		box-shadow: var(--pixel-shadow-hover);
+	}
+
+	.action-button:active {
+		transform: translate(2px, 2px);
+		box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.2);
+	}
+
+	.action-button.primary {
+		background: var(--gold);
+		color: var(--dark-blue);
+	}
+
+	.action-button.primary:hover {
+		background: #ffe44d;
+	}
+
+	.action-button.secondary {
+		background: rgba(255, 255, 255, 0.9);
+		color: var(--dark-blue);
+	}
+
+	.action-button.secondary:hover {
+		background: white;
+	}
+
+	.button-icon {
+		font-size: 1.2rem;
+	}
+
+	/* Fun message */
+	.fun-message {
+		font-size: 1.1rem;
+		color: var(--text-light);
+		opacity: 0.7;
+		max-width: 300px;
+	}
+
+	/* Responsive */
+	@media (max-width: 600px) {
+		.back-link {
+			top: 1rem;
+			left: 1rem;
+			font-size: 0.6rem;
+			padding: 0.5rem 0.75rem;
+		}
+
+		.tower-scene {
+			width: 160px;
+			height: 224px;
+		}
+
+		.error-code {
+			font-size: 2.5rem;
+		}
+
+		.error-message h1 {
+			font-size: 1rem;
+		}
+
+		.error-actions {
+			flex-direction: column;
+		}
+
+		.action-button {
+			width: 100%;
+			justify-content: center;
+		}
+	}
+</style>
