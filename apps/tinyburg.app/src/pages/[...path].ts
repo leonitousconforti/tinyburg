@@ -1,9 +1,21 @@
 import type { APIContext, APIRoute } from "astro";
 
-import { HttpApi, HttpApiBuilder, HttpApiEndpoint, HttpApiGroup, HttpLayerRouter, HttpServer } from "@effect/platform";
-import { Config, Context, Effect, Layer, Schema } from "effect";
+import {
+    Cookies,
+    HttpApi,
+    HttpApiBuilder,
+    HttpApiEndpoint,
+    HttpApiError,
+    HttpApiGroup,
+    HttpLayerRouter,
+    HttpServer,
+    HttpServerResponse,
+    UrlParams,
+} from "@effect/platform";
+import { Config, Context, Effect, Either, Layer, Option, pipe, Schema } from "effect";
+import { Repository } from "../../domain/model";
 
-export const GoogleOAuthConfig = Config.all({
+const GoogleOAuthConfig = Config.all({
     clientId: Config.string("GOOGLE_CLIENT_ID"),
     clientSecret: Config.redacted("GOOGLE_CLIENT_SECRET"),
     redirectUri: Config.string("GOOGLE_REDIRECT_URI").pipe(
@@ -13,22 +25,95 @@ export const GoogleOAuthConfig = Config.all({
 
 class AstroLocals extends Context.Tag("AstroLocals")<AstroLocals, APIContext["locals"]>() {}
 
-const api = HttpApi.make("myApi").add(
-    HttpApiGroup.make("group").add(HttpApiEndpoint.get("test", "/").addSuccess(Schema.String))
+const OAuthGroup = HttpApiGroup.make("oauth")
+    .add(HttpApiEndpoint.get("GoogleLogin", "/auth/google/login"))
+    .add(
+        HttpApiEndpoint.get("GoogleCallback", "/auth/google/callback").setUrlParams(
+            Schema.Union(
+                Schema.Struct({ error: Schema.String }),
+                Schema.Struct({
+                    code: Schema.String,
+                    state: Schema.String,
+                })
+            )
+        )
+    );
+
+const API = HttpApi.make("TinyburgApi")
+    .add(OAuthGroup)
+    .addError(HttpApiError.NotImplemented)
+    .addError(HttpApiError.ServiceUnavailable)
+    .addError(HttpApiError.InternalServerError);
+
+const OauthGroupLive = HttpApiBuilder.group(API, "oauth", (handlers) =>
+    handlers
+        .handle("GoogleLogin", () =>
+            Effect.gen(function* () {
+                const state = "asdf"; // FIXME: implement a proper random string generator
+
+                const config = yield* Effect.orDie(GoogleOAuthConfig);
+                const googleAuthUrl = "https://accounts.google.com/o/oauth2/v2/auth";
+
+                const redirectUrl = pipe(
+                    UrlParams.empty,
+                    UrlParams.set("client_id", config.clientId),
+                    UrlParams.set("redirect_uri", config.redirectUri),
+                    UrlParams.set("response_type", "code"),
+                    UrlParams.set("scope", "openid email profile"),
+                    UrlParams.set("state", state),
+                    UrlParams.set("access_type", "offline"),
+                    UrlParams.set("prompt", "consent"),
+                    (urlParams) => UrlParams.makeUrl(googleAuthUrl, urlParams, Option.none()),
+                    Either.getOrUndefined
+                );
+
+                if (redirectUrl === undefined) {
+                    return yield* new HttpApiError.InternalServerError();
+                }
+
+                const cookies = pipe(
+                    Cookies.empty,
+                    Cookies.set("google_oauth_state", state, {
+                        maxAge: 60 * 10, // 10 minutes
+                        httpOnly: true,
+                        path: "/",
+                        secure: true, // only add when deploying with https (prod)
+                        sameSite: "lax", // optional - do not use "strict"
+                    }),
+                    Either.getOrUndefined
+                );
+
+                if (cookies === undefined) {
+                    return yield* new HttpApiError.InternalServerError();
+                }
+
+                return HttpServerResponse.redirect(redirectUrl, { cookies });
+            })
+        )
+        .handle("GoogleCallback", ({ request, urlParams }) =>
+            Effect.gen(function* () {
+                if ("error" in urlParams) {
+                    return yield* new HttpApiError.InternalServerError();
+                }
+
+                const cookies = Cookies.fromSetCookie(Object.values(request.cookies));
+                const stateCookie = Cookies.get(cookies, "google_oauth_state").pipe(Option.getOrUndefined);
+
+                if (stateCookie === undefined || stateCookie.value !== urlParams.state) {
+                    return yield* new HttpApiError.InternalServerError();
+                }
+
+                yield* Repository.upsertUserFromOAuth({
+                    provider: "google",
+                });
+
+                return HttpServerResponse.empty();
+            })
+        )
 );
 
-const groupLive = HttpApiBuilder.group(api, "group", (handlers) =>
-    handlers.handle("test", () =>
-        Effect.gen(function* () {
-            const locals = yield* AstroLocals;
-            console.log("Astro Locals:", locals);
-            return "Hello from Effect API!";
-        })
-    )
-);
-
-const { dispose, handler } = HttpLayerRouter.addHttpApi(api).pipe(
-    Layer.provide([groupLive, HttpServer.layerContext]),
+const { dispose, handler } = HttpLayerRouter.addHttpApi(API).pipe(
+    Layer.provide([OauthGroupLive, HttpServer.layerContext]),
     (layer) =>
         layer as Layer.Layer<
             Layer.Layer.Success<typeof layer>,
