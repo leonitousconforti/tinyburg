@@ -93,9 +93,9 @@ export class Repository extends Effect.Service<Repository>()("@tinyburg/tinyburg
             execute: ({ avatarUrl, displayName, provider, providerAccountId }) => sql`
                 WITH existing_user AS (
                     -- Try to find the user linked to this oauth account
-                    SELECT user.* FROM oauth_accounts oauth_account
-                    JOIN users user ON user.id = oauth_account.user_id
-                    WHERE oauth_account.provider = ${provider} AND oauth_account.provider_account_id = ${providerAccountId}
+                    SELECT u.* FROM oauth_accounts oa
+                    JOIN users u ON u.id = oa.user_id
+                    WHERE oa.provider = ${provider} AND oa.provider_account_id = ${providerAccountId}
                 ),
                 updated_user AS (
                     -- Update the existing user's profile if found
