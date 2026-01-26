@@ -53,35 +53,29 @@ export class Repository extends Effect.Service<Repository>()("@tinyburg/tinyburg
     effect: Effect.gen(function* () {
         const sql = yield* SqlClient.SqlClient;
 
-        const createSession = SqlSchema.single({
-            Result: Session,
-            Request: Schema.Struct({
-                user: User,
-                expiresIn: Schema.optional(Schema.DurationFromSelf),
-            }),
-            execute: Effect.fnUntraced(function* ({ expiresIn, user }) {
-                const now = yield* DateTime.now;
-                const expiresAt = DateTime.addDuration(now, expiresIn ?? Duration.days(30));
-                const session = Session.insert.make({ userId: user.id, expiresAt });
-                return yield* sql`INSERT INTO sessions ${sql.insert(session).returning("*")}`;
-            }),
+        const sessions = yield* Model.makeRepository(Session, {
+            idColumn: "id",
+            tableName: "sessions",
+            spanPrefix: "tinyburg.app.domain.Repository.sessions",
         });
 
-        const deleteSession = SqlSchema.void({
-            Request: Schema.Struct({
-                sessionId: Schema.UUID,
-            }),
-            execute: ({ sessionId }) => sql`
-                DELETE FROM sessions WHERE id = ${sessionId}
-            `,
-        });
+        const deleteSession = sessions.delete;
+        const createSession = (
+            user: User,
+            expiresIn?: Duration.DurationInput | undefined
+        ): Effect.Effect<Session, never, never> =>
+            Effect.flatMap(DateTime.now, (now) =>
+                sessions.insert({
+                    userId: user.id,
+                    createdAt: undefined,
+                    expiresAt: DateTime.addDuration(now, expiresIn ?? Duration.days(30)),
+                })
+            );
 
         const findUserBySession = SqlSchema.findOne({
             Result: User,
-            Request: Schema.Struct({
-                sessionId: Schema.UUID,
-            }),
-            execute: ({ sessionId }) => sql`
+            Request: Schema.UUID,
+            execute: (sessionId) => sql`
                 SELECT users.* FROM sessions
                 INNER JOIN users ON sessions.user_id = users.id
                 WHERE sessions.id = ${sessionId} AND sessions.expires_at > NOW()
@@ -135,8 +129,8 @@ export class Repository extends Effect.Service<Repository>()("@tinyburg/tinyburg
         });
 
         return {
-            createSession,
             deleteSession,
+            createSession,
             findUserBySession,
             upsertUserFromOAuth,
         };
