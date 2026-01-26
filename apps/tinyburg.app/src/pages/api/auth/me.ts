@@ -1,9 +1,9 @@
 import type { APIRoute } from "astro";
 import { Effect, Option } from "effect";
 
-import { Repository } from "../../../domain/model.ts";
-import { runPromise } from "../../../lib/db.ts";
-import { parseCookies, SESSION_COOKIE_NAME } from "../../../lib/oauth.ts";
+import { Repository } from "../../../../domain/model.ts";
+import { runPromise } from "../../../../lib/db.ts";
+import { parseCookies, SESSION_COOKIE_NAME } from "../../../../lib/oauth.ts";
 
 /**
  * GET /api/auth/me

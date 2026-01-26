@@ -1,7 +1,7 @@
 import type { APIRoute } from "astro";
 import { Effect } from "effect";
 
-import { createStateCookie, DiscordOAuthConfig, generateState, getDiscordAuthUrl } from "../../../../lib/oauth.ts";
+import { createStateCookie, DiscordOAuthConfig, generateState, getDiscordAuthUrl } from "../../../../../lib/oauth.ts";
 
 /**
  * GET /api/auth/discord/login

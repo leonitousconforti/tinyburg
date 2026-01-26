@@ -1,8 +1,8 @@
 import type { APIRoute } from "astro";
 import { Effect, Option, Redacted } from "effect";
 
-import { Repository } from "../../../../domain/model.ts";
-import { runPromise } from "../../../../lib/db.ts";
+import { Repository } from "../../../../../domain/model.ts";
+import { runPromise } from "../../../../../lib/db.ts";
 import {
     createSessionCookie,
     DiscordOAuthConfig,
@@ -11,7 +11,7 @@ import {
     getDiscordUserInfo,
     OAUTH_STATE_COOKIE_NAME,
     parseCookies,
-} from "../../../../lib/oauth.ts";
+} from "../../../../../lib/oauth.ts";
 
 /**
  * GET /api/auth/discord/callback

@@ -10,8 +10,7 @@ export default Effect.flatMap(
             created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
             last_login_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
             display_name TEXT NOT NULL,
-            avatar_url TEXT,
-            email TEXT
+            avatar_url TEXT
         );
 
         -- OAuth accounts table for linking OAuth providers to users
