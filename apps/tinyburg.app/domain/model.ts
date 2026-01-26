@@ -91,7 +91,11 @@ export class Repository extends Effect.Service<Repository>()("@tinyburg/tinyburg
                 avatarUrl: Schema.OptionFromNullishOr(Schema.String, null),
             }),
             execute: ({ avatarUrl, displayName, provider, providerAccountId }) => sql`
-                WITH existing_user AS (
+                WITH lock AS (
+                    -- Acquire an advisory lock to prevent race conditions for the same OAuth account
+                    SELECT pg_advisory_xact_lock(hashtext(${provider} || ':' || ${providerAccountId}))
+                ),
+                existing_user AS (
                     -- Try to find the user linked to this oauth account
                     SELECT u.* FROM oauth_accounts oa
                     JOIN users u ON u.id = oa.user_id
