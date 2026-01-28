@@ -68,6 +68,7 @@ export class PendingTinyTowerAccount extends Model.Class<PendingTinyTowerAccount
     playerId: PlayerIdSchema,
     playerEmail: Schema.String,
     createdAt: Model.DateTimeInsertFromDate,
+    expiresAt: Model.Field({ select: Model.DateTimeFromDate }),
 }) {}
 
 /**

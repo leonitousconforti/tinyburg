@@ -323,6 +323,9 @@ importers:
       typescript:
         specifier: 5.9.3
         version: 5.9.3
+      vite:
+        specifier: 6.4.1
+        version: 6.4.1
 
   packages/bitprints: {}
 
