@@ -3,8 +3,8 @@ import { Effect, Either, Option, pipe } from "effect";
 
 import { makeAstroEndpoint } from "../../../../api/handler";
 import { AstroContext } from "../../../../api/tags";
-import { randomStateGenerator, Sha256CodeChallenge } from "../shared";
-import { authUrl, GoogleOAuthConfig } from "./shared";
+import { randomStateGenerator, Sha256CodeChallenge } from "../_shared";
+import { authUrl, GoogleOAuthConfig } from "./_shared";
 
 export const GET = Effect.gen(function* () {
     const Astro = yield* AstroContext;

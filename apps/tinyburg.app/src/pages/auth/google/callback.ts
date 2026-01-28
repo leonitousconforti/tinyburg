@@ -12,8 +12,8 @@ import { DateTime, Effect, Option, pipe, Schema, String } from "effect";
 import { makeAstroEndpoint } from "../../../../api/handler";
 import { AstroContext } from "../../../../api/tags";
 import { Repository } from "../../../../domain/model";
-import { OAuthResponseSchema } from "../shared";
-import { GoogleOAuthConfig, tokenUrl } from "./shared";
+import { OAuthResponseSchema } from "../_shared";
+import { GoogleOAuthConfig, tokenUrl } from "./_shared";
 
 export const GET = Effect.gen(function* () {
     const config = yield* Effect.orDie(GoogleOAuthConfig);
