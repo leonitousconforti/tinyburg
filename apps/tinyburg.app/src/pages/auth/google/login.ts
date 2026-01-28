@@ -6,7 +6,7 @@ import { AstroContext } from "../../../../api/tags";
 import { randomStateGenerator, Sha256CodeChallenge } from "../_shared";
 import { authUrl, GoogleOAuthConfig } from "./_shared";
 
-export const GET = Effect.gen(function* () {
+export const GET = await Effect.gen(function* () {
     const Astro = yield* AstroContext;
     const state = randomStateGenerator();
     const codeVerifier = randomStateGenerator();
