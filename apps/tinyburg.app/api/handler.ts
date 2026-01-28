@@ -5,25 +5,32 @@ import { Context, Effect, type ManagedRuntime, type Scope } from "effect";
 import { AppRuntime } from "./runtime";
 import { AstroContext } from "./tags";
 
-export const makeAstroEndpoint = async <E>(
-    app: HttpApp.Default<E, AstroContext | Scope.Scope | ManagedRuntime.ManagedRuntime.Context<typeof AppRuntime>>,
+export const makeAstroEndpoint = <E>(
+    app: HttpApp.Default<
+        E,
+        | AstroContext
+        | Scope.Scope
+        | HttpServerRequest.HttpServerRequest
+        | ManagedRuntime.ManagedRuntime.Context<typeof AppRuntime>
+    >,
     middleware?: HttpMiddleware.HttpMiddleware | undefined
-): Promise<APIRoute> => {
-    const runtime = await AppRuntime.runtime();
-    const emptyAstroContext = Context.empty() as Context.Context<AstroContext>;
+): APIRoute => {
+    type R = ManagedRuntime.ManagedRuntime.Context<typeof AppRuntime>;
+
+    let cachedHandler:
+        | ((request: Request, context?: Context.Context<never> | undefined) => Promise<Response>)
+        | undefined = undefined;
+
     const appWithoutAstroContext = Effect.mapInputContext(
         app,
-        (
-            requiredContext: Context.Context<
-                | Scope.Scope
-                | HttpServerRequest.HttpServerRequest
-                | ManagedRuntime.ManagedRuntime.Context<typeof AppRuntime>
-            >
-        ) => Context.merge(requiredContext, emptyAstroContext)
+        (requiredContext: Context.Context<Scope.Scope | HttpServerRequest.HttpServerRequest | R>) =>
+            Context.merge(requiredContext, Context.empty() as Context.Context<AstroContext>)
     );
-    const handler = HttpApp.toWebHandlerRuntime(runtime)(appWithoutAstroContext, middleware);
+
     return async (apiContext) => {
+        const runtime = await AppRuntime.runtime();
+        cachedHandler ??= HttpApp.toWebHandlerRuntime(runtime)(appWithoutAstroContext, middleware);
         const context = Context.make(AstroContext, apiContext);
-        return await handler(apiContext.request, context);
+        return await cachedHandler(apiContext.request, context);
     };
 };

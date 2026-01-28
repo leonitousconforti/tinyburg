@@ -15,7 +15,7 @@ import { Repository } from "../../../../domain/model";
 import { OAuthResponseSchema } from "../_shared";
 import { GoogleOAuthConfig, tokenUrl } from "./_shared";
 
-export const GET = await Effect.gen(function* () {
+export const GET = Effect.gen(function* () {
     const config = yield* Effect.orDie(GoogleOAuthConfig);
     const request = yield* HttpServerRequest.HttpServerRequest;
 

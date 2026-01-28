@@ -6,11 +6,13 @@ import { AstroContext } from "../../../../api/tags";
 import { randomStateGenerator, Sha256CodeChallenge } from "../_shared";
 import { authUrl, GoogleOAuthConfig } from "./_shared";
 
-export const GET = await Effect.gen(function* () {
+export const GET = Effect.gen(function* () {
     const Astro = yield* AstroContext;
+    const config = yield* Effect.orDie(GoogleOAuthConfig);
+
+    // Generate state and code verifier for PKCE
     const state = randomStateGenerator();
     const codeVerifier = randomStateGenerator();
-    const config = yield* Effect.orDie(GoogleOAuthConfig);
 
     // Build the Google OAuth authorization URL
     const maybeGoogleAuthorizationUrl = pipe(
