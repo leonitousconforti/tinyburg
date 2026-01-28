@@ -1,5 +1,7 @@
-declare namespace App {
-    interface Locals {
-        foo?: string;
-    }
-}
+// import type { User } from "../../domain/model";
+
+// declare namespace App {
+//     interface Locals {
+//         user?: User;
+//     }
+// }

@@ -3,12 +3,12 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 ---
 
 <BaseLayout title="About | Tinyburg">
-	<div class="about-container">
-		<a href="/" class="back-link">← Back to Home</a>
+	<div class="page-container about-container">
+		<a href="/" class="back-link back-link--fixed">← Back to Home</a>
 
-		<div class="about-card">
-			<div class="about-header">
-				<span class="about-icon">🏗️</span>
+		<div class="card card--wide card--gold about-card">
+			<div class="page-header">
+				<span class="page-header__icon page-header__icon--large">🏗️</span>
 				<h1>About Tinyburg</h1>
 				<p class="tagline">Building connections, one bitizen at a time</p>
 			</div>
@@ -161,65 +161,11 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 
 <style>
 	.about-container {
-		position: relative;
-		z-index: 1;
-		min-height: 100vh;
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		padding: 2rem;
 		padding-top: 5rem;
 	}
 
-	.back-link {
-		position: fixed;
-		top: 2rem;
-		left: 2rem;
-		font-family: "Press Start 2P", cursive;
-		font-size: 0.7rem;
-		color: var(--text-light);
-		text-decoration: none;
-		padding: 0.75rem 1rem;
-		background: rgba(26, 58, 92, 0.9);
-		border-radius: 4px;
-		transition: all 0.2s;
-		box-shadow: var(--pixel-shadow);
-		z-index: 100;
-	}
-
-	.back-link:hover {
-		transform: translate(-2px, -2px);
-		box-shadow: var(--pixel-shadow-hover);
-		background: rgba(26, 58, 92, 0.95);
-	}
-
 	.about-card {
-		background: var(--card-bg);
-		border-radius: 16px;
-		padding: 3rem;
-		width: 100%;
-		max-width: 800px;
-		box-shadow: var(--pixel-shadow-hover);
-		border: 4px solid var(--gold);
 		margin-bottom: 2rem;
-	}
-
-	.about-header {
-		text-align: center;
-		margin-bottom: 2.5rem;
-	}
-
-	.about-icon {
-		font-size: 4rem;
-		display: block;
-		margin-bottom: 1rem;
-	}
-
-	.about-header h1 {
-		font-family: "Press Start 2P", cursive;
-		font-size: 1.3rem;
-		color: var(--dark-blue);
-		margin-bottom: 0.75rem;
 	}
 
 	.tagline {

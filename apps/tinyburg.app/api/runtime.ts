@@ -1,7 +1,7 @@
-import { Path } from "@effect/platform";
+import { FetchHttpClient, Path, PlatformConfigProvider } from "@effect/platform";
 import { NodeContext } from "@effect/platform-node";
 import { PgClient, PgMigrator } from "@effect/sql-pg";
-import { Config, Effect, Layer, String } from "effect";
+import { Config, Effect, Layer, ManagedRuntime, String } from "effect";
 
 import { Repository } from "../domain/model.ts";
 
@@ -9,7 +9,7 @@ import { Repository } from "../domain/model.ts";
  * @since 1.0.0
  * @category Layers
  */
-export const SqlLive = PgClient.layerConfig({
+const SqlLive = PgClient.layerConfig({
     url: Config.redacted("DATABASE_URL"),
     transformQueryNames: Config.succeed(String.camelToSnake),
     transformResultNames: Config.succeed(String.snakeToCamel),
@@ -19,7 +19,7 @@ export const SqlLive = PgClient.layerConfig({
  * @since 1.0.0
  * @category Layers
  */
-export const MigratorLive = Effect.gen(function* () {
+const MigratorLive = Effect.gen(function* () {
     const path = yield* Path.Path;
     const migrations = yield* path.fromFileUrl(new URL("../migrations", import.meta.url));
     const loader = PgMigrator.fromFileSystem(migrations);
@@ -30,4 +30,19 @@ export const MigratorLive = Effect.gen(function* () {
  * @since 1.0.0
  * @category Layers
  */
-export const DatabaseLive = Repository.Default.pipe(Layer.provide(MigratorLive), Layer.provide(SqlLive));
+const DatabaseLive = Repository.Default.pipe(Layer.provide(MigratorLive), Layer.provide(SqlLive));
+
+/**
+ * @since 1.0.0
+ * @category Layers
+ */
+export const AppLive = Layer.mergeAll(DatabaseLive, FetchHttpClient.layer).pipe(
+    Layer.provide(PlatformConfigProvider.layerDotEnvAdd("./.env")),
+    Layer.provide(NodeContext.layer)
+);
+
+/**
+ * @since 1.0.0
+ * @category Runtime
+ */
+export const AppRuntime = ManagedRuntime.make(AppLive);

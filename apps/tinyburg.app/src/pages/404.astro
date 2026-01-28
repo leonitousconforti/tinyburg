@@ -3,8 +3,8 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 ---
 
 <BaseLayout title="404 - Page Not Found | Tinyburg">
-	<div class="error-container">
-		<a href="/" class="back-link">← Back to Home</a>
+	<div class="page-container page-container--centered">
+		<a href="/" class="back-link back-link--absolute">← Back to Home</a>
 
 		<div class="error-content">
 			<!-- Animated Tower with missing floor -->
@@ -132,38 +132,6 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 </BaseLayout>
 
 <style>
-	.error-container {
-		position: relative;
-		z-index: 1;
-		min-height: 100vh;
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: center;
-		padding: 2rem;
-	}
-
-	.back-link {
-		position: absolute;
-		top: 2rem;
-		left: 2rem;
-		font-family: "Press Start 2P", cursive;
-		font-size: 0.7rem;
-		color: var(--text-light);
-		text-decoration: none;
-		padding: 0.75rem 1rem;
-		background: rgba(26, 58, 92, 0.8);
-		border-radius: 4px;
-		transition: all 0.2s;
-		box-shadow: var(--pixel-shadow);
-	}
-
-	.back-link:hover {
-		transform: translate(-2px, -2px);
-		box-shadow: var(--pixel-shadow-hover);
-		background: rgba(26, 58, 92, 0.95);
-	}
-
 	.error-content {
 		display: flex;
 		flex-direction: column;

@@ -1,4 +1,5 @@
 import { Model, SqlClient, SqlSchema } from "@effect/sql";
+import { PlayerAuthKeySchema, PlayerIdSchema } from "@tinyburg/nimblebit-sdk/NimblebitConfig";
 import { DateTime, Duration, Effect, Schema } from "effect";
 
 /**
@@ -45,18 +46,57 @@ export class Session extends Model.Class<Session>("Session")({
 
 /**
  * @since 1.0.0
+ * @category Models
+ */
+export class TinyTowerAccount extends Model.Class<TinyTowerAccount>("TinyTowerAccount")({
+    id: Model.Generated(Schema.UUID),
+    userId: Schema.UUID,
+    playerId: PlayerIdSchema,
+    playerAuthKey: PlayerAuthKeySchema,
+    playerEmail: Schema.String,
+    createdAt: Model.DateTimeInsertFromDate,
+    verifiedAt: Model.DateTimeFromDate,
+}) {}
+
+/**
+ * @since 1.0.0
+ * @category Models
+ */
+export class PendingTinyTowerAccount extends Model.Class<PendingTinyTowerAccount>("PendingTinyTowerAccount")({
+    id: Model.Generated(Schema.UUID),
+    userId: Schema.UUID,
+    playerId: PlayerIdSchema,
+    playerEmail: Schema.String,
+    createdAt: Model.DateTimeInsertFromDate,
+}) {}
+
+/**
+ * @since 1.0.0
  * @category Services
  */
 export class Repository extends Effect.Service<Repository>()("@tinyburg/tinyburg.app/domain/Repository", {
     accessors: true,
     dependencies: [],
     effect: Effect.gen(function* () {
+        console.log("here");
         const sql = yield* SqlClient.SqlClient;
 
         const sessions = yield* Model.makeRepository(Session, {
             idColumn: "id",
             tableName: "sessions",
             spanPrefix: "tinyburg.app.domain.Repository.sessions",
+        });
+
+        const _tinytowerAccounts = yield* Model.makeRepository(TinyTowerAccount, {
+            idColumn: "id",
+            tableName: "tinytower_accounts",
+            spanPrefix: "tinyburg.app.domain.Repository.tinytowerAccounts",
+        });
+
+        const _pendingTinyTowerAccounts = yield* Model.makeRepository(PendingTinyTowerAccount, {
+            idColumn: "id",
+            tableName: "pending_tinytower_accounts",
+            spanPrefix: "tinyburg.app.domain.Repository.pendingTinyTowerAccounts",
         });
 
         const deleteSession = sessions.delete;

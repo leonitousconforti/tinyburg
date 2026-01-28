@@ -1,0 +1,144 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+
+// Check for error messages
+const errorParam = Astro.url.searchParams.get("error");
+const errorMessages: Record<string, string> = {
+	// Friend code errors
+	invalid_friend_code: "Invalid friend code. Please check and try again.",
+	not_found: "No TinyTower player found with that friend code.",
+	already_linked: "This TinyTower account is already linked to another user.",
+	no_email: "This TinyTower account doesn't have an email registered for cloud sync.",
+	email_failed: "Failed to send verification email. Please try again.",
+	// Verification errors
+	invalid_code: "Invalid verification code. Please check and try again.",
+	expired: "Your verification request has expired. Please start over.",
+	no_request: "No pending link request found. Please start over.",
+	verification_failed: "Verification failed. Please try again.",
+	// General errors
+	server_error: "An error occurred. Please try again.",
+};
+const errorMessage = errorParam ? errorMessages[errorParam] || "An error occurred. Please try again." : null;
+
+// Determine which step to show based on query params
+const step = Astro.url.searchParams.get("step");
+const maskedEmail = Astro.url.searchParams.get("email") || "";
+const showVerifyStep = step === "verify" && maskedEmail;
+---
+
+<BaseLayout title="Link TinyTower Account | Tinyburg">
+	<div class="page-container">
+		<a href="/towers/@me" class="back-link">← Back to My Towers</a>
+
+		<div class="card card--narrow">
+			<!-- Step indicator -->
+			<div class="steps">
+				<div class={`step ${!showVerifyStep ? "step--active" : "step--completed"}`}>
+					<span class="step__number">1</span>
+					<span class="step__label">Friend Code</span>
+				</div>
+				<div class="step-divider"></div>
+				<div class={`step ${showVerifyStep ? "step--active" : ""}`}>
+					<span class="step__number">2</span>
+					<span class="step__label">Verify Email</span>
+				</div>
+			</div>
+
+			{errorMessage && (
+				<div class="message message--error">
+					<span class="message__icon">⚠️</span>
+					<span>{errorMessage}</span>
+				</div>
+			)}
+
+			<!-- Step 1: Friend Code -->
+			<div id="step-friend-code" class={showVerifyStep ? "hidden" : ""}>
+				<div class="page-header">
+					<span class="page-header__icon">🔗</span>
+					<h1 class="page-header__title">Link TinyTower Account</h1>
+					<p class="page-header__subtitle">Connect your TinyTower account to start trading</p>
+				</div>
+
+				<form action="/api/towers/link/start" method="POST" class="form">
+					<div class="form-group">
+						<label for="friendCode" class="form-group__label">Friend Code</label>
+						<input
+							type="text"
+							id="friendCode"
+							name="friendCode"
+							class="form-group__input form-group__input--centered"
+							placeholder="e.g., ABC12"
+							maxlength="5"
+							pattern="[A-Za-z0-9]{1,5}"
+							required
+							autocomplete="off"
+							autocapitalize="characters"
+						/>
+						<p class="form-group__help">Your friend code can be found in the game's menu under "Cloud Sync"</p>
+					</div>
+
+					<button type="submit" class="btn btn--full btn--primary">
+						<span>Send Verification Email</span>
+						<span class="btn__icon">📧</span>
+					</button>
+				</form>
+
+				<div class="info-box">
+					<div class="info-box__icon">ℹ️</div>
+					<div class="info-box__content">
+						<h3 class="info-box__title">How it works</h3>
+						<ol>
+							<li>Enter your TinyTower friend code above</li>
+							<li>We'll send a verification code to your cloud sync email</li>
+							<li>Enter the code to complete the link</li>
+						</ol>
+					</div>
+				</div>
+			</div>
+
+			<!-- Step 2: Verification Code -->
+			<div id="step-verify" class={!showVerifyStep ? "hidden" : ""}>
+				<div class="page-header">
+					<span class="page-header__icon">📧</span>
+					<h1 class="page-header__title">Check Your Email</h1>
+					<p class="page-header__subtitle">We sent a verification code to <strong>{maskedEmail}</strong></p>
+				</div>
+
+				<form action="/api/towers/link/verify" method="POST" class="form">
+					<div class="form-group">
+						<label for="verificationCode" class="form-group__label">Verification Code</label>
+						<input
+							type="text"
+							id="verificationCode"
+							name="verificationCode"
+							class="form-group__input form-group__input--centered"
+							placeholder="Enter code"
+							maxlength="10"
+							required
+							autocomplete="one-time-code"
+							autocapitalize="characters"
+						/>
+						<p class="form-group__help">Enter the 6-character code from the email</p>
+					</div>
+
+					<button type="submit" class="btn btn--full btn--success">
+						<span>Verify & Link Account</span>
+						<span class="btn__icon">✓</span>
+					</button>
+				</form>
+
+				<div class="text-center mb-3">
+					<p class="form-group__help mb-1">Didn't receive the email?</p>
+					<a href="/towers/@link" class="link">Send a new code</a>
+				</div>
+
+				<div class="info-box info-box--warning">
+					<div class="info-box__icon">⏱️</div>
+					<div class="info-box__content">
+						<p>The verification code expires in <strong>10 minutes</strong>. Check your spam folder if you don't see the email.</p>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</BaseLayout>

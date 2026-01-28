@@ -3,10 +3,10 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 ---
 
 <BaseLayout title="Privacy Policy | Tinyburg">
-	<div class="legal-container">
-		<a href="/" class="back-link">← Back to Home</a>
+	<div class="page-container legal-container">
+		<a href="/" class="back-link back-link--fixed">← Back to Home</a>
 
-		<div class="legal-card">
+		<div class="card card--wide card--gold legal-card">
 			<h1>Privacy Policy</h1>
 			<p class="last-updated">Last updated: January 23, 2026</p>
 
@@ -169,46 +169,10 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 
 <style>
 	.legal-container {
-		position: relative;
-		z-index: 1;
-		min-height: 100vh;
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		padding: 2rem;
 		padding-top: 5rem;
 	}
 
-	.back-link {
-		position: fixed;
-		top: 2rem;
-		left: 2rem;
-		font-family: "Press Start 2P", cursive;
-		font-size: 0.7rem;
-		color: var(--text-light);
-		text-decoration: none;
-		padding: 0.75rem 1rem;
-		background: rgba(26, 58, 92, 0.9);
-		border-radius: 4px;
-		transition: all 0.2s;
-		box-shadow: var(--pixel-shadow);
-		z-index: 100;
-	}
-
-	.back-link:hover {
-		transform: translate(-2px, -2px);
-		box-shadow: var(--pixel-shadow-hover);
-		background: rgba(26, 58, 92, 0.95);
-	}
-
 	.legal-card {
-		background: var(--card-bg);
-		border-radius: 16px;
-		padding: 3rem;
-		width: 100%;
-		max-width: 800px;
-		box-shadow: var(--pixel-shadow-hover);
-		border: 4px solid var(--gold);
 		margin-bottom: 2rem;
 	}
 
