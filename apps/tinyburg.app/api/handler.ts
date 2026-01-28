@@ -1,19 +1,29 @@
-import { HttpApp, type HttpMiddleware } from "@effect/platform";
+import { HttpApp, type HttpMiddleware, type HttpServerRequest } from "@effect/platform";
 import { type APIRoute } from "astro";
-import { Context, type ManagedRuntime } from "effect";
+import { Context, Effect, type ManagedRuntime, type Scope } from "effect";
 
 import { AppRuntime } from "./runtime";
 import { AstroContext } from "./tags";
 
-export const makeAstroEndpoint = <E>(
-    app: HttpApp.Default<E, AstroContext | ManagedRuntime.ManagedRuntime.Context<typeof AppRuntime>>,
+export const makeAstroEndpoint = async <E>(
+    app: HttpApp.Default<E, AstroContext | Scope.Scope | ManagedRuntime.ManagedRuntime.Context<typeof AppRuntime>>,
     middleware?: HttpMiddleware.HttpMiddleware | undefined
-): APIRoute => {
+): Promise<APIRoute> => {
+    const runtime = await AppRuntime.runtime();
+    const emptyAstroContext = Context.empty() as Context.Context<AstroContext>;
+    const appWithoutAstroContext = Effect.mapInputContext(
+        app,
+        (
+            requiredContext: Context.Context<
+                | Scope.Scope
+                | HttpServerRequest.HttpServerRequest
+                | ManagedRuntime.ManagedRuntime.Context<typeof AppRuntime>
+            >
+        ) => Context.merge(requiredContext, emptyAstroContext)
+    );
+    const handler = HttpApp.toWebHandlerRuntime(runtime)(appWithoutAstroContext, middleware);
     return async (apiContext) => {
-        const runtime = await AppRuntime.runtime();
         const context = Context.make(AstroContext, apiContext);
-        const appAstroContextOmitted = app as HttpApp.Default<E, never>;
-        const handler = HttpApp.toWebHandlerRuntime(runtime)(appAstroContextOmitted, middleware);
         return await handler(apiContext.request, context);
     };
 };
