@@ -23,15 +23,18 @@ const copyMigrationsPlugin = {
 
 // https://astro.build/config
 export default defineConfig({
-    prefetch: true,
     output: "server",
     site: "https://tinyburg.app",
     integrations: [sitemap()],
+    prefetch: true,
+    experimental: {
+        clientPrerender: true,
+    },
     adapter: node({
         mode: "standalone",
     }),
     server: {
-        allowedHosts: ["tinyburg.app", "www.tinyburg.app"],
+        allowedHosts: ["tinyburg.app"],
     },
     vite: {
         // @ts-ignore
