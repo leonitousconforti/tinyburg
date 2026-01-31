@@ -48,4 +48,4 @@ export const AppLive = Layer.mergeAll(DatabaseLive, FetchHttpClient.layer).pipe(
 export const AppRuntime = ManagedRuntime.make(AppLive);
 
 // Warm the runtime at module load time
-AppRuntime.runSyncExit(Effect.void);
+AppRuntime.runFork(Effect.void);
