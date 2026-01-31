@@ -12,8 +12,14 @@ import { DateTime, Effect, Option, pipe, Schema, String } from "effect";
 import { makeAstroEndpoint } from "../../../../api/handler";
 import { AstroContext } from "../../../../api/tags";
 import { Repository } from "../../../../domain/model";
-import { OAuthResponseSchema } from "../_shared";
-import { GoogleOAuthConfig, tokenUrl } from "./_shared";
+import { OAuthResponseSchema, SESSION_ID_COOKIE_NAME } from "../_shared";
+
+import {
+    GOOGLE_OAUTH_CODE_VERIFIER_COOKIE_NAME,
+    GOOGLE_OAUTH_STATE_COOKIE_NAME,
+    GoogleOAuthConfig,
+    tokenUrl,
+} from "./_shared";
 
 export const GET = Effect.gen(function* () {
     const config = yield* Effect.orDie(GoogleOAuthConfig);
@@ -38,8 +44,8 @@ export const GET = Effect.gen(function* () {
     }
 
     // Retrieve cookies
-    const stateCookie = Option.fromNullable(request.cookies["google_oauth_state"]);
-    const codeVerifierCookie = Option.fromNullable(request.cookies["google_oauth_verifier"]);
+    const stateCookie = Option.fromNullable(request.cookies[GOOGLE_OAUTH_STATE_COOKIE_NAME]);
+    const codeVerifierCookie = Option.fromNullable(request.cookies[GOOGLE_OAUTH_CODE_VERIFIER_COOKIE_NAME]);
 
     // Check state parameter to prevent CSRF attacks
     if (Option.isNone(stateCookie) || Option.isNone(codeVerifierCookie) || stateCookie.value !== urlParams.state) {
@@ -67,7 +73,7 @@ export const GET = Effect.gen(function* () {
     );
 
     // The state cookie has served its purpose, delete it
-    const deleteStateCookie = Cookies.unsafeMakeCookie("google_oauth_state", String.empty, {
+    const deleteStateCookie = Cookies.unsafeMakeCookie(GOOGLE_OAUTH_STATE_COOKIE_NAME, String.empty, {
         expires: new Date(0),
         httpOnly: true,
         path: "/",
@@ -76,7 +82,7 @@ export const GET = Effect.gen(function* () {
     });
 
     // The code verifier cookie has served its purpose, delete it
-    const deleteCodeVerifierCookie = Cookies.unsafeMakeCookie("google_oauth_verifier", String.empty, {
+    const deleteCodeVerifierCookie = Cookies.unsafeMakeCookie(GOOGLE_OAUTH_CODE_VERIFIER_COOKIE_NAME, String.empty, {
         expires: new Date(0),
         httpOnly: true,
         path: "/",
@@ -98,7 +104,7 @@ export const GET = Effect.gen(function* () {
 
     // Create a session for the user
     const session = yield* Repository.createSession(user);
-    const sessionCookie = Cookies.unsafeMakeCookie("session_id", session.id, {
+    const sessionCookie = Cookies.unsafeMakeCookie(SESSION_ID_COOKIE_NAME, session.id, {
         expires: DateTime.toDateUtc(session.expiresAt),
         httpOnly: true,
         path: "/",

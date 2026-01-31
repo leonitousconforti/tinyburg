@@ -42,8 +42,10 @@
         "glob": "13.0.0",
         "madge": "8.0.0",
         "prettier": "3.7.4",
+        "prettier-plugin-astro": "0.14.1",
         "prettier-plugin-jsdoc": "1.8.0",
         "prettier-plugin-packagejson": "2.5.20",
+        "prettier-plugin-tailwindcss": "0.7.2",
         "tsx": "4.21.0",
         "typescript": "5.9.3",
         "typescript-eslint": "8.53.0",
@@ -51,5 +53,10 @@
         "vite-tsconfig-paths": "6.0.4",
         "vitest": "3.2.4"
     },
-    "packageManager": "pnpm@9.15.9"
+    "packageManager": "pnpm@9.15.9",
+    "pnpm": {
+        "patchedDependencies": {
+            "prettier-plugin-jsdoc": "patches/prettier-plugin-jsdoc.patch"
+        }
+    }
 }

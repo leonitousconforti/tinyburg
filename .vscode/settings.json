@@ -2,9 +2,13 @@
     "direnv.restart.automatic": true,
     "typescript.tsdk": "node_modules/typescript/lib",
     "typescript.enablePromptUseWorkspaceTsdk": true,
+    "prettier.documentSelectors": ["**/*.astro"],
     "editor.defaultFormatter": "EditorConfig.EditorConfig",
-    "[typescript][typescriptreact][javascript][javascriptreact][json][jsonc]": {
+    "[typescript][typescriptreact][javascript][javascriptreact][css][scss][json][jsonc][astro]": {
         "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "files.associations": {
+        "*.css": "tailwindcss"
     },
 
     "cSpell.enabled": true,
@@ -37,6 +41,7 @@
         "effectful",
         "efffrida",
         "encodeable",
+        "fontsource",
         "frida",
         "frontmost",
         "gplayapi",
@@ -52,6 +57,8 @@
         "msgpackr",
         "nimblebit",
         "nixpkgs",
+        "pagereveal",
+        "pageswap",
         "Pald",
         "Pbbn",
         "Pbhst",
@@ -80,6 +87,7 @@
         "Ppig",
         "Pplim",
         "Preg",
+        "Prerendered",
         "Prfs",
         "Psfx",
         "Pstories",
@@ -90,6 +98,7 @@
         "Pver",
         "Pvte",
         "rechunk",
+        "rgba",
         "SEMATTRS",
         "swiftshader",
         "TIMESTAMPTZ",

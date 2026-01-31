@@ -4,7 +4,13 @@ import { Effect, Either, Option, pipe } from "effect";
 import { makeAstroEndpoint } from "../../../../api/handler";
 import { AstroContext } from "../../../../api/tags";
 import { randomStateGenerator, Sha256CodeChallenge } from "../_shared";
-import { authUrl, GoogleOAuthConfig } from "./_shared";
+
+import {
+    authUrl,
+    GOOGLE_OAUTH_CODE_VERIFIER_COOKIE_NAME,
+    GOOGLE_OAUTH_STATE_COOKIE_NAME,
+    GoogleOAuthConfig,
+} from "./_shared";
 
 export const GET = Effect.gen(function* () {
     const Astro = yield* AstroContext;
@@ -30,7 +36,7 @@ export const GET = Effect.gen(function* () {
     );
 
     // Store the state in a cookie to verify later
-    const maybeStateCookie = Cookies.makeCookie("google_oauth_state", state, {
+    const maybeStateCookie = Cookies.makeCookie(GOOGLE_OAUTH_STATE_COOKIE_NAME, state, {
         maxAge: "10 minutes",
         httpOnly: true,
         path: "/",
@@ -39,7 +45,7 @@ export const GET = Effect.gen(function* () {
     }).pipe(Either.getOrUndefined);
 
     // Store the code verifier in a cookie to verify later
-    const maybeCodeVerifierCookie = Cookies.makeCookie("google_oauth_verifier", codeVerifier, {
+    const maybeCodeVerifierCookie = Cookies.makeCookie(GOOGLE_OAUTH_CODE_VERIFIER_COOKIE_NAME, codeVerifier, {
         maxAge: "10 minutes",
         httpOnly: true,
         path: "/",

@@ -1,0 +1,72 @@
+@import "tailwindcss";
+
+@font-face {
+    font-family: "Press Start 2P";
+    font-style: normal;
+    font-display: swap;
+    font-weight: 400;
+    src:
+        url(@fontsource/press-start-2p/files/press-start-2p-latin-400-normal.woff2) format("woff2"),
+        url(@fontsource/press-start-2p/files/press-start-2p-latin-400-normal.woff) format("woff");
+    unicode-range:
+        U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F,
+        U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+    font-family: "VT323";
+    font-style: normal;
+    font-display: swap;
+    font-weight: 400;
+    src:
+        url(@fontsource/vt323/files/vt323-latin-400-normal.woff2) format("woff2"),
+        url(@fontsource/vt323/files/vt323-latin-400-normal.woff) format("woff");
+    unicode-range:
+        U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F,
+        U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@theme {
+    /* Fonts */
+    --font-pixel: "Press Start 2P", cursive;
+    --font-mono: "VT323", monospace;
+
+    /* Sky colors from TinyTower */
+    --color-sky-light: #87ceeb;
+    --color-sky-blue: #4fa4d4;
+    --color-sky-dark: #2d7bb3;
+
+    /* Floor type colors */
+    --color-floor-food: #ff9966;
+    --color-floor-retail: #66b3ff;
+    --color-floor-service: #cc99ff;
+    --color-floor-creative: #ff99cc;
+    --color-floor-recreation: #99ff99;
+    --color-floor-residential: #ffeb99;
+
+    /* UI colors */
+    --color-gold: #ffd700;
+    --color-gold-dark: #b8860b;
+    --color-dark-blue: #1a3a5c;
+    --color-text-dark: #2c3e50;
+    --color-card-bg: rgba(255, 255, 255, 0.95);
+
+    /* Provider colors */
+    --color-discord: #5865f2; /* https://discord.com/branding */
+    --color-google: #ea4335; /* https://partnermarketinghub.withgoogle.com/brands/google-news/visual-identity/color-palette */
+
+    /* Pixel-style shadows */
+    --shadow-pixel: 4px 4px 0px rgba(0, 0, 0, 0.2);
+    --shadow-pixel-hover: 6px 6px 0px rgba(0, 0, 0, 0.25);
+}
+
+@layer base {
+    html {
+        scroll-behavior: smooth;
+    }
+
+    body {
+        font-family: var(--font-mono);
+        color: var(--color-text-dark);
+    }
+}

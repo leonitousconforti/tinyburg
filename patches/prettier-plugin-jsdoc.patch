@@ -1,0 +1,35 @@
+diff --git a/CHANGELOG.md b/CHANGELOG.md
+deleted file mode 100644
+index 1e8f684f8b551b663f827069dd01351872552be5..0000000000000000000000000000000000000000
+diff --git a/dist/utils.js b/dist/utils.js
+index a36c1a024cda31a1aa7f65725276abf19bddd82f..c64db3fe20ac19541e8fe1f4f23ac1ad355622fd 100644
+--- a/dist/utils.js
++++ b/dist/utils.js
+@@ -160,7 +160,26 @@ async function formatCode(result, beginningSpace, options) {
+     return result;
+ }
+ const findPluginByParser = (parserName, options) => {
+-    const tsPlugin = options.plugins.find((plugin) => {
++    const plugins = options.plugins ?? [];
++
++    // https://github.com/hosseinmd/prettier-plugin-jsdoc/pull/255
++    // Only consider plugins that appear *before* prettier-plugin-jsdoc.
++    // Plugins that appear after us typically wrap our parser; delegating to them
++    // from our parse/preprocess hooks can create infinite recursion.
++    const jsdocIndex = plugins.findIndex((plugin) => {
++        return (
++            typeof plugin === "object" &&
++            plugin !== null &&
++            !(plugin instanceof URL) &&
++            (plugin).name &&
++            (plugin).name === "prettier-plugin-jsdoc"
++        );
++    });
++
++    const searchPlugins =
++        jsdocIndex === -1 ? plugins : plugins.slice(0, jsdocIndex);
++
++    const tsPlugin = searchPlugins.find((plugin) => {
+         return (typeof plugin === "object" &&
+             plugin !== null &&
+             !(plugin instanceof URL) &&

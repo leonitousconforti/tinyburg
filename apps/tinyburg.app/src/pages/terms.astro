@@ -1,210 +1,258 @@
 ---
-import BaseLayout from "../layouts/BaseLayout.astro";
+import CloudsLayout from "../layouts/CloudsLayout.astro";
+export const prerender = true;
 ---
 
-<BaseLayout title="Terms of Service | Tinyburg">
-	<div class="page-container legal-container">
-		<a href="/" class="back-link back-link--fixed">← Back to Home</a>
+<CloudsLayout
+    title="Terms of Service | Tinyburg"
+    description="Terms of Service for Tinyburg, the community trading platform for TinyTower players."
+>
+    <div class="relative min-h-screen px-4 py-16 sm:px-8 sm:py-20">
+        <a
+            href="/"
+            class="bg-dark-blue/95 font-pixel shadow-pixel hover:shadow-pixel-hover fixed top-4 left-4 flex items-center gap-2 rounded-lg px-3 py-2 text-[0.5rem] text-white backdrop-blur-sm transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 sm:top-6 sm:left-6 sm:px-4 sm:py-2.5 sm:text-[0.6rem]"
+            data-astro-prefetch="viewport"
+        >
+            <span aria-hidden="true">←</span>
+            <span>Home</span>
+        </a>
 
-		<div class="card card--wide card--gold legal-card">
-			<h1>Terms of Service</h1>
-			<p class="last-updated">Last updated: January 23, 2026</p>
+        <article class="mx-auto max-w-3xl">
+            <header
+                class="border-gold to-sky-light/30 shadow-pixel rounded-t-2xl border-3 border-b-0 bg-linear-to-br from-white p-6 sm:p-10"
+            >
+                <h1 class="font-pixel text-dark-blue text-sm leading-relaxed sm:text-lg md:text-xl">
+                    Terms of Service
+                </h1>
+                <p class="text-text-dark/60 mt-3 text-lg">Last updated: January 28, 2026</p>
+            </header>
 
-			<section>
-				<h2>1. Acceptance of Terms</h2>
-				<p>
-					By accessing or using Tinyburg ("the Service"), you agree to be bound
-					by these Terms of Service. If you do not agree to these terms, please
-					do not use the Service.
-				</p>
-			</section>
+            <div
+                class="border-gold bg-card-bg shadow-pixel-hover divide-y-2 divide-gray-100 rounded-b-2xl border-3 border-t-0 p-6 sm:p-10"
+            >
+                <section class="pb-6 sm:pb-8">
+                    <h2 class="font-pixel text-dark-blue mb-4 text-[0.55rem] leading-relaxed sm:text-[0.7rem]">
+                        1. Acceptance of Terms
+                    </h2>
+                    <p class="mb-4 text-lg leading-relaxed sm:text-xl">
+                        By accessing or using Tinyburg ("the Service"), you agree to be bound by these Terms of Service.
+                        If you do not agree to these terms, please do not use the Service.
+                    </p>
+                    <p class="text-lg leading-relaxed sm:text-xl">
+                        You must be at least 13 years old to use the Service. By using the Service, you represent that
+                        you meet this age requirement.
+                    </p>
+                </section>
 
-			<section>
-				<h2>2. Description of Service</h2>
-				<p>
-					Tinyburg is a community-driven platform that facilitates trading of
-					in-game items, bitizens, costumes, and other virtual goods between
-					players of TinyTower, a mobile game developed by NimbleBit LLC.
-				</p>
-				<p>
-					<strong>Disclaimer:</strong> Tinyburg is not affiliated with, endorsed
-					by, or connected to NimbleBit LLC in any way. TinyTower is a trademark
-					of NimbleBit LLC.
-				</p>
-			</section>
+                <section class="py-6 sm:py-8">
+                    <h2 class="font-pixel text-dark-blue mb-4 text-[0.55rem] leading-relaxed sm:text-[0.7rem]">
+                        2. Description of Service
+                    </h2>
+                    <p class="mb-4 text-lg leading-relaxed sm:text-xl">
+                        Tinyburg is a community-driven platform that facilitates trading of in-game items, bitizens,
+                        costumes, and other virtual goods between players of TinyTower, a mobile game developed by
+                        NimbleBit LLC.
+                    </p>
+                    <p class="mb-4 text-lg leading-relaxed sm:text-xl">
+                        All trades involve virtual goods within TinyTower. These items have no real-world monetary
+                        value, and Tinyburg does not facilitate any exchange of real currency between users.
+                    </p>
+                    <div class="border-gold bg-gold/10 rounded-lg border-l-4 p-4">
+                        <p class="text-lg leading-relaxed sm:text-xl">
+                            <strong class="text-dark-blue">Disclaimer:</strong> Tinyburg is an independent fan project and
+                            is not affiliated with, endorsed by, or connected to NimbleBit LLC in any way. TinyTower and related
+                            marks are trademarks of NimbleBit LLC.
+                        </p>
+                    </div>
+                </section>
 
-			<section>
-				<h2>3. User Accounts</h2>
-				<p>
-					To use certain features of the Service, you must create an account
-					using Google or Discord authentication. You are responsible for:
-				</p>
-				<ul>
-					<li>Maintaining the security of your account</li>
-					<li>All activities that occur under your account</li>
-					<li>Ensuring your account information is accurate</li>
-				</ul>
-			</section>
+                <section class="py-6 sm:py-8">
+                    <h2 class="font-pixel text-dark-blue mb-4 text-[0.55rem] leading-relaxed sm:text-[0.7rem]">
+                        3. User Accounts
+                    </h2>
+                    <p class="mb-4 text-lg leading-relaxed sm:text-xl">
+                        To use certain features of the Service, you must create an account using Google or Discord
+                        authentication. You are responsible for:
+                    </p>
+                    <ul class="space-y-2 pl-1">
+                        <li class="flex items-start gap-3 text-lg leading-relaxed sm:text-xl">
+                            <span class="bg-sky-dark mt-2.5 size-1.5 shrink-0 rounded-full" aria-hidden="true"></span>
+                            <span>Maintaining the security of your account</span>
+                        </li>
+                        <li class="flex items-start gap-3 text-lg leading-relaxed sm:text-xl">
+                            <span class="bg-sky-dark mt-2.5 size-1.5 shrink-0 rounded-full" aria-hidden="true"></span>
+                            <span>All activities that occur under your account</span>
+                        </li>
+                        <li class="flex items-start gap-3 text-lg leading-relaxed sm:text-xl">
+                            <span class="bg-sky-dark mt-2.5 size-1.5 shrink-0 rounded-full" aria-hidden="true"></span>
+                            <span>Ensuring your account information is accurate</span>
+                        </li>
+                    </ul>
+                </section>
 
-			<section>
-				<h2>4. User Conduct</h2>
-				<p>You agree not to:</p>
-				<ul>
-					<li>Use the Service for any unlawful purpose</li>
-					<li>Harass, abuse, or harm other users</li>
-					<li>Attempt to scam or defraud other users in trades</li>
-					<li>Impersonate other users or entities</li>
-					<li>Interfere with the proper functioning of the Service</li>
-					<li>Use automated systems to access the Service without permission</li>
-				</ul>
-			</section>
+                <section class="py-6 sm:py-8">
+                    <h2 class="font-pixel text-dark-blue mb-4 text-[0.55rem] leading-relaxed sm:text-[0.7rem]">
+                        4. User Conduct
+                    </h2>
+                    <p class="mb-4 text-lg leading-relaxed sm:text-xl">You agree not to:</p>
+                    <ul class="space-y-2 pl-1">
+                        <li class="flex items-start gap-3 text-lg leading-relaxed sm:text-xl">
+                            <span class="bg-sky-dark mt-2.5 size-1.5 shrink-0 rounded-full" aria-hidden="true"></span>
+                            <span>Use the Service for any unlawful purpose</span>
+                        </li>
+                        <li class="flex items-start gap-3 text-lg leading-relaxed sm:text-xl">
+                            <span class="bg-sky-dark mt-2.5 size-1.5 shrink-0 rounded-full" aria-hidden="true"></span>
+                            <span>Harass, abuse, or harm other users</span>
+                        </li>
+                        <li class="flex items-start gap-3 text-lg leading-relaxed sm:text-xl">
+                            <span class="bg-sky-dark mt-2.5 size-1.5 shrink-0 rounded-full" aria-hidden="true"></span>
+                            <span>Attempt to scam or defraud other users in trades</span>
+                        </li>
+                        <li class="flex items-start gap-3 text-lg leading-relaxed sm:text-xl">
+                            <span class="bg-sky-dark mt-2.5 size-1.5 shrink-0 rounded-full" aria-hidden="true"></span>
+                            <span>Impersonate other users or entities</span>
+                        </li>
+                        <li class="flex items-start gap-3 text-lg leading-relaxed sm:text-xl">
+                            <span class="bg-sky-dark mt-2.5 size-1.5 shrink-0 rounded-full" aria-hidden="true"></span>
+                            <span>Interfere with the proper functioning of the Service</span>
+                        </li>
+                        <li class="flex items-start gap-3 text-lg leading-relaxed sm:text-xl">
+                            <span class="bg-sky-dark mt-2.5 size-1.5 shrink-0 rounded-full" aria-hidden="true"></span>
+                            <span>Use automated systems to access the Service without permission</span>
+                        </li>
+                    </ul>
+                </section>
 
-			<section>
-				<h2>5. Trading</h2>
-				<p>
-					Tinyburg facilitates connections between players for trading purposes.
-					We do not guarantee the completion of any trade. Users trade at their
-					own risk, and Tinyburg is not responsible for:
-				</p>
-				<ul>
-					<li>Failed or incomplete trades</li>
-					<li>Misrepresentation of items by other users</li>
-					<li>Any losses incurred through trading</li>
-				</ul>
-			</section>
+                <section class="py-6 sm:py-8">
+                    <h2 class="font-pixel text-dark-blue mb-4 text-[0.55rem] leading-relaxed sm:text-[0.7rem]">
+                        5. Trading
+                    </h2>
+                    <p class="mb-4 text-lg leading-relaxed sm:text-xl">
+                        Tinyburg facilitates connections between players for trading purposes. We act solely as an
+                        intermediary platform and do not participate in trades directly. Users trade at their own risk.
+                    </p>
+                    <p class="mb-4 text-lg leading-relaxed sm:text-xl">Tinyburg is not responsible for:</p>
+                    <ul class="mb-4 space-y-2 pl-1">
+                        <li class="flex items-start gap-3 text-lg leading-relaxed sm:text-xl">
+                            <span class="bg-sky-dark mt-2.5 size-1.5 shrink-0 rounded-full" aria-hidden="true"></span>
+                            <span>Failed, incomplete, or delayed trades</span>
+                        </li>
+                        <li class="flex items-start gap-3 text-lg leading-relaxed sm:text-xl">
+                            <span class="bg-sky-dark mt-2.5 size-1.5 shrink-0 rounded-full" aria-hidden="true"></span>
+                            <span>Misrepresentation of items or user identity</span>
+                        </li>
+                        <li class="flex items-start gap-3 text-lg leading-relaxed sm:text-xl">
+                            <span class="bg-sky-dark mt-2.5 size-1.5 shrink-0 rounded-full" aria-hidden="true"></span>
+                            <span>Any losses of virtual items incurred through trading</span>
+                        </li>
+                        <li class="flex items-start gap-3 text-lg leading-relaxed sm:text-xl">
+                            <span class="bg-sky-dark mt-2.5 size-1.5 shrink-0 rounded-full" aria-hidden="true"></span>
+                            <span>Technical issues within TinyTower that affect trades</span>
+                        </li>
+                        <li class="flex items-start gap-3 text-lg leading-relaxed sm:text-xl">
+                            <span class="bg-sky-dark mt-2.5 size-1.5 shrink-0 rounded-full" aria-hidden="true"></span>
+                            <span>Actions taken by NimbleBit regarding your TinyTower account</span>
+                        </li>
+                    </ul>
+                    <p class="text-lg leading-relaxed sm:text-xl">
+                        We encourage users to verify trade details before confirming and to report any suspicious
+                        activity to our moderation team.
+                    </p>
+                </section>
 
-			<section>
-				<h2>6. Intellectual Property</h2>
-				<p>
-					The Service and its original content, features, and functionality are
-					owned by Tinyburg and are protected by applicable laws. TinyTower and
-					related game content are the property of NimbleBit LLC.
-				</p>
-			</section>
+                <section class="py-6 sm:py-8">
+                    <h2 class="font-pixel text-dark-blue mb-4 text-[0.55rem] leading-relaxed sm:text-[0.7rem]">
+                        6. Intellectual Property
+                    </h2>
+                    <p class="text-lg leading-relaxed sm:text-xl">
+                        The Service and its original content, features, and functionality are owned by Tinyburg and are
+                        protected by applicable laws. TinyTower and related game content are the property of NimbleBit
+                        LLC.
+                    </p>
+                </section>
 
-			<section>
-				<h2>7. Termination</h2>
-				<p>
-					We reserve the right to terminate or suspend your account at any time,
-					without notice, for conduct that we believe violates these Terms or is
-					harmful to other users, us, or third parties.
-				</p>
-			</section>
+                <section class="py-6 sm:py-8">
+                    <h2 class="font-pixel text-dark-blue mb-4 text-[0.55rem] leading-relaxed sm:text-[0.7rem]">
+                        7. Termination
+                    </h2>
+                    <p class="mb-4 text-lg leading-relaxed sm:text-xl">
+                        We reserve the right to terminate or suspend your account at any time, without prior notice, for
+                        conduct that we believe violates these Terms or is harmful to other users, us, or third parties.
+                    </p>
+                    <p class="text-lg leading-relaxed sm:text-xl">
+                        Upon termination, your right to use the Service will immediately cease. You may request your
+                        data by contacting us before account deletion.
+                    </p>
+                </section>
 
-			<section>
-				<h2>8. Disclaimer of Warranties</h2>
-				<p>
-					The Service is provided "as is" without warranties of any kind. We do
-					not guarantee that the Service will be uninterrupted, secure, or
-					error-free.
-				</p>
-			</section>
+                <section class="py-6 sm:py-8">
+                    <h2 class="font-pixel text-dark-blue mb-4 text-[0.55rem] leading-relaxed sm:text-[0.7rem]">
+                        8. Dispute Resolution
+                    </h2>
+                    <p class="mb-4 text-lg leading-relaxed sm:text-xl">
+                        For disputes between users regarding trades, we encourage resolution through direct
+                        communication. Our moderation team may assist but cannot enforce resolutions or recover lost
+                        virtual items.
+                    </p>
+                    <p class="text-lg leading-relaxed sm:text-xl">
+                        Any disputes with Tinyburg itself shall be resolved through informal negotiation. Contact us via
+                        Discord to address concerns before taking any other action.
+                    </p>
+                </section>
 
-			<section>
-				<h2>9. Limitation of Liability</h2>
-				<p>
-					To the maximum extent permitted by law, Tinyburg shall not be liable
-					for any indirect, incidental, special, or consequential damages
-					arising from your use of the Service.
-				</p>
-			</section>
+                <section class="py-6 sm:py-8">
+                    <h2 class="font-pixel text-dark-blue mb-4 text-[0.55rem] leading-relaxed sm:text-[0.7rem]">
+                        9. Disclaimer of Warranties
+                    </h2>
+                    <p class="text-lg leading-relaxed sm:text-xl">
+                        The Service is provided "as is" without warranties of any kind. We do not guarantee that the
+                        Service will be uninterrupted, secure, or error-free.
+                    </p>
+                </section>
 
-			<section>
-				<h2>10. Changes to Terms</h2>
-				<p>
-					We may modify these Terms at any time. Continued use of the Service
-					after changes constitutes acceptance of the modified Terms.
-				</p>
-			</section>
+                <section class="py-6 sm:py-8">
+                    <h2 class="font-pixel text-dark-blue mb-4 text-[0.55rem] leading-relaxed sm:text-[0.7rem]">
+                        10. Limitation of Liability
+                    </h2>
+                    <p class="text-lg leading-relaxed sm:text-xl">
+                        To the maximum extent permitted by law, Tinyburg shall not be liable for any indirect,
+                        incidental, special, or consequential damages arising from your use of the Service.
+                    </p>
+                </section>
 
-			<section>
-				<h2>11. Contact</h2>
-				<p>
-					If you have questions about these Terms, please contact us through our
-					community Discord server.
-				</p>
-			</section>
-		</div>
-	</div>
-</BaseLayout>
+                <section class="py-6 sm:py-8">
+                    <h2 class="font-pixel text-dark-blue mb-4 text-[0.55rem] leading-relaxed sm:text-[0.7rem]">
+                        11. Changes to Terms
+                    </h2>
+                    <p class="text-lg leading-relaxed sm:text-xl">
+                        We may modify these Terms at any time. Continued use of the Service after changes constitutes
+                        acceptance of the modified Terms.
+                    </p>
+                </section>
 
-<style>
-	.legal-container {
-		padding-top: 5rem;
-	}
-
-	.legal-card {
-		margin-bottom: 2rem;
-	}
-
-	h1 {
-		font-family: "Press Start 2P", cursive;
-		font-size: 1.2rem;
-		color: var(--dark-blue);
-		margin-bottom: 0.5rem;
-		line-height: 1.4;
-	}
-
-	.last-updated {
-		font-size: 1.1rem;
-		color: var(--text-dark);
-		opacity: 0.6;
-		margin-bottom: 2rem;
-		padding-bottom: 1rem;
-		border-bottom: 2px solid #eee;
-	}
-
-	section {
-		margin-bottom: 2rem;
-	}
-
-	h2 {
-		font-family: "Press Start 2P", cursive;
-		font-size: 0.75rem;
-		color: var(--dark-blue);
-		margin-bottom: 1rem;
-		line-height: 1.5;
-	}
-
-	p {
-		font-size: 1.3rem;
-		line-height: 1.6;
-		color: var(--text-dark);
-		margin-bottom: 1rem;
-	}
-
-	ul {
-		margin-left: 1.5rem;
-		margin-bottom: 1rem;
-	}
-
-	li {
-		font-size: 1.3rem;
-		line-height: 1.6;
-		color: var(--text-dark);
-		margin-bottom: 0.5rem;
-	}
-
-	strong {
-		color: var(--dark-blue);
-	}
-
-	@media (max-width: 600px) {
-		.legal-card {
-			padding: 1.5rem;
-		}
-
-		.back-link {
-			top: 1rem;
-			left: 1rem;
-		}
-
-		h1 {
-			font-size: 1rem;
-		}
-
-		h2 {
-			font-size: 0.65rem;
-		}
-	}
-</style>
+                <section class="pt-6 sm:pt-8">
+                    <h2 class="font-pixel text-dark-blue mb-4 text-[0.55rem] leading-relaxed sm:text-[0.7rem]">
+                        12. Contact
+                    </h2>
+                    <p class="text-lg leading-relaxed sm:text-xl">
+                        If you have questions about these Terms, please reach out through our
+                        <a
+                            href="https://discord.gg/tinyburg"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="text-discord decoration-discord/30 hover:decoration-discord inline-flex items-center gap-1 font-semibold underline decoration-2 underline-offset-2 transition-colors"
+                        >
+                            community Discord server
+                            <svg class="size-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                <path
+                                    fill-rule="evenodd"
+                                    d="M5.22 14.78a.75.75 0 001.06 0l7.22-7.22v5.69a.75.75 0 001.5 0v-7.5a.75.75 0 00-.75-.75h-7.5a.75.75 0 000 1.5h5.69l-7.22 7.22a.75.75 0 000 1.06z"
+                                    clip-rule="evenodd"></path>
+                            </svg>
+                        </a>.
+                    </p>
+                </section>
+            </div>
+        </article>
+    </div>
+</CloudsLayout>

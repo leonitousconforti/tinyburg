@@ -52,7 +52,7 @@ const JwtSchema = Schema.transformOrFail(
 
 export const OAuthResponseSchema = Schema.Struct({
     access_token: Schema.String,
-    expires_in: Schema.Number,
+    expires_in: Schema.Int,
     refresh_token: Schema.optional(Schema.String),
     scope: Schema.String,
     token_type: Schema.String,
@@ -60,10 +60,12 @@ export const OAuthResponseSchema = Schema.Struct({
 });
 
 export const randomStateGenerator = () =>
-    Array.from(crypto.getRandomValues(new Uint8Array(32)), (byte) => byte.toString(16).padStart(2, "0")).join("");
+    Array.from(crypto.getRandomValues(new Uint8Array(48)), (byte) => byte.toString(16).padStart(2, "0")).join("");
 
 export const Sha256CodeChallenge = (verifier: string) =>
     Effect.map(
         Effect.promise(() => crypto.subtle.digest("SHA-256", new TextEncoder().encode(verifier))),
-        (hashBuffer) => Encoding.encodeBase64Url(new Uint8Array(hashBuffer))
+        (hashBuffer: ArrayBuffer) => Encoding.encodeBase64Url(new Uint8Array(hashBuffer))
     );
+
+export const SESSION_ID_COOKIE_NAME = "session_id";

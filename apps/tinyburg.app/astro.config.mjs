@@ -4,6 +4,8 @@ import fs from "node:fs";
 import path from "node:path";
 
 import node from "@astrojs/node";
+import sitemap from "@astrojs/sitemap";
+import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "astro/config";
 
 /** @type {import("vite").PluginOption} */
@@ -21,7 +23,10 @@ const copyMigrationsPlugin = {
 
 // https://astro.build/config
 export default defineConfig({
+    prefetch: true,
     output: "server",
+    site: "https://tinyburg.app",
+    integrations: [sitemap()],
     adapter: node({
         mode: "standalone",
     }),
@@ -29,6 +34,7 @@ export default defineConfig({
         allowedHosts: ["tinyburg.app", "www.tinyburg.app"],
     },
     vite: {
-        plugins: [copyMigrationsPlugin],
+        // @ts-ignore
+        plugins: [copyMigrationsPlugin, tailwindcss()],
     },
 });

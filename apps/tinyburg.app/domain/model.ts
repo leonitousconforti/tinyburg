@@ -1,6 +1,6 @@
 import { Model, SqlClient, SqlSchema } from "@effect/sql";
 import { PlayerAuthKeySchema, PlayerIdSchema } from "@tinyburg/nimblebit-sdk/NimblebitConfig";
-import { DateTime, Duration, Effect, Schema } from "effect";
+import { DateTime, Duration, Effect, ParseResult, Schema } from "effect";
 
 /**
  * @since 1.0.0
@@ -79,7 +79,6 @@ export class Repository extends Effect.Service<Repository>()("@tinyburg/tinyburg
     accessors: true,
     dependencies: [],
     effect: Effect.gen(function* () {
-        console.log("here");
         const sql = yield* SqlClient.SqlClient;
 
         const sessions = yield* Model.makeRepository(Session, {
@@ -114,10 +113,59 @@ export class Repository extends Effect.Service<Repository>()("@tinyburg/tinyburg
             );
 
         const findUserBySession = SqlSchema.findOne({
-            Result: User,
             Request: Schema.UUID,
+            Result: Schema.transformOrFail(
+                Schema.encodedSchema(
+                    Schema.Struct({
+                        userId: User.fields.id,
+                        userCreatedAt: User.fields.createdAt,
+                        userLastLoginAt: User.fields.lastLoginAt,
+                        userDisplayName: User.fields.displayName,
+                        userAvatarUrl: User.fields.avatarUrl,
+                        sessionId: Session.fields.id,
+                        sessionUserId: Session.fields.userId,
+                        sessionCreatedAt: Session.fields.createdAt,
+                        sessionExpiresAt: Session.fields.expiresAt,
+                    })
+                ),
+                Schema.Struct({
+                    user: User,
+                    session: Session,
+                }),
+                {
+                    strict: true,
+                    encode: (input, _options, ast) =>
+                        ParseResult.fail(new ParseResult.Forbidden(ast, input, "Encoding is not supported")),
+                    decode: (output) =>
+                        ParseResult.succeed({
+                            user: {
+                                id: output.userId,
+                                createdAt: output.userCreatedAt,
+                                lastLoginAt: output.userLastLoginAt,
+                                displayName: output.userDisplayName,
+                                avatarUrl: output.userAvatarUrl,
+                            },
+                            session: {
+                                id: output.sessionId,
+                                userId: output.sessionUserId,
+                                createdAt: output.sessionCreatedAt,
+                                expiresAt: output.sessionExpiresAt,
+                            },
+                        }),
+                }
+            ),
             execute: (sessionId) => sql`
-                SELECT users.* FROM sessions
+                SELECT
+                    users.id as user_id,
+                    users.created_at as user_created_at,
+                    users.last_login_at as user_last_login_at,
+                    users.display_name as user_display_name,
+                    users.avatar_url as user_avatar_url,
+                    sessions.id as session_id,
+                    sessions.user_id as session_user_id,
+                    sessions.created_at as session_created_at,
+                    sessions.expires_at as session_expires_at
+                FROM sessions
                 INNER JOIN users ON sessions.user_id = users.id
                 WHERE sessions.id = ${sessionId} AND sessions.expires_at > NOW()
             `,

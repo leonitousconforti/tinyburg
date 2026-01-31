@@ -1,396 +1,247 @@
 ---
-import BaseLayout from "../layouts/BaseLayout.astro";
+import CloudsLayout from "../layouts/CloudsLayout.astro";
+export const prerender = true;
 ---
 
-<BaseLayout title="About | Tinyburg">
-	<div class="page-container about-container">
-		<a href="/" class="back-link back-link--fixed">← Back to Home</a>
+<CloudsLayout
+    title="About | Tinyburg"
+    description="Learn about Tinyburg, the community trading platform for TinyTower players."
+>
+    <div class="relative min-h-screen px-4 py-16 sm:px-8 sm:py-20">
+        <a
+            href="/"
+            class="bg-dark-blue/95 font-pixel shadow-pixel hover:shadow-pixel-hover fixed top-4 left-4 flex items-center gap-2 rounded-lg px-3 py-2 text-[0.5rem] text-white backdrop-blur-sm transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 sm:top-6 sm:left-6 sm:px-4 sm:py-2.5 sm:text-[0.6rem]"
+        >
+            <span aria-hidden="true">←</span>
+            <span>Back</span>
+        </a>
 
-		<div class="card card--wide card--gold about-card">
-			<div class="page-header">
-				<span class="page-header__icon page-header__icon--large">🏗️</span>
-				<h1>About Tinyburg</h1>
-				<p class="tagline">Building connections, one bitizen at a time</p>
-			</div>
+        <article class="mx-auto max-w-3xl">
+            <header
+                class="border-gold to-sky-light/30 shadow-pixel rounded-t-2xl border-3 border-b-0 bg-linear-to-br from-white p-6 text-center sm:p-10"
+            >
+                <span class="mb-4 block text-6xl">🏗️</span>
+                <h1 class="font-pixel text-dark-blue mb-2 text-base leading-relaxed sm:text-lg md:text-xl">
+                    About Tinyburg
+                </h1>
+                <p class="text-text-dark/80 text-xl">Building connections, one bitizen at a time</p>
+            </header>
 
-			<section>
-				<h2>What is Tinyburg?</h2>
-				<p>
-					Tinyburg is a community-driven trading platform built by TinyTower
-					enthusiasts, for TinyTower enthusiasts. We make it easy to find dream
-					job bitizens, trade rare costumes, and connect with fellow tower
-					builders from around the world.
-				</p>
-			</section>
+            <div
+                class="border-gold bg-card-bg shadow-pixel-hover divide-y-2 divide-gray-100 rounded-b-2xl border-3 border-t-0 p-6 sm:p-10"
+            >
+                <section class="pb-8">
+                    <h2 class="font-pixel text-dark-blue mb-4 text-[0.55rem] leading-relaxed sm:text-[0.7rem]">
+                        What is Tinyburg?
+                    </h2>
+                    <p class="mb-4 text-xl leading-relaxed sm:text-xl">
+                        Tinyburg is a community-made trading platform built by TinyTower enthusiasts. We make it easy to
+                        find dream job bitizens, trade rare costumes, and connect with fellow tower builders from around
+                        the world.
+                    </p>
+                </section>
 
-			<section>
-				<h2>Our Mission</h2>
-				<div class="mission-grid">
-					<div class="mission-item">
-						<span class="mission-icon">🎯</span>
-						<h3>Find Dream Jobbers</h3>
-						<p>
-							Stop waiting for random bitizens. Search our database to find
-							the perfect 9-skill dream jobbers for your floors.
-						</p>
-					</div>
-					<div class="mission-item">
-						<span class="mission-icon">🤝</span>
-						<h3>Connect Players</h3>
-						<p>
-							Building a tower is more fun together. Connect with thousands of
-							active players ready to trade and help each other out.
-						</p>
-					</div>
-					<div class="mission-item">
-						<span class="mission-icon">🎨</span>
-						<h3>Collect Everything</h3>
-						<p>
-							From rare costumes to adorable pets, trade your way to completing
-							your collection without spending bux.
-						</p>
-					</div>
-				</div>
-			</section>
+                <section class="py-8">
+                    <h2 class="font-pixel text-dark-blue mb-4 text-[0.55rem] leading-relaxed sm:text-[0.7rem]">
+                        Our Mission
+                    </h2>
+                    <div class="mt-4 grid grid-cols-1 gap-6 md:grid-cols-3">
+                        <div class="bg-sky-blue/10 border-sky-blue/20 rounded-xl border-2 p-6 text-center">
+                            <span class="mb-3 block text-4xl">🎯</span>
+                            <h3 class="font-pixel text-dark-blue mb-3 text-[0.65rem] leading-relaxed">
+                                Find Dream Jobbers
+                            </h3>
+                            <p class="text-lg sm:text-xl">
+                                Stop waiting for random bitizens. Search our database to find the perfect 9-skill dream
+                                jobbers for your floors.
+                            </p>
+                        </div>
+                        <div class="bg-sky-blue/10 border-sky-blue/20 rounded-xl border-2 p-6 text-center">
+                            <span class="mb-3 block text-4xl">🤝</span>
+                            <h3 class="font-pixel text-dark-blue mb-3 text-[0.65rem] leading-relaxed">
+                                Connect Players
+                            </h3>
+                            <p class="text-lg sm:text-xl">
+                                Building a tower is more fun together. Connect with thousands of active players ready to
+                                trade and help each other out.
+                            </p>
+                        </div>
+                        <div class="bg-sky-blue/10 border-sky-blue/20 rounded-xl border-2 p-6 text-center">
+                            <span class="mb-3 block text-4xl">🎨</span>
+                            <h3 class="font-pixel text-dark-blue mb-3 text-[0.65rem] leading-relaxed">
+                                Collect Everything
+                            </h3>
+                            <p class="text-lg sm:text-xl">
+                                From rare costumes to adorable pets, trade your way to completing your collection.
+                            </p>
+                        </div>
+                    </div>
+                </section>
 
-			<section>
-				<h2>How It Works</h2>
-				<div class="steps">
-					<div class="step">
-						<span class="step-number">1</span>
-						<div class="step-content">
-							<h3>Sign Up</h3>
-							<p>Create your account using Google or Discord in seconds</p>
-						</div>
-					</div>
-					<div class="step">
-						<span class="step-number">2</span>
-						<div class="step-content">
-							<h3>Link Your Tower</h3>
-							<p>Add your friend code to display your bitizens and floors</p>
-						</div>
-					</div>
-					<div class="step">
-						<span class="step-number">3</span>
-						<div class="step-content">
-							<h3>Browse & Trade</h3>
-							<p>Find what you need and connect with traders directly</p>
-						</div>
-					</div>
-					<div class="step">
-						<span class="step-number">4</span>
-						<div class="step-content">
-							<h3>Build Your Dream Tower</h3>
-							<p>Fill every floor with dream jobbers and rare items</p>
-						</div>
-					</div>
-				</div>
-			</section>
+                <section class="py-8">
+                    <h2 class="font-pixel text-dark-blue mb-4 text-[0.55rem] leading-relaxed sm:text-[0.7rem]">
+                        How It Works
+                    </h2>
+                    <div class="mt-4 flex flex-col gap-4">
+                        <div
+                            class="bg-gold/10 border-gold/30 flex flex-col items-center gap-5 rounded-xl border-2 p-4 md:flex-row"
+                        >
+                            <span
+                                class="font-pixel bg-gold flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-base text-white"
+                                >1</span
+                            >
+                            <div class="text-center md:text-left">
+                                <h3 class="font-pixel text-dark-blue mb-1 text-[0.65rem]">Sign Up</h3>
+                                <p class="text-lg opacity-85 sm:text-xl">
+                                    Create your account using Google or Discord in seconds
+                                </p>
+                            </div>
+                        </div>
+                        <div
+                            class="bg-gold/10 border-gold/30 flex flex-col items-center gap-5 rounded-xl border-2 p-4 md:flex-row"
+                        >
+                            <span
+                                class="font-pixel bg-gold flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-base text-white"
+                                >2</span
+                            >
+                            <div class="text-center md:text-left">
+                                <h3 class="font-pixel text-dark-blue mb-1 text-[0.65rem]">Link Your Tower</h3>
+                                <p class="text-lg opacity-85 sm:text-xl">
+                                    Use Nimblebit's cloud sync feature to link your tower
+                                </p>
+                            </div>
+                        </div>
+                        <div
+                            class="bg-gold/10 border-gold/30 flex flex-col items-center gap-5 rounded-xl border-2 p-4 md:flex-row"
+                        >
+                            <span
+                                class="font-pixel bg-gold flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-base text-white"
+                                >3</span
+                            >
+                            <div class="text-center md:text-left">
+                                <h3 class="font-pixel text-dark-blue mb-1 text-[0.65rem]">Browse & Trade</h3>
+                                <p class="text-lg opacity-85 sm:text-xl">
+                                    Find what you need and connect with other players
+                                </p>
+                            </div>
+                        </div>
+                        <div
+                            class="bg-gold/10 border-gold/30 flex flex-col items-center gap-5 rounded-xl border-2 p-4 md:flex-row"
+                        >
+                            <span
+                                class="font-pixel bg-gold flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-base text-white"
+                                >4</span
+                            >
+                            <div class="text-center md:text-left">
+                                <h3 class="font-pixel text-dark-blue mb-1 text-[0.65rem]">Build Your Dream Tower</h3>
+                                <p class="text-lg opacity-85 sm:text-xl">
+                                    Fill every floor with dream jobbers and rare items
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
 
-			<section>
-				<h2>Community First</h2>
-				<p>
-					Tinyburg is built and maintained by passionate TinyTower players. We're
-					not affiliated with NimbleBit, but we share their love for tiny pixels
-					and tall towers. Our goal is to make the TinyTower community even more
-					connected and helpful.
-				</p>
-				<div class="community-links">
-					<a href="/discord" class="community-link discord">
-						<span>💬</span> Join our Discord
-					</a>
-					<a href="https://reddit.com/r/tinytower" class="community-link reddit" target="_blank" rel="noopener">
-						<span>📱</span> r/tinytower
-					</a>
-				</div>
-			</section>
+                <section class="py-8">
+                    <h2 class="font-pixel text-dark-blue mb-4 text-[0.55rem] leading-relaxed sm:text-[0.7rem]">
+                        Community First
+                    </h2>
+                    <p class="mb-4 text-xl leading-relaxed sm:text-xl">
+                        Tinyburg is built and maintained by passionate TinyTower players. We're not affiliated with
+                        NimbleBit, but we share their love for tiny pixels and tall towers. Our goal is to make the
+                        TinyTower community even more connected and helpful.
+                    </p>
+                    <div class="mt-6 flex flex-col gap-4 md:flex-row">
+                        <a
+                            href="https://discord.gg/tinyburg"
+                            class="bg-discord shadow-pixel hover:shadow-pixel-hover flex items-center justify-center gap-2 rounded-lg px-5 py-3 text-lg text-white transition-all hover:-translate-x-0.5 hover:-translate-y-0.5"
+                        >
+                            <span>💬</span> Join our Discord
+                        </a>
+                        <a
+                            href="https://reddit.com/r/tinytower"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="shadow-pixel hover:shadow-pixel-hover flex items-center justify-center gap-2 rounded-lg bg-[#ff4500] px-5 py-3 text-lg text-white transition-all hover:-translate-x-0.5 hover:-translate-y-0.5"
+                        >
+                            <span>📱</span> r/tinytower
+                        </a>
+                    </div>
+                </section>
 
-			<section>
-				<h2>Open Source</h2>
-				<p>
-					Tinyburg is part of the larger tinyburg open source project. We believe
-					in transparency and community contribution. Check out our code, report
-					bugs, or contribute features on GitHub.
-				</p>
-				<a href="https://github.com/leonitousconforti/tinyburg" class="github-link" target="_blank" rel="noopener">
-					<svg viewBox="0 0 24 24" class="github-icon">
-						<path fill="currentColor" d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-					</svg>
-					View on GitHub
-				</a>
-			</section>
+                <section class="py-8">
+                    <h2 class="font-pixel text-dark-blue mb-4 text-[0.55rem] leading-relaxed sm:text-[0.7rem]">
+                        Open Source
+                    </h2>
+                    <p class="mb-4 text-xl leading-relaxed sm:text-xl">
+                        Tinyburg is an open source project. We believe in transparency and community contribution. Check
+                        out our code, report bugs, or contribute features on GitHub.
+                    </p>
+                    <a
+                        href="https://github.com/leonitousconforti/tinyburg"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="shadow-pixel hover:shadow-pixel-hover mt-2 inline-flex items-center gap-2 rounded-lg bg-[#24292e] px-5 py-3 text-lg text-white transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:bg-[#1a1e22]"
+                    >
+                        <svg viewBox="0 0 24 24" class="h-5 w-5">
+                            <path
+                                fill="currentColor"
+                                d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"
+                            ></path>
+                        </svg>
+                        View on GitHub
+                    </a>
+                </section>
 
-			<section class="faq">
-				<h2>Frequently Asked Questions</h2>
+                <section class="pt-8">
+                    <h2 class="font-pixel text-dark-blue mb-4 text-[0.55rem] leading-relaxed sm:text-[0.7rem]">
+                        Frequently Asked Questions
+                    </h2>
 
-				<div class="faq-item">
-					<h3>Is Tinyburg free?</h3>
-					<p>
-						Yes! Tinyburg is completely free to use. We're a community project
-						built by players who love the game.
-					</p>
-				</div>
+                    <div class="mb-4 rounded-lg border-2 border-gray-200 bg-white/50 p-5">
+                        <h3 class="font-pixel text-dark-blue mb-2 text-[0.6rem] leading-relaxed">
+                            Q: Is Tinyburg free?
+                        </h3>
+                        <p class="text-lg sm:text-xl">
+                            A: Yes! Tinyburg is completely free to use. We're a community project built by players who
+                            love the game.
+                        </p>
+                    </div>
 
-				<div class="faq-item">
-					<h3>Is this affiliated with NimbleBit?</h3>
-					<p>
-						No, Tinyburg is an independent fan project. We're not affiliated
-						with, endorsed by, or connected to NimbleBit LLC in any way.
-					</p>
-				</div>
+                    <div class="mb-4 rounded-lg border-2 border-gray-200 bg-white/50 p-5">
+                        <h3 class="font-pixel text-dark-blue mb-2 text-[0.6rem] leading-relaxed">
+                            Q: Is this affiliated with NimbleBit?
+                        </h3>
+                        <p class="text-lg sm:text-xl">
+                            A: No, Tinyburg is an independent fan project. We're not affiliated with, endorsed by, or
+                            connected to NimbleBit LLC in any way.
+                        </p>
+                    </div>
 
-				<div class="faq-item">
-					<h3>How do trades work?</h3>
-					<p>
-						Tinyburg helps you find traders and coordinate exchanges. The actual
-						trading happens in-game using TinyTower's built-in gifting system.
-					</p>
-				</div>
+                    <div class="mb-4 rounded-lg border-2 border-gray-200 bg-white/50 p-5">
+                        <h3 class="font-pixel text-dark-blue mb-2 text-[0.6rem] leading-relaxed">
+                            Q: How do trades work?
+                        </h3>
+                        <p class="text-lg sm:text-xl">
+                            A: Tinyburg helps you find traders and coordinate exchanges. The actual trading can leverage
+                            a couple different methods to exchange the items depending on what the items are, such as
+                            sending gifts or modifying save data.
+                        </p>
+                    </div>
 
-				<div class="faq-item">
-					<h3>Is my data safe?</h3>
-					<p>
-						We only collect what's necessary to provide the service. Check our
-						<a href="/privacy">Privacy Policy</a> for full details.
-					</p>
-				</div>
-			</section>
-		</div>
-	</div>
-</BaseLayout>
-
-<style>
-	.about-container {
-		padding-top: 5rem;
-	}
-
-	.about-card {
-		margin-bottom: 2rem;
-	}
-
-	.tagline {
-		font-size: 1.4rem;
-		color: var(--text-dark);
-		opacity: 0.8;
-	}
-
-	section {
-		margin-bottom: 2.5rem;
-	}
-
-	h2 {
-		font-family: "Press Start 2P", cursive;
-		font-size: 0.85rem;
-		color: var(--dark-blue);
-		margin-bottom: 1rem;
-		line-height: 1.5;
-	}
-
-	p {
-		font-size: 1.3rem;
-		line-height: 1.6;
-		color: var(--text-dark);
-		margin-bottom: 1rem;
-	}
-
-	/* Mission Grid */
-	.mission-grid {
-		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-		gap: 1.5rem;
-		margin-top: 1rem;
-	}
-
-	.mission-item {
-		background: rgba(79, 164, 212, 0.1);
-		padding: 1.5rem;
-		border-radius: 12px;
-		border: 2px solid rgba(79, 164, 212, 0.2);
-		text-align: center;
-	}
-
-	.mission-icon {
-		font-size: 2.5rem;
-		display: block;
-		margin-bottom: 0.75rem;
-	}
-
-	.mission-item h3 {
-		font-family: "Press Start 2P", cursive;
-		font-size: 0.65rem;
-		color: var(--dark-blue);
-		margin-bottom: 0.75rem;
-		line-height: 1.4;
-	}
-
-	.mission-item p {
-		font-size: 1.15rem;
-		margin-bottom: 0;
-	}
-
-	/* Steps */
-	.steps {
-		display: flex;
-		flex-direction: column;
-		gap: 1rem;
-		margin-top: 1rem;
-	}
-
-	.step {
-		display: flex;
-		align-items: center;
-		gap: 1.25rem;
-		padding: 1rem;
-		background: rgba(255, 215, 0, 0.1);
-		border-radius: 12px;
-		border: 2px solid rgba(255, 215, 0, 0.3);
-	}
-
-	.step-number {
-		font-family: "Press Start 2P", cursive;
-		font-size: 1rem;
-		color: var(--text-light);
-		background: var(--gold);
-		width: 40px;
-		height: 40px;
-		border-radius: 50%;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		flex-shrink: 0;
-	}
-
-	.step-content h3 {
-		font-family: "Press Start 2P", cursive;
-		font-size: 0.65rem;
-		color: var(--dark-blue);
-		margin-bottom: 0.25rem;
-	}
-
-	.step-content p {
-		font-size: 1.15rem;
-		margin-bottom: 0;
-		opacity: 0.85;
-	}
-
-	/* Community Links */
-	.community-links {
-		display: flex;
-		gap: 1rem;
-		margin-top: 1.5rem;
-		flex-wrap: wrap;
-	}
-
-	.community-link {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-		padding: 0.75rem 1.25rem;
-		border-radius: 8px;
-		font-size: 1.2rem;
-		text-decoration: none;
-		transition: all 0.2s;
-		box-shadow: var(--pixel-shadow);
-	}
-
-	.community-link:hover {
-		transform: translate(-2px, -2px);
-		box-shadow: var(--pixel-shadow-hover);
-	}
-
-	.community-link.discord {
-		background: var(--discord-blurple);
-		color: white;
-	}
-
-	.community-link.reddit {
-		background: #ff4500;
-		color: white;
-	}
-
-	/* GitHub Link */
-	.github-link {
-		display: inline-flex;
-		align-items: center;
-		gap: 0.5rem;
-		padding: 0.75rem 1.25rem;
-		background: #24292e;
-		color: white;
-		border-radius: 8px;
-		font-size: 1.2rem;
-		text-decoration: none;
-		transition: all 0.2s;
-		box-shadow: var(--pixel-shadow);
-		margin-top: 0.5rem;
-	}
-
-	.github-link:hover {
-		transform: translate(-2px, -2px);
-		box-shadow: var(--pixel-shadow-hover);
-		background: #1a1e22;
-	}
-
-	.github-icon {
-		width: 20px;
-		height: 20px;
-	}
-
-	/* FAQ */
-	.faq-item {
-		background: rgba(255, 255, 255, 0.5);
-		padding: 1.25rem;
-		border-radius: 8px;
-		margin-bottom: 1rem;
-		border: 2px solid #eee;
-	}
-
-	.faq-item h3 {
-		font-family: "Press Start 2P", cursive;
-		font-size: 0.6rem;
-		color: var(--dark-blue);
-		margin-bottom: 0.5rem;
-		line-height: 1.5;
-	}
-
-	.faq-item p {
-		margin-bottom: 0;
-		font-size: 1.2rem;
-	}
-
-	.faq-item a {
-		color: var(--sky-dark);
-		text-decoration: none;
-	}
-
-	.faq-item a:hover {
-		text-decoration: underline;
-	}
-
-	@media (max-width: 600px) {
-		.about-card {
-			padding: 1.5rem;
-		}
-
-		.back-link {
-			top: 1rem;
-			left: 1rem;
-		}
-
-		.about-header h1 {
-			font-size: 1rem;
-		}
-
-		.mission-grid {
-			grid-template-columns: 1fr;
-		}
-
-		.step {
-			flex-direction: column;
-			text-align: center;
-		}
-
-		.community-links {
-			flex-direction: column;
-		}
-	}
-</style>
+                    <div class="rounded-lg border-2 border-gray-200 bg-white/50 p-5">
+                        <h3 class="font-pixel text-dark-blue mb-2 text-[0.6rem] leading-relaxed">Is my data safe?</h3>
+                        <p class="text-lg sm:text-xl">
+                            We only collect what's necessary to provide the service. Check our
+                            <a
+                                href="/privacy"
+                                class="text-sky-dark decoration-sky-dark/30 hover:decoration-sky-dark underline decoration-2 underline-offset-2 transition-colors"
+                                >Privacy Policy</a
+                            > for full details.
+                        </p>
+                    </div>
+                </section>
+            </div>
+        </article>
+    </div>
+</CloudsLayout>

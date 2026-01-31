@@ -1,266 +1,350 @@
 ---
-import BaseLayout from "../layouts/BaseLayout.astro";
+import CloudsLayout from "../layouts/CloudsLayout.astro";
+export const prerender = true;
 ---
 
-<BaseLayout title="Privacy Policy | Tinyburg">
-	<div class="page-container legal-container">
-		<a href="/" class="back-link back-link--fixed">← Back to Home</a>
+<CloudsLayout
+    title="Privacy Policy | Tinyburg"
+    description="Privacy Policy for Tinyburg, the community trading platform for TinyTower players."
+>
+    <div class="relative min-h-screen px-4 py-16 sm:px-8 sm:py-20">
+        <a
+            href="/"
+            class="bg-dark-blue/95 font-pixel shadow-pixel hover:shadow-pixel-hover fixed top-4 left-4 flex items-center gap-2 rounded-lg px-3 py-2 text-[0.5rem] text-white backdrop-blur-sm transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 sm:top-6 sm:left-6 sm:px-4 sm:py-2.5 sm:text-[0.6rem]"
+            data-astro-prefetch="viewport"
+        >
+            <span aria-hidden="true">←</span>
+            <span>Home</span>
+        </a>
 
-		<div class="card card--wide card--gold legal-card">
-			<h1>Privacy Policy</h1>
-			<p class="last-updated">Last updated: January 23, 2026</p>
+        <article class="mx-auto max-w-3xl">
+            <header
+                class="border-gold to-sky-light/30 shadow-pixel rounded-t-2xl border-3 border-b-0 bg-linear-to-br from-white p-6 sm:p-10"
+            >
+                <h1 class="font-pixel text-dark-blue text-sm leading-relaxed sm:text-lg md:text-xl">Privacy Policy</h1>
+                <p class="text-text-dark/60 mt-3 text-lg">Last updated: January 28, 2026</p>
+            </header>
 
-			<section>
-				<h2>1. Introduction</h2>
-				<p>
-					This Privacy Policy explains how Tinyburg ("we", "us", or "our")
-					collects, uses, and protects your information when you use our
-					trading platform for TinyTower players.
-				</p>
-			</section>
+            <div
+                class="border-gold bg-card-bg shadow-pixel-hover divide-y-2 divide-gray-100 rounded-b-2xl border-3 border-t-0 p-6 sm:p-10"
+            >
+                <section class="pb-6 sm:pb-8">
+                    <h2 class="font-pixel text-dark-blue mb-4 text-[0.55rem] leading-relaxed sm:text-[0.7rem]">
+                        1. Introduction
+                    </h2>
+                    <p class="mb-4 text-lg leading-relaxed sm:text-xl">
+                        This Privacy Policy explains how Tinyburg ("we", "us", or "our") collects, uses, shares, and
+                        protects your information when you use our trading platform for TinyTower players.
+                    </p>
+                    <p class="text-lg leading-relaxed sm:text-xl">
+                        By using Tinyburg, you consent to the practices described in this policy. We encourage you to
+                        read this document carefully.
+                    </p>
+                </section>
 
-			<section>
-				<h2>2. Information We Collect</h2>
+                <section class="py-6 sm:py-8">
+                    <h2 class="font-pixel text-dark-blue mb-4 text-[0.55rem] leading-relaxed sm:text-[0.7rem]">
+                        2. Information We Collect
+                    </h2>
 
-				<h3>2.1 Account Information</h3>
-				<p>When you sign in using Google or Discord, we receive:</p>
-				<ul>
-					<li>Your display name or username</li>
-					<li>Your email address</li>
-					<li>Your profile picture (if available)</li>
-					<li>Your unique account identifier from the provider</li>
-				</ul>
+                    <h3 class="text-dark-blue mt-4 mb-3 text-lg font-bold sm:text-xl">2.1 Account Information</h3>
+                    <p class="mb-4 text-lg leading-relaxed sm:text-xl">
+                        When you sign in using Google or Discord, we receive:
+                    </p>
+                    <ul class="mb-6 space-y-2 pl-1">
+                        <li class="flex items-start gap-3 text-lg leading-relaxed sm:text-xl">
+                            <span class="bg-sky-dark mt-2.5 size-1.5 shrink-0 rounded-full" aria-hidden="true"></span>
+                            <span>Your display name or username</span>
+                        </li>
+                        <li class="flex items-start gap-3 text-lg leading-relaxed sm:text-xl">
+                            <span class="bg-sky-dark mt-2.5 size-1.5 shrink-0 rounded-full" aria-hidden="true"></span>
+                            <span>Your email address</span>
+                        </li>
+                        <li class="flex items-start gap-3 text-lg leading-relaxed sm:text-xl">
+                            <span class="bg-sky-dark mt-2.5 size-1.5 shrink-0 rounded-full" aria-hidden="true"></span>
+                            <span>Your profile picture (if available)</span>
+                        </li>
+                        <li class="flex items-start gap-3 text-lg leading-relaxed sm:text-xl">
+                            <span class="bg-sky-dark mt-2.5 size-1.5 shrink-0 rounded-full" aria-hidden="true"></span>
+                            <span>Your unique account identifier from the provider</span>
+                        </li>
+                    </ul>
 
-				<h3>2.2 TinyTower Information</h3>
-				<p>If you choose to link your TinyTower account, we may collect:</p>
-				<ul>
-					<li>Your TinyTower friend code</li>
-					<li>Your tower data (floors, bitizens, etc.)</li>
-					<li>Trading history within our platform</li>
-				</ul>
+                    <h3 class="text-dark-blue mt-4 mb-3 text-lg font-bold sm:text-xl">2.2 TinyTower Information</h3>
+                    <p class="mb-4 text-lg leading-relaxed sm:text-xl">
+                        If you choose to link your TinyTower account, we may collect:
+                    </p>
+                    <ul class="mb-6 space-y-2 pl-1">
+                        <li class="flex items-start gap-3 text-lg leading-relaxed sm:text-xl">
+                            <span class="bg-sky-dark mt-2.5 size-1.5 shrink-0 rounded-full" aria-hidden="true"></span>
+                            <span>Your TinyTower friend code</span>
+                        </li>
+                        <li class="flex items-start gap-3 text-lg leading-relaxed sm:text-xl">
+                            <span class="bg-sky-dark mt-2.5 size-1.5 shrink-0 rounded-full" aria-hidden="true"></span>
+                            <span>Your tower data (floors, bitizens, etc.)</span>
+                        </li>
+                        <li class="flex items-start gap-3 text-lg leading-relaxed sm:text-xl">
+                            <span class="bg-sky-dark mt-2.5 size-1.5 shrink-0 rounded-full" aria-hidden="true"></span>
+                            <span>Trading history within our platform</span>
+                        </li>
+                    </ul>
 
-				<h3>2.3 Usage Information</h3>
-				<p>We automatically collect:</p>
-				<ul>
-					<li>Pages visited and features used</li>
-					<li>Time and date of visits</li>
-					<li>Device and browser information</li>
-				</ul>
-			</section>
+                    <h3 class="text-dark-blue mt-4 mb-3 text-lg font-bold sm:text-xl">2.3 Usage Information</h3>
+                    <p class="mb-4 text-lg leading-relaxed sm:text-xl">We automatically collect:</p>
+                    <ul class="mb-6 space-y-2 pl-1">
+                        <li class="flex items-start gap-3 text-lg leading-relaxed sm:text-xl">
+                            <span class="bg-sky-dark mt-2.5 size-1.5 shrink-0 rounded-full" aria-hidden="true"></span>
+                            <span>Pages visited and features used</span>
+                        </li>
+                        <li class="flex items-start gap-3 text-lg leading-relaxed sm:text-xl">
+                            <span class="bg-sky-dark mt-2.5 size-1.5 shrink-0 rounded-full" aria-hidden="true"></span>
+                            <span>Time and date of visits</span>
+                        </li>
+                        <li class="flex items-start gap-3 text-lg leading-relaxed sm:text-xl">
+                            <span class="bg-sky-dark mt-2.5 size-1.5 shrink-0 rounded-full" aria-hidden="true"></span>
+                            <span>Device type and browser information</span>
+                        </li>
+                        <li class="flex items-start gap-3 text-lg leading-relaxed sm:text-xl">
+                            <span class="bg-sky-dark mt-2.5 size-1.5 shrink-0 rounded-full" aria-hidden="true"></span>
+                            <span>IP address (for security and fraud prevention)</span>
+                        </li>
+                    </ul>
+                </section>
 
-			<section>
-				<h2>3. How We Use Your Information</h2>
-				<p>We use collected information to:</p>
-				<ul>
-					<li>Provide and maintain the Service</li>
-					<li>Facilitate trades between users</li>
-					<li>Display your profile to other traders</li>
-					<li>Send important service updates</li>
-					<li>Improve and optimize the Service</li>
-					<li>Prevent fraud and abuse</li>
-				</ul>
-			</section>
+                <section class="py-6 sm:py-8">
+                    <h2 class="font-pixel text-dark-blue mb-4 text-[0.55rem] leading-relaxed sm:text-[0.7rem]">
+                        3. How We Use Your Information
+                    </h2>
+                    <p class="mb-4 text-lg leading-relaxed sm:text-xl">We use collected information to:</p>
+                    <ul class="space-y-2 pl-1">
+                        <li class="flex items-start gap-3 text-lg leading-relaxed sm:text-xl">
+                            <span class="bg-sky-dark mt-2.5 size-1.5 shrink-0 rounded-full" aria-hidden="true"></span>
+                            <span>Provide and maintain the Service</span>
+                        </li>
+                        <li class="flex items-start gap-3 text-lg leading-relaxed sm:text-xl">
+                            <span class="bg-sky-dark mt-2.5 size-1.5 shrink-0 rounded-full" aria-hidden="true"></span>
+                            <span>Facilitate trades between users</span>
+                        </li>
+                        <li class="flex items-start gap-3 text-lg leading-relaxed sm:text-xl">
+                            <span class="bg-sky-dark mt-2.5 size-1.5 shrink-0 rounded-full" aria-hidden="true"></span>
+                            <span>Display your profile to other traders</span>
+                        </li>
+                        <li class="flex items-start gap-3 text-lg leading-relaxed sm:text-xl">
+                            <span class="bg-sky-dark mt-2.5 size-1.5 shrink-0 rounded-full" aria-hidden="true"></span>
+                            <span>Send important service updates</span>
+                        </li>
+                        <li class="flex items-start gap-3 text-lg leading-relaxed sm:text-xl">
+                            <span class="bg-sky-dark mt-2.5 size-1.5 shrink-0 rounded-full" aria-hidden="true"></span>
+                            <span>Improve and optimize the Service</span>
+                        </li>
+                        <li class="flex items-start gap-3 text-lg leading-relaxed sm:text-xl">
+                            <span class="bg-sky-dark mt-2.5 size-1.5 shrink-0 rounded-full" aria-hidden="true"></span>
+                            <span>Prevent fraud and abuse</span>
+                        </li>
+                    </ul>
+                </section>
 
-			<section>
-				<h2>4. Information Sharing</h2>
-				<p>We do not sell your personal information. We may share information:</p>
-				<ul>
-					<li>
-						<strong>With other users:</strong> Your display name, profile picture,
-						and trading information are visible to facilitate trades
-					</li>
-					<li>
-						<strong>For legal reasons:</strong> When required by law or to protect
-						our rights
-					</li>
-					<li>
-						<strong>With service providers:</strong> Third parties that help us
-						operate the Service (hosting, analytics)
-					</li>
-				</ul>
-			</section>
+                <section class="py-6 sm:py-8">
+                    <h2 class="font-pixel text-dark-blue mb-4 text-[0.55rem] leading-relaxed sm:text-[0.7rem]">
+                        4. Information Sharing
+                    </h2>
+                    <p class="mb-4 text-lg leading-relaxed sm:text-xl">
+                        We do not sell your personal information. We may share information:
+                    </p>
+                    <ul class="space-y-3 pl-1">
+                        <li class="flex items-start gap-3 text-lg leading-relaxed sm:text-xl">
+                            <span class="bg-sky-dark mt-2.5 size-1.5 shrink-0 rounded-full" aria-hidden="true"></span>
+                            <span>
+                                <strong class="text-dark-blue">With other users:</strong> Your display name, profile picture,
+                                and trading information are visible to facilitate trades
+                            </span>
+                        </li>
+                        <li class="flex items-start gap-3 text-lg leading-relaxed sm:text-xl">
+                            <span class="bg-sky-dark mt-2.5 size-1.5 shrink-0 rounded-full" aria-hidden="true"></span>
+                            <span>
+                                <strong class="text-dark-blue">For legal reasons:</strong> When required by law or to protect
+                                our rights
+                            </span>
+                        </li>
+                        <li class="flex items-start gap-3 text-lg leading-relaxed sm:text-xl">
+                            <span class="bg-sky-dark mt-2.5 size-1.5 shrink-0 rounded-full" aria-hidden="true"></span>
+                            <span>
+                                <strong class="text-dark-blue">With service providers:</strong> Third parties that help us
+                                operate the Service (hosting, analytics)
+                            </span>
+                        </li>
+                    </ul>
+                </section>
 
-			<section>
-				<h2>5. Data Security</h2>
-				<p>
-					We implement appropriate security measures to protect your information.
-					However, no method of transmission over the Internet is 100% secure,
-					and we cannot guarantee absolute security.
-				</p>
-			</section>
+                <section class="py-6 sm:py-8">
+                    <h2 class="font-pixel text-dark-blue mb-4 text-[0.55rem] leading-relaxed sm:text-[0.7rem]">
+                        5. Data Security
+                    </h2>
+                    <p class="text-lg leading-relaxed sm:text-xl">
+                        We implement appropriate security measures to protect your information. However, no method of
+                        transmission over the Internet is 100% secure, and we cannot guarantee absolute security.
+                    </p>
+                </section>
 
-			<section>
-				<h2>6. Data Retention</h2>
-				<p>
-					We retain your information for as long as your account is active or as
-					needed to provide the Service. You may request deletion of your account
-					and associated data at any time.
-				</p>
-			</section>
+                <section class="py-6 sm:py-8">
+                    <h2 class="font-pixel text-dark-blue mb-4 text-[0.55rem] leading-relaxed sm:text-[0.7rem]">
+                        6. Data Retention
+                    </h2>
+                    <p class="text-lg leading-relaxed sm:text-xl">
+                        We retain your information for as long as your account is active or as needed to provide the
+                        Service. You may request deletion of your account and associated data at any time.
+                    </p>
+                </section>
 
-			<section>
-				<h2>7. Your Rights</h2>
-				<p>You have the right to:</p>
-				<ul>
-					<li>Access your personal information</li>
-					<li>Correct inaccurate information</li>
-					<li>Delete your account and data</li>
-					<li>Export your data</li>
-					<li>Opt out of non-essential communications</li>
-				</ul>
-			</section>
+                <section class="py-6 sm:py-8">
+                    <h2 class="font-pixel text-dark-blue mb-4 text-[0.55rem] leading-relaxed sm:text-[0.7rem]">
+                        7. Your Rights
+                    </h2>
+                    <p class="mb-4 text-lg leading-relaxed sm:text-xl">You have the right to:</p>
+                    <ul class="space-y-2 pl-1">
+                        <li class="flex items-start gap-3 text-lg leading-relaxed sm:text-xl">
+                            <span class="bg-sky-dark mt-2.5 size-1.5 shrink-0 rounded-full" aria-hidden="true"></span>
+                            <span>Access your personal information</span>
+                        </li>
+                        <li class="flex items-start gap-3 text-lg leading-relaxed sm:text-xl">
+                            <span class="bg-sky-dark mt-2.5 size-1.5 shrink-0 rounded-full" aria-hidden="true"></span>
+                            <span>Correct inaccurate information</span>
+                        </li>
+                        <li class="flex items-start gap-3 text-lg leading-relaxed sm:text-xl">
+                            <span class="bg-sky-dark mt-2.5 size-1.5 shrink-0 rounded-full" aria-hidden="true"></span>
+                            <span>Delete your account and data</span>
+                        </li>
+                        <li class="flex items-start gap-3 text-lg leading-relaxed sm:text-xl">
+                            <span class="bg-sky-dark mt-2.5 size-1.5 shrink-0 rounded-full" aria-hidden="true"></span>
+                            <span>Export your data</span>
+                        </li>
+                        <li class="flex items-start gap-3 text-lg leading-relaxed sm:text-xl">
+                            <span class="bg-sky-dark mt-2.5 size-1.5 shrink-0 rounded-full" aria-hidden="true"></span>
+                            <span>Opt out of non-essential communications</span>
+                        </li>
+                    </ul>
+                </section>
 
-			<section>
-				<h2>8. Cookies</h2>
-				<p>
-					We use essential cookies to maintain your session and preferences.
-					These are necessary for the Service to function properly.
-				</p>
-			</section>
+                <section class="py-6 sm:py-8">
+                    <h2 class="font-pixel text-dark-blue mb-4 text-[0.55rem] leading-relaxed sm:text-[0.7rem]">
+                        8. Cookies and Local Storage
+                    </h2>
+                    <p class="mb-4 text-lg leading-relaxed sm:text-xl">We use the following technologies:</p>
+                    <ul class="mb-4 space-y-3 pl-1">
+                        <li class="flex items-start gap-3 text-lg leading-relaxed sm:text-xl">
+                            <span class="bg-sky-dark mt-2.5 size-1.5 shrink-0 rounded-full" aria-hidden="true"></span>
+                            <span>
+                                <strong class="text-dark-blue">Session cookies:</strong> To keep you logged in
+                            </span>
+                        </li>
+                        <li class="flex items-start gap-3 text-lg leading-relaxed sm:text-xl">
+                            <span class="bg-sky-dark mt-2.5 size-1.5 shrink-0 rounded-full" aria-hidden="true"></span>
+                            <span>
+                                <strong class="text-dark-blue">Preference cookies:</strong> To remember your settings
+                            </span>
+                        </li>
+                        <li class="flex items-start gap-3 text-lg leading-relaxed sm:text-xl">
+                            <span class="bg-sky-dark mt-2.5 size-1.5 shrink-0 rounded-full" aria-hidden="true"></span>
+                            <span>
+                                <strong class="text-dark-blue">Local storage:</strong> To cache tower data for performance
+                            </span>
+                        </li>
+                    </ul>
+                    <p class="text-lg leading-relaxed sm:text-xl">
+                        We do not use advertising or tracking cookies. All cookies are essential for the Service to
+                        function.
+                    </p>
+                </section>
 
-			<section>
-				<h2>9. Third-Party Services</h2>
-				<p>
-					Our Service uses Google and Discord for authentication. Please review
-					their respective privacy policies:
-				</p>
-				<ul>
-					<li>
-						<a href="https://policies.google.com/privacy" target="_blank" rel="noopener">
-							Google Privacy Policy
-						</a>
-					</li>
-					<li>
-						<a href="https://discord.com/privacy" target="_blank" rel="noopener">
-							Discord Privacy Policy
-						</a>
-					</li>
-				</ul>
-			</section>
+                <section class="py-6 sm:py-8">
+                    <h2 class="font-pixel text-dark-blue mb-4 text-[0.55rem] leading-relaxed sm:text-[0.7rem]">
+                        9. Third-Party Services
+                    </h2>
+                    <p class="mb-4 text-lg leading-relaxed sm:text-xl">
+                        Our Service uses Google and Discord for authentication. Please review their respective privacy
+                        policies:
+                    </p>
+                    <ul class="space-y-2 pl-1">
+                        <li class="flex items-start gap-3 text-lg leading-relaxed sm:text-xl">
+                            <span class="bg-sky-dark mt-2.5 size-1.5 shrink-0 rounded-full" aria-hidden="true"></span>
+                            <a
+                                href="https://policies.google.com/privacy"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                class="text-google decoration-google/30 hover:decoration-google font-semibold underline decoration-2 underline-offset-2 transition-colors"
+                            >
+                                Google Privacy Policy
+                            </a>
+                        </li>
+                        <li class="flex items-start gap-3 text-lg leading-relaxed sm:text-xl">
+                            <span class="bg-sky-dark mt-2.5 size-1.5 shrink-0 rounded-full" aria-hidden="true"></span>
+                            <a
+                                href="https://discord.com/privacy"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                class="text-discord decoration-discord/30 hover:decoration-discord font-semibold underline decoration-2 underline-offset-2 transition-colors"
+                            >
+                                Discord Privacy Policy
+                            </a>
+                        </li>
+                    </ul>
+                </section>
 
-			<section>
-				<h2>10. Children's Privacy</h2>
-				<p>
-					The Service is not intended for children under 13. We do not knowingly
-					collect information from children under 13. If you believe a child has
-					provided us with personal information, please contact us.
-				</p>
-			</section>
+                <section class="py-6 sm:py-8">
+                    <h2 class="font-pixel text-dark-blue mb-4 text-[0.55rem] leading-relaxed sm:text-[0.7rem]">
+                        10. International Data Transfers
+                    </h2>
+                    <p class="text-lg leading-relaxed sm:text-xl">
+                        Your information may be transferred to and processed in countries other than your own. We ensure
+                        appropriate safeguards are in place to protect your data in accordance with this Privacy Policy.
+                    </p>
+                </section>
 
-			<section>
-				<h2>11. Changes to This Policy</h2>
-				<p>
-					We may update this Privacy Policy from time to time. We will notify
-					you of significant changes by posting a notice on the Service or
-					sending you an email.
-				</p>
-			</section>
+                <section class="py-6 sm:py-8">
+                    <h2 class="font-pixel text-dark-blue mb-4 text-[0.55rem] leading-relaxed sm:text-[0.7rem]">
+                        11. Children's Privacy
+                    </h2>
+                    <p class="text-lg leading-relaxed sm:text-xl">
+                        The Service is not intended for children under 13. We do not knowingly collect information from
+                        children under 13. If you believe a child has provided us with personal information, please
+                        contact us immediately and we will delete the information.
+                    </p>
+                </section>
 
-			<section>
-				<h2>12. Contact Us</h2>
-				<p>
-					If you have questions about this Privacy Policy or your data, please
-					contact us through our community Discord server.
-				</p>
-			</section>
-		</div>
-	</div>
-</BaseLayout>
+                <section class="py-6 sm:py-8">
+                    <h2 class="font-pixel text-dark-blue mb-4 text-[0.55rem] leading-relaxed sm:text-[0.7rem]">
+                        12. Changes to This Policy
+                    </h2>
+                    <p class="text-lg leading-relaxed sm:text-xl">
+                        We may update this Privacy Policy from time to time. We will notify you of significant changes
+                        by posting a notice on the Service or sending you an email.
+                    </p>
+                </section>
 
-<style>
-	.legal-container {
-		padding-top: 5rem;
-	}
-
-	.legal-card {
-		margin-bottom: 2rem;
-	}
-
-	h1 {
-		font-family: "Press Start 2P", cursive;
-		font-size: 1.2rem;
-		color: var(--dark-blue);
-		margin-bottom: 0.5rem;
-		line-height: 1.4;
-	}
-
-	.last-updated {
-		font-size: 1.1rem;
-		color: var(--text-dark);
-		opacity: 0.6;
-		margin-bottom: 2rem;
-		padding-bottom: 1rem;
-		border-bottom: 2px solid #eee;
-	}
-
-	section {
-		margin-bottom: 2rem;
-	}
-
-	h2 {
-		font-family: "Press Start 2P", cursive;
-		font-size: 0.75rem;
-		color: var(--dark-blue);
-		margin-bottom: 1rem;
-		line-height: 1.5;
-	}
-
-	h3 {
-		font-family: "VT323", monospace;
-		font-size: 1.4rem;
-		color: var(--dark-blue);
-		margin-bottom: 0.75rem;
-		margin-top: 1rem;
-	}
-
-	p {
-		font-size: 1.3rem;
-		line-height: 1.6;
-		color: var(--text-dark);
-		margin-bottom: 1rem;
-	}
-
-	ul {
-		margin-left: 1.5rem;
-		margin-bottom: 1rem;
-	}
-
-	li {
-		font-size: 1.3rem;
-		line-height: 1.6;
-		color: var(--text-dark);
-		margin-bottom: 0.5rem;
-	}
-
-	strong {
-		color: var(--dark-blue);
-	}
-
-	a {
-		color: var(--sky-dark);
-		text-decoration: none;
-	}
-
-	a:hover {
-		text-decoration: underline;
-	}
-
-	@media (max-width: 600px) {
-		.legal-card {
-			padding: 1.5rem;
-		}
-
-		.back-link {
-			top: 1rem;
-			left: 1rem;
-		}
-
-		h1 {
-			font-size: 1rem;
-		}
-
-		h2 {
-			font-size: 0.65rem;
-		}
-	}
-</style>
+                <section class="pt-6 sm:pt-8">
+                    <h2 class="font-pixel text-dark-blue mb-4 text-[0.55rem] leading-relaxed sm:text-[0.7rem]">
+                        13. Contact Us
+                    </h2>
+                    <p class="text-lg leading-relaxed sm:text-xl">
+                        If you have questions about this Privacy Policy, wish to exercise your data rights, or have
+                        concerns about your information, please contact us through our
+                        <a
+                            href="https://discord.gg/tinyburg"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="text-discord decoration-discord/30 hover:decoration-discord inline-flex items-center gap-1 font-semibold underline decoration-2 underline-offset-2 transition-colors"
+                        >
+                            community Discord server
+                            <svg class="size-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                <path
+                                    fill-rule="evenodd"
+                                    d="M5.22 14.78a.75.75 0 001.06 0l7.22-7.22v5.69a.75.75 0 001.5 0v-7.5a.75.75 0 00-.75-.75h-7.5a.75.75 0 000 1.5h5.69l-7.22 7.22a.75.75 0 000 1.06z"
+                                    clip-rule="evenodd"></path>
+                            </svg>
+                        </a>.
+                    </p>
+                </section>
+            </div>
+        </article>
+    </div>
+</CloudsLayout>

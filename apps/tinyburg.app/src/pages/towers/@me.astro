@@ -1,55 +1,11 @@
 ---
-import BaseLayout from "../../layouts/BaseLayout.astro";
+import { Option } from "effect";
 
-// Check for success messages
-const linkedParam = Astro.url.searchParams.get("linked");
-const successMessage = linkedParam === "success" ? "TinyTower account linked successfully!" : null;
+const maybeAccount = Astro.locals.account;
+if (Option.isNone(maybeAccount)) {
+    return Astro.redirect("/login");
+}
 ---
 
-<BaseLayout title="My Towers | Tinyburg">
-	<div class="page-container page-container--wide">
-		<a href="/" class="back-link">← Back to Home</a>
-
-		<div class="page-header">
-			<h1>🏢 My Towers</h1>
-			<p>Manage your linked TinyTower accounts</p>
-		</div>
-
-		{successMessage && (
-			<div class="message message--success">
-				<span class="message__icon">✓</span>
-				<span>{successMessage}</span>
-			</div>
-		)}
-
-		<div class="towers-list">
-			<div class="empty-state">
-				<span class="empty-state__icon">🏗️</span>
-				<h2 class="empty-state__title">No towers linked yet</h2>
-				<p class="empty-state__text">Link your TinyTower account to start trading bitizens and more!</p>
-				<a href="/towers/@link" class="btn">
-					<span>Link TinyTower Account</span>
-					<span class="btn__icon">🔗</span>
-				</a>
-			</div>
-		</div>
-
-		<div class="add-tower-section">
-			<a href="/towers/@link" class="btn btn--ghost btn--full">
-				<span class="btn__add-icon">+</span>
-				<span>Link Another Tower</span>
-			</a>
-		</div>
-	</div>
-</BaseLayout>
-
-<style>
-	.towers-list {
-		width: 100%;
-		margin-bottom: 2rem;
-	}
-
-	.add-tower-section {
-		width: 100%;
-	}
-</style>
+<p>Hello, {maybeAccount.value.user.displayName}</p>
+<p>{new URL("towers/@me", Astro.site).toString()}</p>

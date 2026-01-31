@@ -1,0 +1,168 @@
+---
+import "../styles/global.css";
+
+interface Props {
+    title: string;
+    description: string;
+}
+
+const { title, description } = Astro.props;
+---
+
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <link rel="icon" href="/favicon.ico" />
+        <meta name="viewport" content="width=device-width" />
+        <meta name="generator" content={Astro.generator} />
+        <title>{title}</title>
+        <meta name="description" content={description} />
+    </head>
+    <body>
+        <div class="clouds">
+            <div class="cloud cloud-1"></div>
+            <div class="cloud cloud-2"></div>
+            <div class="cloud cloud-3"></div>
+        </div>
+
+        <slot />
+    </body>
+</html>
+
+<script is:inline>
+    // Save animation times before navigating away
+    window.addEventListener("pageswap", () => {
+        const time = document.querySelector(".cloud").getAnimations()[0]?.currentTime;
+        sessionStorage.setItem("cloud-time", time);
+    });
+
+    // Restore animation times after view transition completes
+    window.addEventListener("pagereveal", () => {
+        const stored = sessionStorage.getItem("cloud-time");
+        if (!stored) return;
+
+        for (const cloud of document.querySelectorAll(".cloud")) {
+            const animation = cloud.getAnimations()[0];
+            if (animation) animation.currentTime = parseFloat(stored);
+        }
+    });
+</script>
+
+<style>
+    .clouds {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 0;
+        overflow: hidden;
+    }
+
+    .cloud {
+        position: absolute;
+        background: rgba(255, 255, 255, 0.8);
+        border-radius: 50px;
+        animation: float linear infinite;
+    }
+
+    .cloud::before,
+    .cloud::after {
+        content: "";
+        position: absolute;
+        background: rgba(255, 255, 255, 0.8);
+        border-radius: 50%;
+    }
+
+    .cloud-1 {
+        width: 120px;
+        height: 40px;
+        top: 10%;
+        animation-duration: 35s;
+    }
+
+    .cloud-1::before {
+        width: 50px;
+        height: 50px;
+        top: -25px;
+        left: 20px;
+    }
+
+    .cloud-1::after {
+        width: 60px;
+        height: 60px;
+        top: -30px;
+        left: 50px;
+    }
+
+    .cloud-2 {
+        width: 150px;
+        height: 50px;
+        top: 25%;
+        animation-duration: 45s;
+        animation-delay: -15s;
+    }
+
+    .cloud-2::before {
+        width: 60px;
+        height: 60px;
+        top: -30px;
+        left: 25px;
+    }
+
+    .cloud-2::after {
+        width: 70px;
+        height: 70px;
+        top: -35px;
+        left: 60px;
+    }
+
+    .cloud-3 {
+        width: 100px;
+        height: 35px;
+        top: 15%;
+        animation-duration: 40s;
+        animation-delay: -25s;
+    }
+
+    .cloud-3::before {
+        width: 40px;
+        height: 40px;
+        top: -20px;
+        left: 15px;
+    }
+
+    .cloud-3::after {
+        width: 50px;
+        height: 50px;
+        top: -25px;
+        left: 40px;
+    }
+
+    @keyframes float {
+        from {
+            left: -200px;
+        }
+        to {
+            left: 100%;
+        }
+    }
+</style>
+
+<style is:global>
+    @view-transition {
+        navigation: auto;
+    }
+
+    body {
+        min-height: 100vh;
+        background: linear-gradient(
+            180deg,
+            var(--color-sky-light) 0%,
+            var(--color-sky-blue) 50%,
+            var(--color-sky-dark) 100%
+        );
+    }
+</style>
