@@ -33,15 +33,13 @@ const { title, description } = Astro.props;
 <script is:inline>
     // Save animation times before navigating away
     window.addEventListener("pageswap", () => {
-        const time = document.querySelector(".cloud").getAnimations()[0]?.currentTime;
+        const time = document.querySelector(".cloud").getAnimations()[0]?.currentTime ?? 0;
         sessionStorage.setItem("cloud-time", time);
     });
 
     // Restore animation times after view transition completes
     window.addEventListener("pagereveal", () => {
-        const stored = sessionStorage.getItem("cloud-time");
-        if (!stored) return;
-
+        const stored = sessionStorage.getItem("cloud-time") ?? "0";
         for (const cloud of document.querySelectorAll(".cloud")) {
             const animation = cloud.getAnimations()[0];
             if (animation) animation.currentTime = parseFloat(stored);
