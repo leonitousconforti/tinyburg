@@ -873,7 +873,7 @@ export const social_sendItem = Effect.fn("social_sendItem")(function* ({
 
     const salt = yield* nimblebitAuth.salt;
     const hash = yield* nimblebitAuth.sign(
-        `tt/${itemType}/${playerId}/${salt}${itemStr}${Redacted.value(playerAuthKey)}`
+        `tt/${itemType}/${playerId}/${friendId}/${salt}${itemStr}${Redacted.value(playerAuthKey)}`
     );
 
     const response = yield* endpoint({

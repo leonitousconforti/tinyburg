@@ -53,7 +53,7 @@ const MigratorLive = Effect.gen(function* () {
     return PgMigrator.layer({ loader });
 }).pipe(Layer.unwrapEffect);
 
-HttpLayerRouter.serve(AllRoutes).pipe(
+HttpLayerRouter.serve(AllRoutes, { routerConfig: { maxParamLength: 500 } }).pipe(
     Layer.provide(Repository.Default),
     Layer.provide(MigratorLive),
     Layer.provide(SqlLive),

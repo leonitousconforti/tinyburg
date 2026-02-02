@@ -386,7 +386,7 @@ export const SocialGetGiftsEndpoint = HttpApiEndpoint.get(
     );
 
 /** @internal */
-export const SocialReceiveGiftEndpoint = HttpApiEndpoint.post(
+export const SocialReceiveGiftEndpoint = HttpApiEndpoint.get(
     "SocialReceiveGift"
 )`/receive_item/tt/${playerIdParam}/${giftIdParam}/${saltParam}/${hashParam}`
     .addSuccess(ErrorResponse)
