@@ -196,7 +196,7 @@ export const DevicePlayerDetailsEndpoint = HttpApiEndpoint.get(
 /** @internal */
 export const DeviceVerifyDeviceEndpoint = HttpApiEndpoint.get(
     "DeviceVerifyDevice"
-)`/verify_device/tt/${playerIdParam}/:${HttpApiSchema.param("verificationCode", Schema.String)}`
+)`/verify_device/tt/${playerIdParam}/${HttpApiSchema.param("verificationCode", Schema.String)}`
     .addSuccess(ErrorResponse)
     .addSuccess(
         Schema.rename(

@@ -274,7 +274,15 @@ export const device_verifyDevice = Effect.fn("device_verifyDevice")(function* ({
     });
 
     const playerId = yield* Effect.map(nimblebitAuth.burnbot, ({ playerId }) => playerId);
-    const response = yield* endpoint({ path: { playerId, verificationCode } });
+    const response = yield* endpoint({
+        path: {
+            playerId,
+            verificationCode:
+                nimblebitAuth.host === "https://sync.nimblebit.com"
+                    ? verificationCode
+                    : yield* nimblebitAuth.sign(verificationCode),
+        },
+    });
 
     if ("error" in response) {
         return yield* new NimblebitError.NimblebitError({
