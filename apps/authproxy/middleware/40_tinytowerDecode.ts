@@ -14,6 +14,8 @@ export const AuthProxyApiDecodeHashMiddleware = HttpLayerRouter.middleware(
         HttpMiddleware.make((httpAppMiddleware) =>
             Effect.gen(function* () {
                 const request = yield* HttpServerRequest.HttpServerRequest;
+                if (request.url.startsWith("/verify_device/tt/")) return yield* httpAppMiddleware;
+
                 const lastSlashIndex = String.lastIndexOf("/")(request.url);
                 if (Option.isNone(lastSlashIndex)) return yield* new HttpApiError.BadRequest();
 
