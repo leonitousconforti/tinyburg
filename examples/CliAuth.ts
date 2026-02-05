@@ -1,0 +1,56 @@
+import { Prompt } from "@effect/cli";
+import { FetchHttpClient } from "@effect/platform";
+import { NodeContext, NodeRuntime } from "@effect/platform-node";
+import { NimblebitAuth, NimblebitConfig } from "@tinyburg/nimblebit-sdk";
+import { TinyTower } from "@tinyburg/tinytower-sdk";
+import { Config, Effect, Layer, Schema } from "effect";
+
+const AppLive = Layer.mergeAll(
+    NodeContext.layer,
+    FetchHttpClient.layer,
+    NimblebitAuth.layerNodeTinyburgAuthProxyConfig({
+        authKey: Config.redacted("API_KEY"),
+    })
+);
+
+Effect.gen(function* () {
+    const playerId = yield* Prompt.text({
+        message: "Enter your cloud sync id (a.k.a friend code):",
+        validate: (input) =>
+            Effect.mapError(
+                Schema.decode(NimblebitConfig.PlayerIdSchema)(input),
+                () => "Invalid player id, please look in the cloud sync menu"
+            ),
+    }).pipe(
+        Prompt.run,
+        Effect.map((playerId) => NimblebitConfig.PlayerIdSchema.make(playerId))
+    );
+
+    const playerEmail = yield* Prompt.password({
+        message: "Enter your email associated with this account:",
+    }).pipe(
+        Prompt.run,
+        Effect.map((email) => NimblebitConfig.PlayerEmailSchema.make(email))
+    );
+
+    const result = yield* TinyTower.device_registerEmail({ playerId, playerEmail });
+    yield* Effect.logInfo(result);
+
+    const verificationCode = yield* Prompt.text({
+        message: "Enter the verification code sent to your email:",
+    });
+
+    const playerDetails = yield* TinyTower.device_verifyDevice({ verificationCode });
+    const shouldPrint = yield* Prompt.confirm({
+        message: "Do you want to print your player details? (this will contain sensitive information)",
+    });
+
+    if (!shouldPrint) {
+        yield* Effect.logInfo("Understood, player details not printed.");
+        return;
+    }
+
+    yield* Effect.logInfo(`playerId ${playerDetails.playerId}`);
+    yield* Effect.logInfo(`playerEmail ${playerDetails.playerEmail}`);
+    yield* Effect.logInfo(`playerAuthKey ${playerDetails.playerAuthKey}`);
+}).pipe(Effect.provide(AppLive), NodeRuntime.runMain);
