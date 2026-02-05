@@ -14,8 +14,14 @@ const BitizenAccessoriesJson = Schema.Struct({
         left: Schema.typeSchema(NimblebitSchema.UnityColor),
         right: Schema.typeSchema(NimblebitSchema.UnityColor),
     }),
-    glasses: Schema.Either({ left: Schema.NonNegativeInt, right: Schema.NonNegativeInt }),
-    hairAccessory: Schema.Either({ left: Schema.NonNegativeInt, right: Schema.NonNegativeInt }),
+    glasses: Schema.Either({
+        left: Schema.NonNegativeInt,
+        right: Schema.NonNegativeInt,
+    }),
+    hairAccessory: Schema.Either({
+        left: Schema.NonNegativeInt,
+        right: Schema.NonNegativeInt,
+    }),
     hat: Schema.Either({
         left: Schema.Struct({
             index: Schema.NonNegativeInt,
