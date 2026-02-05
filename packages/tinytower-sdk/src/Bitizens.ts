@@ -1275,25 +1275,25 @@ export const BitizenAttributes = Schema.suspend(() => {
             shoeColorIndex: Schema.NonNegativeInt,
         }),
         accessories: Schema.Struct({
-            tie: Schema.EitherFromSelf({
+            tie: Schema.Either({
                 left: Schema.typeSchema(NimblebitSchema.UnityColor),
                 right: Schema.typeSchema(NimblebitSchema.UnityColor),
             }),
-            earrings: Schema.EitherFromSelf({
+            earrings: Schema.Either({
                 left: Schema.typeSchema(NimblebitSchema.UnityColor),
                 right: Schema.typeSchema(NimblebitSchema.UnityColor),
             }),
-            glasses: Schema.EitherFromSelf({ left: Schema.NonNegativeInt, right: Schema.NonNegativeInt }),
-            hairAccessory: Schema.EitherFromSelf({ left: Schema.NonNegativeInt, right: Schema.NonNegativeInt }),
-            hat: Schema.EitherFromSelf({
+            glasses: Schema.Either({ left: Schema.NonNegativeInt, right: Schema.NonNegativeInt }),
+            hairAccessory: Schema.Either({ left: Schema.NonNegativeInt, right: Schema.NonNegativeInt }),
+            hat: Schema.Either({
                 left: Schema.Struct({
-                    color: Schema.typeSchema(NimblebitSchema.UnityColor),
                     index: Schema.NonNegativeInt,
+                    color: Schema.typeSchema(NimblebitSchema.UnityColor),
                 }),
                 right: Schema.Struct({
-                    color: Schema.typeSchema(NimblebitSchema.UnityColor),
                     index: Schema.NonNegativeInt,
                     gender: Schema.Literal("female", "male", "bi"),
+                    color: Schema.typeSchema(NimblebitSchema.UnityColor),
                 }),
             }),
         }),
@@ -1338,13 +1338,15 @@ export const BitizenAttributes = Schema.suspend(() => {
     ]);
 
     return Schema.transformOrFail(from, to, {
+        strict: true,
         encode: (
-            custom: Schema.Schema.Encoded<typeof to>,
+            customI: Schema.Schema.Encoded<typeof to>,
             _options: SchemaAST.ParseOptions,
-            ast: SchemaAST.AST
+            ast: SchemaAST.AST,
+            customA: Schema.Schema.Type<typeof to>
         ): Effect.Effect<Schema.Schema.Type<typeof from>, ParseResult.ParseIssue, never> => {
-            const isMale = custom.gender === "male";
-            const [firstName, lastName] = custom.name.split(" ");
+            const isMale = customI.gender === "male";
+            const [firstName, lastName] = customI.name.split(" ");
 
             const firstNameIndex = Function.pipe(
                 isMale ? maleNames : femaleNames,
@@ -1362,8 +1364,8 @@ export const BitizenAttributes = Schema.suspend(() => {
                 return ParseResult.fail(
                     new ParseResult.Type(
                         ast,
-                        custom.name,
-                        `Bitizen name ${custom.name} not found in internal lists, cannot encode`
+                        customI.name,
+                        `Bitizen name ${customI.name} not found in internal lists, cannot encode`
                     )
                 );
             }
@@ -1372,41 +1374,41 @@ export const BitizenAttributes = Schema.suspend(() => {
                 male: isMale,
                 firstNameIndex: firstNameIndex.value,
                 lastNameIndex: lastNameIndex.value,
-                birthMonth: custom.birthday[0],
-                birthDay: custom.birthday[1],
-                skinColorIndex: custom.designColors.skinColorIndex,
-                hairColorIndex: custom.designColors.hairColorIndex,
-                shoeColorIndex: custom.designColors.shoeColorIndex,
-                pantColor: custom.designColors.pantColor,
-                shirtColor: custom.designColors.shirtColor,
-                hasGlasses: Either.isRight(custom.accessories.glasses),
-                glassesIndex: Either.merge(custom.accessories.glasses),
-                hasTie: Either.isRight(custom.accessories.tie),
-                tieColor: Either.merge(custom.accessories.tie),
-                hasHairAccessory: Either.isRight(custom.accessories.hairAccessory),
-                hairAccessoryIndex: Either.merge(custom.accessories.hairAccessory),
+                birthMonth: customI.birthday[0],
+                birthDay: customI.birthday[1],
+                skinColorIndex: customI.designColors.skinColorIndex,
+                hairColorIndex: customI.designColors.hairColorIndex,
+                shoeColorIndex: customI.designColors.shoeColorIndex,
+                pantColor: customI.designColors.pantColor,
+                shirtColor: customI.designColors.shirtColor,
+                hasGlasses: Either.isRight(customA.accessories.glasses),
+                glassesIndex: Either.merge(customA.accessories.glasses),
+                hasTie: Either.isRight(customA.accessories.tie),
+                tieColor: Either.merge(customA.accessories.tie),
+                hasHairAccessory: Either.isRight(customA.accessories.hairAccessory),
+                hairAccessoryIndex: Either.merge(customA.accessories.hairAccessory),
                 hasBiHat: Either.getOrElse(
-                    Either.map(custom.accessories.hat, ({ gender }) => gender === "bi"),
+                    Either.map(customA.accessories.hat, ({ gender }) => gender === "bi"),
                     Function.constFalse
                 ),
                 hasMaleHat: Either.getOrElse(
-                    Either.map(custom.accessories.hat, ({ gender }) => gender === "male"),
+                    Either.map(customA.accessories.hat, ({ gender }) => gender === "male"),
                     Function.constFalse
                 ),
                 hasFemaleHat: Either.getOrElse(
-                    Either.map(custom.accessories.hat, ({ gender }) => gender === "female"),
+                    Either.map(customA.accessories.hat, ({ gender }) => gender === "female"),
                     Function.constFalse
                 ),
-                hatIndex: Either.merge(custom.accessories.hat).index,
-                hatColor: Either.merge(custom.accessories.hat).color,
-                hasEarrings: Either.isRight(custom.accessories.earrings),
-                earringsColor: Either.merge(custom.accessories.earrings),
-                skillFood: custom.skills.food,
-                skillService: custom.skills.service,
-                skillRecreation: custom.skills.recreation,
-                skillRetail: custom.skills.retail,
-                skillCreative: custom.skills.creative,
-                $unknown: custom.$unknown,
+                hatIndex: Either.merge(customA.accessories.hat).index,
+                hatColor: Either.merge(customA.accessories.hat).color,
+                hasEarrings: Either.isRight(customA.accessories.earrings),
+                earringsColor: Either.merge(customA.accessories.earrings),
+                skillFood: customI.skills.food,
+                skillService: customI.skills.service,
+                skillRecreation: customI.skills.recreation,
+                skillRetail: customI.skills.retail,
+                skillCreative: customI.skills.creative,
+                $unknown: customI.$unknown,
             });
         },
         decode: (
@@ -1438,24 +1440,25 @@ export const BitizenAttributes = Schema.suspend(() => {
                 );
             }
 
-            const tie = nimblebit.hasTie ? Either.right(nimblebit.tieColor) : Either.left(nimblebit.tieColor);
-            const glasses = nimblebit.hasGlasses
-                ? Either.right(nimblebit.glassesIndex)
-                : Either.left(nimblebit.glassesIndex);
+            const makeLeft = <L>(l: L) => ({ _tag: "Left", left: l }) as const;
+            const makeRight = <R>(u: R) => ({ _tag: "Right", right: u }) as const;
+
+            const tie = nimblebit.hasTie ? makeRight(nimblebit.tieColor) : makeLeft(nimblebit.tieColor);
+            const glasses = nimblebit.hasGlasses ? makeRight(nimblebit.glassesIndex) : makeLeft(nimblebit.glassesIndex);
             const hairAccessory = nimblebit.hasHairAccessory
-                ? Either.right(nimblebit.hairAccessoryIndex)
-                : Either.left(nimblebit.hairAccessoryIndex);
+                ? makeRight(nimblebit.hairAccessoryIndex)
+                : makeLeft(nimblebit.hairAccessoryIndex);
             const earrings = nimblebit.hasEarrings
-                ? Either.right(nimblebit.earringsColor)
-                : Either.left(nimblebit.earringsColor);
+                ? makeRight(nimblebit.earringsColor)
+                : makeLeft(nimblebit.earringsColor);
             const hat =
                 nimblebit.hasBiHat || nimblebit.hasMaleHat || nimblebit.hasFemaleHat
-                    ? Either.right({
+                    ? makeRight({
                           index: nimblebit.hatIndex,
                           color: nimblebit.hatColor,
                           gender: nimblebit.hasBiHat ? "bi" : nimblebit.hasMaleHat ? "male" : "female",
                       } as const)
-                    : Either.left({
+                    : makeLeft({
                           index: nimblebit.hatIndex,
                           color: nimblebit.hatColor,
                       } as const);
