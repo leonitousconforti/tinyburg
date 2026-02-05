@@ -21,17 +21,11 @@ Effect.gen(function* () {
                 Schema.decode(NimblebitConfig.PlayerIdSchema)(input),
                 () => "Invalid player id, please look in the cloud sync menu"
             ),
-    }).pipe(
-        Prompt.run,
-        Effect.map((playerId) => NimblebitConfig.PlayerIdSchema.make(playerId))
-    );
+    }).pipe(Effect.map(NimblebitConfig.PlayerIdSchema.make));
 
     const playerEmail = yield* Prompt.password({
         message: "Enter your email associated with this account",
-    }).pipe(
-        Prompt.run,
-        Effect.map((email) => NimblebitConfig.PlayerEmailSchema.make(email))
-    );
+    }).pipe(Effect.map(NimblebitConfig.PlayerEmailSchema.make));
 
     const result = yield* TinyTower.device_registerEmail({ playerId, playerEmail });
     yield* Effect.logInfo(result);
