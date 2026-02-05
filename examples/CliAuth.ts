@@ -1,9 +1,9 @@
 import { Prompt } from "@effect/cli";
-import { FetchHttpClient } from "@effect/platform";
+import { FetchHttpClient, Terminal } from "@effect/platform";
 import { NodeContext, NodeRuntime } from "@effect/platform-node";
 import { NimblebitAuth, NimblebitConfig } from "@tinyburg/nimblebit-sdk";
 import { TinyTower } from "@tinyburg/tinytower-sdk";
-import { Config, Effect, Layer, Schema } from "effect";
+import { Config, Console, Effect, Layer, Redacted, Schema } from "effect";
 
 const AppLive = Layer.mergeAll(
     NodeContext.layer,
@@ -15,7 +15,7 @@ const AppLive = Layer.mergeAll(
 
 Effect.gen(function* () {
     const playerId = yield* Prompt.text({
-        message: "Enter your cloud sync id (a.k.a friend code):",
+        message: "Enter your cloud sync id (a.k.a friend code)",
         validate: (input) =>
             Effect.mapError(
                 Schema.decode(NimblebitConfig.PlayerIdSchema)(input),
@@ -27,7 +27,7 @@ Effect.gen(function* () {
     );
 
     const playerEmail = yield* Prompt.password({
-        message: "Enter your email associated with this account:",
+        message: "Enter your email associated with this account",
     }).pipe(
         Prompt.run,
         Effect.map((email) => NimblebitConfig.PlayerEmailSchema.make(email))
@@ -37,7 +37,7 @@ Effect.gen(function* () {
     yield* Effect.logInfo(result);
 
     const verificationCode = yield* Prompt.text({
-        message: "Enter the verification code sent to your email:",
+        message: "Enter the verification code sent to your email",
     });
 
     const playerDetails = yield* TinyTower.device_verifyDevice({ verificationCode });
@@ -51,6 +51,13 @@ Effect.gen(function* () {
     }
 
     yield* Effect.logInfo(`playerId ${playerDetails.playerId}`);
-    yield* Effect.logInfo(`playerEmail ${playerDetails.playerEmail}`);
-    yield* Effect.logInfo(`playerAuthKey ${playerDetails.playerAuthKey}`);
-}).pipe(Effect.provide(AppLive), NodeRuntime.runMain);
+    yield* Effect.logInfo(`playerEmail ${Redacted.value(playerDetails.playerEmail)}`);
+    yield* Effect.logInfo(`playerAuthKey ${Redacted.value(playerDetails.playerAuthKey)}`);
+}).pipe(
+    Effect.catchIf(
+        (error) => Terminal.isQuitException(error),
+        () => Effect.andThen(Console.log(""), Effect.logInfo("Okay, goodbye!"))
+    ),
+    Effect.provide(AppLive),
+    NodeRuntime.runMain
+);
