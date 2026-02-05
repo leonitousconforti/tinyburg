@@ -90,7 +90,7 @@ const program = Effect.gen(function* () {
         }
 
         // Save the bitizen to the filesystem
-        const bitizenJson = Schema.encodeSync(Schema.parseJson(BitizenJson))(maybeBitizen.value);
+        const bitizenJson = Schema.encodeSync(Schema.parseJson(BitizenJson, { space: 4 }))(maybeBitizen.value);
         yield* fileSystem.writeFileString(`gift_${gift.id}.json`, bitizenJson);
 
         // Wait for the user to confirm they are done editing
