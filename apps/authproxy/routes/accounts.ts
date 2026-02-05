@@ -1,3 +1,5 @@
+import * as crypto from "node:crypto";
+
 import {
     HttpApi,
     HttpApiBuilder,
@@ -312,14 +314,20 @@ const AccountsGroupLive = HttpApiBuilder.group(AccountsApi, "AccountsGroup", (ha
 export const AuthorizationLive = Layer.effect(
     Authorization,
     Effect.gen(function* () {
-        const adminUsername = yield* Config.string("ADMIN_USERNAME");
+        const adminUsername = yield* Config.redacted("ADMIN_USERNAME");
         const adminPassword = yield* Config.redacted("ADMIN_PASSWORD");
 
         return {
             basic: (credentials) => {
                 if (
-                    credentials.username !== adminUsername ||
-                    Redacted.value(credentials.password) !== Redacted.value(adminPassword)
+                    !crypto.timingSafeEqual(
+                        Buffer.from(credentials.username),
+                        Buffer.from(Redacted.value(adminUsername))
+                    ) ||
+                    !crypto.timingSafeEqual(
+                        Buffer.from(Redacted.value(credentials.password)),
+                        Buffer.from(Redacted.value(adminPassword))
+                    )
                 ) {
                     return Effect.fail(new HttpApiError.Unauthorized());
                 }
