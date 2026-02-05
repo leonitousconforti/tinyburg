@@ -128,6 +128,9 @@ const program = Effect.gen(function* () {
             ...authenticatedPlayer,
             giftId: gift.id,
         });
+
+        // Delete the json file
+        yield* fileSystem.remove(`gift_${gift.id}.json`);
     }
 });
 
