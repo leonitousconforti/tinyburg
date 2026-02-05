@@ -38,13 +38,21 @@ const BitizenAccessoriesJson = Schema.Struct({
 const BitizenAttributesJson = Bitizens.BitizenAttributes.pipe(
     Schema.typeSchema,
     Schema.omit("accessories"),
-    Schema.extend(Schema.Struct({ accessories: BitizenAccessoriesJson }))
+    Schema.extend(
+        Schema.Struct({
+            accessories: BitizenAccessoriesJson,
+        })
+    )
 );
 
 const BitizenJson = Bitizens.Bitizen.pipe(
     Schema.typeSchema,
     Schema.omit("attributes"),
-    Schema.extend(Schema.Struct({ attributes: BitizenAttributesJson }))
+    Schema.extend(
+        Schema.Struct({
+            attributes: BitizenAttributesJson,
+        })
+    )
 );
 
 const EnvLive = Layer.provideMerge(PlatformConfigProvider.layerDotEnvAdd(".env"), NodeContext.layer);
