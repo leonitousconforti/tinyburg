@@ -5,6 +5,8 @@
 
 import * as NimblebitSchema from "@tinyburg/nimblebit-sdk/NimblebitSchema";
 import * as Array from "effect/Array";
+import * as Equivalence from "effect/Equivalence";
+import * as Function from "effect/Function";
 import * as Option from "effect/Option";
 import * as ParseResult from "effect/ParseResult";
 import * as Schema from "effect/Schema";
@@ -396,22 +398,71 @@ export type Floor = (typeof floors)[number];
 
 //////////////////////////////////////////////////////////////////
 
-const floorsSchema = Schema.suspend(() => {
-    type SchemaType = {
-        [K in Extract<keyof typeof floors, `${number}`>]: Schema.Struct<{
-            name: Schema.Literal<[(typeof floors)[K]["name"]]>;
-            type: Schema.Literal<[(typeof floors)[K]["type"]]>;
-        }>;
-    }[Extract<keyof typeof floors, `${number}`>];
+const FloorIdSchema = Schema.suspend(() => {
+    type FloorIndices = {
+        [I in Exclude<keyof typeof floors, keyof []>]: I extends `${infer N extends number}` ? N : never;
+    }[Exclude<keyof typeof floors, keyof []>];
 
-    const mapped = Array.map(floors, (floor) =>
-        Schema.Struct({
-            name: Schema.Literal(floor.name),
-            type: Schema.Literal(floor.type),
-        })
-    ) as Array<SchemaType>;
+    type ValidFloorIndices = {
+        [I in FloorIndices]: (typeof floors)[I]["type"] extends "None" ? never : I;
+    }[FloorIndices];
 
-    return Schema.Union(...mapped);
+    type ValidFloor = (typeof floors)[ValidFloorIndices];
+
+    type ValidIndicesSchema = Schema.Literal<[ValidFloorIndices]>;
+    type ValidFloorsSchema = {
+        [I in ValidFloorIndices]: (typeof floors)[I]["type"] extends "None"
+            ? never
+            : Schema.Struct<{
+                  name: Schema.Literal<[(typeof floors)[I]["name"]]>;
+                  type: Schema.Literal<[(typeof floors)[I]["type"]]>;
+              }>;
+    }[ValidFloorIndices];
+
+    const validFloorsSchema = Function.pipe(
+        floors,
+        Array.filter((floor) => floor.type !== floorType.None),
+        Array.map((floor) =>
+            Schema.Struct({
+                name: Schema.Literal(floor.name),
+                type: Schema.Literal(floor.type),
+            })
+        )
+    ) as Array<ValidFloorsSchema>;
+
+    const validIndicesSchema = Function.pipe(
+        floors,
+        Array.map((floor, index) => ({ ...floor, index })),
+        Array.filter(({ type }) => type !== floorType.None),
+        Array.map(({ index }) => index as unknown as ValidFloorIndices),
+        (literals) => Schema.Literal(...literals)
+    ) as ValidIndicesSchema;
+
+    const FloorEquivalence: Equivalence.Equivalence<Floor> = Equivalence.struct({
+        name: Equivalence.string,
+        type: Equivalence.string,
+    });
+
+    const tryFindFloor = (input: ValidFloor): Option.Option<number> =>
+        Array.findLastIndex(floors, (floor) => FloorEquivalence(input, floor));
+
+    return Schema.transformOrFail(
+        Schema.compose(Schema.NumberFromString, validIndicesSchema),
+        Schema.Union(...validFloorsSchema),
+        {
+            strict: true,
+            encode: (input: ValidFloor, _options, ast) =>
+                Option.match(tryFindFloor(input), {
+                    onSome: (index) => ParseResult.succeed(index as ValidFloorIndices),
+                    onNone: () => ParseResult.fail(new ParseResult.Type(ast, input, "Unknown floor")),
+                }),
+            decode: (index: ValidFloorIndices, _options, ast) =>
+                Option.match(Array.get(floors, index), {
+                    onSome: (floor) => ParseResult.succeed(floor as ValidFloor),
+                    onNone: () => ParseResult.fail(new ParseResult.Type(ast, index, "Unknown floor index")),
+                }),
+        }
+    );
 });
 
 /**
@@ -427,21 +478,7 @@ export const Floor = NimblebitSchema.parseNimblebitObject(
             Schema.propertySignature,
             Schema.fromKey("Fs")
         ),
-        floorId: Schema.transformOrFail(Schema.compose(Schema.NumberFromString, Schema.Int), floorsSchema, {
-            encode: ({ name, type }, _options, ast) =>
-                Option.match(
-                    Array.findFirstIndex(floors, (floor) => floor.name === name && floor.type === type),
-                    {
-                        onSome: (index) => ParseResult.succeed(index),
-                        onNone: () => ParseResult.fail(new ParseResult.Type(ast, { name, type }, "Unknown floor")),
-                    }
-                ),
-            decode: (index, _options, ast) =>
-                Option.match(Array.get(floors, index), {
-                    onSome: (floor) => ParseResult.succeed(floor),
-                    onNone: () => ParseResult.fail(new ParseResult.Type(ast, index, "Unknown floor index")),
-                }),
-        }).pipe(Schema.propertySignature, Schema.fromKey("Ff")),
+        floorId: FloorIdSchema.pipe(Schema.propertySignature, Schema.fromKey("Ff")),
         level: Schema.NumberFromString.pipe(Schema.compose(Schema.Int), Schema.propertySignature, Schema.fromKey("Fl")),
         openDate: NimblebitSchema.CSharpDate.pipe(Schema.propertySignature, Schema.fromKey("Fod")),
         stockBaseTime: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Fsbt")),
