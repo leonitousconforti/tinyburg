@@ -64,8 +64,8 @@ Effect.gen(function* () {
         }
 
         // Save the bitizen to the filesystem
-        const bitizenJson = Schema.encodeSync(Schema.parseJson(BitizenJson, { space: 4 }))(maybeBitizen.value);
-        yield* fileSystem.writeFileString(`gift_${gift.id}.json`, bitizenJson);
+        const giftJson = Schema.encodeSync(Schema.parseJson(BitizenJson, { space: 4 }))(maybeBitizen.value);
+        yield* fileSystem.writeFileString(`gift_${gift.id}.json`, giftJson);
 
         // Wait for the user to confirm they are done editing
         let doneEditing = false;
@@ -77,8 +77,8 @@ Effect.gen(function* () {
 
         // Read the edited bitizen from the filesystem
         const editedJson = yield* fileSystem.readFileString(`gift_${gift.id}.json`);
-        const editedBitizen = yield* Schema.decode(Schema.parseJson(BitizenJson))(editedJson);
-        const bitizenEncoded = yield* Schema.encodeUnknown(Bitizens.Bitizen)(editedBitizen);
+        const bitizen = yield* Schema.decode(Schema.parseJson(BitizenJson), { onExcessProperty: "error" })(editedJson);
+        const bitizenEncoded = yield* Schema.encodeUnknown(Bitizens.Bitizen)(bitizen);
 
         // Prompt who they want to send the edited bitizen to
         const decodeFriendId = Schema.decode(NimblebitConfig.PlayerIdSchema);
