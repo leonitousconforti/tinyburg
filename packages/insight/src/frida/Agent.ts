@@ -179,7 +179,6 @@ const RpcsLive = Rpcs.toLayer(
                 FloorsField.value,
                 Extensions.Dictionary.lift<number, Il2Cpp.Object>,
                 (floorInfo) => floorInfo.entries,
-                Array.filter(([floorIndex]) => floorIndex >= 0),
                 Array.map(([floorIndex, floorObject]) => {
                     const index = floorIndex.toString();
                     const floor = liftNimblebitDSO(floorObject);
@@ -187,6 +186,7 @@ const RpcsLive = Rpcs.toLayer(
                     const type = floor.get(Il2Cpp.string("type")).toString();
                     return Tuple.make(name, { index, type });
                 }),
+                Array.append(Tuple.make("never", { index: "59", type: "None" })),
                 Record.fromEntries
             );
 

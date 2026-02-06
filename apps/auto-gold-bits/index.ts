@@ -23,12 +23,12 @@ const program = Effect.gen(function* () {
     for (const bitizenGift of bitizenGifts) {
         // Upgrade their skills to 9s
         const bitizen = yield* Schema.decode(Bitizens.Bitizen)(bitizenGift.contents);
-        const skills = bitizen.attributes.skills as Types.Mutable<typeof bitizen.attributes.skills>;
-        skills.creative = 9;
-        skills.food = 9;
-        skills.recreation = 9;
-        skills.retail = 9;
-        skills.service = 9;
+        const mutableBitizen = bitizen as Types.DeepMutable<typeof bitizen>;
+        mutableBitizen.attributes.skills.creative = 9;
+        mutableBitizen.attributes.skills.food = 9;
+        mutableBitizen.attributes.skills.recreation = 9;
+        mutableBitizen.attributes.skills.retail = 9;
+        mutableBitizen.attributes.skills.service = 9;
 
         // If they have a requested floor, set their dream job to that floor
         const friendMeta = yield* TinyTower.social_pullFriendMeta({
@@ -37,11 +37,11 @@ const program = Effect.gen(function* () {
         });
 
         if (friendMeta.requestedFloorId !== -1) {
-            (bitizen as Types.Mutable<typeof bitizen>).dreamJobIndex = friendMeta.requestedFloorId;
+            mutableBitizen.dreamJobIndex = friendMeta.requestedFloorId;
         }
 
         // Send the upgraded bitizen back to the friend
-        const encodedBitizen = yield* Schema.encode(Bitizens.Bitizen)(bitizen);
+        const encodedBitizen = yield* Schema.encode(Bitizens.Bitizen)(mutableBitizen);
         yield* TinyTower.social_sendItem({
             ...authenticatedPlayer,
             friendId: bitizenGift.from,
