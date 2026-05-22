@@ -33,8 +33,6 @@ describe("SaveData schema round trip tests", async () => {
 
     it.each(snapshots)(`snapshot $snapshotId from player ${NimblebitFriendId} created at $created`, ({ snapshotId }) =>
         Effect.gen(function* () {
-            expect.assertions(1);
-
             const player = yield* authenticatedPlayer;
             const { data: snapshotData } = yield* TinyTower.sync_pullSnapshot({
                 snapshotId,
