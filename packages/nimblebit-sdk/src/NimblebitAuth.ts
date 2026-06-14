@@ -5,9 +5,9 @@
  * @category Auth
  */
 
+import type * as Array from "effect/Array";
 import type * as PlatformError from "effect/PlatformError";
 
-import * as Array from "effect/Array";
 import * as Config from "effect/Config";
 import * as Context from "effect/Context";
 import * as Crypto from "effect/Crypto";
@@ -83,13 +83,10 @@ export class NimblebitAuth extends Context.Service<
     );
 
     private static readonly MD5 = (data: string): Effect.Effect<string, never, never> =>
-        Effect.promise(async () => {
-            const encoder = new TextEncoder();
-            const encoded = encoder.encode(data);
-            const hashBuffer = await crypto.subtle.digest("MD5", encoded);
-            const hashArray = Array.fromIterable(new Uint8Array(hashBuffer));
-            return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
-        });
+        Effect.map(
+            Effect.promise(() => import("node:crypto")),
+            (crypto) => crypto.createHash("md5").update(data).digest("hex")
+        );
 
     public static readonly Direct = (
         authKey: Schema.Schema.Type<typeof NimblebitConfig.NimblebitAuthKeySchema>
