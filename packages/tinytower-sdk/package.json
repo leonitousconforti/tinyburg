@@ -44,7 +44,7 @@
         "check": "tsc -b tsconfig.json",
         "codegen": "build-utils prepare-v4",
         "coverage": "vitest --coverage",
-        "generate": "node --experimental-strip-types ./scripts/GenerateData.ts && prettier --write 'src/{BitbookPosts,Bitizens,Costumes,Elevators,Floors,Missions,Pets,Roofs}.ts'",
+        "generate": "node --experimental-strip-types ./scripts/GenerateData.ts",
         "test": "vitest"
     },
     "dependencies": {
