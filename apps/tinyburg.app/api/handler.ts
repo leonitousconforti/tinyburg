@@ -1,5 +1,5 @@
 import { HttpApp, type HttpMiddleware, type HttpServerRequest } from "@effect/platform";
-import { type APIRoute } from "astro";
+import type { APIRoute } from "astro";
 import { Context, Effect, type ManagedRuntime, type Scope } from "effect";
 
 import { AppRuntime } from "./runtime";

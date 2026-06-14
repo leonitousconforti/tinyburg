@@ -243,6 +243,9 @@ importers:
       '@efffrida/frida-tools':
         specifier: 0.0.36
         version: 0.0.36(effect@4.0.0-beta.69)
+      '@efffrida/gplayapi':
+        specifier: 0.0.17
+        version: 0.0.17(effect@4.0.0-beta.69)
       '@efffrida/il2cpp-bridge':
         specifier: 0.0.33
         version: 0.0.33(effect@4.0.0-beta.69)
@@ -5758,6 +5761,10 @@ snapshots:
   '@efffrida/gplayapi@0.0.17(@bufbuild/protobuf@2.12.0)(effect@4.0.0-beta.69)':
     dependencies:
       '@bufbuild/protobuf': 2.12.0
+      effect: 4.0.0-beta.69
+
+  '@efffrida/gplayapi@0.0.17(effect@4.0.0-beta.69)':
+    dependencies:
       effect: 4.0.0-beta.69
 
   '@efffrida/il2cpp-bridge@0.0.33(effect@4.0.0-beta.69)':

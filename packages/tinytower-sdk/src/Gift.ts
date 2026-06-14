@@ -3,8 +3,9 @@
  * @category Gifts
  */
 
-import * as NimblebitConfig from "@tinyburg/nimblebit-sdk/NimblebitConfig";
 import * as Schema from "effect/Schema";
+
+import * as NimblebitConfig from "@tinyburg/nimblebit-sdk/NimblebitConfig";
 
 import * as SyncItemType from "./SyncItemType.ts";
 
