@@ -1,7 +1,34 @@
+import type { HttpClient, HttpClientError } from "effect/unstable/http";
+
+import {
+    Effect,
+    Layer,
+    Stream,
+    type Path,
+    type Config,
+    type Cause,
+    type Exit,
+    type Crypto,
+    type Schema,
+    type PlatformError,
+    type FileSystem,
+    Tuple,
+    Duration,
+    Context,
+    String,
+} from "effect";
+import { ChildProcess, ChildProcessSpawner } from "effect/unstable/process";
 import { RpcSerialization, type RpcClient } from "effect/unstable/rpc";
-import { FridaScript, FridaSession, type FridaDevice, type FridaSessionError } from "@efffrida/frida-tools";
+
+import {
+    FridaScript,
+    FridaSession,
+    FridaDevice,
+    FridaDeviceAcquisitionError,
+    type FridaSessionError,
+} from "@efffrida/frida-tools";
+import { GooglePlayApi } from "@efffrida/gplayapi";
 import { FridaRpcClient } from "@efffrida/rpc/node";
-import { Effect, Layer, Stream, type Exit, type FileSystem } from "effect";
 import { JsPlatform } from "frida";
 
 const NdJsonSerialization = RpcSerialization.layerNdjson;
@@ -48,3 +75,67 @@ export const AgentWatched = <A, E, R>(
         new URL("../frida/Agent.ts", import.meta.url),
         { platform: JsPlatform.Browser }
     ).pipe(Stream.provide(SessionLive), FridaScript.logWatchErrors);
+
+/**
+ * @since 1.0.0
+ * @category Frida
+ */
+export const DeviceLive: Layer.Layer<
+    FridaDevice.FridaDevice,
+    | Config.ConfigError
+    | FridaDeviceAcquisitionError.FridaDeviceAcquisitionError
+    | HttpClientError.HttpClientError
+    | Schema.SchemaError
+    | PlatformError.PlatformError
+    | Cause.NoSuchElementError,
+    | FileSystem.FileSystem
+    | ChildProcessSpawner.ChildProcessSpawner
+    | Path.Path
+    | HttpClient.HttpClient
+    | GooglePlayApi.AndroidDeviceService
+    | Crypto.Crypto
+> = Layer.tap(
+    FridaDevice.layerAndroidEmulatorDeviceConfig("Small_Phone", {
+        fridaExecutable: "/data/local/tmp/frida-server-17.11.0-android-arm64",
+        extraEmulatorArgs: ["-gpu", "swiftshader_indirect"],
+    }),
+    Effect.fnUntraced(
+        function* (deviceCtx: Context.Context<FridaDevice.FridaDevice>) {
+            const device = Context.get(deviceCtx, FridaDevice.FridaDevice);
+            const emulatorName = String.replace("android-emulator://", "")(device.host);
+            const childProcessSpawner = yield* ChildProcessSpawner.ChildProcessSpawner;
+            const apks = yield* GooglePlayApi.downloadToDisk("com.nimblebit.tinytower");
+
+            yield* Effect.annotateCurrentSpan({
+                "apk.path": apks,
+                "emulator.name": emulatorName,
+            });
+
+            const installCommand = ChildProcess.make("/Users/leo.conforti/Library/Android/sdk/platform-tools/adb", [
+                "-s",
+                emulatorName,
+                "install-multiple",
+                "-r", // Replace existing application (if present)
+                "-t", // Allow test packages
+                "-g", // Grant all runtime permissions
+                "-d", // Allow downgrade
+                ...apks.map((apk) => apk.file),
+            ]);
+
+            const exitCode = yield* childProcessSpawner.exitCode(installCommand);
+            if (exitCode !== 0) {
+                return yield* new FridaDeviceAcquisitionError.FridaDeviceAcquisitionError({
+                    cause: `Failed to install APK. Exit code: ${exitCode}`,
+                    acquisitionMethod: "android-emulator",
+                    attempts: 1,
+                });
+            }
+        },
+        Effect.scoped,
+        Effect.timed,
+        Effect.map(Tuple.get(0)),
+        Effect.map(Duration.toSeconds),
+        Effect.flatMap((time) => Effect.logDebug(`APK downloading and installing took ${time} seconds`)),
+        Effect.asVoid
+    )
+);
