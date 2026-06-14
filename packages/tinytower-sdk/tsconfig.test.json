@@ -7,7 +7,9 @@
         "tsBuildInfoFile": ".tsbuildinfo/test.tsbuildinfo",
         "outDir": ".tsbuildinfo/test",
         "noEmit": true,
-        "baseUrl": ".",
+        "erasableSyntaxOnly": false,
+        "rewriteRelativeImportExtensions": false,
+        "allowImportingTsExtensions": true,
         "types": ["node"],
         "paths": {
             "@tinyburg/tinytower-sdk": ["./src/index.ts"],

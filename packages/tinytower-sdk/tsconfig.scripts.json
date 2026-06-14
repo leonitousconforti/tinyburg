@@ -7,7 +7,9 @@
         "tsBuildInfoFile": ".tsbuildinfo/scripts.tsbuildinfo",
         "outDir": ".tsbuildinfo/scripts",
         "noEmit": true,
-        "baseUrl": ".",
+        "erasableSyntaxOnly": true,
+        "rewriteRelativeImportExtensions": false,
+        "allowImportingTsExtensions": true,
         "types": ["node"],
         "plugins": [
             {

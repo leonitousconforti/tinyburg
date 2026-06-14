@@ -11,7 +11,7 @@ const ConfigLayerLive = DotEnvLayer.pipe(Layer.provideMerge(NodeServices.layer))
 
 const Live = Layer.mergeAll(
     FetchHttpClient.layer,
-    NimblebitAuth.layerNodeDirectConfig(NimblebitConfig.NimblebitAuthKeyConfig)
+    NimblebitAuth.layerDirectConfig(NimblebitConfig.NimblebitAuthKeyConfig)
 ).pipe(Layer.provideMerge(ConfigLayerLive));
 
 describe("SaveData schema round trip tests", async () => {
