@@ -1,5 +1,6 @@
-import { Model, SqlClient, SqlSchema } from "@effect/sql";
-import { Context, Effect, Schema } from "effect";
+import { Context, Effect, Schema, Layer } from "effect";
+import { Model } from "effect/unstable/schema";
+import { SqlClient, SqlSchema, SqlModel } from "effect/unstable/sql";
 
 /**
  * The current account in context, provided by middleware.
@@ -7,10 +8,9 @@ import { Context, Effect, Schema } from "effect";
  * @since 1.0.0
  * @category Tags
  */
-export class CurrentAccount extends Context.Tag("@tinyburg/authproxy/model/CurrentAccount")<
-    CurrentAccount,
-    Account
->() {}
+export class CurrentAccount extends Context.Service<CurrentAccount, Account>()(
+    "@tinyburg/authproxy/model/CurrentAccount"
+) {}
 
 /**
  * An account in the authproxy system.
@@ -19,17 +19,18 @@ export class CurrentAccount extends Context.Tag("@tinyburg/authproxy/model/Curre
  * @category Models
  */
 export class Account extends Model.Class<Account>("Account")({
-    id: Model.Generated(Schema.NonNegativeInt),
+    id: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)).pipe(Model.GeneratedByDb),
     createdAt: Model.DateTimeInsertFromDate,
     lastUsedAt: Model.DateTimeUpdateFromDate,
-    key: Model.Generated(Schema.UUID),
-    revoked: Model.Generated(Schema.Boolean),
+    key: Schema.String.check(Schema.isUUID()).pipe(Model.FieldExcept(["insert"])),
+    revoked: Schema.Boolean.pipe(Model.FieldExcept(["insert"])),
     scopes: Schema.ReadonlySet(Schema.String),
-    description: Schema.OptionFromNullishOr(Schema.String, null),
+    description: Schema.OptionFromNullishOr(Schema.String, { onNoneEncoding: null }),
     rateLimitLimit: Schema.Int,
     rateLimitWindow: Schema.NumberFromString.pipe(
-        Schema.compose(Schema.NonNegativeInt),
-        Schema.compose(Schema.DurationFromMillis)
+        Schema.check(Schema.isGreaterThanOrEqualTo(0)),
+        Schema.decodeTo(Schema.Int),
+        Schema.decodeTo(Schema.DurationFromMillis)
     ),
 }) {}
 
@@ -39,10 +40,8 @@ export class Account extends Model.Class<Account>("Account")({
  * @since 1.0.0
  * @category Services
  */
-export class Repository extends Effect.Service<Repository>()("@tinyburg/authproxy/model/Repository", {
-    accessors: true,
-    dependencies: [],
-    effect: Effect.gen(function* () {
+export class Repository extends Context.Service<Repository>()("@tinyburg/authproxy/model/Repository", {
+    make: Effect.gen(function* () {
         const sql = yield* SqlClient.SqlClient;
 
         const listAll = SqlSchema.findAll({
@@ -51,14 +50,14 @@ export class Repository extends Effect.Service<Repository>()("@tinyburg/authprox
             execute: () => sql`SELECT * FROM accounts`,
         });
 
-        const repoByKey = yield* Model.makeRepository(Account, {
-            idColumn: "key",
-            tableName: "accounts",
+        const repoByKey = yield* SqlModel.makeRepository(Account, {
             spanPrefix: "@tinyburg/authproxy/model/Repository/ByKey",
+            tableName: "accounts",
+            idColumn: "key",
         });
 
-        const seededNoneAccount = yield* Effect.flatten(repoByKey.findById("00000000-0000-0000-0000-000000000001"));
-        const seededReadonlyAccount = yield* Effect.flatten(repoByKey.findById("00000000-0000-0000-0000-000000000002"));
+        const seededNoneAccount = repoByKey.findById("00000000-0000-0000-0000-000000000001");
+        const seededReadonlyAccount = repoByKey.findById("00000000-0000-0000-0000-000000000002");
 
         return {
             ...repoByKey,
@@ -71,4 +70,6 @@ export class Repository extends Effect.Service<Repository>()("@tinyburg/authprox
             seededReadonlyAccount,
         };
     }),
-}) {}
+}) {
+    static readonly Live = Layer.effect(Repository, Repository.make);
+}

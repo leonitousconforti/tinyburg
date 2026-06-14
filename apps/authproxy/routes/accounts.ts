@@ -1,5 +1,4 @@
-import * as crypto from "node:crypto";
-
+import { Config, Effect, Layer, Option, Redacted, Schema, Function } from "effect";
 import {
     HttpApi,
     HttpApiBuilder,
@@ -7,80 +6,103 @@ import {
     HttpApiError,
     HttpApiGroup,
     HttpApiMiddleware,
-    HttpApiSchema,
     HttpApiSecurity,
-    HttpLayerRouter,
-} from "@effect/platform";
-import { Model } from "@effect/sql";
-import { Config, Effect, Layer, Option, Redacted, Schema } from "effect";
+} from "effect/unstable/httpapi";
+import { Model } from "effect/unstable/schema";
+
+import * as crypto from "node:crypto";
 
 import { Account, Repository } from "../domain/model.ts";
 
-/** @internal */
-const keyParam = HttpApiSchema.param("key", Schema.UUID);
-
-/** @internal */
-const accountType = HttpApiSchema.param("accountType", Schema.Literal("none", "readonly"));
+/**
+ * @since 1.0.0
+ * @category Endpoints
+ */
+export const CreateAccount = HttpApiEndpoint.post("create", `/accounts/new/:accountType`, {
+    params: { accountType: Schema.Literals(["none", "readonly"]) },
+    success: Account.json,
+});
 
 /**
  * @since 1.0.0
  * @category Endpoints
  */
-export const CreateAccount = HttpApiEndpoint.post("create")`/accounts/new/${accountType}`.addSuccess(Account.json);
+export const DeleteAccount = HttpApiEndpoint.delete("delete", `/accounts/delete/:key`, {
+    params: { key: Schema.String.check(Schema.isUUID()) },
+    error: HttpApiError.NotFound,
+    success: Schema.Void,
+});
 
 /**
  * @since 1.0.0
  * @category Endpoints
  */
-export const DeleteAccount = HttpApiEndpoint.del("delete")`/accounts/delete/${keyParam}`.addSuccess(Schema.Void);
+export const ViewAccount = HttpApiEndpoint.get("view", `/accounts/view/:key`, {
+    params: { key: Schema.String.check(Schema.isUUID()) },
+    error: HttpApiError.NotFound,
+    success: Account.json,
+});
 
 /**
  * @since 1.0.0
  * @category Endpoints
  */
-export const ViewAccount = HttpApiEndpoint.get("view")`/accounts/view/${keyParam}`.addSuccess(Account.json);
+export const ListAccounts = HttpApiEndpoint.get("list", `/accounts/list`, {
+    success: Schema.Array(Account.json),
+});
 
 /**
  * @since 1.0.0
  * @category Endpoints
  */
-export const ListAccounts = HttpApiEndpoint.get("list")`/accounts/list`.addSuccess(Schema.Array(Account.json));
+export const RevokeAccount = HttpApiEndpoint.put("revoke", `/accounts/revoke/:key`, {
+    params: { key: Schema.String.check(Schema.isUUID()) },
+    error: [HttpApiError.NotFound, HttpApiError.BadRequest],
+    success: Account.json,
+});
 
 /**
  * @since 1.0.0
  * @category Endpoints
  */
-export const RevokeAccount = HttpApiEndpoint.put("revoke")`/accounts/revoke/${keyParam}`.addSuccess(Account.json);
+export const AuthorizeAccount = HttpApiEndpoint.put("authorize", `/accounts/grant/:key`, {
+    params: { key: Schema.String.check(Schema.isUUID()) },
+    error: [HttpApiError.NotFound, HttpApiError.BadRequest],
+    success: Account.json,
+});
 
 /**
  * @since 1.0.0
  * @category Endpoints
  */
-export const AuthorizeAccount = HttpApiEndpoint.put("authorize")`/accounts/grant/${keyParam}`.addSuccess(Account.json);
+export const ModifyScopes = HttpApiEndpoint.patch("scopes", `/accounts/scopes/:key`, {
+    params: { key: Schema.String.check(Schema.isUUID()) },
+    payload: Schema.Struct({ scopes: Schema.ReadonlySet(Schema.String) }),
+    error: HttpApiError.NotFound,
+    success: Account.json,
+});
 
 /**
  * @since 1.0.0
  * @category Endpoints
  */
-export const ModifyScopes = HttpApiEndpoint.patch("scopes")`/accounts/scopes/${keyParam}`
-    .setPayload(Schema.Struct({ scopes: Schema.ReadonlySet(Schema.String) }))
-    .addSuccess(Account.json);
+export const ModifyRateLimit = HttpApiEndpoint.patch("rateLimit", `/accounts/ratelimit/:key`, {
+    params: { key: Schema.String.check(Schema.isUUID()) },
+    payload: Schema.Struct({ limit: Schema.Int, window: Schema.DurationFromMillis }),
+    error: HttpApiError.NotFound,
+    success: Account.json,
+});
 
 /**
  * @since 1.0.0
  * @category Endpoints
  */
-export const ModifyRateLimit = HttpApiEndpoint.patch("rateLimit")`/accounts/ratelimit/${keyParam}`
-    .setPayload(Schema.Struct({ limit: Schema.Int, window: Schema.DurationFromMillis }))
-    .addSuccess(Account.json);
-
-/**
- * @since 1.0.0
- * @category Endpoints
- */
-export const ModifyDescription = HttpApiEndpoint.patch("description")`/accounts/description/${keyParam}`
-    .setPayload(Schema.Struct({ description: Schema.OptionFromNullishOr(Schema.String, null) }))
-    .addSuccess(Account.json);
+export const ModifyDescription = HttpApiEndpoint.patch("description", `/accounts/description/:key`, {
+    params: { key: Schema.String.check(Schema.isUUID()) },
+    payload: Schema.Struct({ description: Schema.OptionFromNullishOr(Schema.String, { onNoneEncoding: null }) }),
+    error: HttpApiError.NotFound,
+    success: Account.json,
+});
 
 /**
  * @since 1.0.0
@@ -101,8 +123,8 @@ export const AccountsGroup = HttpApiGroup.make("AccountsGroup")
  * @since 1.0.0
  * @category Middlewares
  */
-export class Authorization extends HttpApiMiddleware.Tag<Authorization>()("Authorization", {
-    failure: HttpApiError.Unauthorized,
+export class Authorization extends HttpApiMiddleware.Service<Authorization>()("Authorization", {
+    error: HttpApiError.Unauthorized,
     security: { basic: HttpApiSecurity.basic },
 }) {}
 
@@ -110,229 +132,275 @@ export class Authorization extends HttpApiMiddleware.Tag<Authorization>()("Autho
  * @since 1.0.0
  * @category Api
  */
-export const AccountsApi = HttpApi.make("AccountsApi")
-    .add(AccountsGroup)
-    .middleware(Authorization)
-    .addError(HttpApiError.NotFound)
-    .addError(HttpApiError.BadRequest)
-    .addError(HttpApiError.InternalServerError);
+export const AccountsApi = HttpApi.make("AccountsApi").add(AccountsGroup).middleware(Authorization);
 
 /** @internal */
-const CreateHandler = HttpApiBuilder.handler(
-    AccountsApi,
-    "AccountsGroup",
+const CreateHandler: HttpApiEndpoint.HandlerWithName<
+    HttpApiGroup.Endpoints<
+        HttpApiGroup.WithName<(typeof AccountsApi)["groups"][keyof (typeof AccountsApi)["groups"]], "AccountsGroup">
+    >,
     "create",
-    Effect.fnUntraced(function* ({ path: { accountType } }) {
-        const repo = yield* Repository;
-        const seededAccount = accountType === "none" ? repo.seededNoneAccount : repo.seededReadonlyAccount;
-        return yield* repo.insert({
-            createdAt: undefined,
-            lastUsedAt: undefined,
+    never,
+    Repository
+> = Effect.fnUntraced(function* ({ params: { accountType } }) {
+    const repo = yield* Repository;
+    const seededAccount = yield* accountType === "none" ? repo.seededNoneAccount : repo.seededReadonlyAccount;
+    return yield* repo.insert(
+        Account.insert.make({
             description: Option.none(),
             scopes: seededAccount.scopes,
             rateLimitLimit: seededAccount.rateLimitLimit,
             rateLimitWindow: seededAccount.rateLimitWindow,
-        });
-    })
-);
+        })
+    );
+}, Effect.orDie);
 
 /** @internal */
-const DeleteHandler = HttpApiBuilder.handler(
-    AccountsApi,
-    "AccountsGroup",
+const DeleteHandler: HttpApiEndpoint.HandlerWithName<
+    HttpApiGroup.Endpoints<
+        HttpApiGroup.WithName<(typeof AccountsApi)["groups"][keyof (typeof AccountsApi)["groups"]], "AccountsGroup">
+    >,
     "delete",
-    Effect.fnUntraced(function* ({ path: { key } }) {
-        const repo = yield* Repository;
-        const maybeAccount = yield* repo.findById(key);
-        return yield* Option.match(maybeAccount, {
-            onNone: () => Effect.fail(new HttpApiError.NotFound()),
-            onSome: (account) => repo.delete(account.key),
-        });
-    })
-);
+    never,
+    Repository
+> = Effect.fnUntraced(function* ({ params: { key } }) {
+    const repo = yield* Repository;
+    const maybeAccount = yield* repo.findById(key).pipe(Effect.catchNoSuchElement);
+    return yield* Option.match(maybeAccount, {
+        onNone: () => Effect.fail(new HttpApiError.NotFound()),
+        onSome: (account) => repo.delete(account.key),
+    });
+}, Effect.orDie);
 
 /** @internal */
-const ViewHandler = HttpApiBuilder.handler(
-    AccountsApi,
-    "AccountsGroup",
+const ViewHandler: HttpApiEndpoint.HandlerWithName<
+    HttpApiGroup.Endpoints<
+        HttpApiGroup.WithName<(typeof AccountsApi)["groups"][keyof (typeof AccountsApi)["groups"]], "AccountsGroup">
+    >,
     "view",
-    Effect.fnUntraced(function* ({ path: { key } }) {
-        const repo = yield* Repository;
-        const maybeAccount = yield* repo.findById(key);
-        return yield* Option.match(maybeAccount, {
-            onNone: () => Effect.fail(new HttpApiError.NotFound()),
-            onSome: Effect.succeed,
-        });
-    })
-);
+    never,
+    Repository
+> = Effect.fnUntraced(function* ({ params: { key } }) {
+    const repo = yield* Repository;
+    const maybeAccount = yield* repo.findById(key).pipe(Effect.catchNoSuchElement);
+    return yield* Option.match(maybeAccount, {
+        onNone: () => Effect.fail(new HttpApiError.NotFound()),
+        onSome: Effect.succeed,
+    });
+}, Effect.orDie);
 
 /** @internal */
-const ListHandler = HttpApiBuilder.handler(
-    AccountsApi,
-    "AccountsGroup",
+const ListHandler: HttpApiEndpoint.HandlerWithName<
+    HttpApiGroup.Endpoints<
+        HttpApiGroup.WithName<(typeof AccountsApi)["groups"][keyof (typeof AccountsApi)["groups"]], "AccountsGroup">
+    >,
     "list",
-    Effect.fnUntraced(function* () {
-        const repo = yield* Repository;
-        return yield* repo.listAll();
-    }, Effect.orDie)
-);
+    never,
+    Repository
+> = Effect.fnUntraced(function* () {
+    const repo = yield* Repository;
+    return yield* repo.listAll();
+}, Effect.orDie);
 
 /** @internal */
-const RevokeHandler = HttpApiBuilder.handler(
-    AccountsApi,
-    "AccountsGroup",
+const RevokeHandler: HttpApiEndpoint.HandlerWithName<
+    HttpApiGroup.Endpoints<
+        HttpApiGroup.WithName<(typeof AccountsApi)["groups"][keyof (typeof AccountsApi)["groups"]], "AccountsGroup">
+    >,
     "revoke",
-    Effect.fnUntraced(function* ({ path: { key } }) {
-        const repo = yield* Repository;
-        const maybeAccount = yield* repo.findById(key);
+    never,
+    Repository
+> = Effect.fnUntraced(function* ({ params: { key } }) {
+    const repo = yield* Repository;
+    const maybeAccount = yield* repo.findById(key).pipe(Effect.catchNoSuchElement);
 
-        if (Option.isNone(maybeAccount)) {
-            return yield* new HttpApiError.NotFound();
-        }
+    if (Option.isNone(maybeAccount)) {
+        return yield* new HttpApiError.NotFound();
+    }
 
-        const account = maybeAccount.value;
-        if (account.revoked) {
-            return yield* new HttpApiError.BadRequest();
-        }
+    const account = maybeAccount.value;
+    if (account.revoked) {
+        return yield* new HttpApiError.BadRequest();
+    }
 
-        return yield* repo.update({
-            ...account,
+    return yield* repo.update(
+        Account.update.make({
+            key: maybeAccount.value.key,
+            scopes: maybeAccount.value.scopes,
+            description: maybeAccount.value.description,
+            rateLimitLimit: maybeAccount.value.rateLimitLimit,
+            rateLimitWindow: maybeAccount.value.rateLimitWindow,
+            lastUsedAt: Model.Override(maybeAccount.value.lastUsedAt),
             revoked: true,
-            lastUsedAt: Model.Override(account.lastUsedAt),
-        });
-    })
-);
+        })
+    );
+}, Effect.orDie);
 
 /** @internal */
-const AuthorizeHandler = HttpApiBuilder.handler(
-    AccountsApi,
-    "AccountsGroup",
+const AuthorizeHandler: HttpApiEndpoint.HandlerWithName<
+    HttpApiGroup.Endpoints<
+        HttpApiGroup.WithName<(typeof AccountsApi)["groups"][keyof (typeof AccountsApi)["groups"]], "AccountsGroup">
+    >,
     "authorize",
-    Effect.fnUntraced(function* ({ path: { key } }) {
-        const repo = yield* Repository;
-        const maybeAccount = yield* repo.findById(key);
+    never,
+    Repository
+> = Effect.fnUntraced(function* ({ params: { key } }) {
+    const repo = yield* Repository;
+    const maybeAccount = yield* repo.findById(key).pipe(Effect.catchNoSuchElement);
 
-        if (Option.isNone(maybeAccount)) {
-            return yield* new HttpApiError.NotFound();
-        }
+    if (Option.isNone(maybeAccount)) {
+        return yield* new HttpApiError.NotFound();
+    }
 
-        const account = maybeAccount.value;
-        if (!account.revoked) {
-            return yield* new HttpApiError.BadRequest();
-        }
+    const account = maybeAccount.value;
+    if (!account.revoked) {
+        return yield* new HttpApiError.BadRequest();
+    }
 
-        return yield* repo.update({
-            ...account,
+    return yield* repo.update(
+        Account.update.make({
+            key: maybeAccount.value.key,
+            scopes: maybeAccount.value.scopes,
+            description: maybeAccount.value.description,
+            rateLimitLimit: maybeAccount.value.rateLimitLimit,
+            rateLimitWindow: maybeAccount.value.rateLimitWindow,
+            lastUsedAt: Model.Override(maybeAccount.value.lastUsedAt),
             revoked: false,
-            lastUsedAt: Model.Override(account.lastUsedAt),
-        });
-    })
-);
+        })
+    );
+}, Effect.orDie);
 
 /** @internal */
-const ModifyScopesHandler = HttpApiBuilder.handler(
-    AccountsApi,
-    "AccountsGroup",
+const ModifyScopesHandler: HttpApiEndpoint.HandlerWithName<
+    HttpApiGroup.Endpoints<
+        HttpApiGroup.WithName<(typeof AccountsApi)["groups"][keyof (typeof AccountsApi)["groups"]], "AccountsGroup">
+    >,
     "scopes",
-    Effect.fnUntraced(function* ({ path: { key }, payload: { scopes } }) {
-        const repo = yield* Repository;
-        const maybeAccount = yield* repo.findById(key);
+    never,
+    Repository
+> = Effect.fnUntraced(function* ({ params: { key }, payload: { scopes } }) {
+    const repo = yield* Repository;
+    const maybeAccount = yield* repo.findById(key).pipe(Effect.catchNoSuchElement);
 
-        if (Option.isNone(maybeAccount)) {
-            return yield* new HttpApiError.NotFound();
-        }
+    if (Option.isNone(maybeAccount)) {
+        return yield* new HttpApiError.NotFound();
+    }
 
-        const account = maybeAccount.value;
-        return yield* repo.update({
-            ...account,
+    return yield* repo.update(
+        Account.update.make({
+            key: maybeAccount.value.key,
+            revoked: maybeAccount.value.revoked,
+            description: maybeAccount.value.description,
+            rateLimitLimit: maybeAccount.value.rateLimitLimit,
+            rateLimitWindow: maybeAccount.value.rateLimitWindow,
+            lastUsedAt: Model.Override(maybeAccount.value.lastUsedAt),
             scopes,
-            lastUsedAt: Model.Override(account.lastUsedAt),
-        });
-    })
-);
+        })
+    );
+}, Effect.orDie);
 
 /** @internal */
-const ModifyRateLimitHandler = HttpApiBuilder.handler(
-    AccountsApi,
-    "AccountsGroup",
+const ModifyRateLimitHandler: HttpApiEndpoint.HandlerWithName<
+    HttpApiGroup.Endpoints<
+        HttpApiGroup.WithName<(typeof AccountsApi)["groups"][keyof (typeof AccountsApi)["groups"]], "AccountsGroup">
+    >,
     "rateLimit",
-    Effect.fnUntraced(function* ({ path: { key }, payload: { limit, window } }) {
-        const repo = yield* Repository;
-        const maybeAccount = yield* repo.findById(key);
+    never,
+    Repository
+> = Effect.fnUntraced(function* ({ params: { key }, payload: { limit, window } }) {
+    const repo = yield* Repository;
+    const maybeAccount = yield* repo.findById(key).pipe(Effect.catchNoSuchElement);
 
-        if (Option.isNone(maybeAccount)) {
-            return yield* new HttpApiError.NotFound();
-        }
+    if (Option.isNone(maybeAccount)) {
+        return yield* new HttpApiError.NotFound();
+    }
 
-        const account = maybeAccount.value;
-        return yield* repo.update({
-            ...account,
+    return yield* repo.update(
+        Account.update.make({
+            key: maybeAccount.value.key,
+            revoked: maybeAccount.value.revoked,
+            description: maybeAccount.value.description,
+            scopes: maybeAccount.value.scopes,
+            lastUsedAt: Model.Override(maybeAccount.value.lastUsedAt),
             rateLimitLimit: limit,
             rateLimitWindow: window,
-            lastUsedAt: Model.Override(account.lastUsedAt),
-        });
-    })
-);
+        })
+    );
+}, Effect.orDie);
 
 /** @internal */
-const ModifyDescriptionHandler = HttpApiBuilder.handler(
+const ModifyDescriptionHandler: HttpApiEndpoint.HandlerWithName<
+    HttpApiGroup.Endpoints<
+        HttpApiGroup.WithName<(typeof AccountsApi)["groups"][keyof (typeof AccountsApi)["groups"]], "AccountsGroup">
+    >,
+    "description",
+    never,
+    Repository
+> = Effect.fnUntraced(function* ({ params: { key }, payload: { description } }) {
+    const repo = yield* Repository;
+    const maybeAccount = yield* repo.findById(key).pipe(Effect.catchNoSuchElement);
+
+    if (Option.isNone(maybeAccount)) {
+        return yield* new HttpApiError.NotFound();
+    }
+
+    return yield* repo.update(
+        Account.update.make({
+            key: maybeAccount.value.key,
+            revoked: maybeAccount.value.revoked,
+            scopes: maybeAccount.value.scopes,
+            rateLimitLimit: maybeAccount.value.rateLimitLimit,
+            rateLimitWindow: maybeAccount.value.rateLimitWindow,
+            lastUsedAt: Model.Override(maybeAccount.value.lastUsedAt),
+            description,
+        })
+    );
+}, Effect.orDie);
+
+/** @internal */
+const AccountsGroupLive = HttpApiBuilder.group(
     AccountsApi,
     "AccountsGroup",
-    "description",
-    Effect.fnUntraced(function* ({ path: { key }, payload: { description } }) {
+    Effect.fnUntraced(function* (handlers) {
         const repo = yield* Repository;
-        const maybeAccount = yield* repo.findById(key);
+        const provideRepo = Effect.provideService(Repository, repo);
 
-        if (Option.isNone(maybeAccount)) {
-            return yield* new HttpApiError.NotFound();
-        }
-
-        const account = maybeAccount.value;
-        return yield* repo.update({
-            ...account,
-            description,
-            lastUsedAt: Model.Override(account.lastUsedAt),
-        });
+        return handlers
+            .handle("create", Function.flow(CreateHandler, provideRepo))
+            .handle("delete", Function.flow(DeleteHandler, provideRepo))
+            .handle("view", Function.flow(ViewHandler, provideRepo))
+            .handle("list", Function.flow(ListHandler, provideRepo))
+            .handle("revoke", Function.flow(RevokeHandler, provideRepo))
+            .handle("authorize", Function.flow(AuthorizeHandler, provideRepo))
+            .handle("scopes", Function.flow(ModifyScopesHandler, provideRepo))
+            .handle("rateLimit", Function.flow(ModifyRateLimitHandler, provideRepo))
+            .handle("description", Function.flow(ModifyDescriptionHandler, provideRepo));
     })
 );
 
 /** @internal */
-const AccountsGroupLive = HttpApiBuilder.group(AccountsApi, "AccountsGroup", (handlers) =>
-    handlers
-        .handle("create", CreateHandler)
-        .handle("delete", DeleteHandler)
-        .handle("view", ViewHandler)
-        .handle("list", ListHandler)
-        .handle("revoke", RevokeHandler)
-        .handle("authorize", AuthorizeHandler)
-        .handle("scopes", ModifyScopesHandler)
-        .handle("rateLimit", ModifyRateLimitHandler)
-        .handle("description", ModifyDescriptionHandler)
-);
-
-/** @internal */
-export const AuthorizationLive = Layer.effect(
+const AuthorizationLive = Layer.effect(
     Authorization,
     Effect.gen(function* () {
         const adminUsername = yield* Config.redacted("ADMIN_USERNAME");
         const adminPassword = yield* Config.redacted("ADMIN_PASSWORD");
 
         return {
-            basic: (credentials) => {
+            basic: (effect, { credential }) => {
                 if (
                     !crypto.timingSafeEqual(
-                        Buffer.from(credentials.username),
+                        Buffer.from(credential.username),
                         Buffer.from(Redacted.value(adminUsername))
                     ) ||
                     !crypto.timingSafeEqual(
-                        Buffer.from(Redacted.value(credentials.password)),
+                        Buffer.from(Redacted.value(credential.password)),
                         Buffer.from(Redacted.value(adminPassword))
                     )
                 ) {
                     return Effect.fail(new HttpApiError.Unauthorized());
                 }
 
-                return Effect.void;
+                return effect;
             },
         };
     })
@@ -340,9 +408,9 @@ export const AuthorizationLive = Layer.effect(
 
 /**
  * @since 1.0.0
- * @category Routes
+ * @category Api
  */
-export const AllAccountsRoutes = Layer.provide(HttpLayerRouter.addHttpApi(AccountsApi), [
-    AccountsGroupLive,
-    AuthorizationLive,
-]);
+export const AccountsApiLive = HttpApiBuilder.layer(AccountsApi).pipe(
+    Layer.provide(AccountsGroupLive),
+    Layer.provide(AuthorizationLive)
+);

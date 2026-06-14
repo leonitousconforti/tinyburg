@@ -1,44 +1,18 @@
-import { RateLimiter } from "@effect/experimental";
-import { FetchHttpClient, HttpLayerRouter, Path } from "@effect/platform";
-import { NodeHttpServer, NodeRuntime } from "@effect/platform-node";
-import { PgClient, PgMigrator } from "@effect/sql-pg";
-import { NimblebitAuth } from "@tinyburg/nimblebit-sdk";
-import { Config, Effect, Layer, String } from "effect";
+import { Config, Effect, Layer, String, Path } from "effect";
+import { FetchHttpClient, HttpRouter } from "effect/unstable/http";
+import { RateLimiter } from "effect/unstable/persistence";
+
 import { createServer } from "node:http";
 
+import { NodeHttpServer, NodeRuntime, NodeServices } from "@effect/platform-node";
+import { PgClient, PgMigrator } from "@effect/sql-pg";
+
 import { Repository } from "./domain/model.ts";
-import { HttpApiErrorMiddleware } from "./middleware/00_httpApiError.ts";
-import { AuthProxyApiAccountMiddleware } from "./middleware/10_account.ts";
-import { AuthProxyApiRatelimitMiddleware } from "./middleware/20_ratelimit.ts";
-import { AuthProxyApiAuthorizationMiddleware } from "./middleware/30_authorization.ts";
-import { AuthProxyApiDecodeHashMiddleware } from "./middleware/40_tinytowerDecode.ts";
-import { AllAccountsRoutes } from "./routes/accounts.ts";
-import { HealthCheckRoute } from "./routes/health.ts";
-import { AllTinyTowerRoutes } from "./routes/tinytower.ts";
+import { AccountsApiLive } from "./routes/accounts.ts";
+import { HealthCheckRoutesLive } from "./routes/health.ts";
+import { TinyTowerApiLive } from "./routes/tinytower.ts";
 
-const AuthProxyApiMiddleware =
-    // Runs fourth to decode the hash before the handler
-    AuthProxyApiDecodeHashMiddleware
-        // Runs third to authorize after rate limiting
-        .combine(AuthProxyApiAuthorizationMiddleware)
-        // Runs second to rate limit before authorization
-        .combine(AuthProxyApiRatelimitMiddleware)
-        // Runs first to get the account from the bearer token (if present)
-        .combine(AuthProxyApiAccountMiddleware)
-        // Runs zeroth to handle HttpApi errors
-        .combine(HttpApiErrorMiddleware);
-
-const AuthProxyApiRoutes = AllTinyTowerRoutes.pipe(
-    Layer.provide(AuthProxyApiMiddleware.layer),
-    Layer.provide(RateLimiter.layer),
-    Layer.provide(RateLimiter.layerStoreMemory)
-);
-
-const AllRoutes = AuthProxyApiRoutes.pipe(
-    Layer.merge(HealthCheckRoute),
-    Layer.merge(AllAccountsRoutes),
-    Layer.provide([NimblebitAuth.layerNodeDirectConfig(), FetchHttpClient.layer])
-);
+const AllRoutes = Layer.mergeAll(TinyTowerApiLive, AccountsApiLive, HealthCheckRoutesLive);
 
 const SqlLive = PgClient.layerConfig({
     url: Config.redacted("DATABASE_URL"),
@@ -51,10 +25,10 @@ const MigratorLive = Effect.gen(function* () {
     const migrations = yield* path.fromFileUrl(new URL("migrations", import.meta.url));
     const loader = PgMigrator.fromFileSystem(migrations);
     return PgMigrator.layer({ loader });
-}).pipe(Layer.unwrapEffect);
+}).pipe(Layer.unwrap);
 
-HttpLayerRouter.serve(AllRoutes, { routerConfig: { maxParamLength: 500 } }).pipe(
-    Layer.provide(Repository.Default),
+HttpRouter.serve(AllRoutes, { routerConfig: { maxParamLength: 500 } }).pipe(
+    Layer.provide([RateLimiter.layerStoreMemory, Repository.Live, FetchHttpClient.layer]),
     Layer.provide(MigratorLive),
     Layer.provide(SqlLive),
     Layer.provide(
@@ -63,6 +37,7 @@ HttpLayerRouter.serve(AllRoutes, { routerConfig: { maxParamLength: 500 } }).pipe
             host: Config.string("HOST").pipe(Config.withDefault("0.0.0.0")),
         })
     ),
+    Layer.provide(NodeServices.layer), // FIXME: this should not be needed
     Layer.launch,
     NodeRuntime.runMain
 );
