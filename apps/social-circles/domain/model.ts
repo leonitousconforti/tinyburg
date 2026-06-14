@@ -1,13 +1,16 @@
-import { Model, SqlClient, SqlSchema, type SqlError } from "@effect/sql";
+import { Array, Effect, Function, Schema, pipe, Context } from "effect";
+import * as Layer from "effect/Layer";
+import { Model } from "effect/unstable/schema";
+import { SqlModel, SqlClient, SqlSchema, type SqlError } from "effect/unstable/sql";
+
 import { PlayerIdSchema } from "@tinyburg/nimblebit-sdk/NimblebitConfig";
-import { Array, Cron, Effect, Function, Schedule, Schema, pipe, type ParseResult } from "effect";
 
 /**
  * @since 1.0.0
  * @category Model
  */
 export class Player extends Model.Class<Player>("Player")({
-    id: Model.Generated(Schema.UUID),
+    id: Model.GeneratedByDb(Schema.String.check(Schema.isUUID())),
     playerId: PlayerIdSchema,
     firstSeenAt: Model.DateTimeInsertFromDate,
 }) {}
@@ -16,15 +19,13 @@ export class Player extends Model.Class<Player>("Player")({
  * @since 1.0.0
  * @category Repository
  */
-export class Repository extends Effect.Service<Repository>()("@tinyburg/social-circles/domain/model/Repository", {
-    accessors: true,
-    dependencies: [],
-    scoped: Effect.gen(function* () {
+export class Repository extends Context.Service<Repository>()("@tinyburg/social-circles/domain/model/Repository", {
+    make: Effect.gen(function* () {
         const sql = yield* SqlClient.SqlClient;
-        const materializedViewsRefresh = yield* Cron.parse("*/5 * * * *");
+        // const materializedViewsRefresh = yield* Cron.parse("*/5 * * * *");
 
         // Player repository
-        const players = yield* Model.makeRepository(Player, {
+        const players = yield* SqlModel.makeRepository(Player, {
             idColumn: "playerId",
             tableName: "players",
             spanPrefix: "@tinyburg/social-circles/domain/model/Repository/players",
@@ -49,18 +50,19 @@ export class Repository extends Effect.Service<Repository>()("@tinyburg/social-c
             Effect.asVoid
         );
 
-        // Background task for periodic refresh
-        yield* pipe(
-            refreshViews,
-            Effect.tapErrorCause(Effect.logWarning),
-            Effect.retry(Schedule.spaced("500 millis")),
-            Effect.scheduleForked(Schedule.cron(materializedViewsRefresh))
-        );
+        // // Background task for periodic refresh
+        // const x = pipe(
+        //     refreshViews,
+        //     Effect.tapError(Effect.logWarning),
+        //     Effect.retry(Schedule.spaced("500 millis")),
+        //     // Effect.schedule(Schedule.cron(materializedViewsRefresh)),
+        //     // Effect.forkChild
+        // );
 
         // Add a single friend (records a 'friended' event)
         const addFriend = (
-            fromPlayer: Schema.Schema.Type<PlayerIdSchema>,
-            toPlayer: Schema.Schema.Type<PlayerIdSchema>
+            fromPlayer: Schema.Schema.Type<typeof PlayerIdSchema>,
+            toPlayer: Schema.Schema.Type<typeof PlayerIdSchema>
         ) =>
             sql`
                 WITH new_players AS (
@@ -81,8 +83,8 @@ export class Repository extends Effect.Service<Repository>()("@tinyburg/social-c
 
         // Remove a singular friend (records an 'unfriended' event)
         const removeFriend = (
-            fromPlayer: Schema.Schema.Type<PlayerIdSchema>,
-            toPlayer: Schema.Schema.Type<PlayerIdSchema>
+            fromPlayer: Schema.Schema.Type<typeof PlayerIdSchema>,
+            toPlayer: Schema.Schema.Type<typeof PlayerIdSchema>
         ) =>
             sql`
                 INSERT INTO friendship_events (from_player_id, to_player_id, event_type)
@@ -93,8 +95,8 @@ export class Repository extends Effect.Service<Repository>()("@tinyburg/social-c
 
         // Add multiple friends at once (bulk 'friended' events)
         const addFriends = (
-            fromPlayer: Schema.Schema.Type<PlayerIdSchema>,
-            toPlayers: ReadonlySet<Schema.Schema.Type<PlayerIdSchema>>
+            fromPlayer: Schema.Schema.Type<typeof PlayerIdSchema>,
+            toPlayers: ReadonlySet<Schema.Schema.Type<typeof PlayerIdSchema>>
         ) => {
             if (toPlayers.size === 0) return Effect.void;
             const toPlayersArray = Array.fromIterable(toPlayers);
@@ -120,8 +122,8 @@ export class Repository extends Effect.Service<Repository>()("@tinyburg/social-c
 
         // Remove multiple friends at once (bulk 'unfriended' events)
         const removeFriends = (
-            fromPlayer: Schema.Schema.Type<PlayerIdSchema>,
-            toPlayers: ReadonlySet<Schema.Schema.Type<PlayerIdSchema>>
+            fromPlayer: Schema.Schema.Type<typeof PlayerIdSchema>,
+            toPlayers: ReadonlySet<Schema.Schema.Type<typeof PlayerIdSchema>>
         ) => {
             if (toPlayers.size === 0) return Effect.void;
             const toPlayersArray = Array.fromIterable(toPlayers);
@@ -159,7 +161,7 @@ export class Repository extends Effect.Service<Repository>()("@tinyburg/social-c
 
         // ALl the current friendships between all players
         const currentFriendships = SqlSchema.findAll({
-            Result: Schema.Tuple(PlayerIdSchema, PlayerIdSchema),
+            Result: Schema.Tuple([PlayerIdSchema, PlayerIdSchema]),
             Request: Schema.Void,
             execute: () =>
                 sql`
@@ -170,7 +172,7 @@ export class Repository extends Effect.Service<Repository>()("@tinyburg/social-c
 
         // All the current mutual friendships between all players
         const mutualFriendships = SqlSchema.findAll({
-            Result: Schema.Tuple(PlayerIdSchema, PlayerIdSchema),
+            Result: Schema.Tuple([PlayerIdSchema, PlayerIdSchema]),
             Request: Schema.Void,
             execute: () =>
                 sql`
@@ -181,14 +183,14 @@ export class Repository extends Effect.Service<Repository>()("@tinyburg/social-c
 
         // Sync a player's friends list (adds new friends, removes old ones)
         const syncFriends = Effect.fnUntraced(function* (
-            fromPlayer: Schema.Schema.Type<PlayerIdSchema>,
-            friends: ReadonlySet<Schema.Schema.Type<PlayerIdSchema>>
+            fromPlayer: Schema.Schema.Type<typeof PlayerIdSchema>,
+            friends: ReadonlySet<Schema.Schema.Type<typeof PlayerIdSchema>>
         ): Effect.fn.Return<
             {
                 added: number;
                 removed: number;
             },
-            SqlError.SqlError | ParseResult.ParseError,
+            SqlError.SqlError | Schema.SchemaError,
             never
         > {
             const newSet = pipe(
@@ -235,4 +237,6 @@ export class Repository extends Effect.Service<Repository>()("@tinyburg/social-c
             syncFriends,
         };
     }),
-}) {}
+}) {
+    static readonly Default = Layer.effect(Repository, this.make);
+}
