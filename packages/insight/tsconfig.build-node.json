@@ -1,0 +1,10 @@
+{
+    "$schema": "https://json.schemastore.org/tsconfig",
+    "extends": "./tsconfig.src-node.json",
+    "references": [{ "path": "tsconfig.build-shared.json" }],
+    "compilerOptions": {
+        "tsBuildInfoFile": ".tsbuildinfo/build-node.tsbuildinfo",
+        "outDir": "dist",
+        "stripInternal": true
+    }
+}

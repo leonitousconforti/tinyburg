@@ -3,9 +3,8 @@
     "extends": "../../tsconfig.base.jsonc",
     "include": ["src/shared"],
     "compilerOptions": {
-        "tsBuildInfoFile": ".tsbuildinfo/shared.tsbuildinfo",
-        // "outDir": ".tsbuildinfo/src",
-        "outDir": "dist",
+        "tsBuildInfoFile": ".tsbuildinfo/src-shared.tsbuildinfo",
+        "outDir": ".tsbuildinfo/src",
         "types": [],
         "rootDir": "src"
     }

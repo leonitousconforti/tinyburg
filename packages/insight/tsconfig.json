@@ -3,8 +3,8 @@
     "extends": "../../tsconfig.base.jsonc",
     "include": [],
     "references": [
-        { "path": "tsconfig.frida.json" },
-        { "path": "tsconfig.node.json" },
-        { "path": "tsconfig.shared.json" }
+        { "path": "tsconfig.src-node.json" },
+        { "path": "tsconfig.src-frida.json" },
+        { "path": "tsconfig.src-shared.json" }
     ]
 }
