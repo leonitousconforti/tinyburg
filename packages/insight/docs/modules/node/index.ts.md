@@ -14,6 +14,7 @@ parent: Modules
   - [AgentLive](#agentlive)
   - [AgentWatched](#agentwatched)
 - [Frida](#frida)
+  - [DeviceLive](#devicelive)
   - [ScriptLive](#scriptlive)
   - [SessionLive](#sessionlive)
 
@@ -33,7 +34,7 @@ declare const AgentLive: Layer.Layer<
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/insight/blob/main/src/index.ts#L32)
+[Source](https://github.com/leonitousconforti/tinyburg/packages/insight/blob/main/src/index.ts#L58)
 
 Since v1.0.0
 
@@ -53,11 +54,37 @@ declare const AgentWatched: <A, E, R>(
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/insight/blob/main/src/index.ts#L38)
+[Source](https://github.com/leonitousconforti/tinyburg/packages/insight/blob/main/src/index.ts#L64)
 
 Since v1.0.0
 
 # Frida
+
+## DeviceLive
+
+**Signature**
+
+```ts
+declare const DeviceLive: Layer.Layer<
+  FridaDevice.FridaDevice,
+  | Config.ConfigError
+  | FridaDeviceAcquisitionError.FridaDeviceAcquisitionError
+  | HttpClientError.HttpClientError
+  | Schema.SchemaError
+  | PlatformError.PlatformError
+  | Cause.NoSuchElementError,
+  | FileSystem.FileSystem
+  | ChildProcessSpawner.ChildProcessSpawner
+  | Path.Path
+  | HttpClient.HttpClient
+  | GooglePlayApi.AndroidDeviceService
+  | Crypto.Crypto
+>
+```
+
+[Source](https://github.com/leonitousconforti/tinyburg/packages/insight/blob/main/src/index.ts#L83)
+
+Since v1.0.0
 
 ## ScriptLive
 
@@ -71,7 +98,7 @@ declare const ScriptLive: Layer.Layer<
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/insight/blob/main/src/index.ts#L21)
+[Source](https://github.com/leonitousconforti/tinyburg/packages/insight/blob/main/src/index.ts#L47)
 
 Since v1.0.0
 
@@ -87,6 +114,6 @@ declare const SessionLive: Layer.Layer<
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/insight/blob/main/src/index.ts#L15)
+[Source](https://github.com/leonitousconforti/tinyburg/packages/insight/blob/main/src/index.ts#L41)
 
 Since v1.0.0

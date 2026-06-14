@@ -6,22 +6,40 @@ parent: "@tinyburg/nimblebit-sdk"
 
 ## index.ts overview
 
+Authentication providers for connecting to Nimblebit's servers.
+
 Since v1.0.0
 
 ---
 
 ## Exports Grouped by Category
 
+- [Auth](#auth)
+  - [NimblebitAuth (namespace export)](#nimblebitauth-namespace-export)
 - [Config](#config)
   - [NimblebitConfig (namespace export)](#nimblebitconfig-namespace-export)
 - [Errors](#errors)
   - [NimblebitError (namespace export)](#nimblebiterror-namespace-export)
 - [Schemas](#schemas)
   - [NimblebitSchema (namespace export)](#nimblebitschema-namespace-export)
-- [utils](#utils)
-  - [NimblebitAuth (namespace export)](#nimblebitauth-namespace-export)
 
 ---
+
+# Auth
+
+## NimblebitAuth (namespace export)
+
+Re-exports all named exports from the "./NimblebitAuth.ts" module as `NimblebitAuth`.
+
+**Signature**
+
+```ts
+export * as NimblebitAuth from "./NimblebitAuth.ts"
+```
+
+[Source](https://github.com/leonitousconforti/tinyburg/packages/nimblebit-sdk/blob/main/src/index.ts#L11)
+
+Since v1.0.0
 
 # Config
 
@@ -68,21 +86,5 @@ export * as NimblebitSchema from "./NimblebitSchema.ts"
 ```
 
 [Source](https://github.com/leonitousconforti/tinyburg/packages/nimblebit-sdk/blob/main/src/index.ts#L36)
-
-Since v1.0.0
-
-# utils
-
-## NimblebitAuth (namespace export)
-
-Re-exports all named exports from the "./NimblebitAuth.ts" module as `NimblebitAuth`.
-
-**Signature**
-
-```ts
-export * as NimblebitAuth from "./NimblebitAuth.ts"
-```
-
-[Source](https://github.com/leonitousconforti/tinyburg/packages/nimblebit-sdk/blob/main/src/index.ts#L11)
 
 Since v1.0.0

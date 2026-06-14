@@ -18,11 +18,9 @@ Since v1.0.0
   - [parseNimblebitObject](#parsenimblebitobject)
   - [parseNimblebitOrderedList](#parsenimblebitorderedlist)
 - [Schemas](#schemas)
-  - [csharpDate](#csharpdate)
-  - [unityColor](#unitycolor)
-  - [unityColorFromString](#unitycolorfromstring)
-- [Types](#types)
-  - [ValidateNimblebitItemSchema (type alias)](#validatenimblebititemschema-type-alias)
+  - [CSharpDate](#csharpdate)
+  - [UnityColor](#unitycolor)
+  - [split](#split)
 
 ---
 
@@ -33,27 +31,27 @@ Since v1.0.0
 **Signature**
 
 ```ts
-declare const parseNimblebitObject: <Fields extends Schema.Struct.Fields>(
+declare const parseNimblebitObject: <Fields extends { readonly [x: PropertyKey]: Schema.Codec<any, string, any, any> }>(
   struct: Schema.Struct<Fields>
-) => Schema.transformOrFail<
-  typeof Schema.String,
-  Schema.extend<
-    Schema.Struct<Fields>,
-    Schema.Struct<{
-      $unknown: Schema.Record$<
-        typeof Schema.String,
+) => Schema.decodeTo<
+  Schema.Struct<
+    Fields & {
+      readonly $unknown: Schema.$Record<
+        Schema.String,
         Schema.Struct<{
-          value: typeof Schema.String
-          $locationMetadata: Schema.Struct<{ after: Schema.NullishOr<typeof Schema.String> }>
+          value: Schema.String
+          $locationMetadata: Schema.Struct<{ after: Schema.NullishOr<Schema.String> }>
         }>
       >
-    }>
+    }
   >,
-  never
+  Schema.String,
+  Schema.Struct.DecodingServices<Fields>,
+  Schema.Struct.EncodingServices<Fields>
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/nimblebit-sdk/blob/main/src/NimblebitSchema.ts#L67)
+[Source](https://github.com/leonitousconforti/tinyburg/packages/nimblebit-sdk/blob/main/src/NimblebitSchema.ts#L59)
 
 Since v1.0.0
 
@@ -63,108 +61,90 @@ Since v1.0.0
 
 ```ts
 declare const parseNimblebitOrderedList: <
-  const Items extends ReadonlyArray<{ property: PropertyKey; schema: Schema.Schema.Any }>
+  const Items extends ReadonlyArray<{
+    property: PropertyKey
+    schema: Schema.Codec<any, string, any, any> & {
+      readonly "~encoded.optionality": "required"
+      readonly "~encoded.mutability": "readonly"
+      readonly "~type.optionality": "required"
+      readonly "~type.mutability": "readonly"
+    }
+  }>
 >(
-  items: ValidateNimblebitItemSchema<Items>,
+  items: Items,
   separator?: string | undefined
-) => Schema.transformOrFail<
-  typeof Schema.String,
-  Schema.extend<
-    Schema.Struct<{ [K in Items[number]["property"]]: Extract<Items[number], { property: K }>["schema"] }>,
-    Schema.Struct<{ $unknown: Schema.Array$<typeof Schema.String> }>
+) => Schema.decodeTo<
+  Schema.Struct<
+    { [K in Items[number]["property"]]: Extract<Items[number], { property: K }>["schema"] } & {
+      readonly $unknown: Schema.$Array<Schema.String>
+    }
   >,
-  Items[number]["schema"]["Context"]
+  Schema.String,
+  Items[number]["schema"]["DecodingServices"],
+  Items[number]["schema"]["EncodingServices"]
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/nimblebit-sdk/blob/main/src/NimblebitSchema.ts#L37)
+[Source](https://github.com/leonitousconforti/tinyburg/packages/nimblebit-sdk/blob/main/src/NimblebitSchema.ts#L24)
 
 Since v1.0.0
 
 # Schemas
 
-## csharpDate
+## CSharpDate
 
 **Signature**
 
 ```ts
-declare const csharpDate: Schema.transform<
-  typeof Schema.BigInt,
+declare const CSharpDate: Schema.decodeTo<
   Schema.Union<
-    [
-      typeof Schema.DateFromSelf,
-      Schema.Struct<{ date: typeof Schema.DateFromSelf; extraTicks: typeof Schema.BigIntFromSelf }>
-    ]
-  >
+    readonly [Schema.Date, Schema.Struct<{ readonly date: Schema.Date; readonly extraTicks: Schema.BigInt }>]
+  >,
+  Schema.BigInt,
+  never,
+  never
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/nimblebit-sdk/blob/main/src/NimblebitSchema.ts#L92)
+[Source](https://github.com/leonitousconforti/tinyburg/packages/nimblebit-sdk/blob/main/src/NimblebitSchema.ts#L88)
 
 Since v1.0.0
 
-## unityColor
+## UnityColor
 
 **Signature**
 
 ```ts
-declare const unityColor: Schema.Struct<{
-  r: typeof EffectSchemas.Number.U8
-  g: typeof EffectSchemas.Number.U8
-  b: typeof EffectSchemas.Number.U8
-}>
-```
-
-[Source](https://github.com/leonitousconforti/tinyburg/packages/nimblebit-sdk/blob/main/src/NimblebitSchema.ts#L118)
-
-Since v1.0.0
-
-## unityColorFromString
-
-**Signature**
-
-```ts
-declare const unityColorFromString: Schema.transform<
+declare const UnityColor: Schema.decodeTo<
+  Schema.Struct<{ readonly r: Schema.Int; readonly g: Schema.Int; readonly b: Schema.Int }>,
   Schema.TemplateLiteralParser<
-    [
-      Schema.transform<typeof Schema.NumberFromString, Schema.refine<number, typeof Schema.NonNegative>>,
+    readonly [
+      Schema.compose<Schema.Finite, Schema.NumberFromString>,
       ":",
-      Schema.transform<typeof Schema.NumberFromString, Schema.refine<number, typeof Schema.NonNegative>>,
+      Schema.compose<Schema.Finite, Schema.NumberFromString>,
       ":",
-      Schema.transform<typeof Schema.NumberFromString, Schema.refine<number, typeof Schema.NonNegative>>
+      Schema.compose<Schema.Finite, Schema.NumberFromString>
     ]
   >,
-  Schema.Struct<{
-    r: typeof EffectSchemas.Number.U8
-    g: typeof EffectSchemas.Number.U8
-    b: typeof EffectSchemas.Number.U8
-  }>
+  never,
+  never
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/nimblebit-sdk/blob/main/src/NimblebitSchema.ts#L128)
+[Source](https://github.com/leonitousconforti/tinyburg/packages/nimblebit-sdk/blob/main/src/NimblebitSchema.ts#L107)
 
 Since v1.0.0
 
-# Types
-
-## ValidateNimblebitItemSchema (type alias)
+## split
 
 **Signature**
 
 ```ts
-type ValidateNimblebitItemSchema<Items> = {
-  [K in keyof Items]: Items[K] extends {
-    property: infer P
-    schema: Schema.Schema<infer _A, infer _I, infer _R>
-  }
-    ? [_I] extends [string | Readonly<string>]
-      ? { property: P; schema: Items[K]["schema"] }
-      : { property: P; schema: `Nimblebit ordered list items schemas must be encodeable to strings` }
-    : Items[K]
-}
+declare const split: (
+  options?: { readonly separator?: string | undefined } | undefined
+) => (from: Schema.String) => Schema.decodeTo<Schema.$Array<Schema.String>, Schema.String, never, never>
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/nimblebit-sdk/blob/main/src/NimblebitSchema.ts#L17)
+[Source](https://github.com/leonitousconforti/tinyburg/packages/nimblebit-sdk/blob/main/src/NimblebitSchema.ts#L130)
 
 Since v1.0.0

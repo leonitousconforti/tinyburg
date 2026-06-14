@@ -24,12 +24,12 @@ Since v1.0.0
   - [PlayerIdConfig](#playeridconfig)
   - [UnauthenticatedPlayerConfig](#unauthenticatedplayerconfig)
 - [Schema](#schema)
-  - [AuthenticatedPlayerSchema (class)](#authenticatedplayerschema-class)
-  - [NimblebitAuthKeySchema (class)](#nimblebitauthkeyschema-class)
-  - [PlayerAuthKeySchema (class)](#playerauthkeyschema-class)
-  - [PlayerEmailSchema (class)](#playeremailschema-class)
-  - [PlayerIdSchema (class)](#playeridschema-class)
-  - [UnauthenticatedPlayerSchema (class)](#unauthenticatedplayerschema-class)
+  - [AuthenticatedPlayerSchema](#authenticatedplayerschema)
+  - [NimblebitAuthKeySchema](#nimblebitauthkeyschema)
+  - [PlayerAuthKeySchema](#playerauthkeyschema)
+  - [PlayerEmailSchema](#playeremailschema)
+  - [PlayerIdSchema](#playeridschema)
+  - [UnauthenticatedPlayerSchema](#unauthenticatedplayerschema)
 
 ---
 
@@ -41,12 +41,12 @@ Since v1.0.0
 
 ```ts
 declare const AuthenticatedPlayerConfig: Config.Config<{
-  readonly playerId: string & Brand<"PlayerId">
   readonly playerAuthKey: Redacted<string> & Brand<"PlayerAuthKey">
+  readonly playerId: string & Brand<"PlayerId">
 }>
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/nimblebit-sdk/blob/main/src/NimblebitConfig.ts#L108)
+[Source](https://github.com/leonitousconforti/tinyburg/packages/nimblebit-sdk/blob/main/src/NimblebitConfig.ts#L107)
 
 Since v1.0.0
 
@@ -58,7 +58,7 @@ Since v1.0.0
 declare const NimblebitAuthKeyConfig: Config.Config<Redacted<string> & Brand<"NimblebitAuthKey">>
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/nimblebit-sdk/blob/main/src/NimblebitConfig.ts#L159)
+[Source](https://github.com/leonitousconforti/tinyburg/packages/nimblebit-sdk/blob/main/src/NimblebitConfig.ts#L167)
 
 Since v1.0.0
 
@@ -70,7 +70,7 @@ Since v1.0.0
 declare const PlayerAuthKeyConfig: Config.Config<Redacted<string> & Brand<"PlayerAuthKey">>
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/nimblebit-sdk/blob/main/src/NimblebitConfig.ts#L90)
+[Source](https://github.com/leonitousconforti/tinyburg/packages/nimblebit-sdk/blob/main/src/NimblebitConfig.ts#L88)
 
 Since v1.0.0
 
@@ -84,7 +84,7 @@ declare const PlayerConfig: Config.Config<
       readonly playerEmail: Redacted<string> & Brand<"PlayerEmail">
       readonly playerId?: (string & Brand<"PlayerId">) | undefined
     }
-  | { readonly playerId: string & Brand<"PlayerId">; readonly playerAuthKey: Redacted<string> & Brand<"PlayerAuthKey"> }
+  | { readonly playerAuthKey: Redacted<string> & Brand<"PlayerAuthKey">; readonly playerId: string & Brand<"PlayerId"> }
 >
 ```
 
@@ -100,7 +100,7 @@ Since v1.0.0
 declare const PlayerEmailConfig: Config.Config<Redacted<string> & Brand<"PlayerEmail">>
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/nimblebit-sdk/blob/main/src/NimblebitConfig.ts#L81)
+[Source](https://github.com/leonitousconforti/tinyburg/packages/nimblebit-sdk/blob/main/src/NimblebitConfig.ts#L79)
 
 Since v1.0.0
 
@@ -112,7 +112,7 @@ Since v1.0.0
 declare const PlayerIdConfig: Config.Config<string & Brand<"PlayerId">>
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/nimblebit-sdk/blob/main/src/NimblebitConfig.ts#L72)
+[Source](https://github.com/leonitousconforti/tinyburg/packages/nimblebit-sdk/blob/main/src/NimblebitConfig.ts#L70)
 
 Since v1.0.0
 
@@ -127,80 +127,86 @@ declare const UnauthenticatedPlayerConfig: Config.Config<{
 }>
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/nimblebit-sdk/blob/main/src/NimblebitConfig.ts#L99)
+[Source](https://github.com/leonitousconforti/tinyburg/packages/nimblebit-sdk/blob/main/src/NimblebitConfig.ts#L97)
 
 Since v1.0.0
 
 # Schema
 
-## AuthenticatedPlayerSchema (class)
+## AuthenticatedPlayerSchema
 
 **Signature**
 
 ```ts
-declare class AuthenticatedPlayerSchema
+declare const AuthenticatedPlayerSchema: Schema.Struct<{
+  readonly playerAuthKey: Schema.brand<Schema.Redacted<Schema.String>, "PlayerAuthKey">
+  readonly playerId: Schema.brand<Schema.String, "PlayerId">
+}>
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/nimblebit-sdk/blob/main/src/NimblebitConfig.ts#L53)
+[Source](https://github.com/leonitousconforti/tinyburg/packages/nimblebit-sdk/blob/main/src/NimblebitConfig.ts#L55)
 
 Since v1.0.0
 
-## NimblebitAuthKeySchema (class)
+## NimblebitAuthKeySchema
 
 **Signature**
 
 ```ts
-declare class NimblebitAuthKeySchema
+declare const NimblebitAuthKeySchema: Schema.brand<Schema.Redacted<Schema.String>, "NimblebitAuthKey">
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/nimblebit-sdk/blob/main/src/NimblebitConfig.ts#L62)
+[Source](https://github.com/leonitousconforti/tinyburg/packages/nimblebit-sdk/blob/main/src/NimblebitConfig.ts#L64)
 
 Since v1.0.0
 
-## PlayerAuthKeySchema (class)
+## PlayerAuthKeySchema
 
 **Signature**
 
 ```ts
-declare class PlayerAuthKeySchema
+declare const PlayerAuthKeySchema: Schema.brand<Schema.Redacted<Schema.String>, "PlayerAuthKey">
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/nimblebit-sdk/blob/main/src/NimblebitConfig.ts#L38)
+[Source](https://github.com/leonitousconforti/tinyburg/packages/nimblebit-sdk/blob/main/src/NimblebitConfig.ts#L36)
 
 Since v1.0.0
 
-## PlayerEmailSchema (class)
+## PlayerEmailSchema
 
 **Signature**
 
 ```ts
-declare class PlayerEmailSchema
+declare const PlayerEmailSchema: Schema.brand<Schema.Redacted<Schema.String>, "PlayerEmail">
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/nimblebit-sdk/blob/main/src/NimblebitConfig.ts#L32)
+[Source](https://github.com/leonitousconforti/tinyburg/packages/nimblebit-sdk/blob/main/src/NimblebitConfig.ts#L30)
 
 Since v1.0.0
 
-## PlayerIdSchema (class)
+## PlayerIdSchema
 
 **Signature**
 
 ```ts
-declare class PlayerIdSchema
+declare const PlayerIdSchema: Schema.brand<Schema.String, "PlayerId">
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/nimblebit-sdk/blob/main/src/NimblebitConfig.ts#L20)
+[Source](https://github.com/leonitousconforti/tinyburg/packages/nimblebit-sdk/blob/main/src/NimblebitConfig.ts#L19)
 
 Since v1.0.0
 
-## UnauthenticatedPlayerSchema (class)
+## UnauthenticatedPlayerSchema
 
 **Signature**
 
 ```ts
-declare class UnauthenticatedPlayerSchema
+declare const UnauthenticatedPlayerSchema: Schema.Struct<{
+  readonly playerId: Schema.optional<Schema.brand<Schema.String, "PlayerId">>
+  readonly playerEmail: Schema.brand<Schema.Redacted<Schema.String>, "PlayerEmail">
+}>
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/nimblebit-sdk/blob/main/src/NimblebitConfig.ts#L44)
+[Source](https://github.com/leonitousconforti/tinyburg/packages/nimblebit-sdk/blob/main/src/NimblebitConfig.ts#L46)
 
 Since v1.0.0
