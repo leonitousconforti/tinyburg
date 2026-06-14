@@ -1,13 +1,14 @@
-import { S3 } from "@effect-aws/client-s3";
-import { PlatformConfigProvider } from "@effect/platform";
-import { NodeContext } from "@effect/platform-node";
-import { GooglePlayApi } from "@efffrida/gplayapi";
-import { Config, Effect, Layer, Logger, LogLevel, Redacted } from "effect";
+import { Config, Effect, Layer, References, Redacted, ConfigProvider } from "effect";
+import { FetchHttpClient } from "effect/unstable/http";
 
-const DoSpacesLive = Layer.unwrapEffect(
+import { S3 } from "@effect-aws/client-s3";
+import { NodeServices } from "@effect/platform-node";
+import { GooglePlayApi } from "@efffrida/gplayapi";
+
+const DoSpacesLive = Layer.unwrap(
     Effect.gen(function* () {
-        const accessKeyId = yield* Config.redacted(Config.string("SPACES_KEY"));
-        const secretAccessKey = yield* Config.redacted(Config.string("SPACES_SECRET"));
+        const accessKeyId = yield* Config.redacted("SPACES_KEY");
+        const secretAccessKey = yield* Config.redacted("SPACES_SECRET");
         return S3.layer({
             forcePathStyle: false,
             endpoint: "https://sfo3.digitaloceanspaces.com",
@@ -22,6 +23,10 @@ const DoSpacesLive = Layer.unwrapEffect(
 
 export const Live = Layer.mergeAll(
     DoSpacesLive,
-    GooglePlayApi.defaultHttpClient,
-    Logger.minimumLogLevel(LogLevel.Debug)
-).pipe(Layer.provideMerge(PlatformConfigProvider.layerDotEnvAdd(".env")), Layer.provideMerge(NodeContext.layer));
+    FetchHttpClient.layer,
+    GooglePlayApi.AndroidDevice.EmbeddedPixel7aLive,
+    Layer.succeed(References.MinimumLogLevel, "Debug")
+).pipe(
+    Layer.provideMerge(Layer.effect(ConfigProvider.ConfigProvider, ConfigProvider.fromDotEnv())),
+    Layer.provideMerge(NodeServices.layer)
+);

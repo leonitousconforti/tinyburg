@@ -3,8 +3,9 @@
  * @category Missions
  */
 
-import * as NimblebitSchema from "@tinyburg/nimblebit-sdk/NimblebitSchema";
 import * as Schema from "effect/Schema";
+
+import * as NimblebitSchema from "@tinyburg/nimblebit-sdk/NimblebitSchema";
 
 //////////////////////////////////////////////////////////////////
 
@@ -3289,16 +3290,14 @@ export type Mission = (typeof missions)[number];
  * @since 1.0.0
  * @category Schemas
  */
-export const Mission = NimblebitSchema.parseNimblebitObject(
-    Schema.Struct({
-        id: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("m_id")),
-        // type: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("m_type")),
-        // character: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("m_char")),
-        // text: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("m_txt")),
-        // cnt: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("m_cnt")),
-        // ft: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("m_ft")),
-        // fid: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("m_fid")),
-        // pop: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("m_pop")),
-        // com: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("m_com")),
-    })
-);
+export const Mission = Schema.Struct({
+    id: Schema.String.annotateKey({ nimblebitSaveDataKey: "m_id" }),
+    type: Schema.NumberFromString.annotateKey({ nimblebitSaveDataKey: "m_type" }),
+    character: Schema.String.annotateKey({ nimblebitSaveDataKey: "m_char" }),
+    text: Schema.String.annotateKey({ nimblebitSaveDataKey: "m_txt" }),
+    cnt: Schema.String.annotateKey({ nimblebitSaveDataKey: "m_cnt" }),
+    ft: Schema.String.annotateKey({ nimblebitSaveDataKey: "m_ft" }),
+    fid: Schema.String.annotateKey({ nimblebitSaveDataKey: "m_fid" }),
+    pop: Schema.String.annotateKey({ nimblebitSaveDataKey: "m_pop" }),
+    com: Schema.String.annotateKey({ nimblebitSaveDataKey: "m_com" }),
+}).pipe(NimblebitSchema.parseNimblebitObject);

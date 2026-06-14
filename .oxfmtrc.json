@@ -7,11 +7,9 @@
         "**/.tsbuildinfo",
         "**/generated/**",
         ".agents/**/*",
-        "**/index.ts",
         "repos/**",
         "**/CHANGELOG.md",
-        "!packages/polyfills/src/index.ts",
-        "!packages/vitest-pool/src/index.ts"
+        "packages/**/src/index.ts"
     ],
     "sortPackageJson": true,
     "trailingComma": "es5",

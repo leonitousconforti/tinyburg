@@ -134,7 +134,7 @@
     },
     "Pvip": {
       "$locationMetadata": {
-        "after": "Prf",
+        "after": "raffleID",
       },
       "value": "",
     },
@@ -230,7 +230,7 @@
     },
     "easter22Currency": {
       "$locationMetadata": {
-        "after": "Pb",
+        "after": "bux",
       },
       "value": "0",
     },
@@ -242,7 +242,7 @@
     },
     "elevatorSpeed": {
       "$locationMetadata": {
-        "after": "Plbs",
+        "after": "lobbies",
       },
       "value": "{"speed":9.25}",
     },
@@ -266,7 +266,7 @@
     },
     "nFreeBux": {
       "$locationMetadata": {
-        "after": "Plp",
+        "after": "bbpost",
       },
       "value": "639680900246845210",
     },
@@ -405,7 +405,6 @@
   "bbPosts": [
     {
       "$unknown": {},
-      "_tid": "976",
       "bitizen": {
         "$unknown": {},
         "attributes": {
@@ -414,28 +413,28 @@
           ],
           "accessories": {
             "earrings": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 0,
                 "g": 0,
                 "r": 0,
               },
             },
             "glasses": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": 0,
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": 0,
             },
             "hairAccessory": {
-              "_id": "Either",
-              "_tag": "Right",
-              "right": 1,
+              "_id": "Result",
+              "_tag": "Success",
+              "value": 1,
             },
             "hat": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "color": {
                   "b": 0,
                   "g": 0,
@@ -445,9 +444,9 @@
               },
             },
             "tie": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 0,
                 "g": 0,
                 "r": 0,
@@ -500,10 +499,10 @@
       "media_path": "",
       "media_type": "0",
       "source_name": "EMILY DIXON",
+      "tid": "976",
     },
     {
       "$unknown": {},
-      "_tid": "1853",
       "bitizen": {
         "$unknown": {},
         "attributes": {
@@ -512,28 +511,28 @@
           ],
           "accessories": {
             "earrings": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 0,
                 "g": 0,
                 "r": 0,
               },
             },
             "glasses": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": 0,
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": 0,
             },
             "hairAccessory": {
-              "_id": "Either",
-              "_tag": "Right",
-              "right": 1,
+              "_id": "Result",
+              "_tag": "Success",
+              "value": 1,
             },
             "hat": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "color": {
                   "b": 0,
                   "g": 0,
@@ -543,9 +542,9 @@
               },
             },
             "tie": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 0,
                 "g": 0,
                 "r": 0,
@@ -598,10 +597,10 @@
       "media_path": "",
       "media_type": "0",
       "source_name": "DIANNE MILLS",
+      "tid": "1853",
     },
     {
       "$unknown": {},
-      "_tid": "1091",
       "bitizen": {
         "$unknown": {},
         "attributes": {
@@ -610,28 +609,28 @@
           ],
           "accessories": {
             "earrings": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 0,
                 "g": 0,
                 "r": 0,
               },
             },
             "glasses": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": 0,
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": 0,
             },
             "hairAccessory": {
-              "_id": "Either",
-              "_tag": "Right",
-              "right": 1,
+              "_id": "Result",
+              "_tag": "Success",
+              "value": 1,
             },
             "hat": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "color": {
                   "b": 0,
                   "g": 0,
@@ -641,9 +640,9 @@
               },
             },
             "tie": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 0,
                 "g": 0,
                 "r": 0,
@@ -696,10 +695,10 @@
       "media_path": "",
       "media_type": "0",
       "source_name": "P. PATTERSON",
+      "tid": "1091",
     },
     {
       "$unknown": {},
-      "_tid": "703",
       "bitizen": {
         "$unknown": {},
         "attributes": {
@@ -708,28 +707,28 @@
           ],
           "accessories": {
             "earrings": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 0,
                 "g": 0,
                 "r": 0,
               },
             },
             "glasses": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": 0,
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": 0,
             },
             "hairAccessory": {
-              "_id": "Either",
-              "_tag": "Right",
-              "right": 1,
+              "_id": "Result",
+              "_tag": "Success",
+              "value": 1,
             },
             "hat": {
-              "_id": "Either",
-              "_tag": "Right",
-              "right": {
+              "_id": "Result",
+              "_tag": "Success",
+              "value": {
                 "color": {
                   "b": 79,
                   "g": 32,
@@ -740,9 +739,9 @@
               },
             },
             "tie": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 0,
                 "g": 0,
                 "r": 0,
@@ -797,10 +796,10 @@ He wanted to get a long little doggy!",
       "media_path": "",
       "media_type": "0",
       "source_name": "JESSIE BURTON",
+      "tid": "703",
     },
     {
       "$unknown": {},
-      "_tid": "228",
       "bitizen": {
         "$unknown": {},
         "attributes": {
@@ -809,28 +808,28 @@ He wanted to get a long little doggy!",
           ],
           "accessories": {
             "earrings": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 0,
                 "g": 0,
                 "r": 0,
               },
             },
             "glasses": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": 0,
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": 0,
             },
             "hairAccessory": {
-              "_id": "Either",
-              "_tag": "Right",
-              "right": 1,
+              "_id": "Result",
+              "_tag": "Success",
+              "value": 1,
             },
             "hat": {
-              "_id": "Either",
-              "_tag": "Right",
-              "right": {
+              "_id": "Result",
+              "_tag": "Success",
+              "value": {
                 "color": {
                   "b": 31,
                   "g": 119,
@@ -841,9 +840,9 @@ He wanted to get a long little doggy!",
               },
             },
             "tie": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 0,
                 "g": 0,
                 "r": 0,
@@ -896,10 +895,10 @@ He wanted to get a long little doggy!",
       "media_path": "",
       "media_type": "0",
       "source_name": "ASHLEY JONES",
+      "tid": "228",
     },
     {
       "$unknown": {},
-      "_tid": "1856",
       "bitizen": {
         "$unknown": {},
         "attributes": {
@@ -908,28 +907,28 @@ He wanted to get a long little doggy!",
           ],
           "accessories": {
             "earrings": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 0,
                 "g": 0,
                 "r": 0,
               },
             },
             "glasses": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": 0,
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": 0,
             },
             "hairAccessory": {
-              "_id": "Either",
-              "_tag": "Right",
-              "right": 1,
+              "_id": "Result",
+              "_tag": "Success",
+              "value": 1,
             },
             "hat": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "color": {
                   "b": 0,
                   "g": 0,
@@ -939,9 +938,9 @@ He wanted to get a long little doggy!",
               },
             },
             "tie": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 0,
                 "g": 0,
                 "r": 0,
@@ -994,10 +993,10 @@ He wanted to get a long little doggy!",
       "media_path": "",
       "media_type": "0",
       "source_name": "R. THOMPSON",
+      "tid": "1856",
     },
     {
       "$unknown": {},
-      "_tid": "1738",
       "bitizen": {
         "$unknown": {},
         "attributes": {
@@ -1006,28 +1005,28 @@ He wanted to get a long little doggy!",
           ],
           "accessories": {
             "earrings": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 0,
                 "g": 0,
                 "r": 0,
               },
             },
             "glasses": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": 0,
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": 0,
             },
             "hairAccessory": {
-              "_id": "Either",
-              "_tag": "Right",
-              "right": 1,
+              "_id": "Result",
+              "_tag": "Success",
+              "value": 1,
             },
             "hat": {
-              "_id": "Either",
-              "_tag": "Right",
-              "right": {
+              "_id": "Result",
+              "_tag": "Success",
+              "value": {
                 "color": {
                   "b": 79,
                   "g": 32,
@@ -1038,9 +1037,9 @@ He wanted to get a long little doggy!",
               },
             },
             "tie": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 0,
                 "g": 0,
                 "r": 0,
@@ -1093,10 +1092,10 @@ He wanted to get a long little doggy!",
       "media_path": "",
       "media_type": "0",
       "source_name": "JESSIE BURTON",
+      "tid": "1738",
     },
     {
       "$unknown": {},
-      "_tid": "280",
       "bitizen": {
         "$unknown": {},
         "attributes": {
@@ -1105,28 +1104,28 @@ He wanted to get a long little doggy!",
           ],
           "accessories": {
             "earrings": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 0,
                 "g": 0,
                 "r": 0,
               },
             },
             "glasses": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": 0,
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": 0,
             },
             "hairAccessory": {
-              "_id": "Either",
-              "_tag": "Right",
-              "right": 1,
+              "_id": "Result",
+              "_tag": "Success",
+              "value": 1,
             },
             "hat": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "color": {
                   "b": 0,
                   "g": 0,
@@ -1136,9 +1135,9 @@ He wanted to get a long little doggy!",
               },
             },
             "tie": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 0,
                 "g": 0,
                 "r": 0,
@@ -1191,10 +1190,10 @@ He wanted to get a long little doggy!",
       "media_path": "",
       "media_type": "0",
       "source_name": "EMILY DIXON",
+      "tid": "280",
     },
     {
       "$unknown": {},
-      "_tid": "966",
       "bitizen": {
         "$unknown": {},
         "attributes": {
@@ -1203,28 +1202,28 @@ He wanted to get a long little doggy!",
           ],
           "accessories": {
             "earrings": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 0,
                 "g": 0,
                 "r": 0,
               },
             },
             "glasses": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": 0,
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": 0,
             },
             "hairAccessory": {
-              "_id": "Either",
-              "_tag": "Right",
-              "right": 1,
+              "_id": "Result",
+              "_tag": "Success",
+              "value": 1,
             },
             "hat": {
-              "_id": "Either",
-              "_tag": "Right",
-              "right": {
+              "_id": "Result",
+              "_tag": "Success",
+              "value": {
                 "color": {
                   "b": 31,
                   "g": 119,
@@ -1235,9 +1234,9 @@ He wanted to get a long little doggy!",
               },
             },
             "tie": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 0,
                 "g": 0,
                 "r": 0,
@@ -1290,10 +1289,10 @@ He wanted to get a long little doggy!",
       "media_path": "",
       "media_type": "0",
       "source_name": "ASHLEY JONES",
+      "tid": "966",
     },
     {
       "$unknown": {},
-      "_tid": "264",
       "bitizen": {
         "$unknown": {},
         "attributes": {
@@ -1302,28 +1301,28 @@ He wanted to get a long little doggy!",
           ],
           "accessories": {
             "earrings": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 0,
                 "g": 0,
                 "r": 0,
               },
             },
             "glasses": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": 0,
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": 0,
             },
             "hairAccessory": {
-              "_id": "Either",
-              "_tag": "Right",
-              "right": 1,
+              "_id": "Result",
+              "_tag": "Success",
+              "value": 1,
             },
             "hat": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "color": {
                   "b": 0,
                   "g": 0,
@@ -1333,9 +1332,9 @@ He wanted to get a long little doggy!",
               },
             },
             "tie": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 0,
                 "g": 0,
                 "r": 0,
@@ -1388,10 +1387,10 @@ He wanted to get a long little doggy!",
       "media_path": "",
       "media_type": "0",
       "source_name": "EARL SULLIVAN",
+      "tid": "264",
     },
     {
       "$unknown": {},
-      "_tid": "308",
       "bitizen": {
         "$unknown": {},
         "attributes": {
@@ -1400,28 +1399,28 @@ He wanted to get a long little doggy!",
           ],
           "accessories": {
             "earrings": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 0,
                 "g": 0,
                 "r": 0,
               },
             },
             "glasses": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": 0,
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": 0,
             },
             "hairAccessory": {
-              "_id": "Either",
-              "_tag": "Right",
-              "right": 1,
+              "_id": "Result",
+              "_tag": "Success",
+              "value": 1,
             },
             "hat": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "color": {
                   "b": 0,
                   "g": 0,
@@ -1431,9 +1430,9 @@ He wanted to get a long little doggy!",
               },
             },
             "tie": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 0,
                 "g": 0,
                 "r": 0,
@@ -1486,10 +1485,10 @@ He wanted to get a long little doggy!",
       "media_path": "",
       "media_type": "0",
       "source_name": "EMILY DIXON",
+      "tid": "308",
     },
     {
       "$unknown": {},
-      "_tid": "1613",
       "bitizen": {
         "$unknown": {},
         "attributes": {
@@ -1498,28 +1497,28 @@ He wanted to get a long little doggy!",
           ],
           "accessories": {
             "earrings": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 0,
                 "g": 0,
                 "r": 0,
               },
             },
             "glasses": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": 0,
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": 0,
             },
             "hairAccessory": {
-              "_id": "Either",
-              "_tag": "Right",
-              "right": 1,
+              "_id": "Result",
+              "_tag": "Success",
+              "value": 1,
             },
             "hat": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "color": {
                   "b": 0,
                   "g": 0,
@@ -1529,9 +1528,9 @@ He wanted to get a long little doggy!",
               },
             },
             "tie": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 0,
                 "g": 0,
                 "r": 0,
@@ -1584,10 +1583,10 @@ He wanted to get a long little doggy!",
       "media_path": "",
       "media_type": "0",
       "source_name": "EMILY DIXON",
+      "tid": "1613",
     },
     {
       "$unknown": {},
-      "_tid": "1798",
       "bitizen": {
         "$unknown": {},
         "attributes": {
@@ -1596,28 +1595,28 @@ He wanted to get a long little doggy!",
           ],
           "accessories": {
             "earrings": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 0,
                 "g": 0,
                 "r": 0,
               },
             },
             "glasses": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": 0,
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": 0,
             },
             "hairAccessory": {
-              "_id": "Either",
-              "_tag": "Right",
-              "right": 1,
+              "_id": "Result",
+              "_tag": "Success",
+              "value": 1,
             },
             "hat": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "color": {
                   "b": 0,
                   "g": 0,
@@ -1627,9 +1626,9 @@ He wanted to get a long little doggy!",
               },
             },
             "tie": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 0,
                 "g": 0,
                 "r": 0,
@@ -1682,10 +1681,10 @@ He wanted to get a long little doggy!",
       "media_path": "",
       "media_type": "0",
       "source_name": "DAVID DOUGLAS",
+      "tid": "1798",
     },
     {
       "$unknown": {},
-      "_tid": "1840",
       "bitizen": {
         "$unknown": {},
         "attributes": {
@@ -1694,28 +1693,28 @@ He wanted to get a long little doggy!",
           ],
           "accessories": {
             "earrings": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 0,
                 "g": 0,
                 "r": 0,
               },
             },
             "glasses": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": 0,
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": 0,
             },
             "hairAccessory": {
-              "_id": "Either",
-              "_tag": "Right",
-              "right": 1,
+              "_id": "Result",
+              "_tag": "Success",
+              "value": 1,
             },
             "hat": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "color": {
                   "b": 0,
                   "g": 0,
@@ -1725,9 +1724,9 @@ He wanted to get a long little doggy!",
               },
             },
             "tie": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 0,
                 "g": 0,
                 "r": 0,
@@ -1780,10 +1779,10 @@ He wanted to get a long little doggy!",
       "media_path": "",
       "media_type": "0",
       "source_name": "DIANNE MILLS",
+      "tid": "1840",
     },
     {
       "$unknown": {},
-      "_tid": "221",
       "bitizen": {
         "$unknown": {},
         "attributes": {
@@ -1792,28 +1791,28 @@ He wanted to get a long little doggy!",
           ],
           "accessories": {
             "earrings": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 0,
                 "g": 0,
                 "r": 0,
               },
             },
             "glasses": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": 0,
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": 0,
             },
             "hairAccessory": {
-              "_id": "Either",
-              "_tag": "Right",
-              "right": 1,
+              "_id": "Result",
+              "_tag": "Success",
+              "value": 1,
             },
             "hat": {
-              "_id": "Either",
-              "_tag": "Right",
-              "right": {
+              "_id": "Result",
+              "_tag": "Success",
+              "value": {
                 "color": {
                   "b": 31,
                   "g": 119,
@@ -1824,9 +1823,9 @@ He wanted to get a long little doggy!",
               },
             },
             "tie": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 0,
                 "g": 0,
                 "r": 0,
@@ -1879,10 +1878,10 @@ He wanted to get a long little doggy!",
       "media_path": "",
       "media_type": "0",
       "source_name": "ASHLEY JONES",
+      "tid": "221",
     },
     {
       "$unknown": {},
-      "_tid": "1425",
       "bitizen": {
         "$unknown": {},
         "attributes": {
@@ -1891,28 +1890,28 @@ He wanted to get a long little doggy!",
           ],
           "accessories": {
             "earrings": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 0,
                 "g": 0,
                 "r": 0,
               },
             },
             "glasses": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": 0,
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": 0,
             },
             "hairAccessory": {
-              "_id": "Either",
-              "_tag": "Right",
-              "right": 1,
+              "_id": "Result",
+              "_tag": "Success",
+              "value": 1,
             },
             "hat": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "color": {
                   "b": 0,
                   "g": 0,
@@ -1922,9 +1921,9 @@ He wanted to get a long little doggy!",
               },
             },
             "tie": {
-              "_id": "Either",
-              "_tag": "Right",
-              "right": {
+              "_id": "Result",
+              "_tag": "Success",
+              "value": {
                 "b": 251,
                 "g": 212,
                 "r": 253,
@@ -1977,10 +1976,10 @@ He wanted to get a long little doggy!",
       "media_path": "",
       "media_type": "0",
       "source_name": "SHANE SCHMIDT",
+      "tid": "1425",
     },
     {
       "$unknown": {},
-      "_tid": "1860",
       "bitizen": {
         "$unknown": {},
         "attributes": {
@@ -1989,28 +1988,28 @@ He wanted to get a long little doggy!",
           ],
           "accessories": {
             "earrings": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 0,
                 "g": 0,
                 "r": 0,
               },
             },
             "glasses": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": 0,
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": 0,
             },
             "hairAccessory": {
-              "_id": "Either",
-              "_tag": "Right",
-              "right": 1,
+              "_id": "Result",
+              "_tag": "Success",
+              "value": 1,
             },
             "hat": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "color": {
                   "b": 0,
                   "g": 0,
@@ -2020,9 +2019,9 @@ He wanted to get a long little doggy!",
               },
             },
             "tie": {
-              "_id": "Either",
-              "_tag": "Right",
-              "right": {
+              "_id": "Result",
+              "_tag": "Success",
+              "value": {
                 "b": 238,
                 "g": 35,
                 "r": 248,
@@ -2075,10 +2074,10 @@ He wanted to get a long little doggy!",
       "media_path": "",
       "media_type": "0",
       "source_name": "JASON WILLIAMS",
+      "tid": "1860",
     },
     {
       "$unknown": {},
-      "_tid": "1544",
       "bitizen": {
         "$unknown": {},
         "attributes": {
@@ -2087,28 +2086,28 @@ He wanted to get a long little doggy!",
           ],
           "accessories": {
             "earrings": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 0,
                 "g": 0,
                 "r": 0,
               },
             },
             "glasses": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": 0,
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": 0,
             },
             "hairAccessory": {
-              "_id": "Either",
-              "_tag": "Right",
-              "right": 1,
+              "_id": "Result",
+              "_tag": "Success",
+              "value": 1,
             },
             "hat": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "color": {
                   "b": 0,
                   "g": 0,
@@ -2118,9 +2117,9 @@ He wanted to get a long little doggy!",
               },
             },
             "tie": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 0,
                 "g": 0,
                 "r": 0,
@@ -2173,10 +2172,10 @@ He wanted to get a long little doggy!",
       "media_path": "",
       "media_type": "0",
       "source_name": "DAVID DOUGLAS",
+      "tid": "1544",
     },
     {
       "$unknown": {},
-      "_tid": "1743",
       "bitizen": {
         "$unknown": {},
         "attributes": {
@@ -2185,28 +2184,28 @@ He wanted to get a long little doggy!",
           ],
           "accessories": {
             "earrings": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 0,
                 "g": 0,
                 "r": 0,
               },
             },
             "glasses": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": 0,
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": 0,
             },
             "hairAccessory": {
-              "_id": "Either",
-              "_tag": "Right",
-              "right": 1,
+              "_id": "Result",
+              "_tag": "Success",
+              "value": 1,
             },
             "hat": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "color": {
                   "b": 0,
                   "g": 0,
@@ -2216,9 +2215,9 @@ He wanted to get a long little doggy!",
               },
             },
             "tie": {
-              "_id": "Either",
-              "_tag": "Right",
-              "right": {
+              "_id": "Result",
+              "_tag": "Success",
+              "value": {
                 "b": 251,
                 "g": 212,
                 "r": 253,
@@ -2271,10 +2270,10 @@ He wanted to get a long little doggy!",
       "media_path": "",
       "media_type": "0",
       "source_name": "SHANE SCHMIDT",
+      "tid": "1743",
     },
     {
       "$unknown": {},
-      "_tid": "997",
       "bitizen": {
         "$unknown": {},
         "attributes": {
@@ -2283,28 +2282,28 @@ He wanted to get a long little doggy!",
           ],
           "accessories": {
             "earrings": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 0,
                 "g": 0,
                 "r": 0,
               },
             },
             "glasses": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": 0,
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": 0,
             },
             "hairAccessory": {
-              "_id": "Either",
-              "_tag": "Right",
-              "right": 1,
+              "_id": "Result",
+              "_tag": "Success",
+              "value": 1,
             },
             "hat": {
-              "_id": "Either",
-              "_tag": "Right",
-              "right": {
+              "_id": "Result",
+              "_tag": "Success",
+              "value": {
                 "color": {
                   "b": 190,
                   "g": 50,
@@ -2315,9 +2314,9 @@ He wanted to get a long little doggy!",
               },
             },
             "tie": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 0,
                 "g": 0,
                 "r": 0,
@@ -2370,10 +2369,10 @@ He wanted to get a long little doggy!",
       "media_path": "",
       "media_type": "0",
       "source_name": "TYLER BRYANT",
+      "tid": "997",
     },
     {
       "$unknown": {},
-      "_tid": "118",
       "bitizen": {
         "$unknown": {},
         "attributes": {
@@ -2382,28 +2381,28 @@ He wanted to get a long little doggy!",
           ],
           "accessories": {
             "earrings": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 0,
                 "g": 0,
                 "r": 0,
               },
             },
             "glasses": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": 0,
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": 0,
             },
             "hairAccessory": {
-              "_id": "Either",
-              "_tag": "Right",
-              "right": 1,
+              "_id": "Result",
+              "_tag": "Success",
+              "value": 1,
             },
             "hat": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "color": {
                   "b": 0,
                   "g": 0,
@@ -2413,9 +2412,9 @@ He wanted to get a long little doggy!",
               },
             },
             "tie": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 0,
                 "g": 0,
                 "r": 0,
@@ -2468,10 +2467,10 @@ He wanted to get a long little doggy!",
       "media_path": "",
       "media_type": "0",
       "source_name": "EMILY DIXON",
+      "tid": "118",
     },
     {
       "$unknown": {},
-      "_tid": "295",
       "bitizen": {
         "$unknown": {},
         "attributes": {
@@ -2480,28 +2479,28 @@ He wanted to get a long little doggy!",
           ],
           "accessories": {
             "earrings": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 0,
                 "g": 0,
                 "r": 0,
               },
             },
             "glasses": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": 0,
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": 0,
             },
             "hairAccessory": {
-              "_id": "Either",
-              "_tag": "Right",
-              "right": 1,
+              "_id": "Result",
+              "_tag": "Success",
+              "value": 1,
             },
             "hat": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "color": {
                   "b": 0,
                   "g": 0,
@@ -2511,9 +2510,9 @@ He wanted to get a long little doggy!",
               },
             },
             "tie": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 0,
                 "g": 0,
                 "r": 0,
@@ -2566,10 +2565,10 @@ He wanted to get a long little doggy!",
       "media_path": "",
       "media_type": "0",
       "source_name": "R. THOMPSON",
+      "tid": "295",
     },
     {
       "$unknown": {},
-      "_tid": "141",
       "bitizen": {
         "$unknown": {},
         "attributes": {
@@ -2578,28 +2577,28 @@ He wanted to get a long little doggy!",
           ],
           "accessories": {
             "earrings": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 0,
                 "g": 0,
                 "r": 0,
               },
             },
             "glasses": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": 0,
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": 0,
             },
             "hairAccessory": {
-              "_id": "Either",
-              "_tag": "Right",
-              "right": 1,
+              "_id": "Result",
+              "_tag": "Success",
+              "value": 1,
             },
             "hat": {
-              "_id": "Either",
-              "_tag": "Right",
-              "right": {
+              "_id": "Result",
+              "_tag": "Success",
+              "value": {
                 "color": {
                   "b": 90,
                   "g": 140,
@@ -2610,9 +2609,9 @@ He wanted to get a long little doggy!",
               },
             },
             "tie": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 0,
                 "g": 0,
                 "r": 0,
@@ -2665,10 +2664,10 @@ He wanted to get a long little doggy!",
       "media_path": "",
       "media_type": "0",
       "source_name": "FELIX STEVENS",
+      "tid": "141",
     },
     {
       "$unknown": {},
-      "_tid": "1596",
       "bitizen": {
         "$unknown": {},
         "attributes": {
@@ -2677,28 +2676,28 @@ He wanted to get a long little doggy!",
           ],
           "accessories": {
             "earrings": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 0,
                 "g": 0,
                 "r": 0,
               },
             },
             "glasses": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": 0,
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": 0,
             },
             "hairAccessory": {
-              "_id": "Either",
-              "_tag": "Right",
-              "right": 1,
+              "_id": "Result",
+              "_tag": "Success",
+              "value": 1,
             },
             "hat": {
-              "_id": "Either",
-              "_tag": "Right",
-              "right": {
+              "_id": "Result",
+              "_tag": "Success",
+              "value": {
                 "color": {
                   "b": 90,
                   "g": 140,
@@ -2709,9 +2708,9 @@ He wanted to get a long little doggy!",
               },
             },
             "tie": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 0,
                 "g": 0,
                 "r": 0,
@@ -2764,10 +2763,10 @@ He wanted to get a long little doggy!",
       "media_path": "",
       "media_type": "0",
       "source_name": "FELIX STEVENS",
+      "tid": "1596",
     },
     {
       "$unknown": {},
-      "_tid": "248",
       "bitizen": {
         "$unknown": {},
         "attributes": {
@@ -2776,28 +2775,28 @@ He wanted to get a long little doggy!",
           ],
           "accessories": {
             "earrings": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 0,
                 "g": 0,
                 "r": 0,
               },
             },
             "glasses": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": 0,
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": 0,
             },
             "hairAccessory": {
-              "_id": "Either",
-              "_tag": "Right",
-              "right": 1,
+              "_id": "Result",
+              "_tag": "Success",
+              "value": 1,
             },
             "hat": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "color": {
                   "b": 0,
                   "g": 0,
@@ -2807,9 +2806,9 @@ He wanted to get a long little doggy!",
               },
             },
             "tie": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 0,
                 "g": 0,
                 "r": 0,
@@ -2865,10 +2864,10 @@ Some people repeat themselves too often.",
       "media_path": "",
       "media_type": "0",
       "source_name": "EMILY DIXON",
+      "tid": "248",
     },
     {
       "$unknown": {},
-      "_tid": "1812",
       "bitizen": {
         "$unknown": {},
         "attributes": {
@@ -2877,28 +2876,28 @@ Some people repeat themselves too often.",
           ],
           "accessories": {
             "earrings": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 0,
                 "g": 0,
                 "r": 0,
               },
             },
             "glasses": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": 0,
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": 0,
             },
             "hairAccessory": {
-              "_id": "Either",
-              "_tag": "Right",
-              "right": 1,
+              "_id": "Result",
+              "_tag": "Success",
+              "value": 1,
             },
             "hat": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "color": {
                   "b": 0,
                   "g": 0,
@@ -2908,9 +2907,9 @@ Some people repeat themselves too often.",
               },
             },
             "tie": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 0,
                 "g": 0,
                 "r": 0,
@@ -2963,10 +2962,10 @@ Some people repeat themselves too often.",
       "media_path": "",
       "media_type": "0",
       "source_name": "DIANNE MILLS",
+      "tid": "1812",
     },
     {
       "$unknown": {},
-      "_tid": "1849",
       "bitizen": {
         "$unknown": {},
         "attributes": {
@@ -2975,28 +2974,28 @@ Some people repeat themselves too often.",
           ],
           "accessories": {
             "earrings": {
-              "_id": "Either",
-              "_tag": "Right",
-              "right": {
+              "_id": "Result",
+              "_tag": "Success",
+              "value": {
                 "b": 218,
                 "g": 179,
                 "r": 213,
               },
             },
             "glasses": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": 0,
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": 0,
             },
             "hairAccessory": {
-              "_id": "Either",
-              "_tag": "Right",
-              "right": 1,
+              "_id": "Result",
+              "_tag": "Success",
+              "value": 1,
             },
             "hat": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "color": {
                   "b": 0,
                   "g": 0,
@@ -3006,9 +3005,9 @@ Some people repeat themselves too often.",
               },
             },
             "tie": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 0,
                 "g": 0,
                 "r": 0,
@@ -3061,10 +3060,10 @@ Some people repeat themselves too often.",
       "media_path": "",
       "media_type": "0",
       "source_name": "TERRI LUCAS",
+      "tid": "1849",
     },
     {
       "$unknown": {},
-      "_tid": "1212",
       "bitizen": {
         "$unknown": {},
         "attributes": {
@@ -3073,28 +3072,28 @@ Some people repeat themselves too often.",
           ],
           "accessories": {
             "earrings": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 0,
                 "g": 0,
                 "r": 0,
               },
             },
             "glasses": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": 0,
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": 0,
             },
             "hairAccessory": {
-              "_id": "Either",
-              "_tag": "Right",
-              "right": 1,
+              "_id": "Result",
+              "_tag": "Success",
+              "value": 1,
             },
             "hat": {
-              "_id": "Either",
-              "_tag": "Right",
-              "right": {
+              "_id": "Result",
+              "_tag": "Success",
+              "value": {
                 "color": {
                   "b": 190,
                   "g": 50,
@@ -3105,9 +3104,9 @@ Some people repeat themselves too often.",
               },
             },
             "tie": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 0,
                 "g": 0,
                 "r": 0,
@@ -3160,10 +3159,10 @@ Some people repeat themselves too often.",
       "media_path": "",
       "media_type": "0",
       "source_name": "TYLER BRYANT",
+      "tid": "1212",
     },
     {
       "$unknown": {},
-      "_tid": "1181",
       "bitizen": {
         "$unknown": {},
         "attributes": {
@@ -3172,28 +3171,28 @@ Some people repeat themselves too often.",
           ],
           "accessories": {
             "earrings": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 0,
                 "g": 0,
                 "r": 0,
               },
             },
             "glasses": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": 0,
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": 0,
             },
             "hairAccessory": {
-              "_id": "Either",
-              "_tag": "Right",
-              "right": 1,
+              "_id": "Result",
+              "_tag": "Success",
+              "value": 1,
             },
             "hat": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "color": {
                   "b": 0,
                   "g": 0,
@@ -3203,9 +3202,9 @@ Some people repeat themselves too often.",
               },
             },
             "tie": {
-              "_id": "Either",
-              "_tag": "Right",
-              "right": {
+              "_id": "Result",
+              "_tag": "Success",
+              "value": {
                 "b": 106,
                 "g": 51,
                 "r": 204,
@@ -3258,10 +3257,10 @@ Some people repeat themselves too often.",
       "media_path": "",
       "media_type": "0",
       "source_name": "GILBERT BARNETT",
+      "tid": "1181",
     },
     {
       "$unknown": {},
-      "_tid": "1195",
       "bitizen": {
         "$unknown": {},
         "attributes": {
@@ -3270,28 +3269,28 @@ Some people repeat themselves too often.",
           ],
           "accessories": {
             "earrings": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 0,
                 "g": 0,
                 "r": 0,
               },
             },
             "glasses": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": 0,
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": 0,
             },
             "hairAccessory": {
-              "_id": "Either",
-              "_tag": "Right",
-              "right": 1,
+              "_id": "Result",
+              "_tag": "Success",
+              "value": 1,
             },
             "hat": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "color": {
                   "b": 0,
                   "g": 0,
@@ -3301,9 +3300,9 @@ Some people repeat themselves too often.",
               },
             },
             "tie": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 0,
                 "g": 0,
                 "r": 0,
@@ -3356,6 +3355,7 @@ Some people repeat themselves too often.",
       "media_path": "",
       "media_type": "0",
       "source_name": "DAVID DOUGLAS",
+      "tid": "1195",
     },
   ],
   "bbnotes": 1,
@@ -3371,28 +3371,28 @@ Some people repeat themselves too often.",
         ],
         "accessories": {
           "earrings": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": {
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": {
               "b": 0,
               "g": 0,
               "r": 0,
             },
           },
           "glasses": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": 0,
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": 0,
           },
           "hairAccessory": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": 0,
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": 0,
           },
           "hat": {
-            "_id": "Either",
-            "_tag": "Right",
-            "right": {
+            "_id": "Result",
+            "_tag": "Success",
+            "value": {
               "color": {
                 "b": 227,
                 "g": 76,
@@ -3403,9 +3403,9 @@ Some people repeat themselves too often.",
             },
           },
           "tie": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": {
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": {
               "b": 0,
               "g": 0,
               "r": 0,
@@ -3456,28 +3456,28 @@ Some people repeat themselves too often.",
         ],
         "accessories": {
           "earrings": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": {
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": {
               "b": 0,
               "g": 0,
               "r": 0,
             },
           },
           "glasses": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": 0,
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": 0,
           },
           "hairAccessory": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": 0,
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": 0,
           },
           "hat": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": {
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": {
               "color": {
                 "b": 0,
                 "g": 0,
@@ -3487,9 +3487,9 @@ Some people repeat themselves too often.",
             },
           },
           "tie": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": {
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": {
               "b": 0,
               "g": 0,
               "r": 0,
@@ -3540,28 +3540,28 @@ Some people repeat themselves too often.",
         ],
         "accessories": {
           "earrings": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": {
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": {
               "b": 0,
               "g": 0,
               "r": 0,
             },
           },
           "glasses": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": 0,
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": 0,
           },
           "hairAccessory": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": 0,
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": 0,
           },
           "hat": {
-            "_id": "Either",
-            "_tag": "Right",
-            "right": {
+            "_id": "Result",
+            "_tag": "Success",
+            "value": {
               "color": {
                 "b": 120,
                 "g": 161,
@@ -3572,9 +3572,9 @@ Some people repeat themselves too often.",
             },
           },
           "tie": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": {
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": {
               "b": 0,
               "g": 0,
               "r": 0,
@@ -3625,28 +3625,28 @@ Some people repeat themselves too often.",
         ],
         "accessories": {
           "earrings": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": {
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": {
               "b": 0,
               "g": 0,
               "r": 0,
             },
           },
           "glasses": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": 0,
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": 0,
           },
           "hairAccessory": {
-            "_id": "Either",
-            "_tag": "Right",
-            "right": 2,
+            "_id": "Result",
+            "_tag": "Success",
+            "value": 2,
           },
           "hat": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": {
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": {
               "color": {
                 "b": 0,
                 "g": 0,
@@ -3656,9 +3656,9 @@ Some people repeat themselves too often.",
             },
           },
           "tie": {
-            "_id": "Either",
-            "_tag": "Right",
-            "right": {
+            "_id": "Result",
+            "_tag": "Success",
+            "value": {
               "b": 90,
               "g": 121,
               "r": 111,
@@ -3709,28 +3709,28 @@ Some people repeat themselves too often.",
         ],
         "accessories": {
           "earrings": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": {
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": {
               "b": 0,
               "g": 0,
               "r": 0,
             },
           },
           "glasses": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": 0,
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": 0,
           },
           "hairAccessory": {
-            "_id": "Either",
-            "_tag": "Right",
-            "right": 0,
+            "_id": "Result",
+            "_tag": "Success",
+            "value": 0,
           },
           "hat": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": {
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": {
               "color": {
                 "b": 0,
                 "g": 0,
@@ -3740,9 +3740,9 @@ Some people repeat themselves too often.",
             },
           },
           "tie": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": {
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": {
               "b": 0,
               "g": 0,
               "r": 0,
@@ -3793,28 +3793,28 @@ Some people repeat themselves too often.",
         ],
         "accessories": {
           "earrings": {
-            "_id": "Either",
-            "_tag": "Right",
-            "right": {
+            "_id": "Result",
+            "_tag": "Success",
+            "value": {
               "b": 191,
               "g": 40,
               "r": 73,
             },
           },
           "glasses": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": 0,
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": 0,
           },
           "hairAccessory": {
-            "_id": "Either",
-            "_tag": "Right",
-            "right": 1,
+            "_id": "Result",
+            "_tag": "Success",
+            "value": 1,
           },
           "hat": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": {
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": {
               "color": {
                 "b": 0,
                 "g": 0,
@@ -3824,9 +3824,9 @@ Some people repeat themselves too often.",
             },
           },
           "tie": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": {
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": {
               "b": 0,
               "g": 0,
               "r": 0,
@@ -3878,28 +3878,28 @@ Some people repeat themselves too often.",
         ],
         "accessories": {
           "earrings": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": {
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": {
               "b": 0,
               "g": 0,
               "r": 0,
             },
           },
           "glasses": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": 0,
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": 0,
           },
           "hairAccessory": {
-            "_id": "Either",
-            "_tag": "Right",
-            "right": 1,
+            "_id": "Result",
+            "_tag": "Success",
+            "value": 1,
           },
           "hat": {
-            "_id": "Either",
-            "_tag": "Right",
-            "right": {
+            "_id": "Result",
+            "_tag": "Success",
+            "value": {
               "color": {
                 "b": 12,
                 "g": 152,
@@ -3910,9 +3910,9 @@ Some people repeat themselves too often.",
             },
           },
           "tie": {
-            "_id": "Either",
-            "_tag": "Right",
-            "right": {
+            "_id": "Result",
+            "_tag": "Success",
+            "value": {
               "b": 196,
               "g": 166,
               "r": 209,
@@ -3964,28 +3964,28 @@ Some people repeat themselves too often.",
         ],
         "accessories": {
           "earrings": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": {
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": {
               "b": 0,
               "g": 0,
               "r": 0,
             },
           },
           "glasses": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": 0,
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": 0,
           },
           "hairAccessory": {
-            "_id": "Either",
-            "_tag": "Right",
-            "right": 1,
+            "_id": "Result",
+            "_tag": "Success",
+            "value": 1,
           },
           "hat": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": {
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": {
               "color": {
                 "b": 0,
                 "g": 0,
@@ -3995,9 +3995,9 @@ Some people repeat themselves too often.",
             },
           },
           "tie": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": {
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": {
               "b": 0,
               "g": 0,
               "r": 0,
@@ -4049,28 +4049,28 @@ Some people repeat themselves too often.",
         ],
         "accessories": {
           "earrings": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": {
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": {
               "b": 0,
               "g": 0,
               "r": 0,
             },
           },
           "glasses": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": 0,
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": 0,
           },
           "hairAccessory": {
-            "_id": "Either",
-            "_tag": "Right",
-            "right": 1,
+            "_id": "Result",
+            "_tag": "Success",
+            "value": 1,
           },
           "hat": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": {
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": {
               "color": {
                 "b": 0,
                 "g": 0,
@@ -4080,9 +4080,9 @@ Some people repeat themselves too often.",
             },
           },
           "tie": {
-            "_id": "Either",
-            "_tag": "Right",
-            "right": {
+            "_id": "Result",
+            "_tag": "Success",
+            "value": {
               "b": 106,
               "g": 51,
               "r": 204,
@@ -4134,28 +4134,28 @@ Some people repeat themselves too often.",
         ],
         "accessories": {
           "earrings": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": {
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": {
               "b": 0,
               "g": 0,
               "r": 0,
             },
           },
           "glasses": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": 0,
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": 0,
           },
           "hairAccessory": {
-            "_id": "Either",
-            "_tag": "Right",
-            "right": 1,
+            "_id": "Result",
+            "_tag": "Success",
+            "value": 1,
           },
           "hat": {
-            "_id": "Either",
-            "_tag": "Right",
-            "right": {
+            "_id": "Result",
+            "_tag": "Success",
+            "value": {
               "color": {
                 "b": 79,
                 "g": 32,
@@ -4166,9 +4166,9 @@ Some people repeat themselves too often.",
             },
           },
           "tie": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": {
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": {
               "b": 0,
               "g": 0,
               "r": 0,
@@ -4220,28 +4220,28 @@ Some people repeat themselves too often.",
         ],
         "accessories": {
           "earrings": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": {
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": {
               "b": 0,
               "g": 0,
               "r": 0,
             },
           },
           "glasses": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": 0,
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": 0,
           },
           "hairAccessory": {
-            "_id": "Either",
-            "_tag": "Right",
-            "right": 1,
+            "_id": "Result",
+            "_tag": "Success",
+            "value": 1,
           },
           "hat": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": {
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": {
               "color": {
                 "b": 0,
                 "g": 0,
@@ -4251,9 +4251,9 @@ Some people repeat themselves too often.",
             },
           },
           "tie": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": {
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": {
               "b": 0,
               "g": 0,
               "r": 0,
@@ -4305,28 +4305,28 @@ Some people repeat themselves too often.",
         ],
         "accessories": {
           "earrings": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": {
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": {
               "b": 0,
               "g": 0,
               "r": 0,
             },
           },
           "glasses": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": 0,
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": 0,
           },
           "hairAccessory": {
-            "_id": "Either",
-            "_tag": "Right",
-            "right": 1,
+            "_id": "Result",
+            "_tag": "Success",
+            "value": 1,
           },
           "hat": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": {
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": {
               "color": {
                 "b": 0,
                 "g": 0,
@@ -4336,9 +4336,9 @@ Some people repeat themselves too often.",
             },
           },
           "tie": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": {
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": {
               "b": 0,
               "g": 0,
               "r": 0,
@@ -4390,28 +4390,28 @@ Some people repeat themselves too often.",
         ],
         "accessories": {
           "earrings": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": {
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": {
               "b": 0,
               "g": 0,
               "r": 0,
             },
           },
           "glasses": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": 0,
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": 0,
           },
           "hairAccessory": {
-            "_id": "Either",
-            "_tag": "Right",
-            "right": 1,
+            "_id": "Result",
+            "_tag": "Success",
+            "value": 1,
           },
           "hat": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": {
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": {
               "color": {
                 "b": 0,
                 "g": 0,
@@ -4421,9 +4421,9 @@ Some people repeat themselves too often.",
             },
           },
           "tie": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": {
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": {
               "b": 0,
               "g": 0,
               "r": 0,
@@ -4475,28 +4475,28 @@ Some people repeat themselves too often.",
         ],
         "accessories": {
           "earrings": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": {
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": {
               "b": 0,
               "g": 0,
               "r": 0,
             },
           },
           "glasses": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": 0,
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": 0,
           },
           "hairAccessory": {
-            "_id": "Either",
-            "_tag": "Right",
-            "right": 1,
+            "_id": "Result",
+            "_tag": "Success",
+            "value": 1,
           },
           "hat": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": {
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": {
               "color": {
                 "b": 0,
                 "g": 0,
@@ -4506,9 +4506,9 @@ Some people repeat themselves too often.",
             },
           },
           "tie": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": {
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": {
               "b": 0,
               "g": 0,
               "r": 0,
@@ -4560,28 +4560,28 @@ Some people repeat themselves too often.",
         ],
         "accessories": {
           "earrings": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": {
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": {
               "b": 0,
               "g": 0,
               "r": 0,
             },
           },
           "glasses": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": 0,
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": 0,
           },
           "hairAccessory": {
-            "_id": "Either",
-            "_tag": "Right",
-            "right": 1,
+            "_id": "Result",
+            "_tag": "Success",
+            "value": 1,
           },
           "hat": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": {
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": {
               "color": {
                 "b": 0,
                 "g": 0,
@@ -4591,9 +4591,9 @@ Some people repeat themselves too often.",
             },
           },
           "tie": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": {
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": {
               "b": 0,
               "g": 0,
               "r": 0,
@@ -4645,28 +4645,28 @@ Some people repeat themselves too often.",
         ],
         "accessories": {
           "earrings": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": {
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": {
               "b": 0,
               "g": 0,
               "r": 0,
             },
           },
           "glasses": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": 0,
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": 0,
           },
           "hairAccessory": {
-            "_id": "Either",
-            "_tag": "Right",
-            "right": 1,
+            "_id": "Result",
+            "_tag": "Success",
+            "value": 1,
           },
           "hat": {
-            "_id": "Either",
-            "_tag": "Right",
-            "right": {
+            "_id": "Result",
+            "_tag": "Success",
+            "value": {
               "color": {
                 "b": 31,
                 "g": 119,
@@ -4677,9 +4677,9 @@ Some people repeat themselves too often.",
             },
           },
           "tie": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": {
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": {
               "b": 0,
               "g": 0,
               "r": 0,
@@ -4731,28 +4731,28 @@ Some people repeat themselves too often.",
         ],
         "accessories": {
           "earrings": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": {
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": {
               "b": 0,
               "g": 0,
               "r": 0,
             },
           },
           "glasses": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": 0,
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": 0,
           },
           "hairAccessory": {
-            "_id": "Either",
-            "_tag": "Right",
-            "right": 1,
+            "_id": "Result",
+            "_tag": "Success",
+            "value": 1,
           },
           "hat": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": {
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": {
               "color": {
                 "b": 0,
                 "g": 0,
@@ -4762,9 +4762,9 @@ Some people repeat themselves too often.",
             },
           },
           "tie": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": {
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": {
               "b": 0,
               "g": 0,
               "r": 0,
@@ -4816,28 +4816,28 @@ Some people repeat themselves too often.",
         ],
         "accessories": {
           "earrings": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": {
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": {
               "b": 0,
               "g": 0,
               "r": 0,
             },
           },
           "glasses": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": 0,
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": 0,
           },
           "hairAccessory": {
-            "_id": "Either",
-            "_tag": "Right",
-            "right": 1,
+            "_id": "Result",
+            "_tag": "Success",
+            "value": 1,
           },
           "hat": {
-            "_id": "Either",
-            "_tag": "Right",
-            "right": {
+            "_id": "Result",
+            "_tag": "Success",
+            "value": {
               "color": {
                 "b": 190,
                 "g": 50,
@@ -4848,9 +4848,9 @@ Some people repeat themselves too often.",
             },
           },
           "tie": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": {
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": {
               "b": 0,
               "g": 0,
               "r": 0,
@@ -4902,28 +4902,28 @@ Some people repeat themselves too often.",
         ],
         "accessories": {
           "earrings": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": {
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": {
               "b": 0,
               "g": 0,
               "r": 0,
             },
           },
           "glasses": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": 0,
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": 0,
           },
           "hairAccessory": {
-            "_id": "Either",
-            "_tag": "Right",
-            "right": 1,
+            "_id": "Result",
+            "_tag": "Success",
+            "value": 1,
           },
           "hat": {
-            "_id": "Either",
-            "_tag": "Right",
-            "right": {
+            "_id": "Result",
+            "_tag": "Success",
+            "value": {
               "color": {
                 "b": 101,
                 "g": 125,
@@ -4934,9 +4934,9 @@ Some people repeat themselves too often.",
             },
           },
           "tie": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": {
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": {
               "b": 0,
               "g": 0,
               "r": 0,
@@ -4988,28 +4988,28 @@ Some people repeat themselves too often.",
         ],
         "accessories": {
           "earrings": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": {
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": {
               "b": 0,
               "g": 0,
               "r": 0,
             },
           },
           "glasses": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": 0,
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": 0,
           },
           "hairAccessory": {
-            "_id": "Either",
-            "_tag": "Right",
-            "right": 1,
+            "_id": "Result",
+            "_tag": "Success",
+            "value": 1,
           },
           "hat": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": {
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": {
               "color": {
                 "b": 0,
                 "g": 0,
@@ -5019,9 +5019,9 @@ Some people repeat themselves too often.",
             },
           },
           "tie": {
-            "_id": "Either",
-            "_tag": "Right",
-            "right": {
+            "_id": "Result",
+            "_tag": "Success",
+            "value": {
               "b": 62,
               "g": 67,
               "r": 67,
@@ -5073,28 +5073,28 @@ Some people repeat themselves too often.",
         ],
         "accessories": {
           "earrings": {
-            "_id": "Either",
-            "_tag": "Right",
-            "right": {
+            "_id": "Result",
+            "_tag": "Success",
+            "value": {
               "b": 66,
               "g": 11,
               "r": 27,
             },
           },
           "glasses": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": 0,
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": 0,
           },
           "hairAccessory": {
-            "_id": "Either",
-            "_tag": "Right",
-            "right": 1,
+            "_id": "Result",
+            "_tag": "Success",
+            "value": 1,
           },
           "hat": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": {
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": {
               "color": {
                 "b": 0,
                 "g": 0,
@@ -5104,9 +5104,9 @@ Some people repeat themselves too often.",
             },
           },
           "tie": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": {
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": {
               "b": 0,
               "g": 0,
               "r": 0,
@@ -5158,28 +5158,28 @@ Some people repeat themselves too often.",
         ],
         "accessories": {
           "earrings": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": {
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": {
               "b": 0,
               "g": 0,
               "r": 0,
             },
           },
           "glasses": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": 0,
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": 0,
           },
           "hairAccessory": {
-            "_id": "Either",
-            "_tag": "Right",
-            "right": 1,
+            "_id": "Result",
+            "_tag": "Success",
+            "value": 1,
           },
           "hat": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": {
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": {
               "color": {
                 "b": 0,
                 "g": 0,
@@ -5189,9 +5189,9 @@ Some people repeat themselves too often.",
             },
           },
           "tie": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": {
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": {
               "b": 0,
               "g": 0,
               "r": 0,
@@ -5243,28 +5243,28 @@ Some people repeat themselves too often.",
         ],
         "accessories": {
           "earrings": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": {
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": {
               "b": 0,
               "g": 0,
               "r": 0,
             },
           },
           "glasses": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": 0,
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": 0,
           },
           "hairAccessory": {
-            "_id": "Either",
-            "_tag": "Right",
-            "right": 1,
+            "_id": "Result",
+            "_tag": "Success",
+            "value": 1,
           },
           "hat": {
-            "_id": "Either",
-            "_tag": "Right",
-            "right": {
+            "_id": "Result",
+            "_tag": "Success",
+            "value": {
               "color": {
                 "b": 90,
                 "g": 140,
@@ -5275,9 +5275,9 @@ Some people repeat themselves too often.",
             },
           },
           "tie": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": {
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": {
               "b": 0,
               "g": 0,
               "r": 0,
@@ -5329,28 +5329,28 @@ Some people repeat themselves too often.",
         ],
         "accessories": {
           "earrings": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": {
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": {
               "b": 0,
               "g": 0,
               "r": 0,
             },
           },
           "glasses": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": 0,
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": 0,
           },
           "hairAccessory": {
-            "_id": "Either",
-            "_tag": "Right",
-            "right": 1,
+            "_id": "Result",
+            "_tag": "Success",
+            "value": 1,
           },
           "hat": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": {
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": {
               "color": {
                 "b": 0,
                 "g": 0,
@@ -5360,9 +5360,9 @@ Some people repeat themselves too often.",
             },
           },
           "tie": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": {
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": {
               "b": 0,
               "g": 0,
               "r": 0,
@@ -5414,28 +5414,28 @@ Some people repeat themselves too often.",
         ],
         "accessories": {
           "earrings": {
-            "_id": "Either",
-            "_tag": "Right",
-            "right": {
+            "_id": "Result",
+            "_tag": "Success",
+            "value": {
               "b": 70,
               "g": 112,
               "r": 79,
             },
           },
           "glasses": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": 0,
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": 0,
           },
           "hairAccessory": {
-            "_id": "Either",
-            "_tag": "Right",
-            "right": 1,
+            "_id": "Result",
+            "_tag": "Success",
+            "value": 1,
           },
           "hat": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": {
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": {
               "color": {
                 "b": 0,
                 "g": 0,
@@ -5445,9 +5445,9 @@ Some people repeat themselves too often.",
             },
           },
           "tie": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": {
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": {
               "b": 0,
               "g": 0,
               "r": 0,
@@ -5499,28 +5499,28 @@ Some people repeat themselves too often.",
         ],
         "accessories": {
           "earrings": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": {
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": {
               "b": 0,
               "g": 0,
               "r": 0,
             },
           },
           "glasses": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": 0,
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": 0,
           },
           "hairAccessory": {
-            "_id": "Either",
-            "_tag": "Right",
-            "right": 1,
+            "_id": "Result",
+            "_tag": "Success",
+            "value": 1,
           },
           "hat": {
-            "_id": "Either",
-            "_tag": "Right",
-            "right": {
+            "_id": "Result",
+            "_tag": "Success",
+            "value": {
               "color": {
                 "b": 206,
                 "g": 32,
@@ -5531,9 +5531,9 @@ Some people repeat themselves too often.",
             },
           },
           "tie": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": {
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": {
               "b": 0,
               "g": 0,
               "r": 0,
@@ -5585,28 +5585,28 @@ Some people repeat themselves too often.",
         ],
         "accessories": {
           "earrings": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": {
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": {
               "b": 0,
               "g": 0,
               "r": 0,
             },
           },
           "glasses": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": 0,
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": 0,
           },
           "hairAccessory": {
-            "_id": "Either",
-            "_tag": "Right",
-            "right": 1,
+            "_id": "Result",
+            "_tag": "Success",
+            "value": 1,
           },
           "hat": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": {
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": {
               "color": {
                 "b": 0,
                 "g": 0,
@@ -5616,9 +5616,9 @@ Some people repeat themselves too often.",
             },
           },
           "tie": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": {
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": {
               "b": 0,
               "g": 0,
               "r": 0,
@@ -5670,28 +5670,28 @@ Some people repeat themselves too often.",
         ],
         "accessories": {
           "earrings": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": {
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": {
               "b": 0,
               "g": 0,
               "r": 0,
             },
           },
           "glasses": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": 0,
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": 0,
           },
           "hairAccessory": {
-            "_id": "Either",
-            "_tag": "Right",
-            "right": 1,
+            "_id": "Result",
+            "_tag": "Success",
+            "value": 1,
           },
           "hat": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": {
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": {
               "color": {
                 "b": 0,
                 "g": 0,
@@ -5701,9 +5701,9 @@ Some people repeat themselves too often.",
             },
           },
           "tie": {
-            "_id": "Either",
-            "_tag": "Right",
-            "right": {
+            "_id": "Result",
+            "_tag": "Success",
+            "value": {
               "b": 238,
               "g": 35,
               "r": 248,
@@ -5755,28 +5755,28 @@ Some people repeat themselves too often.",
         ],
         "accessories": {
           "earrings": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": {
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": {
               "b": 0,
               "g": 0,
               "r": 0,
             },
           },
           "glasses": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": 0,
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": 0,
           },
           "hairAccessory": {
-            "_id": "Either",
-            "_tag": "Right",
-            "right": 1,
+            "_id": "Result",
+            "_tag": "Success",
+            "value": 1,
           },
           "hat": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": {
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": {
               "color": {
                 "b": 0,
                 "g": 0,
@@ -5786,9 +5786,9 @@ Some people repeat themselves too often.",
             },
           },
           "tie": {
-            "_id": "Either",
-            "_tag": "Right",
-            "right": {
+            "_id": "Result",
+            "_tag": "Success",
+            "value": {
               "b": 251,
               "g": 212,
               "r": 253,
@@ -5840,28 +5840,28 @@ Some people repeat themselves too often.",
         ],
         "accessories": {
           "earrings": {
-            "_id": "Either",
-            "_tag": "Right",
-            "right": {
+            "_id": "Result",
+            "_tag": "Success",
+            "value": {
               "b": 218,
               "g": 179,
               "r": 213,
             },
           },
           "glasses": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": 0,
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": 0,
           },
           "hairAccessory": {
-            "_id": "Either",
-            "_tag": "Right",
-            "right": 1,
+            "_id": "Result",
+            "_tag": "Success",
+            "value": 1,
           },
           "hat": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": {
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": {
               "color": {
                 "b": 0,
                 "g": 0,
@@ -5871,9 +5871,9 @@ Some people repeat themselves too often.",
             },
           },
           "tie": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": {
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": {
               "b": 0,
               "g": 0,
               "r": 0,
@@ -5925,28 +5925,28 @@ Some people repeat themselves too often.",
         ],
         "accessories": {
           "earrings": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": {
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": {
               "b": 0,
               "g": 0,
               "r": 0,
             },
           },
           "glasses": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": 0,
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": 0,
           },
           "hairAccessory": {
-            "_id": "Either",
-            "_tag": "Right",
-            "right": 1,
+            "_id": "Result",
+            "_tag": "Success",
+            "value": 1,
           },
           "hat": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": {
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": {
               "color": {
                 "b": 0,
                 "g": 0,
@@ -5956,9 +5956,9 @@ Some people repeat themselves too often.",
             },
           },
           "tie": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": {
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": {
               "b": 0,
               "g": 0,
               "r": 0,
@@ -6010,28 +6010,28 @@ Some people repeat themselves too often.",
         ],
         "accessories": {
           "earrings": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": {
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": {
               "b": 0,
               "g": 0,
               "r": 0,
             },
           },
           "glasses": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": 0,
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": 0,
           },
           "hairAccessory": {
-            "_id": "Either",
-            "_tag": "Right",
-            "right": 1,
+            "_id": "Result",
+            "_tag": "Success",
+            "value": 1,
           },
           "hat": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": {
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": {
               "color": {
                 "b": 0,
                 "g": 0,
@@ -6041,9 +6041,9 @@ Some people repeat themselves too often.",
             },
           },
           "tie": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": {
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": {
               "b": 0,
               "g": 0,
               "r": 0,
@@ -6095,28 +6095,28 @@ Some people repeat themselves too often.",
         ],
         "accessories": {
           "earrings": {
-            "_id": "Either",
-            "_tag": "Right",
-            "right": {
+            "_id": "Result",
+            "_tag": "Success",
+            "value": {
               "b": 115,
               "g": 50,
               "r": 110,
             },
           },
           "glasses": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": 0,
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": 0,
           },
           "hairAccessory": {
-            "_id": "Either",
-            "_tag": "Right",
-            "right": 1,
+            "_id": "Result",
+            "_tag": "Success",
+            "value": 1,
           },
           "hat": {
-            "_id": "Either",
-            "_tag": "Right",
-            "right": {
+            "_id": "Result",
+            "_tag": "Success",
+            "value": {
               "color": {
                 "b": 19,
                 "g": 94,
@@ -6127,9 +6127,9 @@ Some people repeat themselves too often.",
             },
           },
           "tie": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": {
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": {
               "b": 0,
               "g": 0,
               "r": 0,
@@ -6181,28 +6181,28 @@ Some people repeat themselves too often.",
         ],
         "accessories": {
           "earrings": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": {
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": {
               "b": 0,
               "g": 0,
               "r": 0,
             },
           },
           "glasses": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": 0,
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": 0,
           },
           "hairAccessory": {
-            "_id": "Either",
-            "_tag": "Right",
-            "right": 1,
+            "_id": "Result",
+            "_tag": "Success",
+            "value": 1,
           },
           "hat": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": {
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": {
               "color": {
                 "b": 0,
                 "g": 0,
@@ -6212,9 +6212,9 @@ Some people repeat themselves too often.",
             },
           },
           "tie": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": {
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": {
               "b": 0,
               "g": 0,
               "r": 0,
@@ -6266,28 +6266,28 @@ Some people repeat themselves too often.",
         ],
         "accessories": {
           "earrings": {
-            "_id": "Either",
-            "_tag": "Right",
-            "right": {
+            "_id": "Result",
+            "_tag": "Success",
+            "value": {
               "b": 142,
               "g": 130,
               "r": 35,
             },
           },
           "glasses": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": 0,
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": 0,
           },
           "hairAccessory": {
-            "_id": "Either",
-            "_tag": "Right",
-            "right": 1,
+            "_id": "Result",
+            "_tag": "Success",
+            "value": 1,
           },
           "hat": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": {
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": {
               "color": {
                 "b": 0,
                 "g": 0,
@@ -6297,9 +6297,9 @@ Some people repeat themselves too often.",
             },
           },
           "tie": {
-            "_id": "Either",
-            "_tag": "Right",
-            "right": {
+            "_id": "Result",
+            "_tag": "Success",
+            "value": {
               "b": 64,
               "g": 180,
               "r": 17,
@@ -6558,28 +6558,28 @@ Some people repeat themselves too often.",
       ],
       "accessories": {
         "earrings": {
-          "_id": "Either",
-          "_tag": "Left",
-          "left": {
+          "_id": "Result",
+          "_tag": "Failure",
+          "failure": {
             "b": 140,
             "g": 103,
             "r": 44,
           },
         },
         "glasses": {
-          "_id": "Either",
-          "_tag": "Left",
-          "left": 0,
+          "_id": "Result",
+          "_tag": "Failure",
+          "failure": 0,
         },
         "hairAccessory": {
-          "_id": "Either",
-          "_tag": "Right",
-          "right": 1,
+          "_id": "Result",
+          "_tag": "Success",
+          "value": 1,
         },
         "hat": {
-          "_id": "Either",
-          "_tag": "Right",
-          "right": {
+          "_id": "Result",
+          "_tag": "Success",
+          "value": {
             "color": {
               "b": 121,
               "g": 101,
@@ -6590,9 +6590,9 @@ Some people repeat themselves too often.",
           },
         },
         "tie": {
-          "_id": "Either",
-          "_tag": "Right",
-          "right": {
+          "_id": "Result",
+          "_tag": "Success",
+          "value": {
             "b": 118,
             "g": 83,
             "r": 97,
@@ -6636,6 +6636,7 @@ Some people repeat themselves too often.",
     "vip": "None",
     "workIndex": -1,
   },
+  "friends": "",
   "gold": 1,
   "hidechat": 0,
   "installTime": 63842658742,
@@ -6705,60 +6706,20 @@ Some people repeat themselves too often.",
     "$unknown": {
       "m_bzn": {
         "$locationMetadata": {
-          "after": "m_com",
+          "after": "com",
         },
         "value": "[h]40[h][w]2[w][d]1[d][j]2[j][c]leprechaun[c][v]0[v][p]sponge[p][BA]1,120,104,8,25,4,24,12,164:246:250,98:108:76,0,0,0,0:0:0,1,1,0,1,0,0,217:32:206,0,0:0:0,9,9,9,9,9,0[BA]",
       },
-      "m_char": {
-        "$locationMetadata": {
-          "after": "m_type",
-        },
-        "value": "",
-      },
-      "m_cnt": {
-        "$locationMetadata": {
-          "after": "m_txt",
-        },
-        "value": "1",
-      },
-      "m_com": {
-        "$locationMetadata": {
-          "after": "m_pop",
-        },
-        "value": "0",
-      },
-      "m_fid": {
-        "$locationMetadata": {
-          "after": "m_ft",
-        },
-        "value": "0",
-      },
-      "m_ft": {
-        "$locationMetadata": {
-          "after": "m_cnt",
-        },
-        "value": "0",
-      },
-      "m_pop": {
-        "$locationMetadata": {
-          "after": "m_fid",
-        },
-        "value": "1",
-      },
-      "m_txt": {
-        "$locationMetadata": {
-          "after": "m_char",
-        },
-        "value": "A census worker is looking for %bitizen%. Find %himher% to be counted!",
-      },
-      "m_type": {
-        "$locationMetadata": {
-          "after": "m_id",
-        },
-        "value": "14",
-      },
     },
+    "character": "",
+    "cnt": "1",
+    "com": "0",
+    "fid": "0",
+    "ft": "0",
     "id": "263",
+    "pop": "1",
+    "text": "A census worker is looking for %bitizen%. Find %himher% to be counted!",
+    "type": 14,
   },
   "missionHist": [
     "153",
@@ -6989,7 +6950,7 @@ Some people repeat themselves too often.",
       "$unknown": {
         "Fprefs": {
           "$locationMetadata": {
-            "after": "Fp",
+            "after": "floorPaint",
           },
           "value": "{"upgrades":[]}",
         },
@@ -7036,13 +6997,13 @@ Some people repeat themselves too often.",
       "$unknown": {
         "Fg": {
           "$locationMetadata": {
-            "after": "Fl",
+            "after": "level",
           },
           "value": "",
         },
         "Fprefs": {
           "$locationMetadata": {
-            "after": "Fp",
+            "after": "floorPaint",
           },
           "value": "{"upgrades":[{"unlocked":true},{"unlocked":false},{"unlocked":false}]}",
         },
@@ -7089,13 +7050,13 @@ Some people repeat themselves too often.",
       "$unknown": {
         "Fg": {
           "$locationMetadata": {
-            "after": "Fl",
+            "after": "level",
           },
           "value": "",
         },
         "Fprefs": {
           "$locationMetadata": {
-            "after": "Fp",
+            "after": "floorPaint",
           },
           "value": "{"upgrades":[{"unlocked":true},{"unlocked":false},{"unlocked":false}]}",
         },
@@ -7142,13 +7103,13 @@ Some people repeat themselves too often.",
       "$unknown": {
         "Fg": {
           "$locationMetadata": {
-            "after": "Fl",
+            "after": "level",
           },
           "value": "",
         },
         "Fprefs": {
           "$locationMetadata": {
-            "after": "Fp",
+            "after": "floorPaint",
           },
           "value": "{"upgrades":[{"unlocked":true},{"unlocked":false},{"unlocked":false}]}",
         },
@@ -7195,13 +7156,13 @@ Some people repeat themselves too often.",
       "$unknown": {
         "Fg": {
           "$locationMetadata": {
-            "after": "Fl",
+            "after": "level",
           },
           "value": "",
         },
         "Fprefs": {
           "$locationMetadata": {
-            "after": "Fp",
+            "after": "floorPaint",
           },
           "value": "{"upgrades":[{"unlocked":true},{"unlocked":false},{"unlocked":false}]}",
         },
@@ -7248,13 +7209,13 @@ Some people repeat themselves too often.",
       "$unknown": {
         "Fg": {
           "$locationMetadata": {
-            "after": "Fl",
+            "after": "level",
           },
           "value": "",
         },
         "Fprefs": {
           "$locationMetadata": {
-            "after": "Fp",
+            "after": "floorPaint",
           },
           "value": "{"upgrades":[{"unlocked":true},{"unlocked":false},{"unlocked":false}]}",
         },
@@ -7301,13 +7262,13 @@ Some people repeat themselves too often.",
       "$unknown": {
         "Fg": {
           "$locationMetadata": {
-            "after": "Fl",
+            "after": "level",
           },
           "value": "",
         },
         "Fprefs": {
           "$locationMetadata": {
-            "after": "Fp",
+            "after": "floorPaint",
           },
           "value": "{"upgrades":[{"unlocked":true},{"unlocked":false},{"unlocked":false}]}",
         },
@@ -7354,13 +7315,13 @@ Some people repeat themselves too often.",
       "$unknown": {
         "Fg": {
           "$locationMetadata": {
-            "after": "Fl",
+            "after": "level",
           },
           "value": "",
         },
         "Fprefs": {
           "$locationMetadata": {
-            "after": "Fp",
+            "after": "floorPaint",
           },
           "value": "{"upgrades":[{"unlocked":true},{"unlocked":false},{"unlocked":false}]}",
         },
@@ -7407,13 +7368,13 @@ Some people repeat themselves too often.",
       "$unknown": {
         "Fg": {
           "$locationMetadata": {
-            "after": "Fl",
+            "after": "level",
           },
           "value": "",
         },
         "Fprefs": {
           "$locationMetadata": {
-            "after": "Fp",
+            "after": "floorPaint",
           },
           "value": "{"upgrades":[{"unlocked":true},{"unlocked":false},{"unlocked":false}]}",
         },
@@ -7460,13 +7421,13 @@ Some people repeat themselves too often.",
       "$unknown": {
         "Fg": {
           "$locationMetadata": {
-            "after": "Fl",
+            "after": "level",
           },
           "value": "",
         },
         "Fprefs": {
           "$locationMetadata": {
-            "after": "Fp",
+            "after": "floorPaint",
           },
           "value": "{"upgrades":[{"unlocked":true},{"unlocked":false},{"unlocked":false}]}",
         },
@@ -7513,7 +7474,7 @@ Some people repeat themselves too often.",
       "$unknown": {
         "Fprefs": {
           "$locationMetadata": {
-            "after": "Fp",
+            "after": "floorPaint",
           },
           "value": "{"upgrades":[{"unlocked":true},{"unlocked":false},{"unlocked":false}]}",
         },
@@ -7560,7 +7521,7 @@ Some people repeat themselves too often.",
       "$unknown": {
         "Fprefs": {
           "$locationMetadata": {
-            "after": "Fp",
+            "after": "floorPaint",
           },
           "value": "{"upgrades":[{"unlocked":true},{"unlocked":false},{"unlocked":false}]}",
         },
@@ -7607,7 +7568,7 @@ Some people repeat themselves too often.",
       "$unknown": {
         "Fprefs": {
           "$locationMetadata": {
-            "after": "Fp",
+            "after": "floorPaint",
           },
           "value": "{"upgrades":[{"unlocked":true},{"unlocked":false},{"unlocked":false}]}",
         },
@@ -7654,7 +7615,7 @@ Some people repeat themselves too often.",
       "$unknown": {
         "Fprefs": {
           "$locationMetadata": {
-            "after": "Fp",
+            "after": "floorPaint",
           },
           "value": "{"upgrades":[{"unlocked":true},{"unlocked":false},{"unlocked":false}]}",
         },
@@ -7701,7 +7662,7 @@ Some people repeat themselves too often.",
       "$unknown": {
         "Fprefs": {
           "$locationMetadata": {
-            "after": "Fp",
+            "after": "floorPaint",
           },
           "value": "{"upgrades":[{"unlocked":true},{"unlocked":false},{"unlocked":false}]}",
         },
@@ -7748,7 +7709,7 @@ Some people repeat themselves too often.",
       "$unknown": {
         "Fprefs": {
           "$locationMetadata": {
-            "after": "Fp",
+            "after": "floorPaint",
           },
           "value": "{"upgrades":[{"unlocked":true},{"unlocked":false},{"unlocked":false}]}",
         },
@@ -7795,7 +7756,7 @@ Some people repeat themselves too often.",
       "$unknown": {
         "Fprefs": {
           "$locationMetadata": {
-            "after": "Fn",
+            "after": "floorName",
           },
           "value": "{"upgrades":[]}",
         },

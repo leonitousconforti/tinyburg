@@ -1,5 +1,6 @@
-import { type NimblebitConfig } from "@tinyburg/nimblebit-sdk";
-import { Array, Effect, Function, Graph, Tuple, type Schema } from "effect";
+import { Array, Effect, Function, Graph, type Schema } from "effect";
+
+import type { NimblebitConfig } from "@tinyburg/nimblebit-sdk";
 
 import { Repository } from "../domain/model.ts";
 
@@ -7,7 +8,7 @@ export const toDirectedGraph = Effect.gen(function* () {
     const repo = yield* Repository;
     const entries = yield* repo.currentFriendships();
 
-    const graph = Graph.directed<Schema.Schema.Type<NimblebitConfig.PlayerIdSchema>, never>((mutable) => {
+    const graph = Graph.directed<Schema.Schema.Type<typeof NimblebitConfig.PlayerIdSchema>, never>((mutable) => {
         // Add all players as nodes
         for (const player of Array.flatten(entries)) {
             Graph.addNode(mutable, player);
@@ -17,7 +18,7 @@ export const toDirectedGraph = Effect.gen(function* () {
         const nodeIndexByData = Function.pipe(
             mutable.nodes.entries(),
             Array.fromIterable,
-            Array.map(Tuple.swap),
+            Array.map(([x, y]) => [y, x] as const),
             (entries) => new Map(entries)
         );
 
@@ -36,7 +37,7 @@ export const toUndirectedGraph = Effect.gen(function* () {
     const repo = yield* Repository;
     const entries = yield* repo.mutualFriendships();
 
-    const graph = Graph.undirected<Schema.Schema.Type<NimblebitConfig.PlayerIdSchema>, never>((mutable) => {
+    const graph = Graph.undirected<Schema.Schema.Type<typeof NimblebitConfig.PlayerIdSchema>, never>((mutable) => {
         // Add all players as nodes
         for (const player of Array.flatten(entries)) {
             Graph.addNode(mutable, player);
@@ -46,7 +47,7 @@ export const toUndirectedGraph = Effect.gen(function* () {
         const nodeIndexByData = Function.pipe(
             mutable.nodes.entries(),
             Array.fromIterable,
-            Array.map(Tuple.swap),
+            Array.map(([x, y]) => [y, x] as const),
             (entries) => new Map(entries)
         );
 

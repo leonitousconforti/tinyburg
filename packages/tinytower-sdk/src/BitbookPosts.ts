@@ -3,8 +3,10 @@
  * @category Bitbook Posts
  */
 
-import * as NimblebitSchema from "@tinyburg/nimblebit-sdk/NimblebitSchema";
 import * as Schema from "effect/Schema";
+
+import * as NimblebitSchema from "@tinyburg/nimblebit-sdk/NimblebitSchema";
+
 import * as Bitizen from "./Bitizens.ts";
 
 //////////////////////////////////////////////////////////////////
@@ -1979,19 +1981,19 @@ export type Post = (typeof posts)[number];
  * @since 1.0.0
  * @category Schemas
  */
-export const BitbookPost = NimblebitSchema.parseNimblebitObject(
-    Schema.Struct({
-        _tid: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("bb_tid")),
-        bitizen: Bitizen.Bitizen.pipe(Schema.propertySignature, Schema.fromKey("bb_bzn")),
-        source_name: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("bb_sname")),
-        date: NimblebitSchema.CSharpDate.pipe(Schema.propertySignature, Schema.fromKey("bb_date")),
-        body: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("bb_txt")),
-        media_type: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("bb_mt")),
-        media_path: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("bb_mp")),
-        likes: Schema.NumberFromString.pipe(
-            Schema.compose(Schema.Int),
-            Schema.propertySignature,
-            Schema.fromKey("bb_lks")
-        ),
-    })
-);
+export const BitbookPost = Schema.Struct({
+    tid: Schema.String.annotateKey({ nimblebitSaveDataKey: "bb_tid" }),
+    bitizen: Bitizen.Bitizen.annotateKey({ nimblebitSaveDataKey: "bb_bzn" }),
+    source_name: Schema.String.annotateKey({ nimblebitSaveDataKey: "bb_sname" }),
+    date: Schema.BigIntFromString.pipe(
+        Schema.decodeTo(NimblebitSchema.CSharpDate),
+        Schema.annotateKey({ nimblebitSaveDataKey: "bb_date" })
+    ),
+    body: Schema.String.annotateKey({ nimblebitSaveDataKey: "bb_txt" }),
+    media_type: Schema.String.annotateKey({ nimblebitSaveDataKey: "bb_mt" }),
+    media_path: Schema.String.annotateKey({ nimblebitSaveDataKey: "bb_mp" }),
+    likes: Schema.NumberFromString.pipe(
+        Schema.decodeTo(Schema.Int),
+        Schema.annotateKey({ nimblebitSaveDataKey: "bb_lks" })
+    ),
+}).pipe(NimblebitSchema.parseNimblebitObject);

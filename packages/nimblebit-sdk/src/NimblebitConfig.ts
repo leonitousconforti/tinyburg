@@ -7,115 +7,115 @@
  */
 
 import * as Config from "effect/Config";
-import * as ConfigError from "effect/ConfigError";
-import * as Either from "effect/Either";
-import * as Function from "effect/Function";
+import * as Effect from "effect/Effect";
 import * as Option from "effect/Option";
 import * as Schema from "effect/Schema";
+import * as SchemaIssue from "effect/SchemaIssue";
 
 /**
  * @since 1.0.0
  * @category Schema
  */
-export class PlayerIdSchema extends Function.pipe(
-    Schema.String,
-    Schema.minLength(1),
-    Schema.maxLength(5),
-    Schema.pattern(/^([\dA-Z]*)$/gm),
+export const PlayerIdSchema = Schema.String.pipe(
+    Schema.check(Schema.isMinLength(1)),
+    Schema.check(Schema.isMaxLength(5)),
+    Schema.check(Schema.isPattern(/^([\dA-Z]*)$/)),
     Schema.brand("PlayerId")
-) {}
+);
 
 /**
  * @since 1.0.0
  * @category Schema
  */
-export class PlayerEmailSchema extends Function.pipe(Schema.String, Schema.Redacted, Schema.brand("PlayerEmail")) {}
+export const PlayerEmailSchema = Schema.String.pipe(Schema.Redacted, Schema.brand("PlayerEmail"));
 
 /**
  * @since 1.0.0
  * @category Schema
  */
-export class PlayerAuthKeySchema extends Function.pipe(Schema.UUID, Schema.Redacted, Schema.brand("PlayerAuthKey")) {}
-
-/**
- * @since 1.0.0
- * @category Schema
- */
-export class UnauthenticatedPlayerSchema extends Schema.Struct({
-    playerEmail: PlayerEmailSchema,
-    playerId: Schema.optionalWith(PlayerIdSchema, { nullable: true }),
-}) {}
-
-/**
- * @since 1.0.0
- * @category Schema
- */
-export class AuthenticatedPlayerSchema extends Schema.Struct({
-    playerId: PlayerIdSchema,
-    playerAuthKey: PlayerAuthKeySchema,
-}) {}
-
-/**
- * @since 1.0.0
- * @category Schema
- */
-export class NimblebitAuthKeySchema extends Function.pipe(
-    Schema.String,
+export const PlayerAuthKeySchema = Schema.String.pipe(
+    Schema.check(Schema.isUUID()),
     Schema.Redacted,
-    Schema.brand("NimblebitAuthKey")
-) {}
+    Schema.brand("PlayerAuthKey")
+);
 
 /**
  * @since 1.0.0
- * @category Config
+ * @category Schema
  */
-export const PlayerIdConfig: Config.Config<Schema.Schema.Type<PlayerIdSchema>> = Schema.Config(
-    "PLAYER_ID",
-    PlayerIdSchema
-).pipe(Config.withDescription("The player id of your cloud sync account."));
-
-/**
- * @since 1.0.0
- * @category Config
- */
-export const PlayerEmailConfig: Config.Config<Schema.Schema.Type<PlayerEmailSchema>> = Schema.Config(
-    "PLAYER_EMAIL",
-    PlayerEmailSchema
-).pipe(Config.withDescription("The email address of your cloud sync account."));
-
-/**
- * @since 1.0.0
- * @category Config
- */
-export const PlayerAuthKeyConfig: Config.Config<Schema.Schema.Type<PlayerAuthKeySchema>> = Schema.Config(
-    "PLAYER_AUTH_KEY",
-    PlayerAuthKeySchema
-).pipe(Config.withDescription("The player auth key of your cloud sync account."));
-
-/**
- * @since 1.0.0
- * @category Config
- */
-export const UnauthenticatedPlayerConfig: Config.Config<Schema.Schema.Type<UnauthenticatedPlayerSchema>> = Config.all({
-    playerEmail: PlayerEmailConfig,
-    playerId: PlayerIdConfig.pipe(Config.orElse(() => Config.succeed(undefined))),
+export const UnauthenticatedPlayerSchema = Schema.Struct({
+    playerId: PlayerIdSchema.pipe(Schema.optional),
+    playerEmail: PlayerEmailSchema,
 });
 
 /**
  * @since 1.0.0
+ * @category Schema
+ */
+export const AuthenticatedPlayerSchema = Schema.Struct({
+    playerAuthKey: PlayerAuthKeySchema,
+    playerId: PlayerIdSchema,
+});
+
+/**
+ * @since 1.0.0
+ * @category Schema
+ */
+export const NimblebitAuthKeySchema = Schema.String.pipe(Schema.Redacted, Schema.brand("NimblebitAuthKey"));
+
+/**
+ * @since 1.0.0
  * @category Config
  */
-export const AuthenticatedPlayerConfig: Config.Config<Schema.Schema.Type<AuthenticatedPlayerSchema>> = Config.all({
-    playerId: PlayerIdConfig,
-    playerAuthKey: PlayerAuthKeyConfig,
-});
+export const PlayerIdConfig: Config.Config<Schema.Schema.Type<typeof PlayerIdSchema>> = Config.schema(
+    PlayerIdSchema,
+    "PLAYER_ID"
+);
+
+/**
+ * @since 1.0.0
+ * @category Config
+ */
+export const PlayerEmailConfig: Config.Config<Schema.Schema.Type<typeof PlayerEmailSchema>> = Config.schema(
+    PlayerEmailSchema,
+    "PLAYER_EMAIL"
+);
+
+/**
+ * @since 1.0.0
+ * @category Config
+ */
+export const PlayerAuthKeyConfig: Config.Config<Schema.Schema.Type<typeof PlayerAuthKeySchema>> = Config.schema(
+    PlayerAuthKeySchema,
+    "PLAYER_AUTH_KEY"
+);
+
+/**
+ * @since 1.0.0
+ * @category Config
+ */
+export const UnauthenticatedPlayerConfig: Config.Config<Schema.Schema.Type<typeof UnauthenticatedPlayerSchema>> =
+    Config.all({
+        playerId: PlayerIdConfig.pipe(Config.orElse(() => Config.succeed(undefined))),
+        playerEmail: PlayerEmailConfig,
+    });
+
+/**
+ * @since 1.0.0
+ * @category Config
+ */
+export const AuthenticatedPlayerConfig: Config.Config<Schema.Schema.Type<typeof AuthenticatedPlayerSchema>> =
+    Config.all({
+        playerAuthKey: PlayerAuthKeyConfig,
+        playerId: PlayerIdConfig,
+    });
 
 /**
  * @since 1.0.0
  * @category Config
  */
 export const PlayerConfig: Config.Config<
-    Schema.Schema.Type<UnauthenticatedPlayerSchema> | Schema.Schema.Type<AuthenticatedPlayerSchema>
+    Schema.Schema.Type<typeof UnauthenticatedPlayerSchema> | Schema.Schema.Type<typeof AuthenticatedPlayerSchema>
 > = Config.mapOrFail(
     Config.all({
         playerId: PlayerIdConfig,
@@ -126,29 +126,37 @@ export const PlayerConfig: Config.Config<
         playerAuthKey,
         playerEmail,
         playerId,
-    }): Either.Either<
+    }): Effect.Effect<
         | {
-              playerId: Schema.Schema.Type<PlayerIdSchema>;
-              playerEmail: Schema.Schema.Type<PlayerEmailSchema>;
+              playerId: Schema.Schema.Type<typeof PlayerIdSchema>;
+              playerEmail: Schema.Schema.Type<typeof PlayerEmailSchema>;
           }
         | {
-              playerId: Schema.Schema.Type<PlayerIdSchema>;
-              playerAuthKey: Schema.Schema.Type<PlayerAuthKeySchema>;
+              playerId: Schema.Schema.Type<typeof PlayerIdSchema>;
+              playerAuthKey: Schema.Schema.Type<typeof PlayerAuthKeySchema>;
           },
-        ConfigError.ConfigError
+        Config.ConfigError
     > => {
         // Have email
         if (Option.isSome(playerEmail) && Option.isNone(playerAuthKey)) {
-            return Either.right({ playerId, playerEmail: playerEmail.value });
+            return Effect.succeed({ playerId, playerEmail: playerEmail.value });
         }
 
         // Have player salt
         if (Option.isSome(playerAuthKey) && Option.isNone(playerEmail)) {
-            return Either.right({ playerId, playerAuthKey: playerAuthKey.value });
+            return Effect.succeed({ playerId, playerAuthKey: playerAuthKey.value });
         }
 
         // Cannot have both email and player salt or neither
-        return Either.left(ConfigError.InvalidData([], "Either email or player salt must be provided, not both."));
+        return Effect.fail(
+            new Config.ConfigError(
+                new Schema.SchemaError(
+                    new SchemaIssue.InvalidValue(Option.none(), {
+                        message: "Either email or player salt must be provided, not both.",
+                    })
+                )
+            )
+        );
     }
 );
 
@@ -156,7 +164,7 @@ export const PlayerConfig: Config.Config<
  * @since 1.0.0
  * @category Config
  */
-export const NimblebitAuthKeyConfig: Config.Config<Schema.Schema.Type<NimblebitAuthKeySchema>> = Schema.Config(
-    "NIMBLEBIT_AUTH_KEY",
-    NimblebitAuthKeySchema
+export const NimblebitAuthKeyConfig: Config.Config<Schema.Schema.Type<typeof NimblebitAuthKeySchema>> = Config.schema(
+    NimblebitAuthKeySchema,
+    "NIMBLEBIT_AUTH_KEY"
 );

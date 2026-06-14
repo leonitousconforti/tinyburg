@@ -1,32 +1,39 @@
-import { HttpApiBuilder, HttpApiClient, HttpApiError, HttpLayerRouter, type HttpClientError } from "@effect/platform";
+import type { HttpClientError } from "effect/unstable/http";
+
+import { Context, Effect, Function, Layer, type Schema } from "effect";
+import { HttpApiBuilder, HttpApiClient, HttpApiError } from "effect/unstable/httpapi";
+
+import { NimblebitAuth } from "@tinyburg/nimblebit-sdk";
 import { Endpoints as TinyTowerEndpoints } from "@tinyburg/tinytower-sdk";
-import { Effect, Function, Layer, type ParseResult } from "effect";
+
+import { Authorization, AuthorizationLive } from "../middleware/10_authorization.ts";
+import { AuthProxyApiDecodeHash, AuthProxyApiDecodeHashLive } from "../middleware/20_tinytowerDecode.ts";
 
 /** @internal */
-class Client extends Effect.Service<Client>()("Client", {
-    accessors: false,
-    dependencies: [],
-    effect: HttpApiClient.make(TinyTowerEndpoints.Api, {
+class Client extends Context.Service<Client>()("Client", {
+    make: HttpApiClient.make(TinyTowerEndpoints.Api, {
         baseUrl: "https://sync.nimblebit.com",
     }),
-}) {}
+}) {
+    static readonly Default = Layer.effect(Client, Client.make);
+}
 
 /** @internal */
-const catch500s = <A, E, R>(
-    effect: Effect.Effect<A, E | ParseResult.ParseError | HttpClientError.HttpClientError, R>
-): Effect.Effect<A, E | HttpApiError.InternalServerError, R> =>
+const catch500s = <A, E, R>(effect: Effect.Effect<A, E | Schema.SchemaError | HttpClientError.HttpClientError, R>) =>
     effect.pipe(
-        Effect.catchTag("ParseError", () => new HttpApiError.InternalServerError()),
-        Effect.catchTag("RequestError", () => new HttpApiError.InternalServerError()),
-        Effect.catchTag("ResponseError", () => new HttpApiError.InternalServerError())
+        Effect.catchTag("SchemaError", () => new HttpApiError.InternalServerError()),
+        Effect.catchTag("HttpClientError", () => new HttpApiError.InternalServerError())
     );
+
+/** @internal */
+const Api = TinyTowerEndpoints.Api.middleware(Authorization).middleware(AuthProxyApiDecodeHash);
 
 /**
  * @since 1.0.0
  * @category TinyTower Routes
  */
 export const RaffleLive = HttpApiBuilder.group(
-    TinyTowerEndpoints.Api,
+    Api,
     "RaffleGroup",
     Effect.fnUntraced(function* (handlers) {
         const client = yield* Effect.map(Client, (client) => client.RaffleGroup);
@@ -45,7 +52,7 @@ export const RaffleLive = HttpApiBuilder.group(
  * @category TinyTower Routes
  */
 export const DeviceManagementLive = HttpApiBuilder.group(
-    TinyTowerEndpoints.Api,
+    Api,
     "DeviceManagementGroup",
     Effect.fnUntraced(function* (handlers) {
         const client = yield* Effect.map(Client, (client) => client.DeviceManagementGroup);
@@ -66,7 +73,7 @@ export const DeviceManagementLive = HttpApiBuilder.group(
  * @category TinyTower Routes
  */
 export const SyncManagementLive = HttpApiBuilder.group(
-    TinyTowerEndpoints.Api,
+    Api,
     "SyncManagementGroup",
     Effect.fnUntraced(function* (handlers) {
         const client = yield* Effect.map(Client, (client) => client.SyncManagementGroup);
@@ -91,7 +98,7 @@ export const SyncManagementLive = HttpApiBuilder.group(
  * @category TinyTower Routes
  */
 export const SocialGroupLive = HttpApiBuilder.group(
-    TinyTowerEndpoints.Api,
+    Api,
     "SocialGroup",
     Effect.fnUntraced(function* (handlers) {
         const client = yield* Effect.map(Client, (client) => client.SocialGroup);
@@ -117,7 +124,9 @@ export const SocialGroupLive = HttpApiBuilder.group(
  * @since 1.0.0
  * @category TinyTower Routes
  */
-export const AllTinyTowerRoutes = HttpLayerRouter.addHttpApi(TinyTowerEndpoints.Api).pipe(
+export const TinyTowerApiLive = HttpApiBuilder.layer(Api).pipe(
     Layer.provide([RaffleLive, DeviceManagementLive, SyncManagementLive, SocialGroupLive]),
+    Layer.provide([AuthorizationLive, AuthProxyApiDecodeHashLive]),
+    Layer.provide(NimblebitAuth.layerDirectConfig()),
     Layer.provide(Client.Default)
 );

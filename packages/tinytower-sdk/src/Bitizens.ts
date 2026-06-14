@@ -3,18 +3,17 @@
  * @category Bitizens
  */
 
-import type * as Effect from "effect/Effect";
-import type * as SchemaAST from "effect/SchemaAST";
-
-import * as NimblebitSchema from "@tinyburg/nimblebit-sdk/NimblebitSchema";
 import * as Array from "effect/Array";
-import * as Either from "effect/Either";
+import * as Effect from "effect/Effect";
 import * as Function from "effect/Function";
 import * as Option from "effect/Option";
-import * as ParseResult from "effect/ParseResult";
 import * as Record from "effect/Record";
+import * as Result from "effect/Result";
 import * as Schema from "effect/Schema";
-import * as String from "effect/String";
+import * as SchemaIssue from "effect/SchemaIssue";
+import * as SchemaTransformation from "effect/SchemaTransformation";
+
+import * as NimblebitSchema from "@tinyburg/nimblebit-sdk/NimblebitSchema";
 
 import * as Costumes from "./Costumes.ts";
 import * as Pets from "./Pets.ts";
@@ -1256,52 +1255,48 @@ export const femaleLastNames = [
  * @category Schemas
  */
 export const BitizenAttributes = Schema.suspend(() => {
-    class Skill extends Function.pipe(Schema.Int, Schema.between(0, 9)) {}
-    class BirthDay extends Function.pipe(Schema.Int, Schema.between(1, 31)) {}
-    class BirthMonth extends Function.pipe(Schema.Int, Schema.between(1, 31)) {}
-    class BooleanFromOneOrZero extends Schema.transformLiterals(["0", false], ["1", true]) {}
-    class IndexFromString extends Schema.compose(Schema.NumberFromString, Schema.NonNegativeInt) {}
+    const Skill = Schema.Int.check(Schema.isBetween({ minimum: 0, maximum: 9 }));
+    const BirthDay = Schema.Int.check(Schema.isBetween({ minimum: 1, maximum: 31 }));
+    const BirthMonth = Schema.Int.check(Schema.isBetween({ minimum: 1, maximum: 31 }));
+
+    const Index = Schema.Number.check(Schema.isFinite(), Schema.isInt(), Schema.isGreaterThanOrEqualTo(0));
+    const IndexFromString = Schema.NumberFromString.pipe(Schema.decodeTo(Index));
+
+    const BooleanFromStringBit = Schema.Literals(["0", "1"])
+        .transform([false, true])
+        .pipe(Schema.decodeTo(Schema.Boolean));
 
     const to = Schema.Struct({
         $unknown: Schema.Array(Schema.String),
-        gender: Schema.Literal("female", "male"),
+        gender: Schema.Literals(["female", "male"]),
         name: Schema.String,
-        birthday: Schema.Tuple(BirthMonth, BirthDay),
+        birthday: Schema.Tuple([BirthMonth, BirthDay]),
         designColors: Schema.Struct({
-            pantColor: Schema.typeSchema(NimblebitSchema.UnityColor),
-            shirtColor: Schema.typeSchema(NimblebitSchema.UnityColor),
-            skinColorIndex: Schema.NonNegativeInt,
-            hairColorIndex: Schema.NonNegativeInt,
-            shoeColorIndex: Schema.NonNegativeInt,
+            pantColor: Schema.toType(NimblebitSchema.UnityColor),
+            shirtColor: Schema.toType(NimblebitSchema.UnityColor),
+            skinColorIndex: Index,
+            hairColorIndex: Index,
+            shoeColorIndex: Index,
         }),
         accessories: Schema.Struct({
-            glasses: Schema.Either({
-                left: Schema.NonNegativeInt,
-                right: Schema.NonNegativeInt,
-            }),
-            hairAccessory: Schema.Either({
-                left: Schema.NonNegativeInt,
-                right: Schema.NonNegativeInt,
-            }),
-            tie: Schema.Either({
-                left: Schema.typeSchema(NimblebitSchema.UnityColor),
-                right: Schema.typeSchema(NimblebitSchema.UnityColor),
-            }),
-            earrings: Schema.Either({
-                left: Schema.typeSchema(NimblebitSchema.UnityColor),
-                right: Schema.typeSchema(NimblebitSchema.UnityColor),
-            }),
-            hat: Schema.Either({
-                left: Schema.Struct({
-                    index: Schema.NonNegativeInt,
-                    color: Schema.typeSchema(NimblebitSchema.UnityColor),
+            glasses: Schema.Result(Index, Index),
+            hairAccessory: Schema.Result(Index, Index),
+            tie: Schema.Result(Schema.toType(NimblebitSchema.UnityColor), Schema.toType(NimblebitSchema.UnityColor)),
+            earrings: Schema.Result(
+                Schema.toType(NimblebitSchema.UnityColor),
+                Schema.toType(NimblebitSchema.UnityColor)
+            ),
+            hat: Schema.Result(
+                Schema.Struct({
+                    index: Index,
+                    gender: Schema.Literals(["female", "male", "bi"]),
+                    color: Schema.toType(NimblebitSchema.UnityColor),
                 }),
-                right: Schema.Struct({
-                    index: Schema.NonNegativeInt,
-                    gender: Schema.Literal("female", "male", "bi"),
-                    color: Schema.typeSchema(NimblebitSchema.UnityColor),
-                }),
-            }),
+                Schema.Struct({
+                    index: Index,
+                    color: Schema.toType(NimblebitSchema.UnityColor),
+                })
+            ),
         }),
         skills: Schema.Struct({
             food: Skill,
@@ -1313,191 +1308,192 @@ export const BitizenAttributes = Schema.suspend(() => {
     });
 
     const from = NimblebitSchema.parseNimblebitOrderedList([
-        { property: "male", schema: BooleanFromOneOrZero },
+        { property: "male", schema: BooleanFromStringBit },
         { property: "firstNameIndex", schema: IndexFromString },
         { property: "lastNameIndex", schema: IndexFromString },
-        { property: "birthMonth", schema: Schema.compose(Schema.NumberFromString, BirthMonth) },
-        { property: "birthDay", schema: Schema.compose(Schema.NumberFromString, BirthDay) },
+        { property: "birthMonth", schema: Schema.NumberFromString.pipe(Schema.decodeTo(BirthMonth)) },
+        { property: "birthDay", schema: Schema.NumberFromString.pipe(Schema.decodeTo(BirthDay)) },
         { property: "skinColorIndex", schema: IndexFromString }, // TODO: What do these index?
         { property: "hairColorIndex", schema: IndexFromString }, // TODO: What do these index?
         { property: "shoeColorIndex", schema: IndexFromString }, // TODO: What do these index?
         { property: "pantColor", schema: NimblebitSchema.UnityColor },
         { property: "shirtColor", schema: NimblebitSchema.UnityColor },
-        { property: "hasGlasses", schema: BooleanFromOneOrZero },
+        { property: "hasGlasses", schema: BooleanFromStringBit },
         { property: "glassesIndex", schema: IndexFromString }, // TODO: What does this index
-        { property: "hasTie", schema: BooleanFromOneOrZero },
+        { property: "hasTie", schema: BooleanFromStringBit },
         { property: "tieColor", schema: NimblebitSchema.UnityColor },
-        { property: "hasHairAccessory", schema: BooleanFromOneOrZero },
+        { property: "hasHairAccessory", schema: BooleanFromStringBit },
         { property: "hairAccessoryIndex", schema: IndexFromString }, // TODO: What does this index
-        { property: "hasBiHat", schema: BooleanFromOneOrZero },
-        { property: "hasMaleHat", schema: BooleanFromOneOrZero },
-        { property: "hasFemaleHat", schema: BooleanFromOneOrZero },
+        { property: "hasBiHat", schema: BooleanFromStringBit },
+        { property: "hasMaleHat", schema: BooleanFromStringBit },
+        { property: "hasFemaleHat", schema: BooleanFromStringBit },
         { property: "hatIndex", schema: IndexFromString }, // TODO: What does this index
         { property: "hatColor", schema: NimblebitSchema.UnityColor },
-        { property: "hasEarrings", schema: BooleanFromOneOrZero },
+        { property: "hasEarrings", schema: BooleanFromStringBit },
         { property: "earringsColor", schema: NimblebitSchema.UnityColor },
-        { property: "skillFood", schema: Schema.compose(Schema.NumberFromString, Skill) },
-        { property: "skillService", schema: Schema.compose(Schema.NumberFromString, Skill) },
-        { property: "skillRecreation", schema: Schema.compose(Schema.NumberFromString, Skill) },
-        { property: "skillRetail", schema: Schema.compose(Schema.NumberFromString, Skill) },
-        { property: "skillCreative", schema: Schema.compose(Schema.NumberFromString, Skill) },
+        { property: "skillFood", schema: Schema.NumberFromString.pipe(Schema.decodeTo(Skill)) },
+        { property: "skillService", schema: Schema.NumberFromString.pipe(Schema.decodeTo(Skill)) },
+        { property: "skillRecreation", schema: Schema.NumberFromString.pipe(Schema.decodeTo(Skill)) },
+        { property: "skillRetail", schema: Schema.NumberFromString.pipe(Schema.decodeTo(Skill)) },
+        { property: "skillCreative", schema: Schema.NumberFromString.pipe(Schema.decodeTo(Skill)) },
     ]);
 
-    return Schema.transformOrFail(from, to, {
-        strict: true,
-        encode: (
-            customI: Schema.Schema.Encoded<typeof to>,
-            _options: SchemaAST.ParseOptions,
-            ast: SchemaAST.AST,
-            customA: Schema.Schema.Type<typeof to>
-        ): Effect.Effect<Schema.Schema.Type<typeof from>, ParseResult.ParseIssue, never> => {
-            const isMale = customI.gender === "male";
-            const [firstName, lastName] = customI.name.split(" ");
+    return from.pipe(
+        Schema.decodeTo(
+            to,
+            SchemaTransformation.transformOrFail({
+                encode: (customI: (typeof to)["Encoded"]) => {
+                    const isMale = customI.gender === "male";
+                    const [firstName, lastName] = customI.name.split(" ");
 
-            const firstNameIndex = Function.pipe(
-                isMale ? maleNames : femaleNames,
-                Array.fromIterable,
-                Array.findFirstIndex((name) => name === firstName)
-            );
+                    const firstNameIndex = Function.pipe(
+                        isMale ? maleNames : femaleNames,
+                        Array.fromIterable,
+                        Array.findFirstIndex((name) => name === firstName)
+                    );
 
-            const lastNameIndex = Function.pipe(
-                isMale ? maleLastNames : femaleLastNames,
-                Array.fromIterable,
-                Array.findFirstIndex((name) => name === lastName)
-            );
+                    const lastNameIndex = Function.pipe(
+                        isMale ? maleLastNames : femaleLastNames,
+                        Array.fromIterable,
+                        Array.findFirstIndex((name) => name === lastName)
+                    );
 
-            if (Option.isNone(firstNameIndex) || Option.isNone(lastNameIndex)) {
-                return ParseResult.fail(
-                    new ParseResult.Type(
-                        ast,
-                        customI.name,
-                        `Bitizen name ${customI.name} not found in internal lists, cannot encode`
-                    )
-                );
-            }
+                    if (Option.isNone(firstNameIndex) || Option.isNone(lastNameIndex)) {
+                        return Effect.fail(
+                            new SchemaIssue.InvalidValue(Option.some(customI.name), {
+                                message: `Bitizen name ${customI.name} not found in internal lists, cannot encode`,
+                            })
+                        );
+                    }
 
-            return ParseResult.succeed({
-                male: isMale,
-                firstNameIndex: firstNameIndex.value,
-                lastNameIndex: lastNameIndex.value,
-                birthMonth: customI.birthday[0],
-                birthDay: customI.birthday[1],
-                skinColorIndex: customI.designColors.skinColorIndex,
-                hairColorIndex: customI.designColors.hairColorIndex,
-                shoeColorIndex: customI.designColors.shoeColorIndex,
-                pantColor: customI.designColors.pantColor,
-                shirtColor: customI.designColors.shirtColor,
-                hasGlasses: Either.isRight(customA.accessories.glasses),
-                glassesIndex: Either.merge(customA.accessories.glasses),
-                hasTie: Either.isRight(customA.accessories.tie),
-                tieColor: Either.merge(customA.accessories.tie),
-                hasHairAccessory: Either.isRight(customA.accessories.hairAccessory),
-                hairAccessoryIndex: Either.merge(customA.accessories.hairAccessory),
-                hasBiHat: Either.getOrElse(
-                    Either.map(customA.accessories.hat, ({ gender }) => gender === "bi"),
-                    Function.constFalse
-                ),
-                hasMaleHat: Either.getOrElse(
-                    Either.map(customA.accessories.hat, ({ gender }) => gender === "male"),
-                    Function.constFalse
-                ),
-                hasFemaleHat: Either.getOrElse(
-                    Either.map(customA.accessories.hat, ({ gender }) => gender === "female"),
-                    Function.constFalse
-                ),
-                hatIndex: Either.merge(customA.accessories.hat).index,
-                hatColor: Either.merge(customA.accessories.hat).color,
-                hasEarrings: Either.isRight(customA.accessories.earrings),
-                earringsColor: Either.merge(customA.accessories.earrings),
-                skillFood: customI.skills.food,
-                skillService: customI.skills.service,
-                skillRecreation: customI.skills.recreation,
-                skillRetail: customI.skills.retail,
-                skillCreative: customI.skills.creative,
-                $unknown: customI.$unknown,
-            });
-        },
-        decode: (
-            nimblebit: Schema.Schema.Type<typeof from>,
-            _options: SchemaAST.ParseOptions,
-            _ast: SchemaAST.AST
-        ): Effect.Effect<Schema.Schema.Encoded<typeof to>, ParseResult.ParseIssue, never> => {
-            const gender = nimblebit.male ? "male" : "female";
-
-            const firstName = Function.pipe(
-                gender === "female" ? femaleNames : maleNames,
-                Array.fromIterable,
-                Array.get(nimblebit.firstNameIndex)
-            );
-
-            const lastName = Function.pipe(
-                gender === "female" ? femaleLastNames : maleLastNames,
-                Array.fromIterable,
-                Array.get(nimblebit.lastNameIndex)
-            );
-
-            if (Option.isNone(firstName) || Option.isNone(lastName)) {
-                return ParseResult.fail(
-                    new ParseResult.Type(
-                        _ast,
-                        nimblebit,
-                        `Bitizen name indexes ${nimblebit.firstNameIndex},${nimblebit.lastNameIndex} not found in internal lists, cannot decode`
-                    )
-                );
-            }
-
-            const makeLeft = <L>(l: L) => ({ _tag: "Left", left: l }) as const;
-            const makeRight = <R>(u: R) => ({ _tag: "Right", right: u }) as const;
-
-            const tie = nimblebit.hasTie ? makeRight(nimblebit.tieColor) : makeLeft(nimblebit.tieColor);
-            const glasses = nimblebit.hasGlasses ? makeRight(nimblebit.glassesIndex) : makeLeft(nimblebit.glassesIndex);
-            const hairAccessory = nimblebit.hasHairAccessory
-                ? makeRight(nimblebit.hairAccessoryIndex)
-                : makeLeft(nimblebit.hairAccessoryIndex);
-            const earrings = nimblebit.hasEarrings
-                ? makeRight(nimblebit.earringsColor)
-                : makeLeft(nimblebit.earringsColor);
-            const hat =
-                nimblebit.hasBiHat || nimblebit.hasMaleHat || nimblebit.hasFemaleHat
-                    ? makeRight({
-                          index: nimblebit.hatIndex,
-                          color: nimblebit.hatColor,
-                          gender: nimblebit.hasBiHat ? "bi" : nimblebit.hasMaleHat ? "male" : "female",
-                      } as const)
-                    : makeLeft({
-                          index: nimblebit.hatIndex,
-                          color: nimblebit.hatColor,
-                      } as const);
-
-            return ParseResult.succeed({
-                $unknown: nimblebit.$unknown,
-                gender,
-                name: `${firstName.value} ${lastName.value}`,
-                birthday: [nimblebit.birthMonth, nimblebit.birthDay],
-                designColors: {
-                    skinColorIndex: nimblebit.skinColorIndex,
-                    hairColorIndex: nimblebit.hairColorIndex,
-                    shoeColorIndex: nimblebit.shoeColorIndex,
-                    pantColor: nimblebit.pantColor,
-                    shirtColor: nimblebit.shirtColor,
+                    const hatResult = customI.accessories.hat;
+                    const hatMerged = Result.merge(hatResult);
+                    return Effect.succeed({
+                        male: isMale,
+                        firstNameIndex: firstNameIndex.value,
+                        lastNameIndex: lastNameIndex.value,
+                        birthMonth: customI.birthday[0],
+                        birthDay: customI.birthday[1],
+                        skinColorIndex: customI.designColors.skinColorIndex,
+                        hairColorIndex: customI.designColors.hairColorIndex,
+                        shoeColorIndex: customI.designColors.shoeColorIndex,
+                        pantColor: customI.designColors.pantColor,
+                        shirtColor: customI.designColors.shirtColor,
+                        hasGlasses: Result.isSuccess(customI.accessories.glasses),
+                        glassesIndex: Result.merge(customI.accessories.glasses),
+                        hasTie: Result.isSuccess(customI.accessories.tie),
+                        tieColor: Result.merge(customI.accessories.tie),
+                        hasHairAccessory: Result.isSuccess(customI.accessories.hairAccessory),
+                        hairAccessoryIndex: Result.merge(customI.accessories.hairAccessory),
+                        hasBiHat: Result.getOrElse(
+                            Result.map(hatResult, ({ gender }) => gender === "bi"),
+                            Function.constFalse
+                        ),
+                        hasMaleHat: Result.getOrElse(
+                            Result.map(hatResult, ({ gender }) => gender === "male"),
+                            Function.constFalse
+                        ),
+                        hasFemaleHat: Result.getOrElse(
+                            Result.map(hatResult, ({ gender }) => gender === "female"),
+                            Function.constFalse
+                        ),
+                        hatIndex: hatMerged.index,
+                        hatColor: hatMerged.color,
+                        hasEarrings: Result.isSuccess(customI.accessories.earrings),
+                        earringsColor: Result.merge(customI.accessories.earrings),
+                        skillFood: customI.skills.food,
+                        skillService: customI.skills.service,
+                        skillRecreation: customI.skills.recreation,
+                        skillRetail: customI.skills.retail,
+                        skillCreative: customI.skills.creative,
+                        $unknown: customI.$unknown,
+                    });
                 },
-                accessories: {
-                    tie,
-                    glasses,
-                    hairAccessory,
-                    earrings,
-                    hat,
+                decode: (nimblebit: Schema.Schema.Type<typeof from>) => {
+                    const gender = nimblebit.male ? "male" : "female";
+
+                    const firstName = Function.pipe(
+                        gender === "female" ? femaleNames : maleNames,
+                        Array.fromIterable,
+                        Array.get(nimblebit.firstNameIndex)
+                    );
+
+                    const lastName = Function.pipe(
+                        gender === "female" ? femaleLastNames : maleLastNames,
+                        Array.fromIterable,
+                        Array.get(nimblebit.lastNameIndex)
+                    );
+
+                    if (Option.isNone(firstName) || Option.isNone(lastName)) {
+                        return Effect.fail(
+                            new SchemaIssue.InvalidValue(Option.some(nimblebit), {
+                                message: `Bitizen name indexes ${nimblebit.firstNameIndex},${nimblebit.lastNameIndex} not found in internal lists, cannot decode`,
+                            })
+                        );
+                    }
+
+                    const makeFailure = <L>(l: L) => Result.fail(l);
+                    const makeSuccess = <R>(r: R) => Result.succeed(r);
+
+                    const tie = nimblebit.hasTie ? makeSuccess(nimblebit.tieColor) : makeFailure(nimblebit.tieColor);
+                    const glasses = nimblebit.hasGlasses
+                        ? makeSuccess(nimblebit.glassesIndex)
+                        : makeFailure(nimblebit.glassesIndex);
+                    const hairAccessory = nimblebit.hasHairAccessory
+                        ? makeSuccess(nimblebit.hairAccessoryIndex)
+                        : makeFailure(nimblebit.hairAccessoryIndex);
+                    const earrings = nimblebit.hasEarrings
+                        ? makeSuccess(nimblebit.earringsColor)
+                        : makeFailure(nimblebit.earringsColor);
+                    const hat =
+                        nimblebit.hasBiHat || nimblebit.hasMaleHat || nimblebit.hasFemaleHat
+                            ? makeSuccess({
+                                  index: nimblebit.hatIndex,
+                                  color: nimblebit.hatColor,
+                                  gender: (nimblebit.hasBiHat ? "bi" : nimblebit.hasMaleHat ? "male" : "female") as
+                                      | "bi"
+                                      | "male"
+                                      | "female",
+                              })
+                            : makeFailure({
+                                  index: nimblebit.hatIndex,
+                                  color: nimblebit.hatColor,
+                              });
+
+                    return Effect.succeed({
+                        $unknown: nimblebit.$unknown,
+                        gender,
+                        name: `${firstName.value} ${lastName.value}`,
+                        birthday: [nimblebit.birthMonth, nimblebit.birthDay] as [
+                            Schema.Schema.Type<typeof BirthMonth>,
+                            Schema.Schema.Type<typeof BirthDay>,
+                        ],
+                        designColors: {
+                            skinColorIndex: nimblebit.skinColorIndex,
+                            hairColorIndex: nimblebit.hairColorIndex,
+                            shoeColorIndex: nimblebit.shoeColorIndex,
+                            pantColor: nimblebit.pantColor,
+                            shirtColor: nimblebit.shirtColor,
+                        },
+                        accessories: {
+                            tie,
+                            glasses,
+                            hairAccessory,
+                            earrings,
+                            hat,
+                        },
+                        skills: {
+                            food: nimblebit.skillFood,
+                            service: nimblebit.skillService,
+                            recreation: nimblebit.skillRecreation,
+                            retail: nimblebit.skillRetail,
+                            creative: nimblebit.skillCreative,
+                        },
+                    });
                 },
-                skills: {
-                    food: nimblebit.skillFood,
-                    service: nimblebit.skillService,
-                    recreation: nimblebit.skillRecreation,
-                    retail: nimblebit.skillRetail,
-                    creative: nimblebit.skillCreative,
-                },
-            });
-        },
-    });
+            })
+        )
+    );
 });
 
 /**
@@ -1506,50 +1502,49 @@ export const BitizenAttributes = Schema.suspend(() => {
  * @since 1.0.0
  * @category Schemas
  */
-export const Bitizen = NimblebitSchema.parseNimblebitObject(
-    Schema.Struct({
-        homeIndex: Schema.NumberFromString.pipe(
-            Schema.compose(Schema.Int),
-            Schema.propertySignature,
-            Schema.fromKey("h")
+export const Bitizen = Schema.Struct({
+    homeIndex: Schema.NumberFromString.pipe(
+        Schema.decodeTo(Schema.Int),
+        Schema.annotateKey({ nimblebitSaveDataKey: "h" })
+    ),
+    workIndex: Schema.NumberFromString.pipe(
+        Schema.decodeTo(Schema.Int),
+        Schema.annotateKey({ nimblebitSaveDataKey: "w" })
+    ),
+    placedDreamJob: Schema.Literals(["0", "1"]).pipe(
+        Schema.decodeTo(
+            Schema.Boolean,
+            SchemaTransformation.transform({
+                decode: (s) => s === "1",
+                encode: (b) => (b ? "1" : "0") as "0" | "1",
+            })
         ),
-        workIndex: Schema.NumberFromString.pipe(
-            Schema.compose(Schema.Int),
-            Schema.propertySignature,
-            Schema.fromKey("w")
-        ),
-        placedDreamJob: Schema.transformLiterals(["0", false], ["1", true]).pipe(
-            Schema.propertySignature,
-            Schema.fromKey("d")
-        ),
-        dreamJobIndex: Schema.NumberFromString.pipe(
-            Schema.compose(Schema.Int),
-            Schema.propertySignature,
-            Schema.fromKey("j")
-        ),
-        costume: Schema.requiredToOptional(
-            Schema.Union(Schema.Literal(""), Schema.Literal(...Record.keys(Costumes.costumes)), Schema.String),
-            Schema.Union(Schema.Literal(...Record.keys(Costumes.costumes)), Schema.String),
-            {
-                encode: Option.getOrElse(() => "" as const),
-                decode: Option.liftPredicate(String.isNonEmpty),
-            }
-        ).pipe(Schema.fromKey("c")),
-        vip: Schema.Union(
-            Schema.transformLiterals(
-                ["0", "None"],
-                ["1", "Engineer"],
-                ["2", "TravelAgent"],
-                ["3", "Deliveryman"],
-                ["4", "BigSpender"],
-                ["5", "Celebrity"],
-                ["6", "GiftBit"]
-                // TODO: Investigate remaining missing entries
-            ),
-            Schema.compose(Schema.NumberFromString, Schema.Int)
-        ).pipe(Schema.propertySignature, Schema.fromKey("v")),
-        customName: Schema.String.pipe(Schema.optional, Schema.fromKey("cn")),
-        pet: Schema.Literal(...Record.keys(Pets.pets)).pipe(Schema.optional, Schema.fromKey("p")),
-        attributes: BitizenAttributes.pipe(Schema.propertySignature, Schema.fromKey("BA")),
-    })
-);
+        Schema.annotateKey({ nimblebitSaveDataKey: "d" })
+    ),
+    dreamJobIndex: Schema.NumberFromString.pipe(
+        Schema.decodeTo(Schema.Int),
+        Schema.annotateKey({ nimblebitSaveDataKey: "j" })
+    ),
+    costume: Schema.Union([Schema.Literals(Record.keys(Costumes.costumes)), Schema.String]).pipe(
+        Schema.annotateKey({ nimblebitSaveDataKey: "c" }),
+        Schema.optionalKey
+    ),
+    vip: Schema.Union([
+        Schema.Literals(["0", "1", "2", "3", "4", "5", "6"]).transform([
+            "None",
+            "Engineer",
+            "TravelAgent",
+            "Deliveryman",
+            "BigSpender",
+            "Celebrity",
+            "GiftBit",
+        ]),
+        Schema.NumberFromString.pipe(Schema.decodeTo(Schema.Int)),
+    ]).annotateKey({ nimblebitSaveDataKey: "v" }),
+    customName: Schema.String.pipe(Schema.optionalKey, Schema.annotateKey({ nimblebitSaveDataKey: "cn" })),
+    pet: Schema.Literals(Record.keys(Pets.pets)).pipe(
+        Schema.annotateKey({ nimblebitSaveDataKey: "p" }),
+        Schema.optionalKey
+    ),
+    attributes: BitizenAttributes.pipe(Schema.annotateKey({ nimblebitSaveDataKey: "BA" })),
+}).pipe(NimblebitSchema.parseNimblebitObject);

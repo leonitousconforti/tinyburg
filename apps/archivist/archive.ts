@@ -1,75 +1,86 @@
+import { Effect, Match, Option, Stream } from "effect";
+
 import { S3 } from "@effect-aws/client-s3";
-import { HttpClient, HttpClientResponse } from "@effect/platform";
-import { NodeStream } from "@effect/platform-node";
 import { GooglePlayApi } from "@efffrida/gplayapi";
-import { Array, Effect } from "effect";
 
 const bundleIdentifier = "com.nimblebit.tinytower";
 
-export const archiveToS3 = Effect.fnUntraced(function* ({
-    offerType,
-    versionCode,
-}: {
-    offerType: number;
-    versionCode: number | bigint;
-}) {
-    const { encodedDeliveryToken } = yield* GooglePlayApi.purchase(bundleIdentifier, {
-        offerType,
-        versionCode,
-    });
+export const archiveToS3 = Effect.fnUntraced(function* (options: { offerType: number; versionCode: number | bigint }) {
+    const streams = yield* GooglePlayApi.downloadToStreams(bundleIdentifier, options).pipe(Effect.catchNoSuchElement);
 
-    const deliveryResult = yield* GooglePlayApi.delivery(bundleIdentifier, {
-        offerType,
-        versionCode,
-        deliveryToken: encodedDeliveryToken,
-    });
-
-    const mainDeliveryData = deliveryResult?.appDeliveryData;
-    if (mainDeliveryData === undefined) {
-        return yield* Effect.logDebug(`No delivery data for version code ${versionCode}`);
+    if (Option.isNone(streams)) {
+        return yield* Effect.logInfo(`No delivery data available for version ${options.versionCode}`);
     }
 
-    const main = Effect.gen(function* () {
-        const httpClient = yield* HttpClient.HttpClient;
-        const stream = HttpClientResponse.stream(httpClient.get(mainDeliveryData.downloadUrl));
-        yield* S3.putObject({
-            ACL: "private",
-            Bucket: "tinyburg-cold",
-            Key: `archivist/${versionCode}/${bundleIdentifier}.apk`,
-            Body: NodeStream.toReadableNever(stream),
-            ContentLength: Number(mainDeliveryData.downloadSize),
-        });
-    });
+    for (const { stream, integrity, size, name } of streams.value) {
+        const checksumAlgorithm = Match.value(integrity).pipe(
+            Match.when({ "SHA-1": Match.string }, () => "SHA1" as const),
+            Match.when({ "SHA-256": Match.string }, () => "SHA256" as const),
+            Match.when({ "SHA-512": Match.string }, () => "SHA512" as const),
+            Match.orElse(() => undefined)
+        );
 
-    const splits = Array.map(mainDeliveryData.splitDeliveryData, (split) =>
-        Effect.gen(function* () {
-            const httpClient = yield* HttpClient.HttpClient;
-            const stream = HttpClientResponse.stream(httpClient.get(split.downloadUrl));
-            yield* S3.putObject({
+        const integrityBase64 = Match.value(integrity).pipe(
+            Match.when({ "SHA-1": Match.string }, ({ "SHA-1": sha1Hash }) =>
+                Buffer.from(sha1Hash, "hex").toString("base64")
+            ),
+            Match.when({ "SHA-256": Match.string }, ({ "SHA-256": sha256Hash }) =>
+                Buffer.from(sha256Hash, "hex").toString("base64")
+            ),
+            Match.when({ "SHA-512": Match.string }, ({ "SHA-512": sha512Hash }) =>
+                Buffer.from(sha512Hash, "hex").toString("base64")
+            ),
+            Match.orElse(() => undefined)
+        );
+
+        if ("SHA-384" in integrity) {
+            return yield* Effect.die("SHA-384 is not supported and thus could not be checked by S3");
+        }
+
+        const maybeExistingUpload = yield* Effect.flatMap(S3, (s3) =>
+            s3.getObject({
+                Bucket: "tinyburg-cold",
+                Key: `archivist/${options?.versionCode}/${name}`,
+            })
+        ).pipe(Effect.catchNoSuchElement);
+
+        // If the upload already exists, let's just check its integrity
+        if (Option.isSome(maybeExistingUpload)) {
+            const existingUploadIntegrity = Match.value(integrity).pipe(
+                Match.when({ "SHA-1": Match.string }, () => maybeExistingUpload.value.ChecksumSHA1),
+                Match.when({ "SHA-256": Match.string }, () => maybeExistingUpload.value.ChecksumSHA256),
+                Match.when({ "SHA-512": Match.string }, () => maybeExistingUpload.value.ChecksumSHA512),
+                Match.orElse(() => undefined)
+            );
+
+            if (existingUploadIntegrity !== integrityBase64) {
+                yield* Effect.logDebug(
+                    `Integrity check for existing upload ${name} version ${options.versionCode} failed`
+                );
+            } else {
+                return yield* Effect.logDebug(
+                    `Integrity check for existing upload ${name} version ${options.versionCode} passed`
+                );
+            }
+        }
+
+        // FIXME: I don't want to have to do this :/
+        const data = yield* Stream.mkUint8Array(stream);
+
+        yield* S3.use((s3) =>
+            s3.putObject({
                 ACL: "private",
                 Bucket: "tinyburg-cold",
-                Key: `archivist/${versionCode}/${split.name}.apk`,
-                Body: NodeStream.toReadableNever(stream),
-                ContentLength: Number(split.downloadSize),
-            });
-        })
-    );
+                ContentLength: Number(size),
+                Body: data, // NodeStream.toReadableNever(stream),
+                ChecksumAlgorithm: checksumAlgorithm,
+                Key: `archivist/${options?.versionCode}/${name}`,
+                ...("SHA-1" in integrity ? { ChecksumSHA1: integrityBase64 } : {}),
+                ...("SHA-256" in integrity ? { ChecksumSHA256: integrityBase64 } : {}),
+                ...("SHA-512" in integrity ? { ChecksumSHA512: integrityBase64 } : {}),
+            })
+        );
 
-    const expansions = Array.map(mainDeliveryData.additionalFile, (expansion) =>
-        Effect.gen(function* () {
-            const httpClient = yield* HttpClient.HttpClient;
-            const typeStr = expansion.fileType === 1 ? "main" : "patch";
-            const name = `${typeStr}.${expansion.versionCode}.${bundleIdentifier}.obb`;
-            const stream = HttpClientResponse.stream(httpClient.get(expansion.downloadUrl));
-            yield* S3.putObject({
-                ACL: "private",
-                Bucket: "tinyburg-cold",
-                Key: `archivist/${versionCode}/${name}`,
-                Body: NodeStream.toReadableNever(stream),
-                ContentLength: Number(expansion.size),
-            });
-        })
-    );
-
-    return yield* Effect.all([main, ...splits, ...expansions]);
-}, Effect.asVoid);
+        yield* Effect.logDebug(`Successfully uploaded ${name} version ${options.versionCode} to S3`);
+    }
+});

@@ -1,6 +1,6 @@
-import * as Rpc from "@effect/rpc/Rpc";
-import * as RpcGroup from "@effect/rpc/RpcGroup";
 import * as Schema from "effect/Schema";
+import * as Rpc from "effect/unstable/rpc/Rpc";
+import * as RpcGroup from "effect/unstable/rpc/RpcGroup";
 
 export const TowerCredentials = Schema.Struct({
     playerId: Schema.String,
@@ -43,17 +43,14 @@ export class Rpcs extends RpcGroup.make(
     }),
     Rpc.make("GetAllFloors", {
         success: Schema.Struct({
-            floors: Schema.Record({
-                key: Schema.String,
-                value: Schema.Struct({
+            floors: Schema.Record(
+                Schema.String,
+                Schema.Struct({
                     index: Schema.String,
                     type: Schema.String,
-                }),
-            }),
-            types: Schema.Record({
-                key: Schema.String,
-                value: Schema.String,
-            }),
+                })
+            ),
+            types: Schema.Record(Schema.String, Schema.String),
         }),
     }),
     Rpc.make("GetAllElevators", {
@@ -63,29 +60,17 @@ export class Rpcs extends RpcGroup.make(
         success: Schema.Array(Schema.String),
     }),
     Rpc.make("GetAllCostumes", {
-        success: Schema.Record({
-            key: Schema.String,
-            value: Schema.Record({
-                key: Schema.String,
-                value: Schema.Union(Schema.String, Schema.Number, Schema.Boolean),
-            }),
-        }),
+        success: Schema.Record(
+            Schema.String,
+            Schema.Record(Schema.String, Schema.Union([Schema.String, Schema.Number, Schema.Boolean]))
+        ),
     }),
     Rpc.make("GetAllBitbookPosts", {
         success: Schema.Struct({
-            eventTypes: Schema.Record({
-                key: Schema.String,
-                value: Schema.String,
-            }),
-            mediaTypes: Schema.Record({
-                key: Schema.String,
-                value: Schema.String,
-            }),
+            eventTypes: Schema.Record(Schema.String, Schema.String),
+            mediaTypes: Schema.Record(Schema.String, Schema.String),
             posts: Schema.Array(
-                Schema.Record({
-                    key: Schema.String,
-                    value: Schema.Union(Schema.String, Schema.Number, Schema.Boolean),
-                })
+                Schema.Record(Schema.String, Schema.Union([Schema.String, Schema.Number, Schema.Boolean]))
             ),
         }),
     }),
@@ -106,37 +91,22 @@ export class Rpcs extends RpcGroup.make(
     }),
     Rpc.make("GetAllMissions", {
         success: Schema.Struct({
-            types: Schema.Record({
-                key: Schema.String,
-                value: Schema.String,
-            }),
+            types: Schema.Record(Schema.String, Schema.String),
             tutorialMissions: Schema.Array(
-                Schema.Record({
-                    key: Schema.String,
-                    value: Schema.Union(Schema.String, Schema.Number, Schema.Boolean),
-                })
+                Schema.Record(Schema.String, Schema.Union([Schema.String, Schema.Number, Schema.Boolean]))
             ),
             tipMissions: Schema.Array(
-                Schema.Record({
-                    key: Schema.String,
-                    value: Schema.Union(Schema.String, Schema.Number, Schema.Boolean),
-                })
+                Schema.Record(Schema.String, Schema.Union([Schema.String, Schema.Number, Schema.Boolean]))
             ),
             missions: Schema.Array(
-                Schema.Record({
-                    key: Schema.String,
-                    value: Schema.Union(Schema.String, Schema.Number, Schema.Boolean),
-                })
+                Schema.Record(Schema.String, Schema.Union([Schema.String, Schema.Number, Schema.Boolean]))
             ),
         }),
     }),
     Rpc.make("GetAllPets", {
-        success: Schema.Record({
-            key: Schema.String,
-            value: Schema.Record({
-                key: Schema.String,
-                value: Schema.Union(Schema.String, Schema.Number, Schema.Boolean),
-            }),
-        }),
+        success: Schema.Record(
+            Schema.String,
+            Schema.Record(Schema.String, Schema.Union([Schema.String, Schema.Number, Schema.Boolean]))
+        ),
     })
 ) {}

@@ -1,5 +1,5 @@
-import { SqlClient } from "@effect/sql";
 import { Effect } from "effect";
+import { SqlClient } from "effect/unstable/sql";
 
 export default Effect.flatMap(
     SqlClient.SqlClient,
@@ -15,6 +15,9 @@ export default Effect.flatMap(
             rate_limit_window BIGINT NOT NULL,                      -- Rate limit time window in milliseconds
             description TEXT                                        -- Optional description
         );
+
+        -- Create an index on the key column for faster lookups
+        CREATE INDEX IF NOT EXISTS idx_accounts_key ON accounts(key);
 
         -- "None" account with no permitted scopes
         INSERT INTO accounts (key, description, rate_limit_limit, rate_limit_window, scopes)

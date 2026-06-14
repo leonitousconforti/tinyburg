@@ -5,19 +5,18 @@
  * @category SDK
  */
 
-import * as HttpApiClient from "@effect/platform/HttpApiClient";
-import * as HttpClient from "@effect/platform/HttpClient";
-import * as HttpClientRequest from "@effect/platform/HttpClientRequest";
 import * as Effect from "effect/Effect";
 import * as Encoding from "effect/Encoding";
 import * as Function from "effect/Function";
-import * as Option from "effect/Option";
 import * as Redacted from "effect/Redacted";
 import * as Schema from "effect/Schema";
-import * as String from "effect/String";
-import * as Pako from "pako";
+import * as SchemaTransformation from "effect/SchemaTransformation";
+import * as HttpClient from "effect/unstable/http/HttpClient";
+import * as HttpClientRequest from "effect/unstable/http/HttpClientRequest";
+import * as HttpApiClient from "effect/unstable/httpapi/HttpApiClient";
 
 import { NimblebitAuth, NimblebitConfig, NimblebitError, NimblebitSchema } from "@tinyburg/nimblebit-sdk";
+import * as Pako from "pako";
 
 import * as BitbookPost from "./BitbookPosts.ts";
 import * as Bitizen from "./Bitizens.ts";
@@ -32,142 +31,151 @@ import * as SyncItemType from "./SyncItemType.ts";
  * @since 1.0.0
  * @category Schemas
  */
-export class SaveData extends Schema.suspend(() => {
-    const FriendSchema = Schema.Union(
-        Schema.transform(
-            Schema.TemplateLiteralParser(
-                Schema.String,
-                "|",
-                NimblebitConfig.PlayerIdSchema,
-                "|",
-                NimblebitSchema.CSharpDate
-            ),
+export const SaveData = Schema.suspend(() => {
+    const FriendWithTimestamp = Schema.TemplateLiteralParser([
+        Schema.String,
+        "|",
+        NimblebitConfig.PlayerIdSchema,
+        "|",
+        NimblebitSchema.CSharpDate,
+    ]).pipe(
+        Schema.decodeTo(
             Schema.Struct({
                 displayName: Schema.String,
-                friendId: Schema.typeSchema(NimblebitConfig.PlayerIdSchema),
-                timestamp: Schema.typeSchema(NimblebitSchema.CSharpDate),
+                friendId: Schema.toType(NimblebitConfig.PlayerIdSchema),
+                timestamp: Schema.toType(NimblebitSchema.CSharpDate),
             }),
-            {
+            SchemaTransformation.transform({
                 encode: ({ displayName, friendId, timestamp }) => [displayName, "|", friendId, "|", timestamp] as const,
                 decode: ([displayName, _, friendId, __, timestamp]) => ({ displayName, friendId, timestamp }) as const,
-            }
-        ),
-        Schema.transform(
-            Schema.TemplateLiteralParser(Schema.String, "|", NimblebitConfig.PlayerIdSchema),
-            Schema.Struct({
-                displayName: Schema.String,
-                friendId: Schema.typeSchema(NimblebitConfig.PlayerIdSchema),
-            }),
-            {
-                encode: ({ displayName, friendId }) => [displayName, "|", friendId] as const,
-                decode: ([displayName, _, friendId]) => ({ displayName, friendId }) as const,
-            }
+            })
         )
     );
 
-    const FriendListSchema = Schema.compose(Schema.split(","), Schema.Array(FriendSchema));
-
-    return Schema.transform(
+    const FriendWithoutTimestamp = Schema.TemplateLiteralParser([
         Schema.String,
-        NimblebitSchema.parseNimblebitObject(
+        "|",
+        NimblebitConfig.PlayerIdSchema,
+    ]).pipe(
+        Schema.decodeTo(
             Schema.Struct({
-                coins: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pc")),
-                bux: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pb")),
-                Ppig: Schema.String.pipe(Schema.optional, Schema.fromKey("Ppig")),
-                Pplim: Schema.String.pipe(Schema.optional, Schema.fromKey("Pplim")),
-                maxGold: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pmg")),
-                gold: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pg")),
-                tip: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Ptip")),
-                needUpgrade: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pnu")),
-                ver: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Pver")),
-                roof: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pr")),
-                lift: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pe")),
-                lobby: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pl")),
-                buxBought: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pbxb")),
-                installTime: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("PiT")),
-                lastSaleTick: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("PlST")),
-                lobbyName: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Pln")),
-                raffleID: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Prf")),
-                vipTrialEnd: Schema.BigInt.pipe(Schema.propertySignature, Schema.fromKey("Pvte")),
-                costumes: Schema.split(",").pipe(Schema.propertySignature, Schema.fromKey("Pcos")),
-                pets: Schema.split(",").pipe(Schema.optional, Schema.fromKey("Ppets")),
-                missionHist: Schema.split(",").pipe(Schema.optional, Schema.fromKey("Pmhst")),
-                bbHist: Schema.split(",").pipe(Schema.propertySignature, Schema.fromKey("Pbhst")),
-                roofs: Schema.split(",").pipe(Schema.propertySignature, Schema.fromKey("Prfs")),
-                lifts: Schema.split(",").pipe(Schema.propertySignature, Schema.fromKey("Plfs")),
-                lobbies: Schema.split(",").pipe(Schema.propertySignature, Schema.fromKey("Plbs")),
-                bannedFriends: Schema.optionalToOptional(
-                    Schema.Union(
-                        Schema.Literal(""),
-                        Schema.encodedSchema(
-                            Schema.compose(
-                                Schema.split(","),
-                                Schema.Array(Schema.Union(NimblebitConfig.PlayerIdSchema, Schema.String))
-                            )
-                        )
-                    ),
-                    Schema.compose(
-                        Schema.split(","),
-                        Schema.Array(Schema.Union(NimblebitConfig.PlayerIdSchema, Schema.String))
-                    ),
-                    {
-                        encode: Function.identity,
-                        decode: Option.filterMap(Option.liftPredicate(String.isNonEmpty)),
-                    }
-                ).pipe(Schema.fromKey("Pbf")),
-                liftSpeed: Schema.NumberFromString.pipe(Schema.optional, Schema.fromKey("Pls")),
-                totalPoints: Schema.BigInt.pipe(Schema.propertySignature, Schema.fromKey("Ptp")),
-                lrc: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Plrc")),
-                lfc: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Plfc")),
-                cfd: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Pcfd")),
-                lbc: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Plbc")),
-                lbbcp: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Plbbcp")),
-                lcmiss: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Plcmiss")),
-                lcg: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Plcg")),
-                sfx: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Psfx")),
-                mus: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pmus")),
-                notes: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pnts")),
-                autoLiftDisable: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pald")),
-                videos: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pvds")),
-                vidCheck: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pvdc")),
-                bbnotes: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Pbbn")),
-                hidechat: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Phchat")),
-                tmi: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Ptmi")),
-                PVF: Schema.String.pipe(Schema.optional, Schema.fromKey("PVF")),
-                PHP: Schema.String.pipe(Schema.optional, Schema.fromKey("PHP")),
-                mission: Mission.Mission.pipe(Schema.optional, Schema.fromKey("Pmiss")),
-                doorman: Bitizen.Bitizen.pipe(Schema.propertySignature, Schema.fromKey("Pdrmn")),
-                playerID: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Ppid")),
-                playerRegistered: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("Preg")),
-                bzns: Schema.compose(Schema.split("|"), Schema.Array(Bitizen.Bitizen)).pipe(
-                    Schema.propertySignature,
-                    Schema.fromKey("Pbits")
-                ),
-                stories: Schema.compose(Schema.split("|"), Schema.Array(Floor.Floor)).pipe(
-                    Schema.propertySignature,
-                    Schema.fromKey("Pstories")
-                ),
-                friends: Schema.requiredToOptional(
-                    Schema.Union(Schema.Literal(""), Schema.encodedSchema(FriendListSchema)),
-                    FriendListSchema,
-                    {
-                        encode: Option.getOrElse(() => "" as const),
-                        decode: Option.liftPredicate(String.isNonEmpty),
-                    }
-                ).pipe(Schema.fromKey("Pfrns")),
-                bbPosts: Schema.compose(Schema.split("|"), Schema.Array(BitbookPost.BitbookPost)).pipe(
-                    Schema.propertySignature,
-                    Schema.fromKey("PBB")
-                ),
-                bbpost: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Plp")),
+                displayName: Schema.String,
+                friendId: Schema.toType(NimblebitConfig.PlayerIdSchema),
+            }),
+            SchemaTransformation.transform({
+                encode: ({ displayName, friendId }) => [displayName, "|", friendId] as const,
+                decode: ([displayName, _, friendId]) => ({ displayName, friendId }) as const,
             })
-        ),
-        {
-            encode: (input) => `[_save]${input}[_save]`,
-            decode: (input) => (input.startsWith('"') ? input.slice(8, -8) : input.slice(7, -7)),
-        }
+        )
     );
-}) {}
+
+    const FriendSchema = Schema.Union([FriendWithTimestamp, FriendWithoutTimestamp]);
+    const FriendsSchema = Schema.String.pipe(NimblebitSchema.split(), Schema.decodeTo(Schema.Array(FriendSchema)));
+    const FriendListSchema = Schema.String.pipe(Schema.decodeTo(Schema.Union([Schema.Literal(""), FriendsSchema])));
+
+    const BannedFriendsSchema = Schema.String.pipe(
+        NimblebitSchema.split(),
+        Schema.decodeTo(Schema.Array(Schema.String))
+    );
+
+    const from = Schema.String;
+    const to = Schema.Struct({
+        coins: Schema.NumberFromString.pipe(
+            Schema.decodeTo(Schema.Int),
+            Schema.annotateKey({ nimblebitSaveDataKey: "Pc" })
+        ),
+        bux: Schema.NumberFromString.pipe(
+            Schema.decodeTo(Schema.Int),
+            Schema.annotateKey({ nimblebitSaveDataKey: "Pb" })
+        ),
+        Ppig: Schema.String.pipe(Schema.optionalKey),
+        Pplim: Schema.String.pipe(Schema.optionalKey),
+        maxGold: Schema.NumberFromString.annotateKey({ nimblebitSaveDataKey: "Pmg" }),
+        gold: Schema.NumberFromString.annotateKey({ nimblebitSaveDataKey: "Pg" }),
+        tip: Schema.NumberFromString.annotateKey({ nimblebitSaveDataKey: "Ptip" }),
+        needUpgrade: Schema.NumberFromString.annotateKey({ nimblebitSaveDataKey: "Pnu" }),
+        ver: Schema.String.annotateKey({ nimblebitSaveDataKey: "Pver" }),
+        roof: Schema.NumberFromString.annotateKey({ nimblebitSaveDataKey: "Pr" }),
+        lift: Schema.NumberFromString.annotateKey({ nimblebitSaveDataKey: "Pe" }),
+        lobby: Schema.NumberFromString.annotateKey({ nimblebitSaveDataKey: "Pl" }),
+        buxBought: Schema.NumberFromString.annotateKey({ nimblebitSaveDataKey: "Pbxb" }),
+        installTime: Schema.NumberFromString.annotateKey({ nimblebitSaveDataKey: "PiT" }),
+        lastSaleTick: Schema.NumberFromString.annotateKey({ nimblebitSaveDataKey: "PlST" }),
+        lobbyName: Schema.String.annotateKey({ nimblebitSaveDataKey: "Pln" }),
+        raffleID: Schema.NumberFromString.annotateKey({ nimblebitSaveDataKey: "Prf" }),
+        vipTrialEnd: Schema.BigIntFromString.annotateKey({ nimblebitSaveDataKey: "Pvte" }),
+        costumes: Schema.String.pipe(NimblebitSchema.split(), Schema.annotateKey({ nimblebitSaveDataKey: "Pcos" })),
+        pets: Schema.String.pipe(
+            NimblebitSchema.split(),
+            Schema.annotateKey({ nimblebitSaveDataKey: "Ppets" }),
+            Schema.optionalKey
+        ),
+        missionHist: Schema.String.pipe(
+            NimblebitSchema.split(),
+            Schema.annotateKey({ nimblebitSaveDataKey: "Pmhst" }),
+            Schema.optionalKey
+        ),
+        bbHist: Schema.String.pipe(NimblebitSchema.split(), Schema.annotateKey({ nimblebitSaveDataKey: "Pbhst" })),
+        roofs: Schema.String.pipe(NimblebitSchema.split(), Schema.annotateKey({ nimblebitSaveDataKey: "Prfs" })),
+        lifts: Schema.String.pipe(NimblebitSchema.split(), Schema.annotateKey({ nimblebitSaveDataKey: "Plfs" })),
+        lobbies: Schema.String.pipe(NimblebitSchema.split(), Schema.annotateKey({ nimblebitSaveDataKey: "Plbs" })),
+        bannedFriends: BannedFriendsSchema.pipe(
+            Schema.optionalKey,
+            Schema.annotateKey({ nimblebitSaveDataKey: "Pbf" })
+        ),
+        liftSpeed: Schema.NumberFromString.pipe(
+            Schema.annotateKey({ nimblebitSaveDataKey: "Pls" }),
+            Schema.optionalKey
+        ),
+        totalPoints: Schema.BigIntFromString.annotateKey({ nimblebitSaveDataKey: "Ptp" }),
+        lrc: Schema.String.annotateKey({ nimblebitSaveDataKey: "Plrc" }),
+        lfc: Schema.String.annotateKey({ nimblebitSaveDataKey: "Plfc" }),
+        cfd: Schema.String.annotateKey({ nimblebitSaveDataKey: "Pcfd" }),
+        lbc: Schema.String.annotateKey({ nimblebitSaveDataKey: "Plbc" }),
+        lbbcp: Schema.String.annotateKey({ nimblebitSaveDataKey: "Plbbcp" }),
+        lcmiss: Schema.String.annotateKey({ nimblebitSaveDataKey: "Plcmiss" }),
+        lcg: Schema.String.annotateKey({ nimblebitSaveDataKey: "Plcg" }),
+        sfx: Schema.NumberFromString.annotateKey({ nimblebitSaveDataKey: "Psfx" }),
+        mus: Schema.NumberFromString.annotateKey({ nimblebitSaveDataKey: "Pmus" }),
+        notes: Schema.NumberFromString.annotateKey({ nimblebitSaveDataKey: "Pnts" }),
+        autoLiftDisable: Schema.NumberFromString.annotateKey({ nimblebitSaveDataKey: "Pald" }),
+        videos: Schema.NumberFromString.annotateKey({ nimblebitSaveDataKey: "Pvds" }),
+        vidCheck: Schema.NumberFromString.annotateKey({ nimblebitSaveDataKey: "Pvdc" }),
+        bbnotes: Schema.NumberFromString.annotateKey({ nimblebitSaveDataKey: "Pbbn" }),
+        hidechat: Schema.NumberFromString.annotateKey({ nimblebitSaveDataKey: "Phchat" }),
+        tmi: Schema.String.annotateKey({ nimblebitSaveDataKey: "Ptmi" }),
+        PVF: Schema.String.pipe(Schema.optionalKey),
+        PHP: Schema.String.pipe(Schema.optionalKey),
+        mission: Mission.Mission.pipe(Schema.optionalKey, Schema.annotateKey({ nimblebitSaveDataKey: "Pmiss" })),
+        doorman: Bitizen.Bitizen.annotateKey({ nimblebitSaveDataKey: "Pdrmn" }),
+        playerID: Schema.String.annotateKey({ nimblebitSaveDataKey: "Ppid" }),
+        playerRegistered: Schema.NumberFromString.annotateKey({ nimblebitSaveDataKey: "Preg" }),
+        bzns: Schema.String.pipe(
+            NimblebitSchema.split({ separator: "|" }),
+            Schema.decodeTo(Schema.Array(Bitizen.Bitizen)),
+            Schema.annotateKey({ nimblebitSaveDataKey: "Pbits" })
+        ),
+        stories: Schema.String.pipe(
+            NimblebitSchema.split({ separator: "|" }),
+            Schema.decodeTo(Schema.Array(Floor.Floor)),
+            Schema.annotateKey({ nimblebitSaveDataKey: "Pstories" })
+        ),
+        friends: FriendListSchema.pipe(Schema.optionalKey, Schema.annotateKey({ nimblebitSaveDataKey: "Pfrns" })),
+        bbPosts: Schema.String.pipe(
+            NimblebitSchema.split({ separator: "|" }),
+            Schema.decodeTo(Schema.Array(BitbookPost.BitbookPost)),
+            Schema.annotateKey({ nimblebitSaveDataKey: "PBB" })
+        ),
+        bbpost: Schema.String.annotateKey({ nimblebitSaveDataKey: "Plp" }),
+    }).pipe(NimblebitSchema.parseNimblebitObject);
+
+    const transformation = SchemaTransformation.transform({
+        encode: (input: string) => `[_save]${input}[_save]`,
+        decode: (input: string) => (input.startsWith('"') ? input.slice(8, -8) : input.slice(7, -7)),
+    });
+
+    return from.pipe(Schema.decodeTo(to, transformation));
+});
 
 /**
  * Requests a new player from the Nimblebit servers.
@@ -194,7 +202,7 @@ export const device_newPlayer = Effect.gen(function* () {
     const salt1 = yield* nimblebitAuth.salt;
     const salt2 = yield* nimblebitAuth.salt;
     const hash = yield* nimblebitAuth.sign(`tt/${salt1}/${salt2}`);
-    const response = yield* endpoint({ path: { salt1, salt2, hash } });
+    const response = yield* endpoint({ params: { salt1, salt2, hash } });
 
     if ("error" in response) {
         return yield* new NimblebitError.NimblebitError({
@@ -216,7 +224,7 @@ export const device_newPlayer = Effect.gen(function* () {
 export const device_playerDetails = Effect.fn("device_playerDetails")(function* ({
     playerAuthKey,
     playerId,
-}: Schema.Schema.Type<NimblebitConfig.AuthenticatedPlayerSchema>) {
+}: Schema.Schema.Type<typeof NimblebitConfig.AuthenticatedPlayerSchema>) {
     const nimblebitAuth = yield* NimblebitAuth.NimblebitAuth;
     const httpClient = yield* HttpClient.HttpClient;
 
@@ -234,7 +242,7 @@ export const device_playerDetails = Effect.fn("device_playerDetails")(function* 
 
     const salt = yield* nimblebitAuth.salt;
     const hash = yield* nimblebitAuth.sign(`tt/${playerId}/${salt}${Redacted.value(playerAuthKey)}`);
-    const response = yield* endpoint({ path: { playerId, salt, hash } });
+    const response = yield* endpoint({ params: { playerId, salt, hash } });
 
     if ("error" in response) {
         return yield* new NimblebitError.NimblebitError({
@@ -274,7 +282,7 @@ export const device_verifyDevice = Effect.fn("device_verifyDevice")(function* ({
     });
 
     const playerId = yield* Effect.map(nimblebitAuth.burnbot, ({ playerId }) => playerId);
-    const response = yield* endpoint({ path: { playerId, verificationCode } });
+    const response = yield* endpoint({ params: { playerId, verificationCode } });
 
     if ("error" in response) {
         return yield* new NimblebitError.NimblebitError({
@@ -295,7 +303,7 @@ export const device_verifyDevice = Effect.fn("device_verifyDevice")(function* ({
  */
 export const device_registerEmail = Effect.fn("device_registerEmail")(function* ({
     playerEmail,
-}: Schema.Schema.Type<NimblebitConfig.UnauthenticatedPlayerSchema>) {
+}: Schema.Schema.Type<typeof NimblebitConfig.UnauthenticatedPlayerSchema>) {
     const nimblebitAuth = yield* NimblebitAuth.NimblebitAuth;
     const httpClient = yield* HttpClient.HttpClient;
 
@@ -320,7 +328,7 @@ export const device_registerEmail = Effect.fn("device_registerEmail")(function* 
 
     const response = yield* endpoint({
         payload: { email: playerEmail, promote: 1 },
-        path: { playerId: burnbot.playerId, salt, hash },
+        params: { playerId: burnbot.playerId, salt, hash },
     });
 
     if ("error" in response) {
@@ -343,7 +351,7 @@ export const device_registerEmail = Effect.fn("device_registerEmail")(function* 
 export const sync_pullSave = Effect.fn("sync_pullSave")(function* ({
     playerAuthKey,
     playerId,
-}: Schema.Schema.Type<NimblebitConfig.AuthenticatedPlayerSchema>) {
+}: Schema.Schema.Type<typeof NimblebitConfig.AuthenticatedPlayerSchema>) {
     const nimblebitAuth = yield* NimblebitAuth.NimblebitAuth;
     const httpClient = yield* HttpClient.HttpClient;
 
@@ -361,7 +369,7 @@ export const sync_pullSave = Effect.fn("sync_pullSave")(function* ({
 
     const salt = yield* nimblebitAuth.salt;
     const hash = yield* nimblebitAuth.sign(`tt/${playerId}/${salt}${Redacted.value(playerAuthKey)}`);
-    const response = yield* endpoint({ path: { playerId, salt, hash } });
+    const response = yield* endpoint({ params: { playerId, salt, hash } });
 
     if ("error" in response) {
         return yield* new NimblebitError.NimblebitError({
@@ -408,7 +416,9 @@ export const sync_pushSave = Effect.fn("sync_pushSave")(function* ({
     data,
     playerAuthKey,
     playerId,
-}: Schema.Schema.Type<NimblebitConfig.AuthenticatedPlayerSchema> & { data: Schema.Schema.Type<typeof SaveData> }) {
+}: Schema.Schema.Type<typeof NimblebitConfig.AuthenticatedPlayerSchema> & {
+    data: Schema.Schema.Type<typeof SaveData>;
+}) {
     const nimblebitAuth = yield* NimblebitAuth.NimblebitAuth;
     const httpClient = yield* HttpClient.HttpClient;
 
@@ -425,13 +435,13 @@ export const sync_pushSave = Effect.fn("sync_pushSave")(function* ({
     });
 
     const salt = yield* nimblebitAuth.salt;
-    const dataAsUint8Array = Pako.deflate(yield* Schema.encode(SaveData)(data));
+    const dataAsUint8Array = Pako.deflate(yield* Schema.encodeEffect(SaveData)(data));
     const dataAsBase64 = Encoding.encodeBase64(dataAsUint8Array);
     const hash = yield* nimblebitAuth.sign(`tt/${playerId}/${salt}${dataAsBase64}${Redacted.value(playerAuthKey)}`);
     const saveVersion = yield* sync_checkForNewerSave({ playerAuthKey, playerId });
 
     const response = yield* endpoint({
-        path: { playerId, salt, hash },
+        params: { playerId, salt, hash },
         payload: {
             mg: data.maxGold,
             doorman: data.doorman,
@@ -473,7 +483,7 @@ export const sync_pushSave = Effect.fn("sync_pushSave")(function* ({
 export const sync_checkForNewerSave = Effect.fn("sync_checkForNewerSave")(function* ({
     playerAuthKey,
     playerId,
-}: Schema.Schema.Type<NimblebitConfig.AuthenticatedPlayerSchema>) {
+}: Schema.Schema.Type<typeof NimblebitConfig.AuthenticatedPlayerSchema>) {
     const nimblebitAuth = yield* NimblebitAuth.NimblebitAuth;
     const httpClient = yield* HttpClient.HttpClient;
 
@@ -491,7 +501,7 @@ export const sync_checkForNewerSave = Effect.fn("sync_checkForNewerSave")(functi
 
     const salt = yield* nimblebitAuth.salt;
     const hash = yield* nimblebitAuth.sign(`tt/${playerId}/${salt}${Redacted.value(playerAuthKey)}`);
-    const response = yield* endpoint({ path: { playerId, salt, hash } });
+    const response = yield* endpoint({ params: { playerId, salt, hash } });
 
     if ("error" in response) {
         return yield* new NimblebitError.NimblebitError({
@@ -534,7 +544,7 @@ export const sync_pullSnapshot = Effect.fn("sync_pullSnapshot")(function* ({
     playerAuthKey,
     playerId,
     snapshotId,
-}: Schema.Schema.Type<NimblebitConfig.AuthenticatedPlayerSchema> & { snapshotId: number }) {
+}: Schema.Schema.Type<typeof NimblebitConfig.AuthenticatedPlayerSchema> & { snapshotId: number }) {
     const nimblebitAuth = yield* NimblebitAuth.NimblebitAuth;
     const httpClient = yield* HttpClient.HttpClient;
 
@@ -552,7 +562,7 @@ export const sync_pullSnapshot = Effect.fn("sync_pullSnapshot")(function* ({
 
     const salt = yield* nimblebitAuth.salt;
     const hash = yield* nimblebitAuth.sign(`tt/${playerId}/${snapshotId}/${salt}${Redacted.value(playerAuthKey)}`);
-    const response = yield* endpoint({ path: { playerId, salt, hash, snapshotId } });
+    const response = yield* endpoint({ params: { playerId, salt, hash, snapshotId } });
 
     if ("error" in response) {
         return yield* new NimblebitError.NimblebitError({
@@ -599,7 +609,9 @@ export const sync_pushSnapshot = Effect.fn("sync_pushSnapshot")(function* ({
     data,
     playerAuthKey,
     playerId,
-}: Schema.Schema.Type<NimblebitConfig.AuthenticatedPlayerSchema> & { data: Schema.Schema.Type<typeof SaveData> }) {
+}: Schema.Schema.Type<typeof NimblebitConfig.AuthenticatedPlayerSchema> & {
+    data: Schema.Schema.Type<typeof SaveData>;
+}) {
     const nimblebitAuth = yield* NimblebitAuth.NimblebitAuth;
     const httpClient = yield* HttpClient.HttpClient;
 
@@ -616,13 +628,13 @@ export const sync_pushSnapshot = Effect.fn("sync_pushSnapshot")(function* ({
     });
 
     const salt = yield* nimblebitAuth.salt;
-    const dataAsUint8Array = Pako.deflate(yield* Schema.encode(SaveData)(data));
+    const dataAsUint8Array = Pako.deflate(yield* Schema.encodeEffect(SaveData)(data));
     const dataAsBase64 = Encoding.encodeBase64(dataAsUint8Array);
     const hash = yield* nimblebitAuth.sign(`tt/${playerId}/${salt}${dataAsBase64}${Redacted.value(playerAuthKey)}`);
     const saveVersion = yield* sync_checkForNewerSave({ playerAuthKey, playerId });
 
     const response = yield* endpoint({
-        path: { playerId, salt, hash },
+        params: { playerId, salt, hash },
         payload: {
             mg: data.maxGold,
             doorman: data.doorman,
@@ -664,7 +676,7 @@ export const sync_pushSnapshot = Effect.fn("sync_pushSnapshot")(function* ({
 export const sync_retrieveSnapshotList = Effect.fn("sync_retrieveSnapshotList")(function* ({
     playerAuthKey,
     playerId,
-}: Schema.Schema.Type<NimblebitConfig.AuthenticatedPlayerSchema>) {
+}: Schema.Schema.Type<typeof NimblebitConfig.AuthenticatedPlayerSchema>) {
     const nimblebitAuth = yield* NimblebitAuth.NimblebitAuth;
     const httpClient = yield* HttpClient.HttpClient;
 
@@ -682,7 +694,7 @@ export const sync_retrieveSnapshotList = Effect.fn("sync_retrieveSnapshotList")(
 
     const salt = yield* nimblebitAuth.salt;
     const hash = yield* nimblebitAuth.sign(`tt/${playerId}/${salt}${Redacted.value(playerAuthKey)}`);
-    const response = yield* endpoint({ path: { playerId, salt, hash } });
+    const response = yield* endpoint({ params: { playerId, salt, hash } });
 
     if ("error" in response) {
         return yield* new NimblebitError.NimblebitError({
@@ -712,7 +724,7 @@ export const sync_retrieveSnapshotList = Effect.fn("sync_retrieveSnapshotList")(
 export const raffle_enterRaffle = Effect.fn("raffle_enterRaffle")(function* ({
     playerAuthKey,
     playerId,
-}: Schema.Schema.Type<NimblebitConfig.AuthenticatedPlayerSchema>) {
+}: Schema.Schema.Type<typeof NimblebitConfig.AuthenticatedPlayerSchema>) {
     const nimblebitAuth = yield* NimblebitAuth.NimblebitAuth;
     const httpClient = yield* HttpClient.HttpClient;
 
@@ -730,7 +742,7 @@ export const raffle_enterRaffle = Effect.fn("raffle_enterRaffle")(function* ({
 
     const salt = yield* nimblebitAuth.salt;
     const hash = yield* nimblebitAuth.sign(`tt/${playerId}/${salt}${Redacted.value(playerAuthKey)}`);
-    const response = yield* endpoint({ path: { playerId, salt, hash } });
+    const response = yield* endpoint({ params: { playerId, salt, hash } });
 
     if ("error" in response) {
         return yield* new NimblebitError.NimblebitError({
@@ -760,7 +772,7 @@ export const raffle_enterRaffle = Effect.fn("raffle_enterRaffle")(function* ({
 export const raffle_enterMultiRaffle = Effect.fn("raffle_enterMultiRaffle")(function* ({
     playerAuthKey,
     playerId,
-}: Schema.Schema.Type<NimblebitConfig.AuthenticatedPlayerSchema>) {
+}: Schema.Schema.Type<typeof NimblebitConfig.AuthenticatedPlayerSchema>) {
     const nimblebitAuth = yield* NimblebitAuth.NimblebitAuth;
     const httpClient = yield* HttpClient.HttpClient;
 
@@ -778,7 +790,7 @@ export const raffle_enterMultiRaffle = Effect.fn("raffle_enterMultiRaffle")(func
 
     const salt = yield* nimblebitAuth.salt;
     const hash = yield* nimblebitAuth.sign(`tt/${playerId}/${salt}${Redacted.value(playerAuthKey)}`);
-    const response = yield* endpoint({ path: { playerId, salt, hash } });
+    const response = yield* endpoint({ params: { playerId, salt, hash } });
 
     if ("error" in response) {
         return yield* new NimblebitError.NimblebitError({
@@ -808,7 +820,7 @@ export const raffle_enterMultiRaffle = Effect.fn("raffle_enterMultiRaffle")(func
 export const raffle_checkEnteredCurrent = Effect.fn("raffle_checkEnteredCurrent")(function* ({
     playerAuthKey,
     playerId,
-}: Schema.Schema.Type<NimblebitConfig.AuthenticatedPlayerSchema>) {
+}: Schema.Schema.Type<typeof NimblebitConfig.AuthenticatedPlayerSchema>) {
     const nimblebitAuth = yield* NimblebitAuth.NimblebitAuth;
     const httpClient = yield* HttpClient.HttpClient;
 
@@ -826,7 +838,7 @@ export const raffle_checkEnteredCurrent = Effect.fn("raffle_checkEnteredCurrent"
 
     const salt = yield* nimblebitAuth.salt;
     const hash = yield* nimblebitAuth.sign(`tt/${playerId}/${salt}${Redacted.value(playerAuthKey)}`);
-    const response = yield* endpoint({ path: { playerId, salt, hash } });
+    const response = yield* endpoint({ params: { playerId, salt, hash } });
 
     if ("error" in response) {
         return yield* new NimblebitError.NimblebitError({
@@ -851,10 +863,10 @@ export const social_sendItem = Effect.fn("social_sendItem")(function* ({
     itemType,
     playerAuthKey,
     playerId,
-}: Schema.Schema.Type<NimblebitConfig.AuthenticatedPlayerSchema> & {
+}: Schema.Schema.Type<typeof NimblebitConfig.AuthenticatedPlayerSchema> & {
     itemStr: string;
     itemType: (typeof SyncItemType.SyncItemType)[keyof typeof SyncItemType.SyncItemType];
-    friendId: Schema.Schema.Type<NimblebitConfig.PlayerIdSchema>;
+    friendId: Schema.Schema.Type<typeof NimblebitConfig.PlayerIdSchema>;
 }) {
     const nimblebitAuth = yield* NimblebitAuth.NimblebitAuth;
     const httpClient = yield* HttpClient.HttpClient;
@@ -878,7 +890,7 @@ export const social_sendItem = Effect.fn("social_sendItem")(function* ({
 
     const response = yield* endpoint({
         payload: { itemStr },
-        path: { playerId, friendId, salt, hash, syncItemType: itemType },
+        params: { playerId, friendId, salt, hash, syncItemType: itemType },
     });
 
     if ("error" in response) {
@@ -909,7 +921,7 @@ export const social_sendItem = Effect.fn("social_sendItem")(function* ({
 export const social_getGifts = Effect.fn("social_getGifts")(function* ({
     playerAuthKey,
     playerId,
-}: Schema.Schema.Type<NimblebitConfig.AuthenticatedPlayerSchema>) {
+}: Schema.Schema.Type<typeof NimblebitConfig.AuthenticatedPlayerSchema>) {
     const nimblebitAuth = yield* NimblebitAuth.NimblebitAuth;
     const httpClient = yield* HttpClient.HttpClient;
 
@@ -927,7 +939,7 @@ export const social_getGifts = Effect.fn("social_getGifts")(function* ({
 
     const salt = yield* nimblebitAuth.salt;
     const hash = yield* nimblebitAuth.sign(`tt/${playerId}/${salt}${Redacted.value(playerAuthKey)}`);
-    const response = yield* endpoint({ path: { playerId, salt, hash } });
+    const response = yield* endpoint({ params: { playerId, salt, hash } });
 
     if ("error" in response) {
         return yield* new NimblebitError.NimblebitError({
@@ -961,7 +973,7 @@ export const social_receiveGift = Effect.fn("social_receiveGift")(function* ({
     giftId,
     playerAuthKey,
     playerId,
-}: Schema.Schema.Type<NimblebitConfig.AuthenticatedPlayerSchema> & { giftId: number }) {
+}: Schema.Schema.Type<typeof NimblebitConfig.AuthenticatedPlayerSchema> & { giftId: number }) {
     const nimblebitAuth = yield* NimblebitAuth.NimblebitAuth;
     const httpClient = yield* HttpClient.HttpClient;
 
@@ -979,7 +991,7 @@ export const social_receiveGift = Effect.fn("social_receiveGift")(function* ({
 
     const salt = yield* nimblebitAuth.salt;
     const hash = yield* nimblebitAuth.sign(`tt/${playerId}/${giftId}/${salt}${Redacted.value(playerAuthKey)}`);
-    const response = yield* endpoint({ path: { playerId, giftId, salt, hash } });
+    const response = yield* endpoint({ params: { playerId, giftId, salt, hash } });
 
     if ("error" in response) {
         return yield* new NimblebitError.NimblebitError({
@@ -1010,8 +1022,8 @@ export const social_pullFriendMeta = Effect.fn("social_pullFriendMeta")(function
     friendId,
     playerAuthKey,
     playerId,
-}: Schema.Schema.Type<NimblebitConfig.AuthenticatedPlayerSchema> & {
-    friendId: Schema.Schema.Type<NimblebitConfig.PlayerIdSchema>;
+}: Schema.Schema.Type<typeof NimblebitConfig.AuthenticatedPlayerSchema> & {
+    friendId: Schema.Schema.Type<typeof NimblebitConfig.PlayerIdSchema>;
 }) {
     const nimblebitAuth = yield* NimblebitAuth.NimblebitAuth;
     const httpClient = yield* HttpClient.HttpClient;
@@ -1030,7 +1042,7 @@ export const social_pullFriendMeta = Effect.fn("social_pullFriendMeta")(function
 
     const salt = yield* nimblebitAuth.salt;
     const hash = yield* nimblebitAuth.sign(`tt/${playerId}/${salt}${friendId}${Redacted.value(playerAuthKey)}`);
-    const response = yield* endpoint({ path: { playerId, salt, hash }, payload: { friends: friendId } });
+    const response = yield* endpoint({ params: { playerId, salt, hash }, payload: { friends: friendId } });
 
     if ("error" in response) {
         return yield* new NimblebitError.NimblebitError({
@@ -1061,8 +1073,8 @@ export const social_pullFriendTower = Effect.fn("social_pullFriendTower")(functi
     friendId,
     playerAuthKey,
     playerId,
-}: Schema.Schema.Type<NimblebitConfig.AuthenticatedPlayerSchema> & {
-    friendId: Schema.Schema.Type<NimblebitConfig.PlayerIdSchema>;
+}: Schema.Schema.Type<typeof NimblebitConfig.AuthenticatedPlayerSchema> & {
+    friendId: Schema.Schema.Type<typeof NimblebitConfig.PlayerIdSchema>;
 }) {
     const nimblebitAuth = yield* NimblebitAuth.NimblebitAuth;
     const httpClient = yield* HttpClient.HttpClient;
@@ -1081,7 +1093,7 @@ export const social_pullFriendTower = Effect.fn("social_pullFriendTower")(functi
 
     const salt = yield* nimblebitAuth.salt;
     const hash = yield* nimblebitAuth.sign(`tt/${playerId}/${friendId}/${salt}${Redacted.value(playerAuthKey)}`);
-    const response = yield* endpoint({ path: { playerId, friendId, salt, hash } });
+    const response = yield* endpoint({ params: { playerId, friendId, salt, hash } });
 
     if ("error" in response) {
         return yield* new NimblebitError.NimblebitError({
@@ -1128,8 +1140,8 @@ export const social_retrieveFriendsSnapshotList = Effect.fn("social_retrieveFrie
     friendId,
     playerAuthKey,
     playerId,
-}: Schema.Schema.Type<NimblebitConfig.AuthenticatedPlayerSchema> & {
-    friendId: Schema.Schema.Type<NimblebitConfig.PlayerIdSchema>;
+}: Schema.Schema.Type<typeof NimblebitConfig.AuthenticatedPlayerSchema> & {
+    friendId: Schema.Schema.Type<typeof NimblebitConfig.PlayerIdSchema>;
 }) {
     const nimblebitAuth = yield* NimblebitAuth.NimblebitAuth;
     const httpClient = yield* HttpClient.HttpClient;
@@ -1148,7 +1160,7 @@ export const social_retrieveFriendsSnapshotList = Effect.fn("social_retrieveFrie
 
     const salt = yield* nimblebitAuth.salt;
     const hash = yield* nimblebitAuth.sign(`tt/${playerId}/${friendId}/${salt}${Redacted.value(playerAuthKey)}`);
-    const response = yield* endpoint({ path: { playerId, friendId, salt, hash } });
+    const response = yield* endpoint({ params: { playerId, friendId, salt, hash } });
 
     if ("error" in response) {
         return yield* new NimblebitError.NimblebitError({
@@ -1178,7 +1190,7 @@ export const social_retrieveFriendsSnapshotList = Effect.fn("social_retrieveFrie
 export const social_getVisits = Effect.fn("social_getVisits")(function* ({
     playerAuthKey,
     playerId,
-}: Schema.Schema.Type<NimblebitConfig.AuthenticatedPlayerSchema>) {
+}: Schema.Schema.Type<typeof NimblebitConfig.AuthenticatedPlayerSchema>) {
     const nimblebitAuth = yield* NimblebitAuth.NimblebitAuth;
     const httpClient = yield* HttpClient.HttpClient;
 
@@ -1196,7 +1208,7 @@ export const social_getVisits = Effect.fn("social_getVisits")(function* ({
 
     const salt = yield* nimblebitAuth.salt;
     const hash = yield* nimblebitAuth.sign(`tt/${playerId}/${salt}${Redacted.value(playerAuthKey)}`);
-    const response = yield* endpoint({ path: { playerId, salt, hash } });
+    const response = yield* endpoint({ params: { playerId, salt, hash } });
 
     if ("error" in response) {
         return yield* new NimblebitError.NimblebitError({
@@ -1230,12 +1242,12 @@ export const social_visit = Effect.fn("social_visit")(function* ({
     friendId,
     playerAuthKey,
     playerId,
-}: Schema.Schema.Type<NimblebitConfig.AuthenticatedPlayerSchema> & {
-    friendId: Schema.Schema.Type<NimblebitConfig.PlayerIdSchema>;
+}: Schema.Schema.Type<typeof NimblebitConfig.AuthenticatedPlayerSchema> & {
+    friendId: Schema.Schema.Type<typeof NimblebitConfig.PlayerIdSchema>;
 }) {
     const { data: saveData } = yield* sync_pullSave({ playerAuthKey, playerId });
-    const { doorman } = yield* Schema.decode(SaveData)(saveData);
-    const doormanItemStr = yield* Schema.encode(Bitizen.Bitizen)(doorman);
+    const { doorman } = yield* Schema.decodeEffect(SaveData)(saveData);
+    const doormanItemStr = yield* Schema.encodeEffect(Bitizen.Bitizen)(doorman);
     yield* social_sendItem({
         playerId,
         playerAuthKey,

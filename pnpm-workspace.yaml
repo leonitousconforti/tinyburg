@@ -1,5 +1,29 @@
+hoist: false
+hoistPattern: []
+autoInstallPeers: false
+strictPeerDependencies: true
+publicHoistPattern:
+  - "vitest"
+  - "@types/*"
+  - "@vitest/*"
+  - "@effect/vitest"
+
+recursiveInstall: true
+dedupePeerDependents: false
+linkWorkspacePackages: true
+hoistWorkspacePackages: false
+preferWorkspacePackages: true
+resolvePeersFromWorkspaceRoot: false
+
+allowBuilds:
+  '@parcel/watcher': true
+  esbuild: true
+  frida: true
+  msgpackr-extract: true
+  sharp: true
+
 packages:
   - apps/*
-  - packages/*
   - examples/*
+  - packages/*
   - scratchpad

@@ -1,11 +1,12 @@
 import "@efffrida/polyfills";
 import "frida-il2cpp-bridge";
 
-import { RpcSerialization, RpcServer } from "@effect/rpc";
+import { Array, Cause, Effect, Function, Layer, Option, pipe, Record, Schedule, Schema, Tuple, Result } from "effect";
+import { RpcSerialization, RpcServer } from "effect/unstable/rpc";
+
 import { Assembly, Class, Extensions, FridaIl2cppBridge } from "@efffrida/il2cpp-bridge";
 import { FridaRuntime } from "@efffrida/platform";
 import { FridaRpcServer } from "@efffrida/rpc/frida";
-import { Array, Cause, Effect, Function, Layer, Option, pipe, Record, Schedule, Schema, Tuple } from "effect";
 
 import { GameState, Rpcs, TowerCredentials } from "../shared/Rpcs.ts";
 
@@ -18,12 +19,11 @@ export const liftNimblebitDSO = (object: Il2Cpp.Object): Extensions.Dictionary<I
 };
 
 /** @internal */
-export const readString = (object: Il2Cpp.Field.Type): Option.Option<string> => {
+export const readString = (object: Il2Cpp.Field.Type): Result.Result<string, void> => {
     if (object instanceof Il2Cpp.String) {
-        return Option.fromNullable(object.isNull() ? null : object.content);
-    } else {
-        return Option.some(object.toString());
-    }
+        if (object.isNull()) return Result.failVoid;
+        else return Result.succeed(object.content!);
+    } else return Result.succeed(object.toString());
 };
 
 /** @internal */
@@ -34,7 +34,8 @@ export const objectReadAllFields = (object: Il2Cpp.Object): Record<string, strin
         Array.filter((field) => !field.name.startsWith("_")),
         Array.filterMap((classField) => {
             const objectField = object.field(classField.name);
-            return Option.product(Option.some(objectField.name), readString(objectField.value));
+            const maybeString = readString(objectField.value);
+            return Result.map(maybeString, (string) => Tuple.make(objectField.name, string));
         }),
         Record.fromEntries
     );
@@ -60,11 +61,11 @@ const RpcsLive = Rpcs.toLayer(
         const waitForInstance = <R = never>(
             className: string,
             instanceFieldName: string | undefined = "instance",
-            policy: Schedule.Schedule<unknown, Cause.NoSuchElementException, R> | undefined = Schedule.addDelay(
+            policy: Schedule.Schedule<unknown, unknown, Cause.NoSuchElementError, R> | undefined = Schedule.addDelay(
                 Schedule.recurs(3),
-                () => "2 seconds"
+                () => Effect.succeed("2 seconds")
             )
-        ): Effect.Effect<void, Cause.NoSuchElementException, R> =>
+        ): Effect.Effect<void, Cause.NoSuchElementError, R> =>
             pipe(
                 assemblyCached("Assembly-CSharp"),
                 Effect.map((assembly) => assembly.image),
@@ -76,15 +77,16 @@ const RpcsLive = Rpcs.toLayer(
                         !field.value.isNull() &&
                         !field.handle.equals(ptr(0x0)) &&
                         !field.value.handle.equals(ptr(0x0)),
-                    () => new Cause.NoSuchElementException(`${className}.${instanceFieldName} is null`)
+                    () => new Cause.NoSuchElementError(`${className}.${instanceFieldName} is null`)
                 ),
                 Effect.tap((field) =>
                     Effect.try({
                         try: () => field.value.class.name,
-                        catch: () => new Cause.NoSuchElementException(`${className} class is not yet available`),
+                        catch: () => new Cause.NoSuchElementError(`${className} class is not yet available`),
                     })
                 ),
-                Effect.retry(policy)
+                Effect.retry(policy),
+                Effect.asVoid
             );
 
         // Loading necessary classes
@@ -104,7 +106,7 @@ const RpcsLive = Rpcs.toLayer(
             );
 
             const versionParts = Array.fromIterable(VersionStringMethod.invoke());
-            const decode = Schema.decodeUnknown(Schema.Tuple(Schema.Int, Schema.Int, Schema.Int));
+            const decode = Schema.decodeUnknownEffect(Schema.Tuple([Schema.Int, Schema.Int, Schema.Int]));
             return yield* Effect.map(decode(versionParts), ([major, minor, patch]) => `${major}.${minor}.${patch}`);
         }, Effect.orDie);
 
@@ -129,7 +131,7 @@ const RpcsLive = Rpcs.toLayer(
                 ? Option.some(PlayerEmailField.invoke().content)
                 : Option.none();
 
-            return yield* Schema.decodeUnknown(TowerCredentials)({
+            return yield* Schema.decodeUnknownEffect(TowerCredentials)({
                 playerId,
                 playerAuthKey,
                 playerEmail,
@@ -159,7 +161,7 @@ const RpcsLive = Rpcs.toLayer(
             const GoldenTicketsMethod = yield* tryMethodCached<Il2Cpp.String>(VPlayerClass, "get_gold");
             const ElevatorSpeedMethod = yield* tryMethodCached<Il2Cpp.String>(VPlayerClass, "get_ElevatorSpeed");
 
-            return yield* Schema.decodeUnknown(GameState)({
+            return yield* Schema.decodeUnknownEffect(GameState)({
                 bux: Number(BuxMethod.invoke().content),
                 coins: Number(CoinsMethod.invoke().content),
                 elevatorSpeed: Number(ElevatorSpeedMethod.invoke().content),
@@ -211,7 +213,7 @@ const RpcsLive = Rpcs.toLayer(
             );
 
             if (elevators.length !== numElevators) {
-                return yield* Effect.dieMessage(
+                return yield* Effect.die(
                     `Expected to read ${numElevators} elevators, but only read ${elevators.length} instead`
                 );
             }
@@ -237,9 +239,7 @@ const RpcsLive = Rpcs.toLayer(
             );
 
             if (roofs.length !== numRoofs) {
-                return yield* Effect.dieMessage(
-                    `Expected to read ${numRoofs} roofs, but only read ${roofs.length} instead`
-                );
+                return yield* Effect.die(`Expected to read ${numRoofs} roofs, but only read ${roofs.length} instead`);
             }
 
             return roofs;
@@ -348,7 +348,7 @@ const RpcsLive = Rpcs.toLayer(
                 liftNimblebitDSO,
                 (dict) => dict.toRecord([Il2Cpp.string("VIP")]),
                 Record.map((value) => value.toString()),
-                Record.map((boolean) => (boolean.toLowerCase() === "true" ? true : false))
+                Record.map((boolean) => boolean.toLowerCase() === "true")
             );
 
             const pets = pipe(

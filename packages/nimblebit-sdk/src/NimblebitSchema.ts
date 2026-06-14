@@ -5,30 +5,17 @@
  * @category Schemas
  */
 
-import * as EffectSchemas from "effect-schemas";
-import * as Schema from "effect/Schema";
+import type * as Schema from "effect/Schema";
 
 import * as internal from "./internal/Schema.ts";
 
-/**
- * @since 1.0.0
- * @category Types
- */
-export type ValidateNimblebitItemSchema<
-    Items extends ReadonlyArray<{
-        property: PropertyKey;
-        schema: Schema.Schema.Any;
-    }>,
-> = {
-    [K in keyof Items]: Items[K] extends {
-        property: infer P;
-        schema: Schema.Schema<infer _A, infer _I, infer _R>;
+declare module "effect/Schema" {
+    namespace Annotations {
+        interface Augment {
+            readonly nimblebitSaveDataKey?: string | undefined;
+        }
     }
-        ? [_I] extends [string | Readonly<string>]
-            ? { property: P; schema: Items[K]["schema"] }
-            : { property: P; schema: `Nimblebit ordered list items schemas must be encodeable to strings` }
-        : Items[K];
-};
+}
 
 /**
  * @since 1.0.0
@@ -37,99 +24,114 @@ export type ValidateNimblebitItemSchema<
 export const parseNimblebitOrderedList: <
     const Items extends ReadonlyArray<{
         property: PropertyKey;
-        schema: Schema.Schema.Any;
+        schema: Schema.Codec<any, string, any, any> & {
+            readonly "~encoded.optionality": "required";
+            readonly "~encoded.mutability": "readonly";
+            readonly "~type.optionality": "required";
+            readonly "~type.mutability": "readonly";
+        };
     }>,
 >(
-    items: ValidateNimblebitItemSchema<Items>,
+    items: Items,
     separator?: string | undefined
-) => Schema.transformOrFail<
-    typeof Schema.String,
-    Schema.extend<
-        Schema.Struct<{
+) => Schema.decodeTo<
+    Schema.Struct<
+        {
             [K in Items[number]["property"]]: Extract<
                 Items[number],
                 {
                     property: K;
                 }
             >["schema"];
-        }>,
-        Schema.Struct<{
-            $unknown: Schema.Array$<typeof Schema.String>;
-        }>
+        } & {
+            readonly $unknown: Schema.$Array<Schema.String>;
+        }
     >,
-    Items[number]["schema"]["Context"]
+    Schema.String,
+    Items[number]["schema"]["DecodingServices"],
+    Items[number]["schema"]["EncodingServices"]
 > = internal.parseNimblebitOrderedList;
 
 /**
  * @since 1.0.0
  * @category Parsers
  */
-export const parseNimblebitObject: <Fields extends Schema.Struct.Fields>(
+export const parseNimblebitObject: <
+    Fields extends {
+        readonly [x: PropertyKey]: Schema.Codec<any, string, any, any>;
+    },
+>(
     struct: Schema.Struct<Fields>
-) => Schema.transformOrFail<
-    typeof Schema.String,
-    Schema.extend<
-        Schema.Struct<Fields>,
-        Schema.Struct<{
-            $unknown: Schema.Record$<
-                typeof Schema.String,
+) => Schema.decodeTo<
+    Schema.Struct<
+        Fields & {
+            readonly $unknown: Schema.$Record<
+                Schema.String,
                 Schema.Struct<{
-                    value: typeof Schema.String;
+                    value: Schema.String;
                     $locationMetadata: Schema.Struct<{
-                        after: Schema.NullishOr<typeof Schema.String>;
+                        after: Schema.NullishOr<Schema.String>;
                     }>;
                 }>
             >;
-        }>
+        }
     >,
-    never
+    Schema.String,
+    Schema.Struct.DecodingServices<Fields>,
+    Schema.Struct.EncodingServices<Fields>
 > = internal.parseNimblebitObject;
 
 /**
  * @since 1.0.0
  * @category Schemas
  */
-export const CSharpDate = Schema.transform(
+export const CSharpDate: Schema.decodeTo<
+    Schema.Union<
+        readonly [
+            Schema.Date,
+            Schema.Struct<{
+                readonly date: Schema.Date;
+                readonly extraTicks: Schema.BigInt;
+            }>,
+        ]
+    >,
     Schema.BigInt,
-    Schema.Union(
-        Schema.DateFromSelf,
-        Schema.Struct({
-            date: Schema.DateFromSelf,
-            extraTicks: Schema.BigIntFromSelf,
-        })
-    ),
-    {
-        encode: (input) => {
-            const date = "date" in input ? input.date : input;
-            const extraTicks = "extraTicks" in input ? input.extraTicks : 0n;
-            return BigInt(date.getTime()) * 10_000n + 621_355_968_000_000_000n + extraTicks;
-        },
-        decode: (cSharpTicks) => {
-            const ms = (cSharpTicks - 621_355_968_000_000_000n) / 10_000n;
-            return { date: new Date(Number(ms)), extraTicks: cSharpTicks % 10_000n } as const;
-        },
-    }
-);
+    never,
+    never
+> = internal.CSharpDate;
 
 /**
  * @since 1.0.0
  * @category Schemas
  */
-export const UnityColor = Schema.transform(
-    Schema.TemplateLiteralParser(
-        Schema.compose(Schema.NumberFromString, Schema.NonNegativeInt),
-        ":",
-        Schema.compose(Schema.NumberFromString, Schema.NonNegativeInt),
-        ":",
-        Schema.compose(Schema.NumberFromString, Schema.NonNegativeInt)
-    ),
-    Schema.Struct({
-        r: EffectSchemas.Number.U8,
-        g: EffectSchemas.Number.U8,
-        b: EffectSchemas.Number.U8,
-    }),
-    {
-        encode: (color) => [color.r, ":", color.g, ":", color.b] as const,
-        decode: (parts) => ({ r: parts[0], g: parts[2], b: parts[4] }) as const,
-    }
-);
+export const UnityColor: Schema.decodeTo<
+    Schema.Struct<{
+        readonly r: Schema.Int;
+        readonly g: Schema.Int;
+        readonly b: Schema.Int;
+    }>,
+    Schema.TemplateLiteralParser<
+        readonly [
+            Schema.compose<Schema.Finite, Schema.NumberFromString>,
+            ":",
+            Schema.compose<Schema.Finite, Schema.NumberFromString>,
+            ":",
+            Schema.compose<Schema.Finite, Schema.NumberFromString>,
+        ]
+    >,
+    never,
+    never
+> = internal.UnityColor;
+
+/**
+ * @since 1.0.0
+ * @category Schemas
+ */
+export const split: (
+    options?:
+        | {
+              readonly separator?: string | undefined;
+          }
+        | undefined
+) => (from: Schema.String) => Schema.decodeTo<Schema.$Array<Schema.String>, Schema.String, never, never> =
+    internal.split;

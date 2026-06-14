@@ -2,7 +2,7 @@
   "$unknown": {
     "Pvip": {
       "$locationMetadata": {
-        "after": "Prf",
+        "after": "raffleID",
       },
       "value": "",
     },
@@ -542,35 +542,34 @@
   "bbPosts": [
     {
       "$unknown": {},
-      "_tid": "-2000099690",
       "bitizen": {
         "$unknown": {},
         "attributes": {
           "$unknown": [],
           "accessories": {
             "earrings": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 174,
                 "g": 27,
                 "r": 43,
               },
             },
             "glasses": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": 0,
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": 0,
             },
             "hairAccessory": {
-              "_id": "Either",
-              "_tag": "Right",
-              "right": 1,
+              "_id": "Result",
+              "_tag": "Success",
+              "value": 1,
             },
             "hat": {
-              "_id": "Either",
-              "_tag": "Right",
-              "right": {
+              "_id": "Result",
+              "_tag": "Success",
+              "value": {
                 "color": {
                   "b": 78,
                   "g": 230,
@@ -581,9 +580,9 @@
               },
             },
             "tie": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 227,
                 "g": 48,
                 "r": 241,
@@ -635,38 +634,38 @@
       "media_path": "",
       "media_type": "0",
       "source_name": "MELMEL",
+      "tid": "-2000099690",
     },
     {
       "$unknown": {},
-      "_tid": "-2102604642",
       "bitizen": {
         "$unknown": {},
         "attributes": {
           "$unknown": [],
           "accessories": {
             "earrings": {
-              "_id": "Either",
-              "_tag": "Right",
-              "right": {
+              "_id": "Result",
+              "_tag": "Success",
+              "value": {
                 "b": 103,
                 "g": 100,
                 "r": 31,
               },
             },
             "glasses": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": 0,
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": 0,
             },
             "hairAccessory": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": 0,
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": 0,
             },
             "hat": {
-              "_id": "Either",
-              "_tag": "Right",
-              "right": {
+              "_id": "Result",
+              "_tag": "Success",
+              "value": {
                 "color": {
                   "b": 209,
                   "g": 134,
@@ -677,9 +676,9 @@
               },
             },
             "tie": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 18,
                 "g": 77,
                 "r": 27,
@@ -731,38 +730,38 @@
       "media_path": "",
       "media_type": "0",
       "source_name": "BRENZA",
+      "tid": "-2102604642",
     },
     {
       "$unknown": {},
-      "_tid": "-169966414",
       "bitizen": {
         "$unknown": {},
         "attributes": {
           "$unknown": [],
           "accessories": {
             "earrings": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 206,
                 "g": 21,
                 "r": 90,
               },
             },
             "glasses": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": 0,
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": 0,
             },
             "hairAccessory": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": 0,
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": 0,
             },
             "hat": {
-              "_id": "Either",
-              "_tag": "Right",
-              "right": {
+              "_id": "Result",
+              "_tag": "Success",
+              "value": {
                 "color": {
                   "b": 147,
                   "g": 2,
@@ -773,9 +772,9 @@
               },
             },
             "tie": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 37,
                 "g": 128,
                 "r": 68,
@@ -827,38 +826,38 @@
       "media_path": "",
       "media_type": "0",
       "source_name": "THELAGO",
+      "tid": "-169966414",
     },
     {
       "$unknown": {},
-      "_tid": "-1980422510",
       "bitizen": {
         "$unknown": {},
         "attributes": {
           "$unknown": [],
           "accessories": {
             "earrings": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 113,
                 "g": 114,
                 "r": 203,
               },
             },
             "glasses": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": 0,
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": 0,
             },
             "hairAccessory": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": 0,
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": 0,
             },
             "hat": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "color": {
                   "b": 130,
                   "g": 35,
@@ -868,9 +867,9 @@
               },
             },
             "tie": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 197,
                 "g": 60,
                 "r": 87,
@@ -922,38 +921,38 @@
       "media_path": "",
       "media_type": "0",
       "source_name": "KENNA",
+      "tid": "-1980422510",
     },
     {
       "$unknown": {},
-      "_tid": "-1610721506",
       "bitizen": {
         "$unknown": {},
         "attributes": {
           "$unknown": [],
           "accessories": {
             "earrings": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 108,
                 "g": 53,
                 "r": 206,
               },
             },
             "glasses": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": 0,
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": 0,
             },
             "hairAccessory": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": 0,
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": 0,
             },
             "hat": {
-              "_id": "Either",
-              "_tag": "Right",
-              "right": {
+              "_id": "Result",
+              "_tag": "Success",
+              "value": {
                 "color": {
                   "b": 193,
                   "g": 88,
@@ -964,9 +963,9 @@
               },
             },
             "tie": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 108,
                 "g": 254,
                 "r": 15,
@@ -1002,6 +1001,7 @@
             "service": 4,
           },
         },
+        "costume": "",
         "dreamJobIndex": 18,
         "homeIndex": -1,
         "placedDreamJob": false,
@@ -1017,38 +1017,38 @@
       "media_path": "",
       "media_type": "0",
       "source_name": "JEEP",
+      "tid": "-1610721506",
     },
     {
       "$unknown": {},
-      "_tid": "-1813703504",
       "bitizen": {
         "$unknown": {},
         "attributes": {
           "$unknown": [],
           "accessories": {
             "earrings": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 193,
                 "g": 78,
                 "r": 33,
               },
             },
             "glasses": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": 0,
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": 0,
             },
             "hairAccessory": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": 0,
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": 0,
             },
             "hat": {
-              "_id": "Either",
-              "_tag": "Right",
-              "right": {
+              "_id": "Result",
+              "_tag": "Success",
+              "value": {
                 "color": {
                   "b": 180,
                   "g": 206,
@@ -1059,9 +1059,9 @@
               },
             },
             "tie": {
-              "_id": "Either",
-              "_tag": "Right",
-              "right": {
+              "_id": "Result",
+              "_tag": "Success",
+              "value": {
                 "b": 220,
                 "g": 139,
                 "r": 128,
@@ -1113,38 +1113,38 @@
       "media_path": "",
       "media_type": "0",
       "source_name": "DEBI",
+      "tid": "-1813703504",
     },
     {
       "$unknown": {},
-      "_tid": "-1625503527",
       "bitizen": {
         "$unknown": {},
         "attributes": {
           "$unknown": [],
           "accessories": {
             "earrings": {
-              "_id": "Either",
-              "_tag": "Right",
-              "right": {
+              "_id": "Result",
+              "_tag": "Success",
+              "value": {
                 "b": 251,
                 "g": 144,
                 "r": 195,
               },
             },
             "glasses": {
-              "_id": "Either",
-              "_tag": "Right",
-              "right": 0,
+              "_id": "Result",
+              "_tag": "Success",
+              "value": 0,
             },
             "hairAccessory": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": 0,
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": 0,
             },
             "hat": {
-              "_id": "Either",
-              "_tag": "Right",
-              "right": {
+              "_id": "Result",
+              "_tag": "Success",
+              "value": {
                 "color": {
                   "b": 93,
                   "g": 242,
@@ -1155,9 +1155,9 @@
               },
             },
             "tie": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 58,
                 "g": 130,
                 "r": 168,
@@ -1193,6 +1193,7 @@
             "service": 3,
           },
         },
+        "costume": "",
         "dreamJobIndex": 97,
         "homeIndex": -1,
         "placedDreamJob": false,
@@ -1208,38 +1209,38 @@
       "media_path": "",
       "media_type": "0",
       "source_name": "4 syd",
+      "tid": "-1625503527",
     },
     {
       "$unknown": {},
-      "_tid": "-1766436151",
       "bitizen": {
         "$unknown": {},
         "attributes": {
           "$unknown": [],
           "accessories": {
             "earrings": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 205,
                 "g": 161,
                 "r": 238,
               },
             },
             "glasses": {
-              "_id": "Either",
-              "_tag": "Right",
-              "right": 0,
+              "_id": "Result",
+              "_tag": "Success",
+              "value": 0,
             },
             "hairAccessory": {
-              "_id": "Either",
-              "_tag": "Right",
-              "right": 1,
+              "_id": "Result",
+              "_tag": "Success",
+              "value": 1,
             },
             "hat": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "color": {
                   "b": 1,
                   "g": 127,
@@ -1249,9 +1250,9 @@
               },
             },
             "tie": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 119,
                 "g": 203,
                 "r": 64,
@@ -1303,38 +1304,38 @@
       "media_path": "",
       "media_type": "0",
       "source_name": "STEELWOOL ",
+      "tid": "-1766436151",
     },
     {
       "$unknown": {},
-      "_tid": "-2118087720",
       "bitizen": {
         "$unknown": {},
         "attributes": {
           "$unknown": [],
           "accessories": {
             "earrings": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 91,
                 "g": 226,
                 "r": 130,
               },
             },
             "glasses": {
-              "_id": "Either",
-              "_tag": "Right",
-              "right": 0,
+              "_id": "Result",
+              "_tag": "Success",
+              "value": 0,
             },
             "hairAccessory": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": 0,
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": 0,
             },
             "hat": {
-              "_id": "Either",
-              "_tag": "Right",
-              "right": {
+              "_id": "Result",
+              "_tag": "Success",
+              "value": {
                 "color": {
                   "b": 179,
                   "g": 184,
@@ -1345,9 +1346,9 @@
               },
             },
             "tie": {
-              "_id": "Either",
-              "_tag": "Right",
-              "right": {
+              "_id": "Result",
+              "_tag": "Success",
+              "value": {
                 "b": 214,
                 "g": 180,
                 "r": 79,
@@ -1399,38 +1400,38 @@
       "media_path": "",
       "media_type": "0",
       "source_name": "WURE",
+      "tid": "-2118087720",
     },
     {
       "$unknown": {},
-      "_tid": "-1581236938",
       "bitizen": {
         "$unknown": {},
         "attributes": {
           "$unknown": [],
           "accessories": {
             "earrings": {
-              "_id": "Either",
-              "_tag": "Right",
-              "right": {
+              "_id": "Result",
+              "_tag": "Success",
+              "value": {
                 "b": 88,
                 "g": 213,
                 "r": 119,
               },
             },
             "glasses": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": 0,
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": 0,
             },
             "hairAccessory": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": 0,
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": 0,
             },
             "hat": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "color": {
                   "b": 207,
                   "g": 106,
@@ -1440,9 +1441,9 @@
               },
             },
             "tie": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 173,
                 "g": 36,
                 "r": 58,
@@ -1494,38 +1495,38 @@
       "media_path": "",
       "media_type": "0",
       "source_name": "SAGECLAW ",
+      "tid": "-1581236938",
     },
     {
       "$unknown": {},
-      "_tid": "-209436850",
       "bitizen": {
         "$unknown": {},
         "attributes": {
           "$unknown": [],
           "accessories": {
             "earrings": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 203,
                 "g": 92,
                 "r": 202,
               },
             },
             "glasses": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": 0,
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": 0,
             },
             "hairAccessory": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": 0,
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": 0,
             },
             "hat": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "color": {
                   "b": 130,
                   "g": 104,
@@ -1535,9 +1536,9 @@
               },
             },
             "tie": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 203,
                 "g": 148,
                 "r": 136,
@@ -1589,38 +1590,38 @@
       "media_path": "",
       "media_type": "0",
       "source_name": "gingko",
+      "tid": "-209436850",
     },
     {
       "$unknown": {},
-      "_tid": "-555447939",
       "bitizen": {
         "$unknown": {},
         "attributes": {
           "$unknown": [],
           "accessories": {
             "earrings": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 64,
                 "g": 138,
                 "r": 165,
               },
             },
             "glasses": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": 0,
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": 0,
             },
             "hairAccessory": {
-              "_id": "Either",
-              "_tag": "Right",
-              "right": 0,
+              "_id": "Result",
+              "_tag": "Success",
+              "value": 0,
             },
             "hat": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "color": {
                   "b": 222,
                   "g": 242,
@@ -1630,9 +1631,9 @@
               },
             },
             "tie": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 153,
                 "g": 112,
                 "r": 110,
@@ -1684,38 +1685,38 @@
       "media_path": "",
       "media_type": "0",
       "source_name": "jeremy",
+      "tid": "-555447939",
     },
     {
       "$unknown": {},
-      "_tid": "-301649055",
       "bitizen": {
         "$unknown": {},
         "attributes": {
           "$unknown": [],
           "accessories": {
             "earrings": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 122,
                 "g": 198,
                 "r": 147,
               },
             },
             "glasses": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": 0,
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": 0,
             },
             "hairAccessory": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": 0,
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": 0,
             },
             "hat": {
-              "_id": "Either",
-              "_tag": "Right",
-              "right": {
+              "_id": "Result",
+              "_tag": "Success",
+              "value": {
                 "color": {
                   "b": 136,
                   "g": 242,
@@ -1726,9 +1727,9 @@
               },
             },
             "tie": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 207,
                 "g": 76,
                 "r": 20,
@@ -1764,6 +1765,7 @@
             "service": 1,
           },
         },
+        "costume": "",
         "dreamJobIndex": 142,
         "homeIndex": -1,
         "placedDreamJob": false,
@@ -1779,38 +1781,38 @@
       "media_path": "",
       "media_type": "0",
       "source_name": "KAYO",
+      "tid": "-301649055",
     },
     {
       "$unknown": {},
-      "_tid": "-1423160177",
       "bitizen": {
         "$unknown": {},
         "attributes": {
           "$unknown": [],
           "accessories": {
             "earrings": {
-              "_id": "Either",
-              "_tag": "Right",
-              "right": {
+              "_id": "Result",
+              "_tag": "Success",
+              "value": {
                 "b": 127,
                 "g": 111,
                 "r": 98,
               },
             },
             "glasses": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": 0,
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": 0,
             },
             "hairAccessory": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": 0,
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": 0,
             },
             "hat": {
-              "_id": "Either",
-              "_tag": "Right",
-              "right": {
+              "_id": "Result",
+              "_tag": "Success",
+              "value": {
                 "color": {
                   "b": 55,
                   "g": 175,
@@ -1821,9 +1823,9 @@
               },
             },
             "tie": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 126,
                 "g": 236,
                 "r": 43,
@@ -1859,6 +1861,7 @@
             "service": 2,
           },
         },
+        "costume": "",
         "dreamJobIndex": 67,
         "homeIndex": -1,
         "placedDreamJob": false,
@@ -1874,38 +1877,38 @@
       "media_path": "",
       "media_type": "0",
       "source_name": "danni",
+      "tid": "-1423160177",
     },
     {
       "$unknown": {},
-      "_tid": "-199534911",
       "bitizen": {
         "$unknown": {},
         "attributes": {
           "$unknown": [],
           "accessories": {
             "earrings": {
-              "_id": "Either",
-              "_tag": "Right",
-              "right": {
+              "_id": "Result",
+              "_tag": "Success",
+              "value": {
                 "b": 103,
                 "g": 100,
                 "r": 31,
               },
             },
             "glasses": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": 0,
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": 0,
             },
             "hairAccessory": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": 0,
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": 0,
             },
             "hat": {
-              "_id": "Either",
-              "_tag": "Right",
-              "right": {
+              "_id": "Result",
+              "_tag": "Success",
+              "value": {
                 "color": {
                   "b": 209,
                   "g": 134,
@@ -1916,9 +1919,9 @@
               },
             },
             "tie": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 18,
                 "g": 77,
                 "r": 27,
@@ -1970,38 +1973,38 @@
       "media_path": "",
       "media_type": "0",
       "source_name": "BRENZA",
+      "tid": "-199534911",
     },
     {
       "$unknown": {},
-      "_tid": "-1607622946",
       "bitizen": {
         "$unknown": {},
         "attributes": {
           "$unknown": [],
           "accessories": {
             "earrings": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 255,
                 "g": 6,
                 "r": 36,
               },
             },
             "glasses": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": 0,
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": 0,
             },
             "hairAccessory": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": 0,
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": 0,
             },
             "hat": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "color": {
                   "b": 5,
                   "g": 49,
@@ -2011,9 +2014,9 @@
               },
             },
             "tie": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 179,
                 "g": 84,
                 "r": 140,
@@ -2065,38 +2068,38 @@
       "media_path": "",
       "media_type": "0",
       "source_name": "PIERRE",
+      "tid": "-1607622946",
     },
     {
       "$unknown": {},
-      "_tid": "-1302796253",
       "bitizen": {
         "$unknown": {},
         "attributes": {
           "$unknown": [],
           "accessories": {
             "earrings": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 61,
                 "g": 97,
                 "r": 125,
               },
             },
             "glasses": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": 0,
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": 0,
             },
             "hairAccessory": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": 0,
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": 0,
             },
             "hat": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "color": {
                   "b": 105,
                   "g": 138,
@@ -2106,9 +2109,9 @@
               },
             },
             "tie": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 232,
                 "g": 74,
                 "r": 122,
@@ -2160,38 +2163,38 @@
       "media_path": "",
       "media_type": "0",
       "source_name": "BECCA",
+      "tid": "-1302796253",
     },
     {
       "$unknown": {},
-      "_tid": "-1030064539",
       "bitizen": {
         "$unknown": {},
         "attributes": {
           "$unknown": [],
           "accessories": {
             "earrings": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 150,
                 "g": 131,
                 "r": 255,
               },
             },
             "glasses": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": 0,
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": 0,
             },
             "hairAccessory": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": 0,
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": 0,
             },
             "hat": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "color": {
                   "b": 90,
                   "g": 228,
@@ -2201,9 +2204,9 @@
               },
             },
             "tie": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 77,
                 "g": 25,
                 "r": 197,
@@ -2255,38 +2258,38 @@
       "media_path": "",
       "media_type": "0",
       "source_name": "prudence ",
+      "tid": "-1030064539",
     },
     {
       "$unknown": {},
-      "_tid": "-162903407",
       "bitizen": {
         "$unknown": {},
         "attributes": {
           "$unknown": [],
           "accessories": {
             "earrings": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 216,
                 "g": 74,
                 "r": 178,
               },
             },
             "glasses": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": 0,
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": 0,
             },
             "hairAccessory": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": 0,
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": 0,
             },
             "hat": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "color": {
                   "b": 73,
                   "g": 49,
@@ -2296,9 +2299,9 @@
               },
             },
             "tie": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 244,
                 "g": 245,
                 "r": 180,
@@ -2350,38 +2353,38 @@
       "media_path": "",
       "media_type": "0",
       "source_name": "books",
+      "tid": "-162903407",
     },
     {
       "$unknown": {},
-      "_tid": "-201432857",
       "bitizen": {
         "$unknown": {},
         "attributes": {
           "$unknown": [],
           "accessories": {
             "earrings": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 166,
                 "g": 115,
                 "r": 167,
               },
             },
             "glasses": {
-              "_id": "Either",
-              "_tag": "Right",
-              "right": 0,
+              "_id": "Result",
+              "_tag": "Success",
+              "value": 0,
             },
             "hairAccessory": {
-              "_id": "Either",
-              "_tag": "Right",
-              "right": 2,
+              "_id": "Result",
+              "_tag": "Success",
+              "value": 2,
             },
             "hat": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "color": {
                   "b": 61,
                   "g": 3,
@@ -2391,9 +2394,9 @@
               },
             },
             "tie": {
-              "_id": "Either",
-              "_tag": "Right",
-              "right": {
+              "_id": "Result",
+              "_tag": "Success",
+              "value": {
                 "b": 36,
                 "g": 166,
                 "r": 170,
@@ -2445,38 +2448,38 @@
       "media_path": "",
       "media_type": "0",
       "source_name": "JESSE",
+      "tid": "-201432857",
     },
     {
       "$unknown": {},
-      "_tid": "-1297951746",
       "bitizen": {
         "$unknown": {},
         "attributes": {
           "$unknown": [],
           "accessories": {
             "earrings": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 98,
                 "g": 164,
                 "r": 237,
               },
             },
             "glasses": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": 0,
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": 0,
             },
             "hairAccessory": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": 0,
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": 0,
             },
             "hat": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "color": {
                   "b": 161,
                   "g": 151,
@@ -2486,9 +2489,9 @@
               },
             },
             "tie": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 183,
                 "g": 243,
                 "r": 176,
@@ -2540,38 +2543,38 @@
       "media_path": "",
       "media_type": "0",
       "source_name": "mandy",
+      "tid": "-1297951746",
     },
     {
       "$unknown": {},
-      "_tid": "-337224970",
       "bitizen": {
         "$unknown": {},
         "attributes": {
           "$unknown": [],
           "accessories": {
             "earrings": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 203,
                 "g": 92,
                 "r": 202,
               },
             },
             "glasses": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": 0,
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": 0,
             },
             "hairAccessory": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": 0,
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": 0,
             },
             "hat": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "color": {
                   "b": 130,
                   "g": 104,
@@ -2581,9 +2584,9 @@
               },
             },
             "tie": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 203,
                 "g": 148,
                 "r": 136,
@@ -2635,38 +2638,38 @@
       "media_path": "",
       "media_type": "0",
       "source_name": "gingko",
+      "tid": "-337224970",
     },
     {
       "$unknown": {},
-      "_tid": "-1976872726",
       "bitizen": {
         "$unknown": {},
         "attributes": {
           "$unknown": [],
           "accessories": {
             "earrings": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 91,
                 "g": 226,
                 "r": 130,
               },
             },
             "glasses": {
-              "_id": "Either",
-              "_tag": "Right",
-              "right": 0,
+              "_id": "Result",
+              "_tag": "Success",
+              "value": 0,
             },
             "hairAccessory": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": 0,
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": 0,
             },
             "hat": {
-              "_id": "Either",
-              "_tag": "Right",
-              "right": {
+              "_id": "Result",
+              "_tag": "Success",
+              "value": {
                 "color": {
                   "b": 179,
                   "g": 184,
@@ -2677,9 +2680,9 @@
               },
             },
             "tie": {
-              "_id": "Either",
-              "_tag": "Right",
-              "right": {
+              "_id": "Result",
+              "_tag": "Success",
+              "value": {
                 "b": 214,
                 "g": 180,
                 "r": 79,
@@ -2731,38 +2734,38 @@
       "media_path": "",
       "media_type": "0",
       "source_name": "WURE",
+      "tid": "-1976872726",
     },
     {
       "$unknown": {},
-      "_tid": "-26529177",
       "bitizen": {
         "$unknown": {},
         "attributes": {
           "$unknown": [],
           "accessories": {
             "earrings": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 219,
                 "g": 132,
                 "r": 150,
               },
             },
             "glasses": {
-              "_id": "Either",
-              "_tag": "Right",
-              "right": 0,
+              "_id": "Result",
+              "_tag": "Success",
+              "value": 0,
             },
             "hairAccessory": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": 0,
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": 0,
             },
             "hat": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "color": {
                   "b": 248,
                   "g": 8,
@@ -2772,9 +2775,9 @@
               },
             },
             "tie": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 218,
                 "g": 28,
                 "r": 15,
@@ -2826,38 +2829,38 @@
       "media_path": "",
       "media_type": "0",
       "source_name": "ROLLER",
+      "tid": "-26529177",
     },
     {
       "$unknown": {},
-      "_tid": "-814466647",
       "bitizen": {
         "$unknown": {},
         "attributes": {
           "$unknown": [],
           "accessories": {
             "earrings": {
-              "_id": "Either",
-              "_tag": "Right",
-              "right": {
+              "_id": "Result",
+              "_tag": "Success",
+              "value": {
                 "b": 251,
                 "g": 144,
                 "r": 195,
               },
             },
             "glasses": {
-              "_id": "Either",
-              "_tag": "Right",
-              "right": 0,
+              "_id": "Result",
+              "_tag": "Success",
+              "value": 0,
             },
             "hairAccessory": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": 0,
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": 0,
             },
             "hat": {
-              "_id": "Either",
-              "_tag": "Right",
-              "right": {
+              "_id": "Result",
+              "_tag": "Success",
+              "value": {
                 "color": {
                   "b": 93,
                   "g": 242,
@@ -2868,9 +2871,9 @@
               },
             },
             "tie": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 58,
                 "g": 130,
                 "r": 168,
@@ -2906,6 +2909,7 @@
             "service": 3,
           },
         },
+        "costume": "",
         "dreamJobIndex": 97,
         "homeIndex": -1,
         "placedDreamJob": false,
@@ -2921,38 +2925,38 @@
       "media_path": "",
       "media_type": "0",
       "source_name": "4 syd",
+      "tid": "-814466647",
     },
     {
       "$unknown": {},
-      "_tid": "-1377232614",
       "bitizen": {
         "$unknown": {},
         "attributes": {
           "$unknown": [],
           "accessories": {
             "earrings": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 61,
                 "g": 97,
                 "r": 125,
               },
             },
             "glasses": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": 0,
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": 0,
             },
             "hairAccessory": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": 0,
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": 0,
             },
             "hat": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "color": {
                   "b": 105,
                   "g": 138,
@@ -2962,9 +2966,9 @@
               },
             },
             "tie": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 232,
                 "g": 74,
                 "r": 122,
@@ -3016,38 +3020,38 @@
       "media_path": "",
       "media_type": "0",
       "source_name": "BECCA",
+      "tid": "-1377232614",
     },
     {
       "$unknown": {},
-      "_tid": "-1303013590",
       "bitizen": {
         "$unknown": {},
         "attributes": {
           "$unknown": [],
           "accessories": {
             "earrings": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 254,
                 "g": 64,
                 "r": 136,
               },
             },
             "glasses": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": 0,
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": 0,
             },
             "hairAccessory": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": 0,
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": 0,
             },
             "hat": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "color": {
                   "b": 105,
                   "g": 65,
@@ -3057,9 +3061,9 @@
               },
             },
             "tie": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 168,
                 "g": 110,
                 "r": 143,
@@ -3111,38 +3115,38 @@
       "media_path": "",
       "media_type": "0",
       "source_name": "disnerd",
+      "tid": "-1303013590",
     },
     {
       "$unknown": {},
-      "_tid": "-636917041",
       "bitizen": {
         "$unknown": {},
         "attributes": {
           "$unknown": [],
           "accessories": {
             "earrings": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 219,
                 "g": 140,
                 "r": 33,
               },
             },
             "glasses": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": 0,
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": 0,
             },
             "hairAccessory": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": 0,
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": 0,
             },
             "hat": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "color": {
                   "b": 17,
                   "g": 31,
@@ -3152,9 +3156,9 @@
               },
             },
             "tie": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 133,
                 "g": 242,
                 "r": 231,
@@ -3206,38 +3210,38 @@
       "media_path": "",
       "media_type": "0",
       "source_name": "ERIN",
+      "tid": "-636917041",
     },
     {
       "$unknown": {},
-      "_tid": "-1859099436",
       "bitizen": {
         "$unknown": {},
         "attributes": {
           "$unknown": [],
           "accessories": {
             "earrings": {
-              "_id": "Either",
-              "_tag": "Right",
-              "right": {
+              "_id": "Result",
+              "_tag": "Success",
+              "value": {
                 "b": 103,
                 "g": 100,
                 "r": 31,
               },
             },
             "glasses": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": 0,
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": 0,
             },
             "hairAccessory": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": 0,
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": 0,
             },
             "hat": {
-              "_id": "Either",
-              "_tag": "Right",
-              "right": {
+              "_id": "Result",
+              "_tag": "Success",
+              "value": {
                 "color": {
                   "b": 209,
                   "g": 134,
@@ -3248,9 +3252,9 @@
               },
             },
             "tie": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 18,
                 "g": 77,
                 "r": 27,
@@ -3302,38 +3306,38 @@
       "media_path": "",
       "media_type": "0",
       "source_name": "BRENZA",
+      "tid": "-1859099436",
     },
     {
       "$unknown": {},
-      "_tid": "-1931591963",
       "bitizen": {
         "$unknown": {},
         "attributes": {
           "$unknown": [],
           "accessories": {
             "earrings": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 174,
                 "g": 27,
                 "r": 43,
               },
             },
             "glasses": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": 0,
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": 0,
             },
             "hairAccessory": {
-              "_id": "Either",
-              "_tag": "Right",
-              "right": 1,
+              "_id": "Result",
+              "_tag": "Success",
+              "value": 1,
             },
             "hat": {
-              "_id": "Either",
-              "_tag": "Right",
-              "right": {
+              "_id": "Result",
+              "_tag": "Success",
+              "value": {
                 "color": {
                   "b": 78,
                   "g": 230,
@@ -3344,9 +3348,9 @@
               },
             },
             "tie": {
-              "_id": "Either",
-              "_tag": "Left",
-              "left": {
+              "_id": "Result",
+              "_tag": "Failure",
+              "failure": {
                 "b": 227,
                 "g": 48,
                 "r": 241,
@@ -3398,6 +3402,7 @@
       "media_path": "",
       "media_type": "0",
       "source_name": "MELMEL",
+      "tid": "-1931591963",
     },
   ],
   "bbnotes": 0,
@@ -3411,28 +3416,28 @@
         "$unknown": [],
         "accessories": {
           "earrings": {
-            "_id": "Either",
-            "_tag": "Right",
-            "right": {
+            "_id": "Result",
+            "_tag": "Success",
+            "value": {
               "b": 203,
               "g": 153,
               "r": 21,
             },
           },
           "glasses": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": 0,
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": 0,
           },
           "hairAccessory": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": 0,
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": 0,
           },
           "hat": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": {
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": {
               "color": {
                 "b": 134,
                 "g": 44,
@@ -3442,9 +3447,9 @@
             },
           },
           "tie": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": {
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": {
               "b": 32,
               "g": 100,
               "r": 161,
@@ -3493,28 +3498,28 @@
         "$unknown": [],
         "accessories": {
           "earrings": {
-            "_id": "Either",
-            "_tag": "Right",
-            "right": {
+            "_id": "Result",
+            "_tag": "Success",
+            "value": {
               "b": 203,
               "g": 153,
               "r": 21,
             },
           },
           "glasses": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": 0,
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": 0,
           },
           "hairAccessory": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": 0,
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": 0,
           },
           "hat": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": {
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": {
               "color": {
                 "b": 134,
                 "g": 44,
@@ -3524,9 +3529,9 @@
             },
           },
           "tie": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": {
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": {
               "b": 32,
               "g": 100,
               "r": 161,
@@ -3575,28 +3580,28 @@
         "$unknown": [],
         "accessories": {
           "earrings": {
-            "_id": "Either",
-            "_tag": "Right",
-            "right": {
+            "_id": "Result",
+            "_tag": "Success",
+            "value": {
               "b": 203,
               "g": 153,
               "r": 21,
             },
           },
           "glasses": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": 0,
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": 0,
           },
           "hairAccessory": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": 0,
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": 0,
           },
           "hat": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": {
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": {
               "color": {
                 "b": 134,
                 "g": 44,
@@ -3606,9 +3611,9 @@
             },
           },
           "tie": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": {
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": {
               "b": 32,
               "g": 100,
               "r": 161,
@@ -3657,28 +3662,28 @@
         "$unknown": [],
         "accessories": {
           "earrings": {
-            "_id": "Either",
-            "_tag": "Right",
-            "right": {
+            "_id": "Result",
+            "_tag": "Success",
+            "value": {
               "b": 203,
               "g": 153,
               "r": 21,
             },
           },
           "glasses": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": 0,
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": 0,
           },
           "hairAccessory": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": 0,
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": 0,
           },
           "hat": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": {
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": {
               "color": {
                 "b": 134,
                 "g": 44,
@@ -3688,9 +3693,9 @@
             },
           },
           "tie": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": {
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": {
               "b": 32,
               "g": 100,
               "r": 161,
@@ -3739,28 +3744,28 @@
         "$unknown": [],
         "accessories": {
           "earrings": {
-            "_id": "Either",
-            "_tag": "Right",
-            "right": {
+            "_id": "Result",
+            "_tag": "Success",
+            "value": {
               "b": 203,
               "g": 153,
               "r": 21,
             },
           },
           "glasses": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": 0,
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": 0,
           },
           "hairAccessory": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": 0,
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": 0,
           },
           "hat": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": {
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": {
               "color": {
                 "b": 134,
                 "g": 44,
@@ -3770,9 +3775,9 @@
             },
           },
           "tie": {
-            "_id": "Either",
-            "_tag": "Left",
-            "left": {
+            "_id": "Result",
+            "_tag": "Failure",
+            "failure": {
               "b": 32,
               "g": 100,
               "r": 161,
@@ -3982,28 +3987,28 @@
       "$unknown": [],
       "accessories": {
         "earrings": {
-          "_id": "Either",
-          "_tag": "Right",
-          "right": {
+          "_id": "Result",
+          "_tag": "Success",
+          "value": {
             "b": 203,
             "g": 153,
             "r": 21,
           },
         },
         "glasses": {
-          "_id": "Either",
-          "_tag": "Left",
-          "left": 0,
+          "_id": "Result",
+          "_tag": "Failure",
+          "failure": 0,
         },
         "hairAccessory": {
-          "_id": "Either",
-          "_tag": "Left",
-          "left": 0,
+          "_id": "Result",
+          "_tag": "Failure",
+          "failure": 0,
         },
         "hat": {
-          "_id": "Either",
-          "_tag": "Left",
-          "left": {
+          "_id": "Result",
+          "_tag": "Failure",
+          "failure": {
             "color": {
               "b": 134,
               "g": 44,
@@ -4013,9 +4018,9 @@
           },
         },
         "tie": {
-          "_id": "Either",
-          "_tag": "Left",
-          "left": {
+          "_id": "Result",
+          "_tag": "Failure",
+          "failure": {
             "b": 32,
             "g": 100,
             "r": 161,
@@ -5181,7 +5186,7 @@
       "$unknown": {
         "Fg": {
           "$locationMetadata": {
-            "after": "Fl",
+            "after": "level",
           },
           "value": "",
         },
@@ -5228,7 +5233,7 @@
       "$unknown": {
         "Fg": {
           "$locationMetadata": {
-            "after": "Fl",
+            "after": "level",
           },
           "value": "",
         },
@@ -5275,7 +5280,7 @@
       "$unknown": {
         "Fg": {
           "$locationMetadata": {
-            "after": "Fl",
+            "after": "level",
           },
           "value": "",
         },
@@ -5322,7 +5327,7 @@
       "$unknown": {
         "Fg": {
           "$locationMetadata": {
-            "after": "Fl",
+            "after": "level",
           },
           "value": "",
         },
@@ -5369,7 +5374,7 @@
       "$unknown": {
         "Fg": {
           "$locationMetadata": {
-            "after": "Fl",
+            "after": "level",
           },
           "value": "",
         },
@@ -5416,7 +5421,7 @@
       "$unknown": {
         "Fg": {
           "$locationMetadata": {
-            "after": "Fl",
+            "after": "level",
           },
           "value": "",
         },
@@ -5463,7 +5468,7 @@
       "$unknown": {
         "Fg": {
           "$locationMetadata": {
-            "after": "Fl",
+            "after": "level",
           },
           "value": "",
         },
@@ -5510,7 +5515,7 @@
       "$unknown": {
         "Fg": {
           "$locationMetadata": {
-            "after": "Fl",
+            "after": "level",
           },
           "value": "",
         },
@@ -5557,7 +5562,7 @@
       "$unknown": {
         "Fg": {
           "$locationMetadata": {
-            "after": "Fl",
+            "after": "level",
           },
           "value": "",
         },
@@ -5604,7 +5609,7 @@
       "$unknown": {
         "Fg": {
           "$locationMetadata": {
-            "after": "Fl",
+            "after": "level",
           },
           "value": "",
         },
@@ -5651,7 +5656,7 @@
       "$unknown": {
         "Fg": {
           "$locationMetadata": {
-            "after": "Fl",
+            "after": "level",
           },
           "value": "",
         },
@@ -5698,7 +5703,7 @@
       "$unknown": {
         "Fg": {
           "$locationMetadata": {
-            "after": "Fl",
+            "after": "level",
           },
           "value": "",
         },
@@ -5745,7 +5750,7 @@
       "$unknown": {
         "Fg": {
           "$locationMetadata": {
-            "after": "Fl",
+            "after": "level",
           },
           "value": "",
         },
@@ -5792,7 +5797,7 @@
       "$unknown": {
         "Fg": {
           "$locationMetadata": {
-            "after": "Fl",
+            "after": "level",
           },
           "value": "",
         },
@@ -5839,7 +5844,7 @@
       "$unknown": {
         "Fg": {
           "$locationMetadata": {
-            "after": "Fl",
+            "after": "level",
           },
           "value": "",
         },
@@ -5886,7 +5891,7 @@
       "$unknown": {
         "Fg": {
           "$locationMetadata": {
-            "after": "Fl",
+            "after": "level",
           },
           "value": "",
         },
@@ -5933,7 +5938,7 @@
       "$unknown": {
         "Fg": {
           "$locationMetadata": {
-            "after": "Fl",
+            "after": "level",
           },
           "value": "",
         },
@@ -5980,7 +5985,7 @@
       "$unknown": {
         "Fg": {
           "$locationMetadata": {
-            "after": "Fl",
+            "after": "level",
           },
           "value": "",
         },

@@ -1,8 +1,7 @@
-import { type FileSystem } from "@effect/platform";
-import { RpcSerialization, type RpcClient } from "@effect/rpc";
+import { RpcSerialization, type RpcClient } from "effect/unstable/rpc";
 import { FridaScript, FridaSession, type FridaDevice, type FridaSessionError } from "@efffrida/frida-tools";
 import { FridaRpcClient } from "@efffrida/rpc/node";
-import { Effect, Layer, Stream, type Exit } from "effect";
+import { Effect, Layer, Stream, type Exit, type FileSystem } from "effect";
 import { JsPlatform } from "frida";
 
 const NdJsonSerialization = RpcSerialization.layerNdjson;
@@ -48,4 +47,4 @@ export const AgentWatched = <A, E, R>(
         Effect.provide(effect, Layer.fresh(ProtocolLive)),
         new URL("../frida/Agent.ts", import.meta.url),
         { platform: JsPlatform.Browser }
-    ).pipe(Stream.provideSomeLayer(SessionLive), FridaScript.logWatchErrors);
+    ).pipe(Stream.provide(SessionLive), FridaScript.logWatchErrors);

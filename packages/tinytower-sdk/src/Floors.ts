@@ -3,13 +3,16 @@
  * @category Floors
  */
 
-import * as NimblebitSchema from "@tinyburg/nimblebit-sdk/NimblebitSchema";
 import * as Array from "effect/Array";
+import * as Effect from "effect/Effect";
 import * as Equivalence from "effect/Equivalence";
 import * as Function from "effect/Function";
 import * as Option from "effect/Option";
-import * as ParseResult from "effect/ParseResult";
 import * as Schema from "effect/Schema";
+import * as SchemaIssue from "effect/SchemaIssue";
+import * as SchemaTransformation from "effect/SchemaTransformation";
+
+import * as NimblebitSchema from "@tinyburg/nimblebit-sdk/NimblebitSchema";
 
 //////////////////////////////////////////////////////////////////
 
@@ -392,6 +395,7 @@ export const floors = [
     { name: "Santa's Lobby", type: floorType.Lobby },
     { name: "Soccer Shop", type: floorType.Retail },
     { name: "Game Dungeon", type: floorType.Creative },
+    { name: "test", type: floorType.Lobby },
 ] as const;
 
 export type Floor = (typeof floors)[number];
@@ -409,13 +413,13 @@ const FloorIdSchema = Schema.suspend(() => {
 
     type ValidFloor = (typeof floors)[ValidFloorIndices];
 
-    type ValidIndicesSchema = Schema.Literal<[ValidFloorIndices]>;
+    type ValidIndicesSchema = Schema.Literals<[ValidFloorIndices]>;
     type ValidFloorsSchema = {
         [I in ValidFloorIndices]: (typeof floors)[I]["type"] extends "None"
             ? never
             : Schema.Struct<{
-                  name: Schema.Literal<[(typeof floors)[I]["name"]]>;
-                  type: Schema.Literal<[(typeof floors)[I]["type"]]>;
+                  name: Schema.Literal<(typeof floors)[I]["name"]>;
+                  type: Schema.Literal<(typeof floors)[I]["type"]>;
               }>;
     }[ValidFloorIndices];
 
@@ -435,33 +439,44 @@ const FloorIdSchema = Schema.suspend(() => {
         Array.map((floor, index) => ({ ...floor, index })),
         Array.filter(({ type }) => type !== floorType.None),
         Array.map(({ index }) => index as unknown as ValidFloorIndices),
-        (literals) => Schema.Literal(...literals)
+        (literals) => Schema.Literals(literals)
     ) as ValidIndicesSchema;
 
-    const FloorEquivalence: Equivalence.Equivalence<Floor> = Equivalence.struct({
-        name: Equivalence.string,
-        type: Equivalence.string,
+    const FloorEquivalence: Equivalence.Equivalence<Floor> = Equivalence.Struct({
+        name: Equivalence.String,
+        type: Equivalence.String,
     });
 
     const tryFindFloor = (input: ValidFloor): Option.Option<number> =>
         Array.findLastIndex(floors, (floor) => FloorEquivalence(input, floor));
 
-    return Schema.transformOrFail(
-        Schema.compose(Schema.NumberFromString, validIndicesSchema),
-        Schema.Union(...validFloorsSchema),
-        {
-            strict: true,
-            encode: (input: ValidFloor, _options, ast) =>
-                Option.match(tryFindFloor(input), {
-                    onSome: (index) => ParseResult.succeed(index as ValidFloorIndices),
-                    onNone: () => ParseResult.fail(new ParseResult.Type(ast, input, "Unknown floor")),
-                }),
-            decode: (index: ValidFloorIndices, _options, ast) =>
-                Option.match(Array.get(floors, index), {
-                    onSome: (floor) => ParseResult.succeed(floor as ValidFloor),
-                    onNone: () => ParseResult.fail(new ParseResult.Type(ast, index, "Unknown floor index")),
-                }),
-        }
+    return Schema.NumberFromString.pipe(
+        Schema.decodeTo(validIndicesSchema),
+        Schema.decodeTo(
+            Schema.Union(validFloorsSchema),
+            SchemaTransformation.transformOrFail({
+                encode: (input: ValidFloor) =>
+                    Option.match(tryFindFloor(input), {
+                        onSome: (index) => Effect.succeed(index as ValidFloorIndices),
+                        onNone: () =>
+                            Effect.fail(
+                                new SchemaIssue.InvalidValue(Option.some(input), {
+                                    message: "Unknown floor",
+                                })
+                            ),
+                    }),
+                decode: (index: ValidFloorIndices) =>
+                    Option.match(Array.get(floors, index), {
+                        onSome: (floor) => Effect.succeed(floor as ValidFloor),
+                        onNone: () =>
+                            Effect.fail(
+                                new SchemaIssue.InvalidValue(Option.some(index), {
+                                    message: "Unknown floor index",
+                                })
+                            ),
+                    }),
+            })
+        )
     );
 });
 
@@ -471,32 +486,43 @@ const FloorIdSchema = Schema.suspend(() => {
  * @since 1.0.0
  * @category Schemas
  */
-export const Floor = NimblebitSchema.parseNimblebitObject(
-    Schema.Struct({
-        storyHeight: Schema.NumberFromString.pipe(
-            Schema.compose(Schema.Int),
-            Schema.propertySignature,
-            Schema.fromKey("Fs")
+export const Floor = Schema.Struct({
+    storyHeight: Schema.NumberFromString.pipe(
+        Schema.decodeTo(Schema.Int),
+        Schema.annotateKey({ nimblebitSaveDataKey: "Fs" })
+    ),
+    floorId: FloorIdSchema.annotateKey({ nimblebitSaveDataKey: "Ff" }),
+    level: Schema.NumberFromString.pipe(
+        Schema.decodeTo(Schema.Int),
+        Schema.annotateKey({ nimblebitSaveDataKey: "Fl" })
+    ),
+    openDate: Schema.BigIntFromString.pipe(
+        Schema.decodeTo(NimblebitSchema.CSharpDate),
+        Schema.annotateKey({ nimblebitSaveDataKey: "Fod" })
+    ),
+    stockBaseTime: Schema.String.annotateKey({ nimblebitSaveDataKey: "Fsbt" }),
+    stockingTier: Schema.NumberFromString.pipe(
+        Schema.decodeTo(Schema.Int),
+        Schema.annotateKey({ nimblebitSaveDataKey: "Fsi" })
+    ),
+    stockingStartTime: Schema.BigIntFromString.pipe(
+        Schema.decodeTo(NimblebitSchema.CSharpDate),
+        Schema.annotateKey({ nimblebitSaveDataKey: "Fst" })
+    ),
+    stocks: Schema.String.pipe(
+        NimblebitSchema.split(),
+        Schema.decodeTo(Schema.Array(Schema.BigIntFromString).pipe(Schema.check(Schema.isLengthBetween(3, 3)))),
+        Schema.annotateKey({ nimblebitSaveDataKey: "Fstk" })
+    ),
+    lastSaleTicks: Schema.String.pipe(
+        NimblebitSchema.split(),
+        Schema.decodeTo(
+            Schema.Array(Schema.BigIntFromString.pipe(Schema.decodeTo(NimblebitSchema.CSharpDate))).pipe(
+                Schema.check(Schema.isLengthBetween(3, 3))
+            )
         ),
-        floorId: FloorIdSchema.pipe(Schema.propertySignature, Schema.fromKey("Ff")),
-        level: Schema.NumberFromString.pipe(Schema.compose(Schema.Int), Schema.propertySignature, Schema.fromKey("Fl")),
-        openDate: NimblebitSchema.CSharpDate.pipe(Schema.propertySignature, Schema.fromKey("Fod")),
-        stockBaseTime: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Fsbt")),
-        stockingTier: Schema.NumberFromString.pipe(
-            Schema.compose(Schema.Int),
-            Schema.propertySignature,
-            Schema.fromKey("Fsi")
-        ),
-        stockingStartTime: NimblebitSchema.CSharpDate.pipe(Schema.propertySignature, Schema.fromKey("Fst")),
-        stocks: Schema.compose(Schema.split(","), Schema.Array(Schema.BigInt))
-            .pipe(Schema.itemsCount(3))
-            .pipe(Schema.propertySignature)
-            .pipe(Schema.fromKey("Fstk")),
-        lastSaleTicks: Schema.compose(Schema.split(","), Schema.Array(NimblebitSchema.CSharpDate))
-            .pipe(Schema.itemsCount(3))
-            .pipe(Schema.propertySignature)
-            .pipe(Schema.fromKey("Flst")),
-        floorName: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("Fn")),
-        floorPaint: Schema.String.pipe(Schema.optional, Schema.fromKey("Fp")),
-    })
-);
+        Schema.annotateKey({ nimblebitSaveDataKey: "Flst" })
+    ),
+    floorName: Schema.String.annotateKey({ nimblebitSaveDataKey: "Fn" }),
+    floorPaint: Schema.String.pipe(Schema.optionalKey, Schema.annotateKey({ nimblebitSaveDataKey: "Fp" })),
+}).pipe(NimblebitSchema.parseNimblebitObject);

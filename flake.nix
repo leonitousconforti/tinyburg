@@ -21,7 +21,7 @@
             bun
             deno
             corepack
-            nodejs_24
+            nodejs-slim_26
             python3
           ];
         };

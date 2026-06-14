@@ -1,5 +1,5 @@
-import { SqlClient } from "@effect/sql";
 import { Effect } from "effect";
+import { SqlClient } from "effect/unstable/sql";
 
 // Postgresql database
 export default Effect.flatMap(

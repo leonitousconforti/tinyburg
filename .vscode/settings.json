@@ -1,5 +1,6 @@
 {
     "js/ts.tsdk.path": "node_modules/typescript/lib",
+    "js/ts.tsdk.promptToUseWorkspaceVersion": true,
     "editor.defaultFormatter": "EditorConfig.EditorConfig",
     "[typescript][typescriptreact][javascript][javascriptreact][json][jsonc]": {
         "editor.defaultFormatter": "oxc.oxc-vscode"

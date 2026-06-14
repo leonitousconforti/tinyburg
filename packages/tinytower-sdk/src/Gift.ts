@@ -16,23 +16,33 @@ import * as SyncItemType from "./SyncItemType.ts";
  */
 export const Gift = Schema.Struct({
     /** Unique id for the gift. */
-    id: Schema.NumberFromString.pipe(Schema.propertySignature, Schema.fromKey("gift_id")),
+    id: Schema.NumberFromString,
 
     /** Who the gift was sent to (should be you!). */
-    to: NimblebitConfig.PlayerIdSchema.pipe(Schema.propertySignature, Schema.fromKey("gift_to")),
+    to: NimblebitConfig.PlayerIdSchema,
 
     /** Who the gift was sent from. */
-    from: NimblebitConfig.PlayerIdSchema.pipe(Schema.propertySignature, Schema.fromKey("gift_from")),
+    from: NimblebitConfig.PlayerIdSchema,
 
     /** The type of the gift. */
-    type: Schema.Enums(SyncItemType.SyncItemType).pipe(Schema.propertySignature, Schema.fromKey("gift_type")),
+    type: Schema.Enum(SyncItemType.SyncItemType),
 
     /** The contents of the gift. */
-    contents: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("gift_str")),
+    contents: Schema.String,
 
     /** Validation hash for the gift, unsure how to compute. */
-    checksum: Schema.String.pipe(Schema.propertySignature, Schema.fromKey("h")),
+    checksum: Schema.String,
 
     /** Not sure. */
-    c: Schema.Unknown.pipe(Schema.propertySignature, Schema.fromKey("c")),
-});
+    c: Schema.Unknown,
+}).pipe(
+    Schema.encodeKeys({
+        id: "gift_id",
+        to: "gift_to",
+        from: "gift_from",
+        type: "gift_type",
+        contents: "gift_str",
+        checksum: "h",
+        c: "c",
+    })
+);

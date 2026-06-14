@@ -5,15 +5,15 @@
  * @category Auth
  */
 
-import type * as ConfigError from "effect/ConfigError";
-import type * as ParseResult from "effect/ParseResult";
+import type * as PlatformError from "effect/PlatformError";
 
-import * as EffectSchemas from "effect-schemas";
 import * as Array from "effect/Array";
 import * as Config from "effect/Config";
 import * as Context from "effect/Context";
+import * as Crypto from "effect/Crypto";
 import * as Effect from "effect/Effect";
 import * as Layer from "effect/Layer";
+import * as Random from "effect/Random";
 import * as Redacted from "effect/Redacted";
 import * as Schema from "effect/Schema";
 
@@ -23,12 +23,12 @@ import * as NimblebitConfig from "./NimblebitConfig.ts";
  * @since 1.0.0
  * @category Auth
  */
-export class NimblebitAuth extends Context.Tag("NimblebitAuth")<
+export class NimblebitAuth extends Context.Service<
     NimblebitAuth,
     (
         | {
               readonly host: "https://sync.nimblebit.com";
-              readonly authKey: Schema.Schema.Type<NimblebitConfig.NimblebitAuthKeySchema>;
+              readonly authKey: Schema.Schema.Type<typeof NimblebitConfig.NimblebitAuthKeySchema>;
           }
         | {
               readonly host: "https://authproxy.tinyburg.app";
@@ -39,13 +39,17 @@ export class NimblebitAuth extends Context.Tag("NimblebitAuth")<
               readonly authKey: Redacted.Redacted<string>;
           }
     ) & {
-        readonly sign: (data: string) => Effect.Effect<string, ParseResult.ParseError, never>;
-        readonly salt: Effect.Effect<Schema.Schema.Type<EffectSchemas.Number.U32>, never, never>;
-        readonly burnbot: Effect.Effect<Schema.Schema.Type<NimblebitConfig.AuthenticatedPlayerSchema>, never, never>;
+        readonly sign: (data: string) => Effect.Effect<string, Schema.SchemaError, never>;
+        readonly salt: Effect.Effect<number, PlatformError.PlatformError, never>;
+        readonly burnbot: Effect.Effect<
+            Schema.Schema.Type<typeof NimblebitConfig.AuthenticatedPlayerSchema>,
+            never,
+            never
+        >;
     }
->() {
+>()("NimblebitAuth") {
     private static readonly burnbots: Array.NonEmptyReadonlyArray<
-        Schema.Schema.Type<NimblebitConfig.AuthenticatedPlayerSchema>
+        Schema.Schema.Type<typeof NimblebitConfig.AuthenticatedPlayerSchema>
     > = [
         {
             playerId: NimblebitConfig.PlayerIdSchema.make("BPQSY"),
@@ -73,27 +77,12 @@ export class NimblebitAuth extends Context.Tag("NimblebitAuth")<
         },
     ] as const;
 
-    private static readonly NodeSalt: Effect.Effect<Schema.Schema.Type<EffectSchemas.Number.U32>, never, never> =
-        Effect.map(
-            Effect.promise(() => import("node:crypto")),
-            (crypto) => EffectSchemas.Number.U32.make(crypto.randomBytes(4).readUInt32BE(0))
-        );
+    private static readonly Salt: Effect.Effect<number, PlatformError.PlatformError, Crypto.Crypto> = Effect.map(
+        Crypto.Crypto.use((crypto) => crypto.randomBytes(4)),
+        (bytes) => new DataView(bytes.buffer).getUint32(0, false)
+    );
 
-    private static readonly WebSalt: Effect.Effect<Schema.Schema.Type<EffectSchemas.Number.U32>, never, never> =
-        Effect.sync(() => {
-            const array = new Uint8Array(4);
-            crypto.getRandomValues(array);
-            const salt = new DataView(array.buffer).getUint32(0, false);
-            return EffectSchemas.Number.U32.make(salt);
-        });
-
-    private static readonly NodeMD5 = (data: string): Effect.Effect<string, never, never> =>
-        Effect.map(
-            Effect.promise(() => import("node:crypto")),
-            (crypto) => crypto.createHash("md5").update(data).digest("hex")
-        );
-
-    private static readonly WebMD5 = (data: string): Effect.Effect<string, never, never> =>
+    private static readonly MD5 = (data: string): Effect.Effect<string, never, never> =>
         Effect.promise(async () => {
             const encoder = new TextEncoder();
             const encoded = encoder.encode(data);
@@ -102,175 +91,101 @@ export class NimblebitAuth extends Context.Tag("NimblebitAuth")<
             return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
         });
 
-    public static readonly NodeDirect = (
-        authKey: Schema.Schema.Type<NimblebitConfig.NimblebitAuthKeySchema>
-    ): Layer.Layer<NimblebitAuth, never, never> =>
-        Layer.succeed(this, {
-            authKey,
-            host: "https://sync.nimblebit.com",
-            salt: NimblebitAuth.NodeSalt,
-            burnbot: Effect.sync(() => this.burnbots[0]),
-            sign: (data: string) => NimblebitAuth.NodeMD5(data + Redacted.value(authKey)),
-        });
+    public static readonly Direct = (
+        authKey: Schema.Schema.Type<typeof NimblebitConfig.NimblebitAuthKeySchema>
+    ): Layer.Layer<NimblebitAuth, never, Crypto.Crypto> =>
+        Effect.flatMap(
+            Crypto.Crypto,
+            Effect.fnUntraced(function* (crypto) {
+                const randomBurnBot = yield* Random.shuffle(NimblebitAuth.burnbots);
+                return {
+                    sign: (data: string) => NimblebitAuth.MD5(data + Redacted.value(authKey)),
+                    salt: NimblebitAuth.Salt.pipe(Effect.provideService(Crypto.Crypto, crypto)),
+                    burnbot: Effect.sync(() => randomBurnBot[0]),
+                    host: "https://sync.nimblebit.com",
+                    authKey,
+                };
+            })
+        ).pipe(Layer.effect(this));
 
-    public static readonly WebDirect = (
-        authKey: Schema.Schema.Type<NimblebitConfig.NimblebitAuthKeySchema>
-    ): Layer.Layer<NimblebitAuth, never, never> =>
-        Layer.succeed(this, {
-            authKey,
-            host: "https://sync.nimblebit.com" as const,
-            salt: NimblebitAuth.WebSalt,
-            burnbot: Effect.sync(() => this.burnbots[0]),
-            sign: (data: string) => NimblebitAuth.WebMD5(data + Redacted.value(authKey)),
-        });
-
-    public static readonly NodeDirectConfig = (
+    public static readonly DirectConfig = (
         config: Config.Config<
-            Schema.Schema.Type<NimblebitConfig.NimblebitAuthKeySchema>
+            Schema.Schema.Type<typeof NimblebitConfig.NimblebitAuthKeySchema>
         > = NimblebitConfig.NimblebitAuthKeyConfig
-    ): Layer.Layer<NimblebitAuth, ConfigError.ConfigError, never> =>
-        Effect.map(config, (authKey) => NimblebitAuth.NodeDirect(authKey)).pipe(Layer.unwrapEffect);
+    ): Layer.Layer<NimblebitAuth, Config.ConfigError, Crypto.Crypto> =>
+        Effect.map(config, (authKey) => NimblebitAuth.Direct(authKey)).pipe(Layer.unwrap);
 
-    public static readonly WebDirectConfig = (
-        config: Config.Config<
-            Schema.Schema.Type<NimblebitConfig.NimblebitAuthKeySchema>
-        > = NimblebitConfig.NimblebitAuthKeyConfig
-    ): Layer.Layer<NimblebitAuth, ConfigError.ConfigError, never> =>
-        Effect.map(config, (authKey) => NimblebitAuth.WebDirect(authKey)).pipe(Layer.unwrapEffect);
-
-    public static readonly NodeCustomHost = ({
+    public static readonly CustomHost = ({
         authKey,
         host,
     }: {
         host: string;
         authKey: Redacted.Redacted<string>;
-    }): Layer.Layer<NimblebitAuth, never, never> =>
-        Layer.succeed(this, {
-            host,
-            authKey,
-            salt: NimblebitAuth.NodeSalt,
-            burnbot: Effect.sync(() => this.burnbots[0]),
-            sign: Schema.encode(Schema.StringFromBase64Url),
-        });
+    }): Layer.Layer<NimblebitAuth, never, Crypto.Crypto> =>
+        Effect.flatMap(
+            Crypto.Crypto,
+            Effect.fnUntraced(function* (crypto) {
+                const randomBurnBot = yield* Random.shuffle(NimblebitAuth.burnbots);
+                return {
+                    salt: NimblebitAuth.Salt.pipe(Effect.provideService(Crypto.Crypto, crypto)),
+                    sign: Schema.encodeEffect(Schema.StringFromBase64Url),
+                    burnbot: Effect.sync(() => randomBurnBot[0]),
+                    authKey,
+                    host,
+                };
+            })
+        ).pipe(Layer.effect(this));
 
-    public static readonly WebCustomHost = ({
-        authKey,
-        host,
-    }: {
-        host: string;
-        authKey: Redacted.Redacted<string>;
-    }): Layer.Layer<NimblebitAuth, never, never> =>
-        Layer.succeed(this, {
-            host,
-            authKey,
-            salt: NimblebitAuth.WebSalt,
-            burnbot: Effect.sync(() => this.burnbots[0]),
-            sign: Schema.encode(Schema.StringFromBase64Url),
-        });
-
-    public static readonly NodeTinyburgAuthProxy = ({
+    public static readonly TinyburgAuthProxy = ({
         authKey,
     }: {
         authKey: Redacted.Redacted<string>;
-    }): Layer.Layer<NimblebitAuth, never, never> =>
-        NimblebitAuth.NodeCustomHost({ host: "https://authproxy.tinyburg.app", authKey });
+    }): Layer.Layer<NimblebitAuth, never, Crypto.Crypto> =>
+        NimblebitAuth.CustomHost({ host: "https://authproxy.tinyburg.app", authKey });
 
-    public static readonly WebTinyburgAuthProxy = ({
-        authKey,
-    }: {
-        authKey: Redacted.Redacted<string>;
-    }): Layer.Layer<NimblebitAuth, never, never> =>
-        NimblebitAuth.WebCustomHost({ host: "https://authproxy.tinyburg.app", authKey });
-
-    public static readonly NodeTinyburgAuthProxyConfig = (
-        options: Config.Config.Wrap<Parameters<typeof NimblebitAuth.NodeTinyburgAuthProxy>[0]>
-    ): Layer.Layer<NimblebitAuth, ConfigError.ConfigError, never> =>
-        Layer.unwrapEffect(Effect.map(Config.unwrap(options), NimblebitAuth.NodeTinyburgAuthProxy));
-
-    public static readonly WebTinyburgAuthProxyConfig = (
-        options: Config.Config.Wrap<Parameters<typeof NimblebitAuth.WebTinyburgAuthProxy>[0]>
-    ): Layer.Layer<NimblebitAuth, ConfigError.ConfigError, never> =>
-        Layer.unwrapEffect(Effect.map(Config.unwrap(options), NimblebitAuth.WebTinyburgAuthProxy));
+    public static readonly TinyburgAuthProxyConfig = (
+        options: Config.Wrap<Parameters<typeof NimblebitAuth.TinyburgAuthProxy>[0]>
+    ): Layer.Layer<NimblebitAuth, Config.ConfigError, Crypto.Crypto> =>
+        Layer.unwrap(Effect.map(Config.unwrap(options), NimblebitAuth.TinyburgAuthProxy));
 }
 
 /**
  * @since 1.0.0
  * @category Layer
  */
-export const layerNodeDirect: (
-    authKey: Schema.Schema.Type<NimblebitConfig.NimblebitAuthKeySchema>
-) => Layer.Layer<NimblebitAuth, never, never> = NimblebitAuth.NodeDirect;
+export const layerDirect: (
+    authKey: Schema.Schema.Type<typeof NimblebitConfig.NimblebitAuthKeySchema>
+) => Layer.Layer<NimblebitAuth, never, Crypto.Crypto> = NimblebitAuth.Direct;
 
 /**
  * @since 1.0.0
  * @category Layer
  */
-export const layerWebDirect: (
-    authKey: Schema.Schema.Type<NimblebitConfig.NimblebitAuthKeySchema>
-) => Layer.Layer<NimblebitAuth, never, never> = NimblebitAuth.WebDirect;
+export const layerDirectConfig: (
+    config?: Config.Config<Schema.Schema.Type<typeof NimblebitConfig.NimblebitAuthKeySchema>> | undefined
+) => Layer.Layer<NimblebitAuth, Config.ConfigError, Crypto.Crypto> = NimblebitAuth.DirectConfig;
 
 /**
  * @since 1.0.0
  * @category Layer
  */
-export const layerNodeDirectConfig: (
-    config?: Config.Config<Schema.Schema.Type<NimblebitConfig.NimblebitAuthKeySchema>> | undefined
-) => Layer.Layer<NimblebitAuth, ConfigError.ConfigError, never> = NimblebitAuth.NodeDirectConfig;
-
-/**
- * @since 1.0.0
- * @category Layer
- */
-export const layerWebDirectConfig: (
-    config?: Config.Config<Schema.Schema.Type<NimblebitConfig.NimblebitAuthKeySchema>> | undefined
-) => Layer.Layer<NimblebitAuth, ConfigError.ConfigError, never> = NimblebitAuth.WebDirectConfig;
-
-/**
- * @since 1.0.0
- * @category Layer
- */
-export const layerNodeCustomHost: (options: {
+export const layerCustomHost: (options: {
     host: string;
     authKey: Redacted.Redacted<string>;
-}) => Layer.Layer<NimblebitAuth, never, never> = NimblebitAuth.NodeCustomHost;
+}) => Layer.Layer<NimblebitAuth, never, Crypto.Crypto> = NimblebitAuth.CustomHost;
 
 /**
  * @since 1.0.0
  * @category Layer
  */
-export const layerWebCustomHost: (options: {
-    host: string;
+export const layerTinyburgAuthProxy: (options: {
     authKey: Redacted.Redacted<string>;
-}) => Layer.Layer<NimblebitAuth, never, never> = NimblebitAuth.WebCustomHost;
+}) => Layer.Layer<NimblebitAuth, never, Crypto.Crypto> = NimblebitAuth.TinyburgAuthProxy;
 
 /**
  * @since 1.0.0
  * @category Layer
  */
-export const layerNodeTinyburgAuthProxy: (options: {
-    authKey: Redacted.Redacted<string>;
-}) => Layer.Layer<NimblebitAuth, never, never> = NimblebitAuth.NodeTinyburgAuthProxy;
-
-/**
- * @since 1.0.0
- * @category Layer
- */
-export const layerWebTinyburgAuthProxy: (options: {
-    authKey: Redacted.Redacted<string>;
-}) => Layer.Layer<NimblebitAuth, never, never> = NimblebitAuth.WebTinyburgAuthProxy;
-
-/**
- * @since 1.0.0
- * @category Layer
- */
-export const layerNodeTinyburgAuthProxyConfig: (
-    options: Config.Config.Wrap<Parameters<typeof NimblebitAuth.NodeTinyburgAuthProxy>[0]>
-) => Layer.Layer<NimblebitAuth, ConfigError.ConfigError, never> = NimblebitAuth.NodeTinyburgAuthProxyConfig;
-
-/**
- * @since 1.0.0
- * @category Layer
- */
-export const layerWebTinyburgAuthProxyConfig: (
-    options: Config.Config.Wrap<Parameters<typeof NimblebitAuth.WebTinyburgAuthProxy>[0]>
-) => Layer.Layer<NimblebitAuth, ConfigError.ConfigError, never> = NimblebitAuth.WebTinyburgAuthProxyConfig;
+export const layerTinyburgAuthProxyConfig: (
+    options: Config.Wrap<Parameters<typeof NimblebitAuth.TinyburgAuthProxy>[0]>
+) => Layer.Layer<NimblebitAuth, Config.ConfigError, Crypto.Crypto> = NimblebitAuth.TinyburgAuthProxyConfig;

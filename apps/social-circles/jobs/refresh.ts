@@ -1,9 +1,10 @@
-import { FetchHttpClient, HttpClient, Path } from "@effect/platform";
-import { NodeContext, NodeRuntime } from "@effect/platform-node";
+import { Array, Config, Effect, Layer, pipe, Redacted, Schema, String, Path } from "effect";
+import { FetchHttpClient, HttpClient } from "effect/unstable/http";
+
+import { NodeServices, NodeRuntime } from "@effect/platform-node";
 import { PgClient, PgMigrator } from "@effect/sql-pg";
 import { NimblebitAuth, NimblebitConfig } from "@tinyburg/nimblebit-sdk";
 import { TinyTower } from "@tinyburg/tinytower-sdk";
-import { Array, Config, Effect, Layer, pipe, Redacted, Schema, String } from "effect";
 
 import { Repository } from "../domain/model.ts";
 
@@ -23,7 +24,7 @@ const program = Effect.gen(function* () {
         // Pull friend's tower data
         const friendSaveData = yield* Effect.flatMap(
             TinyTower.social_pullFriendTower({ ...player, friendId }),
-            ({ data }) => Schema.decode(TinyTower.SaveData)(data)
+            ({ data }) => Schema.decodeEffect(TinyTower.SaveData)(data)
         );
 
         // Get friend's friends whom have also granted permission
@@ -53,15 +54,15 @@ const MigratorLive = Effect.gen(function* () {
     const migrations = yield* path.fromFileUrl(new URL("migrations", import.meta.url));
     const loader = PgMigrator.fromFileSystem(migrations);
     return PgMigrator.layer({ loader });
-}).pipe(Layer.unwrapEffect);
+}).pipe(Layer.unwrap);
 
 const Live = Layer.empty.pipe(
-    Layer.provideMerge(NimblebitAuth.layerNodeDirectConfig()),
+    Layer.provideMerge(NimblebitAuth.layerDirectConfig()),
     Layer.provideMerge(FetchHttpClient.layer),
     Layer.provideMerge(Repository.Default),
     Layer.provideMerge(MigratorLive),
     Layer.provideMerge(SqlLive),
-    Layer.provide(NodeContext.layer)
+    Layer.provide(NodeServices.layer)
 );
 
 program.pipe(Effect.provide(Live), NodeRuntime.runMain);
