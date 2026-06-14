@@ -8,20 +8,12 @@
         "tinytowers"
     ],
     "homepage": "https://github.com/leonitousconforti/tinyburg",
+    "license": "GPL-3.0-only",
+    "author": "Leo Conforti <leo@leoconforti.us> (https://leoconforti.us)",
     "repository": {
         "type": "git",
         "url": "https://github.com/leonitousconforti/tinyburg.git",
         "directory": "packages/tinytower-sdk"
-    },
-    "license": "GPL-3.0-only",
-    "author": "Leo Conforti <leo@leoconforti.us> (https://leoconforti.us)",
-    "sideEffects": [],
-    "type": "module",
-    "exports": {
-        "./package.json": "./package.json",
-        ".": "./src/index.ts",
-        "./*": "./src/*.ts",
-        "./internal/*": null
     },
     "files": [
         "src/**/*.ts",
@@ -30,6 +22,23 @@
         "dist/**/*.d.ts",
         "dist/**/*.d.ts.map"
     ],
+    "type": "module",
+    "sideEffects": [],
+    "exports": {
+        "./package.json": "./package.json",
+        ".": "./src/index.ts",
+        "./*": "./src/*.ts",
+        "./internal/*": null
+    },
+    "publishConfig": {
+        "exports": {
+            "./package.json": "./package.json",
+            ".": "./dist/index.js",
+            "./*": "./dist/*.js",
+            "./internal/*": null
+        },
+        "access": "public"
+    },
     "scripts": {
         "build": "tsc -b tsconfig.build.json && babel dist --plugins annotate-pure-calls --out-dir dist --source-maps",
         "check": "tsc -b tsconfig.json",
@@ -40,7 +49,6 @@
     },
     "dependencies": {
         "@tinyburg/nimblebit-sdk": "workspace:*",
-        "effect-schemas": "0.0.14",
         "pako": "2.1.0"
     },
     "devDependencies": {
@@ -58,15 +66,6 @@
     },
     "peerDependencies": {
         "effect": "4.0.0-beta.69"
-    },
-    "publishConfig": {
-        "access": "public",
-        "exports": {
-            "./package.json": "./package.json",
-            ".": "./dist/index.js",
-            "./*": "./dist/*.js",
-            "./internal/*": null
-        }
     },
     "tags": [
         "nimblebit",

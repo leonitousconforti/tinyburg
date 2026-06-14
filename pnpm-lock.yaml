@@ -270,10 +270,6 @@ importers:
         version: 4.0.0-beta.69
 
   packages/nimblebit-sdk:
-    dependencies:
-      effect-schemas:
-        specifier: 0.0.14
-        version: 0.0.14(effect@4.0.0-beta.69)
     devDependencies:
       effect:
         specifier: 4.0.0-beta.69
@@ -284,9 +280,6 @@ importers:
       '@tinyburg/nimblebit-sdk':
         specifier: workspace:*
         version: link:../nimblebit-sdk
-      effect-schemas:
-        specifier: 0.0.14
-        version: 0.0.14(effect@4.0.0-beta.69)
       pako:
         specifier: 2.1.0
         version: 2.1.0
@@ -2739,12 +2732,6 @@ packages:
 
   ee-first@1.1.1:
     resolution: {integrity: sha512-WMwm9LhRUo+WUaRN+vRuETqG89IgZphVSNkdFgeb6sS/E4OrDIN7t48CAewSHXc6C8lefD8KKfr5vY61brQlow==}
-
-  effect-schemas@0.0.14:
-    resolution: {integrity: sha512-+8BvhsEim1RnMANIxYHIG+39wnagusLVJK2RR1B+g8w5Ak6LUcIhgTUVFPWizdnF1/Wqjka9TNI6V+VgEb+BLA==}
-    engines: {node: '>=18.0.0'}
-    peerDependencies:
-      effect: 4.0.0-beta.69
 
   effect@4.0.0-beta.69:
     resolution: {integrity: sha512-o6og4Dkh0/esTnCJq7UwQ5PZhuQQYCxNCrEYPVk5Z2Fo7oPTHj0/AAVi5kF2Dln53+jEVxA7quXMC/+jPnATuw==}
@@ -7407,10 +7394,6 @@ snapshots:
   dset@3.1.4: {}
 
   ee-first@1.1.1: {}
-
-  effect-schemas@0.0.14(effect@4.0.0-beta.69):
-    dependencies:
-      effect: 4.0.0-beta.69
 
   effect@4.0.0-beta.69:
     dependencies:
