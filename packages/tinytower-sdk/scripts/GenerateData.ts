@@ -1,10 +1,25 @@
-import { Command, FileSystem, Path } from "@effect/platform";
-import { NodeContext, NodeRuntime } from "@effect/platform-node";
-import { RpcClient } from "@effect/rpc";
+import {
+    Array,
+    Duration,
+    Context,
+    Effect,
+    Layer,
+    References,
+    Order,
+    pipe,
+    Record,
+    String,
+    Tuple,
+    FileSystem,
+    Path,
+} from "effect";
+import { FetchHttpClient } from "effect/unstable/http";
+import { ChildProcessSpawner, ChildProcess } from "effect/unstable/process";
+import { RpcClient } from "effect/unstable/rpc";
+
+import { NodeServices, NodeRuntime } from "@effect/platform-node";
 import { FridaDevice, FridaDeviceAcquisitionError } from "@efffrida/frida-tools";
 import { GooglePlayApi } from "@efffrida/gplayapi";
-import { Array, Cause, Context, Effect, Layer, Logger, LogLevel, Order, pipe, Record, String, Tuple } from "effect";
-
 import { AgentLive } from "@tinyburg/insight/node/index";
 import { Rpcs } from "@tinyburg/insight/shared/Rpcs";
 
@@ -15,7 +30,7 @@ const sortIndexable = <T extends Readonly<{ index: string }>>(
         input,
         Record.toEntries,
         Array.map(([name, object]) => ({ name, ...object })),
-        Array.sortWith(({ index }) => Number.parseInt(index), Order.number),
+        Array.sortWith(({ index }) => Number.parseInt(index), Order.Number),
         Array.map(({ index: _index, ...rest }) => ({ ...rest }))
     );
 
@@ -42,7 +57,7 @@ const replaceGeneratedContent = (
         const separatorPattern = new RegExp(`(${SEPARATOR})([\\s\\S]*?)(${SEPARATOR})`, "g");
 
         if (!separatorPattern.test(existingContent)) {
-            return yield* Effect.dieMessage(`Expected two separators in file: ${filePath}`);
+            return yield* Effect.die(`Expected two separators in file: ${filePath}`);
         }
 
         const updatedContent = existingContent.replace(
@@ -184,7 +199,7 @@ const generateData = Effect.gen(function* () {
 
 const DeviceLive = pipe(
     FridaDevice.layerAndroidEmulatorDeviceConfig("Small_Phone", {
-        fridaExecutable: "/data/local/tmp/frida-server-17.5.2-android-arm64",
+        fridaExecutable: "/data/local/tmp/frida-server-17.11.0-android-arm64",
         extraEmulatorArgs: ["-gpu", "swiftshader_indirect"],
     }),
     Layer.tap(
@@ -192,18 +207,15 @@ const DeviceLive = pipe(
             function* (deviceCtx: Context.Context<FridaDevice.FridaDevice>) {
                 const device = Context.get(deviceCtx, FridaDevice.FridaDevice);
                 const emulatorName = String.replace("android-emulator://", "")(device.host);
-                const apks = yield* Effect.provide(
-                    GooglePlayApi.download("com.nimblebit.tinytower"),
-                    GooglePlayApi.defaultHttpClient
-                );
+                const childProcessSpawner = yield* ChildProcessSpawner.ChildProcessSpawner;
+                const apks = yield* GooglePlayApi.downloadToDisk("com.nimblebit.tinytower");
 
                 yield* Effect.annotateCurrentSpan({
                     "apk.path": apks,
                     "emulator.name": emulatorName,
                 });
 
-                const installCommand = Command.make(
-                    "/Users/leo.conforti/Library/Android/sdk/platform-tools/adb",
+                const installCommand = ChildProcess.make("/Users/leo.conforti/Library/Android/sdk/platform-tools/adb", [
                     "-s",
                     emulatorName,
                     "install-multiple",
@@ -211,47 +223,46 @@ const DeviceLive = pipe(
                     "-t", // Allow test packages
                     "-g", // Grant all runtime permissions
                     "-d", // Allow downgrade
-                    ...apks.map((apk) => apk.file)
-                );
+                    ...apks.map((apk) => apk.file),
+                ]);
 
-                const exitCode = yield* Command.exitCode(installCommand);
+                const exitCode = yield* childProcessSpawner.exitCode(installCommand);
                 if (exitCode !== 0) {
                     return yield* new FridaDeviceAcquisitionError.FridaDeviceAcquisitionError({
-                        attempts: 1,
+                        cause: `Failed to install APK. Exit code: ${exitCode}`,
                         acquisitionMethod: "android-emulator",
-                        cause: new Cause.RuntimeException(`Failed to install APK. Exit code: ${exitCode}`),
+                        attempts: 1,
                     });
                 }
             },
             Effect.scoped,
             Effect.timed,
-            Effect.map(Tuple.getFirst),
-            Effect.flatMap((time) => Effect.logDebug(`APK downloading and installing took ${time}`)),
+            Effect.map(Tuple.get(0)),
+            Effect.map(Duration.toSeconds),
+            Effect.flatMap((time) => Effect.logDebug(`APK downloading and installing took ${time} seconds`)),
             Effect.asVoid
         )
-    ),
-    Layer.provide(NodeContext.layer)
+    )
 );
 
 const Live = pipe(
     AgentLive,
     Layer.provideMerge(DeviceLive),
-    Layer.provideMerge(Layer.merge(Logger.minimumLogLevel(LogLevel.All), NodeContext.layer))
+    Layer.provideMerge(GooglePlayApi.AndroidDevice.EmbeddedPixel7aLive),
+    Layer.provideMerge(FetchHttpClient.layer),
+    Layer.provideMerge(NodeServices.layer),
+    Layer.provide(Layer.succeed(References.MinimumLogLevel, "Debug"))
 );
 
 Effect.gen(function* () {
     const path = yield* Path.Path;
     const fileSystem = yield* FileSystem.FileSystem;
     const srcDir = yield* path.fromFileUrl(new URL("../src", import.meta.url));
-
-    const details = yield* Effect.provide(
-        GooglePlayApi.details("com.nimblebit.tinytower"),
-        GooglePlayApi.defaultHttpClient
-    );
+    const details = yield* GooglePlayApi.details("com.nimblebit.tinytower");
 
     const version = details.item?.details?.appDetails?.versionString;
     if (version === undefined) {
-        return yield* Effect.dieMessage("Could not fetch Tiny Tower version from Google Play");
+        return yield* Effect.die("Could not fetch Tiny Tower version from Google Play");
     }
 
     const generatedFiles = Array.make(
@@ -273,7 +284,7 @@ Effect.gen(function* () {
                 (content) => !content.includes(`With Tiny Tower Version: ${version}`)
             )
         ),
-        Array.isEmptyArray,
-        () => generateData.pipe(Effect.scoped, Effect.provide(Live))
+        Array.isArrayEmpty,
+        () => generateData
     );
-}).pipe(Effect.provide(NodeContext.layer), NodeRuntime.runMain);
+}).pipe(Effect.scoped, Effect.provide(Live), NodeRuntime.runMain);
