@@ -34,4 +34,5 @@ jobs:
       - run: pnpm circular
       - run: pnpm lint
       - run: pnpm build
+      - run: touch ./.env
       - run: pnpm test
