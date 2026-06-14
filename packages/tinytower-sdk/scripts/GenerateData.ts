@@ -179,7 +179,7 @@ const generateData = Effect.gen(function* () {
         export type Roof = (typeof roofs)[number];
         `
     );
-}).pipe(Effect.scoped);
+}).pipe(Effect.scoped, Effect.provide(Layer.provideMerge(AgentLive, DeviceLive)));
 
 const Live = pipe(
     GooglePlayApi.AndroidDevice.EmbeddedPixel7aLive,
@@ -218,11 +218,6 @@ Effect.gen(function* () {
             )
         ),
         Array.isArrayEmpty,
-        () => generateData.pipe(Effect.provide(Layer.provideMerge(AgentLive, DeviceLive)))
+        () => generateData
     );
-}).pipe(
-    (x) => x,
-    Effect.provide(Live),
-    (x) => x,
-    NodeRuntime.runMain
-);
+}).pipe(Effect.provide(Live), NodeRuntime.runMain);
