@@ -133,6 +133,14 @@ export class NimblebitAuth extends Context.Service<
             })
         ).pipe(Layer.effect(this));
 
+    public static readonly CustomHostConfig = (
+        options: Config.Wrap<{
+            host: string;
+            authKey: Redacted.Redacted<string>;
+        }>
+    ): Layer.Layer<NimblebitAuth, Config.ConfigError, Crypto.Crypto> =>
+        Layer.unwrap(Effect.map(Config.unwrap(options), NimblebitAuth.CustomHost));
+
     public static readonly TinyburgAuthProxy = ({
         authKey,
     }: {
@@ -141,7 +149,9 @@ export class NimblebitAuth extends Context.Service<
         NimblebitAuth.CustomHost({ host: "https://authproxy.tinyburg.app", authKey });
 
     public static readonly TinyburgAuthProxyConfig = (
-        options: Config.Wrap<Parameters<typeof NimblebitAuth.TinyburgAuthProxy>[0]>
+        options: Config.Wrap<{
+            authKey: Redacted.Redacted<string>;
+        }>
     ): Layer.Layer<NimblebitAuth, Config.ConfigError, Crypto.Crypto> =>
         Layer.unwrap(Effect.map(Config.unwrap(options), NimblebitAuth.TinyburgAuthProxy));
 }
@@ -175,6 +185,17 @@ export const layerCustomHost: (options: {
  * @since 1.0.0
  * @category Layer
  */
+export const layerCustomHostConfig: (
+    options: Config.Wrap<{
+        host: string;
+        authKey: Redacted.Redacted<string>;
+    }>
+) => Layer.Layer<NimblebitAuth, Config.ConfigError, Crypto.Crypto> = NimblebitAuth.CustomHostConfig;
+
+/**
+ * @since 1.0.0
+ * @category Layer
+ */
 export const layerTinyburgAuthProxy: (options: {
     authKey: Redacted.Redacted<string>;
 }) => Layer.Layer<NimblebitAuth, never, Crypto.Crypto> = NimblebitAuth.TinyburgAuthProxy;
@@ -184,5 +205,7 @@ export const layerTinyburgAuthProxy: (options: {
  * @category Layer
  */
 export const layerTinyburgAuthProxyConfig: (
-    options: Config.Wrap<Parameters<typeof NimblebitAuth.TinyburgAuthProxy>[0]>
+    options: Config.Wrap<{
+        authKey: Redacted.Redacted<string>;
+    }>
 ) => Layer.Layer<NimblebitAuth, Config.ConfigError, Crypto.Crypto> = NimblebitAuth.TinyburgAuthProxyConfig;

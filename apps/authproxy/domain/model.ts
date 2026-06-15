@@ -1,4 +1,4 @@
-import { Context, Effect, Schema, Layer } from "effect";
+import { Context, Effect, Schema, Layer, SchemaGetter } from "effect";
 import { Model } from "effect/unstable/schema";
 import { SqlClient, SqlSchema, SqlModel } from "effect/unstable/sql";
 
@@ -22,9 +22,18 @@ export class Account extends Model.Class<Account>("Account")({
     id: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)).pipe(Model.GeneratedByDb),
     createdAt: Model.DateTimeInsertFromDate,
     lastUsedAt: Model.DateTimeUpdateFromDate,
-    key: Schema.String.check(Schema.isUUID()).pipe(Model.FieldExcept(["insert"])),
+    key: Schema.Union([
+        Schema.String.check(Schema.isUUID()),
+        Schema.Literal("00000000-0000-0000-0000-000000000001"),
+        Schema.Literal("00000000-0000-0000-0000-000000000002"),
+    ]).pipe(Model.FieldExcept(["insert"])),
     revoked: Schema.Boolean.pipe(Model.FieldExcept(["insert"])),
-    scopes: Schema.ReadonlySet(Schema.String),
+    scopes: Schema.UniqueArray(Schema.String).pipe(
+        Schema.decodeTo(Schema.ReadonlySet(Schema.String), {
+            encode: SchemaGetter.transform((set) => Array.from(set)),
+            decode: SchemaGetter.transform((array) => new Set(array)),
+        })
+    ),
     description: Schema.OptionFromNullishOr(Schema.String, { onNoneEncoding: null }),
     rateLimitLimit: Schema.Int,
     rateLimitWindow: Schema.NumberFromString.pipe(
