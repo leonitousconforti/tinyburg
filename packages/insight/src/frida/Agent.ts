@@ -196,7 +196,6 @@ const RpcsLive = Rpcs.toLayer(
         // Get all floors implementation
         const getAllFloors = Effect.fnUntraced(
             function* () {
-                yield* waitForInstance("VFloorData");
                 const FloorTypeClass = yield* tryClassCached(CSharpAssembly.image, "FloorType");
                 const VFloorDataClass = yield* tryClassCached(CSharpAssembly.image, "VFloorData");
                 const FloorsField = yield* tryFieldCached<Il2Cpp.Object>(VFloorDataClass, "info");
@@ -226,7 +225,6 @@ const RpcsLive = Rpcs.toLayer(
         // Get all elevators implementation
         const getAllElevators = Effect.fnUntraced(
             function* () {
-                yield* waitForInstance("VElevatorData");
                 const VElevatorDataClass = yield* tryClassCached(CSharpAssembly.image, "VElevatorData");
                 const NumElevatorsField = yield* tryFieldCached<number>(VElevatorDataClass, "NUM_ELEVATORS");
                 const ElevatorsField = yield* tryFieldCached<Il2Cpp.Array<Il2Cpp.Object>>(VElevatorDataClass, "info");
@@ -256,7 +254,6 @@ const RpcsLive = Rpcs.toLayer(
         // Get all roofs implementation
         const getAllRoofs = Effect.fnUntraced(
             function* () {
-                yield* waitForInstance("VRoofData");
                 const VRoofDataClass = yield* tryClassCached(CSharpAssembly.image, "VRoofData");
                 const NumRoofsField = yield* tryFieldCached<number>(VRoofDataClass, "NUM_ROOFS");
                 const RoofsField = yield* tryFieldCached<Il2Cpp.Array<Il2Cpp.Object>>(VRoofDataClass, "info");
