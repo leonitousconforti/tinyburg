@@ -8,6 +8,7 @@ const config: ViteUserConfig = {
     },
     test: {
         setupFiles: [path.join(__dirname, "vitest.setup.ts")],
+        server: { deps: { inline: [/@effect\/vitest/] } },
         fakeTimers: {
             toFake: undefined,
         },
