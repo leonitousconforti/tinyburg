@@ -250,8 +250,8 @@ importers:
         specifier: 0.0.18
         version: 0.0.18(@bufbuild/protobuf@2.12.0)(effect@4.0.0-beta.69)
       '@efffrida/il2cpp-bridge':
-        specifier: 0.0.34
-        version: 0.0.34(effect@4.0.0-beta.69)
+        specifier: 0.0.36
+        version: 0.0.36(effect@4.0.0-beta.69)
       '@efffrida/platform':
         specifier: 0.0.28
         version: 0.0.28(effect@4.0.0-beta.69)
@@ -759,8 +759,8 @@ packages:
       '@bufbuild/protobuf': 2.12.0
       effect: 4.0.0-beta.69
 
-  '@efffrida/il2cpp-bridge@0.0.34':
-    resolution: {integrity: sha512-cFwE+00Ynv3lTrSKqOwz8EcnG2K8myJMaWCCL68eb2HvwyfoJOTfKd4O9sJc6Bb6uy0jdQEBHnJziCJYmBONxA==}
+  '@efffrida/il2cpp-bridge@0.0.36':
+    resolution: {integrity: sha512-W3slhsBPuhZ7RnTIaokRk/9qGc6RJz2kmMHV2p2dFRtgSNyCsvgmcle28bfGpgwgngxWPJr6k866irv1bdjkfw==}
     peerDependencies:
       effect: 4.0.0-beta.69
 
@@ -5771,7 +5771,7 @@ snapshots:
       '@bufbuild/protobuf': 2.12.0
       effect: 4.0.0-beta.69
 
-  '@efffrida/il2cpp-bridge@0.0.34(effect@4.0.0-beta.69)':
+  '@efffrida/il2cpp-bridge@0.0.36(effect@4.0.0-beta.69)':
     dependencies:
       effect: 4.0.0-beta.69
       frida-il2cpp-bridge: 0.13.1
