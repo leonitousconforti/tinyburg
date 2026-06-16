@@ -10,7 +10,7 @@ Effect.gen(function* () {
     const bundleIdentifier = "com.nimblebit.tinytower";
     const { item } = yield* GooglePlayApi.details(bundleIdentifier);
     const maxVersionCode = item?.details?.appDetails?.versionCode ?? 0n;
-    for (let versionCode = BigInt(0); versionCode < maxVersionCode; versionCode++) {
+    for (let versionCode = BigInt(0); versionCode <= maxVersionCode; versionCode++) {
         yield* Effect.logInfo(`Archiving ${bundleIdentifier} version ${versionCode}`);
         yield* archiveToS3({ offerType: item?.offer[0].offerType ?? 1, versionCode });
     }
