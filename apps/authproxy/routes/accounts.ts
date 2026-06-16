@@ -145,14 +145,13 @@ const CreateHandler: HttpApiEndpoint.HandlerWithName<
 > = Effect.fnUntraced(function* ({ params: { accountType } }) {
     const repo = yield* Repository;
     const seededAccount = yield* accountType === "none" ? repo.seededNoneAccount : repo.seededReadonlyAccount;
-    return yield* repo.insert(
-        Account.insert.make({
-            description: Option.none(),
-            scopes: seededAccount.scopes,
-            rateLimitLimit: seededAccount.rateLimitLimit,
-            rateLimitWindow: seededAccount.rateLimitWindow,
-        })
-    );
+    const newAccount = yield* Account.insert.makeEffect({
+        rateLimitWindow: seededAccount.rateLimitWindow,
+        rateLimitLimit: seededAccount.rateLimitLimit,
+        scopes: seededAccount.scopes,
+        description: Option.none(),
+    });
+    return yield* repo.insert(newAccount);
 }, Effect.orDie);
 
 /** @internal */
@@ -223,17 +222,17 @@ const RevokeHandler: HttpApiEndpoint.HandlerWithName<
         return yield* new HttpApiError.BadRequest();
     }
 
-    return yield* repo.update(
-        Account.update.make({
-            key: maybeAccount.value.key,
-            scopes: maybeAccount.value.scopes,
-            description: maybeAccount.value.description,
-            rateLimitLimit: maybeAccount.value.rateLimitLimit,
-            rateLimitWindow: maybeAccount.value.rateLimitWindow,
-            lastUsedAt: Model.Override(maybeAccount.value.lastUsedAt),
-            revoked: true,
-        })
-    );
+    const updatedAccount = yield* Account.update.makeEffect({
+        key: maybeAccount.value.key,
+        scopes: maybeAccount.value.scopes,
+        description: maybeAccount.value.description,
+        rateLimitLimit: maybeAccount.value.rateLimitLimit,
+        rateLimitWindow: maybeAccount.value.rateLimitWindow,
+        lastUsedAt: Model.Override(maybeAccount.value.lastUsedAt),
+        revoked: true,
+    });
+
+    return yield* repo.update(updatedAccount);
 }, Effect.orDie);
 
 /** @internal */
@@ -257,17 +256,17 @@ const AuthorizeHandler: HttpApiEndpoint.HandlerWithName<
         return yield* new HttpApiError.BadRequest();
     }
 
-    return yield* repo.update(
-        Account.update.make({
-            key: maybeAccount.value.key,
-            scopes: maybeAccount.value.scopes,
-            description: maybeAccount.value.description,
-            rateLimitLimit: maybeAccount.value.rateLimitLimit,
-            rateLimitWindow: maybeAccount.value.rateLimitWindow,
-            lastUsedAt: Model.Override(maybeAccount.value.lastUsedAt),
-            revoked: false,
-        })
-    );
+    const updatedAccount = yield* Account.update.makeEffect({
+        key: maybeAccount.value.key,
+        scopes: maybeAccount.value.scopes,
+        description: maybeAccount.value.description,
+        rateLimitLimit: maybeAccount.value.rateLimitLimit,
+        rateLimitWindow: maybeAccount.value.rateLimitWindow,
+        lastUsedAt: Model.Override(maybeAccount.value.lastUsedAt),
+        revoked: false,
+    });
+
+    return yield* repo.update(updatedAccount);
 }, Effect.orDie);
 
 /** @internal */
@@ -286,17 +285,17 @@ const ModifyScopesHandler: HttpApiEndpoint.HandlerWithName<
         return yield* new HttpApiError.NotFound();
     }
 
-    return yield* repo.update(
-        Account.update.make({
-            key: maybeAccount.value.key,
-            revoked: maybeAccount.value.revoked,
-            description: maybeAccount.value.description,
-            rateLimitLimit: maybeAccount.value.rateLimitLimit,
-            rateLimitWindow: maybeAccount.value.rateLimitWindow,
-            lastUsedAt: Model.Override(maybeAccount.value.lastUsedAt),
-            scopes,
-        })
-    );
+    const updatedAccount = yield* Account.update.makeEffect({
+        key: maybeAccount.value.key,
+        revoked: maybeAccount.value.revoked,
+        description: maybeAccount.value.description,
+        rateLimitLimit: maybeAccount.value.rateLimitLimit,
+        rateLimitWindow: maybeAccount.value.rateLimitWindow,
+        lastUsedAt: Model.Override(maybeAccount.value.lastUsedAt),
+        scopes,
+    });
+
+    return yield* repo.update(updatedAccount);
 }, Effect.orDie);
 
 /** @internal */
@@ -315,17 +314,17 @@ const ModifyRateLimitHandler: HttpApiEndpoint.HandlerWithName<
         return yield* new HttpApiError.NotFound();
     }
 
-    return yield* repo.update(
-        Account.update.make({
-            key: maybeAccount.value.key,
-            revoked: maybeAccount.value.revoked,
-            description: maybeAccount.value.description,
-            scopes: maybeAccount.value.scopes,
-            lastUsedAt: Model.Override(maybeAccount.value.lastUsedAt),
-            rateLimitLimit: limit,
-            rateLimitWindow: window,
-        })
-    );
+    const updatedAccount = yield* Account.update.makeEffect({
+        key: maybeAccount.value.key,
+        revoked: maybeAccount.value.revoked,
+        description: maybeAccount.value.description,
+        scopes: maybeAccount.value.scopes,
+        lastUsedAt: Model.Override(maybeAccount.value.lastUsedAt),
+        rateLimitLimit: limit,
+        rateLimitWindow: window,
+    });
+
+    return yield* repo.update(updatedAccount);
 }, Effect.orDie);
 
 /** @internal */
@@ -344,17 +343,17 @@ const ModifyDescriptionHandler: HttpApiEndpoint.HandlerWithName<
         return yield* new HttpApiError.NotFound();
     }
 
-    return yield* repo.update(
-        Account.update.make({
-            key: maybeAccount.value.key,
-            revoked: maybeAccount.value.revoked,
-            scopes: maybeAccount.value.scopes,
-            rateLimitLimit: maybeAccount.value.rateLimitLimit,
-            rateLimitWindow: maybeAccount.value.rateLimitWindow,
-            lastUsedAt: Model.Override(maybeAccount.value.lastUsedAt),
-            description,
-        })
-    );
+    const updatedAccount = yield* Account.update.makeEffect({
+        key: maybeAccount.value.key,
+        revoked: maybeAccount.value.revoked,
+        scopes: maybeAccount.value.scopes,
+        rateLimitLimit: maybeAccount.value.rateLimitLimit,
+        rateLimitWindow: maybeAccount.value.rateLimitWindow,
+        lastUsedAt: Model.Override(maybeAccount.value.lastUsedAt),
+        description,
+    });
+
+    return yield* repo.update(updatedAccount);
 }, Effect.orDie);
 
 /** @internal */

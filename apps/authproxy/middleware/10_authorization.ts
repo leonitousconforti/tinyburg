@@ -117,16 +117,16 @@ export const AuthorizationLive = Layer.effect(
                     if (
                         Duration.isGreaterThanOrEqualTo(DateTime.distance(accountLastUsedAt, now), Duration.minutes(1))
                     ) {
-                        yield* repo.updateVoid(
-                            Account.update.make({
-                                key: maybeAccount.value.key,
-                                scopes: maybeAccount.value.scopes,
-                                revoked: maybeAccount.value.revoked,
-                                description: maybeAccount.value.description,
-                                rateLimitLimit: maybeAccount.value.rateLimitLimit,
-                                rateLimitWindow: maybeAccount.value.rateLimitWindow,
-                            })
-                        );
+                        const updatedAccount = yield* Account.update.makeEffect({
+                            key: maybeAccount.value.key,
+                            scopes: maybeAccount.value.scopes,
+                            revoked: maybeAccount.value.revoked,
+                            description: maybeAccount.value.description,
+                            rateLimitLimit: maybeAccount.value.rateLimitLimit,
+                            rateLimitWindow: maybeAccount.value.rateLimitWindow,
+                        });
+
+                        yield* repo.updateVoid(updatedAccount);
                     }
 
                     return yield* next;
