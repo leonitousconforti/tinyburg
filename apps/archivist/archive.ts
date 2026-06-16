@@ -1,6 +1,7 @@
-import { Effect, Match, Option, Stream } from "effect";
+import { Effect, Match, Option } from "effect";
 
 import { S3 } from "@effect-aws/client-s3";
+import { NodeStream } from "@effect/platform-node";
 import { GooglePlayApi } from "@efffrida/gplayapi";
 
 const bundleIdentifier = "com.nimblebit.tinytower";
@@ -42,7 +43,10 @@ export const archiveToS3 = Effect.fnUntraced(function* (options: { offerType: nu
                 Bucket: "tinyburg-cold",
                 Key: `archivist/${options?.versionCode}/${name}`,
             })
-        ).pipe(Effect.catchNoSuchElement);
+        ).pipe(
+            Effect.flatMap(Effect.succeedSome),
+            Effect.catchTag("NoSuchKey", () => Effect.succeedNone)
+        );
 
         // If the upload already exists, let's just check its integrity
         if (Option.isSome(maybeExistingUpload)) {
@@ -64,15 +68,12 @@ export const archiveToS3 = Effect.fnUntraced(function* (options: { offerType: nu
             }
         }
 
-        // FIXME: I don't want to have to do this :/
-        const data = yield* Stream.mkUint8Array(stream);
-
         yield* S3.use((s3) =>
             s3.putObject({
                 ACL: "private",
                 Bucket: "tinyburg-cold",
                 ContentLength: Number(size),
-                Body: data, // NodeStream.toReadableNever(stream),
+                Body: NodeStream.toReadableNever(stream),
                 ChecksumAlgorithm: checksumAlgorithm,
                 Key: `archivist/${options?.versionCode}/${name}`,
                 ...("SHA-1" in integrity ? { ChecksumSHA1: integrityBase64 } : {}),
