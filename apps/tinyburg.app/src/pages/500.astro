@@ -5,13 +5,13 @@ interface Props {
     error: unknown;
 }
 
-const { error: _error } = Astro.props;
+const { error } = Astro.props;
 ---
 
 <CloudsLayout title="Error | Tinyburg" description="An error occurred.">
     <section class="relative flex min-h-screen flex-col items-center justify-center px-6 py-16 text-center sm:px-10">
         <div class="mx-auto w-full max-w-2xl">
-            <div class="mb-8 flex justify-center">Content</div>
+            <div class="mb-8 flex justify-center">${error instanceof Error ? error.message : "An unknown error occurred"}</div>
 
             <h1 class="font-pixel text-3xl text-white drop-shadow-[3px_3px_0_rgba(0,0,0,0.45)] sm:text-4xl">
                 Oops, something went wrong!
