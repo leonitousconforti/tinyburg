@@ -37,7 +37,7 @@ HttpRouter.serve(AllRoutes, { routerConfig: { maxParamLength: 500 } }).pipe(
             host: Config.string("HOST").pipe(Config.withDefault("0.0.0.0")),
         })
     ),
-    Layer.provide(NodeServices.layer), // FIXME: this should not be needed
+    Layer.provide(NodeServices.layer), // FIXME: this should not be needed https://github.com/Effect-TS/effect-smol/issues/2363
     Layer.launch,
     NodeRuntime.runMain
 );
