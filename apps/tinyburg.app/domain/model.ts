@@ -1,12 +1,14 @@
-import { Model, SqlClient, SqlSchema } from "@effect/sql";
+import { DateTime, Duration, Effect, Context, Schema, Layer, SchemaGetter } from "effect";
+import { Model } from "effect/unstable/schema";
+import { SqlClient, SqlSchema, SqlModel, type SqlError } from "effect/unstable/sql";
+
 import { PlayerAuthKeySchema, PlayerIdSchema } from "@tinyburg/nimblebit-sdk/NimblebitConfig";
-import { DateTime, Duration, Effect, ParseResult, Schema } from "effect";
 
 /**
  * @since 1.0.0
  * @category Schemas
  */
-export const OAuthProvider = Schema.Literal("google", "discord");
+export const OAuthProvider = Schema.Literals(["google", "discord"]);
 
 /**
  * A user in the tinyburg.app system.
@@ -15,11 +17,11 @@ export const OAuthProvider = Schema.Literal("google", "discord");
  * @category Models
  */
 export class User extends Model.Class<User>("User")({
-    id: Model.Generated(Schema.UUID),
+    id: Schema.String.check(Schema.isUUID()).pipe(Model.GeneratedByDb),
     createdAt: Model.DateTimeInsertFromDate,
     lastLoginAt: Model.DateTimeUpdateFromDate,
     displayName: Schema.String,
-    avatarUrl: Schema.OptionFromNullishOr(Schema.String, null),
+    avatarUrl: Schema.OptionFromNullishOr(Schema.String, { onNoneEncoding: null }),
 }) {}
 
 /**
@@ -27,7 +29,7 @@ export class User extends Model.Class<User>("User")({
  * @category Models
  */
 export class OAuthAccount extends Model.Class<OAuthAccount>("OAuthAccount")({
-    userId: Schema.UUID,
+    userId: Schema.String.check(Schema.isUUID()),
     provider: OAuthProvider,
     providerAccountId: Schema.String,
     createdAt: Model.DateTimeInsertFromDate,
@@ -38,10 +40,10 @@ export class OAuthAccount extends Model.Class<OAuthAccount>("OAuthAccount")({
  * @category Models
  */
 export class Session extends Model.Class<Session>("Session")({
-    id: Model.Generated(Schema.UUID),
-    userId: Schema.UUID,
+    id: Schema.String.check(Schema.isUUID()).pipe(Model.FieldExcept(["insert"])),
+    userId: Schema.String.check(Schema.isUUID()),
     createdAt: Model.DateTimeInsertFromDate,
-    expiresAt: Model.DateTimeFromDate,
+    expiresAt: Model.DateTimeInsertFromDate,
 }) {}
 
 /**
@@ -49,13 +51,12 @@ export class Session extends Model.Class<Session>("Session")({
  * @category Models
  */
 export class TinyTowerAccount extends Model.Class<TinyTowerAccount>("TinyTowerAccount")({
-    id: Model.Generated(Schema.UUID),
-    userId: Schema.UUID,
+    id: Schema.String.check(Schema.isUUID()).pipe(Model.FieldExcept(["insert"])),
+    userId: Schema.String.check(Schema.isUUID()),
     playerId: PlayerIdSchema,
     playerAuthKey: PlayerAuthKeySchema,
     playerEmail: Schema.String,
     createdAt: Model.DateTimeInsertFromDate,
-    verifiedAt: Model.DateTimeFromDate,
 }) {}
 
 /**
@@ -63,81 +64,79 @@ export class TinyTowerAccount extends Model.Class<TinyTowerAccount>("TinyTowerAc
  * @category Models
  */
 export class PendingTinyTowerAccount extends Model.Class<PendingTinyTowerAccount>("PendingTinyTowerAccount")({
-    id: Model.Generated(Schema.UUID),
-    userId: Schema.UUID,
+    id: Schema.String.check(Schema.isUUID()).pipe(Model.FieldExcept(["insert"])),
+    userId: Schema.String.check(Schema.isUUID()),
     playerId: PlayerIdSchema,
     playerEmail: Schema.String,
     createdAt: Model.DateTimeInsertFromDate,
-    expiresAt: Model.Field({ select: Model.DateTimeFromDate }),
+    expiresAt: Schema.DateTimeUtcFromDate.pipe(Model.GeneratedByDb),
 }) {}
 
 /**
  * @since 1.0.0
  * @category Services
  */
-export class Repository extends Effect.Service<Repository>()("@tinyburg/tinyburg.app/domain/Repository", {
-    accessors: true,
-    dependencies: [],
-    effect: Effect.gen(function* () {
+export class Repository extends Context.Service<Repository>()("@tinyburg/tinyburg.app/domain/Repository", {
+    make: Effect.gen(function* () {
         const sql = yield* SqlClient.SqlClient;
 
-        const sessions = yield* Model.makeRepository(Session, {
-            idColumn: "id",
-            tableName: "sessions",
+        const sessions = yield* SqlModel.makeRepository(Session, {
             spanPrefix: "tinyburg.app.domain.Repository.sessions",
+            tableName: "sessions",
+            idColumn: "id",
         });
 
-        const _tinytowerAccounts = yield* Model.makeRepository(TinyTowerAccount, {
-            idColumn: "id",
-            tableName: "tinytower_accounts",
+        const _tinytowerAccounts = yield* SqlModel.makeRepository(TinyTowerAccount, {
             spanPrefix: "tinyburg.app.domain.Repository.tinytowerAccounts",
+            tableName: "tinytower_accounts",
+            idColumn: "id",
         });
 
-        const _pendingTinyTowerAccounts = yield* Model.makeRepository(PendingTinyTowerAccount, {
-            idColumn: "id",
-            tableName: "pending_tinytower_accounts",
+        const _pendingTinyTowerAccounts = yield* SqlModel.makeRepository(PendingTinyTowerAccount, {
             spanPrefix: "tinyburg.app.domain.Repository.pendingTinyTowerAccounts",
+            tableName: "pending_tinytower_accounts",
+            idColumn: "id",
         });
 
         const deleteSession = sessions.delete;
         const createSession = (
             user: User,
-            expiresIn?: Duration.DurationInput | undefined
-        ): Effect.Effect<Session, never, never> =>
-            Effect.flatMap(DateTime.now, (now) =>
-                sessions.insert({
+            expiresIn?: Duration.Input | undefined
+        ): Effect.Effect<Session, Schema.SchemaError | SqlError.SqlError, never> =>
+            Effect.gen(function* () {
+                const now = yield* DateTime.now;
+                const newSession = yield* Session.insert.makeEffect({
                     userId: user.id,
                     createdAt: undefined,
-                    expiresAt: DateTime.addDuration(now, expiresIn ?? Duration.days(30)),
-                })
-            );
+                    expiresAt: Model.Override(DateTime.addDuration(now, expiresIn ?? Duration.days(30))),
+                });
 
-        const findUserBySession = SqlSchema.findOne({
-            Request: Schema.UUID,
-            Result: Schema.transformOrFail(
-                Schema.encodedSchema(
-                    Schema.Struct({
-                        userId: User.fields.id,
-                        userCreatedAt: User.fields.createdAt,
-                        userLastLoginAt: User.fields.lastLoginAt,
-                        userDisplayName: User.fields.displayName,
-                        userAvatarUrl: User.fields.avatarUrl,
-                        sessionId: Session.fields.id,
-                        sessionUserId: Session.fields.userId,
-                        sessionCreatedAt: Session.fields.createdAt,
-                        sessionExpiresAt: Session.fields.expiresAt,
-                    })
-                ),
+                return yield* sessions.insert(newSession);
+            });
+
+        const findUserBySession = SqlSchema.findOneOption({
+            Request: Schema.String.check(Schema.isUUID()),
+            Result: Schema.toEncoded(
                 Schema.Struct({
-                    user: User,
-                    session: Session,
-                }),
-                {
-                    strict: true,
-                    encode: (input, _options, ast) =>
-                        ParseResult.fail(new ParseResult.Forbidden(ast, input, "Encoding is not supported")),
-                    decode: (output) =>
-                        ParseResult.succeed({
+                    userId: User.fields.id,
+                    userCreatedAt: User.fields.createdAt,
+                    userLastLoginAt: User.fields.lastLoginAt,
+                    userDisplayName: User.fields.displayName,
+                    userAvatarUrl: User.fields.avatarUrl,
+                    sessionId: Session.fields.id,
+                    sessionUserId: Session.fields.userId,
+                    sessionCreatedAt: Session.fields.createdAt,
+                    sessionExpiresAt: Session.fields.expiresAt,
+                })
+            ).pipe(
+                Schema.decodeTo(
+                    Schema.Struct({
+                        user: User,
+                        session: Session,
+                    }),
+                    {
+                        encode: SchemaGetter.forbidden(() => "Encoding not supported"),
+                        decode: SchemaGetter.transform((output) => ({
                             user: {
                                 id: output.userId,
                                 createdAt: output.userCreatedAt,
@@ -151,8 +150,9 @@ export class Repository extends Effect.Service<Repository>()("@tinyburg/tinyburg
                                 createdAt: output.sessionCreatedAt,
                                 expiresAt: output.sessionExpiresAt,
                             },
-                        }),
-                }
+                        })),
+                    }
+                )
             ),
             execute: (sessionId) => sql`
                 SELECT
@@ -171,13 +171,13 @@ export class Repository extends Effect.Service<Repository>()("@tinyburg/tinyburg
             `,
         });
 
-        const upsertUserFromOAuth = SqlSchema.single({
+        const upsertUserFromOAuth = SqlSchema.findOne({
             Result: User,
             Request: Schema.Struct({
                 provider: OAuthProvider,
                 providerAccountId: Schema.String,
                 displayName: Schema.String,
-                avatarUrl: Schema.OptionFromNullishOr(Schema.String, null),
+                avatarUrl: Schema.OptionFromNullishOr(Schema.String, { onNoneEncoding: null }),
             }),
             execute: ({ avatarUrl, displayName, provider, providerAccountId }) => sql`
                 WITH lock AS (
@@ -228,4 +228,6 @@ export class Repository extends Effect.Service<Repository>()("@tinyburg/tinyburg
             upsertUserFromOAuth,
         };
     }),
-}) {}
+}) {
+    static readonly Default = Layer.effect(this, Repository.make);
+}

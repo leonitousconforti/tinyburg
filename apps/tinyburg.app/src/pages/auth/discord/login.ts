@@ -1,10 +1,9 @@
-import { Cookies, HttpServerResponse, UrlParams } from "@effect/platform";
-import { Effect, Either, Option, pipe } from "effect";
+import { Effect, Result, pipe } from "effect";
+import { Cookies, HttpServerResponse, UrlParams } from "effect/unstable/http";
 
 import { makeAstroEndpoint } from "../../../../api/handler";
 import { AstroContext } from "../../../../api/tags";
 import { randomStateGenerator, Sha256CodeChallenge } from "../_shared";
-
 import {
     authUrl,
     DISCORD_OAUTH_CODE_VERIFIER_COOKIE_NAME,
@@ -31,8 +30,8 @@ export const GET = Effect.gen(function* () {
         UrlParams.set("code_challenge_method", "S256"),
         UrlParams.set("code_challenge", yield* Sha256CodeChallenge(codeVerifier)),
         UrlParams.set("prompt", "consent"),
-        (urlParams) => UrlParams.makeUrl(authUrl, urlParams, Option.none()),
-        Either.getOrUndefined
+        (urlParams) => UrlParams.makeUrl(authUrl, urlParams, undefined),
+        Result.getOrUndefined
     );
 
     // Store the state in a cookie to verify later
@@ -42,7 +41,7 @@ export const GET = Effect.gen(function* () {
         path: "/",
         secure: import.meta.env.PROD, // only add when deploying with https (prod)
         sameSite: "lax", // optional - do not use "strict"
-    }).pipe(Either.getOrUndefined);
+    }).pipe(Result.getOrUndefined);
 
     // Store the code verifier in a cookie to verify later
     const maybeCodeVerifierCookie = Cookies.makeCookie(DISCORD_OAUTH_CODE_VERIFIER_COOKIE_NAME, codeVerifier, {
@@ -51,7 +50,7 @@ export const GET = Effect.gen(function* () {
         path: "/",
         secure: import.meta.env.PROD, // only add when deploying with https (prod)
         sameSite: "lax", // optional - do not use "strict"
-    }).pipe(Either.getOrUndefined);
+    }).pipe(Result.getOrUndefined);
 
     // Check that everything was created successfully
     if (

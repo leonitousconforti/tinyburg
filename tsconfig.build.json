@@ -16,6 +16,7 @@
         { "path": "apps/authproxy/tsconfig.json" },
         { "path": "apps/auto-gold-bits/tsconfig.json" },
         { "path": "apps/personas/tsconfig.json" },
-        { "path": "apps/social-circles/tsconfig.json" }
+        { "path": "apps/social-circles/tsconfig.json" },
+        { "path": "apps/tinyburg.app/tsconfig.json" }
     ]
 }

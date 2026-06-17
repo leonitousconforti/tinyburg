@@ -1,3 +1,4 @@
+import { DateTime, Effect, Option, pipe, Schema, String } from "effect";
 import {
     Cookies,
     HttpBody,
@@ -6,14 +7,12 @@ import {
     HttpServerRequest,
     HttpServerResponse,
     UrlParams,
-} from "@effect/platform";
-import { DateTime, Effect, Option, pipe, Schema, String } from "effect";
+} from "effect/unstable/http";
 
 import { makeAstroEndpoint } from "../../../../api/handler";
 import { AstroContext } from "../../../../api/tags";
 import { Repository } from "../../../../domain/model";
 import { OAuthResponseSchema, SESSION_ID_COOKIE_NAME } from "../_shared";
-
 import {
     DISCORD_OAUTH_CODE_VERIFIER_COOKIE_NAME,
     DISCORD_OAUTH_STATE_COOKIE_NAME,
@@ -26,30 +25,30 @@ export const GET = Effect.gen(function* () {
     const request = yield* HttpServerRequest.HttpServerRequest;
 
     // Parse query parameters
-    const urlParams = yield* Schema.decodeUnknown(
-        Schema.Union(
+    const urlParams = yield* Schema.decodeUnknownEffect(
+        Schema.Union([
             Schema.Struct({
                 error: Schema.String,
             }),
             Schema.Struct({
                 code: Schema.String,
                 state: Schema.String,
-            })
-        )
+            }),
+        ])
     )(HttpServerRequest.searchParamsFromURL(new URL(request.originalUrl)));
 
     // Handle error from OAuth provider
     if ("error" in urlParams) {
-        return yield* Effect.dieMessage(`Discord OAuth error: ${urlParams.error}`);
+        return yield* Effect.die(`Discord OAuth error: ${urlParams.error}`);
     }
 
     // Retrieve cookies
-    const stateCookie = Option.fromNullable(request.cookies[DISCORD_OAUTH_STATE_COOKIE_NAME]);
-    const codeVerifierCookie = Option.fromNullable(request.cookies[DISCORD_OAUTH_CODE_VERIFIER_COOKIE_NAME]);
+    const stateCookie = Option.fromNullishOr(request.cookies[DISCORD_OAUTH_STATE_COOKIE_NAME]);
+    const codeVerifierCookie = Option.fromNullishOr(request.cookies[DISCORD_OAUTH_CODE_VERIFIER_COOKIE_NAME]);
 
     // Check state parameter to prevent CSRF attacks
     if (Option.isNone(stateCookie) || Option.isNone(codeVerifierCookie) || stateCookie.value !== urlParams.state) {
-        return yield* Effect.dieMessage("Invalid state parameter in Discord OAuth callback");
+        return yield* Effect.die("Invalid state parameter in Discord OAuth callback");
     }
 
     // Exchange the authorization code for tokens
@@ -69,11 +68,11 @@ export const GET = Effect.gen(function* () {
         HttpClientRequest.basicAuth(config.clientId, config.clientSecret),
         HttpClient.execute,
         Effect.flatMap((response) => response.json),
-        Effect.flatMap(Schema.decodeUnknown(OAuthResponseSchema))
+        Effect.flatMap(Schema.decodeUnknownEffect(OAuthResponseSchema))
     );
 
     // The state cookie has served its purpose, delete it
-    const deleteStateCookie = Cookies.unsafeMakeCookie(DISCORD_OAUTH_STATE_COOKIE_NAME, String.empty, {
+    const deleteStateCookie = Cookies.makeCookieUnsafe(DISCORD_OAUTH_STATE_COOKIE_NAME, String.empty, {
         expires: new Date(0),
         httpOnly: true,
         path: "/",
@@ -82,7 +81,7 @@ export const GET = Effect.gen(function* () {
     });
 
     // The code verifier cookie has served its purpose, delete it
-    const deleteCodeVerifierCookie = Cookies.unsafeMakeCookie(DISCORD_OAUTH_CODE_VERIFIER_COOKIE_NAME, String.empty, {
+    const deleteCodeVerifierCookie = Cookies.makeCookieUnsafe(DISCORD_OAUTH_CODE_VERIFIER_COOKIE_NAME, String.empty, {
         expires: new Date(0),
         httpOnly: true,
         path: "/",
@@ -93,18 +92,20 @@ export const GET = Effect.gen(function* () {
     // Upsert the user
     const claims = tokens.id_token;
     const providerAccountId = claims.sub;
-    const avatarUrl = Option.fromNullable(claims.picture as string | undefined);
-    const displayName = yield* Option.fromNullable(claims.name as string | undefined);
-    const user = yield* Repository.upsertUserFromOAuth({
-        provider: "discord",
-        displayName,
-        providerAccountId,
-        avatarUrl,
-    });
+    const avatarUrl = Option.fromNullishOr(claims.picture as string | undefined);
+    const displayName = yield* Option.fromNullishOr(claims.name as string | undefined).pipe(Effect.fromOption);
+    const user = yield* Repository.use((repo) =>
+        repo.upsertUserFromOAuth({
+            provider: "discord",
+            displayName,
+            providerAccountId,
+            avatarUrl,
+        })
+    );
 
     // Create a session for the user
-    const session = yield* Repository.createSession(user);
-    const sessionCookie = Cookies.unsafeMakeCookie(SESSION_ID_COOKIE_NAME, session.id, {
+    const session = yield* Repository.use((repo) => repo.createSession(user));
+    const sessionCookie = Cookies.makeCookieUnsafe(SESSION_ID_COOKIE_NAME, session.id, {
         expires: DateTime.toDateUtc(session.expiresAt),
         httpOnly: true,
         path: "/",
@@ -119,7 +120,7 @@ export const GET = Effect.gen(function* () {
 }).pipe(
     Effect.orDie,
     Effect.tapDefect(Effect.logError),
-    Effect.catchAllDefect((_defect) =>
+    Effect.catchDefect((_defect) =>
         pipe(
             AstroContext,
             Effect.flatMap((Astro) => Effect.promise(() => Astro.rewrite("/500"))),

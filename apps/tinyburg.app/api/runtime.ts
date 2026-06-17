@@ -1,7 +1,8 @@
-import { FetchHttpClient, Path, PlatformConfigProvider } from "@effect/platform";
-import { NodeContext } from "@effect/platform-node";
+import { Config, Effect, Layer, ManagedRuntime, String, Path, ConfigProvider } from "effect";
+import { FetchHttpClient } from "effect/unstable/http";
+
+import { NodeServices } from "@effect/platform-node";
 import { PgClient, PgMigrator } from "@effect/sql-pg";
-import { Config, Effect, Layer, ManagedRuntime, String } from "effect";
 
 import { Repository } from "../domain/model.ts";
 
@@ -24,7 +25,7 @@ const MigratorLive = Effect.gen(function* () {
     const migrations = yield* path.fromFileUrl(new URL("../migrations", import.meta.url));
     const loader = PgMigrator.fromFileSystem(migrations);
     return PgMigrator.layer({ loader });
-}).pipe(Layer.unwrapEffect, Layer.provide(NodeContext.layer));
+}).pipe(Layer.unwrap);
 
 /**
  * @since 1.0.0
@@ -37,8 +38,8 @@ const DatabaseLive = Repository.Default.pipe(Layer.provide(MigratorLive), Layer.
  * @category Layers
  */
 export const AppLive = Layer.mergeAll(DatabaseLive, FetchHttpClient.layer).pipe(
-    Layer.provide(PlatformConfigProvider.layerDotEnvAdd("./.env")),
-    Layer.provide(NodeContext.layer)
+    Layer.provide(ConfigProvider.layerAdd(ConfigProvider.fromDotEnv())),
+    Layer.provide(NodeServices.layer)
 );
 
 /**

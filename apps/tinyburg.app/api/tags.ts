@@ -1,5 +1,5 @@
-import type { APIContext } from "astro";
-
 import { Context } from "effect";
 
-export class AstroContext extends Context.Tag("AstroContext")<AstroContext, APIContext>() {}
+import type { APIContext } from "astro";
+
+export class AstroContext extends Context.Service<AstroContext, APIContext>()("AstroContext") {}

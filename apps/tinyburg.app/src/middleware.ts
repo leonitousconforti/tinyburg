@@ -1,6 +1,7 @@
+import { Option, Effect } from "effect";
+
 import type { APIContext, MiddlewareNext } from "astro";
 
-import { Option } from "effect";
 import { AppRuntime } from "../api/runtime";
 import { Repository } from "../domain/model";
 
@@ -16,6 +17,10 @@ export const onRequest = async (context: APIContext, next: MiddlewareNext): Prom
     if (sessionId === undefined) return await next();
 
     // Lookup user by session
-    context.locals.account = await AppRuntime.runPromise(Repository.findUserBySession(sessionId));
+    context.locals.account = await Repository.pipe(
+        Effect.flatMap((repo) => repo.findUserBySession(sessionId)),
+        AppRuntime.runPromise
+    );
+
     return await next();
 };

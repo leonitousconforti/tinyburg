@@ -1,9 +1,8 @@
-import { Cookies, HttpServerResponse } from "@effect/platform";
-import { Effect, Either, Option, String } from "effect";
+import { Effect, Result, Option, String } from "effect";
+import { Cookies, HttpServerResponse } from "effect/unstable/http";
 
 import { makeAstroEndpoint } from "../../api/handler";
 import { AstroContext } from "../../api/tags";
-
 import { Repository } from "../../domain/model";
 import { SESSION_ID_COOKIE_NAME } from "./auth/_shared";
 
@@ -22,7 +21,7 @@ export const GET = Effect.gen(function* () {
         path: "/",
         secure: import.meta.env.PROD, // only add when deploying with https (prod)
         sameSite: "lax", // optional - do not use "strict"
-    }).pipe(Either.getOrUndefined);
+    }).pipe(Result.getOrUndefined);
 
     if (deleteSessionCookie === undefined) {
         return yield* Effect.map(
@@ -32,7 +31,7 @@ export const GET = Effect.gen(function* () {
     }
 
     // Delete the session from the database
-    yield* Repository.deleteSession(session.id);
+    yield* Repository.use((repo) => repo.deleteSession(session.id));
     return HttpServerResponse.redirect("/", {
         cookies: Cookies.fromIterable([deleteSessionCookie]),
     });

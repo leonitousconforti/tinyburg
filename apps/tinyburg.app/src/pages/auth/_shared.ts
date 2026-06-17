@@ -1,9 +1,9 @@
-import { Effect, Encoding, ParseResult, Schema } from "effect";
+import { Effect, Encoding, Schema, SchemaGetter } from "effect";
 
 const JoseHeaderSchema = Schema.Struct({
     kid: Schema.String,
     typ: Schema.Literal("JWT"),
-    alg: Schema.Literal(
+    alg: Schema.Literals([
         "HS256",
         "HS384",
         "HS512",
@@ -16,38 +16,36 @@ const JoseHeaderSchema = Schema.Struct({
         "PS256",
         "PS384",
         "PS512",
-        "none"
-    ),
+        "none",
+    ]),
 });
 
-const JwtBodySchema = Schema.Struct({
-    iss: Schema.String.pipe(Schema.annotations({ description: "Issuer" })),
-    sub: Schema.String.pipe(Schema.annotations({ description: "Subject" })),
-    aud: Schema.Union(Schema.String, Schema.Array(Schema.String)).pipe(Schema.annotations({ description: "Audience" })),
-    exp: Schema.Number.pipe(Schema.annotations({ description: "Expiration Time" })),
-    nbf: Schema.Number.pipe(Schema.annotations({ description: "Not Before" }), Schema.optional),
-    iat: Schema.Number.pipe(Schema.annotations({ description: "Issued At" })),
-    jti: Schema.String.pipe(Schema.annotations({ description: "JWT ID" }), Schema.optional),
-}).pipe(Schema.extend(Schema.Record({ key: Schema.String, value: Schema.UndefinedOr(Schema.Unknown) })));
+const JwtBodySchema = Schema.StructWithRest(
+    Schema.Struct({
+        iss: Schema.String.pipe(Schema.annotate({ description: "Issuer" })),
+        sub: Schema.String.pipe(Schema.annotate({ description: "Subject" })),
+        aud: Schema.Union([Schema.String, Schema.Array(Schema.String)]).pipe(
+            Schema.annotate({ description: "Audience" })
+        ),
+        exp: Schema.Number.pipe(Schema.annotate({ description: "Expiration Time" })),
+        nbf: Schema.Number.pipe(Schema.annotate({ description: "Not Before" }), Schema.optional),
+        iat: Schema.Number.pipe(Schema.annotate({ description: "Issued At" })),
+        jti: Schema.String.pipe(Schema.annotate({ description: "JWT ID" }), Schema.optional),
+    }),
+    [Schema.Record(Schema.String, Schema.UndefinedOr(Schema.Unknown))]
+);
 
-const JwtSchema = Schema.transformOrFail(
-    Schema.TemplateLiteralParser(
-        Schema.compose(Schema.StringFromBase64Url, Schema.parseJson(JoseHeaderSchema)),
-        ".",
-        Schema.compose(Schema.StringFromBase64Url, Schema.parseJson(JwtBodySchema)),
-        ".",
-        Schema.String
-    ),
-    JwtBodySchema,
-    {
-        strict: true,
-        encode: (input, _options, ast) =>
-            ParseResult.fail(new ParseResult.Forbidden(ast, input, "Encoding JWTs is not supported")),
-        decode: ([_header, _period, body, __period, _signature]) => {
-            // TODO: verify the signature
-            return ParseResult.succeed(body);
-        },
-    }
+const JwtSchema = Schema.TemplateLiteralParser([
+    Schema.StringFromBase64Url.pipe(Schema.decodeTo(Schema.fromJsonString(JoseHeaderSchema))),
+    ".",
+    Schema.StringFromBase64Url.pipe(Schema.decodeTo(Schema.fromJsonString(JwtBodySchema))),
+    ".",
+    Schema.String,
+]).pipe(
+    Schema.decodeTo(JwtBodySchema, {
+        encode: SchemaGetter.forbidden(() => "Encoding JWTs is not supported"),
+        decode: SchemaGetter.transform(([_header, _period, body, __period, _signature]) => body),
+    })
 );
 
 export const OAuthResponseSchema = Schema.Struct({

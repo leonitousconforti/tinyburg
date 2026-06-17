@@ -1,5 +1,5 @@
-import { SqlClient } from "@effect/sql";
 import { Effect } from "effect";
+import { SqlClient } from "effect/unstable/sql";
 
 export default Effect.flatMap(
     SqlClient.SqlClient,
@@ -39,8 +39,7 @@ export default Effect.flatMap(
             player_id TEXT NOT NULL UNIQUE,
             player_auth_key TEXT NOT NULL,
             player_email TEXT NOT NULL,
-            created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-            verified_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+            created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
         );
 
         -- Helper function to add one day interval because generated columns need to be immutable

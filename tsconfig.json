@@ -13,6 +13,7 @@
         { "path": "apps/authproxy" },
         { "path": "apps/auto-gold-bits" },
         { "path": "apps/personas" },
-        { "path": "apps/social-circles" }
+        { "path": "apps/social-circles" },
+        { "path": "apps/tinyburg.app" }
     ]
 }

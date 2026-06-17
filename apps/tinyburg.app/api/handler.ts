@@ -1,35 +1,31 @@
-import { HttpApp, type HttpMiddleware, type HttpServerRequest } from "@effect/platform";
+import { Context, type Effect, type ManagedRuntime, type Scope } from "effect";
+import { HttpEffect, type HttpMiddleware, type HttpServerRequest, type HttpServerResponse } from "effect/unstable/http";
+
 import type { APIRoute } from "astro";
-import { Context, Effect, type ManagedRuntime, type Scope } from "effect";
 
 import { AppRuntime } from "./runtime";
 import { AstroContext } from "./tags";
 
-export const makeAstroEndpoint = <E>(
-    app: HttpApp.Default<
-        E,
-        | AstroContext
+export const makeAstroEndpoint = <
+    E,
+    R extends
+        | ManagedRuntime.ManagedRuntime.Services<typeof AppRuntime>
         | Scope.Scope
         | HttpServerRequest.HttpServerRequest
-        | ManagedRuntime.ManagedRuntime.Context<typeof AppRuntime>
-    >,
+        | AstroContext,
+>(
+    app: Effect.Effect<HttpServerResponse.HttpServerResponse, E, R>,
     middleware?: HttpMiddleware.HttpMiddleware | undefined
 ): APIRoute => {
-    type R = ManagedRuntime.ManagedRuntime.Context<typeof AppRuntime>;
-
-    let cachedHandler:
-        | ((request: Request, context?: Context.Context<never> | undefined) => Promise<Response>)
-        | undefined = undefined;
-
-    const appWithoutAstroContext = Effect.mapInputContext(
-        app,
-        (requiredContext: Context.Context<Scope.Scope | HttpServerRequest.HttpServerRequest | R>) =>
-            Context.merge(requiredContext, Context.empty() as Context.Context<AstroContext>)
-    );
+    let cachedHandler: (request: Request, context: Context.Context<AstroContext>) => Promise<Response> = undefined!;
 
     return async (apiContext) => {
-        const runtime = await AppRuntime.runtime();
-        cachedHandler ??= HttpApp.toWebHandlerRuntime(runtime)(appWithoutAstroContext, middleware);
+        const runtime = await AppRuntime.context();
+        cachedHandler ??= HttpEffect.toWebHandlerWith<
+            ManagedRuntime.ManagedRuntime.Services<typeof AppRuntime>,
+            R,
+            AstroContext
+        >(runtime)(app, middleware);
         const context = Context.make(AstroContext, apiContext);
         return await cachedHandler(apiContext.request, context);
     };
