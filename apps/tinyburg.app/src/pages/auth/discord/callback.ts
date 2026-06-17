@@ -9,8 +9,7 @@ import {
     UrlParams,
 } from "effect/unstable/http";
 
-import { makeAstroEndpoint } from "../../../../api/handler";
-import { AstroContext } from "../../../../api/tags";
+import { makeAstroEndpoint, render500 } from "../../../../api/handler";
 import { Repository } from "../../../../domain/model";
 import { OAuthResponseSchema, SESSION_ID_COOKIE_NAME } from "../_shared";
 import {
@@ -117,15 +116,4 @@ export const GET = Effect.gen(function* () {
     return HttpServerResponse.redirect("/towers/@me", {
         cookies: Cookies.fromIterable([sessionCookie, deleteStateCookie, deleteCodeVerifierCookie]),
     });
-}).pipe(
-    Effect.orDie,
-    Effect.tapDefect(Effect.logError),
-    Effect.catchDefect((_defect) =>
-        pipe(
-            AstroContext,
-            Effect.flatMap((Astro) => Effect.promise(() => Astro.rewrite("/500"))),
-            Effect.map(HttpServerResponse.fromWeb)
-        )
-    ),
-    makeAstroEndpoint
-);
+}).pipe(render500, makeAstroEndpoint);
