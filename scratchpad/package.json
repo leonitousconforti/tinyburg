@@ -11,7 +11,7 @@
     "devDependencies": {
         "@bufbuild/protobuf": "2.12.0",
         "@effect/platform-node": "4.0.0-beta.69",
-        "@efffrida/frida-tools": "0.0.38",
+        "@efffrida/frida-tools": "0.0.39",
         "@efffrida/gplayapi": "0.0.18",
         "effect": "4.0.0-beta.69",
         "ioredis": "5.11.1"
