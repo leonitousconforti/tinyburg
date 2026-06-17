@@ -5,7 +5,6 @@ import path from "node:path";
 
 import node from "@astrojs/node";
 import sitemap from "@astrojs/sitemap";
-import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "astro/config";
 
 /** @type {import("vite").PluginOption} */
@@ -38,6 +37,6 @@ export default defineConfig({
     },
     vite: {
         // @ts-ignore
-        plugins: [copyMigrationsPlugin, tailwindcss()],
+        plugins: [copyMigrationsPlugin],
     },
 });

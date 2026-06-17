@@ -17,7 +17,7 @@
         "@effect/sql-pg": "4.0.0-beta.69",
         "@fontsource/press-start-2p": "5.2.7",
         "@fontsource/vt323": "5.2.7",
-        "@tailwindcss/vite": "4.3.1",
+        "@tailwindcss/postcss": "4.3.1",
         "@tinyburg/nimblebit-sdk": "workspace:*",
         "@tinyburg/tinytower-sdk": "workspace:*",
         "astro": "6.4.8",
