@@ -1,9 +1,10 @@
+import { Config, Console, Effect, Layer, Option, Schema, SchemaAST } from "effect";
+
 import { Prompt } from "@effect/cli";
 import { FetchHttpClient, FileSystem, PlatformConfigProvider, Terminal } from "@effect/platform";
 import { NodeContext, NodeRuntime } from "@effect/platform-node";
 import { NimblebitAuth, NimblebitConfig } from "@tinyburg/nimblebit-sdk";
 import { Bitizens, SyncItemType, TinyTower } from "@tinyburg/tinytower-sdk";
-import { Config, Console, Effect, Layer, Option, Schema, SchemaAST } from "effect";
 
 class BitizenJson extends Schema.suspend(() => {
     const attributesJson = Schema.make<unknown, unknown, never>(

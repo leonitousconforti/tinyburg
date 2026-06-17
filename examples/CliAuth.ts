@@ -1,9 +1,10 @@
+import { Config, Console, Effect, Layer, Redacted, Schema } from "effect";
+
 import { Prompt } from "@effect/cli";
 import { FetchHttpClient, Terminal } from "@effect/platform";
 import { NodeContext, NodeRuntime } from "@effect/platform-node";
 import { NimblebitAuth, NimblebitConfig } from "@tinyburg/nimblebit-sdk";
 import { TinyTower } from "@tinyburg/tinytower-sdk";
-import { Config, Console, Effect, Layer, Redacted, Schema } from "effect";
 
 const AppLive = Layer.mergeAll(
     NodeContext.layer,
