@@ -38,7 +38,7 @@ const DatabaseLive = Repository.Default.pipe(Layer.provide(MigratorLive), Layer.
  * @category Layers
  */
 export const AppLive = Layer.mergeAll(DatabaseLive, FetchHttpClient.layer).pipe(
-    Layer.provide(ConfigProvider.layerAdd(ConfigProvider.fromDotEnv())),
+    Layer.provideMerge(ConfigProvider.layerAdd(ConfigProvider.fromDotEnv())),
     Layer.provide(NodeServices.layer)
 );
 
