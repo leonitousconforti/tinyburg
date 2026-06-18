@@ -5,6 +5,7 @@ import type { APIRoute } from "astro";
 
 import { experimental_AstroContainer as AstroContainer } from "astro/container";
 
+// @ts-ignore
 import Page500 from "../src/pages/500.astro";
 import { AppRuntime } from "./runtime";
 import { AstroContext } from "./tags";
