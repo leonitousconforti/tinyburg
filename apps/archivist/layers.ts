@@ -27,6 +27,6 @@ export const Live = Layer.mergeAll(
     GooglePlayApi.AndroidDevice.EmbeddedPixel7aLive,
     Layer.succeed(References.MinimumLogLevel, "Debug")
 ).pipe(
-    Layer.provideMerge(Layer.effect(ConfigProvider.ConfigProvider, ConfigProvider.fromDotEnv())),
+    Layer.provideMerge(ConfigProvider.layerAdd(ConfigProvider.fromDotEnv())),
     Layer.provideMerge(NodeServices.layer)
 );
