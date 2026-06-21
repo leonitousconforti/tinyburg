@@ -46,17 +46,17 @@
     },
     "dependencies": {
         "@bufbuild/protobuf": "2.12.0",
-        "@efffrida/frida-tools": "0.0.39",
+        "@efffrida/frida-tools": "0.0.40",
         "@efffrida/gplayapi": "0.0.18",
-        "@efffrida/il2cpp-bridge": "0.0.36",
-        "@efffrida/platform": "0.0.28",
-        "@efffrida/polyfills": "0.0.13",
-        "@efffrida/rpc": "0.0.42",
-        "frida": "17.14.1",
+        "@efffrida/il2cpp-bridge": "0.0.37",
+        "@efffrida/platform": "0.0.29",
+        "@efffrida/polyfills": "0.0.14",
+        "@efffrida/rpc": "0.0.43",
+        "frida": "17.15.1",
         "frida-il2cpp-bridge": "0.13.1"
     },
     "devDependencies": {
-        "@types/frida-gum": "19.6.0",
+        "@types/frida-gum": "19.7.0",
         "effect": "4.0.0-beta.69"
     },
     "peerDependencies": {

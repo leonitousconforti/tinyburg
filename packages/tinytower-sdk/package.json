@@ -55,7 +55,7 @@
         "@bufbuild/protobuf": "2.12.0",
         "@effect/platform-node": "4.0.0-beta.69",
         "@effect/vitest": "4.0.0-beta.69",
-        "@efffrida/frida-tools": "0.0.39",
+        "@efffrida/frida-tools": "0.0.40",
         "@efffrida/gplayapi": "0.0.18",
         "@tinyburg/insight": "workspace:*",
         "@types/pako": "2.0.4",

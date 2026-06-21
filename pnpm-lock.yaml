@@ -244,33 +244,33 @@ importers:
         specifier: 2.12.0
         version: 2.12.0
       '@efffrida/frida-tools':
-        specifier: 0.0.39
-        version: 0.0.39(effect@4.0.0-beta.69)
+        specifier: 0.0.40
+        version: 0.0.40(effect@4.0.0-beta.69)
       '@efffrida/gplayapi':
         specifier: 0.0.18
         version: 0.0.18(@bufbuild/protobuf@2.12.0)(effect@4.0.0-beta.69)
       '@efffrida/il2cpp-bridge':
-        specifier: 0.0.36
-        version: 0.0.36(effect@4.0.0-beta.69)
+        specifier: 0.0.37
+        version: 0.0.37(effect@4.0.0-beta.69)
       '@efffrida/platform':
-        specifier: 0.0.28
-        version: 0.0.28(effect@4.0.0-beta.69)
+        specifier: 0.0.29
+        version: 0.0.29(effect@4.0.0-beta.69)
       '@efffrida/polyfills':
-        specifier: 0.0.13
-        version: 0.0.13
+        specifier: 0.0.14
+        version: 0.0.14
       '@efffrida/rpc':
-        specifier: 0.0.42
-        version: 0.0.42(effect@4.0.0-beta.69)
+        specifier: 0.0.43
+        version: 0.0.43(effect@4.0.0-beta.69)
       frida:
-        specifier: 17.14.1
-        version: 17.14.1
+        specifier: 17.15.1
+        version: 17.15.1
       frida-il2cpp-bridge:
         specifier: 0.13.1
         version: 0.13.1
     devDependencies:
       '@types/frida-gum':
-        specifier: 19.6.0
-        version: 19.6.0
+        specifier: 19.7.0
+        version: 19.7.0
       effect:
         specifier: 4.0.0-beta.69
         version: 4.0.0-beta.69
@@ -300,8 +300,8 @@ importers:
         specifier: 4.0.0-beta.69
         version: 4.0.0-beta.69(effect@4.0.0-beta.69)(vitest@4.1.8(vite@8.0.16))
       '@efffrida/frida-tools':
-        specifier: 0.0.39
-        version: 0.0.39(effect@4.0.0-beta.69)
+        specifier: 0.0.40
+        version: 0.0.40(effect@4.0.0-beta.69)
       '@efffrida/gplayapi':
         specifier: 0.0.18
         version: 0.0.18(@bufbuild/protobuf@2.12.0)(effect@4.0.0-beta.69)
@@ -345,8 +345,8 @@ importers:
         specifier: 4.0.0-beta.69
         version: 4.0.0-beta.69(effect@4.0.0-beta.69)(ioredis@5.11.1)
       '@efffrida/frida-tools':
-        specifier: 0.0.39
-        version: 0.0.39(effect@4.0.0-beta.69)
+        specifier: 0.0.40
+        version: 0.0.40(effect@4.0.0-beta.69)
       '@efffrida/gplayapi':
         specifier: 0.0.18
         version: 0.0.18(@bufbuild/protobuf@2.12.0)(effect@4.0.0-beta.69)
@@ -752,8 +752,8 @@ packages:
       effect: ^4.0.0-beta.69
       vitest: ^3.0.0 || ^4.0.0
 
-  '@efffrida/frida-tools@0.0.39':
-    resolution: {integrity: sha512-GQ5JcAyBV3+9yxs2LdbmG+qJQz1kx9DNrb2+3Tdmh20GPTPyg2qNw1wbDBBjH2XXxCEIjgC0LOPUr7iu/a36Mw==}
+  '@efffrida/frida-tools@0.0.40':
+    resolution: {integrity: sha512-KcMiIncR43Ke1hxeH1VddaksotDiKlHicuuoCjqJWebh721bsLgya2H1jB2ID9n5sxCeeNZPiQKUG/4AMkW9cA==}
     peerDependencies:
       effect: 4.0.0-beta.69
 
@@ -763,21 +763,21 @@ packages:
       '@bufbuild/protobuf': 2.12.0
       effect: 4.0.0-beta.69
 
-  '@efffrida/il2cpp-bridge@0.0.36':
-    resolution: {integrity: sha512-W3slhsBPuhZ7RnTIaokRk/9qGc6RJz2kmMHV2p2dFRtgSNyCsvgmcle28bfGpgwgngxWPJr6k866irv1bdjkfw==}
+  '@efffrida/il2cpp-bridge@0.0.37':
+    resolution: {integrity: sha512-8OVeGAw+jaU2aUfSAIIXvWzqJydwGKybjO5GhT6aM0W3BqnOuDHTttWyBAbp/idst76voRJV7pPSfWWhUXETWw==}
     peerDependencies:
       effect: 4.0.0-beta.69
 
-  '@efffrida/platform@0.0.28':
-    resolution: {integrity: sha512-zaLBzaXkfNp7fxESBemrD40EhXqwxKVFdn7DFcKvrlB1/l360EaCh9ZJHA+JUsesmH+iDYpDOhhZY7HErRVxGg==}
+  '@efffrida/platform@0.0.29':
+    resolution: {integrity: sha512-uhZfBFvDYxUyv68/On+HAiXrjc+Vh/y4WSWQi6OAydktaqT/4GmfDFLRrZFLZ0OW4PjiMyiK0hTraOj+PYL3/w==}
     peerDependencies:
       effect: 4.0.0-beta.69
 
-  '@efffrida/polyfills@0.0.13':
-    resolution: {integrity: sha512-4yTIVkLMBWYW9F11bQI5QXAyD3tMD6uz0OAdlI7S7xpqXfuPHvkMWXTiImncXshbRIJhpgN/1Mu+jyq/AIyqAA==}
+  '@efffrida/polyfills@0.0.14':
+    resolution: {integrity: sha512-PyabpPi9kBnX9qsjNznAEkngjxWtfKUaAL5NNIntYp6YDP5yI2Nop0J0LyvY8+MrP5M0c4P+uT6JHIJtgA1X+Q==}
 
-  '@efffrida/rpc@0.0.42':
-    resolution: {integrity: sha512-sOwtW9gifCtFnt/cl6Lq8285dRLYloygXH9l67a+WkWAqcVvDALzWEyn1eX8qJ2+vwphIhDCZ+axQxV9WsWCwg==}
+  '@efffrida/rpc@0.0.43':
+    resolution: {integrity: sha512-yq7xdYAMcQ2HegWjQ8iFraEbA8lqyDUJK9+fF5z/2U7ArRTuHS+zR6GCQVqnsbMr3oWnb3939jk89yYJizVFMw==}
     peerDependencies:
       effect: 4.0.0-beta.69
 
@@ -2161,8 +2161,8 @@ packages:
   '@types/estree@1.0.9':
     resolution: {integrity: sha512-GhdPgy1el4/ImP05X05Uw4cw2/M93BCUmnEvWZNStlCzEKME4Fkk+YpoA5OiHNQmoS7Cafb8Xa3Pya8m1Qrzeg==}
 
-  '@types/frida-gum@19.6.0':
-    resolution: {integrity: sha512-wEcTiUfIxtSkMXilYkaRnHtASCtzF+X1Ei8ygQg33/HfTZ+IiMNvykhHJvGZ8GjLqu/5cVt+ILZxTyEHw67pnA==}
+  '@types/frida-gum@19.7.0':
+    resolution: {integrity: sha512-K2jX6tRquzHVEZhkm/zW+/CCWz7JAYZcJesWNspb6TOIs+Z8yIChLySSp4PoGjS+u1OIypy42Td4JkqGUvA+GQ==}
 
   '@types/hast@3.0.4':
     resolution: {integrity: sha512-WPs+bbQw5aCj+x6laNGWLH3wviHtoCv/P3+otBhbOhJgG8qtpdAMlTCxLtsTWA7LH1Oh/bFCHsBn0TPS5m30EQ==}
@@ -2971,8 +2971,8 @@ packages:
     resolution: {integrity: sha512-qXjdcdI+KM5wnjCwqZTe/Tas/2pClXpDhcVWjiaQFxzSun+1vaoHEWlnMe4F09Vdz/vGkkjFOPKfvDem2A8UOQ==}
     hasBin: true
 
-  frida@17.14.1:
-    resolution: {integrity: sha512-8rqA5Suxl9pvSf41mVzDBGrFeLVoF8DFPaaPJKxTOj7/+a/Vpr+Dm9KiF4tKCMUyPQ+E9nxnkQ7fetsq9l7VGA==}
+  frida@17.15.1:
+    resolution: {integrity: sha512-WOkGmcg+yFSKdIH1DOyP/FT5liwhWuflhfPfZsWGEtNvY8LtRcyUt0xy4hoyhObcZo8Sj4s7fZpBwhp5VyKIYQ==}
     engines: {node: '>=16'}
 
   fs-constants@1.0.0:
@@ -4293,6 +4293,11 @@ packages:
 
   semver@7.8.4:
     resolution: {integrity: sha512-rUCObTnP32Q08R2uuIrt7r9PlEonuTmtuXYcW6s5kjdlj3xbnwe+21yXptAUYcMAABLkYYTtnmzb3w3EDZfueA==}
+    engines: {node: '>=10'}
+    hasBin: true
+
+  semver@7.8.5:
+    resolution: {integrity: sha512-Y7/KDsb8LjooZpwaqGyulO6DQlksgCncchHGk+sZIY4SBvUocMBEFH5Ur1fI4dV+Jvl0w6cjvucaIi40puRioA==}
     engines: {node: '>=10'}
     hasBin: true
 
@@ -5773,36 +5778,36 @@ snapshots:
       effect: 4.0.0-beta.69
       vitest: 4.1.8(vite@8.0.16)
 
-  '@efffrida/frida-tools@0.0.39(effect@4.0.0-beta.69)':
+  '@efffrida/frida-tools@0.0.40(effect@4.0.0-beta.69)':
     dependencies:
       effect: 4.0.0-beta.69
-      frida: 17.14.1
+      frida: 17.15.1
 
   '@efffrida/gplayapi@0.0.18(@bufbuild/protobuf@2.12.0)(effect@4.0.0-beta.69)':
     dependencies:
       '@bufbuild/protobuf': 2.12.0
       effect: 4.0.0-beta.69
 
-  '@efffrida/il2cpp-bridge@0.0.36(effect@4.0.0-beta.69)':
+  '@efffrida/il2cpp-bridge@0.0.37(effect@4.0.0-beta.69)':
     dependencies:
       effect: 4.0.0-beta.69
       frida-il2cpp-bridge: 0.13.1
 
-  '@efffrida/platform@0.0.28(effect@4.0.0-beta.69)':
+  '@efffrida/platform@0.0.29(effect@4.0.0-beta.69)':
     dependencies:
       effect: 4.0.0-beta.69
 
-  '@efffrida/polyfills@0.0.13':
+  '@efffrida/polyfills@0.0.14':
     dependencies:
       abort-controller: 3.0.0
       event-target-polyfill: 0.0.4
       fast-text-encoding: 1.0.6
 
-  '@efffrida/rpc@0.0.42(effect@4.0.0-beta.69)':
+  '@efffrida/rpc@0.0.43(effect@4.0.0-beta.69)':
     dependencies:
-      '@efffrida/frida-tools': 0.0.39(effect@4.0.0-beta.69)
-      '@efffrida/platform': 0.0.28(effect@4.0.0-beta.69)
-      '@efffrida/polyfills': 0.0.13
+      '@efffrida/frida-tools': 0.0.40(effect@4.0.0-beta.69)
+      '@efffrida/platform': 0.0.29(effect@4.0.0-beta.69)
+      '@efffrida/polyfills': 0.0.14
       effect: 4.0.0-beta.69
 
   '@emmetio/abbreviation@2.3.3':
@@ -6706,7 +6711,7 @@ snapshots:
 
   '@types/estree@1.0.9': {}
 
-  '@types/frida-gum@19.6.0': {}
+  '@types/frida-gum@19.7.0': {}
 
   '@types/hast@3.0.4':
     dependencies:
@@ -7686,7 +7691,7 @@ snapshots:
 
   frida-il2cpp-bridge@0.13.1: {}
 
-  frida@17.14.1:
+  frida@17.15.1:
     dependencies:
       bindings: 1.5.0
       minimatch: 10.2.5
@@ -8619,7 +8624,7 @@ snapshots:
 
   node-abi@3.92.0:
     dependencies:
-      semver: 7.8.4
+      semver: 7.8.5
 
   node-addon-api@7.1.1:
     optional: true
@@ -9269,6 +9274,8 @@ snapshots:
   semver@7.8.3: {}
 
   semver@7.8.4: {}
+
+  semver@7.8.5: {}
 
   send@1.2.1:
     dependencies:
