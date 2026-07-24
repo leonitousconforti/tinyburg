@@ -1,5 +1,5 @@
 import { Effect, Result, pipe } from "effect";
-import { Cookies, HttpServerResponse, UrlParams } from "effect/unstable/http";
+import { Cookies, HttpServerResponse, Url, UrlParams } from "effect/unstable/http";
 
 import { makeAstroEndpoint, render500 } from "../../../../api/handler";
 import { randomStateGenerator, Sha256CodeChallenge } from "../_shared";
@@ -28,7 +28,7 @@ export const GET = Effect.gen(function* () {
         UrlParams.set("code_challenge_method", "S256"),
         UrlParams.set("code_challenge", yield* Sha256CodeChallenge(codeVerifier)),
         UrlParams.set("prompt", "consent"),
-        (urlParams) => UrlParams.makeUrl(authUrl, urlParams, undefined),
+        (urlParams) => Url.make(authUrl, urlParams, undefined),
         Result.getOrThrow
     );
 

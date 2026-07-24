@@ -135,9 +135,10 @@ export class Authorization extends HttpApiMiddleware.Service<Authorization>()("A
 export const AccountsApi = HttpApi.make("AccountsApi").add(AccountsGroup).middleware(Authorization);
 
 /** @internal */
-const CreateHandler: HttpApiEndpoint.HandlerWithName<
-    HttpApiGroup.Endpoints<
-        HttpApiGroup.WithName<(typeof AccountsApi)["groups"][keyof (typeof AccountsApi)["groups"]], "AccountsGroup">
+const CreateHandler: HttpApiEndpoint.HandlerWithIdentifier<
+    HttpApiGroup.EndpointsWithIdentifier<
+        (typeof AccountsApi)["groups"][keyof (typeof AccountsApi)["groups"]],
+        "AccountsGroup"
     >,
     "create",
     never,
@@ -155,9 +156,10 @@ const CreateHandler: HttpApiEndpoint.HandlerWithName<
 }, Effect.orDie);
 
 /** @internal */
-const DeleteHandler: HttpApiEndpoint.HandlerWithName<
-    HttpApiGroup.Endpoints<
-        HttpApiGroup.WithName<(typeof AccountsApi)["groups"][keyof (typeof AccountsApi)["groups"]], "AccountsGroup">
+const DeleteHandler: HttpApiEndpoint.HandlerWithIdentifier<
+    HttpApiGroup.EndpointsWithIdentifier<
+        (typeof AccountsApi)["groups"][keyof (typeof AccountsApi)["groups"]],
+        "AccountsGroup"
     >,
     "delete",
     never,
@@ -172,9 +174,10 @@ const DeleteHandler: HttpApiEndpoint.HandlerWithName<
 }, Effect.orDie);
 
 /** @internal */
-const ViewHandler: HttpApiEndpoint.HandlerWithName<
-    HttpApiGroup.Endpoints<
-        HttpApiGroup.WithName<(typeof AccountsApi)["groups"][keyof (typeof AccountsApi)["groups"]], "AccountsGroup">
+const ViewHandler: HttpApiEndpoint.HandlerWithIdentifier<
+    HttpApiGroup.EndpointsWithIdentifier<
+        (typeof AccountsApi)["groups"][keyof (typeof AccountsApi)["groups"]],
+        "AccountsGroup"
     >,
     "view",
     never,
@@ -189,9 +192,10 @@ const ViewHandler: HttpApiEndpoint.HandlerWithName<
 }, Effect.orDie);
 
 /** @internal */
-const ListHandler: HttpApiEndpoint.HandlerWithName<
-    HttpApiGroup.Endpoints<
-        HttpApiGroup.WithName<(typeof AccountsApi)["groups"][keyof (typeof AccountsApi)["groups"]], "AccountsGroup">
+const ListHandler: HttpApiEndpoint.HandlerWithIdentifier<
+    HttpApiGroup.EndpointsWithIdentifier<
+        (typeof AccountsApi)["groups"][keyof (typeof AccountsApi)["groups"]],
+        "AccountsGroup"
     >,
     "list",
     never,
@@ -202,9 +206,10 @@ const ListHandler: HttpApiEndpoint.HandlerWithName<
 }, Effect.orDie);
 
 /** @internal */
-const RevokeHandler: HttpApiEndpoint.HandlerWithName<
-    HttpApiGroup.Endpoints<
-        HttpApiGroup.WithName<(typeof AccountsApi)["groups"][keyof (typeof AccountsApi)["groups"]], "AccountsGroup">
+const RevokeHandler: HttpApiEndpoint.HandlerWithIdentifier<
+    HttpApiGroup.EndpointsWithIdentifier<
+        (typeof AccountsApi)["groups"][keyof (typeof AccountsApi)["groups"]],
+        "AccountsGroup"
     >,
     "revoke",
     never,
@@ -236,9 +241,10 @@ const RevokeHandler: HttpApiEndpoint.HandlerWithName<
 }, Effect.orDie);
 
 /** @internal */
-const AuthorizeHandler: HttpApiEndpoint.HandlerWithName<
-    HttpApiGroup.Endpoints<
-        HttpApiGroup.WithName<(typeof AccountsApi)["groups"][keyof (typeof AccountsApi)["groups"]], "AccountsGroup">
+const AuthorizeHandler: HttpApiEndpoint.HandlerWithIdentifier<
+    HttpApiGroup.EndpointsWithIdentifier<
+        (typeof AccountsApi)["groups"][keyof (typeof AccountsApi)["groups"]],
+        "AccountsGroup"
     >,
     "authorize",
     never,
@@ -270,9 +276,10 @@ const AuthorizeHandler: HttpApiEndpoint.HandlerWithName<
 }, Effect.orDie);
 
 /** @internal */
-const ModifyScopesHandler: HttpApiEndpoint.HandlerWithName<
-    HttpApiGroup.Endpoints<
-        HttpApiGroup.WithName<(typeof AccountsApi)["groups"][keyof (typeof AccountsApi)["groups"]], "AccountsGroup">
+const ModifyScopesHandler: HttpApiEndpoint.HandlerWithIdentifier<
+    HttpApiGroup.EndpointsWithIdentifier<
+        (typeof AccountsApi)["groups"][keyof (typeof AccountsApi)["groups"]],
+        "AccountsGroup"
     >,
     "scopes",
     never,
@@ -299,9 +306,10 @@ const ModifyScopesHandler: HttpApiEndpoint.HandlerWithName<
 }, Effect.orDie);
 
 /** @internal */
-const ModifyRateLimitHandler: HttpApiEndpoint.HandlerWithName<
-    HttpApiGroup.Endpoints<
-        HttpApiGroup.WithName<(typeof AccountsApi)["groups"][keyof (typeof AccountsApi)["groups"]], "AccountsGroup">
+const ModifyRateLimitHandler: HttpApiEndpoint.HandlerWithIdentifier<
+    HttpApiGroup.EndpointsWithIdentifier<
+        (typeof AccountsApi)["groups"][keyof (typeof AccountsApi)["groups"]],
+        "AccountsGroup"
     >,
     "rateLimit",
     never,
@@ -328,9 +336,10 @@ const ModifyRateLimitHandler: HttpApiEndpoint.HandlerWithName<
 }, Effect.orDie);
 
 /** @internal */
-const ModifyDescriptionHandler: HttpApiEndpoint.HandlerWithName<
-    HttpApiGroup.Endpoints<
-        HttpApiGroup.WithName<(typeof AccountsApi)["groups"][keyof (typeof AccountsApi)["groups"]], "AccountsGroup">
+const ModifyDescriptionHandler: HttpApiEndpoint.HandlerWithIdentifier<
+    HttpApiGroup.EndpointsWithIdentifier<
+        (typeof AccountsApi)["groups"][keyof (typeof AccountsApi)["groups"]],
+        "AccountsGroup"
     >,
     "description",
     never,
