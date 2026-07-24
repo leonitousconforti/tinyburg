@@ -5,7 +5,7 @@
     "type": "module",
     "dependencies": {
         "@bufbuild/protobuf": "2.12.0",
-        "@effect-aws/client-s3": "2.0.0-beta.4",
+        "@effect-aws/client-s3": "2.0.0-beta.6",
         "@effect/platform-node": "4.0.0-beta.69",
         "@efffrida/gplayapi": "0.0.18",
         "effect": "4.0.0-beta.69",
