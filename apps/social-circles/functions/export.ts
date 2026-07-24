@@ -8,7 +8,7 @@ export const toDirectedGraph = Effect.gen(function* () {
     const repo = yield* Repository;
     const entries = yield* repo.currentFriendships();
 
-    const graph = Graph.directed<Schema.Schema.Type<typeof NimblebitConfig.PlayerIdSchema>, never>((mutable) => {
+    const graph = Graph.directed<Schema.Schema.Type<typeof NimblebitConfig.PlayerIdSchema>, undefined>((mutable) => {
         // Add all players as nodes
         for (const player of Array.flatten(entries)) {
             Graph.addNode(mutable, player);
@@ -16,7 +16,7 @@ export const toDirectedGraph = Effect.gen(function* () {
 
         // Lookup map from player ID to node index
         const nodeIndexByData = Function.pipe(
-            mutable.nodes.entries(),
+            Graph.entries(Graph.nodes(mutable)),
             Array.fromIterable,
             Array.map(([x, y]) => [y, x] as const),
             (entries) => new Map(entries)
@@ -37,7 +37,7 @@ export const toUndirectedGraph = Effect.gen(function* () {
     const repo = yield* Repository;
     const entries = yield* repo.mutualFriendships();
 
-    const graph = Graph.undirected<Schema.Schema.Type<typeof NimblebitConfig.PlayerIdSchema>, never>((mutable) => {
+    const graph = Graph.undirected<Schema.Schema.Type<typeof NimblebitConfig.PlayerIdSchema>, undefined>((mutable) => {
         // Add all players as nodes
         for (const player of Array.flatten(entries)) {
             Graph.addNode(mutable, player);
@@ -45,7 +45,7 @@ export const toUndirectedGraph = Effect.gen(function* () {
 
         // Lookup map from player ID to node index
         const nodeIndexByData = Function.pipe(
-            mutable.nodes.entries(),
+            Graph.entries(Graph.nodes(mutable)),
             Array.fromIterable,
             Array.map(([x, y]) => [y, x] as const),
             (entries) => new Map(entries)

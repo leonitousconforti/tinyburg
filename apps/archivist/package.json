@@ -4,11 +4,11 @@
     "private": true,
     "type": "module",
     "dependencies": {
-        "@bufbuild/protobuf": "2.12.0",
-        "@effect-aws/client-s3": "2.0.0-beta.4",
-        "@effect/platform-node": "4.0.0-beta.69",
-        "@efffrida/gplayapi": "0.0.18",
-        "effect": "4.0.0-beta.69",
+        "@bufbuild/protobuf": "2.13.0",
+        "@effect-aws/client-s3": "2.0.0-beta.6",
+        "@effect/platform-node": "4.0.0-beta.100",
+        "@efffrida/gplayapi": "0.0.22",
+        "effect": "4.0.0-beta.100",
         "ioredis": "5.11.1"
     }
 }
