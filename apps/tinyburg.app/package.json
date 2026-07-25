@@ -17,14 +17,14 @@
         "@effect/sql-pg": "4.0.0-beta.100",
         "@fontsource/press-start-2p": "5.2.7",
         "@fontsource/vt323": "5.2.7",
-        "@tailwindcss/postcss": "4.3.1",
+        "@tailwindcss/postcss": "4.3.3",
         "@tinyburg/nimblebit-sdk": "workspace:*",
         "@tinyburg/tinytower-sdk": "workspace:*",
         "astro": "6.4.8",
         "effect": "4.0.0-beta.100",
         "ioredis": "5.11.1",
         "sass": "1.101.0",
-        "tailwindcss": "4.3.1",
+        "tailwindcss": "4.3.3",
         "typescript": "6.0.3",
         "vite": "8.0.16"
     }
