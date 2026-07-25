@@ -17,6 +17,12 @@ resolvePeersFromWorkspaceRoot: false
 
 overrides:
   "@effect/platform-node-shared": "4.0.0-beta.100"
+  "@effect/docgen>typescript": "6.0.3"
+  "madge>typescript": "6.0.3"
+
+peerDependencyRules:
+  allowedVersions:
+    typescript: "6.0.3"
 
 allowBuilds:
   '@parcel/watcher': true
