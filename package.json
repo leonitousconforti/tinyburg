@@ -25,7 +25,7 @@
         "@babel/core": "7.29.7",
         "@babel/plugin-transform-export-namespace-from": "7.29.7",
         "@babel/plugin-transform-modules-commonjs": "7.29.7",
-        "@changesets/cli": "2.31.0",
+        "@changesets/cli": "2.31.1",
         "@changesets/config": "3.1.4",
         "@effect/build-utils": "0.8.9",
         "@effect/docgen": "https://pkg.pr.new/Effect-TS/docgen/@effect/docgen@e57e5f5",
