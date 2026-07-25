@@ -42,5 +42,5 @@
         "vite": "8.0.16",
         "vitest": "4.1.8"
     },
-    "packageManager": "pnpm@10.34.0+sha512.8736169c56fdb6e26afb5d7e2bd5f4c99cc299620d8bdc288cb354e6dd0936bd4ea62276d1a6b2de4b6e971a00a530e0e08bbeeda63da5d820118d3d7e21ff69"
+    "packageManager": "pnpm@10.34.5+sha512.a4ee05f2f73658255bd6a89859c065a45c28a57daefae2c893a168ee2b73168c37b91e83e57ea67654ad03f03031746430e8bce38e362e042605fb8abc80192e"
 }
