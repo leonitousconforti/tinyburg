@@ -6,6 +6,8 @@ settings:
 
 overrides:
   '@effect/platform-node-shared': 4.0.0-beta.100
+  '@effect/docgen>typescript': 6.0.3
+  madge>typescript: 6.0.3
 
 importers:
 
@@ -720,7 +722,7 @@ packages:
     hasBin: true
     peerDependencies:
       tsx: ^4.19.3
-      typescript: ^5.8.2
+      typescript: 6.0.3
 
   '@effect/language-service@0.86.2':
     resolution: {integrity: sha512-SaPln+8srOqDJDUwNTDmP5e+IYpEDr9+1epGznnsLqu8xvo6VnxyWARdeLpqvZJlb0Pgy9ca7ppqvvdWbHPXAg==}
@@ -3467,7 +3469,7 @@ packages:
     engines: {node: '>=18'}
     hasBin: true
     peerDependencies:
-      typescript: ^5.4.4
+      typescript: 6.0.3
     peerDependenciesMeta:
       typescript:
         optional: true
