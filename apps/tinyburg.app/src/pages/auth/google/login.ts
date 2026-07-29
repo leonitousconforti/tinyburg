@@ -1,8 +1,9 @@
 import { Effect, Result, pipe } from "effect";
-import { Cookies, HttpServerResponse, Url, UrlParams } from "effect/unstable/http";
+import { Cookies, HttpServerRequest, HttpServerResponse, Url, UrlParams } from "effect/unstable/http";
 
 import { randomStateGenerator, Sha256CodeChallenge } from "../../../../api/crypto";
 import { makeAstroEndpoint } from "../../../../api/handler";
+import { stateWithReturnTo } from "../_shared";
 import {
     authUrl,
     GOOGLE_OAUTH_CODE_VERIFIER_COOKIE_NAME,
@@ -12,9 +13,12 @@ import {
 
 export const GET = Effect.gen(function* () {
     const config = yield* Effect.orDie(GoogleOAuthConfig);
+    const request = yield* HttpServerRequest.HttpServerRequest;
 
-    // Generate state and code verifier for PKCE
-    const state = randomStateGenerator();
+    // Generate state and code verifier for PKCE. The state also carries the
+    // post-login destination through the provider round trip.
+    const returnTo = new URL(request.originalUrl).searchParams.get("returnTo");
+    const state = stateWithReturnTo(randomStateGenerator(), returnTo);
     const codeVerifier = randomStateGenerator();
 
     // Build the Google OAuth authorization URL
