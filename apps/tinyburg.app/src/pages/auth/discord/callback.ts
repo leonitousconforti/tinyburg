@@ -10,8 +10,9 @@ import {
 } from "effect/unstable/http";
 
 import { makeAstroEndpoint } from "../../../../api/handler";
-import { Repository } from "../../../../domain/model";
-import { OAuthResponseSchema, SESSION_ID_COOKIE_NAME } from "../_shared";
+import { AuthRepository } from "../../../../domain/auth";
+import { SessionsRepository } from "../../../../domain/sessions";
+import { destinationFromState, OAuthResponseSchema, SESSION_ID_COOKIE_NAME } from "../_shared";
 import {
     DISCORD_OAUTH_CODE_VERIFIER_COOKIE_NAME,
     DISCORD_OAUTH_STATE_COOKIE_NAME,
@@ -93,7 +94,7 @@ export const GET = Effect.gen(function* () {
     const providerAccountId = claims.sub;
     const avatarUrl = Option.fromNullishOr(claims.picture as string | undefined);
     const displayName = yield* Option.fromNullishOr(claims.name as string | undefined).pipe(Effect.fromOption);
-    const user = yield* Repository.use((repo) =>
+    const user = yield* AuthRepository.use((repo) =>
         repo.upsertUserFromOAuth({
             provider: "discord",
             displayName,
@@ -103,7 +104,7 @@ export const GET = Effect.gen(function* () {
     );
 
     // Create a session for the user
-    const session = yield* Repository.use((repo) => repo.createSession(user));
+    const session = yield* SessionsRepository.use((repo) => repo.createSession(user));
     const sessionCookie = Cookies.makeCookieUnsafe(SESSION_ID_COOKIE_NAME, session.id, {
         expires: DateTime.toDateUtc(session.expiresAt),
         httpOnly: true,
@@ -112,8 +113,9 @@ export const GET = Effect.gen(function* () {
         sameSite: "lax", // optional - do not use "strict"
     });
 
-    // Redirect to the user's towers page
-    return HttpServerResponse.redirect("/towers/@me", {
+    // Resume the destination that started the login, defaulting to the
+    // user's towers page
+    return HttpServerResponse.redirect(destinationFromState(urlParams.state), {
         cookies: Cookies.fromIterable([sessionCookie, deleteStateCookie, deleteCodeVerifierCookie]),
     });
 }).pipe(makeAstroEndpoint);

@@ -1,6 +1,16 @@
 ---
+import { Option } from "effect";
+
+import { postLoginDestination } from "./auth/_shared.ts";
 import CloudsLayout from "../layouts/CloudsLayout.astro";
-export const prerender = true;
+
+const returnTo = Astro.url.searchParams.get("returnTo");
+if (Option.isSome(Astro.locals.account)) {
+    return Astro.redirect(postLoginDestination(returnTo));
+}
+
+const loginHref = (provider: "google" | "discord"): string =>
+    returnTo === null ? `/auth/${provider}/login` : `/auth/${provider}/login?returnTo=${encodeURIComponent(returnTo)}`;
 ---
 
 <CloudsLayout
@@ -23,7 +33,7 @@ export const prerender = true;
 
             <div class="flex flex-col gap-4">
                 <a
-                    href="/auth/google/login"
+                    href={loginHref("google")}
                     class="shadow-pixel hover:shadow-pixel-hover hover:border-sky-blue flex w-full items-center justify-center gap-3 rounded-lg border-2 border-gray-300 bg-white px-6 py-4 font-mono text-xl text-gray-800 no-underline transition-all hover:-translate-x-0.5 hover:-translate-y-0.5"
                 >
                     <svg class="h-6 w-6 shrink-0" viewBox="0 0 24 24">
@@ -48,7 +58,7 @@ export const prerender = true;
                 </a>
 
                 <a
-                    href="/auth/discord/login"
+                    href={loginHref("discord")}
                     class="bg-discord shadow-pixel hover:shadow-pixel-hover flex w-full items-center justify-center gap-3 rounded-lg px-6 py-4 font-mono text-xl text-white no-underline transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:bg-[#4752c4]"
                 >
                     <svg class="h-6 w-6 shrink-0" viewBox="0 0 24 24">
