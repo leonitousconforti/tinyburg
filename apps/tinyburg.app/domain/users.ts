@@ -1,21 +1,30 @@
-import { Effect, Context, Schema, Layer } from "effect";
-import { SqlClient, SqlSchema } from "effect/unstable/sql";
+import { Context, Effect, Function, Layer, Schema } from "effect";
+import { SqlClient, SqlSchema, SqlModel } from "effect/unstable/sql";
 
 import { User } from "./models.ts";
 
-export class AuthRepository extends Context.Service<AuthRepository>()("@tinyburg/tinyburg.app/domain/AuthRepository", {
-    make: Effect.gen(function* () {
-        const sql = yield* SqlClient.SqlClient;
+export class UsersRepository extends Context.Service<UsersRepository>()(
+    "@tinyburg/tinyburg.app/domain/UsersRepository",
+    {
+        make: Effect.gen(function* () {
+            const sql = yield* SqlClient.SqlClient;
 
-        const upsertUserFromOAuth = SqlSchema.findOne({
-            Result: User,
-            Request: Schema.Struct({
-                provider: Schema.Literals(["google", "discord"]),
-                providerAccountId: Schema.String,
-                displayName: Schema.String,
-                avatarUrl: Schema.OptionFromNullishOr(Schema.String, { onNoneEncoding: null }),
-            }),
-            execute: ({ avatarUrl, displayName, provider, providerAccountId }) => sql`
+            const users = yield* SqlModel.makeRepository(User, {
+                spanPrefix: "tinyburg.app.domain.Repository.users",
+                tableName: "users",
+                idColumn: "id",
+            });
+
+            const findUserById = Function.flow(users.findById, Effect.catchNoSuchElement);
+            const upsertUserFromOAuth = SqlSchema.findOne({
+                Result: User,
+                Request: Schema.Struct({
+                    provider: Schema.Literals(["google", "discord"]),
+                    providerAccountId: Schema.String,
+                    displayName: Schema.String,
+                    avatarUrl: Schema.OptionFromNullishOr(Schema.String, { onNoneEncoding: null }),
+                }),
+                execute: ({ avatarUrl, displayName, provider, providerAccountId }) => sql`
                 WITH lock AS (
                     -- Acquire an advisory lock to prevent race conditions for the same OAuth account
                     SELECT pg_advisory_xact_lock(hashtext(${provider} || ':' || ${providerAccountId}))
@@ -55,12 +64,14 @@ export class AuthRepository extends Context.Service<AuthRepository>()("@tinyburg
                 )
                 SELECT * FROM final_user;
             `,
-        });
+            });
 
-        return {
-            upsertUserFromOAuth,
-        };
-    }),
-}) {
-    static readonly Default = Layer.effect(this, AuthRepository.make);
+            return {
+                findUserById,
+                upsertUserFromOAuth,
+            };
+        }),
+    }
+) {
+    static readonly Default = Layer.effect(this, UsersRepository.make);
 }

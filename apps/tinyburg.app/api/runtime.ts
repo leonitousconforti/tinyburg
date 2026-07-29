@@ -4,10 +4,10 @@ import { FetchHttpClient } from "effect/unstable/http";
 import { NodeServices } from "@effect/platform-node";
 import { PgClient, PgMigrator } from "@effect/sql-pg";
 
-import { AuthRepository } from "../domain/auth.ts";
 import { DevelopersRepository } from "../domain/developers.ts";
 import { OIDCRepository } from "../domain/oidc.ts";
 import { SessionsRepository } from "../domain/sessions.ts";
+import { UsersRepository } from "../domain/users.ts";
 
 const SqlLive = PgClient.layerConfig({
     url: Config.redacted("DATABASE_URL"),
@@ -25,7 +25,7 @@ const MigratorLive = Effect.gen(function* () {
 const Repositories = Layer.mergeAll(
     SessionsRepository.Default,
     DevelopersRepository.Default,
-    AuthRepository.Default,
+    UsersRepository.Default,
     OIDCRepository.Default
 );
 
