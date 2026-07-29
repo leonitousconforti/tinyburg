@@ -29,6 +29,6 @@ Re-exports all named exports from the "./BitPrint.ts" module as `BitPrint`.
 export * as BitPrint from "./BitPrint.ts"
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/bitprints/blob/main/src/index.ts#L6)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/bitprints/src/index.ts#L6)
 
 Since v1.0.0

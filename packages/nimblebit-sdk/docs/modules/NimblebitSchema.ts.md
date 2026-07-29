@@ -51,7 +51,7 @@ declare const parseNimblebitObject: <Fields extends { readonly [x: PropertyKey]:
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/nimblebit-sdk/blob/main/src/NimblebitSchema.ts#L59)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/NimblebitSchema.ts#L59)
 
 Since v1.0.0
 
@@ -85,7 +85,7 @@ declare const parseNimblebitOrderedList: <
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/nimblebit-sdk/blob/main/src/NimblebitSchema.ts#L24)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/NimblebitSchema.ts#L24)
 
 Since v1.0.0
 
@@ -106,7 +106,7 @@ declare const CSharpDate: Schema.decodeTo<
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/nimblebit-sdk/blob/main/src/NimblebitSchema.ts#L88)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/NimblebitSchema.ts#L88)
 
 Since v1.0.0
 
@@ -131,7 +131,7 @@ declare const UnityColor: Schema.decodeTo<
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/nimblebit-sdk/blob/main/src/NimblebitSchema.ts#L107)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/NimblebitSchema.ts#L107)
 
 Since v1.0.0
 
@@ -145,6 +145,6 @@ declare const split: (
 ) => (from: Schema.String) => Schema.decodeTo<Schema.$Array<Schema.String>, Schema.String, never, never>
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/nimblebit-sdk/blob/main/src/NimblebitSchema.ts#L130)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/NimblebitSchema.ts#L130)
 
 Since v1.0.0

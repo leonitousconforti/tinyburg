@@ -1,5 +1,20 @@
 {
     "$schema": "../../node_modules/@effect/docgen/schema.json",
+    "srcLink": "https://github.com/leonitousconforti/tinyburg/blob/main/packages/insight/src/",
     "exclude": ["src/frida/**/*.ts", "src/shared/**/*.ts"],
-    "projectHomepage": "https://github.com/leonitousconforti/tinyburg/packages/insight"
+    "projectHomepage": "https://github.com/leonitousconforti/tinyburg/packages/insight",
+    "examplesCompilerOptions": {
+        "noEmit": true,
+        "strict": true,
+        "skipLibCheck": true,
+        "moduleResolution": "Bundler",
+        "module": "ES2022",
+        "target": "ES2022",
+        "lib": ["ES2022"],
+        "baseUrl": "../../",
+        "paths": {
+            "@tinyburg/insight": ["./src/index.js"],
+            "@tinyburg/insight/*": ["./src/*.js"]
+        }
+    }
 }

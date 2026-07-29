@@ -18,6 +18,7 @@ Since v1.0.0
   - [NimblebitAuth (class)](#nimblebitauth-class)
 - [Layer](#layer)
   - [layerCustomHost](#layercustomhost)
+  - [layerCustomHostConfig](#layercustomhostconfig)
   - [layerDirect](#layerdirect)
   - [layerDirectConfig](#layerdirectconfig)
   - [layerTinyburgAuthProxy](#layertinyburgauthproxy)
@@ -35,7 +36,7 @@ Since v1.0.0
 declare class NimblebitAuth
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/nimblebit-sdk/blob/main/src/NimblebitAuth.ts#L26)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/NimblebitAuth.ts#L26)
 
 Since v1.0.0
 
@@ -52,7 +53,21 @@ declare const layerCustomHost: (options: {
 }) => Layer.Layer<NimblebitAuth, never, Crypto.Crypto>
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/nimblebit-sdk/blob/main/src/NimblebitAuth.ts#L172)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/NimblebitAuth.ts#L179)
+
+Since v1.0.0
+
+## layerCustomHostConfig
+
+**Signature**
+
+```ts
+declare const layerCustomHostConfig: (
+  options: Config.Wrap<{ host: string; authKey: Redacted.Redacted<string> }>
+) => Layer.Layer<NimblebitAuth, Config.ConfigError, Crypto.Crypto>
+```
+
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/NimblebitAuth.ts#L188)
 
 Since v1.0.0
 
@@ -66,7 +81,7 @@ declare const layerDirect: (
 ) => Layer.Layer<NimblebitAuth, never, Crypto.Crypto>
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/nimblebit-sdk/blob/main/src/NimblebitAuth.ts#L156)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/NimblebitAuth.ts#L163)
 
 Since v1.0.0
 
@@ -80,7 +95,7 @@ declare const layerDirectConfig: (
 ) => Layer.Layer<NimblebitAuth, Config.ConfigError, Crypto.Crypto>
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/nimblebit-sdk/blob/main/src/NimblebitAuth.ts#L164)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/NimblebitAuth.ts#L171)
 
 Since v1.0.0
 
@@ -94,7 +109,7 @@ declare const layerTinyburgAuthProxy: (options: {
 }) => Layer.Layer<NimblebitAuth, never, Crypto.Crypto>
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/nimblebit-sdk/blob/main/src/NimblebitAuth.ts#L181)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/NimblebitAuth.ts#L199)
 
 Since v1.0.0
 
@@ -104,10 +119,10 @@ Since v1.0.0
 
 ```ts
 declare const layerTinyburgAuthProxyConfig: (
-  options: Config.Wrap<Parameters<typeof NimblebitAuth.TinyburgAuthProxy>[0]>
+  options: Config.Wrap<{ authKey: Redacted.Redacted<string> }>
 ) => Layer.Layer<NimblebitAuth, Config.ConfigError, Crypto.Crypto>
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/nimblebit-sdk/blob/main/src/NimblebitAuth.ts#L189)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/NimblebitAuth.ts#L207)
 
 Since v1.0.0

@@ -33,7 +33,7 @@ Since v1.0.0
 declare const NimblebitError: typeof internal.NimblebitError
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/nimblebit-sdk/blob/main/src/NimblebitError.ts#L38)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/NimblebitError.ts#L38)
 
 Since v1.0.0
 
@@ -45,7 +45,7 @@ Since v1.0.0
 type NimblebitError = internal.NimblebitError
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/nimblebit-sdk/blob/main/src/NimblebitError.ts#L32)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/NimblebitError.ts#L32)
 
 Since v1.0.0
 
@@ -57,7 +57,7 @@ Since v1.0.0
 declare const NimblebitErrorTypeId: unique symbol
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/nimblebit-sdk/blob/main/src/NimblebitError.ts#L14)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/NimblebitError.ts#L14)
 
 Since v1.0.0
 
@@ -69,7 +69,7 @@ Since v1.0.0
 type NimblebitErrorTypeId = typeof NimblebitErrorTypeId
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/nimblebit-sdk/blob/main/src/NimblebitError.ts#L20)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/NimblebitError.ts#L20)
 
 Since v1.0.0
 
@@ -81,6 +81,6 @@ Since v1.0.0
 declare const isNimblebitError: (u: unknown) => u is NimblebitError
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/nimblebit-sdk/blob/main/src/NimblebitError.ts#L26)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/NimblebitError.ts#L26)
 
 Since v1.0.0

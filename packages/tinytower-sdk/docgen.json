@@ -1,5 +1,6 @@
 {
     "$schema": "../../node_modules/@effect/docgen/schema.json",
+    "srcLink": "https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/",
     "exclude": [
         "src/index.ts",
         "src/internal/**/*.ts",
@@ -14,5 +15,19 @@
         "src/Roofs.ts",
         "src/SyncItemType.ts"
     ],
-    "projectHomepage": "https://github.com/leonitousconforti/tinyburg/packages/tinytower-sdk"
+    "projectHomepage": "https://github.com/leonitousconforti/tinyburg/packages/tinytower-sdk",
+    "examplesCompilerOptions": {
+        "noEmit": true,
+        "strict": true,
+        "skipLibCheck": true,
+        "moduleResolution": "Bundler",
+        "module": "ES2022",
+        "target": "ES2022",
+        "lib": ["ES2022"],
+        "baseUrl": "../../",
+        "paths": {
+            "@tinyburg/tinytower-sdk": ["./src/index.js"],
+            "@tinyburg/tinytower-sdk/*": ["./src/*.js"]
+        }
+    }
 }

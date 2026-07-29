@@ -1,5 +1,20 @@
 {
     "$schema": "../../node_modules/@effect/docgen/schema.json",
+    "srcLink": "https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/",
     "exclude": ["src/internal/**/*.ts"],
-    "projectHomepage": "https://github.com/leonitousconforti/tinyburg/packages/nimblebit-sdk"
+    "projectHomepage": "https://github.com/leonitousconforti/tinyburg/packages/nimblebit-sdk",
+    "examplesCompilerOptions": {
+        "noEmit": true,
+        "strict": true,
+        "skipLibCheck": true,
+        "moduleResolution": "Bundler",
+        "module": "ES2022",
+        "target": "ES2022",
+        "lib": ["ES2022"],
+        "baseUrl": "../../",
+        "paths": {
+            "@tinyburg/nimblebit-sdk": ["./src/index.js"],
+            "@tinyburg/nimblebit-sdk/*": ["./src/*.js"]
+        }
+    }
 }

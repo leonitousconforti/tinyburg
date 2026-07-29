@@ -37,7 +37,7 @@ Re-exports all named exports from the "./NimblebitAuth.ts" module as `NimblebitA
 export * as NimblebitAuth from "./NimblebitAuth.ts"
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/nimblebit-sdk/blob/main/src/index.ts#L11)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/index.ts#L11)
 
 Since v1.0.0
 
@@ -53,7 +53,7 @@ Re-exports all named exports from the "./NimblebitConfig.ts" module as `Nimblebi
 export * as NimblebitConfig from "./NimblebitConfig.ts"
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/nimblebit-sdk/blob/main/src/index.ts#L20)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/index.ts#L20)
 
 Since v1.0.0
 
@@ -69,7 +69,7 @@ Re-exports all named exports from the "./NimblebitError.ts" module as `Nimblebit
 export * as NimblebitError from "./NimblebitError.ts"
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/nimblebit-sdk/blob/main/src/index.ts#L28)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/index.ts#L28)
 
 Since v1.0.0
 
@@ -85,6 +85,6 @@ Re-exports all named exports from the "./NimblebitSchema.ts" module as `Nimblebi
 export * as NimblebitSchema from "./NimblebitSchema.ts"
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/nimblebit-sdk/blob/main/src/index.ts#L36)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/index.ts#L36)
 
 Since v1.0.0

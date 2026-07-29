@@ -27,6 +27,6 @@ Since v1.0.0
 declare const Hello: "BitPrints!"
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/bitprints/blob/main/src/BitPrint.ts#L2)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/bitprints/src/BitPrint.ts#L2)
 
 Since v1.0.0

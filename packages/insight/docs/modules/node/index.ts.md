@@ -34,7 +34,7 @@ declare const AgentLive: Layer.Layer<
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/insight/blob/main/src/index.ts#L58)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/insight/src/index.ts#L58)
 
 Since v1.0.0
 
@@ -54,7 +54,7 @@ declare const AgentWatched: <A, E, R>(
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/insight/blob/main/src/index.ts#L64)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/insight/src/index.ts#L64)
 
 Since v1.0.0
 
@@ -82,7 +82,7 @@ declare const DeviceLive: Layer.Layer<
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/insight/blob/main/src/index.ts#L83)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/insight/src/index.ts#L83)
 
 Since v1.0.0
 
@@ -98,7 +98,7 @@ declare const ScriptLive: Layer.Layer<
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/insight/blob/main/src/index.ts#L47)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/insight/src/index.ts#L47)
 
 Since v1.0.0
 
@@ -114,6 +114,6 @@ declare const SessionLive: Layer.Layer<
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/insight/blob/main/src/index.ts#L41)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/insight/src/index.ts#L41)
 
 Since v1.0.0
