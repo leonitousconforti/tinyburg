@@ -1,11 +1,323 @@
 ---
 import { Option } from "effect";
 
+import CloudsLayout from "../../layouts/CloudsLayout.astro";
+
 const maybeAccount = Astro.locals.account;
 if (Option.isNone(maybeAccount)) {
     return Astro.redirect("/login");
 }
 ---
 
-<p>Hello, {maybeAccount.value.user.displayName}</p>
-<p>{new URL("towers/@link", Astro.site).toString()}</p>
+<CloudsLayout
+    title="Link Your Tower | Tinyburg"
+    description="Connect your TinyTower cloud save to Tinyburg to start trading bitizens, costumes, and more."
+>
+    <div class="relative z-10 flex min-h-screen flex-col items-center justify-center p-8">
+        <a
+            href="/towers/@me"
+            class="font-pixel bg-dark-blue/80 shadow-pixel hover:shadow-pixel-hover absolute top-8 left-8 rounded px-4 py-3 text-[0.7rem] text-white transition-all hover:-translate-x-0.5 hover:-translate-y-0.5"
+        >
+            ← My Towers
+        </a>
+
+        <div class="bg-card-bg shadow-pixel-hover border-gold w-full max-w-md rounded-2xl border-3 p-8">
+            <div class="mb-6 text-center">
+                <h1 class="font-pixel mb-2 text-lg text-gray-800">Link Your Tower</h1>
+                <p class="font-mono text-xl text-gray-600">
+                    Connect your TinyTower cloud save to start trading with players worldwide
+                </p>
+            </div>
+
+            <div class="mb-8 flex items-center gap-3">
+                <div class="bg-gold h-2 flex-1 rounded-full" aria-hidden="true"></div>
+                <span id="step-label" class="font-pixel shrink-0 text-[0.55rem] text-gray-500">Step 1 of 2</span>
+                <div
+                    id="step-dot-2"
+                    class="h-2 flex-1 rounded-full bg-gray-300 transition-colors duration-300"
+                    aria-hidden="true"
+                >
+                </div>
+            </div>
+
+            <section id="step-link">
+                <form id="link-form" class="flex flex-col gap-6">
+                    <label class="flex flex-col gap-2">
+                        <span class="font-pixel text-[0.6rem] text-gray-500">Friend Code</span>
+                        <input
+                            id="friend-code-input"
+                            type="text"
+                            name="friend-code"
+                            required
+                            maxlength="5"
+                            pattern="[0-9A-Z]{1,5}"
+                            title="Up to 5 letters or numbers"
+                            placeholder="ABC12"
+                            autocomplete="off"
+                            autocapitalize="characters"
+                            spellcheck="false"
+                            class="font-mono rounded-lg border-2 border-gray-300 bg-white p-3 text-center text-3xl tracking-[0.4em] text-gray-800 uppercase focus:border-sky-blue focus:outline-none"
+                        />
+                        <span class="font-mono text-base text-gray-500"
+                            >You can find it on the Friends tab in TinyTower</span
+                        >
+                    </label>
+
+                    <label class="flex flex-col gap-2">
+                        <span class="font-pixel text-[0.6rem] text-gray-500">Cloud Sync Email</span>
+                        <input
+                            id="email-input"
+                            type="email"
+                            name="email"
+                            required
+                            placeholder="you@example.com"
+                            autocomplete="email"
+                            class="font-mono rounded-lg border-2 border-gray-300 bg-white p-3 text-xl text-gray-800 focus:border-sky-blue focus:outline-none"
+                        />
+                        <span class="font-mono text-base text-gray-500">
+                            The email your cloud save is registered with. Nimblebit will send a verification code to it.
+                        </span>
+                    </label>
+
+                    <div id="link-error" role="alert" hidden class="rounded-lg border-2 border-red-300 bg-red-50 p-4">
+                        <p class="font-mono text-lg text-red-700"></p>
+                    </div>
+
+                    <button
+                        type="submit"
+                        class="bg-gold shadow-pixel hover:shadow-pixel-hover font-pixel w-full cursor-pointer rounded-lg border-2 border-transparent px-6 py-4 text-sm text-gray-800 transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-x-0 disabled:hover:translate-y-0 disabled:hover:shadow-pixel"
+                    >
+                        Send Verification Code
+                    </button>
+                </form>
+            </section>
+
+            <section id="step-verify" hidden>
+                <div class="bg-sky-blue/10 border-sky-blue/20 mb-6 rounded-lg border-2 p-4">
+                    <p class="font-mono text-lg text-dark-blue">
+                        📬 Nimblebit sent a verification code to <strong id="sent-to-email" class="break-all"></strong>.
+                        It can take a minute to arrive.
+                    </p>
+                </div>
+
+                <form id="verify-form" class="flex flex-col gap-6">
+                    <label class="flex flex-col gap-2">
+                        <span class="font-pixel text-[0.6rem] text-gray-500">Verification Code</span>
+                        <input
+                            id="verification-code-input"
+                            type="text"
+                            name="verification-code"
+                            required
+                            maxlength="8"
+                            placeholder="1234"
+                            inputmode="numeric"
+                            autocomplete="one-time-code"
+                            spellcheck="false"
+                            class="font-mono rounded-lg border-2 border-gray-300 bg-white p-3 text-center text-3xl tracking-[0.4em] text-gray-800 focus:border-sky-blue focus:outline-none"
+                        />
+                        <span class="font-mono text-base text-gray-500">No email? Check your spam folder</span>
+                    </label>
+
+                    <div id="verify-error" role="alert" hidden class="rounded-lg border-2 border-red-300 bg-red-50 p-4">
+                        <p class="font-mono text-lg text-red-700"></p>
+                    </div>
+
+                    <button
+                        type="submit"
+                        class="bg-gold shadow-pixel hover:shadow-pixel-hover font-pixel w-full cursor-pointer rounded-lg border-2 border-transparent px-6 py-4 text-sm text-gray-800 transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-x-0 disabled:hover:translate-y-0 disabled:hover:shadow-pixel"
+                    >
+                        Link My Tower
+                    </button>
+                </form>
+
+                <div class="mt-6 flex items-center justify-between">
+                    <button
+                        type="button"
+                        id="back-button"
+                        class="font-mono text-sky-dark cursor-pointer text-lg hover:underline"
+                    >
+                        ← Go back
+                    </button>
+                    <button
+                        type="button"
+                        id="resend-button"
+                        class="font-mono text-sky-dark cursor-pointer text-lg hover:underline"
+                    >
+                        Resend email
+                    </button>
+                </div>
+            </section>
+        </div>
+    </div>
+</CloudsLayout>
+
+<script>
+    const stepLink = document.getElementById("step-link") as HTMLElement;
+    const stepVerify = document.getElementById("step-verify") as HTMLElement;
+    const stepLabel = document.getElementById("step-label") as HTMLElement;
+    const stepDot2 = document.getElementById("step-dot-2") as HTMLElement;
+
+    const linkForm = document.getElementById("link-form") as HTMLFormElement;
+    const linkError = document.getElementById("link-error") as HTMLElement;
+    const friendCodeInput = document.getElementById("friend-code-input") as HTMLInputElement;
+    const emailInput = document.getElementById("email-input") as HTMLInputElement;
+
+    const verifyForm = document.getElementById("verify-form") as HTMLFormElement;
+    const verifyError = document.getElementById("verify-error") as HTMLElement;
+    const verificationCodeInput = document.getElementById("verification-code-input") as HTMLInputElement;
+    const sentToEmail = document.getElementById("sent-to-email") as HTMLElement;
+    const backButton = document.getElementById("back-button") as HTMLButtonElement;
+    const resendButton = document.getElementById("resend-button") as HTMLButtonElement;
+
+    // Details from step one, kept for the verify and resend requests.
+    let pendingFriendCode = "";
+    let pendingEmail = "";
+
+    // TODO: POST /v1/tinytower/linkedAccounts/link/:friendCode/:email once the
+    // LinkedTinytowerAccountsGroup handlers are mounted.
+    const requestVerificationCode = async (_friendCode: string, _email: string): Promise<void> => {};
+
+    // TODO: PATCH /v1/tinytower/linkedAccounts/verify/:friendCode/:verificationCode
+    // once the LinkedTinytowerAccountsGroup handlers are mounted.
+    const verifyAndLink = async (_friendCode: string, _verificationCode: string): Promise<void> => {};
+
+    const showError = (box: HTMLElement, message: string): void => {
+        const text = box.querySelector("p");
+        if (text) text.textContent = message;
+        box.hidden = false;
+    };
+
+    const hideError = (box: HTMLElement): void => {
+        box.hidden = true;
+    };
+
+    const showStep = (step: 1 | 2): void => {
+        const entering = step === 1 ? stepLink : stepVerify;
+        const leaving = step === 1 ? stepVerify : stepLink;
+
+        leaving.hidden = true;
+        entering.hidden = false;
+
+        entering.classList.remove("step-enter-forward", "step-enter-backward");
+        void entering.offsetWidth;
+        entering.classList.add(step === 2 ? "step-enter-forward" : "step-enter-backward");
+
+        stepLabel.textContent = `Step ${step} of 2`;
+        stepDot2.classList.toggle("bg-gold", step === 2);
+        stepDot2.classList.toggle("bg-gray-300", step !== 2);
+
+        entering.querySelector("input")?.focus();
+    };
+
+    friendCodeInput.addEventListener("input", () => {
+        friendCodeInput.value = friendCodeInput.value.toUpperCase().replaceAll(/[^0-9A-Z]/g, "");
+    });
+
+    linkForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        hideError(linkError);
+
+        const submitButton = linkForm.querySelector("button[type=submit]") as HTMLButtonElement;
+        const idleText = submitButton.textContent;
+        submitButton.disabled = true;
+        submitButton.textContent = "Sending...";
+
+        try {
+            const friendCode = friendCodeInput.value.trim();
+            const email = emailInput.value.trim();
+            await requestVerificationCode(friendCode, email);
+
+            pendingFriendCode = friendCode;
+            pendingEmail = email;
+            sentToEmail.textContent = email;
+            verificationCodeInput.value = "";
+            hideError(verifyError);
+            showStep(2);
+        } catch {
+            showError(linkError, "We couldn't reach your tower. Please double-check your friend code and try again.");
+        } finally {
+            submitButton.disabled = false;
+            submitButton.textContent = idleText;
+        }
+    });
+
+    verifyForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        hideError(verifyError);
+
+        const submitButton = verifyForm.querySelector("button[type=submit]") as HTMLButtonElement;
+        const idleText = submitButton.textContent;
+        submitButton.disabled = true;
+        submitButton.textContent = "Verifying...";
+
+        try {
+            await verifyAndLink(pendingFriendCode, verificationCodeInput.value.trim());
+            submitButton.textContent = "Linked! Redirecting...";
+            window.location.assign("/towers/@me");
+        } catch {
+            showError(verifyError, "That code didn't work. Please check it and try again, or resend the email.");
+            submitButton.disabled = false;
+            submitButton.textContent = idleText;
+        }
+    });
+
+    backButton.addEventListener("click", () => {
+        showStep(1);
+    });
+
+    resendButton.addEventListener("click", async () => {
+        resendButton.disabled = true;
+        const idleText = resendButton.textContent;
+
+        try {
+            await requestVerificationCode(pendingFriendCode, pendingEmail);
+            resendButton.textContent = "Sent!";
+        } catch {
+            showError(verifyError, "We couldn't resend the email. Please try again in a moment.");
+        } finally {
+            setTimeout(() => {
+                resendButton.textContent = idleText;
+                resendButton.disabled = false;
+            }, 2000);
+        }
+    });
+</script>
+
+<style>
+    .step-enter-forward {
+        animation: slide-in-forward 0.25s ease-out;
+    }
+
+    .step-enter-backward {
+        animation: slide-in-backward 0.25s ease-out;
+    }
+
+    @keyframes slide-in-forward {
+        from {
+            opacity: 0;
+            transform: translateX(2rem);
+        }
+        to {
+            opacity: 1;
+            transform: none;
+        }
+    }
+
+    @keyframes slide-in-backward {
+        from {
+            opacity: 0;
+            transform: translateX(-2rem);
+        }
+        to {
+            opacity: 1;
+            transform: none;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .step-enter-forward,
+        .step-enter-backward {
+            animation: none;
+        }
+    }
+</style>
