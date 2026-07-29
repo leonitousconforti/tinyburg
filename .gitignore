@@ -24,3 +24,6 @@ Assembly-CSharp.dll
 # env files
 .env
 .env.*
+
+# My files
+MONETIZATION.md
