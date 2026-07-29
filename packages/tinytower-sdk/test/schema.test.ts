@@ -6,7 +6,12 @@ import { describe, it } from "@effect/vitest";
 import { NimblebitAuth, NimblebitConfig } from "@tinyburg/nimblebit-sdk";
 import { TinyTower } from "@tinyburg/tinytower-sdk";
 
-const DotEnvLayer = ConfigProvider.layerAdd(ConfigProvider.fromDotEnv({ path: "../../.env" }));
+const DotEnvLayer = Path.Path.pipe(
+    Effect.flatMap((path) => path.fromFileUrl(new URL("../../.env", import.meta.url))),
+    Effect.flatMap((path) => ConfigProvider.fromDotEnv({ path })),
+    ConfigProvider.layerAdd
+);
+
 const ConfigLayerLive = DotEnvLayer.pipe(Layer.provideMerge(NodeServices.layer));
 
 const Live = Layer.mergeAll(
