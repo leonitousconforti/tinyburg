@@ -10,9 +10,9 @@ export const makeAstroEndpoint = <
     E,
     R extends
         | ManagedRuntime.ManagedRuntime.Services<typeof AppRuntime>
-        | Scope.Scope
         | HttpServerRequest.HttpServerRequest
-        | AstroContext,
+        | AstroContext
+        | Scope.Scope,
 >(
     httpEffect: Effect.Effect<HttpServerResponse.HttpServerResponse, E, R>,
     middleware?: HttpMiddleware.HttpMiddleware | undefined
