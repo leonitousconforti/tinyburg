@@ -1,10 +1,10 @@
 import { Effect, Option, String } from "effect";
 import { Cookies, HttpServerResponse } from "effect/unstable/http";
 
-import { AstroContext } from "../../api/context";
-import { makeAstroEndpoint } from "../../api/handler";
-import { Repository } from "../../domain/model";
-import { SESSION_ID_COOKIE_NAME } from "./auth/_shared";
+import { AstroContext } from "../../api/context.ts";
+import { makeAstroEndpoint } from "../../api/handler.ts";
+import { SessionsRepository } from "../../domain/sessions.ts";
+import { SESSION_ID_COOKIE_NAME } from "./auth/_shared.ts";
 
 export const GET = Effect.gen(function* () {
     const Astro = yield* AstroContext;
@@ -24,7 +24,7 @@ export const GET = Effect.gen(function* () {
     });
 
     // Delete the session from the database
-    yield* Repository.use((repo) => repo.deleteSession(session.id));
+    yield* SessionsRepository.use((repo) => repo.deleteSession(session.id));
     return HttpServerResponse.redirect("/", {
         cookies: Cookies.fromIterable([deleteSessionCookie]),
     });

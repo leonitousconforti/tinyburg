@@ -5,8 +5,8 @@
 declare namespace App {
     interface Locals {
         account: import("effect/Option").Option<{
-            user: import("./domain/model").User;
-            session: import("./domain/model").Session;
+            user: import("./domain/models").User;
+            session: import("./domain/models").Session;
         }>;
     }
 }
