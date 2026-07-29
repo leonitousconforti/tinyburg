@@ -1,7 +1,7 @@
 import { Effect, Result, pipe } from "effect";
 import { Cookies, HttpServerResponse, Url, UrlParams } from "effect/unstable/http";
 
-import { makeAstroEndpoint, render500 } from "../../../../api/handler";
+import { makeAstroEndpoint } from "../../../../api/handler";
 import { randomStateGenerator, Sha256CodeChallenge } from "../_shared";
 import {
     authUrl,
@@ -54,4 +54,4 @@ export const GET = Effect.gen(function* () {
     return HttpServerResponse.redirect(maybeGoogleAuthorizationUrl, {
         cookies: Cookies.fromIterable([maybeStateCookie, maybeCodeVerifierCookie]),
     });
-}).pipe(render500, makeAstroEndpoint);
+}).pipe(makeAstroEndpoint);
