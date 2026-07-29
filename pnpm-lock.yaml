@@ -253,30 +253,6 @@ importers:
         specifier: 8.1.5
         version: 8.1.5(sass@1.102.0)
 
-  apps/treasury:
-    dependencies:
-      '@effect/platform-node':
-        specifier: 4.0.0-beta.102
-        version: 4.0.0-beta.102(effect@4.0.0-beta.102)(ioredis@5.11.1)
-      '@effect/sql-pg':
-        specifier: 4.0.0-beta.102
-        version: 4.0.0-beta.102(effect@4.0.0-beta.102)
-      '@tinyburg/nimblebit-sdk':
-        specifier: workspace:*
-        version: link:../../packages/nimblebit-sdk
-      '@tinyburg/tinytower-sdk':
-        specifier: workspace:*
-        version: link:../../packages/tinytower-sdk
-      '@tinyburg/trading-sdk':
-        specifier: workspace:*
-        version: link:../../packages/trading-sdk
-      effect:
-        specifier: 4.0.0-beta.102
-        version: 4.0.0-beta.102
-      ioredis:
-        specifier: 5.11.1
-        version: 5.11.1
-
   packages/bitprints: {}
 
   packages/doorman: {}
@@ -2588,8 +2564,8 @@ packages:
   effect@4.0.0-beta.102:
     resolution: {integrity: sha512-z8Y+Q76Hh/kjLFZrXu8tGn6e+tDsg45R+UHhxd190pXxD53OGwf/G/zDxXTkse4HJ5mobNZfitLfUCp4fMvu6w==}
 
-  electron-to-chromium@1.5.396:
-    resolution: {integrity: sha512-yHiw2Y3C3H9U6TMbOfoWK/BPreiOPXRfTWPBwQBoZG6/8TB6eOPnsy5oaRYuatR7Fw2SJ4kKforgufeo7fq0EQ==}
+  electron-to-chromium@1.5.397:
+    resolution: {integrity: sha512-khGTy9U9x02KEtsKM8vx5A62BsRmcOsIgDpWr1ImE32Ax8GxHGPHZf+Eu9H8zOOyHJnB0jTbseyTHbq2XCT8yw==}
 
   emmet@2.4.11:
     resolution: {integrity: sha512-23QPJB3moh/U9sT4rQzGgeyyGIrcM+GH5uVYg2C6wZIxAIJq7Ng3QLT79tl8FUwDXhyq9SusfknOrofAKqvgyQ==}
@@ -6646,7 +6622,7 @@ snapshots:
     dependencies:
       baseline-browser-mapping: 2.11.5
       caniuse-lite: 1.0.30001806
-      electron-to-chromium: 1.5.396
+      electron-to-chromium: 1.5.397
       node-releases: 2.0.51
       update-browserslist-db: 1.2.3(browserslist@4.28.7)
 
@@ -6947,7 +6923,7 @@ snapshots:
       uuid: 14.0.1
       yaml: 2.9.0
 
-  electron-to-chromium@1.5.396: {}
+  electron-to-chromium@1.5.397: {}
 
   emmet@2.4.11:
     dependencies:
