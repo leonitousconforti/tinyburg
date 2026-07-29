@@ -402,7 +402,7 @@ export const sync_pullSave = Effect.fn("sync_pullSave")(function* ({
 
     return {
         saveId: response.saveId,
-        data: Pako.inflate(response.data, { to: "string" }),
+        data: Pako.inflate(response.data, { toText: true }),
     };
 });
 
@@ -595,7 +595,7 @@ export const sync_pullSnapshot = Effect.fn("sync_pullSnapshot")(function* ({
 
     return {
         snapshotId: response.snapshotId,
-        data: Pako.inflate(response.data, { to: "string" }),
+        data: Pako.inflate(response.data, { toText: true }),
     };
 });
 
@@ -1126,7 +1126,7 @@ export const social_pullFriendTower = Effect.fn("social_pullFriendTower")(functi
 
     return {
         saveId: response.saveId,
-        data: Pako.inflate(response.data, { to: "string" }),
+        data: Pako.inflate(response.data, { toText: true }),
     };
 });
 
