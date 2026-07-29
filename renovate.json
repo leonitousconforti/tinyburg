@@ -54,13 +54,7 @@
         },
         {
             "description": "Group all Effect-TS packages into one PR",
-            "matchPackageNames": [
-                "effect",
-                "/^@effect//",
-                "!@effect/docgen",
-                "!@effect/build-utils",
-                "!@effect/language-service"
-            ],
+            "matchPackageNames": ["effect", "/^@effect//", "!@effect/build-utils", "!@effect/language-service"],
             "groupName": "Effect-TS packages",
             "addLabels": ["pnpm"]
         },
@@ -70,7 +64,6 @@
                 "oxfmt",
                 "oxlint",
                 "@effect/build-utils",
-                "@effect/docgen",
                 "@effect/language-service",
                 "typescript",
                 "tsx"

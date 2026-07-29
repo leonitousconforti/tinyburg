@@ -7,9 +7,10 @@
         "**/.tsbuildinfo",
         "**/generated/**",
         ".agents/**/*",
+        "**/index.ts",
         "repos/**",
         "**/CHANGELOG.md",
-        "packages/**/src/index.ts"
+        "!apps/**/index.ts"
     ],
     "sortPackageJson": true,
     "trailingComma": "es5",
