@@ -5,7 +5,6 @@ import type { APIRoute } from "astro";
 
 import { AstroContext } from "../../api/context.ts";
 import { AppLive, AppRuntime } from "../../api/runtime.ts";
-import { OidcApiLive } from "./oauth/_oidc.ts";
 
 const RouteMissFallback = HttpRouter.add(
     "*",
@@ -18,7 +17,7 @@ const RouteMissFallback = HttpRouter.add(
     })
 ).pipe(Layer.merge(HttpRouter.disableLogger));
 
-const ApiLive = Layer.mergeAll(OidcApiLive, Layer.empty).pipe(
+const ApiLive = Layer.mergeAll(Layer.empty, Layer.empty).pipe(
     Layer.merge(RouteMissFallback),
     Layer.provide(Layer.mergeAll(HttpPlatform.layer, Etag.layer)),
     Layer.provideMerge(AppLive)
