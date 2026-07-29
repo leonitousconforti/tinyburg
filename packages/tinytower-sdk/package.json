@@ -61,8 +61,8 @@
         "@types/pako": "2.0.4",
         "effect": "4.0.0-beta.102",
         "ioredis": "5.11.1",
-        "vite": "8.0.16",
-        "vitest": "4.1.8"
+        "vite": "8.1.5",
+        "vitest": "4.1.10"
     },
     "peerDependencies": {
         "effect": "4.0.0-beta.102"
