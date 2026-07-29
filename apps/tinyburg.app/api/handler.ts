@@ -39,7 +39,7 @@ export const makeAstroEndpoint = <
         const context = Context.make(AstroContext, apiContext);
         const response = await cachedHandler(apiContext.request, context);
         const cause = failures.get(apiContext.request);
-        if (cause !== undefined) throw Cause.squash(cause);
+        if (cause !== undefined) throw Cause.prettyErrors(cause)[0];
         return response;
     };
 };
