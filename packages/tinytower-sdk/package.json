@@ -53,19 +53,19 @@
     },
     "devDependencies": {
         "@bufbuild/protobuf": "2.13.0",
-        "@effect/platform-node": "4.0.0-beta.100",
-        "@effect/vitest": "4.0.0-beta.100",
-        "@efffrida/frida-tools": "0.0.45",
-        "@efffrida/gplayapi": "0.0.22",
+        "@effect/platform-node": "4.0.0-beta.102",
+        "@effect/vitest": "4.0.0-beta.102",
+        "@efffrida/frida-tools": "0.0.47",
+        "@efffrida/gplayapi": "0.0.24",
         "@tinyburg/insight": "workspace:*",
         "@types/pako": "2.0.4",
-        "effect": "4.0.0-beta.100",
+        "effect": "4.0.0-beta.102",
         "ioredis": "5.11.1",
         "vite": "8.0.16",
         "vitest": "4.1.8"
     },
     "peerDependencies": {
-        "effect": "4.0.0-beta.100"
+        "effect": "4.0.0-beta.102"
     },
     "tags": [
         "nimblebit",

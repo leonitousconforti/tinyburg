@@ -16,7 +16,6 @@ preferWorkspacePackages: true
 resolvePeersFromWorkspaceRoot: false
 
 overrides:
-  "@effect/platform-node-shared": "4.0.0-beta.100"
   "@effect/docgen>typescript": "6.0.3"
   "madge>typescript": "6.0.3"
 
@@ -36,3 +35,9 @@ packages:
   - examples/*
   - packages/*
   - scratchpad
+
+minimumReleaseAgeExclude:
+    - "effect-oidc"
+    - "@efffrida/*"
+    - "@effect/*"
+    - "effect"

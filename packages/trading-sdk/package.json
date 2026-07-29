@@ -44,6 +44,15 @@
         "check": "tsc -b tsconfig.json",
         "codegen": "build-utils prepare-v4"
     },
+    "dependencies": {
+        "@tinyburg/nimblebit-sdk": "workspace:^"
+    },
+    "devDependencies": {
+        "effect": "4.0.0-beta.102"
+    },
+    "peerDependencies": {
+        "effect": "4.0.0-beta.102"
+    },
     "tags": [
         "nimblebit",
         "tinytower",
