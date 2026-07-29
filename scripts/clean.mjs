@@ -2,7 +2,7 @@ import * as Fs from "node:fs";
 
 import * as Glob from "glob";
 
-const dirs = [".", ...Glob.sync("packages/*/")];
+const dirs = [".", ...Glob.sync("apps/*/"), ...Glob.sync("packages/*/")];
 dirs.forEach((pkg) => {
     const files = [".tsbuildinfo", "build", "dist", "temp", "coverage"];
 
