@@ -10,8 +10,8 @@
         "preview": "astro preview"
     },
     "dependencies": {
-        "@astrojs/check": "0.9.9",
-        "@astrojs/node": "10.1.4",
+        "@astrojs/check": "0.9.10",
+        "@astrojs/node": "11.0.2",
         "@astrojs/sitemap": "3.7.3",
         "@effect/platform-node": "4.0.0-beta.102",
         "@effect/sql-pg": "4.0.0-beta.102",
@@ -21,11 +21,11 @@
         "@tinyburg/nimblebit-sdk": "workspace:*",
         "@tinyburg/tinytower-sdk": "workspace:*",
         "@tinyburg/trading-sdk": "workspace:^",
-        "astro": "6.4.8",
+        "astro": "7.1.4",
         "effect": "4.0.0-beta.102",
         "effect-oidc": "0.0.2",
         "ioredis": "5.11.1",
-        "sass": "1.101.7",
+        "sass": "1.102.0",
         "tailwindcss": "4.3.3",
         "typescript": "6.0.3",
         "vite": "8.1.5"
