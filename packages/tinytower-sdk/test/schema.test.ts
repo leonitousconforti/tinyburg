@@ -7,7 +7,7 @@ import { NimblebitAuth, NimblebitConfig } from "@tinyburg/nimblebit-sdk";
 import { TinyTower } from "@tinyburg/tinytower-sdk";
 
 const DotEnvLayer = Path.Path.pipe(
-    Effect.flatMap((path) => path.fromFileUrl(new URL("../../.env", import.meta.url))),
+    Effect.flatMap((path) => path.fromFileUrl(new URL("../../../.env", import.meta.url))),
     Effect.flatMap((path) => ConfigProvider.fromDotEnv({ path })),
     ConfigProvider.layerAdd
 );
