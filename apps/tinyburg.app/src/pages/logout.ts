@@ -1,8 +1,8 @@
 import { Effect, Option, String } from "effect";
 import { Cookies, HttpServerResponse } from "effect/unstable/http";
 
+import { AstroContext } from "../../api/context";
 import { makeAstroEndpoint } from "../../api/handler";
-import { AstroContext } from "../../api/tags";
 import { Repository } from "../../domain/model";
 import { SESSION_ID_COOKIE_NAME } from "./auth/_shared";
 

@@ -3,8 +3,8 @@ import { HttpEffect, type HttpMiddleware, type HttpServerRequest, type HttpServe
 
 import type { APIRoute } from "astro";
 
-import { AstroContext } from "./context";
-import { AppRuntime } from "./runtime";
+import { AstroContext } from "./context.ts";
+import { AppRuntime } from "./runtime.ts";
 
 export const makeAstroEndpoint = <
     E,
