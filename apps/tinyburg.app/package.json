@@ -11,7 +11,7 @@
     },
     "dependencies": {
         "@astrojs/check": "0.9.10",
-        "@astrojs/node": "11.0.2",
+        "@astrojs/node": "11.0.3",
         "@astrojs/sitemap": "3.7.3",
         "@effect/platform-node": "4.0.0-beta.102",
         "@effect/sql-pg": "4.0.0-beta.102",
@@ -21,7 +21,7 @@
         "@tinyburg/nimblebit-sdk": "workspace:*",
         "@tinyburg/tinytower-sdk": "workspace:*",
         "@tinyburg/trading-sdk": "workspace:^",
-        "astro": "7.1.4",
+        "astro": "7.1.5",
         "effect": "4.0.0-beta.102",
         "effect-oidc": "0.0.2",
         "ioredis": "5.11.1",
