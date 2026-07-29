@@ -10,8 +10,8 @@ import {
 } from "effect/unstable/http";
 
 import { makeAstroEndpoint } from "../../../../api/handler";
-import { AuthRepository } from "../../../../domain/auth";
 import { SessionsRepository } from "../../../../domain/sessions";
+import { UsersRepository } from "../../../../domain/users";
 import { destinationFromState, OAuthResponseSchema, SESSION_ID_COOKIE_NAME } from "../_shared";
 import {
     GOOGLE_OAUTH_CODE_VERIFIER_COOKIE_NAME,
@@ -94,7 +94,7 @@ export const GET = Effect.gen(function* () {
     const providerAccountId = claims.sub;
     const avatarUrl = Option.fromNullishOr(claims.picture as string | undefined);
     const displayName = yield* Option.fromNullishOr(claims.name as string | undefined).pipe(Effect.fromOption);
-    const user = yield* AuthRepository.use((repo) =>
+    const user = yield* UsersRepository.use((repo) =>
         repo.upsertUserFromOAuth({
             provider: "google",
             displayName,
