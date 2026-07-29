@@ -1,4 +1,4 @@
-import { Effect, Encoding, Schema, SchemaGetter } from "effect";
+import { Schema, SchemaGetter } from "effect";
 
 const JoseHeaderSchema = Schema.Struct({
     kid: Schema.String,
@@ -56,14 +56,5 @@ export const OAuthResponseSchema = Schema.Struct({
     token_type: Schema.String,
     id_token: JwtSchema,
 });
-
-export const randomStateGenerator = () =>
-    Array.from(crypto.getRandomValues(new Uint8Array(48)), (byte) => byte.toString(16).padStart(2, "0")).join("");
-
-export const Sha256CodeChallenge = (verifier: string) =>
-    Effect.map(
-        Effect.promise(() => crypto.subtle.digest("SHA-256", new TextEncoder().encode(verifier))),
-        (hashBuffer: ArrayBuffer) => Encoding.encodeBase64Url(new Uint8Array(hashBuffer))
-    );
 
 export const SESSION_ID_COOKIE_NAME = "session_id";
