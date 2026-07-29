@@ -4,7 +4,7 @@ import { Model } from "effect/unstable/schema";
 import { PlayerAuthKeySchema, PlayerIdSchema } from "@tinyburg/nimblebit-sdk/NimblebitConfig";
 
 export class User extends Model.Class<User>("User")({
-    id: Schema.String.check(Schema.isUUID()).pipe(Model.GeneratedByDb),
+    id: Schema.String.check(Schema.isUUID()).pipe(Model.FieldExcept(["insert"])),
     createdAt: Model.DateTimeInsertFromDate,
     lastLoginAt: Model.DateTimeUpdateFromDate,
     displayName: Schema.String,
