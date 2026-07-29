@@ -1,0 +1,202 @@
+---
+import CloudsLayout from "../../layouts/CloudsLayout.astro";
+export const prerender = true;
+
+const site = Astro.site ?? new URL("https://tinyburg.app");
+
+const endpoints = [
+    { name: "JWKS", url: new URL("/.well-known/jwks.json", site).toString() },
+    { name: "Discovery", url: new URL("/.well-known/openid-configuration", site).toString() },
+    { name: "Authorization", url: new URL("/oauth/authorize", site).toString() },
+    { name: "Token", url: new URL("/oauth/token", site).toString() },
+    { name: "Userinfo", url: new URL("/oauth/userinfo", site).toString() },
+];
+
+const scopes = [
+    { name: "openid", description: "Confirm your Tinyburg identity" },
+    { name: "profile", description: "See your display name and avatar" },
+];
+
+const steps = [
+    {
+        title: "Log In to Tinyburg",
+        description: "You need a Tinyburg account to register applications",
+    },
+    {
+        title: "Register Your Application",
+        description: "Give it a name and your redirect uris, then grab your client id and secret",
+    },
+    {
+        title: "Point Your OIDC Library at Us",
+        description: "Most libraries only need the discovery url below to configure themselves",
+    },
+    {
+        title: "Players Sign In",
+        description: "They approve your app once and arrive back at your redirect uri",
+    },
+];
+---
+
+<CloudsLayout
+    title="Developers | Tinyburg"
+    description="Add Sign in with Tinyburg to your app. Register an OAuth application and let players sign in with their Tinyburg account through standard OpenID Connect."
+>
+    <div class="relative min-h-screen px-4 py-16 sm:px-8 sm:py-20">
+        <a
+            href="/"
+            class="bg-dark-blue/95 font-pixel shadow-pixel hover:shadow-pixel-hover fixed top-4 left-4 flex items-center gap-2 rounded-lg px-3 py-2 text-[0.5rem] text-white backdrop-blur-sm transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 sm:top-6 sm:left-6 sm:px-4 sm:py-2.5 sm:text-[0.6rem]"
+        >
+            <span aria-hidden="true">←</span>
+            <span>Back</span>
+        </a>
+
+        <article class="mx-auto max-w-3xl">
+            <header
+                class="border-gold to-sky-light/30 shadow-pixel rounded-t-2xl border-3 border-b-0 bg-linear-to-br from-white p-6 text-center sm:p-10"
+            >
+                <span class="mb-4 block text-6xl">🛠️</span>
+                <h1 class="font-pixel text-dark-blue mb-2 text-base leading-relaxed sm:text-lg md:text-xl">
+                    Tinyburg for Developers
+                </h1>
+                <p class="text-text-dark/80 text-xl">Let players bring their Tinyburg account to your app</p>
+            </header>
+
+            <div
+                class="border-gold bg-card-bg shadow-pixel-hover divide-y-2 divide-gray-100 rounded-b-2xl border-3 border-t-0 p-6 sm:p-10"
+            >
+                <section class="pb-8">
+                    <h2 class="font-pixel text-dark-blue mb-4 text-[0.55rem] leading-relaxed sm:text-[0.7rem]">
+                        Sign in with Tinyburg
+                    </h2>
+                    <p class="mb-4 text-xl leading-relaxed sm:text-xl">
+                        Tinyburg is an OpenID Connect provider. Building a companion tool, a Discord bot dashboard, or
+                        anything else for the TinyTower community? Register an OAuth application and players can sign in
+                        to it with the same account they use to trade, no new passwords required.
+                    </p>
+                    <div class="mt-6 grid grid-cols-1 gap-6 md:grid-cols-3">
+                        <div class="bg-sky-blue/10 border-sky-blue/20 rounded-xl border-2 p-6 text-center">
+                            <span class="mb-3 block text-4xl">🔐</span>
+                            <h3 class="font-pixel text-dark-blue mb-3 text-[0.65rem] leading-relaxed">Standard OIDC</h3>
+                            <p class="text-lg sm:text-xl">
+                                Authorization code flow with PKCE and ES256-signed id tokens. Any OpenID Connect client
+                                library works out of the box.
+                            </p>
+                        </div>
+                        <div class="bg-sky-blue/10 border-sky-blue/20 rounded-xl border-2 p-6 text-center">
+                            <span class="mb-3 block text-4xl">🪶</span>
+                            <h3 class="font-pixel text-dark-blue mb-3 text-[0.65rem] leading-relaxed">
+                                Minimal Scopes
+                            </h3>
+                            <p class="text-lg sm:text-xl">
+                                Apps only see a player's identity, display name, and avatar. Nothing else leaves
+                                Tinyburg.
+                            </p>
+                        </div>
+                        <div class="bg-sky-blue/10 border-sky-blue/20 rounded-xl border-2 p-6 text-center">
+                            <span class="mb-3 block text-4xl">🤝</span>
+                            <h3 class="font-pixel text-dark-blue mb-3 text-[0.65rem] leading-relaxed">
+                                Player Consent
+                            </h3>
+                            <p class="text-lg sm:text-xl">
+                                Players approve exactly what your app can see on a consent screen before any tokens are
+                                issued.
+                            </p>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="py-8">
+                    <h2 class="font-pixel text-dark-blue mb-4 text-[0.55rem] leading-relaxed sm:text-[0.7rem]">
+                        Getting Started
+                    </h2>
+                    <div class="mt-4 flex flex-col gap-4">
+                        {
+                            steps.map((step, index) => (
+                                <div class="bg-gold/10 border-gold/30 flex flex-col items-center gap-5 rounded-xl border-2 p-4 md:flex-row">
+                                    <span class="font-pixel bg-gold flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-base text-white">
+                                        {index + 1}
+                                    </span>
+                                    <div class="text-center md:text-left">
+                                        <h3 class="font-pixel text-dark-blue mb-1 text-[0.65rem]">{step.title}</h3>
+                                        <p class="text-lg opacity-85 sm:text-xl">{step.description}</p>
+                                    </div>
+                                </div>
+                            ))
+                        }
+                    </div>
+                    <p class="mt-6 text-xl leading-relaxed sm:text-xl">
+                        Redirect uris must use https, except for localhost while you develop. Client secrets are shown
+                        once at registration and stored hashed, so keep yours somewhere safe.
+                    </p>
+                </section>
+
+                <section class="py-8">
+                    <h2 class="font-pixel text-dark-blue mb-4 text-[0.55rem] leading-relaxed sm:text-[0.7rem]">
+                        Endpoints
+                    </h2>
+                    <p class="mb-4 text-xl leading-relaxed sm:text-xl">
+                        Everything below is also published in the discovery document, so most setups only ever need the
+                        first url.
+                    </p>
+                    <div class="flex flex-col gap-3">
+                        {
+                            endpoints.map((endpoint) => (
+                                <div class="rounded-lg border-2 border-gray-200 bg-white/50 p-4">
+                                    <div class="font-pixel text-dark-blue mb-2 text-[0.55rem]">{endpoint.name}</div>
+                                    <code class="font-mono text-base break-all text-gray-600 sm:text-lg">
+                                        {endpoint.url}
+                                    </code>
+                                </div>
+                            ))
+                        }
+                    </div>
+                </section>
+
+                <section class="py-8">
+                    <h2 class="font-pixel text-dark-blue mb-4 text-[0.55rem] leading-relaxed sm:text-[0.7rem]">
+                        Scopes
+                    </h2>
+                    <div class="flex flex-col gap-3">
+                        {
+                            scopes.map((scope) => (
+                                <div class="flex flex-col gap-1 rounded-lg border-2 border-gray-200 bg-white/50 p-4 sm:flex-row sm:items-center sm:gap-4">
+                                    <code class="font-mono text-lg text-gray-800 sm:text-xl">{scope.name}</code>
+                                    <span class="text-lg text-gray-600 sm:text-xl">{scope.description}</span>
+                                </div>
+                            ))
+                        }
+                    </div>
+                </section>
+
+                <section class="pt-8">
+                    <h2 class="font-pixel text-dark-blue mb-4 text-[0.55rem] leading-relaxed sm:text-[0.7rem]">
+                        Ready to Build?
+                    </h2>
+                    <p class="mb-4 text-xl leading-relaxed sm:text-xl">
+                        Register your first application and start signing players in. Questions or stuck on something?
+                        Ask in the{" "}
+                        <a
+                            href="https://discord.gg/tinyburg"
+                            class="text-sky-dark decoration-sky-dark/30 hover:decoration-sky-dark underline decoration-2 underline-offset-2 transition-colors"
+                            >Tinyburg Discord</a
+                        > and we'll help you out.
+                    </p>
+                    <div class="mt-6 flex flex-col gap-4 md:flex-row">
+                        <a
+                            href="/developers/apps"
+                            class="font-pixel bg-gold shadow-pixel hover:shadow-pixel-hover flex items-center justify-center gap-2 rounded-lg px-5 py-4 text-[0.7rem] text-gray-800 transition-all hover:-translate-x-0.5 hover:-translate-y-0.5"
+                        >
+                            Your Applications
+                        </a>
+                        <a
+                            href={endpoints[0]?.url}
+                            class="font-pixel bg-dark-blue/95 shadow-pixel hover:shadow-pixel-hover flex items-center justify-center gap-2 rounded-lg px-5 py-4 text-[0.7rem] text-white transition-all hover:-translate-x-0.5 hover:-translate-y-0.5"
+                        >
+                            Discovery Document
+                        </a>
+                    </div>
+                </section>
+            </div>
+        </article>
+    </div>
+</CloudsLayout>
