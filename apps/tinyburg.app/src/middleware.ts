@@ -2,7 +2,7 @@ import { Option, Effect } from "effect";
 
 import type { APIContext, MiddlewareNext } from "astro";
 
-import { AppRuntime } from "../api/runtime.ts";
+import { AppRuntime } from "../app/runtime.ts";
 import { SessionsRepository } from "../domain/sessions.ts";
 
 export const onRequest = async (context: APIContext, next: MiddlewareNext): Promise<Response> => {
@@ -16,9 +16,10 @@ export const onRequest = async (context: APIContext, next: MiddlewareNext): Prom
     const sessionId = context.cookies.get("session_id")?.value;
     if (sessionId === undefined) return await next();
 
-    // Lookup user by session
+    // Lookup user by session, treating errors as signed out
     context.locals.account = await SessionsRepository.pipe(
         Effect.flatMap((repo) => repo.findUserBySession(sessionId)),
+        Effect.catch(() => Effect.succeed(Option.none())),
         AppRuntime.runPromise
     );
 
