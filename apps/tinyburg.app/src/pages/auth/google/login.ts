@@ -1,8 +1,8 @@
 import { Effect, Result, pipe } from "effect";
 import { Cookies, HttpServerRequest, HttpServerResponse, Url, UrlParams } from "effect/unstable/http";
 
-import { randomStateGenerator, Sha256CodeChallenge } from "../../../../api/crypto";
-import { makeAstroEndpoint } from "../../../../api/handler";
+import { randomStateGenerator, Sha256CodeChallenge } from "../../../../app/crypto";
+import { makeAstroEndpoint } from "../../../../app/handler";
 import { stateWithReturnTo } from "../_shared";
 import {
     authUrl,

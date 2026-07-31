@@ -9,7 +9,7 @@ import {
     UrlParams,
 } from "effect/unstable/http";
 
-import { makeAstroEndpoint } from "../../../../api/handler";
+import { makeAstroEndpoint } from "../../../../app/handler";
 import { SessionsRepository } from "../../../../domain/sessions";
 import { UsersRepository } from "../../../../domain/users";
 import { destinationFromState, OAuthResponseSchema, SESSION_ID_COOKIE_NAME } from "../_shared";
