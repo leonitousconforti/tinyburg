@@ -3,8 +3,8 @@ import { Etag, HttpPlatform, HttpRouter, HttpServerResponse } from "effect/unsta
 
 import type { APIRoute } from "astro";
 
-import { AstroContext } from "../../api/context.ts";
-import { AppLive, AppRuntime } from "../../api/runtime.ts";
+import { AstroContext } from "../../app/context.ts";
+import { AppLive, AppRuntime } from "../../app/runtime.ts";
 
 const RouteMissFallback = HttpRouter.add(
     "*",
