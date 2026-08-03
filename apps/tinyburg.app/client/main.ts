@@ -3,13 +3,14 @@ import { Effect, Match, Option, Schema as S } from "effect";
 import type { Document, Html, HtmlBuilder } from "foldkit/html";
 
 import { Command, Dom, Navigation, type Runtime, Url } from "foldkit";
+import { createLazy } from "foldkit/html";
 import { m } from "foldkit/message";
+import { evo } from "foldkit/struct";
 
 import { postLoginDestination } from "../shared/returnTo.ts";
 import {
-    AppsIdle,
-    AppsLoading,
-    AppsState,
+    type Api,
+    DeveloperApps,
     FetchDeveloperApps,
     FetchMe,
     GotDeveloperApps,
@@ -36,7 +37,7 @@ import { clouds } from "./ui/chrome.ts";
 export const Model = S.Struct({
     route: AppRoute,
     session: SessionState,
-    developerApps: AppsState,
+    developerApps: DeveloperApps.schema,
     wizard: WizardModel,
 });
 export type Model = typeof Model.Type;
@@ -57,36 +58,30 @@ export const Message = S.Union([
 ]);
 export type Message = typeof Message.Type;
 
-type Step = readonly [Model, ReadonlyArray<Command.Command<Message>>];
+type Step = readonly [Model, ReadonlyArray<Command.Command<Message, never, Api>>];
 
 // COMMAND
 
-const NavigateInternal = Command.define("NavigateInternal", {
-    args: { url: S.String },
+const Navigate = Command.define("Navigate", {
+    args: { url: S.String, replace: S.Boolean },
     messages: [CompletedNavigation],
-    execute: ({ url }) => Navigation.pushUrl(url).pipe(Effect.as(CompletedNavigation())),
-});
-
-const ReplaceUrl = Command.define("ReplaceUrl", {
-    args: { url: S.String },
-    messages: [CompletedNavigation],
-    execute: ({ url }) => Navigation.replaceUrl(url).pipe(Effect.as(CompletedNavigation())),
+    execute: ({ replace, url }) =>
+        Effect.gen(function* () {
+            yield* replace ? Navigation.replaceUrl(url) : Navigation.pushUrl(url);
+            // Land like a fresh page load would: at the hash target when there
+            // is one, otherwise at the top.
+            const hash = new URL(url, window.location.origin).hash;
+            yield* hash === ""
+                ? Effect.sync(() => window.scrollTo(0, 0))
+                : Dom.scrollIntoView(hash).pipe(Effect.catch(() => Effect.void));
+            return CompletedNavigation();
+        }),
 });
 
 const LoadExternal = Command.define("LoadExternal", {
     args: { href: S.String },
     messages: [CompletedNavigation],
     execute: ({ href }) => Navigation.load(href).pipe(Effect.as(CompletedNavigation())),
-});
-
-const ScrollTo = Command.define("ScrollTo", {
-    args: { selector: S.String },
-    messages: [CompletedNavigation],
-    execute: ({ selector }) =>
-        Dom.scrollIntoView(selector).pipe(
-            Effect.as(CompletedNavigation()),
-            Effect.catch(() => Effect.succeed(CompletedNavigation()))
-        ),
 });
 
 // Paths that belong to the server, not the SPA router: they must trigger a
@@ -96,6 +91,9 @@ const isServerPath = (pathname: string): boolean =>
     pathname.startsWith("/auth/") ||
     pathname.startsWith("/oauth/") ||
     pathname.startsWith("/.well-known/");
+
+const requiresSession = (route: AppRoute): boolean =>
+    route._tag === "TowerMe" || route._tag === "TowerLink" || route._tag === "DeveloperApps";
 
 // UPDATE
 
@@ -110,21 +108,24 @@ const enterRoute = (model: Model): Step => {
     switch (route._tag) {
         case "Login": {
             if (session._tag === "SignedIn") {
-                return [model, [ReplaceUrl({ url: postLoginDestination(Option.getOrNull(route.returnTo)) })]];
+                return [
+                    model,
+                    [Navigate({ url: postLoginDestination(Option.getOrNull(route.returnTo)), replace: true })],
+                ];
             }
             return [model, []];
         }
         case "TowerMe":
         case "TowerLink": {
-            if (session._tag === "SignedOut") return [model, [ReplaceUrl({ url: "/login" })]];
+            if (session._tag === "SignedOut") return [model, [Navigate({ url: "/login", replace: true })]];
             return [model, []];
         }
         case "DeveloperApps": {
             if (session._tag === "SignedOut") {
-                return [model, [ReplaceUrl({ url: loginHref(Option.some("/developers/apps")) })]];
+                return [model, [Navigate({ url: loginHref(Option.some("/developers/apps")), replace: true })]];
             }
-            if (session._tag === "SignedIn" && model.developerApps._tag === "AppsIdle") {
-                return [{ ...model, developerApps: AppsLoading() }, [FetchDeveloperApps()]];
+            if (session._tag === "SignedIn" && model.developerApps._tag === "Idle") {
+                return [evo(model, { developerApps: () => DeveloperApps.Loading() }), [FetchDeveloperApps()]];
             }
             return [model, []];
         }
@@ -139,10 +140,10 @@ const isWizardMessage = S.is(WizardMessage);
 export const update = (model: Model, message: Message): Step => {
     if (isWizardMessage(message)) {
         const [wizard, wizardCommands] = updateWizard(model.wizard, message);
-        const commands: Array<Command.Command<Message>> = [...wizardCommands];
+        const commands: Array<Command.Command<Message, never, Api>> = [...wizardCommands];
         // The old page did window.location.assign("/towers/@me") after linking
-        if (message._tag === "SucceededVerify") commands.push(NavigateInternal({ url: "/towers/@me" }));
-        return [{ ...model, wizard }, commands];
+        if (message._tag === "SucceededVerify") commands.push(Navigate({ url: "/towers/@me", replace: false }));
+        return [evo(model, { wizard: () => wizard }), commands];
     }
 
     return Match.value(message).pipe(
@@ -152,29 +153,30 @@ export const update = (model: Model, message: Message): Step => {
                 Match.value(request).pipe(
                     Match.withReturnType<Step>(),
                     Match.tagsExhaustive({
-                        Internal: ({ url }) => {
-                            if (isServerPath(url.pathname)) return [model, [LoadExternal({ href: Url.toString(url) })]];
-                            const commands: Array<Command.Command<Message>> = [
-                                NavigateInternal({ url: Url.toString(url) }),
-                            ];
-                            if (Option.isSome(url.hash)) commands.push(ScrollTo({ selector: url.hash.value }));
-                            return [model, commands];
-                        },
+                        Internal: ({ url }) =>
+                            isServerPath(url.pathname)
+                                ? [model, [LoadExternal({ href: Url.toString(url) })]]
+                                : [model, [Navigate({ url: Url.toString(url), replace: false })]],
                         External: ({ href }) => [model, [LoadExternal({ href })]],
                     })
                 ),
             ChangedUrl: ({ url }) => {
                 const route = urlToAppRoute(url);
-                return enterRoute({
-                    ...model,
-                    route,
-                    // Page-scoped state resets on entry, like a fresh server render did
-                    wizard: route._tag === "TowerLink" ? initialWizard : model.wizard,
-                    developerApps: route._tag === "DeveloperApps" ? AppsIdle() : model.developerApps,
-                });
+                const [next, commands] = enterRoute(
+                    evo(model, {
+                        route: () => route,
+                        // Page-scoped state resets on entry, like a fresh server render did
+                        wizard: (wizard) => (route._tag === "TowerLink" ? initialWizard : wizard),
+                        developerApps: (apps) => (route._tag === "DeveloperApps" ? DeveloperApps.Idle() : apps),
+                    })
+                );
+                // Re-check the session when entering an account page, like each
+                // server render did; a signed-out answer re-runs the gating.
+                const refresh = requiresSession(route) && next.session._tag === "SignedIn" ? [FetchMe()] : [];
+                return [next, [...commands, ...refresh]];
             },
-            GotSession: ({ session }) => enterRoute({ ...model, session }),
-            GotDeveloperApps: ({ apps }) => [{ ...model, developerApps: apps }, []],
+            GotSession: ({ session }) => enterRoute(evo(model, { session: () => session })),
+            GotDeveloperApps: ({ apps }) => [evo(model, { developerApps: () => apps }), []],
             CompletedNavigation: () => [model, []],
         })
     );
@@ -182,11 +184,11 @@ export const update = (model: Model, message: Message): Step => {
 
 // INIT
 
-export const init: Runtime.RoutingApplicationInit<Model, Message> = (url) => {
+export const init: Runtime.RoutingApplicationInit<Model, Message, void, Api> = (url) => {
     const [model, commands] = enterRoute({
         route: urlToAppRoute(url),
         session: SessionUnknown(),
-        developerApps: AppsIdle(),
+        developerApps: DeveloperApps.Idle(),
         wizard: initialWizard,
     });
     return [model, [FetchMe(), ...commands]];
@@ -212,23 +214,31 @@ const routeTitle = (route: AppRoute): string =>
         })
     );
 
+const lazyHome = createLazy();
+const lazyAbout = createLazy();
+const lazyPrivacy = createLazy();
+const lazyTerms = createLazy();
+const lazySponsors = createLazy();
+const lazyDevelopers = createLazy();
+const lazyNotFound = createLazy();
+
 const pageView = (model: Model, h: HtmlBuilder<Message>): Html =>
     Match.value(model.route).pipe(
         Match.withReturnType<Html>(),
         Match.tagsExhaustive({
-            Home: () => homeView(h),
-            About: () => aboutView(h),
+            Home: () => lazyHome(homeView, [h]),
+            About: () => lazyAbout(aboutView, [h]),
             Login: ({ returnTo }) => loginView(h, returnTo),
-            Privacy: () => privacyView(h),
-            Terms: () => termsView(h),
-            Sponsors: () => sponsorsView(h),
-            Developers: () => developersView(h),
+            Privacy: () => lazyPrivacy(privacyView, [h]),
+            Terms: () => lazyTerms(termsView, [h]),
+            Sponsors: () => lazySponsors(sponsorsView, [h]),
+            Developers: () => lazyDevelopers(developersView, [h]),
             DeveloperApps: () => developerAppsView(h, model.developerApps),
             // Account pages wait for the session before rendering; a signed-out
             // visitor is redirected by enterRoute in the meantime.
             TowerMe: () => (model.session._tag === "SignedIn" ? towerMeView(h, model.session.user) : h.empty),
             TowerLink: () => (model.session._tag === "SignedIn" ? towerLinkView(h, model.wizard) : h.empty),
-            NotFound: () => notFoundView(h),
+            NotFound: () => lazyNotFound(notFoundView, [h]),
         })
     );
 

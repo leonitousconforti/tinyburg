@@ -5,6 +5,7 @@ import type { Html, HtmlBuilder } from "foldkit/html";
 
 import { Command, Dom } from "foldkit";
 import { m } from "foldkit/message";
+import { evo } from "foldkit/struct";
 
 import { appBackLink } from "../ui/chrome.ts";
 
@@ -144,41 +145,40 @@ export const updateWizard = (wizard: WizardModel, message: WizardMessage): Wizar
         Match.withReturnType<WizardStep>(),
         Match.tagsExhaustive({
             ChangedFriendCode: ({ value }) => [
-                { ...wizard, friendCode: value.toUpperCase().replaceAll(/[^0-9A-Z]/g, "") },
+                evo(wizard, { friendCode: () => value.toUpperCase().replaceAll(/[^0-9A-Z]/g, "") }),
                 [],
             ],
-            ChangedEmail: ({ value }) => [{ ...wizard, email: value }, []],
-            ChangedVerificationCode: ({ value }) => [{ ...wizard, verificationCode: value }, []],
+            ChangedEmail: ({ value }) => [evo(wizard, { email: () => value }), []],
+            ChangedVerificationCode: ({ value }) => [evo(wizard, { verificationCode: () => value }), []],
             SubmittedLinkForm: () => [
-                { ...wizard, submitting: true, linkError: Option.none() },
+                evo(wizard, { submitting: () => true, linkError: Option.none }),
                 [RequestCode({ friendCode: wizard.friendCode.trim(), email: wizard.email.trim() })],
             ],
             SucceededRequestCode: ({ email, friendCode }) => [
-                {
-                    ...wizard,
-                    submitting: false,
-                    step: "verify",
-                    entered: "forward",
-                    pendingFriendCode: friendCode,
-                    pendingEmail: email,
-                    verificationCode: "",
-                    verifyError: Option.none(),
-                    resend: "idle",
-                },
+                evo(wizard, {
+                    submitting: () => false,
+                    step: () => "verify" as const,
+                    entered: () => "forward" as const,
+                    pendingFriendCode: () => friendCode,
+                    pendingEmail: () => email,
+                    verificationCode: () => "",
+                    verifyError: Option.none,
+                    resend: () => "idle" as const,
+                }),
                 [FocusInput({ selector: "#verification-code-input" })],
             ],
             FailedRequestCode: () => [
-                {
-                    ...wizard,
-                    submitting: false,
-                    linkError: Option.some(
-                        "We couldn't reach your tower. Please double-check your friend code and try again."
-                    ),
-                },
+                evo(wizard, {
+                    submitting: () => false,
+                    linkError: () =>
+                        Option.some(
+                            "We couldn't reach your tower. Please double-check your friend code and try again."
+                        ),
+                }),
                 [],
             ],
             SubmittedVerifyForm: () => [
-                { ...wizard, submitting: true, verifyError: Option.none() },
+                evo(wizard, { submitting: () => true, verifyError: Option.none }),
                 [
                     VerifyAndLink({
                         friendCode: wizard.pendingFriendCode,
@@ -186,35 +186,32 @@ export const updateWizard = (wizard: WizardModel, message: WizardMessage): Wizar
                     }),
                 ],
             ],
-            SucceededVerify: () => [{ ...wizard, verified: true }, []],
+            SucceededVerify: () => [evo(wizard, { verified: () => true }), []],
             FailedVerify: () => [
-                {
-                    ...wizard,
-                    submitting: false,
-                    verifyError: Option.some(
-                        "That code didn't work. Please check it and try again, or resend the email."
-                    ),
-                },
+                evo(wizard, {
+                    submitting: () => false,
+                    verifyError: () =>
+                        Option.some("That code didn't work. Please check it and try again, or resend the email."),
+                }),
                 [],
             ],
             ClickedBack: () => [
-                { ...wizard, step: "link", entered: "backward" },
+                evo(wizard, { step: () => "link" as const, entered: () => "backward" as const }),
                 [FocusInput({ selector: "#friend-code-input" })],
             ],
             ClickedResend: () => [
-                { ...wizard, resend: "sending" },
+                evo(wizard, { resend: () => "sending" as const }),
                 [ResendCode({ friendCode: wizard.pendingFriendCode, email: wizard.pendingEmail })],
             ],
-            SucceededResend: () => [{ ...wizard, resend: "sent" }, [ResendCooldown()]],
+            SucceededResend: () => [evo(wizard, { resend: () => "sent" as const }), [ResendCooldown()]],
             FailedResend: () => [
-                {
-                    ...wizard,
-                    resend: "cooldown",
-                    verifyError: Option.some("We couldn't resend the email. Please try again in a moment."),
-                },
+                evo(wizard, {
+                    resend: () => "cooldown" as const,
+                    verifyError: () => Option.some("We couldn't resend the email. Please try again in a moment."),
+                }),
                 [ResendCooldown()],
             ],
-            CompletedResendCooldown: () => [{ ...wizard, resend: "idle" }, []],
+            CompletedResendCooldown: () => [evo(wizard, { resend: () => "idle" as const }), []],
             CompletedStepFocus: () => [wizard, []],
         })
     );
