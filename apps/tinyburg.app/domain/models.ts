@@ -47,7 +47,9 @@ export class OAuthClient extends Model.Class<OAuthClient>("OAuthClient")({
     id: Schema.String.check(Schema.isUUID()).pipe(Model.FieldExcept(["insert"])),
     ownerUserId: Schema.String.check(Schema.isUUID()),
     name: Schema.String,
-    secretHash: Schema.String,
+    // Confidential clients store a hashed secret; public clients (SPAs,
+    // native apps) have none and rely on PKCE alone.
+    secretHash: Schema.OptionFromNullishOr(Schema.String, { onNoneEncoding: null }),
     redirectUris: Schema.Array(Schema.String),
     scope: Schema.String,
     createdAt: Model.DateTimeInsertFromDate,

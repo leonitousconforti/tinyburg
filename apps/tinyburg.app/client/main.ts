@@ -19,6 +19,15 @@ import {
     SessionUnknown,
 } from "./backend.ts";
 import { aboutView } from "./pages/about.ts";
+import {
+    ConsentMessage,
+    ConsentModel,
+    ConsentPromptData,
+    consentFor,
+    consentView,
+    FetchConsentPrompt,
+    updateConsent,
+} from "./pages/consent.ts";
 import { developerAppsView } from "./pages/developerApps.ts";
 import { developersView } from "./pages/developers.ts";
 import { homeView } from "./pages/home.ts";
@@ -29,7 +38,7 @@ import { sponsorsView } from "./pages/sponsors.ts";
 import { termsView } from "./pages/terms.ts";
 import { initialWizard, towerLinkView, updateWizard, WizardMessage, WizardModel } from "./pages/towerLink.ts";
 import { towerMeView } from "./pages/towerMe.ts";
-import { AppRoute, loginHref, urlToAppRoute } from "./routes.ts";
+import { AppRoute, consentRouter, loginHref, urlToAppRoute } from "./routes.ts";
 import { clouds } from "./ui/chrome.ts";
 
 // MODEL
@@ -39,6 +48,7 @@ export const Model = S.Struct({
     session: SessionState,
     developerApps: DeveloperApps.schema,
     wizard: WizardModel,
+    consent: ConsentModel,
 });
 export type Model = typeof Model.Type;
 
@@ -55,6 +65,7 @@ export const Message = S.Union([
     GotSession,
     GotDeveloperApps,
     WizardMessage,
+    ConsentMessage,
 ]);
 export type Message = typeof Message.Type;
 
@@ -93,7 +104,20 @@ const isServerPath = (pathname: string): boolean =>
     pathname.startsWith("/.well-known/");
 
 const requiresSession = (route: AppRoute): boolean =>
-    route._tag === "TowerMe" || route._tag === "TowerLink" || route._tag === "DeveloperApps";
+    route._tag === "TowerMe" ||
+    route._tag === "TowerLink" ||
+    route._tag === "DeveloperApps" ||
+    route._tag === "Consent";
+
+/** Page-scoped state resets when its route is entered, like a fresh server
+ *  render did. Used by init and every url change. */
+const resetPageState = (model: Model, route: AppRoute): Model =>
+    evo(model, {
+        route: () => route,
+        wizard: (wizard) => (route._tag === "TowerLink" ? initialWizard : wizard),
+        developerApps: (apps) => (route._tag === "DeveloperApps" ? DeveloperApps.Idle() : apps),
+        consent: (consent) => (route._tag === "Consent" ? consentFor(route.request) : consent),
+    });
 
 // UPDATE
 
@@ -129,6 +153,42 @@ const enterRoute = (model: Model): Step => {
             }
             return [model, []];
         }
+        case "Consent": {
+            if (session._tag === "SignedOut") {
+                return [
+                    model,
+                    [
+                        Navigate({
+                            url: loginHref(Option.some(consentRouter({ request: route.request }))),
+                            replace: true,
+                        }),
+                    ],
+                ];
+            }
+            if (session._tag === "SignedIn" && model.consent.prompt._tag === "Idle") {
+                return Option.match(model.consent.requestId, {
+                    onNone: () => [
+                        evo(model, {
+                            consent: (consent) =>
+                                evo(consent, {
+                                    prompt: () =>
+                                        ConsentPromptData.Failure({
+                                            error: "This authorization link is missing its request. Head back to the app you came from and try again.",
+                                        }),
+                                }),
+                        }),
+                        [],
+                    ],
+                    onSome: (requestId) => [
+                        evo(model, {
+                            consent: (consent) => evo(consent, { prompt: () => ConsentPromptData.Loading() }),
+                        }),
+                        [FetchConsentPrompt({ requestId })],
+                    ],
+                });
+            }
+            return [model, []];
+        }
         default: {
             return [model, []];
         }
@@ -136,6 +196,7 @@ const enterRoute = (model: Model): Step => {
 };
 
 const isWizardMessage = S.is(WizardMessage);
+const isConsentMessage = S.is(ConsentMessage);
 
 export const update = (model: Model, message: Message): Step => {
     if (isWizardMessage(message)) {
@@ -144,6 +205,14 @@ export const update = (model: Model, message: Message): Step => {
         // The old page did window.location.assign("/towers/@me") after linking
         if (message._tag === "SucceededVerify") commands.push(Navigate({ url: "/towers/@me", replace: false }));
         return [evo(model, { wizard: () => wizard }), commands];
+    }
+
+    if (isConsentMessage(message)) {
+        const [consent, consentCommands] = updateConsent(model.consent, message);
+        const commands: Array<Command.Command<Message, never, Api>> = [...consentCommands];
+        // Decisions leave the SPA entirely, back to the client's redirect uri
+        if (message._tag === "GotConsentRedirect") commands.push(LoadExternal({ href: message.redirectTo }));
+        return [evo(model, { consent: () => consent }), commands];
     }
 
     return Match.value(message).pipe(
@@ -162,14 +231,7 @@ export const update = (model: Model, message: Message): Step => {
                 ),
             ChangedUrl: ({ url }) => {
                 const route = urlToAppRoute(url);
-                const [next, commands] = enterRoute(
-                    evo(model, {
-                        route: () => route,
-                        // Page-scoped state resets on entry, like a fresh server render did
-                        wizard: (wizard) => (route._tag === "TowerLink" ? initialWizard : wizard),
-                        developerApps: (apps) => (route._tag === "DeveloperApps" ? DeveloperApps.Idle() : apps),
-                    })
-                );
+                const [next, commands] = enterRoute(resetPageState(model, route));
                 // Re-check the session when entering an account page, like each
                 // server render did; a signed-out answer re-runs the gating.
                 const refresh = requiresSession(route) && next.session._tag === "SignedIn" ? [FetchMe()] : [];
@@ -185,12 +247,19 @@ export const update = (model: Model, message: Message): Step => {
 // INIT
 
 export const init: Runtime.RoutingApplicationInit<Model, Message, void, Api> = (url) => {
-    const [model, commands] = enterRoute({
-        route: urlToAppRoute(url),
-        session: SessionUnknown(),
-        developerApps: DeveloperApps.Idle(),
-        wizard: initialWizard,
-    });
+    const route = urlToAppRoute(url);
+    const [model, commands] = enterRoute(
+        resetPageState(
+            {
+                route,
+                session: SessionUnknown(),
+                developerApps: DeveloperApps.Idle(),
+                wizard: initialWizard,
+                consent: consentFor(Option.none()),
+            },
+            route
+        )
+    );
     return [model, [FetchMe(), ...commands]];
 };
 
@@ -210,6 +279,7 @@ const routeTitle = (route: AppRoute): string =>
             DeveloperApps: () => "OAuth Applications | Tinyburg",
             TowerMe: () => "My Towers | Tinyburg",
             TowerLink: () => "Link Your Tower | Tinyburg",
+            Consent: () => "Authorize | Tinyburg",
             NotFound: () => "Page Not Found | Tinyburg",
         })
     );
@@ -238,6 +308,7 @@ const pageView = (model: Model, h: HtmlBuilder<Message>): Html =>
             // visitor is redirected by enterRoute in the meantime.
             TowerMe: () => (model.session._tag === "SignedIn" ? towerMeView(h, model.session.user) : h.empty),
             TowerLink: () => (model.session._tag === "SignedIn" ? towerLinkView(h, model.wizard) : h.empty),
+            Consent: () => (model.session._tag === "SignedOut" ? h.empty : consentView(h, model.consent)),
             NotFound: () => lazyNotFound(notFoundView, [h]),
         })
     );

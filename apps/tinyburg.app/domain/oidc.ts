@@ -68,6 +68,24 @@ export class OIDCRepository extends Context.Service<OIDCRepository>()("@tinyburg
                 DO UPDATE SET scope = EXCLUDED.scope, granted_at = NOW()
             `.pipe(Effect.asVoid);
 
+        // Housekeeping rides along on writes so the denylist stays bounded
+        // without a scheduled job.
+        const revokeToken = (options: { jti: string; expiresAt: Date }) =>
+            Effect.andThen(
+                sql`DELETE FROM revoked_tokens WHERE expires_at < NOW()`,
+                sql`
+                    INSERT INTO revoked_tokens (jti, expires_at)
+                    VALUES (${options.jti}, ${options.expiresAt})
+                    ON CONFLICT (jti) DO NOTHING
+                `
+            ).pipe(Effect.asVoid);
+
+        const isTokenRevoked = (jti: string) =>
+            Effect.map(
+                sql`SELECT 1 FROM revoked_tokens WHERE jti = ${jti} AND expires_at > NOW()`,
+                (rows) => rows.length > 0
+            );
+
         return {
             createAuthorizationRequest,
             findAuthorizationRequest,
@@ -76,6 +94,8 @@ export class OIDCRepository extends Context.Service<OIDCRepository>()("@tinyburg
             consumeAuthorizationCode,
             findConsent,
             upsertConsent,
+            revokeToken,
+            isTokenRevoked,
         };
     }),
 }) {

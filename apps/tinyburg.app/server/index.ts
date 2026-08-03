@@ -12,9 +12,10 @@ import { SessionsRepository } from "../domain/sessions.ts";
 import { UsersRepository } from "../domain/users.ts";
 import { ApiLive } from "./routes/api.ts";
 import { OAuthRoutesLive } from "./routes/oauth.ts";
+import { OidcProviderLive } from "./routes/oidc.ts";
 import { StaticRoutesLive } from "./routes/static.ts";
 
-const AllRoutes = Layer.mergeAll(ApiLive, OAuthRoutesLive, StaticRoutesLive);
+const AllRoutes = Layer.mergeAll(ApiLive, OAuthRoutesLive, OidcProviderLive, StaticRoutesLive);
 
 const SqlLive = PgClient.layerConfig({
     url: Config.redacted("DATABASE_URL"),
