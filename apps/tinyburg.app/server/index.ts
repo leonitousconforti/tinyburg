@@ -11,7 +11,7 @@ import { OIDCRepository } from "../domain/oidc.ts";
 import { SessionsRepository } from "../domain/sessions.ts";
 import { UsersRepository } from "../domain/users.ts";
 import { ApiLive } from "./routes/api.ts";
-import { OAuthRoutesLive } from "./routes/oauth.ts";
+import { OAuthRoutesLive } from "./routes/auth.ts";
 import { OidcProviderLive } from "./routes/oidc.ts";
 import { StaticRoutesLive } from "./routes/static.ts";
 

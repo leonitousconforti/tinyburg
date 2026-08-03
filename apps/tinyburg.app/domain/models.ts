@@ -18,11 +18,9 @@ export class OAuthAccount extends Model.Class<OAuthAccount>("OAuthAccount")({
     createdAt: Model.DateTimeInsertFromDate,
 }) {}
 
-export class Session extends Model.Class<Session>("Session")({
-    id: Schema.String.check(Schema.isUUID()).pipe(Model.FieldExcept(["insert"])),
-    userId: Schema.String.check(Schema.isUUID()),
-    createdAt: Model.DateTimeInsertFromDate,
+export class RevokedToken extends Model.Class<RevokedToken>("RevokedToken")({
     expiresAt: Model.DateTimeInsertFromDate,
+    jti: Schema.String,
 }) {}
 
 export class TinyTowerAccount extends Model.Class<TinyTowerAccount>("TinyTowerAccount")({
@@ -47,8 +45,6 @@ export class OAuthClient extends Model.Class<OAuthClient>("OAuthClient")({
     id: Schema.String.check(Schema.isUUID()).pipe(Model.FieldExcept(["insert"])),
     ownerUserId: Schema.String.check(Schema.isUUID()),
     name: Schema.String,
-    // Confidential clients store a hashed secret; public clients (SPAs,
-    // native apps) have none and rely on PKCE alone.
     secretHash: Schema.OptionFromNullishOr(Schema.String, { onNoneEncoding: null }),
     redirectUris: Schema.Array(Schema.String),
     scope: Schema.String,

@@ -11,9 +11,7 @@ import { DevelopersRepository } from "../../domain/developers.ts";
 import { OAuthAuthorizationRequest } from "../../domain/models.ts";
 import { OIDCRepository } from "../../domain/oidc.ts";
 import { UsersRepository } from "../../domain/users.ts";
-import { Sha256CodeChallenge } from "../crypto.ts";
 import { authorizationRedirect, issueAuthorizationCode, scopesOf } from "../grants.ts";
-import { currentAccount } from "../session.ts";
 
 const ACCESS_TOKEN_TTL_SECONDS = 900;
 const ID_TOKEN_TTL_SECONDS = 900;
@@ -57,9 +55,6 @@ const clientSecretMatches = (client: OAuthClient, secret: string | undefined) =>
                           crypto.timingSafeEqual(Buffer.from(presented), Buffer.from(hash))
                   ),
     });
-
-const findClient = (clientId: string) =>
-    DevelopersRepository.use((repo) => repo.findOAuthClient(clientId)).pipe(Effect.catch(() => Effect.succeedNone));
 
 // GET /oauth/authorize - the browser entry point of the code flow. Signed-out
 // visitors bounce through /login and return here; bad clients or redirect
@@ -348,13 +343,6 @@ const revoke = (keys: OidcKeys) =>
         return HttpServerResponse.empty({ status: 200, headers: noStore });
     });
 
-const discovery = (keys: OidcKeys) => HttpServerResponse.json(Oidc.makeDiscoveryDocument(keys.issuer));
-
-const jwksRoute = (keys: OidcKeys) =>
-    Effect.flatMap(Schema.encodeUnknownEffect(Jwt.JwksSchema)(keys.jwks), (encoded) =>
-        HttpServerResponse.json(encoded)
-    );
-
 /**
  * The "Sign in with Tinyburg" OIDC provider. Requires OIDC_PRIVATE_JWK (an
  * ES256 private JWK, see Jwt.generateSigningKey); without it the provider
@@ -362,29 +350,39 @@ const jwksRoute = (keys: OidcKeys) =>
  */
 export const OidcProviderLive = Layer.unwrap(
     Effect.gen(function* () {
-        const maybeConfig = yield* Config.option(OidcConfig);
-        if (Option.isNone(maybeConfig)) {
-            yield* Effect.logWarning("OIDC provider disabled: OIDC_PRIVATE_JWK is not set");
-            return Layer.empty;
-        }
+        const config = yield* OidcConfig;
 
         const privateJwk = yield* Schema.decodeUnknownEffect(Schema.fromJsonString(Jwt.PrivateJwkSchema))(
-            Redacted.value(maybeConfig.value.privateJwk)
+            Redacted.value(config.privateJwk)
         );
+
         // The public half drops the private scalar and re-declares key_ops for
         // verification; a signing key's ["sign"] would make Jwt.verify reject
         // it as an unknown key.
         const { d: _d, key_ops: _keyOps, ...rest } = privateJwk;
         const publicJwk = { ...rest, key_ops: ["verify"] as const };
         const keys: OidcKeys = {
-            issuer: maybeConfig.value.issuer.replace(/\/$/, ""),
+            issuer: config.issuer.replace(/\/$/, ""),
             privateJwk,
             jwks: { keys: [publicJwk] },
         };
 
         return Layer.mergeAll(
-            HttpRouter.add("GET", "/.well-known/openid-configuration", discovery(keys)),
-            HttpRouter.add("GET", "/.well-known/jwks.json", jwksRoute(keys)),
+            HttpRouter.add(
+                "GET",
+                "/.well-known/openid-configuration",
+                HttpServerResponse.json(Oidc.makeDiscoveryDocument(config.issuer))
+            ),
+            HttpRouter.add(
+                "GET",
+                "/.well-known/jwks.json",
+                Effect.flatMap(
+                    Schema.encodeEffect(Jwt.JwksSchema)({
+                        keys: [publicJwk] as const,
+                    }),
+                    (encoded) => HttpServerResponse.json(encoded)
+                )
+            ),
             HttpRouter.add("GET", "/oauth/authorize", authorize),
             HttpRouter.add("POST", "/oauth/token", token(keys)),
             HttpRouter.add("GET", "/oauth/userinfo", userinfo(keys)),

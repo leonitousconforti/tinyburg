@@ -1,16 +1,4 @@
-import {
-    Config,
-    DateTime,
-    Effect,
-    Layer,
-    Option,
-    pipe,
-    type Redacted,
-    Result,
-    Schema,
-    SchemaGetter,
-    String,
-} from "effect";
+import { Config, Encoding, Effect, Layer, Option, pipe, type Redacted, Result, Schema, String } from "effect";
 import {
     Cookies,
     HttpBody,
@@ -23,68 +11,7 @@ import {
     UrlParams,
 } from "effect/unstable/http";
 
-import { SessionsRepository } from "../../domain/sessions.ts";
 import { UsersRepository } from "../../domain/users.ts";
-import { destinationFromState, stateWithReturnTo } from "../../shared/returnTo.ts";
-import { randomStateGenerator, Sha256CodeChallenge } from "../crypto.ts";
-import { SecureCookies, SESSION_ID_COOKIE_NAME } from "../session.ts";
-
-const JoseHeaderSchema = Schema.Struct({
-    kid: Schema.String,
-    typ: Schema.Literal("JWT"),
-    alg: Schema.Literals([
-        "HS256",
-        "HS384",
-        "HS512",
-        "RS256",
-        "RS384",
-        "RS512",
-        "ES256",
-        "ES384",
-        "ES512",
-        "PS256",
-        "PS384",
-        "PS512",
-        "none",
-    ]),
-});
-
-const JwtBodySchema = Schema.StructWithRest(
-    Schema.Struct({
-        iss: Schema.String.pipe(Schema.annotate({ description: "Issuer" })),
-        sub: Schema.String.pipe(Schema.annotate({ description: "Subject" })),
-        aud: Schema.Union([Schema.String, Schema.Array(Schema.String)]).pipe(
-            Schema.annotate({ description: "Audience" })
-        ),
-        exp: Schema.Number.pipe(Schema.annotate({ description: "Expiration Time" })),
-        nbf: Schema.Number.pipe(Schema.annotate({ description: "Not Before" }), Schema.optional),
-        iat: Schema.Number.pipe(Schema.annotate({ description: "Issued At" })),
-        jti: Schema.String.pipe(Schema.annotate({ description: "JWT ID" }), Schema.optional),
-    }),
-    [Schema.Record(Schema.String, Schema.UndefinedOr(Schema.Unknown))]
-);
-
-const JwtSchema = Schema.TemplateLiteralParser([
-    Schema.StringFromBase64Url.pipe(Schema.decodeTo(Schema.fromJsonString(JoseHeaderSchema))),
-    ".",
-    Schema.StringFromBase64Url.pipe(Schema.decodeTo(Schema.fromJsonString(JwtBodySchema))),
-    ".",
-    Schema.String,
-]).pipe(
-    Schema.decodeTo(JwtBodySchema, {
-        encode: SchemaGetter.forbidden(() => "Encoding JWTs is not supported"),
-        decode: SchemaGetter.transform(([_header, _period, body, __period, _signature]) => body),
-    })
-);
-
-const OAuthResponseSchema = Schema.Struct({
-    access_token: Schema.String,
-    expires_in: Schema.Int,
-    refresh_token: Schema.optional(Schema.String),
-    scope: Schema.String,
-    token_type: Schema.String,
-    id_token: JwtSchema,
-});
 
 interface OAuthProvider {
     readonly name: "google" | "discord";
@@ -128,16 +55,26 @@ const discord: OAuthProvider = {
     }),
 };
 
+const randomStateGenerator = () =>
+    Array.from(crypto.getRandomValues(new Uint8Array(48)), (byte) => byte.toString(16).padStart(2, "0")).join("");
+
+const Sha256CodeChallenge = (verifier: string) =>
+    Effect.map(
+        Effect.promise(() => crypto.subtle.digest("SHA-256", new TextEncoder().encode(verifier))),
+        (hashBuffer: ArrayBuffer) => Encoding.encodeBase64Url(new Uint8Array(hashBuffer))
+    );
+
+const SecureCookies = Config.string("NODE_ENV").pipe(
+    Config.withDefault("development"),
+    Config.map((env) => env === "production")
+);
+
 const login = (provider: OAuthProvider) =>
     Effect.gen(function* () {
         const config = yield* Effect.orDie(provider.config);
         const secure = yield* Effect.orDie(SecureCookies);
-        const request = yield* HttpServerRequest.HttpServerRequest;
 
-        // Generate state and code verifier for PKCE. The state also carries the
-        // post-login destination through the provider round trip.
-        const returnTo = new URL(request.originalUrl, "http://localhost").searchParams.get("returnTo");
-        const state = stateWithReturnTo(randomStateGenerator(), returnTo);
+        const state = randomStateGenerator();
         const codeVerifier = randomStateGenerator();
 
         // Build the provider's OAuth authorization URL
@@ -161,7 +98,7 @@ const login = (provider: OAuthProvider) =>
             httpOnly: true,
             path: "/",
             secure,
-            sameSite: "lax", // optional - do not use "strict"
+            sameSite: "lax",
         });
 
         // Store the code verifier in a cookie to verify later
@@ -170,7 +107,7 @@ const login = (provider: OAuthProvider) =>
             httpOnly: true,
             path: "/",
             secure,
-            sameSite: "lax", // optional - do not use "strict"
+            sameSite: "lax",
         });
 
         // Redirect to the provider's OAuth 2.0 authorization endpoint
@@ -196,7 +133,7 @@ const callback = (provider: OAuthProvider) =>
                     state: Schema.String,
                 }),
             ])
-        )(HttpServerRequest.searchParamsFromURL(new URL(request.originalUrl, "http://localhost")));
+        )(HttpServerRequest.searchParamsFromURL(new URL(request.originalUrl, "http://0.0.0.0")));
 
         // Handle error from OAuth provider
         if ("error" in urlParams) {
@@ -238,7 +175,7 @@ const callback = (provider: OAuthProvider) =>
             httpOnly: true,
             path: "/",
             secure,
-            sameSite: "lax", // optional - do not use "strict"
+            sameSite: "lax",
         });
 
         // The code verifier cookie has served its purpose, delete it
@@ -247,7 +184,7 @@ const callback = (provider: OAuthProvider) =>
             httpOnly: true,
             path: "/",
             secure,
-            sameSite: "lax", // optional - do not use "strict"
+            sameSite: "lax",
         });
 
         // Upsert the user
@@ -264,51 +201,14 @@ const callback = (provider: OAuthProvider) =>
             })
         );
 
-        // Create a session for the user
-        const session = yield* SessionsRepository.use((repo) => repo.createSession(user));
-        const sessionCookie = Cookies.makeCookieUnsafe(SESSION_ID_COOKIE_NAME, session.id, {
-            expires: DateTime.toDateUtc(session.expiresAt),
-            httpOnly: true,
-            path: "/",
-            secure,
-            sameSite: "lax", // optional - do not use "strict"
-        });
-
-        // Resume the destination that started the login, defaulting to the
-        // user's towers page
-        return HttpServerResponse.redirect(destinationFromState(urlParams.state), {
-            cookies: Cookies.fromIterable([sessionCookie, deleteStateCookie, deleteCodeVerifierCookie]),
+        return HttpServerResponse.redirect("/towers/@me", {
+            cookies: Cookies.fromIterable([deleteStateCookie, deleteCodeVerifierCookie]),
         });
     });
-
-const logout = Effect.gen(function* () {
-    const secure = yield* Effect.orDie(SecureCookies);
-    const request = yield* HttpServerRequest.HttpServerRequest;
-
-    // Early short circuit if no user is logged in
-    const sessionId = request.cookies[SESSION_ID_COOKIE_NAME];
-    if (sessionId === undefined) return HttpServerResponse.redirect("/");
-
-    // Delete the old session cookie
-    const deleteSessionCookie = Cookies.makeCookieUnsafe(SESSION_ID_COOKIE_NAME, String.empty, {
-        expires: new Date(0),
-        httpOnly: true,
-        path: "/",
-        secure,
-        sameSite: "lax", // optional - do not use "strict"
-    });
-
-    // Delete the session from the database, treating errors as already signed out
-    yield* SessionsRepository.use((repo) => repo.deleteSession(sessionId)).pipe(Effect.catch(() => Effect.void));
-    return HttpServerResponse.redirect("/", {
-        cookies: Cookies.fromIterable([deleteSessionCookie]),
-    });
-});
 
 export const OAuthRoutesLive = Layer.mergeAll(
     HttpRouter.add("GET", "/auth/google/login", login(google)),
     HttpRouter.add("GET", "/auth/google/callback", callback(google)),
     HttpRouter.add("GET", "/auth/discord/login", login(discord)),
-    HttpRouter.add("GET", "/auth/discord/callback", callback(discord)),
-    HttpRouter.add("GET", "/logout", logout)
+    HttpRouter.add("GET", "/auth/discord/callback", callback(discord))
 );
