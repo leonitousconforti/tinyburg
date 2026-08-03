@@ -1,37 +1,28 @@
-import { Config, Effect, Layer, Option, Redacted, Schema } from "effect";
-import { HttpRouter, HttpServerRequest, HttpServerResponse } from "effect/unstable/http";
+import { Effect, Encoding, Layer, Option, Schema } from "effect";
+import { Cookies, HttpRouter, HttpServerRequest, HttpServerResponse } from "effect/unstable/http";
 
 import * as crypto from "node:crypto";
 
-import type { OAuthClient, User } from "../../domain/models.ts";
+import type { OAuthAuthorizationRequest, OAuthClient } from "../../domain/models.ts";
 
 import { Jwt, Oidc } from "effect-oidc";
 
 import { DevelopersRepository } from "../../domain/developers.ts";
-import { OAuthAuthorizationRequest } from "../../domain/models.ts";
+import { OAuthAuthorizationRequest as AuthorizationRequestModel } from "../../domain/models.ts";
 import { OIDCRepository } from "../../domain/oidc.ts";
 import { UsersRepository } from "../../domain/users.ts";
-import { authorizationRedirect, issueAuthorizationCode, scopesOf } from "../grants.ts";
+import { FIRST_PARTY_CLIENT_ID } from "../../firstParty.ts";
+import { OidcKeys } from "../keys.ts";
+import { clearProviderSession, currentUser } from "../providerSession.ts";
 
 const ACCESS_TOKEN_TTL_SECONDS = 900;
 const ID_TOKEN_TTL_SECONDS = 900;
 
-interface OidcKeys {
-    readonly issuer: string;
-    readonly privateJwk: Schema.Schema.Type<typeof Jwt.PrivateJwkSchema>;
-    readonly jwks: Schema.Schema.Type<typeof Jwt.JwksSchema>;
-}
-
-const OidcConfig = Config.all({
-    issuer: Config.string("SITE_URL").pipe(Config.withDefault("https://tinyburg.app")),
-    privateJwk: Config.redacted("OIDC_PRIVATE_JWK"),
-});
+const noStore = { "cache-control": "no-store", pragma: "no-cache" };
 
 /** A plain-text page for authorize errors that must never reach the client's
  *  redirect uri (unknown client, unregistered redirect, malformed request). */
 const badRequest = (message: string) => HttpServerResponse.text(message, { status: 400 });
-
-const noStore = { "cache-control": "no-store", pragma: "no-cache" };
 
 const tokenError = (status: number, error: string) => HttpServerResponse.json({ error }, { status, headers: noStore });
 
@@ -40,35 +31,138 @@ const unauthorizedBearer = HttpServerResponse.empty({
     headers: { "www-authenticate": "Bearer" },
 });
 
-/** Verifies a presented client secret against the registration: public
- *  clients must not send one, confidential clients must match. */
-const clientSecretMatches = (client: OAuthClient, secret: string | undefined) =>
+/**
+ * SHA-256 as base64url, the shape OAuth uses for both the PKCE S256 challenge
+ * and for the hashes we store instead of raw codes and secrets.
+ */
+const sha256 = (value: string): Effect.Effect<string> =>
+    Effect.map(
+        Effect.promise(() => crypto.subtle.digest("SHA-256", new TextEncoder().encode(value))),
+        (digest) => Encoding.encodeBase64Url(new Uint8Array(digest))
+    );
+
+const scopesOf = (scope: string): ReadonlyArray<string> => scope.split(" ").filter((part) => part.length > 0);
+
+/** Appends OAuth response parameters to a client's registered redirect uri. */
+const redirectTo = (redirectUri: string, params: Record<string, string>): string => {
+    const url = new URL(redirectUri);
+    for (const [key, value] of Object.entries(params)) url.searchParams.set(key, value);
+    return url.toString();
+};
+
+const findClient = (clientId: string) =>
+    DevelopersRepository.use((repo) => repo.findOAuthClient(clientId)).pipe(
+        Effect.catchCause(() => Effect.succeedNone)
+    );
+
+/** Public clients must present no secret; confidential clients must match. */
+const clientSecretMatches = (client: OAuthClient, secret: string | undefined): Effect.Effect<boolean> =>
     Option.match(client.secretHash, {
         onNone: () => Effect.succeed(secret === undefined),
         onSome: (hash) =>
             secret === undefined
                 ? Effect.succeed(false)
-                : Effect.map(
-                      Sha256CodeChallenge(secret),
-                      (presented) =>
-                          presented.length === hash.length &&
-                          crypto.timingSafeEqual(Buffer.from(presented), Buffer.from(hash))
-                  ),
+                : Effect.map(sha256(secret), (presented) => timingSafeEquals(presented, hash)),
     });
 
-// GET /oauth/authorize - the browser entry point of the code flow. Signed-out
-// visitors bounce through /login and return here; bad clients or redirect
-// uris render an error page (never a redirect); everything else answers to
-// the client's redirect uri per RFC 6749.
+const timingSafeEquals = (a: string, b: string): boolean =>
+    a.length === b.length && crypto.timingSafeEqual(Buffer.from(a), Buffer.from(b));
+
+/**
+ * Mints a single-use authorization code for an approved request and returns
+ * the redirect back to the client. Only the code's hash is stored; the code
+ * itself rides the redirect. None means the request expired or was already
+ * approved.
+ */
+const issueAuthorizationCode = (
+    request: OAuthAuthorizationRequest,
+    userId: string
+): Effect.Effect<Option.Option<string>, never, OIDCRepository> =>
+    Effect.gen(function* () {
+        const code = crypto.randomUUID() + crypto.randomUUID();
+        const codeHash = yield* sha256(code);
+        const approved = yield* OIDCRepository.use((repo) =>
+            repo.approveAuthorizationRequest({ requestId: request.id, userId, codeHash })
+        ).pipe(Effect.orDie);
+        return Option.map(approved, (row) => redirectTo(row.redirectUri, { code, state: row.state }));
+    });
+
+const escapeHtml = (value: string): string =>
+    value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;");
+
+const scopeDescriptions: Record<string, string> = {
+    openid: "Confirm your Tinyburg identity",
+    profile: "See your display name and avatar",
+    towers: "See and manage the TinyTower saves you have linked",
+};
+
+/**
+ * The consent screen is server-rendered rather than a SPA route: during a
+ * third-party authorization the browser holds no access token for the SPA to
+ * authenticate with, only the provider session cookie this page runs on.
+ */
+const consentPage = (client: OAuthClient, request: OAuthAuthorizationRequest) =>
+    HttpServerResponse.html(
+        `<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width" />
+<title>Authorize ${escapeHtml(client.name)} | Tinyburg</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<style>
+  :root { color-scheme: light }
+  body { margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center;
+         font-family: ui-monospace, SFMono-Regular, monospace; color:#2c3e50;
+         background:linear-gradient(180deg,#87ceeb 0%,#4fa4d4 50%,#2d7bb3 100%); padding:2rem }
+  .card { background:rgba(255,255,255,.95); border:3px solid #ffd700; border-radius:1rem;
+          box-shadow:6px 6px 0 rgba(0,0,0,.25); padding:2rem; max-width:28rem; width:100% }
+  h1 { font-size:1.25rem; margin:0 0 .25rem; text-align:center }
+  p.lead { text-align:center; margin:0 0 1.5rem; color:#4a5568 }
+  ul { list-style:none; padding:1rem; margin:0 0 1.5rem; border:2px solid rgba(79,164,212,.2);
+       background:rgba(79,164,212,.1); border-radius:.5rem }
+  li { padding:.25rem 0 }
+  .row { display:flex; flex-direction:column; gap:.75rem }
+  button { font:inherit; cursor:pointer; border-radius:.5rem; padding:.9rem 1.5rem;
+           box-shadow:4px 4px 0 rgba(0,0,0,.2); border:2px solid transparent }
+  .approve { background:#ffd700 }
+  .deny { background:#fff; border-color:#cbd5e0 }
+  .dest { text-align:center; font-size:.85rem; color:#4a5568; margin-top:1.5rem }
+</style>
+</head>
+<body>
+  <main class="card">
+    <h1>${escapeHtml(client.name)}</h1>
+    <p class="lead">wants to access your Tinyburg account</p>
+    <ul>
+      ${scopesOf(request.scope)
+          .map((scope) => `<li>✅ ${escapeHtml(scopeDescriptions[scope] ?? scope)}</li>`)
+          .join("\n      ")}
+    </ul>
+    <form method="post" action="/oauth/consent" class="row">
+      <input type="hidden" name="request_id" value="${escapeHtml(request.id)}" />
+      <button class="approve" type="submit" name="decision" value="approve">Authorize</button>
+      <button class="deny" type="submit" name="decision" value="deny">Cancel</button>
+    </form>
+    <p class="dest">After authorizing you'll be sent back to ${escapeHtml(new URL(request.redirectUri).host)}</p>
+  </main>
+</body>
+</html>`
+    );
+
+// GET /oauth/authorize - the browser entry point of the code flow. Visitors
+// without a provider session bounce through /login and come back here; bad
+// clients or redirect uris render an error page (never a redirect); anything
+// else answers to the client's redirect uri per RFC 6749.
 const authorize = Effect.gen(function* () {
     const request = yield* HttpServerRequest.HttpServerRequest;
     const url = new URL(request.originalUrl, "http://localhost");
 
-    const maybeAccount = yield* currentAccount;
-    if (Option.isNone(maybeAccount)) {
+    const maybeUser = yield* currentUser;
+    if (Option.isNone(maybeUser)) {
         return HttpServerResponse.redirect(`/login?returnTo=${encodeURIComponent(url.pathname + url.search)}`);
     }
-    const { user } = maybeAccount.value;
+    const user = maybeUser.value;
 
     const decoded = yield* Schema.decodeUnknownEffect(Oidc.AuthorizationRequestSchema)(
         HttpServerRequest.searchParamsFromURL(url)
@@ -89,11 +183,11 @@ const authorize = Effect.gen(function* () {
     const requested = scopesOf(params.scope);
     if (requested.length === 0 || !requested.every((scope) => allowed.has(scope))) {
         return HttpServerResponse.redirect(
-            authorizationRedirect(params.redirect_uri, { error: "invalid_scope", state: params.state })
+            redirectTo(params.redirect_uri, { error: "invalid_scope", state: params.state })
         );
     }
 
-    const insert = yield* OAuthAuthorizationRequest.insert.makeEffect({
+    const insert = yield* AuthorizationRequestModel.insert.makeEffect({
         clientId: client.id,
         userId: user.id,
         redirectUri: params.redirect_uri,
@@ -105,77 +199,116 @@ const authorize = Effect.gen(function* () {
     });
     const created = yield* OIDCRepository.use((repo) => repo.createAuthorizationRequest(insert)).pipe(Effect.orDie);
 
-    // A remembered consent covering every requested scope skips the screen
-    const consent = yield* OIDCRepository.use((repo) =>
-        repo.findConsent({ userId: user.id, clientId: client.id })
-    ).pipe(Effect.orDie);
-    const consented = Option.isSome(consent) && requested.every((s) => scopesOf(consent.value.scope).includes(s));
-    if (consented) {
-        const redirect = yield* issueAuthorizationCode(created, user.id);
-        if (Option.isSome(redirect)) return HttpServerResponse.redirect(redirect.value);
-        return badRequest("This authorization request has expired. Please start over.");
-    }
+    // Every third party asks permission on every authorization; consent is
+    // never remembered. The first party is the app the visitor is already
+    // using, so prompting it to authorize itself would be noise.
+    if (client.id !== FIRST_PARTY_CLIENT_ID) return consentPage(client, created);
 
-    return HttpServerResponse.redirect(`/oauth/consent?request=${created.id}`);
+    const redirect = yield* issueAuthorizationCode(created, user.id);
+    return Option.match(redirect, {
+        onNone: () => badRequest("This authorization request has expired. Please start over."),
+        onSome: (location) => HttpServerResponse.redirect(location),
+    });
 });
 
-const token = (keys: OidcKeys) =>
-    Effect.gen(function* () {
-        const request = yield* HttpServerRequest.HttpServerRequest;
-        const decoded = yield* HttpServerRequest.schemaBodyUrlParams(Oidc.TokenRequestSchema).pipe(Effect.option);
-        if (Option.isNone(decoded)) return yield* tokenError(400, "invalid_request");
-        const body = decoded.value;
+const ConsentDecision = Schema.Struct({
+    request_id: Schema.String.check(Schema.isUUID()),
+    decision: Schema.Literals(["approve", "deny"]),
+});
 
-        const auth = Oidc.clientAuthentication({
-            authorization: request.headers["authorization"],
-            request: body,
-        });
-        if (Option.isNone(auth)) return yield* tokenError(401, "invalid_client");
+// POST /oauth/consent - the decision from the screen above.
+const consent = Effect.gen(function* () {
+    const maybeUser = yield* currentUser;
+    if (Option.isNone(maybeUser)) return HttpServerResponse.redirect("/login");
+    const user = maybeUser.value;
 
-        const maybeClient = yield* findClient(auth.value.clientId);
-        if (Option.isNone(maybeClient)) return yield* tokenError(401, "invalid_client");
-        const client = maybeClient.value;
-        if (!(yield* clientSecretMatches(client, auth.value.clientSecret))) {
-            return yield* tokenError(401, "invalid_client");
-        }
+    const decoded = yield* HttpServerRequest.schemaBodyUrlParams(ConsentDecision).pipe(Effect.option);
+    if (Option.isNone(decoded)) return badRequest("This consent decision is malformed.");
+    const { decision, request_id: requestId } = decoded.value;
 
-        switch (body.grant_type) {
-            case "authorization_code": {
-                const codeHash = yield* Sha256CodeChallenge(body.code);
-                const maybeGrant = yield* OIDCRepository.use((repo) => repo.consumeAuthorizationCode(codeHash)).pipe(
-                    Effect.orDie
-                );
-                if (Option.isNone(maybeGrant)) return yield* tokenError(400, "invalid_grant");
-                const grant = maybeGrant.value;
+    const maybeRequest = yield* OIDCRepository.use((repo) => repo.findAuthorizationRequest(requestId)).pipe(
+        Effect.orDie
+    );
+    if (Option.isNone(maybeRequest) || maybeRequest.value.userId !== user.id) {
+        return badRequest("This authorization request has expired. Please start over.");
+    }
+    const request = maybeRequest.value;
 
-                const verifierChallenge = yield* Sha256CodeChallenge(body.code_verifier);
-                if (
-                    grant.clientId !== client.id ||
-                    grant.redirectUri !== body.redirect_uri ||
-                    verifierChallenge !== grant.codeChallenge
-                ) {
-                    return yield* tokenError(400, "invalid_grant");
-                }
+    if (decision === "deny") {
+        yield* OIDCRepository.use((repo) => repo.deleteAuthorizationRequest(request.id)).pipe(
+            Effect.catchCause(() => Effect.void)
+        );
+        return HttpServerResponse.redirect(
+            redirectTo(request.redirectUri, { error: "access_denied", state: request.state })
+        );
+    }
 
-                const maybeUser = yield* UsersRepository.use((repo) => repo.findUserById(grant.userId)).pipe(
-                    Effect.catch(() => Effect.succeedNone)
-                );
-                if (Option.isNone(maybeUser)) return yield* tokenError(400, "invalid_grant");
-                const user: User = maybeUser.value;
+    const redirect = yield* issueAuthorizationCode(request, user.id);
+    return Option.match(redirect, {
+        onNone: () => badRequest("This authorization request has expired. Please start over."),
+        onSome: (location) => HttpServerResponse.redirect(location),
+    });
+});
 
-                const scopes = scopesOf(grant.scope);
-                const accessToken = yield* Oidc.issueAccessToken({
-                    privateJwk: keys.privateJwk,
-                    issuer: keys.issuer,
-                    subject: user.id,
-                    audience: keys.issuer,
-                    clientId: client.id,
-                    scope: grant.scope,
-                    ttlSeconds: ACCESS_TOKEN_TTL_SECONDS,
-                }).pipe(Effect.orDie);
+const token = Effect.gen(function* () {
+    const keys = yield* OidcKeys;
+    const request = yield* HttpServerRequest.HttpServerRequest;
 
-                const idToken = scopes.includes("openid")
-                    ? yield* Oidc.issueIdToken({
+    const decoded = yield* HttpServerRequest.schemaBodyUrlParams(Oidc.TokenRequestSchema).pipe(Effect.option);
+    if (Option.isNone(decoded)) return yield* tokenError(400, "invalid_request");
+    const body = decoded.value;
+
+    const auth = Oidc.clientAuthentication({
+        authorization: request.headers["authorization"],
+        request: body,
+    });
+    if (Option.isNone(auth)) return yield* tokenError(401, "invalid_client");
+
+    const maybeClient = yield* findClient(auth.value.clientId);
+    if (Option.isNone(maybeClient)) return yield* tokenError(401, "invalid_client");
+    const client = maybeClient.value;
+    if (!(yield* clientSecretMatches(client, auth.value.clientSecret))) {
+        return yield* tokenError(401, "invalid_client");
+    }
+
+    switch (body.grant_type) {
+        case "authorization_code": {
+            const codeHash = yield* sha256(body.code);
+            const maybeGrant = yield* OIDCRepository.use((repo) => repo.consumeAuthorizationCode(codeHash)).pipe(
+                Effect.orDie
+            );
+            if (Option.isNone(maybeGrant)) return yield* tokenError(400, "invalid_grant");
+            const grant = maybeGrant.value;
+
+            const presentedChallenge = yield* sha256(body.code_verifier);
+            if (
+                grant.clientId !== client.id ||
+                grant.redirectUri !== body.redirect_uri ||
+                !timingSafeEquals(presentedChallenge, grant.codeChallenge)
+            ) {
+                return yield* tokenError(400, "invalid_grant");
+            }
+
+            const maybeUser = yield* UsersRepository.use((repo) => repo.findUserById(grant.userId)).pipe(
+                Effect.catchCause(() => Effect.succeedNone)
+            );
+            if (Option.isNone(maybeUser)) return yield* tokenError(400, "invalid_grant");
+            const user = maybeUser.value;
+
+            const scopes = scopesOf(grant.scope);
+            const accessToken = yield* Oidc.issueAccessToken({
+                privateJwk: keys.privateJwk,
+                issuer: keys.issuer,
+                subject: user.id,
+                audience: keys.issuer,
+                clientId: client.id,
+                scope: grant.scope,
+                ttlSeconds: ACCESS_TOKEN_TTL_SECONDS,
+            }).pipe(Effect.orDie);
+
+            const idToken = scopes.includes("openid")
+                ? Option.some(
+                      yield* Oidc.issueIdToken({
                           privateJwk: keys.privateJwk,
                           issuer: keys.issuer,
                           subject: user.id,
@@ -186,112 +319,122 @@ const token = (keys: OidcKeys) =>
                               ? { name: user.displayName, picture: Option.getOrUndefined(user.avatarUrl) }
                               : undefined,
                       }).pipe(Effect.orDie)
-                    : undefined;
+                  )
+                : Option.none<string>();
 
-                return yield* HttpServerResponse.json(
-                    {
-                        access_token: accessToken,
-                        token_type: "Bearer",
-                        expires_in: ACCESS_TOKEN_TTL_SECONDS,
-                        scope: grant.scope,
-                        ...(idToken !== undefined ? { id_token: idToken } : {}),
-                    },
-                    { headers: noStore }
-                );
-            }
-            case "client_credentials": {
-                // Machine to machine is for confidential clients only
-                if (Option.isNone(client.secretHash)) return yield* tokenError(401, "invalid_client");
-                const allowed = new Set(scopesOf(client.scope));
-                const requested = body.scope === undefined ? scopesOf(client.scope) : scopesOf(body.scope);
-                if (!requested.every((scope) => allowed.has(scope))) {
-                    return yield* tokenError(400, "invalid_scope");
-                }
-                const accessToken = yield* Oidc.issueAccessToken({
-                    privateJwk: keys.privateJwk,
-                    issuer: keys.issuer,
-                    subject: client.id,
-                    audience: keys.issuer,
-                    clientId: client.id,
-                    scope: requested.join(" "),
-                    ttlSeconds: ACCESS_TOKEN_TTL_SECONDS,
-                }).pipe(Effect.orDie);
-                return yield* HttpServerResponse.json(
-                    {
-                        access_token: accessToken,
-                        token_type: "Bearer",
-                        expires_in: ACCESS_TOKEN_TTL_SECONDS,
-                        scope: requested.join(" "),
-                    },
-                    { headers: noStore }
-                );
-            }
-            case "refresh_token": {
-                return yield* tokenError(400, "unsupported_grant_type");
-            }
-        }
-    });
-
-const userinfo = (keys: OidcKeys) =>
-    Effect.gen(function* () {
-        const request = yield* HttpServerRequest.HttpServerRequest;
-        const header = request.headers["authorization"];
-        if (header === undefined || !header.startsWith("Bearer ")) return unauthorizedBearer;
-
-        const verified = yield* Jwt.verify(header.slice("Bearer ".length), {
-            jwks: keys.jwks,
-            issuer: keys.issuer,
-            audience: keys.issuer,
-            algorithms: ["ES256"],
-        }).pipe(Effect.option);
-        if (Option.isNone(verified)) return unauthorizedBearer;
-
-        const claims = yield* Schema.decodeUnknownEffect(Oidc.AccessTokenClaimsSchema)(verified.value).pipe(
-            Effect.option
-        );
-        if (Option.isNone(claims)) return unauthorizedBearer;
-
-        if (verified.value.jti !== undefined) {
-            const revoked = yield* OIDCRepository.use((repo) => repo.isTokenRevoked(verified.value.jti as string)).pipe(
-                Effect.orDie
+            return yield* HttpServerResponse.json(
+                {
+                    access_token: accessToken,
+                    token_type: "Bearer",
+                    expires_in: ACCESS_TOKEN_TTL_SECONDS,
+                    scope: grant.scope,
+                    ...Option.match(idToken, {
+                        onNone: () => ({}),
+                        onSome: (id_token) => ({ id_token }),
+                    }),
+                },
+                { headers: noStore }
             );
-            if (revoked) return unauthorizedBearer;
         }
+        case "client_credentials": {
+            // Machine to machine is for confidential clients only
+            if (Option.isNone(client.secretHash)) return yield* tokenError(401, "invalid_client");
+            const allowed = new Set(scopesOf(client.scope));
+            const requested = body.scope === undefined ? scopesOf(client.scope) : scopesOf(body.scope);
+            if (!requested.every((scope) => allowed.has(scope))) return yield* tokenError(400, "invalid_scope");
 
-        const scopes = scopesOf(claims.value.scope);
-        if (!scopes.includes("openid")) {
-            return HttpServerResponse.empty({
-                status: 403,
-                headers: { "www-authenticate": 'Bearer error="insufficient_scope"' },
-            });
+            const accessToken = yield* Oidc.issueAccessToken({
+                privateJwk: keys.privateJwk,
+                issuer: keys.issuer,
+                subject: client.id,
+                audience: keys.issuer,
+                clientId: client.id,
+                scope: requested.join(" "),
+                ttlSeconds: ACCESS_TOKEN_TTL_SECONDS,
+            }).pipe(Effect.orDie);
+
+            return yield* HttpServerResponse.json(
+                {
+                    access_token: accessToken,
+                    token_type: "Bearer",
+                    expires_in: ACCESS_TOKEN_TTL_SECONDS,
+                    scope: requested.join(" "),
+                },
+                { headers: noStore }
+            );
         }
+        case "refresh_token": {
+            // Public clients re-authorize silently against the provider
+            // session instead, which keeps no refresh token in the browser.
+            return yield* tokenError(400, "unsupported_grant_type");
+        }
+    }
+});
 
-        const maybeUser = yield* UsersRepository.use((repo) => repo.findUserById(claims.value.sub)).pipe(
-            Effect.catch(() => Effect.succeedNone)
-        );
-        if (Option.isNone(maybeUser)) return unauthorizedBearer;
-        const user = maybeUser.value;
+/** The verified, unrevoked access-token claims carried by a bearer header. */
+const bearerClaims = Effect.gen(function* () {
+    const keys = yield* OidcKeys;
+    const request = yield* HttpServerRequest.HttpServerRequest;
 
-        return yield* HttpServerResponse.json(
-            {
-                sub: user.id,
-                ...(scopes.includes("profile")
-                    ? {
-                          name: user.displayName,
-                          ...Option.match(user.avatarUrl, {
-                              onNone: () => ({}),
-                              onSome: (picture) => ({ picture }),
-                          }),
-                      }
-                    : {}),
-            },
-            { headers: noStore }
-        );
+    const header = Option.fromNullishOr(request.headers["authorization"]).pipe(
+        Option.filter((value) => value.startsWith("Bearer "))
+    );
+    if (Option.isNone(header)) return Option.none();
+
+    const claims = yield* Jwt.verify(header.value.slice("Bearer ".length), {
+        jwks: keys.jwks,
+        issuer: keys.issuer,
+        audience: keys.issuer,
+        algorithms: ["ES256"],
+    }).pipe(Effect.flatMap(Schema.decodeUnknownEffect(Oidc.AccessTokenClaimsSchema)), Effect.option);
+    if (Option.isNone(claims)) return Option.none();
+
+    const revoked = yield* Option.match(Option.fromNullishOr(claims.value.jti), {
+        onNone: () => Effect.succeed(false),
+        onSome: (jti) => OIDCRepository.use((repo) => repo.isTokenRevoked(jti)).pipe(Effect.orDie),
     });
+    return revoked ? Option.none() : claims;
+});
+
+const userinfo = Effect.gen(function* () {
+    const maybeClaims = yield* bearerClaims;
+    if (Option.isNone(maybeClaims)) return unauthorizedBearer;
+    const claims = maybeClaims.value;
+
+    const scopes = scopesOf(claims.scope);
+    if (!scopes.includes("openid")) {
+        return HttpServerResponse.empty({
+            status: 403,
+            headers: { "www-authenticate": 'Bearer error="insufficient_scope"' },
+        });
+    }
+
+    const maybeUser = yield* UsersRepository.use((repo) => repo.findUserById(claims.sub)).pipe(
+        Effect.catchCause(() => Effect.succeedNone)
+    );
+    if (Option.isNone(maybeUser)) return unauthorizedBearer;
+    const user = maybeUser.value;
+
+    return yield* HttpServerResponse.json(
+        {
+            sub: user.id,
+            ...(scopes.includes("profile")
+                ? {
+                      name: user.displayName,
+                      ...Option.match(user.avatarUrl, {
+                          onNone: () => ({}),
+                          onSome: (picture) => ({ picture }),
+                      }),
+                  }
+                : {}),
+        },
+        { headers: noStore }
+    );
+});
 
 // The revocation request body plus the client_secret_post authentication
 // parameters, decoded together because the body can only be read once.
-const RevocationBodySchema = Schema.Struct({
+const RevocationBody = Schema.Struct({
     token: Schema.String,
     token_type_hint: Schema.optional(Schema.String),
     client_id: Schema.optional(Schema.String),
@@ -300,93 +443,71 @@ const RevocationBodySchema = Schema.Struct({
 
 // POST /oauth/revoke - RFC 7009. Always answers 200 for well-formed,
 // authenticated requests so callers cannot probe token validity.
-const revoke = (keys: OidcKeys) =>
-    Effect.gen(function* () {
-        const request = yield* HttpServerRequest.HttpServerRequest;
-        const decoded = yield* HttpServerRequest.schemaBodyUrlParams(RevocationBodySchema).pipe(Effect.option);
-        if (Option.isNone(decoded)) return yield* tokenError(400, "invalid_request");
+const revoke = Effect.gen(function* () {
+    const keys = yield* OidcKeys;
+    const request = yield* HttpServerRequest.HttpServerRequest;
 
-        const auth = Oidc.clientAuthentication({
-            authorization: request.headers["authorization"],
-            request: decoded.value,
-        });
-        if (Option.isNone(auth)) return yield* tokenError(401, "invalid_client");
+    const decoded = yield* HttpServerRequest.schemaBodyUrlParams(RevocationBody).pipe(Effect.option);
+    if (Option.isNone(decoded)) return yield* tokenError(400, "invalid_request");
 
-        const maybeClient = yield* findClient(auth.value.clientId);
-        if (Option.isNone(maybeClient)) return yield* tokenError(401, "invalid_client");
-        const client = maybeClient.value;
-        if (!(yield* clientSecretMatches(client, auth.value.clientSecret))) {
-            return yield* tokenError(401, "invalid_client");
-        }
+    const auth = Oidc.clientAuthentication({
+        authorization: request.headers["authorization"],
+        request: decoded.value,
+    });
+    if (Option.isNone(auth)) return yield* tokenError(401, "invalid_client");
 
-        const verified = yield* Jwt.verify(decoded.value.token, {
-            jwks: keys.jwks,
-            issuer: keys.issuer,
-            algorithms: ["ES256"],
-        }).pipe(Effect.option);
-        if (Option.isSome(verified) && verified.value.jti !== undefined) {
-            const claims = yield* Schema.decodeUnknownEffect(Oidc.AccessTokenClaimsSchema)(verified.value).pipe(
-                Effect.option
-            );
-            // Only the client a token was issued to may revoke it
-            const owned = Option.isSome(claims) && claims.value.client_id === client.id;
-            if (owned) {
-                yield* OIDCRepository.use((repo) =>
-                    repo.revokeToken({
-                        jti: verified.value.jti as string,
-                        expiresAt: new Date(verified.value.exp * 1000),
-                    })
-                ).pipe(Effect.orDie);
-            }
-        }
+    const maybeClient = yield* findClient(auth.value.clientId);
+    if (Option.isNone(maybeClient)) return yield* tokenError(401, "invalid_client");
+    const client = maybeClient.value;
+    if (!(yield* clientSecretMatches(client, auth.value.clientSecret))) {
+        return yield* tokenError(401, "invalid_client");
+    }
 
-        return HttpServerResponse.empty({ status: 200, headers: noStore });
+    const verified = yield* Jwt.verify(decoded.value.token, {
+        jwks: keys.jwks,
+        issuer: keys.issuer,
+        algorithms: ["ES256"],
+    }).pipe(Effect.flatMap(Schema.decodeUnknownEffect(Oidc.AccessTokenClaimsSchema)), Effect.option);
+
+    // Only the client a token was issued to may revoke it
+    yield* Option.match(verified, {
+        onNone: () => Effect.void,
+        onSome: (claims) =>
+            claims.client_id === client.id && claims.jti !== undefined
+                ? OIDCRepository.use((repo) =>
+                      repo.revokeToken({ jti: claims.jti as string, expiresAt: new Date(claims.exp * 1000) })
+                  ).pipe(Effect.orDie)
+                : Effect.void,
     });
 
+    return HttpServerResponse.empty({ status: 200, headers: noStore });
+});
+
+/** Ends the provider session. The SPA discards its tokens separately. */
+const logout = Effect.map(clearProviderSession, (cookie) =>
+    HttpServerResponse.redirect("/", { cookies: Cookies.fromIterable([cookie]) })
+);
+
+const discovery = Effect.flatMap(OidcKeys, (keys) => HttpServerResponse.json(Oidc.makeDiscoveryDocument(keys.issuer)));
+
+const jwks = Effect.gen(function* () {
+    const keys = yield* OidcKeys;
+    const encoded = yield* Schema.encodeEffect(Jwt.JwksSchema)(keys.jwks);
+    return yield* HttpServerResponse.json(encoded);
+});
+
 /**
- * The "Sign in with Tinyburg" OIDC provider. Requires OIDC_PRIVATE_JWK (an
- * ES256 private JWK, see Jwt.generateSigningKey); without it the provider
- * routes are not mounted and the rest of the app works as before.
+ * The "Sign in with Tinyburg" OIDC provider. Public clients (the first-party
+ * SPA included) authenticate with PKCE and no secret; confidential clients
+ * additionally present their secret.
  */
-export const OidcProviderLive = Layer.unwrap(
-    Effect.gen(function* () {
-        const config = yield* OidcConfig;
-
-        const privateJwk = yield* Schema.decodeUnknownEffect(Schema.fromJsonString(Jwt.PrivateJwkSchema))(
-            Redacted.value(config.privateJwk)
-        );
-
-        // The public half drops the private scalar and re-declares key_ops for
-        // verification; a signing key's ["sign"] would make Jwt.verify reject
-        // it as an unknown key.
-        const { d: _d, key_ops: _keyOps, ...rest } = privateJwk;
-        const publicJwk = { ...rest, key_ops: ["verify"] as const };
-        const keys: OidcKeys = {
-            issuer: config.issuer.replace(/\/$/, ""),
-            privateJwk,
-            jwks: { keys: [publicJwk] },
-        };
-
-        return Layer.mergeAll(
-            HttpRouter.add(
-                "GET",
-                "/.well-known/openid-configuration",
-                HttpServerResponse.json(Oidc.makeDiscoveryDocument(config.issuer))
-            ),
-            HttpRouter.add(
-                "GET",
-                "/.well-known/jwks.json",
-                Effect.flatMap(
-                    Schema.encodeEffect(Jwt.JwksSchema)({
-                        keys: [publicJwk] as const,
-                    }),
-                    (encoded) => HttpServerResponse.json(encoded)
-                )
-            ),
-            HttpRouter.add("GET", "/oauth/authorize", authorize),
-            HttpRouter.add("POST", "/oauth/token", token(keys)),
-            HttpRouter.add("GET", "/oauth/userinfo", userinfo(keys)),
-            HttpRouter.add("POST", "/oauth/revoke", revoke(keys))
-        );
-    })
+export const OidcProviderLive = Layer.mergeAll(
+    HttpRouter.add("GET", "/.well-known/openid-configuration", discovery),
+    HttpRouter.add("GET", "/.well-known/jwks.json", jwks),
+    HttpRouter.add("GET", "/oauth/authorize", authorize),
+    HttpRouter.add("POST", "/oauth/consent", consent),
+    HttpRouter.add("POST", "/oauth/token", token),
+    HttpRouter.add("GET", "/oauth/userinfo", userinfo),
+    HttpRouter.add("POST", "/oauth/revoke", revoke),
+    HttpRouter.add("GET", "/logout", logout)
 );

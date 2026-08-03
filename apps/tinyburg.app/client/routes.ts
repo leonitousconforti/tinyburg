@@ -13,7 +13,7 @@ export const DevelopersRoute = r("Developers");
 export const DeveloperAppsRoute = r("DeveloperApps");
 export const TowerMeRoute = r("TowerMe");
 export const TowerLinkRoute = r("TowerLink");
-export const ConsentRoute = r("Consent", { request: S.Option(S.String) });
+export const CallbackRoute = r("Callback");
 export const NotFoundRoute = r("NotFound", { path: S.String });
 
 export const AppRoute = S.Union([
@@ -27,7 +27,7 @@ export const AppRoute = S.Union([
     DeveloperAppsRoute,
     TowerMeRoute,
     TowerLinkRoute,
-    ConsentRoute,
+    CallbackRoute,
     NotFoundRoute,
 ]);
 export type AppRoute = typeof AppRoute.Type;
@@ -46,12 +46,9 @@ export const developersRouter = pipe(literal("developers"), Route.mapTo(Develope
 export const developerAppsRouter = pipe(literal("developers"), slash(literal("apps")), Route.mapTo(DeveloperAppsRoute));
 export const towerMeRouter = pipe(literal("towers"), slash(literal("@me")), Route.mapTo(TowerMeRoute));
 export const towerLinkRouter = pipe(literal("towers"), slash(literal("@link")), Route.mapTo(TowerLinkRoute));
-export const consentRouter = pipe(
-    literal("oauth"),
-    slash(literal("consent")),
-    Route.query(S.Struct({ request: S.OptionFromOptional(S.String) })),
-    Route.mapTo(ConsentRoute)
-);
+// The provider redirects here with ?code and ?state; the callback command
+// reads them straight off the url rather than routing on them.
+export const callbackRouter = pipe(literal("auth"), slash(literal("callback")), Route.mapTo(CallbackRoute));
 
 const routeParser = Route.oneOf(
     homeRouter,
@@ -64,7 +61,7 @@ const routeParser = Route.oneOf(
     developersRouter,
     towerMeRouter,
     towerLinkRouter,
-    consentRouter
+    callbackRouter
 );
 
 export const urlToAppRoute = Route.parseUrlWithFallback(routeParser, NotFoundRoute);

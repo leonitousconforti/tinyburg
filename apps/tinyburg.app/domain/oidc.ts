@@ -1,7 +1,7 @@
 import { Context, Effect, Layer, Schema } from "effect";
 import { SqlClient, SqlSchema, SqlModel } from "effect/unstable/sql";
 
-import { OAuthAuthorizationRequest, OAuthConsent } from "./models.ts";
+import { OAuthAuthorizationRequest } from "./models.ts";
 
 export class OIDCRepository extends Context.Service<OIDCRepository>()("@tinyburg/tinyburg.app/domain/OIDCRepository", {
     make: Effect.gen(function* () {
@@ -49,25 +49,6 @@ export class OIDCRepository extends Context.Service<OIDCRepository>()("@tinyburg
             `,
         });
 
-        const findConsent = SqlSchema.findOneOption({
-            Request: Schema.Struct({
-                userId: Schema.String.check(Schema.isUUID()),
-                clientId: Schema.String.check(Schema.isUUID()),
-            }),
-            Result: OAuthConsent,
-            execute: ({ clientId, userId }) => sql`
-                SELECT * FROM oauth_consents WHERE user_id = ${userId} AND client_id = ${clientId}
-            `,
-        });
-
-        const upsertConsent = (options: { userId: string; clientId: string; scope: string }) =>
-            sql`
-                INSERT INTO oauth_consents (user_id, client_id, scope)
-                VALUES (${options.userId}, ${options.clientId}, ${options.scope})
-                ON CONFLICT (user_id, client_id)
-                DO UPDATE SET scope = EXCLUDED.scope, granted_at = NOW()
-            `.pipe(Effect.asVoid);
-
         // Housekeeping rides along on writes so the denylist stays bounded
         // without a scheduled job.
         const revokeToken = (options: { jti: string; expiresAt: Date }) =>
@@ -92,8 +73,6 @@ export class OIDCRepository extends Context.Service<OIDCRepository>()("@tinyburg
             deleteAuthorizationRequest,
             approveAuthorizationRequest,
             consumeAuthorizationCode,
-            findConsent,
-            upsertConsent,
             revokeToken,
             isTokenRevoked,
         };

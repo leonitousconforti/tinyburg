@@ -6,15 +6,18 @@ import * as HttpApiGroup from "effect/unstable/httpapi/HttpApiGroup";
 import * as HttpApiSchema from "effect/unstable/httpapi/HttpApiSchema";
 
 import * as NimblebitConfig from "@tinyburg/nimblebit-sdk/NimblebitConfig";
+import { ResourceServer } from "effect-oidc";
 
 const TinyburgLinkedTinyTowerAccountsList = HttpApiEndpoint.get(
     "TinyburgLinkedTinyTowerAccountsList",
     "/v1/tinytower/linkedAccounts/list",
     {
+        // The cloud sync email is deliberately absent: it is write-only
+        // input for linking, `Schema.Redacted` cannot cross a json boundary,
+        // and echoing it back would leak a player's address to every client.
         success: Schema.Array(
             Schema.Struct({
                 playerId: NimblebitConfig.PlayerIdSchema,
-                playerEmail: NimblebitConfig.PlayerEmailSchema,
                 createdAt: Schema.DateTimeUtcFromString,
             })
         ),
@@ -37,6 +40,7 @@ const TinyburgLinkedTinyTowerAccountsLink = HttpApiEndpoint.post(
     "/v1/tinytower/linkedAccounts/link",
     {
         success: Schema.Void,
+        error: HttpApiError.NotImplemented,
         payload: Schema.Struct({
             friendCode: NimblebitConfig.PlayerIdSchema,
             email: NimblebitConfig.PlayerEmailSchema,
@@ -53,6 +57,7 @@ const TinyburgLinkedTinyTowerAccountsVerify = HttpApiEndpoint.post(
     "/v1/tinytower/linkedAccounts/verify",
     {
         success: Schema.Void,
+        error: HttpApiError.NotImplemented,
         payload: Schema.Struct({
             friendCode: NimblebitConfig.PlayerIdSchema,
             verificationCode: Schema.String,
@@ -103,18 +108,34 @@ const TinyTowerRaffleEnterMulti = HttpApiEndpoint.post(
     }
 );
 
+/**
+ * The scope guarding a player's towers. Signing someone in is not enough to
+ * touch their towers: an application has to be granted this on top of
+ * `openid`/`profile`, and the player approves it on the consent screen.
+ *
+ * @since 1.0.0
+ */
+export const TOWERS_SCOPE = "towers";
+
+// Every endpoint is bearer authenticated: callers present an access token
+// minted by the Tinyburg OIDC provider, whether that is the first-party app,
+// a third-party application, or a long-lived api key.
 const LinkedTinyTowerAccountsGroup = HttpApiGroup.make("LinkedTinyTowerAccountsGroup")
     .add(TinyburgLinkedTinyTowerAccountsList)
     .add(TinyburgLinkedTinyTowerAccountsUnlink)
     .add(TinyburgLinkedTinyTowerAccountsLink)
-    .add(TinyburgLinkedTinyTowerAccountsVerify);
+    .add(TinyburgLinkedTinyTowerAccountsVerify)
+    .annotate(ResourceServer.OIDCScopes, [TOWERS_SCOPE])
+    .middleware(ResourceServer.Authorization);
 
 const TinyTowerGroup = HttpApiGroup.make("TinyTowerGroup")
     .add(TinyTowerSyncPullSave)
     .add(TinyTowerSyncPushSave)
     .add(TinyTowerRaffleCheckEnteredCurrent)
     .add(TinyTowerRaffleEnter)
-    .add(TinyTowerRaffleEnterMulti);
+    .add(TinyTowerRaffleEnterMulti)
+    .annotate(ResourceServer.OIDCScopes, [TOWERS_SCOPE])
+    .middleware(ResourceServer.Authorization);
 
 /** @since 1.0.0 */
 export const Api = HttpApi.make("TradingSdk").add(LinkedTinyTowerAccountsGroup).add(TinyTowerGroup);

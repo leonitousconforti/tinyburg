@@ -1,17 +1,38 @@
-import { Config, Encoding, Effect, Layer, Option, pipe, type Redacted, Result, Schema, String } from "effect";
-import {
-    Cookies,
-    HttpBody,
-    HttpClient,
-    HttpClientRequest,
-    HttpRouter,
-    HttpServerRequest,
-    HttpServerResponse,
-    Url,
-    UrlParams,
-} from "effect/unstable/http";
+import { Config, Encoding, Effect, Layer, Option, Redacted, Result, Schema, String } from "effect";
+import { Cookies, HttpRouter, HttpServerRequest, HttpServerResponse, Url, UrlParams } from "effect/unstable/http";
+
+import { Oidc } from "effect-oidc";
 
 import { UsersRepository } from "../../domain/users.ts";
+import { issueProviderSession } from "../providerSession.ts";
+
+/**
+ * Where to land after a federated login. Only local absolute paths are
+ * honoured, so a tampered `returnTo` can never bounce the browser off-site.
+ * `/oauth/authorize` uses this to resume an authorization it interrupted.
+ */
+const DEFAULT_DESTINATION = "/towers/@me";
+
+const sanitizeReturnTo = (returnTo: string | null): string =>
+    returnTo !== null && returnTo.startsWith("/") && !returnTo.startsWith("//") && !returnTo.includes("\\")
+        ? returnTo
+        : DEFAULT_DESTINATION;
+
+/**
+ * The post-login destination rides inside the OAuth state parameter, which
+ * already round-trips through the provider and is integrity-checked against
+ * the state cookie. Base64url contains no ".", keeping the separator
+ * unambiguous after the random prefix.
+ */
+const stateWithReturnTo = (state: string, returnTo: string | null): string =>
+    returnTo === null ? state : `${state}.${Encoding.encodeBase64Url(sanitizeReturnTo(returnTo))}`;
+
+const destinationFromState = (state: string): string => {
+    const separator = state.indexOf(".");
+    if (separator === -1) return DEFAULT_DESTINATION;
+    const decoded = Encoding.decodeBase64UrlString(state.slice(separator + 1));
+    return Result.isSuccess(decoded) ? sanitizeReturnTo(decoded.success) : DEFAULT_DESTINATION;
+};
 
 interface OAuthProvider {
     readonly name: "google" | "discord";
@@ -24,6 +45,7 @@ interface OAuthProvider {
         readonly clientId: string;
         readonly clientSecret: Redacted.Redacted;
         readonly redirectUri: string;
+        readonly jwksUri: string;
     }>;
 }
 
@@ -38,6 +60,7 @@ const google: OAuthProvider = {
         clientId: Config.string("GOOGLE_CLIENT_ID"),
         clientSecret: Config.redacted("GOOGLE_CLIENT_SECRET"),
         redirectUri: Config.string("GOOGLE_REDIRECT_URI"),
+        jwksUri: Config.string("GOOGLE_JWKS_URI"),
     }),
 };
 
@@ -52,6 +75,7 @@ const discord: OAuthProvider = {
         clientId: Config.string("DISCORD_CLIENT_ID"),
         clientSecret: Config.redacted("DISCORD_CLIENT_SECRET"),
         redirectUri: Config.string("DISCORD_REDIRECT_URI"),
+        jwksUri: Config.string("DISCORD_JWKS_URI"),
     }),
 };
 
@@ -73,13 +97,16 @@ const login = (provider: OAuthProvider) =>
     Effect.gen(function* () {
         const config = yield* Effect.orDie(provider.config);
         const secure = yield* Effect.orDie(SecureCookies);
+        const request = yield* HttpServerRequest.HttpServerRequest;
 
-        const state = randomStateGenerator();
+        // The state carries the post-login destination through the provider
+        // round trip, so an interrupted /oauth/authorize can resume.
+        const returnTo = new URL(request.originalUrl, "http://0.0.0.0").searchParams.get("returnTo");
+        const state = stateWithReturnTo(randomStateGenerator(), returnTo);
         const codeVerifier = randomStateGenerator();
 
         // Build the provider's OAuth authorization URL
-        const maybeAuthorizationUrl = pipe(
-            UrlParams.empty,
+        const maybeAuthorizationUrl = UrlParams.empty.pipe(
             UrlParams.set("client_id", config.clientId),
             UrlParams.set("redirect_uri", config.redirectUri),
             UrlParams.set("response_type", "code"),
@@ -150,24 +177,14 @@ const callback = (provider: OAuthProvider) =>
         }
 
         // Exchange the authorization code for tokens
-        const tokens = yield* HttpClientRequest.post(provider.tokenUrl, {
-            headers: { "User-Agent": "TinyburgApp/1.0" },
-            body: pipe(
-                UrlParams.empty,
-                UrlParams.set("grant_type", "authorization_code"),
-                UrlParams.set("code", urlParams.code),
-                UrlParams.set("redirect_uri", config.redirectUri),
-                UrlParams.set("client_id", config.clientId),
-                UrlParams.set("code_verifier", codeVerifierCookie.value),
-                HttpBody.urlParams
-            ),
-        }).pipe(
-            HttpClientRequest.acceptJson,
-            HttpClientRequest.basicAuth(config.clientId, config.clientSecret),
-            HttpClient.execute,
-            Effect.flatMap((response) => response.json),
-            Effect.flatMap(Schema.decodeUnknownEffect(OAuthResponseSchema))
-        );
+        const tokens = yield* Oidc.exchangeAuthorizationCode({
+            tokenEndpoint: provider.tokenUrl,
+            clientId: config.clientId,
+            clientSecret: Redacted.value(config.clientSecret),
+            redirectUri: config.redirectUri,
+            code: urlParams.code,
+            codeVerifier: codeVerifierCookie.value,
+        });
 
         // The state cookie has served its purpose, delete it
         const deleteStateCookie = Cookies.makeCookieUnsafe(provider.stateCookieName, String.empty, {
@@ -187,11 +204,21 @@ const callback = (provider: OAuthProvider) =>
             sameSite: "lax",
         });
 
+        // Verify the ID token and extract user information
+        const claims = yield* Oidc.verifyIdToken({
+            idToken: tokens.id_token ?? "",
+            clientId: config.clientId,
+            issuer: provider.name === "google" ? "https://accounts.google.com" : "https://discord.com",
+            jwks:
+                provider.name === "google"
+                    ? yield* Oidc.fetchJwks("https://www.googleapis.com/oauth2/v3/certs").pipe(Effect.orDie)
+                    : yield* Oidc.fetchJwks("https://discord.com/api/oauth2/keys").pipe(Effect.orDie),
+        });
+
         // Upsert the user
-        const claims = tokens.id_token;
         const providerAccountId = claims.sub;
-        const avatarUrl = Option.fromNullishOr(claims.picture as string | undefined);
-        const displayName = yield* Option.fromNullishOr(claims.name as string | undefined).pipe(Effect.fromOption);
+        const avatarUrl = Option.fromNullishOr(claims.picture);
+        const displayName = yield* Option.fromNullishOr(claims.name).pipe(Effect.fromOption);
         const user = yield* UsersRepository.use((repo) =>
             repo.upsertUserFromOAuth({
                 provider: provider.name,
@@ -201,8 +228,13 @@ const callback = (provider: OAuthProvider) =>
             })
         );
 
-        return HttpServerResponse.redirect("/towers/@me", {
-            cookies: Cookies.fromIterable([deleteStateCookie, deleteCodeVerifierCookie]),
+        // This browser is now signed in to the provider. The SPA gets no
+        // credential here; it runs the code flow against /oauth/authorize,
+        // which this session authenticates.
+        const sessionCookie = yield* issueProviderSession(user);
+
+        return HttpServerResponse.redirect(destinationFromState(urlParams.state), {
+            cookies: Cookies.fromIterable([sessionCookie, deleteStateCookie, deleteCodeVerifierCookie]),
         });
     });
 

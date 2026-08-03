@@ -8,8 +8,9 @@ import { PgClient, PgMigrator } from "@effect/sql-pg";
 
 import { DevelopersRepository } from "../domain/developers.ts";
 import { OIDCRepository } from "../domain/oidc.ts";
-import { SessionsRepository } from "../domain/sessions.ts";
+import { TinyTowerAccountsRepository } from "../domain/tinytower.ts";
 import { UsersRepository } from "../domain/users.ts";
+import { OidcKeys } from "./keys.ts";
 import { ApiLive } from "./routes/api.ts";
 import { OAuthRoutesLive } from "./routes/auth.ts";
 import { OidcProviderLive } from "./routes/oidc.ts";
@@ -31,14 +32,14 @@ const MigratorLive = Effect.gen(function* () {
 }).pipe(Layer.unwrap);
 
 const Repositories = Layer.mergeAll(
-    SessionsRepository.Default,
     DevelopersRepository.Default,
     UsersRepository.Default,
-    OIDCRepository.Default
+    OIDCRepository.Default,
+    TinyTowerAccountsRepository.Default
 );
 
 HttpRouter.serve(AllRoutes).pipe(
-    Layer.provide([Repositories, FetchHttpClient.layer]),
+    Layer.provide([Repositories, OidcKeys.Default, FetchHttpClient.layer]),
     Layer.provide(MigratorLive),
     Layer.provide(SqlLive),
     Layer.provide(

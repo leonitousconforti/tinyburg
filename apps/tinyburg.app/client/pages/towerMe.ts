@@ -1,7 +1,10 @@
 import { DateTime, Option } from "effect";
 
-import type { CurrentUser } from "../../shared/api.ts";
+import type { Account } from "../auth.ts";
+import type { LinkedTowers } from "../backend.ts";
 import type { Html, HtmlBuilder } from "foldkit/html";
+
+import { AsyncData } from "foldkit";
 
 import { appBackLink } from "../ui/chrome.ts";
 import { discordIcon, googleIcon } from "../ui/icons.ts";
@@ -23,7 +26,7 @@ const connectRow = <M>(h: HtmlBuilder<M>, href: string, icon: Html, label: strin
         ]
     );
 
-const avatar = <M>(h: HtmlBuilder<M>, user: CurrentUser): Html =>
+const avatar = <M>(h: HtmlBuilder<M>, user: Account): Html =>
     Option.match(user.avatarUrl, {
         onSome: (avatarUrl) =>
             h.img([
@@ -44,15 +47,59 @@ const avatar = <M>(h: HtmlBuilder<M>, user: CurrentUser): Html =>
             ),
     });
 
-export const towerMeView = <M>(h: HtmlBuilder<M>, user: CurrentUser): Html => {
-    const mayorSince = DateTime.format(user.createdAt, { locale: "en-US", month: "long", year: "numeric" });
-    const lastLogin = DateTime.format(user.lastLoginAt, {
-        locale: "en-US",
-        month: "long",
-        day: "numeric",
-        year: "numeric",
-    });
+/** The linked towers section, driven by the trading api. */
+const towerList = <M>(h: HtmlBuilder<M>, towers: LinkedTowers): Html => {
+    const empty = (message: string, detail: string): Html =>
+        h.div(
+            [h.Class("rounded-lg border-2 border-dashed border-gray-300 p-8 text-center")],
+            [
+                h.div([h.Class("mb-3 text-4xl")], ["🏗️"]),
+                h.p([h.Class("font-mono mb-1 text-2xl text-gray-600")], [message]),
+                h.p([h.Class("font-mono text-lg text-gray-500")], [detail]),
+            ]
+        );
 
+    const linked = (data: ReadonlyArray<{ readonly playerId: string; readonly createdAt: DateTime.Utc }>): Html =>
+        data.length === 0
+            ? empty(
+                  "No towers linked yet",
+                  "Link your TinyTower save to sync your bitizens and start trading with players worldwide."
+              )
+            : h.div(
+                  [h.Class("flex flex-col gap-4")],
+                  data.map((tower) =>
+                      h.keyed("div")(
+                          tower.playerId,
+                          [h.Class("rounded-lg border-2 border-gray-300 bg-white p-4")],
+                          [
+                              h.div([h.Class("font-mono text-2xl tracking-[0.2em] text-gray-800")], [tower.playerId]),
+                              h.div(
+                                  [h.Class("font-mono text-base text-gray-500")],
+                                  [
+                                      `Linked ${DateTime.format(tower.createdAt, {
+                                          locale: "en-US",
+                                          month: "long",
+                                          day: "numeric",
+                                          year: "numeric",
+                                      })}`,
+                                  ]
+                              ),
+                          ]
+                      )
+                  )
+              );
+
+    return AsyncData.match(towers, {
+        onIdle: () => empty("No towers linked yet", "Link your TinyTower save to start trading."),
+        onLoading: () => h.p([h.Class("font-mono text-xl text-gray-600")], ["Loading your towers..."]),
+        onFailure: (error) => h.p([h.Class("font-mono text-xl text-red-700")], [error]),
+        onRefreshing: linked,
+        onStale: ({ data }) => linked(data),
+        onSuccess: linked,
+    });
+};
+
+export const towerMeView = <M>(h: HtmlBuilder<M>, user: Account, towers: LinkedTowers): Html => {
     return h.div(
         [h.Class("relative z-10 flex min-h-screen flex-col items-center p-8 pt-24")],
         [
@@ -74,14 +121,7 @@ export const towerMeView = <M>(h: HtmlBuilder<M>, user: CurrentUser): Html => {
                                                 [h.Class("font-pixel mb-2 text-lg wrap-break-word text-gray-800")],
                                                 [user.displayName]
                                             ),
-                                            h.p(
-                                                [h.Class("font-mono text-xl text-gray-600")],
-                                                [`🏙️ Mayor since ${mayorSince}`]
-                                            ),
-                                            h.p(
-                                                [h.Class("font-mono text-base text-gray-500")],
-                                                [`Last login ${lastLogin}`]
-                                            ),
+                                            h.p([h.Class("font-mono text-xl text-gray-600")], ["🏙️ Mayor of Tinyburg"]),
                                         ]
                                     ),
                                     h.a(
@@ -115,19 +155,7 @@ export const towerMeView = <M>(h: HtmlBuilder<M>, user: CurrentUser): Html => {
                                     ),
                                 ]
                             ),
-                            h.div(
-                                [h.Class("rounded-lg border-2 border-dashed border-gray-300 p-8 text-center")],
-                                [
-                                    h.div([h.Class("mb-3 text-4xl")], ["🏗️"]),
-                                    h.p([h.Class("font-mono mb-1 text-2xl text-gray-600")], ["No towers linked yet"]),
-                                    h.p(
-                                        [h.Class("font-mono text-lg text-gray-500")],
-                                        [
-                                            "Link your TinyTower save to sync your bitizens and start trading with players worldwide.",
-                                        ]
-                                    ),
-                                ]
-                            ),
+                            towerList(h, towers),
                         ]
                     ),
                     h.section(
