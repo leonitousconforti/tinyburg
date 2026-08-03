@@ -45,7 +45,8 @@
         "codegen": "build-utils prepare-v4"
     },
     "dependencies": {
-        "@tinyburg/nimblebit-sdk": "workspace:^"
+        "@tinyburg/nimblebit-sdk": "workspace:^",
+        "effect-oidc": "0.0.4"
     },
     "devDependencies": {
         "effect": "4.0.0-beta.102"
