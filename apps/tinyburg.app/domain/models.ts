@@ -1,7 +1,7 @@
 import { Schema } from "effect";
 import { Model } from "effect/unstable/schema";
 
-import { PlayerAuthKeySchema, PlayerIdSchema } from "@tinyburg/nimblebit-sdk/NimblebitConfig";
+import { PlayerAuthKeySchema, PlayerEmailSchema, PlayerIdSchema } from "@tinyburg/nimblebit-sdk/NimblebitConfig";
 
 export class User extends Model.Class<User>("User")({
     id: Schema.String.check(Schema.isUUID()).pipe(Model.FieldExcept(["insert"])),
@@ -28,7 +28,7 @@ export class TinyTowerAccount extends Model.Class<TinyTowerAccount>("TinyTowerAc
     userId: Schema.String.check(Schema.isUUID()),
     playerId: PlayerIdSchema,
     playerAuthKey: PlayerAuthKeySchema,
-    playerEmail: Schema.String,
+    playerEmail: PlayerEmailSchema,
     createdAt: Model.DateTimeInsertFromDate,
 }) {}
 
@@ -36,7 +36,7 @@ export class PendingTinyTowerAccount extends Model.Class<PendingTinyTowerAccount
     id: Schema.String.check(Schema.isUUID()).pipe(Model.FieldExcept(["insert"])),
     userId: Schema.String.check(Schema.isUUID()),
     playerId: PlayerIdSchema,
-    playerEmail: Schema.String,
+    playerEmail: PlayerEmailSchema,
     createdAt: Model.DateTimeInsertFromDate,
     expiresAt: Schema.DateTimeUtcFromDate.pipe(Model.GeneratedByDb),
 }) {}
