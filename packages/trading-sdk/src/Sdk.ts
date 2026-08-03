@@ -116,4 +116,5 @@ const TinyTowerGroup = HttpApiGroup.make("TinyTowerGroup")
     .add(TinyTowerRaffleEnter)
     .add(TinyTowerRaffleEnterMulti);
 
+/** @since 1.0.0 */
 export const Sdk = HttpApi.make("TradingSdk").add(LinkedTinyTowerAccountsGroup).add(TinyTowerGroup);
