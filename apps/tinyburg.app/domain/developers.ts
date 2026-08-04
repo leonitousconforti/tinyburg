@@ -1,4 +1,4 @@
-import { Context, Effect, Layer, Schema } from "effect";
+import { Context, Effect, Function, Layer, Schema } from "effect";
 import { SqlClient, SqlSchema, SqlModel } from "effect/unstable/sql";
 
 import { OAuthClient } from "./models.ts";
@@ -16,7 +16,10 @@ export class DevelopersRepository extends Context.Service<DevelopersRepository>(
             });
 
             const createOAuthClient = oauthClients.insert;
-            const findOAuthClient = oauthClients.findById;
+            const findOAuthClient = Function.flow(oauthClients.findById, Effect.catchNoSuchElement);
+
+            const deleteOAuthClient = (clientId: string, ownerUserId: string) =>
+                Effect.asVoid(sql`DELETE FROM oauth_clients WHERE id = ${clientId} AND owner_user_id = ${ownerUserId}`);
 
             const listOAuthClients = SqlSchema.findAll({
                 Request: Schema.String.check(Schema.isUUID()),
@@ -28,16 +31,11 @@ export class DevelopersRepository extends Context.Service<DevelopersRepository>(
                 `,
             });
 
-            const deleteOAuthClient = (clientId: string, ownerUserId: string) =>
-                sql`DELETE FROM oauth_clients WHERE id = ${clientId} AND owner_user_id = ${ownerUserId}`.pipe(
-                    Effect.asVoid
-                );
-
             return {
                 createOAuthClient,
                 findOAuthClient,
-                listOAuthClients,
                 deleteOAuthClient,
+                listOAuthClients,
             };
         }),
     }
