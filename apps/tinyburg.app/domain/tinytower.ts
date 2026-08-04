@@ -1,3 +1,5 @@
+import type { SqlError } from "effect/unstable/sql";
+
 import { Context, Effect, Layer, Schema } from "effect";
 import { SqlClient, SqlSchema } from "effect/unstable/sql";
 
@@ -19,7 +21,10 @@ export class TinyTowerAccountsRepository extends Context.Service<TinyTowerAccoun
                 `,
             });
 
-            const unlink = (options: { userId: string; playerId: string }) =>
+            const unlink = (options: {
+                readonly userId: string;
+                readonly playerId: string;
+            }): Effect.Effect<void, SqlError.SqlError, never> =>
                 sql`
                     DELETE FROM tinytower_accounts
                     WHERE user_id = ${options.userId} AND player_id = ${options.playerId}

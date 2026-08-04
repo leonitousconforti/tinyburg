@@ -1,7 +1,9 @@
+import type { SqlError } from "effect/unstable/sql";
+
 import { Context, Effect, Function, Layer, Schema } from "effect";
 import { SqlClient, SqlSchema, SqlModel } from "effect/unstable/sql";
 
-import { User } from "./models.ts";
+import { OAuthAccount, User } from "./models.ts";
 
 export class UsersRepository extends Context.Service<UsersRepository>()(
     "@tinyburg/tinyburg.app/domain/UsersRepository",
@@ -16,59 +18,134 @@ export class UsersRepository extends Context.Service<UsersRepository>()(
             });
 
             const findUserById = Function.flow(users.findById, Effect.catchNoSuchElement);
-            const upsertUserFromOAuth = SqlSchema.findOne({
+            const signInWithOAuth = SqlSchema.findOne({
                 Result: User,
                 Request: Schema.Struct({
-                    provider: Schema.Literals(["google", "discord"]),
+                    provider: OAuthAccount.fields.provider,
                     providerAccountId: Schema.String,
                     displayName: Schema.String,
+                    email: Schema.OptionFromNullishOr(Schema.String, { onNoneEncoding: null }),
                     avatarUrl: Schema.OptionFromNullishOr(Schema.String, { onNoneEncoding: null }),
                 }),
-                execute: ({ avatarUrl, displayName, provider, providerAccountId }) => sql`
+                execute: ({ avatarUrl, displayName, email, provider, providerAccountId }) => sql`
                 WITH lock AS (
                     -- Acquire an advisory lock to prevent race conditions for the same OAuth account
                     SELECT pg_advisory_xact_lock(hashtext(${provider} || ':' || ${providerAccountId}))
                 ),
-                existing_user AS (
-                    -- Try to find the user linked to this oauth account
-                    SELECT u.* FROM oauth_accounts oa
-                    JOIN users u ON u.id = oa.user_id
-                    WHERE oa.provider = ${provider} AND oa.provider_account_id = ${providerAccountId}
+                existing_account AS (
+                    -- The account this provider account already belongs to, if any
+                    SELECT user_id FROM oauth_accounts
+                    WHERE provider = ${provider} AND provider_account_id = ${providerAccountId}
                 ),
-                updated_user AS (
-                    -- Update the existing user's profile if found
-                    UPDATE users SET
+                new_user AS (
+                    -- Insert a new user only if this provider account is a stranger
+                    INSERT INTO users (display_name, avatar_url, last_login_at)
+                    SELECT ${displayName}, ${avatarUrl}, NOW()
+                    WHERE NOT EXISTS (SELECT 1 FROM existing_account)
+                    RETURNING *
+                ),
+                new_account AS (
+                    -- Link the provider account to the user it just created
+                    INSERT INTO oauth_accounts (
+                        provider, provider_account_id, user_id, email, display_name, avatar_url
+                    )
+                    SELECT ${provider}, ${providerAccountId}, id, ${email}, ${displayName}, ${avatarUrl}
+                    FROM new_user
+                    ON CONFLICT (provider, provider_account_id) DO NOTHING
+                ),
+                refreshed_account AS (
+                    -- Or refresh what the provider says about a link we already hold
+                    UPDATE oauth_accounts SET
+                        email = ${email},
                         display_name = ${displayName},
                         avatar_url = ${avatarUrl},
                         last_login_at = NOW()
-                    WHERE id = (SELECT id FROM existing_user)
+                    WHERE provider = ${provider} AND provider_account_id = ${providerAccountId}
+                ),
+                returning_user AS (
+                    UPDATE users SET last_login_at = NOW()
+                    WHERE id = (SELECT user_id FROM existing_account)
                     RETURNING *
-                ),
-                new_user AS (
-                    -- Insert a new user only if one wasn't found
-                    INSERT INTO users (display_name, avatar_url, last_login_at)
-                    SELECT ${displayName}, ${avatarUrl}, NOW()
-                    WHERE NOT EXISTS (SELECT 1 FROM existing_user)
-                    RETURNING *
-                ),
-                final_user AS (
-                    SELECT * FROM updated_user
-                    UNION ALL
-                    SELECT * FROM new_user
-                ),
-                linked_account AS (
-                    -- Link the oauth account to the new user (no-op if already linked)
-                    INSERT INTO oauth_accounts (provider, provider_account_id, user_id)
-                    SELECT ${provider}, ${providerAccountId}, id FROM new_user
-                    ON CONFLICT (provider, provider_account_id) DO NOTHING
                 )
-                SELECT * FROM final_user;
+                SELECT * FROM returning_user
+                UNION ALL
+                SELECT * FROM new_user;
             `,
             });
 
+            const attemptLink = SqlSchema.findOne({
+                Request: Schema.Struct({
+                    userId: Schema.String.check(Schema.isUUID()),
+                    provider: OAuthAccount.fields.provider,
+                    providerAccountId: Schema.String,
+                    displayName: Schema.String,
+                    email: Schema.OptionFromNullishOr(Schema.String, { onNoneEncoding: null }),
+                    avatarUrl: Schema.OptionFromNullishOr(Schema.String, { onNoneEncoding: null }),
+                }),
+                Result: Schema.Struct({ outcome: Schema.Literals(["linked", "alreadyLinked", "taken"]) }),
+                execute: ({ avatarUrl, displayName, email, provider, providerAccountId, userId }) => sql`
+                    WITH inserted AS (
+                        INSERT INTO oauth_accounts (
+                            provider, provider_account_id, user_id, email, display_name, avatar_url
+                        )
+                        VALUES (
+                            ${provider}, ${providerAccountId}, ${userId}, ${email}, ${displayName}, ${avatarUrl}
+                        )
+                        ON CONFLICT (provider, provider_account_id) DO NOTHING
+                        RETURNING user_id
+                    )
+                    SELECT CASE
+                        WHEN EXISTS (SELECT 1 FROM inserted) THEN 'linked'
+                        -- Nothing was inserted, so the row was already there
+                        -- before this statement began: this account's, or
+                        -- somebody else's.
+                        WHEN (
+                            SELECT user_id FROM oauth_accounts
+                            WHERE provider = ${provider} AND provider_account_id = ${providerAccountId}
+                        ) = ${userId} THEN 'alreadyLinked'
+                        ELSE 'taken'
+                    END AS outcome
+                `,
+            });
+
+            const linkOAuthAccount = Function.flow(
+                attemptLink,
+                Effect.map((row) => row.outcome)
+            );
+
+            const listOAuthAccounts = SqlSchema.findAll({
+                Request: Schema.String.check(Schema.isUUID()),
+                Result: OAuthAccount,
+                execute: (userId) => sql`
+                    SELECT * FROM oauth_accounts
+                    WHERE user_id = ${userId}
+                    ORDER BY created_at ASC
+                `,
+            });
+
+            const unlinkOAuthAccount = (options: {
+                readonly userId: string;
+                readonly provider: typeof OAuthAccount.fields.provider.Type;
+                readonly providerAccountId: string;
+            }): Effect.Effect<boolean, SqlError.SqlError, never> =>
+                Effect.map(
+                    sql`
+                        DELETE FROM oauth_accounts
+                        WHERE user_id = ${options.userId}
+                          AND provider = ${options.provider}
+                          AND provider_account_id = ${options.providerAccountId}
+                          AND (SELECT COUNT(*) FROM oauth_accounts WHERE user_id = ${options.userId}) > 1
+                        RETURNING provider
+                    `,
+                    (rows) => rows.length > 0
+                );
+
             return {
                 findUserById,
-                upsertUserFromOAuth,
+                signInWithOAuth,
+                linkOAuthAccount,
+                listOAuthAccounts,
+                unlinkOAuthAccount,
             };
         }),
     }

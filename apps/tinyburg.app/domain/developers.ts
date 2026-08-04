@@ -1,3 +1,5 @@
+import type { SqlError } from "effect/unstable/sql";
+
 import { Context, Effect, Function, Layer, Schema } from "effect";
 import { SqlClient, SqlSchema, SqlModel } from "effect/unstable/sql";
 
@@ -18,8 +20,14 @@ export class DevelopersRepository extends Context.Service<DevelopersRepository>(
             const createOAuthClient = oauthClients.insert;
             const findOAuthClient = Function.flow(oauthClients.findById, Effect.catchNoSuchElement);
 
-            const deleteOAuthClient = (clientId: string, ownerUserId: string) =>
-                Effect.asVoid(sql`DELETE FROM oauth_clients WHERE id = ${clientId} AND owner_user_id = ${ownerUserId}`);
+            const deleteOAuthClient = (options: {
+                readonly clientId: string;
+                readonly ownerUserId: string;
+            }): Effect.Effect<void, SqlError.SqlError, never> =>
+                sql`
+                    DELETE FROM oauth_clients
+                    WHERE id = ${options.clientId} AND owner_user_id = ${options.ownerUserId}
+                `.pipe(Effect.asVoid);
 
             const listOAuthClients = SqlSchema.findAll({
                 Request: Schema.String.check(Schema.isUUID()),
