@@ -3,6 +3,8 @@ import { Headers, HttpRouter, HttpServerRequest } from "effect/unstable/http";
 import { HttpApiBuilder, HttpApiError } from "effect/unstable/httpapi";
 import { Model } from "effect/unstable/schema";
 
+import type { Session, User } from "../../domain/models.ts";
+
 import { Api } from "@tinyburg/trading-sdk/Sdk";
 import { Oidc, ResourceServer } from "effect-oidc";
 
@@ -10,12 +12,10 @@ import { OidcRepository } from "../../domain/oidc.ts";
 import { SessionsRepository } from "../../domain/sessions.ts";
 import { sha256 } from "../crypto.ts";
 import { OidcKeys } from "../keys.ts";
-import { CurrentUser } from "../providerSession.ts";
 
-const accessTokenFor = Effect.gen(function* () {
+const accessTokenFor = Effect.fnUntraced(function* ({ session, user }: { session: Session; user: User }) {
     const keys = yield* OidcKeys;
     const now = yield* DateTime.now;
-    const { session, user } = yield* CurrentUser;
 
     /** A token this close to expiring is replaced rather than reused. */
     const REFRESH_SKEW = Duration.minutes(1);
@@ -84,10 +84,7 @@ const SessionBearer = HttpRouter.middleware(
                 ).pipe(Effect.catch(() => Effect.succeedNone));
 
                 if (Option.isNone(maybeSessionAndUser)) return yield* httpEffect;
-                const accessToken = yield* accessTokenFor.pipe(
-                    Effect.provideService(CurrentUser, maybeSessionAndUser.value),
-                    Effect.orDie
-                );
+                const accessToken = yield* Effect.orDie(accessTokenFor(maybeSessionAndUser.value));
 
                 return yield* Effect.provideService(
                     httpEffect,
