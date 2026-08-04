@@ -4,10 +4,12 @@ import { SqlClient } from "effect/unstable/sql";
 export default Effect.flatMap(
     SqlClient.SqlClient,
     (sql) => sql`
-        -- OAuth applications registered by developers
+        -- OAuth applications registered by developers. The first party has no
+        -- owner to speak of, so the column is nullable and only a developer's
+        -- own apps go when their account does.
         CREATE TABLE IF NOT EXISTS oauth_clients (
             id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-            owner_user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+            owner_user_id UUID REFERENCES users(id) ON DELETE CASCADE,
             name TEXT NOT NULL,
             secret_hash TEXT,                                   -- SHA-256 (base64url) of the client secret
             redirect_uris TEXT[] NOT NULL,                      -- Exact-match allow list
