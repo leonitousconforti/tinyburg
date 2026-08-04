@@ -1,4 +1,4 @@
-import { DateTime, Duration, Effect, Layer, Option } from "effect";
+import { DateTime, Duration, Effect, Layer, Option, Schema } from "effect";
 import { Headers, HttpRouter, HttpServerRequest } from "effect/unstable/http";
 import { HttpApiBuilder, HttpApiError } from "effect/unstable/httpapi";
 import { Model } from "effect/unstable/schema";
@@ -6,7 +6,7 @@ import { Model } from "effect/unstable/schema";
 import type { Session, User } from "../../domain/models.ts";
 
 import { Api } from "@tinyburg/trading-sdk/Sdk";
-import { Oidc, ResourceServer } from "effect-oidc";
+import { Oidc, ResourceServer, Jwt } from "effect-oidc";
 
 import { DevelopersRepository } from "../../domain/developers.ts";
 import { OidcRepository } from "../../domain/oidc.ts";
@@ -46,12 +46,15 @@ const accessTokenFor = Effect.fnUntraced(function* ({ session, user }: { session
         ttlSeconds: ACCESS_TOKEN_TTL_SECONDS,
     });
 
-    const accessTokenJti = Option.none<string>(); // yield* claim(accessToken, "jti"); FIXME: this needs to be fixed
+    const claims = yield* Schema.decodeEffect(Schema.fromJsonString(Jwt.StandardClaimsSchema))(
+        accessToken.split(".")[1]
+    );
+
     yield* SessionsRepository.use((repo) =>
         repo.storeAccessToken({
             ...session,
             accessToken: Option.some(accessToken),
-            accessTokenJti: accessTokenJti,
+            accessTokenJti: Option.fromNullishOr(claims.jti),
             expiresAt: now.pipe(DateTime.addDuration(Duration.seconds(ACCESS_TOKEN_TTL_SECONDS)), Model.Override),
             createdAt: session.createdAt.pipe(Model.Override),
             lastSeenAt: now.pipe(Model.Override),
@@ -69,11 +72,11 @@ const SessionBearer = HttpRouter.middleware(
         return Effect.fnUntraced(
             function* (httpEffect) {
                 const request = yield* HttpServerRequest.HttpServerRequest;
-                if (request.headers.authorization !== undefined) {
+                if (Headers.has(request.headers, "authorization")) {
                     return yield* httpEffect;
                 }
 
-                const cookie = Option.fromNullishOr(request.cookies["provider_session"]);
+                const cookie = Option.fromNullishOr(request.cookies[SessionsRepository.PROVIDER_SESSION_COOKIE_NAME]);
                 if (Option.isNone(cookie)) return yield* httpEffect;
 
                 const tokenHash = yield* sha256(cookie.value);
