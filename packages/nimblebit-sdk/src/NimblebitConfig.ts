@@ -27,7 +27,7 @@ export const PlayerIdSchema = Schema.String.pipe(
  * @since 1.0.0
  * @category Schema
  */
-export const PlayerEmailSchema = Schema.String.pipe(Schema.Redacted, Schema.brand("PlayerEmail"));
+export const PlayerEmailSchema = Schema.String.pipe(Schema.RedactedFromValue, Schema.brand("PlayerEmail"));
 
 /**
  * @since 1.0.0
@@ -35,7 +35,7 @@ export const PlayerEmailSchema = Schema.String.pipe(Schema.Redacted, Schema.bran
  */
 export const PlayerAuthKeySchema = Schema.String.pipe(
     Schema.check(Schema.isUUID()),
-    Schema.Redacted,
+    Schema.RedactedFromValue,
     Schema.brand("PlayerAuthKey")
 );
 
@@ -61,7 +61,7 @@ export const AuthenticatedPlayerSchema = Schema.Struct({
  * @since 1.0.0
  * @category Schema
  */
-export const NimblebitAuthKeySchema = Schema.String.pipe(Schema.Redacted, Schema.brand("NimblebitAuthKey"));
+export const NimblebitAuthKeySchema = Schema.String.pipe(Schema.RedactedFromValue, Schema.brand("NimblebitAuthKey"));
 
 /**
  * @since 1.0.0

@@ -12,9 +12,6 @@ const TinyburgLinkedTinyTowerAccountsList = HttpApiEndpoint.get(
     "TinyburgLinkedTinyTowerAccountsList",
     "/v1/tinytower/linkedAccounts/list",
     {
-        // The cloud sync email is deliberately absent: it is write-only
-        // input for linking, `Schema.Redacted` cannot cross a json boundary,
-        // and echoing it back would leak a player's address to every client.
         success: Schema.Array(
             Schema.Struct({
                 playerId: NimblebitConfig.PlayerIdSchema,

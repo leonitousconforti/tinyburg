@@ -1,17 +1,7 @@
 import { Schema } from "effect";
 import { Model } from "effect/unstable/schema";
 
-import { PlayerIdSchema } from "@tinyburg/nimblebit-sdk/NimblebitConfig";
-
-/**
- * The sdk's redacted schemas are opaque on both sides - they expect a
- * `Redacted` going in as well as coming out - so a text column cannot decode
- * through them. These wrap the raw column value instead, landing on the same
- * branded `Redacted` type the sdk and the api speak.
- */
-const PlayerEmailFromColumn = Schema.RedactedFromValue(Schema.String).pipe(Schema.brand("PlayerEmail"));
-
-const PlayerAuthKeyFromColumn = Schema.RedactedFromValue(Schema.String).pipe(Schema.brand("PlayerAuthKey"));
+import { PlayerAuthKeySchema, PlayerEmailSchema, PlayerIdSchema } from "@tinyburg/nimblebit-sdk/NimblebitConfig";
 
 export class User extends Model.Class<User>("User")({
     id: Schema.String.check(Schema.isUUID()).pipe(Model.FieldExcept(["insert"])),
@@ -37,8 +27,8 @@ export class TinyTowerAccount extends Model.Class<TinyTowerAccount>("TinyTowerAc
     id: Schema.String.check(Schema.isUUID()).pipe(Model.FieldExcept(["insert"])),
     userId: Schema.String.check(Schema.isUUID()),
     playerId: PlayerIdSchema,
-    playerAuthKey: PlayerAuthKeyFromColumn,
-    playerEmail: PlayerEmailFromColumn,
+    playerAuthKey: PlayerAuthKeySchema,
+    playerEmail: PlayerEmailSchema,
     createdAt: Model.DateTimeInsertFromDate,
 }) {}
 
@@ -46,7 +36,7 @@ export class PendingTinyTowerAccount extends Model.Class<PendingTinyTowerAccount
     id: Schema.String.check(Schema.isUUID()).pipe(Model.FieldExcept(["insert"])),
     userId: Schema.String.check(Schema.isUUID()),
     playerId: PlayerIdSchema,
-    playerEmail: PlayerEmailFromColumn,
+    playerEmail: PlayerEmailSchema,
     createdAt: Model.DateTimeInsertFromDate,
     expiresAt: Schema.DateTimeUtcFromDate.pipe(Model.GeneratedByDb),
 }) {}
