@@ -5,7 +5,6 @@
     "type": "module",
     "scripts": {
         "build": "vite build",
-        "dev": "vite",
         "start": "node server/index.ts"
     },
     "dependencies": {
