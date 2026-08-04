@@ -293,9 +293,15 @@ importers:
 
   packages/nimblebit-sdk:
     devDependencies:
+      '@effect/vitest':
+        specifier: 4.0.0-beta.102
+        version: 4.0.0-beta.102(effect@4.0.0-beta.102)(vitest@4.1.10)
       effect:
         specifier: 4.0.0-beta.102
         version: 4.0.0-beta.102
+      vitest:
+        specifier: 4.1.10
+        version: 4.1.10
 
   packages/tinytower-sdk:
     dependencies:
@@ -3280,7 +3286,6 @@ packages:
       '@vitest/ui': 4.1.10
       happy-dom: '*'
       jsdom: '*'
-      vite: ^6.0.0 || ^7.0.0 || ^8.0.0
     peerDependenciesMeta:
       '@edge-runtime/vm':
         optional: true
@@ -3907,6 +3912,11 @@ snapshots:
       effect: 4.0.0-beta.102
       vitest: 4.1.10(vite@8.1.5)
 
+  '@effect/vitest@4.0.0-beta.102(effect@4.0.0-beta.102)(vitest@4.1.10)':
+    dependencies:
+      effect: 4.0.0-beta.102
+      vitest: 4.1.10
+
   '@efffrida/frida-tools@0.0.47(effect@4.0.0-beta.102)':
     dependencies:
       effect: 4.0.0-beta.102
@@ -4519,6 +4529,12 @@ snapshots:
       '@vitest/utils': 4.1.10
       chai: 6.2.2
       tinyrainbow: 3.1.0
+
+  '@vitest/mocker@4.1.10':
+    dependencies:
+      '@vitest/spy': 4.1.10
+      estree-walker: 3.0.3
+      magic-string: 0.30.21
 
   '@vitest/mocker@4.1.10(vite@8.1.5(@types/node@26.1.2)(tsx@4.23.1))':
     dependencies:
@@ -6168,6 +6184,31 @@ snapshots:
       fsevents: 2.3.3
       tsx: 4.23.1
 
+  vitest@4.1.10:
+    dependencies:
+      '@vitest/expect': 4.1.10
+      '@vitest/mocker': 4.1.10
+      '@vitest/pretty-format': 4.1.10
+      '@vitest/runner': 4.1.10
+      '@vitest/snapshot': 4.1.10
+      '@vitest/spy': 4.1.10
+      '@vitest/utils': 4.1.10
+      es-module-lexer: 2.3.1
+      expect-type: 1.4.0
+      magic-string: 0.30.21
+      obug: 2.1.4
+      pathe: 2.0.3
+      picomatch: 4.0.5
+      std-env: 4.2.0
+      tinybench: 2.9.0
+      tinyexec: 1.2.4
+      tinyglobby: 0.2.17
+      tinyrainbow: 3.1.0
+      why-is-node-running: 2.3.0
+    transitivePeerDependencies:
+      - msw
+      - vite
+
   vitest@4.1.10(@types/node@26.1.2)(@vitest/coverage-v8@4.1.10)(vite@8.1.5(@types/node@26.1.2)(tsx@4.23.1)):
     dependencies:
       '@vitest/expect': 4.1.10
@@ -6188,13 +6229,13 @@ snapshots:
       tinyexec: 1.2.4
       tinyglobby: 0.2.17
       tinyrainbow: 3.1.0
-      vite: 8.1.5(@types/node@26.1.2)(tsx@4.23.1)
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@types/node': 26.1.2
       '@vitest/coverage-v8': 4.1.10(vitest@4.1.10)
     transitivePeerDependencies:
       - msw
+      - vite
 
   vitest@4.1.10(vite@8.1.5):
     dependencies:
@@ -6216,10 +6257,10 @@ snapshots:
       tinyexec: 1.2.4
       tinyglobby: 0.2.17
       tinyrainbow: 3.1.0
-      vite: 8.1.5
       why-is-node-running: 2.3.0
     transitivePeerDependencies:
       - msw
+      - vite
 
   walkdir@0.4.1: {}
 
