@@ -1,4 +1,4 @@
-import type { SqlError, Statement } from "effect/unstable/sql";
+import type { SqlConnection, SqlError, Statement } from "effect/unstable/sql";
 
 import { Context, DateTime, Duration, Effect, Layer, Option, Schema, SchemaGetter } from "effect";
 import { Model } from "effect/unstable/schema";
@@ -137,7 +137,9 @@ export class SessionsRepository extends Context.Service<SessionsRepository>()(
                 `,
             });
 
-            const revokeWhere = (where: Statement.Fragment) => sql`
+            const revokeWhere = (
+                where: Statement.Fragment
+            ): Effect.Effect<ReadonlyArray<SqlConnection.Row>, SqlError.SqlError, never> => sql`
                 WITH deleted AS (
                     DELETE FROM sessions WHERE ${where}
                     RETURNING id, access_token_jti, access_token_expires_at
@@ -177,19 +179,7 @@ export class SessionsRepository extends Context.Service<SessionsRepository>()(
                     (rows) => rows.length
                 );
 
-            const storeAccessToken = (options: {
-                readonly sessionId: string;
-                readonly accessToken: string;
-                readonly accessTokenJti: Option.Option<string>;
-                readonly expiresAt: Date;
-            }): Effect.Effect<void, SqlError.SqlError, never> =>
-                sql`
-                    UPDATE sessions
-                    SET access_token = ${options.accessToken},
-                        access_token_expires_at = ${options.expiresAt},
-                        access_token_jti = ${Option.getOrNull(options.accessTokenJti)}
-                    WHERE id = ${options.sessionId}
-                `.pipe(Effect.asVoid);
+            const storeAccessToken = sessions.updateVoid;
 
             return {
                 createSession,

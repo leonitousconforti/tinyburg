@@ -26,9 +26,9 @@ export class Session extends Model.Class<Session>("Session")({
     id: Schema.String.check(Schema.isUUID()).pipe(Model.FieldExcept(["insert"])),
     userId: Schema.String.check(Schema.isUUID()),
     tokenHash: Model.Sensitive(Schema.String.check(Schema.isBase64Url())),
-    createdAt: Model.DateTimeInsertFromDate,
-    expiresAt: Model.DateTimeInsertFromDate,
-    lastSeenAt: Model.DateTimeInsertFromDate,
+    createdAt: Model.DateTimeUpdateFromDate,
+    expiresAt: Model.DateTimeUpdateFromDate,
+    lastSeenAt: Model.DateTimeUpdateFromDate,
     userAgent: Schema.OptionFromNullishOr(Schema.String, { onNoneEncoding: null }),
     ip: Schema.OptionFromNullishOr(Schema.String, { onNoneEncoding: null }),
     accessToken: Schema.OptionFromNullishOr(Schema.String, { onNoneEncoding: null }).pipe(

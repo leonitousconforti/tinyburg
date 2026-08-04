@@ -1,3 +1,5 @@
+import type { SqlError } from "effect/unstable/sql";
+
 import { Context, Effect, Layer, Schema } from "effect";
 import { SqlClient, SqlSchema, SqlModel } from "effect/unstable/sql";
 
@@ -50,14 +52,17 @@ export class OidcRepository extends Context.Service<OidcRepository>()("@tinyburg
             `,
         });
 
-        const revokeToken = (options: { jti: string; expiresAt: Date }) =>
+        const revokeToken = (options: {
+            readonly jti: string;
+            readonly expiresAt: Date;
+        }): Effect.Effect<void, SqlError.SqlError, never> =>
             sql`
                 INSERT INTO revoked_tokens (jti, expires_at)
                 VALUES (${options.jti}, ${options.expiresAt})
                 ON CONFLICT (jti) DO NOTHING
             `.pipe(Effect.asVoid);
 
-        const isTokenRevoked = (jti: string) =>
+        const isTokenRevoked = (jti: string): Effect.Effect<boolean, SqlError.SqlError, never> =>
             Effect.map(
                 sql`SELECT 1 FROM revoked_tokens WHERE jti = ${jti} AND expires_at > NOW()`,
                 (rows) => rows.length > 0
