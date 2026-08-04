@@ -1,7 +1,17 @@
 import { Schema } from "effect";
 import { Model } from "effect/unstable/schema";
 
-import { PlayerAuthKeySchema, PlayerIdSchema } from "@tinyburg/nimblebit-sdk/NimblebitConfig";
+import { PlayerIdSchema } from "@tinyburg/nimblebit-sdk/NimblebitConfig";
+
+/**
+ * The sdk's redacted schemas are opaque on both sides - they expect a
+ * `Redacted` going in as well as coming out - so a text column cannot decode
+ * through them. These wrap the raw column value instead, landing on the same
+ * branded `Redacted` type the sdk and the api speak.
+ */
+const PlayerEmailFromColumn = Schema.RedactedFromValue(Schema.String).pipe(Schema.brand("PlayerEmail"));
+
+const PlayerAuthKeyFromColumn = Schema.RedactedFromValue(Schema.String).pipe(Schema.brand("PlayerAuthKey"));
 
 export class User extends Model.Class<User>("User")({
     id: Schema.String.check(Schema.isUUID()).pipe(Model.FieldExcept(["insert"])),
@@ -18,19 +28,17 @@ export class OAuthAccount extends Model.Class<OAuthAccount>("OAuthAccount")({
     createdAt: Model.DateTimeInsertFromDate,
 }) {}
 
-export class Session extends Model.Class<Session>("Session")({
-    id: Schema.String.check(Schema.isUUID()).pipe(Model.FieldExcept(["insert"])),
-    userId: Schema.String.check(Schema.isUUID()),
-    createdAt: Model.DateTimeInsertFromDate,
+export class RevokedToken extends Model.Class<RevokedToken>("RevokedToken")({
     expiresAt: Model.DateTimeInsertFromDate,
+    jti: Schema.String,
 }) {}
 
 export class TinyTowerAccount extends Model.Class<TinyTowerAccount>("TinyTowerAccount")({
     id: Schema.String.check(Schema.isUUID()).pipe(Model.FieldExcept(["insert"])),
     userId: Schema.String.check(Schema.isUUID()),
     playerId: PlayerIdSchema,
-    playerAuthKey: PlayerAuthKeySchema,
-    playerEmail: Schema.String,
+    playerAuthKey: PlayerAuthKeyFromColumn,
+    playerEmail: PlayerEmailFromColumn,
     createdAt: Model.DateTimeInsertFromDate,
 }) {}
 
@@ -38,16 +46,17 @@ export class PendingTinyTowerAccount extends Model.Class<PendingTinyTowerAccount
     id: Schema.String.check(Schema.isUUID()).pipe(Model.FieldExcept(["insert"])),
     userId: Schema.String.check(Schema.isUUID()),
     playerId: PlayerIdSchema,
-    playerEmail: Schema.String,
+    playerEmail: PlayerEmailFromColumn,
     createdAt: Model.DateTimeInsertFromDate,
     expiresAt: Schema.DateTimeUtcFromDate.pipe(Model.GeneratedByDb),
 }) {}
 
 export class OAuthClient extends Model.Class<OAuthClient>("OAuthClient")({
     id: Schema.String.check(Schema.isUUID()).pipe(Model.FieldExcept(["insert"])),
-    ownerUserId: Schema.String.check(Schema.isUUID()),
+    // First-party clients belong to the platform rather than to a developer
+    ownerUserId: Schema.OptionFromNullishOr(Schema.String.check(Schema.isUUID()), { onNoneEncoding: null }),
     name: Schema.String,
-    secretHash: Schema.String,
+    secretHash: Schema.OptionFromNullishOr(Schema.String, { onNoneEncoding: null }),
     redirectUris: Schema.Array(Schema.String),
     scope: Schema.String,
     createdAt: Model.DateTimeInsertFromDate,

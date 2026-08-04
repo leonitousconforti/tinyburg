@@ -15,7 +15,7 @@ export default Effect.flatMap(
 
         -- OAuth accounts table for linking OAuth providers to users
         CREATE TABLE IF NOT EXISTS oauth_accounts (
-            user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+            user_id UUID NOT NULL REFERENCES users(id),
             provider TEXT NOT NULL CHECK (provider IN ('google', 'discord')),
             provider_account_id TEXT NOT NULL,
             created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -24,11 +24,9 @@ export default Effect.flatMap(
             PRIMARY KEY (provider, provider_account_id)
         );
 
-        -- Sessions table for managing user sessions
-        CREATE TABLE IF NOT EXISTS sessions (
-            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-            user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-            created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        -- Revoked tokens table for storing JWT IDs of revoked tokens
+        CREATE TABLE IF NOT EXISTS revoked_tokens (
+            jti TEXT PRIMARY KEY,
             expires_at TIMESTAMPTZ NOT NULL
         );
 
@@ -60,7 +58,8 @@ export default Effect.flatMap(
 
         -- Indexes for common query patterns
         CREATE INDEX IF NOT EXISTS idx_oauth_accounts_user_id ON oauth_accounts(user_id);
-        CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON sessions(user_id);
+        CREATE INDEX IF NOT EXISTS idx_oauth_accounts_provider ON oauth_accounts(provider);
+        CREATE INDEX IF NOT EXISTS idx_revoked_tokens_expires_at ON revoked_tokens(expires_at);
         CREATE INDEX IF NOT EXISTS idx_tinytower_accounts_user_id ON tinytower_accounts(user_id);
         CREATE INDEX IF NOT EXISTS idx_tinytower_accounts_player_id ON tinytower_accounts(player_id);
         CREATE INDEX IF NOT EXISTS idx_pending_tinytower_accounts_user_id ON pending_tinytower_accounts(user_id);

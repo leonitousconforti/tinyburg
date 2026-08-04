@@ -1,5 +1,15 @@
 {
-    "extends": "astro/tsconfigs/strict",
-    "include": [".astro/types.d.ts", "**/*"],
-    "exclude": ["dist"]
+    "extends": "../../tsconfig.base.jsonc",
+    "references": [{ "path": "../../packages/nimblebit-sdk/tsconfig.src.json" }],
+    "include": ["client", "domain", "migrations", "server", "shared", "vite.config.ts"],
+    "compilerOptions": {
+        "noEmit": true,
+        "declaration": false,
+        "declarationMap": false,
+        "composite": false,
+        "incremental": false,
+        "types": ["node", "vite/client"],
+        "allowImportingTsExtensions": true,
+        "rewriteRelativeImportExtensions": false
+    }
 }

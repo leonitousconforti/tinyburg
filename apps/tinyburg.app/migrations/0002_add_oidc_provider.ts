@@ -9,7 +9,7 @@ export default Effect.flatMap(
             id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
             owner_user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
             name TEXT NOT NULL,
-            secret_hash TEXT NOT NULL,                          -- SHA-256 (base64url) of the client secret
+            secret_hash TEXT,                                   -- SHA-256 (base64url) of the client secret
             redirect_uris TEXT[] NOT NULL,                      -- Exact-match allow list
             scope TEXT NOT NULL DEFAULT 'openid profile',       -- Space-delimited scopes the client may request
             created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
