@@ -4,7 +4,7 @@ import { Cookies, HttpRouter, HttpServerRequest, HttpServerResponse, Url, UrlPar
 import { Oidc } from "effect-oidc";
 
 import { UsersRepository } from "../../domain/users.ts";
-import { issueProviderSession } from "../providerSession.ts";
+import { randomSecret, sha256 } from "../crypto.ts";
 
 /**
  * Where to land after a federated login. Only local absolute paths are
@@ -13,31 +13,58 @@ import { issueProviderSession } from "../providerSession.ts";
  */
 const DEFAULT_DESTINATION = "/towers/@me";
 
+/** Where the connected accounts live, for a link round trip to return to. */
+const ACCOUNTS_DESTINATION = "/towers/@me";
+
 const sanitizeReturnTo = (returnTo: string | null): string =>
     returnTo !== null && returnTo.startsWith("/") && !returnTo.startsWith("//") && !returnTo.includes("\\")
         ? returnTo
         : DEFAULT_DESTINATION;
 
 /**
- * The post-login destination rides inside the OAuth state parameter, which
- * already round-trips through the provider and is integrity-checked against
- * the state cookie. Base64url contains no ".", keeping the separator
- * unambiguous after the random prefix.
+ * Arriving at a provider's callback means one of two things, and the two must
+ * never be confused: `login` says whoever comes back is who this browser now
+ * is, `link` says the account this browser is already signed in to gains
+ * another way in.
  */
-const stateWithReturnTo = (state: string, returnTo: string | null): string =>
-    returnTo === null ? state : `${state}.${Encoding.encodeBase64Url(sanitizeReturnTo(returnTo))}`;
+type CallbackMode = "login" | "link";
+
+/**
+ * Both the mode and the post-login destination ride inside the OAuth state
+ * parameter, which round-trips through the provider and is checked byte for
+ * byte against the state cookie on the way back. Base64url contains no ".",
+ * keeping the separators unambiguous after the random prefix.
+ */
+const encodeState = (mode: CallbackMode, returnTo: string | null): string =>
+    `${randomSecret()}.${mode}.${Encoding.encodeBase64Url(sanitizeReturnTo(returnTo))}`;
+
+const modeFromState = (state: string): CallbackMode => (state.split(".")[1] === "link" ? "link" : "login");
 
 const destinationFromState = (state: string): string => {
-    const separator = state.indexOf(".");
-    if (separator === -1) return DEFAULT_DESTINATION;
-    const decoded = Encoding.decodeBase64UrlString(state.slice(separator + 1));
+    const encoded = state.split(".")[2];
+    if (encoded === undefined) return DEFAULT_DESTINATION;
+    const decoded = Encoding.decodeBase64UrlString(encoded);
     return Result.isSuccess(decoded) ? sanitizeReturnTo(decoded.success) : DEFAULT_DESTINATION;
+};
+
+/**
+ * Reports the outcome of a link on the page the visitor lands back on. The
+ * destination is a local path that may already carry a query of its own, so
+ * the parameters are appended rather than assumed to be the first.
+ */
+const withLinkOutcome = (destination: string, provider: OAuthProviderName, outcome: string): string => {
+    const url = new URL(destination, "http://0.0.0.0");
+    url.searchParams.set("linked", provider);
+    url.searchParams.set("result", outcome);
+    return `${url.pathname}${url.search}`;
 };
 
 interface OAuthProvider {
     readonly name: "google" | "discord";
     readonly authUrl: string;
     readonly tokenUrl: string;
+    readonly issuer: string;
+    readonly jwksUrl: string;
     readonly scope: string;
     readonly stateCookieName: string;
     readonly codeVerifierCookieName: string;
@@ -53,6 +80,8 @@ const google: OAuthProvider = {
     name: "google",
     authUrl: "https://accounts.google.com/o/oauth2/v2/auth",
     tokenUrl: "https://oauth2.googleapis.com/token",
+    issuer: "https://accounts.google.com",
+    jwksUrl: "https://www.googleapis.com/oauth2/v3/certs",
     scope: "openid email profile",
     stateCookieName: "google_oauth_state",
     codeVerifierCookieName: "google_oauth_code_verifier",
@@ -68,6 +97,8 @@ const discord: OAuthProvider = {
     name: "discord",
     authUrl: "https://discord.com/oauth2/authorize",
     tokenUrl: "https://discord.com/api/oauth2/token",
+    issuer: "https://discord.com",
+    jwksUrl: "https://discord.com/api/oauth2/keys",
     scope: "identify email openid",
     stateCookieName: "discord_oauth_state",
     codeVerifierCookieName: "discord_oauth_code_verifier",
@@ -79,31 +110,30 @@ const discord: OAuthProvider = {
     }),
 };
 
-const randomStateGenerator = () =>
-    Array.from(crypto.getRandomValues(new Uint8Array(48)), (byte) => byte.toString(16).padStart(2, "0")).join("");
-
-const Sha256CodeChallenge = (verifier: string) =>
-    Effect.map(
-        Effect.promise(() => crypto.subtle.digest("SHA-256", new TextEncoder().encode(verifier))),
-        (hashBuffer: ArrayBuffer) => Encoding.encodeBase64Url(new Uint8Array(hashBuffer))
-    );
-
 const SecureCookies = Config.string("NODE_ENV").pipe(
     Config.withDefault("development"),
     Config.map((env) => env === "production")
 );
 
-const login = (provider: OAuthProvider) =>
+const start = (provider: OAuthProvider, mode: CallbackMode) =>
     Effect.gen(function* () {
+        // Linking is something you do from inside an account. Without a session
+        // there is nothing to link to, so this is a login like any other. The
+        // question is settled before the provider's configuration is read, so
+        // the answer does not depend on a provider we are not going to visit.
+        if (mode === "link" && Option.isNone(yield* Effect.serviceOption(CurrentUser))) {
+            return HttpServerResponse.redirect(`/login?returnTo=${encodeURIComponent(ACCOUNTS_DESTINATION)}`);
+        }
+
         const config = yield* Effect.orDie(provider.config);
         const secure = yield* Effect.orDie(SecureCookies);
         const request = yield* HttpServerRequest.HttpServerRequest;
 
-        // The state carries the post-login destination through the provider
-        // round trip, so an interrupted /oauth/authorize can resume.
+        // The state carries the mode and the post-login destination through the
+        // provider round trip, so an interrupted /oauth/authorize can resume.
         const returnTo = new URL(request.originalUrl, "http://0.0.0.0").searchParams.get("returnTo");
-        const state = stateWithReturnTo(randomStateGenerator(), returnTo);
-        const codeVerifier = randomStateGenerator();
+        const state = encodeState(mode, mode === "link" ? (returnTo ?? ACCOUNTS_DESTINATION) : returnTo);
+        const codeVerifier = randomSecret();
 
         // Build the provider's OAuth authorization URL
         const maybeAuthorizationUrl = UrlParams.empty.pipe(
@@ -113,7 +143,7 @@ const login = (provider: OAuthProvider) =>
             UrlParams.set("scope", provider.scope),
             UrlParams.set("state", state),
             UrlParams.set("code_challenge_method", "S256"),
-            UrlParams.set("code_challenge", yield* Sha256CodeChallenge(codeVerifier)),
+            UrlParams.set("code_challenge", yield* sha256(codeVerifier)),
             UrlParams.set("prompt", "consent"),
             (urlParams) => Url.make(provider.authUrl, urlParams, undefined),
             Result.getOrThrow
@@ -204,43 +234,72 @@ const callback = (provider: OAuthProvider) =>
             sameSite: "lax",
         });
 
+        const spentCookies = [deleteStateCookie, deleteCodeVerifierCookie];
+
         // Verify the ID token and extract user information
+        const idToken = tokens.id_token ?? "";
         const claims = yield* Oidc.verifyIdToken({
-            idToken: tokens.id_token ?? "",
+            idToken,
             clientId: config.clientId,
-            issuer: provider.name === "google" ? "https://accounts.google.com" : "https://discord.com",
-            jwks:
-                provider.name === "google"
-                    ? yield* Oidc.fetchJwks("https://www.googleapis.com/oauth2/v3/certs").pipe(Effect.orDie)
-                    : yield* Oidc.fetchJwks("https://discord.com/api/oauth2/keys").pipe(Effect.orDie),
+            issuer: provider.issuer,
+            jwks: yield* Oidc.fetchJwks(provider.jwksUrl).pipe(Effect.orDie),
         });
 
-        // Upsert the user
-        const providerAccountId = claims.sub;
-        const avatarUrl = Option.fromNullishOr(claims.picture);
-        const displayName = yield* Option.fromNullishOr(claims.name).pipe(Effect.fromOption);
-        const user = yield* UsersRepository.use((repo) =>
-            repo.upsertUserFromOAuth({
-                provider: provider.name,
-                displayName,
-                providerAccountId,
-                avatarUrl,
-            })
-        );
+        const profile = {
+            provider: provider.name,
+            providerAccountId: claims.sub,
+            displayName: yield* Option.fromNullishOr(claims.name).pipe(Effect.fromOption),
+            // Both providers send an email for the scopes we ask for, but
+            // `verifyIdToken` hands back only the claims it is opinionated
+            // about. This reads one more out of the token it just verified,
+            // so the connected accounts screen can say which account is which.
+            email: claim(idToken, "email"),
+            avatarUrl: Option.fromNullishOr(claims.picture),
+        };
+        const destination = destinationFromState(urlParams.state);
+
+        // A link round trip adds a provider to the account this browser is
+        // already signed in as, and issues no session of its own: the visitor
+        // stays exactly who they were before they left.
+        if (modeFromState(urlParams.state) === "link") {
+            const maybeUser = yield* Effect.serviceOption(CurrentUser);
+            if (Option.isNone(maybeUser)) {
+                return HttpServerResponse.redirect(`/login?returnTo=${encodeURIComponent(ACCOUNTS_DESTINATION)}`, {
+                    cookies: Cookies.fromIterable(spentCookies),
+                });
+            }
+
+            const outcome = yield* UsersRepository.use((repo) =>
+                repo.linkOAuthAccount({ ...profile, userId: maybeUser.value.user.id })
+            );
+
+            return HttpServerResponse.redirect(withLinkOutcome(destination, provider.name, outcome), {
+                cookies: Cookies.fromIterable(spentCookies),
+            });
+        }
+
+        const user = yield* UsersRepository.use((repo) => repo.signInWithOAuth(profile));
 
         // This browser is now signed in to the provider. The SPA gets no
         // credential here; it runs the code flow against /oauth/authorize,
         // which this session authenticates.
         const sessionCookie = yield* issueProviderSession(user);
 
-        return HttpServerResponse.redirect(destinationFromState(urlParams.state), {
-            cookies: Cookies.fromIterable([sessionCookie, deleteStateCookie, deleteCodeVerifierCookie]),
+        return HttpServerResponse.redirect(destination, {
+            cookies: Cookies.fromIterable([sessionCookie, ...spentCookies]),
         });
     });
 
+/**
+ * Federated login: Tinyburg is itself an OAuth client of these providers. The
+ * session and account management endpoints that a login unlocks live in
+ * `auth.ts`.
+ */
 export const OAuthRoutesLive = Layer.mergeAll(
-    HttpRouter.add("GET", "/auth/google/login", login(google)),
+    HttpRouter.add("GET", "/auth/google/login", start(google, "login")),
+    HttpRouter.add("GET", "/auth/google/link", start(google, "link")),
     HttpRouter.add("GET", "/auth/google/callback", callback(google)),
-    HttpRouter.add("GET", "/auth/discord/login", login(discord)),
+    HttpRouter.add("GET", "/auth/discord/login", start(discord, "login")),
+    HttpRouter.add("GET", "/auth/discord/link", start(discord, "link")),
     HttpRouter.add("GET", "/auth/discord/callback", callback(discord))
 );
