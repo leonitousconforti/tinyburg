@@ -2,8 +2,10 @@ import { foldkit } from "@foldkit/vite-plugin";
 import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "vite";
 
-// The client dev server proxies server-owned paths to the Effect http server
-// (`pnpm start`). In production the server serves the built client itself.
+// Build config only. There is no vite dev server: the Effect http server
+// serves `dist/client` in development exactly as it does in production, so
+// there is one origin, and no proxy table to keep in step with the routes the
+// server owns.
 export default defineConfig({
     root: "client",
     publicDir: "../public",
@@ -12,12 +14,4 @@ export default defineConfig({
         emptyOutDir: true,
     },
     plugins: [tailwindcss(), foldkit()],
-    optimizeDeps: { entries: ["entry.ts"] },
-    server: {
-        proxy: {
-            "^/api/": "http://localhost:3000",
-            "^/auth/": "http://localhost:3000",
-            "^/logout$": "http://localhost:3000",
-        },
-    },
 });
