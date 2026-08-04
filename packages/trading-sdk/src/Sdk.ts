@@ -12,6 +12,7 @@ const TinyburgLinkedTinyTowerAccountsList = HttpApiEndpoint.get(
     "TinyburgLinkedTinyTowerAccountsList",
     "/v1/tinytower/linkedAccounts/list",
     {
+        error: HttpApiError.NotImplemented,
         success: Schema.Array(
             Schema.Struct({
                 playerId: NimblebitConfig.PlayerIdSchema,
@@ -26,6 +27,7 @@ const TinyburgLinkedTinyTowerAccountsUnlink = HttpApiEndpoint.delete(
     "/v1/tinytower/linkedAccounts/unlink/:friendCode",
     {
         success: Schema.Void,
+        error: HttpApiError.NotImplemented,
         params: {
             friendCode: NimblebitConfig.PlayerIdSchema,
         },
