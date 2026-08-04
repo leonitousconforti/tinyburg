@@ -15,6 +15,7 @@ export class OIDCRepository extends Context.Service<OIDCRepository>()("@tinyburg
 
         const createAuthorizationRequest = oauthAuthorizationRequests.insert;
         const deleteAuthorizationRequest = oauthAuthorizationRequests.delete;
+
         const findAuthorizationRequest = SqlSchema.findOneOption({
             Request: Schema.String.check(Schema.isUUID()),
             Result: OAuthAuthorizationRequest,
@@ -50,14 +51,11 @@ export class OIDCRepository extends Context.Service<OIDCRepository>()("@tinyburg
         });
 
         const revokeToken = (options: { jti: string; expiresAt: Date }) =>
-            Effect.andThen(
-                sql`DELETE FROM revoked_tokens WHERE expires_at < NOW()`,
-                sql`
-                    INSERT INTO revoked_tokens (jti, expires_at)
-                    VALUES (${options.jti}, ${options.expiresAt})
-                    ON CONFLICT (jti) DO NOTHING
-                `
-            ).pipe(Effect.asVoid);
+            sql`
+                INSERT INTO revoked_tokens (jti, expires_at)
+                VALUES (${options.jti}, ${options.expiresAt})
+                ON CONFLICT (jti) DO NOTHING
+            `.pipe(Effect.asVoid);
 
         const isTokenRevoked = (jti: string) =>
             Effect.map(
