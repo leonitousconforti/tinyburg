@@ -3,7 +3,7 @@ import { SqlClient, SqlSchema, SqlModel } from "effect/unstable/sql";
 
 import { OAuthAuthorizationRequest } from "./models.ts";
 
-export class OIDCRepository extends Context.Service<OIDCRepository>()("@tinyburg/tinyburg.app/domain/OIDCRepository", {
+export class OidcRepository extends Context.Service<OidcRepository>()("@tinyburg/tinyburg.app/domain/OidcRepository", {
     make: Effect.gen(function* () {
         const sql = yield* SqlClient.SqlClient;
 
@@ -74,5 +74,5 @@ export class OIDCRepository extends Context.Service<OIDCRepository>()("@tinyburg
         };
     }),
 }) {
-    static readonly Default = Layer.effect(this, OIDCRepository.make);
+    static readonly Default = Layer.effect(this, OidcRepository.make);
 }
