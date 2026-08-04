@@ -7,12 +7,13 @@ import { NodeHttpServer, NodeRuntime } from "@effect/platform-node";
 import { PgClient, PgMigrator } from "@effect/sql-pg";
 
 import { DevelopersRepository } from "../domain/developers.ts";
-import { OIDCRepository } from "../domain/oidc.ts";
+import { OidcRepository } from "../domain/oidc.ts";
+import { SessionsRepository } from "../domain/sessions.ts";
 import { TinyTowerAccountsRepository } from "../domain/tinytower.ts";
 import { UsersRepository } from "../domain/users.ts";
 import { OidcKeys } from "./keys.ts";
 import { ApiLive } from "./routes/api.ts";
-import { OAuthRoutesLive } from "./routes/auth.ts";
+import { OAuthRoutesLive } from "./routes/oauth.ts";
 import { OidcProviderLive } from "./routes/oidc.ts";
 import { StaticRoutesLive } from "./routes/static.ts";
 
@@ -34,7 +35,8 @@ const MigratorLive = Effect.gen(function* () {
 const Repositories = Layer.mergeAll(
     DevelopersRepository.Default,
     UsersRepository.Default,
-    OIDCRepository.Default,
+    OidcRepository.Default,
+    SessionsRepository.Default,
     TinyTowerAccountsRepository.Default
 );
 
