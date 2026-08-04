@@ -19,15 +19,16 @@ export class TinyTowerAccountsRepository extends Context.Service<TinyTowerAccoun
                 `,
             });
 
-            /** Unlinks one of the user's own towers. Scoping the delete by
-             *  user id keeps a friend code from unlinking someone else's. */
             const unlink = (options: { userId: string; playerId: string }) =>
                 sql`
                     DELETE FROM tinytower_accounts
                     WHERE user_id = ${options.userId} AND player_id = ${options.playerId}
                 `.pipe(Effect.asVoid);
 
-            return { listForUser, unlink };
+            return {
+                listForUser,
+                unlink,
+            };
         }),
     }
 ) {
