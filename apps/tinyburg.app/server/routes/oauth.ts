@@ -1,8 +1,9 @@
-import { Config, Effect, Layer, Option, Redacted, Result, Schema, String } from "effect";
-import { Cookies, HttpRouter, HttpServerRequest, HttpServerResponse, Url } from "effect/unstable/http";
+import { Config, DateTime, Effect, Layer, Option, Redacted, Result, Schema, String } from "effect";
+import { Cookies, Headers, HttpRouter, HttpServerRequest, HttpServerResponse, Url } from "effect/unstable/http";
 
 import { Oidc } from "effect-oidc";
 
+import { SessionsRepository } from "../../domain/sessions.ts";
 import { UsersRepository } from "../../domain/users.ts";
 import { randomSecret, sha256 } from "../crypto.ts";
 
@@ -28,8 +29,8 @@ const google: OAuthProvider = {
     tokenUrl: "https://oauth2.googleapis.com/token",
     issuer: "https://accounts.google.com",
     scopes: ["openid", "email", "profile"],
-    stateCookieName: "google_oauth_state",
-    codeVerifierCookieName: "google_oauth_code_verifier",
+    stateCookieName: "google_oauth_state_tinyburg",
+    codeVerifierCookieName: "google_oauth_code_verifier_tinyburg",
     config: Config.all({
         clientId: Config.string("GOOGLE_CLIENT_ID"),
         clientSecret: Config.redacted("GOOGLE_CLIENT_SECRET"),
@@ -44,8 +45,8 @@ const discord: OAuthProvider = {
     tokenUrl: "https://discord.com/api/oauth2/token",
     issuer: "https://discord.com",
     scopes: ["identify", "email", "openid"],
-    stateCookieName: "discord_oauth_state",
-    codeVerifierCookieName: "discord_oauth_code_verifier",
+    stateCookieName: "discord_oauth_state_tinyburg",
+    codeVerifierCookieName: "discord_oauth_code_verifier_tinyburg",
     config: Config.all({
         clientId: Config.string("DISCORD_CLIENT_ID"),
         clientSecret: Config.redacted("DISCORD_CLIENT_SECRET"),
@@ -187,8 +188,38 @@ const callback = (provider: OAuthProvider) =>
             email: Option.none<string>(),
         };
 
-        // Make a session cookie for the user
+        // How the session is described
+        const userAgent = Headers.get(request.headers, "user-agent").pipe(
+            Option.map((agent) => agent.slice(0, 512)),
+            Option.filter((agent) => agent.length > 0)
+        );
+
+        // Get the IP address of the request
+        const ipAddress = Headers.get(request.headers, "do-connecting-ip").pipe(
+            Option.orElse(() => Headers.get(request.headers, "x-real-ip")),
+            Option.orElse(() => Headers.get(request.headers, "x-forwarded-for")),
+            Option.orElse(() => request.remoteAddress)
+        );
+
+        const sessionToken = randomSecret();
+        const tokenHash = yield* sha256(sessionToken);
         const user = yield* UsersRepository.use((repo) => repo.signInWithOAuth(profile));
+        const session = yield* SessionsRepository.use((repo) =>
+            repo.createSession({
+                user,
+                tokenHash,
+                userAgent,
+                ip: ipAddress,
+            })
+        );
+
+        const sessionCookie = Cookies.makeCookieUnsafe(SessionsRepository.PROVIDER_SESSION_COOKIE_NAME, sessionToken, {
+            expires: DateTime.toDateUtc(session.expiresAt),
+            httpOnly: true,
+            path: "/",
+            secure,
+            sameSite: "lax",
+        });
 
         return HttpServerResponse.redirect("/towers/@me", {
             cookies: Cookies.fromIterable([sessionCookie, deleteStateCookie, deleteCodeVerifierCookie]),
