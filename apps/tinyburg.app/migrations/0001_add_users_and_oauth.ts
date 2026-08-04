@@ -29,9 +29,9 @@ export default Effect.flatMap(
 
             -- What the session list shows, so a visitor can tell one row from
             -- another before ending it.
+            last_seen_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
             user_agent TEXT,
             ip INET,
-            last_seen_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
             -- The access token this session presents to the bearer-only api,
             -- minted on demand and reused until it expires. Server side only.
