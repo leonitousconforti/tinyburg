@@ -14,15 +14,18 @@ export class OidcKeys extends Context.Service<OidcKeys>()("@tinyburg/tinyburg.ap
             Config.map((url) => url.replace(/\/$/, ""))
         );
 
-        const privateJwk = yield* Config.redacted("OIDC_PRIVATE_JWK").pipe(
-            Effect.flatMap((jwk) =>
-                Schema.decodeUnknownEffect(Schema.fromJsonString(Jwt.PrivateJwkSchema))(Redacted.value(jwk))
-            )
+        const privateJwk = yield* Effect.flatMap(Config.redacted("OIDC_PRIVATE_JWK"), (jwk) =>
+            Schema.decodeEffect(Schema.fromJsonString(Jwt.PrivateJwkSchema))(Redacted.value(jwk))
         );
 
         const publicJwk = yield* Jwt.toPublicKey(privateJwk);
         const jwks: Schema.Schema.Type<typeof Jwt.JwksSchema> = { keys: [publicJwk] };
-        return { issuer, privateJwk, jwks } as const;
+
+        return {
+            issuer,
+            privateJwk,
+            jwks,
+        } as const;
     }),
 }) {
     static readonly Default = Layer.effect(this, OidcKeys.make);
