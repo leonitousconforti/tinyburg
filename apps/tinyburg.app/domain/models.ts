@@ -22,15 +22,10 @@ export class OAuthAccount extends Model.Class<OAuthAccount>("OAuthAccount")({
     lastLoginAt: Model.DateTimeUpdateFromDate,
 }) {}
 
-export class RevokedToken extends Model.Class<RevokedToken>("RevokedToken")({
-    expiresAt: Model.DateTimeInsertFromDate,
-    jti: Schema.String,
-}) {}
-
 export class Session extends Model.Class<Session>("Session")({
     id: Schema.String.check(Schema.isUUID()).pipe(Model.FieldExcept(["insert"])),
     userId: Schema.String.check(Schema.isUUID()),
-    tokenHash: Model.Sensitive(Schema.String),
+    tokenHash: Model.Sensitive(Schema.String.check(Schema.isBase64Url())),
     createdAt: Model.DateTimeInsertFromDate,
     expiresAt: Model.DateTimeInsertFromDate,
     lastSeenAt: Model.DateTimeInsertFromDate,
@@ -69,8 +64,8 @@ export class OAuthClient extends Model.Class<OAuthClient>("OAuthClient")({
     id: Schema.String.check(Schema.isUUID()).pipe(Model.FieldExcept(["insert"])),
     ownerUserId: Schema.OptionFromNullishOr(Schema.String.check(Schema.isUUID()), { onNoneEncoding: null }),
     name: Schema.String,
-    secretHash: Schema.OptionFromNullishOr(Schema.String, { onNoneEncoding: null }),
-    redirectUris: Schema.Array(Schema.String),
+    secretHash: Schema.OptionFromNullishOr(Schema.String.check(Schema.isBase64Url()), { onNoneEncoding: null }),
+    redirectUris: Schema.NonEmptyArray(Schema.String),
     scope: Schema.String,
     createdAt: Model.DateTimeInsertFromDate,
 }) {}
@@ -84,14 +79,7 @@ export class OAuthAuthorizationRequest extends Model.Class<OAuthAuthorizationReq
     state: Schema.String,
     nonce: Schema.OptionFromNullishOr(Schema.String, { onNoneEncoding: null }),
     codeChallenge: Schema.String,
-    codeHash: Schema.OptionFromNullishOr(Schema.String, { onNoneEncoding: null }),
+    codeHash: Schema.OptionFromNullishOr(Schema.String.check(Schema.isBase64Url()), { onNoneEncoding: null }),
     createdAt: Model.DateTimeInsertFromDate,
     expiresAt: Schema.DateTimeUtcFromDate.pipe(Model.GeneratedByDb),
-}) {}
-
-export class OAuthConsent extends Model.Class<OAuthConsent>("OAuthConsent")({
-    userId: Schema.String.check(Schema.isUUID()),
-    clientId: Schema.String.check(Schema.isUUID()),
-    scope: Schema.String,
-    grantedAt: Model.DateTimeInsertFromDate,
 }) {}

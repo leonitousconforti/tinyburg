@@ -92,7 +92,7 @@ export default Effect.flatMap(
         -- Indexes for common query patterns. Unique constraints already carry
         -- an index of their own, so sessions(token_hash), oauth_accounts'
         -- primary key and tinytower_accounts(player_id) need no help here.
-        CREATE INDEX IF NOT EXISTS idx_sessions_user_id_created_at ON sessions(user_id, created_at DESC);
+        CREATE INDEX IF NOT EXISTS idx_sessions_user_id_last_seen_at ON sessions(user_id, last_seen_at DESC);
         CREATE INDEX IF NOT EXISTS idx_sessions_expires_at ON sessions(expires_at);
         CREATE INDEX IF NOT EXISTS idx_oauth_accounts_user_id ON oauth_accounts(user_id);
         CREATE INDEX IF NOT EXISTS idx_revoked_tokens_expires_at ON revoked_tokens(expires_at);

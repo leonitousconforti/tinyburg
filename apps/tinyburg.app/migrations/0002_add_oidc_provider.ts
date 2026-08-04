@@ -12,9 +12,13 @@ export default Effect.flatMap(
             owner_user_id UUID REFERENCES users(id) ON DELETE CASCADE,
             name TEXT NOT NULL,
             secret_hash TEXT,                                   -- SHA-256 (base64url) of the client secret
-            redirect_uris TEXT[] NOT NULL,                      -- Exact-match allow list
             scope TEXT NOT NULL DEFAULT 'openid profile',       -- Space-delimited scopes the client may request
-            created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+            created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+            -- Exact-match allow list. A client with an empty one could never
+            -- complete an authorization, so it is refused at registration
+            -- rather than left to fail on every attempt.
+            redirect_uris TEXT[] NOT NULL CHECK (cardinality(redirect_uris) > 0)
         );
 
         -- Pending authorization requests and their (single-use) authorization codes
@@ -30,17 +34,6 @@ export default Effect.flatMap(
             code_hash TEXT UNIQUE,                              -- SHA-256 (base64url) of the code, set on approval
             created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
             expires_at TIMESTAMPTZ NOT NULL DEFAULT NOW() + INTERVAL '10 minutes'
-        );
-
-        -- Remembered user approvals, so repeat sign-ins skip the consent screen
-        CREATE TABLE IF NOT EXISTS oauth_consents (
-            user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-            client_id UUID NOT NULL REFERENCES oauth_clients(id) ON DELETE CASCADE,
-            scope TEXT NOT NULL,                                -- Space-delimited scopes the user granted
-            granted_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-
-            -- One consent record per user and client
-            PRIMARY KEY (user_id, client_id)
         );
 
         -- Indexes for common query patterns
