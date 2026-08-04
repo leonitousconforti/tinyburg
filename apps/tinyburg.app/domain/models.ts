@@ -15,7 +15,11 @@ export class OAuthAccount extends Model.Class<OAuthAccount>("OAuthAccount")({
     userId: Schema.String.check(Schema.isUUID()),
     provider: Schema.Literals(["google", "discord"]),
     providerAccountId: Schema.String,
+    email: Schema.OptionFromNullishOr(Schema.String, { onNoneEncoding: null }),
+    displayName: Schema.OptionFromNullishOr(Schema.String, { onNoneEncoding: null }),
+    avatarUrl: Schema.OptionFromNullishOr(Schema.String, { onNoneEncoding: null }),
     createdAt: Model.DateTimeInsertFromDate,
+    lastLoginAt: Model.DateTimeUpdateFromDate,
 }) {}
 
 export class RevokedToken extends Model.Class<RevokedToken>("RevokedToken")({
@@ -26,12 +30,19 @@ export class RevokedToken extends Model.Class<RevokedToken>("RevokedToken")({
 export class Session extends Model.Class<Session>("Session")({
     id: Schema.String.check(Schema.isUUID()).pipe(Model.FieldExcept(["insert"])),
     userId: Schema.String.check(Schema.isUUID()),
+    tokenHash: Model.Sensitive(Schema.String),
     createdAt: Model.DateTimeInsertFromDate,
     expiresAt: Model.DateTimeInsertFromDate,
+    lastSeenAt: Model.DateTimeInsertFromDate,
+    userAgent: Schema.OptionFromNullishOr(Schema.String, { onNoneEncoding: null }),
+    ip: Schema.OptionFromNullishOr(Schema.String, { onNoneEncoding: null }),
     accessToken: Schema.OptionFromNullishOr(Schema.String, { onNoneEncoding: null }).pipe(
         Model.FieldExcept(["insert"])
     ),
     accessTokenExpiresAt: Schema.OptionFromNullishOr(Schema.DateTimeUtcFromDate, { onNoneEncoding: null }).pipe(
+        Model.FieldExcept(["insert"])
+    ),
+    accessTokenJti: Schema.OptionFromNullishOr(Schema.String, { onNoneEncoding: null }).pipe(
         Model.FieldExcept(["insert"])
     ),
 }) {}
