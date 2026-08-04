@@ -8,6 +8,7 @@ import type { Session, User } from "../../domain/models.ts";
 import { Api } from "@tinyburg/trading-sdk/Sdk";
 import { Oidc, ResourceServer } from "effect-oidc";
 
+import { DevelopersRepository } from "../../domain/developers.ts";
 import { OidcRepository } from "../../domain/oidc.ts";
 import { SessionsRepository } from "../../domain/sessions.ts";
 import { sha256 } from "../crypto.ts";
@@ -26,9 +27,6 @@ const accessTokenFor = Effect.fnUntraced(function* ({ session, user }: { session
     /** The time-to-live for the access token, in seconds. */
     const ACCESS_TOKEN_TTL_SECONDS = 900;
 
-    /** The first-party app's client id, which is the same as the issuer. */
-    const FIRST_PARTY_CLIENT_ID = ""; // FIXME: what should this be?
-
     const cutoff = DateTime.addDuration(now, REFRESH_SKEW);
     const cached = Option.zipWith(session.accessToken, session.accessTokenExpiresAt, (token, expiresAt) =>
         DateTime.isGreaterThan(expiresAt, cutoff) ? Option.some(token) : Option.none<string>()
@@ -43,7 +41,7 @@ const accessTokenFor = Effect.fnUntraced(function* ({ session, user }: { session
         issuer: keys.issuer,
         subject: user.id,
         audience: keys.issuer,
-        clientId: FIRST_PARTY_CLIENT_ID,
+        clientId: DevelopersRepository.FIRST_PARTY_CLIENT_ID,
         scope: SESSION_SCOPE,
         ttlSeconds: ACCESS_TOKEN_TTL_SECONDS,
     });
