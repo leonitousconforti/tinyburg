@@ -29,7 +29,7 @@ export default Effect.flatMap(
 
         -- OAuth accounts table for linking OAuth providers to users
         CREATE TABLE IF NOT EXISTS oauth_accounts (
-            user_id UUID NOT NULL REFERENCES users(id),
+            user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
             provider TEXT NOT NULL CHECK (provider IN ('google', 'discord')),
             provider_account_id TEXT NOT NULL,
             created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
