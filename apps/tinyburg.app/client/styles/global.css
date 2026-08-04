@@ -339,9 +339,20 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+    .cloud,
     .floor,
     .step-enter-forward,
     .step-enter-backward {
         animation: none;
+    }
+
+    .cloud-1 {
+        left: 12%;
+    }
+    .cloud-2 {
+        left: 58%;
+    }
+    .cloud-3 {
+        left: 78%;
     }
 }
