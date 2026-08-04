@@ -1,4 +1,4 @@
-import { Context, Effect, Function, Layer, Schema } from "effect";
+import { Context, Effect, Layer, Schema } from "effect";
 import { SqlClient, SqlSchema, SqlModel } from "effect/unstable/sql";
 
 import { OAuthClient } from "./models.ts";
@@ -16,7 +16,7 @@ export class DevelopersRepository extends Context.Service<DevelopersRepository>(
             });
 
             const createOAuthClient = oauthClients.insert;
-            const findOAuthClient = Function.flow(oauthClients.findById, Effect.catchNoSuchElement);
+            const findOAuthClient = oauthClients.findById;
 
             const listOAuthClients = SqlSchema.findAll({
                 Request: Schema.String.check(Schema.isUUID()),

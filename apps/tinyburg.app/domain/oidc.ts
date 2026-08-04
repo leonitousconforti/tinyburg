@@ -49,8 +49,6 @@ export class OIDCRepository extends Context.Service<OIDCRepository>()("@tinyburg
             `,
         });
 
-        // Housekeeping rides along on writes so the denylist stays bounded
-        // without a scheduled job.
         const revokeToken = (options: { jti: string; expiresAt: Date }) =>
             Effect.andThen(
                 sql`DELETE FROM revoked_tokens WHERE expires_at < NOW()`,

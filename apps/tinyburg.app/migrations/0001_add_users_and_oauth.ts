@@ -13,6 +13,20 @@ export default Effect.flatMap(
             avatar_url TEXT
         );
 
+        -- Browser sessions for the first-party app. The cookie holds the id and
+        -- nothing else, so signing out is a delete rather than a token expiry.
+        CREATE TABLE IF NOT EXISTS sessions (
+            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+            user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+            created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+            expires_at TIMESTAMPTZ NOT NULL,
+
+            -- The access token this session presents to the bearer-only api,
+            -- minted on demand and reused until it expires. Server side only.
+            access_token TEXT,
+            access_token_expires_at TIMESTAMPTZ
+        );
+
         -- OAuth accounts table for linking OAuth providers to users
         CREATE TABLE IF NOT EXISTS oauth_accounts (
             user_id UUID NOT NULL REFERENCES users(id),
@@ -57,6 +71,8 @@ export default Effect.flatMap(
         );
 
         -- Indexes for common query patterns
+        CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON sessions(user_id);
+        CREATE INDEX IF NOT EXISTS idx_sessions_expires_at ON sessions(expires_at);
         CREATE INDEX IF NOT EXISTS idx_oauth_accounts_user_id ON oauth_accounts(user_id);
         CREATE INDEX IF NOT EXISTS idx_oauth_accounts_provider ON oauth_accounts(provider);
         CREATE INDEX IF NOT EXISTS idx_revoked_tokens_expires_at ON revoked_tokens(expires_at);

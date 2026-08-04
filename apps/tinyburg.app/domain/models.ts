@@ -23,6 +23,19 @@ export class RevokedToken extends Model.Class<RevokedToken>("RevokedToken")({
     jti: Schema.String,
 }) {}
 
+export class Session extends Model.Class<Session>("Session")({
+    id: Schema.String.check(Schema.isUUID()).pipe(Model.FieldExcept(["insert"])),
+    userId: Schema.String.check(Schema.isUUID()),
+    createdAt: Model.DateTimeInsertFromDate,
+    expiresAt: Model.DateTimeInsertFromDate,
+    accessToken: Schema.OptionFromNullishOr(Schema.String, { onNoneEncoding: null }).pipe(
+        Model.FieldExcept(["insert"])
+    ),
+    accessTokenExpiresAt: Schema.OptionFromNullishOr(Schema.DateTimeUtcFromDate, { onNoneEncoding: null }).pipe(
+        Model.FieldExcept(["insert"])
+    ),
+}) {}
+
 export class TinyTowerAccount extends Model.Class<TinyTowerAccount>("TinyTowerAccount")({
     id: Schema.String.check(Schema.isUUID()).pipe(Model.FieldExcept(["insert"])),
     userId: Schema.String.check(Schema.isUUID()),
@@ -43,7 +56,6 @@ export class PendingTinyTowerAccount extends Model.Class<PendingTinyTowerAccount
 
 export class OAuthClient extends Model.Class<OAuthClient>("OAuthClient")({
     id: Schema.String.check(Schema.isUUID()).pipe(Model.FieldExcept(["insert"])),
-    // First-party clients belong to the platform rather than to a developer
     ownerUserId: Schema.OptionFromNullishOr(Schema.String.check(Schema.isUUID()), { onNoneEncoding: null }),
     name: Schema.String,
     secretHash: Schema.OptionFromNullishOr(Schema.String, { onNoneEncoding: null }),
