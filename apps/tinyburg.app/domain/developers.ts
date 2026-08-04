@@ -51,5 +51,5 @@ export class DevelopersRepository extends Context.Service<DevelopersRepository>(
     static readonly Default = Layer.effect(this, DevelopersRepository.make);
 
     /** The first-party app's client id. */
-    static readonly FIRST_PARTY_CLIENT_ID = ""; // FIXME: make a migration that adds this
+    static readonly FIRST_PARTY_CLIENT_ID = "0868602a-9bf8-4e6e-ba20-ccd2b3acc832";
 }

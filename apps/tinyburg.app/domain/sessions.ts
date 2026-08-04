@@ -194,4 +194,7 @@ export class SessionsRepository extends Context.Service<SessionsRepository>()(
     }
 ) {
     static readonly Default = Layer.effect(this, SessionsRepository.make);
+
+    /** The name of the cookie used to store the provider session. */
+    static readonly PROVIDER_SESSION_COOKIE_NAME = "tinyburg_provider_session";
 }
