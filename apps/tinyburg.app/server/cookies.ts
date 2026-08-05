@@ -32,16 +32,6 @@ export class CookiePolicy extends Context.Service<CookiePolicy>()("@tinyburg/tin
     static readonly Default = Layer.effect(this, CookiePolicy.make);
 }
 
-/** Reads one of our cookies off the request, prefix-aware. */
-export const readCookie = (
-    base: string
-): Effect.Effect<Option.Option<string>, never, CookiePolicy | HttpServerRequest.HttpServerRequest> =>
-    Effect.gen(function* () {
-        const { name } = yield* CookiePolicy;
-        const request = yield* HttpServerRequest.HttpServerRequest;
-        return Option.fromNullishOr(request.cookies[name(base)]);
-    });
-
 /**
  * The user and session riding the provider session cookie, if any. None for a
  * missing, expired, or unknown cookie; a repository failure stays in the
@@ -57,7 +47,9 @@ export const maybeCurrentUser: Effect.Effect<
     Schema.SchemaError | SqlError.SqlError,
     CookiePolicy | HttpServerRequest.HttpServerRequest | SessionsRepository
 > = Effect.gen(function* () {
-    const sessionToken = yield* readCookie(PROVIDER_SESSION_COOKIE_NAME);
+    const cookiePolicy = yield* CookiePolicy;
+    const request = yield* HttpServerRequest.HttpServerRequest;
+    const sessionToken = Option.fromNullishOr(request.cookies[cookiePolicy.name(PROVIDER_SESSION_COOKIE_NAME)]);
     if (Option.isNone(sessionToken)) return Option.none();
     const sessionTokenHash = yield* sha256(sessionToken.value);
     return yield* SessionsRepository.use((repo) => repo.findSessionWithUser(sessionTokenHash));

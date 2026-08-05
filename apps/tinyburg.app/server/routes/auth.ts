@@ -5,8 +5,7 @@ import { HttpApiBuilder, HttpApiError } from "effect/unstable/httpapi";
 import { SessionsRepository } from "../../domain/sessions.ts";
 import { UsersRepository } from "../../domain/users.ts";
 import { AuthApi, CurrentSession, SessionCookie } from "../../shared/auth.ts";
-import { CookiePolicy, maybeCurrentUser, PROVIDER_SESSION_COOKIE_NAME, readCookie } from "../cookies.ts";
-import { sha256 } from "../crypto.ts";
+import { CookiePolicy, maybeCurrentUser, PROVIDER_SESSION_COOKIE_NAME } from "../cookies.ts";
 
 const SessionCookieLive = Layer.effect(
     SessionCookie,
@@ -111,11 +110,9 @@ const AuthGroupLive = HttpApiBuilder.group(
 
 const logout = Effect.gen(function* () {
     const cookies = yield* CookiePolicy;
-    const sessionToken = yield* readCookie(PROVIDER_SESSION_COOKIE_NAME);
-
-    if (Option.isSome(sessionToken)) {
-        const tokenHash = yield* sha256(sessionToken.value);
-        yield* SessionsRepository.use((repo) => repo.revokeSessionByTokenHash(tokenHash));
+    const maybeUser = yield* maybeCurrentUser;
+    if (Option.isSome(maybeUser)) {
+        yield* SessionsRepository.use((repo) => repo.revokeSessionByTokenHash(maybeUser.value.session.tokenHash));
     }
 
     return yield* HttpServerResponse.expireCookie(
