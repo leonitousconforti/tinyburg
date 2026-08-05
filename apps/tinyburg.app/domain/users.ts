@@ -27,50 +27,52 @@ export class UsersRepository extends Context.Service<UsersRepository>()(
                     email: Schema.OptionFromNullishOr(Schema.String, { onNoneEncoding: null }),
                     avatarUrl: Schema.OptionFromNullishOr(Schema.String, { onNoneEncoding: null }),
                 }),
-                execute: ({ avatarUrl, displayName, email, provider, providerAccountId }) => sql`
-                WITH lock AS (
-                    -- Acquire an advisory lock to prevent race conditions for the same OAuth account
-                    SELECT pg_advisory_xact_lock(hashtext(${provider} || ':' || ${providerAccountId}))
-                ),
-                existing_account AS (
-                    -- The account this provider account already belongs to, if any
-                    SELECT user_id FROM oauth_accounts
-                    WHERE provider = ${provider} AND provider_account_id = ${providerAccountId}
-                ),
-                new_user AS (
-                    -- Insert a new user only if this provider account is a stranger
-                    INSERT INTO users (display_name, avatar_url, last_login_at)
-                    SELECT ${displayName}, ${avatarUrl}, NOW()
-                    WHERE NOT EXISTS (SELECT 1 FROM existing_account)
-                    RETURNING *
-                ),
-                new_account AS (
-                    -- Link the provider account to the user it just created
-                    INSERT INTO oauth_accounts (
-                        provider, provider_account_id, user_id, email, display_name, avatar_url
-                    )
-                    SELECT ${provider}, ${providerAccountId}, id, ${email}, ${displayName}, ${avatarUrl}
-                    FROM new_user
-                    ON CONFLICT (provider, provider_account_id) DO NOTHING
-                ),
-                refreshed_account AS (
-                    -- Or refresh what the provider says about a link we already hold
-                    UPDATE oauth_accounts SET
-                        email = ${email},
-                        display_name = ${displayName},
-                        avatar_url = ${avatarUrl},
-                        last_login_at = NOW()
-                    WHERE provider = ${provider} AND provider_account_id = ${providerAccountId}
-                ),
-                returning_user AS (
-                    UPDATE users SET last_login_at = NOW()
-                    WHERE id = (SELECT user_id FROM existing_account)
-                    RETURNING *
-                )
-                SELECT * FROM returning_user
-                UNION ALL
-                SELECT * FROM new_user;
-            `,
+                execute: ({ avatarUrl, displayName, email, provider, providerAccountId }) =>
+                    sql.withTransaction(
+                        Effect.andThen(
+                            sql`SELECT pg_advisory_xact_lock(hashtext(${provider} || ':' || ${providerAccountId}))`,
+                            sql`
+                                WITH existing_account AS (
+                                    -- The account this provider account already belongs to, if any
+                                    SELECT user_id FROM oauth_accounts
+                                    WHERE provider = ${provider} AND provider_account_id = ${providerAccountId}
+                                ),
+                                new_user AS (
+                                    -- Insert a new user only if this provider account is a stranger
+                                    INSERT INTO users (display_name, avatar_url, last_login_at)
+                                    SELECT ${displayName}, ${avatarUrl}, NOW()
+                                    WHERE NOT EXISTS (SELECT 1 FROM existing_account)
+                                    RETURNING *
+                                ),
+                                new_account AS (
+                                    -- Link the provider account to the user it just created
+                                    INSERT INTO oauth_accounts (
+                                        provider, provider_account_id, user_id, email, display_name, avatar_url
+                                    )
+                                    SELECT ${provider}, ${providerAccountId}, id, ${email}, ${displayName}, ${avatarUrl}
+                                    FROM new_user
+                                    ON CONFLICT (provider, provider_account_id) DO NOTHING
+                                ),
+                                refreshed_account AS (
+                                    -- Or refresh what the provider says about a link we already hold
+                                    UPDATE oauth_accounts SET
+                                        email = ${email},
+                                        display_name = ${displayName},
+                                        avatar_url = ${avatarUrl},
+                                        last_login_at = NOW()
+                                    WHERE provider = ${provider} AND provider_account_id = ${providerAccountId}
+                                ),
+                                returning_user AS (
+                                    UPDATE users SET last_login_at = NOW()
+                                    WHERE id = (SELECT user_id FROM existing_account)
+                                    RETURNING *
+                                )
+                                SELECT * FROM returning_user
+                                UNION ALL
+                                SELECT * FROM new_user;
+                            `
+                        )
+                    ),
             });
 
             const attemptLink = SqlSchema.findOne({
@@ -134,7 +136,15 @@ export class UsersRepository extends Context.Service<UsersRepository>()(
                         WHERE user_id = ${options.userId}
                           AND provider = ${options.provider}
                           AND provider_account_id = ${options.providerAccountId}
-                          AND (SELECT COUNT(*) FROM oauth_accounts WHERE user_id = ${options.userId}) > 1
+                          -- Locking every one of the user's rows makes
+                          -- concurrent unlinks take turns, so two of them
+                          -- cannot both see a count above one and delete the
+                          -- final two accounts out from under each other.
+                          AND (
+                            SELECT COUNT(*) FROM (
+                                SELECT 1 FROM oauth_accounts WHERE user_id = ${options.userId} FOR UPDATE
+                            ) AS locked
+                          ) > 1
                         RETURNING provider
                     `,
                     (rows) => rows.length > 0

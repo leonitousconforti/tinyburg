@@ -1,5 +1,5 @@
-import { Effect, Encoding, Layer, Option, Schema } from "effect";
-import { Cookies, HttpRouter, HttpServerRequest, HttpServerResponse } from "effect/unstable/http";
+import { Effect, Layer, Option, Schema } from "effect";
+import { HttpRouter, HttpServerRequest, HttpServerResponse } from "effect/unstable/http";
 
 import * as crypto from "node:crypto";
 
@@ -9,11 +9,11 @@ import { Jwt, Oidc } from "effect-oidc";
 
 import { DevelopersRepository } from "../../domain/developers.ts";
 import { OAuthAuthorizationRequest as AuthorizationRequestModel } from "../../domain/models.ts";
-import { OIDCRepository } from "../../domain/oidc.ts";
+import { OidcRepository } from "../../domain/oidc.ts";
 import { UsersRepository } from "../../domain/users.ts";
-import { FIRST_PARTY_CLIENT_ID } from "../../firstParty.ts";
+import { maybeCurrentUser } from "../cookies.ts";
+import { sha256 } from "../crypto.ts";
 import { OidcKeys } from "../keys.ts";
-import { clearProviderSession, currentUser } from "../providerSession.ts";
 
 const ACCESS_TOKEN_TTL_SECONDS = 900;
 const ID_TOKEN_TTL_SECONDS = 900;
@@ -31,16 +31,6 @@ const unauthorizedBearer = HttpServerResponse.empty({
     headers: { "www-authenticate": "Bearer" },
 });
 
-/**
- * SHA-256 as base64url, the shape OAuth uses for both the PKCE S256 challenge
- * and for the hashes we store instead of raw codes and secrets.
- */
-const sha256 = (value: string): Effect.Effect<string> =>
-    Effect.map(
-        Effect.promise(() => crypto.subtle.digest("SHA-256", new TextEncoder().encode(value))),
-        (digest) => Encoding.encodeBase64Url(new Uint8Array(digest))
-    );
-
 const scopesOf = (scope: string): ReadonlyArray<string> => scope.split(" ").filter((part) => part.length > 0);
 
 /** Appends OAuth response parameters to a client's registered redirect uri. */
@@ -50,10 +40,10 @@ const redirectTo = (redirectUri: string, params: Record<string, string>): string
     return url.toString();
 };
 
-const findClient = (clientId: string) =>
-    DevelopersRepository.use((repo) => repo.findOAuthClient(clientId)).pipe(
-        Effect.catchCause(() => Effect.succeedNone)
-    );
+const findClient = (clientId: string) => DevelopersRepository.use((repo) => repo.findOAuthClient(clientId));
+
+/** The user signed in on the provider session cookie, if any. */
+const currentUser = Effect.map(maybeCurrentUser, Option.map(({ user }) => user));
 
 /** Public clients must present no secret; confidential clients must match. */
 const clientSecretMatches = (client: OAuthClient, secret: string | undefined): Effect.Effect<boolean> =>
@@ -77,11 +67,11 @@ const timingSafeEquals = (a: string, b: string): boolean =>
 const issueAuthorizationCode = (
     request: OAuthAuthorizationRequest,
     userId: string
-): Effect.Effect<Option.Option<string>, never, OIDCRepository> =>
+): Effect.Effect<Option.Option<string>, never, OidcRepository> =>
     Effect.gen(function* () {
         const code = crypto.randomUUID() + crypto.randomUUID();
         const codeHash = yield* sha256(code);
-        const approved = yield* OIDCRepository.use((repo) =>
+        const approved = yield* OidcRepository.use((repo) =>
             repo.approveAuthorizationRequest({ requestId: request.id, userId, codeHash })
         ).pipe(Effect.orDie);
         return Option.map(approved, (row) => redirectTo(row.redirectUri, { code, state: row.state }));
@@ -148,7 +138,7 @@ const consentPage = (client: OAuthClient, request: OAuthAuthorizationRequest) =>
   </main>
 </body>
 </html>`
-    );
+    ).pipe(HttpServerResponse.setHeader("cache-control", "no-store"));
 
 // GET /oauth/authorize - the browser entry point of the code flow. Visitors
 // without a provider session bounce through /login and come back here; bad
@@ -197,12 +187,12 @@ const authorize = Effect.gen(function* () {
         codeChallenge: params.code_challenge,
         codeHash: Option.none(),
     });
-    const created = yield* OIDCRepository.use((repo) => repo.createAuthorizationRequest(insert)).pipe(Effect.orDie);
+    const created = yield* OidcRepository.use((repo) => repo.createAuthorizationRequest(insert)).pipe(Effect.orDie);
 
     // Every third party asks permission on every authorization; consent is
     // never remembered. The first party is the app the visitor is already
     // using, so prompting it to authorize itself would be noise.
-    if (client.id !== FIRST_PARTY_CLIENT_ID) return consentPage(client, created);
+    if (client.id !== DevelopersRepository.FIRST_PARTY_CLIENT_ID) return consentPage(client, created);
 
     const redirect = yield* issueAuthorizationCode(created, user.id);
     return Option.match(redirect, {
@@ -226,7 +216,7 @@ const consent = Effect.gen(function* () {
     if (Option.isNone(decoded)) return badRequest("This consent decision is malformed.");
     const { decision, request_id: requestId } = decoded.value;
 
-    const maybeRequest = yield* OIDCRepository.use((repo) => repo.findAuthorizationRequest(requestId)).pipe(
+    const maybeRequest = yield* OidcRepository.use((repo) => repo.findAuthorizationRequest(requestId)).pipe(
         Effect.orDie
     );
     if (Option.isNone(maybeRequest) || maybeRequest.value.userId !== user.id) {
@@ -235,7 +225,7 @@ const consent = Effect.gen(function* () {
     const request = maybeRequest.value;
 
     if (decision === "deny") {
-        yield* OIDCRepository.use((repo) => repo.deleteAuthorizationRequest(request.id)).pipe(
+        yield* OidcRepository.use((repo) => repo.deleteAuthorizationRequest(request.id)).pipe(
             Effect.catchCause(() => Effect.void)
         );
         return HttpServerResponse.redirect(
@@ -274,7 +264,7 @@ const token = Effect.gen(function* () {
     switch (body.grant_type) {
         case "authorization_code": {
             const codeHash = yield* sha256(body.code);
-            const maybeGrant = yield* OIDCRepository.use((repo) => repo.consumeAuthorizationCode(codeHash)).pipe(
+            const maybeGrant = yield* OidcRepository.use((repo) => repo.consumeAuthorizationCode(codeHash)).pipe(
                 Effect.orDie
             );
             if (Option.isNone(maybeGrant)) return yield* tokenError(400, "invalid_grant");
@@ -391,7 +381,7 @@ const bearerClaims = Effect.gen(function* () {
 
     const revoked = yield* Option.match(Option.fromNullishOr(claims.value.jti), {
         onNone: () => Effect.succeed(false),
-        onSome: (jti) => OIDCRepository.use((repo) => repo.isTokenRevoked(jti)).pipe(Effect.orDie),
+        onSome: (jti) => OidcRepository.use((repo) => repo.isTokenRevoked(jti)).pipe(Effect.orDie),
     });
     return revoked ? Option.none() : claims;
 });
@@ -474,7 +464,7 @@ const revoke = Effect.gen(function* () {
         onNone: () => Effect.void,
         onSome: (claims) =>
             claims.client_id === client.id && claims.jti !== undefined
-                ? OIDCRepository.use((repo) =>
+                ? OidcRepository.use((repo) =>
                       repo.revokeToken({ jti: claims.jti as string, expiresAt: new Date(claims.exp * 1000) })
                   ).pipe(Effect.orDie)
                 : Effect.void,
@@ -482,11 +472,6 @@ const revoke = Effect.gen(function* () {
 
     return HttpServerResponse.empty({ status: 200, headers: noStore });
 });
-
-/** Ends the provider session. The SPA discards its tokens separately. */
-const logout = Effect.map(clearProviderSession, (cookie) =>
-    HttpServerResponse.redirect("/", { cookies: Cookies.fromIterable([cookie]) })
-);
 
 const discovery = Effect.flatMap(OidcKeys, (keys) => HttpServerResponse.json(Oidc.makeDiscoveryDocument(keys.issuer)));
 
@@ -508,6 +493,5 @@ export const OidcProviderLive = Layer.mergeAll(
     HttpRouter.add("POST", "/oauth/consent", consent),
     HttpRouter.add("POST", "/oauth/token", token),
     HttpRouter.add("GET", "/oauth/userinfo", userinfo),
-    HttpRouter.add("POST", "/oauth/revoke", revoke),
-    HttpRouter.add("GET", "/logout", logout)
+    HttpRouter.add("POST", "/oauth/revoke", revoke)
 );

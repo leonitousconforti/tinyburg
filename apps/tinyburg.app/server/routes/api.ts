@@ -1,4 +1,4 @@
-import { DateTime, Duration, Effect, Layer, Option, Schema } from "effect";
+import { DateTime, Duration, Effect, Encoding, Layer, Option, Schema } from "effect";
 import { Headers, HttpRouter, HttpServerRequest } from "effect/unstable/http";
 import { HttpApiBuilder, HttpApiError } from "effect/unstable/httpapi";
 import { Model } from "effect/unstable/schema";
@@ -11,6 +11,7 @@ import { DevelopersRepository } from "../../domain/developers.ts";
 import { OidcRepository } from "../../domain/oidc.ts";
 import { SessionsRepository } from "../../domain/sessions.ts";
 import { Api } from "../../shared/api.ts";
+import { maybeCurrentUser } from "../cookies.ts";
 import { OidcKeys } from "../keys.ts";
 
 const accessTokenFor = Effect.fnUntraced(function* ({ session, user }: { session: Session; user: User }) {
@@ -45,8 +46,8 @@ const accessTokenFor = Effect.fnUntraced(function* ({ session, user }: { session
         ttlSeconds: ACCESS_TOKEN_TTL_SECONDS,
     });
 
-    const claims = yield* Schema.decodeEffect(Schema.fromJsonString(Jwt.StandardClaimsSchema))(
-        accessToken.split(".")[1]
+    const claims = yield* Effect.fromResult(Encoding.decodeBase64UrlString(accessToken.split(".")[1])).pipe(
+        Effect.flatMap(Schema.decodeEffect(Schema.fromJsonString(Jwt.StandardClaimsSchema)))
     );
 
     yield* SessionsRepository.use((repo) =>
@@ -54,7 +55,8 @@ const accessTokenFor = Effect.fnUntraced(function* ({ session, user }: { session
             ...session,
             accessToken: Option.some(accessToken),
             accessTokenJti: Option.fromNullishOr(claims.jti),
-            expiresAt: now.pipe(DateTime.addDuration(Duration.seconds(ACCESS_TOKEN_TTL_SECONDS)), Model.Override),
+            accessTokenExpiresAt: Option.some(DateTime.addDuration(now, Duration.seconds(ACCESS_TOKEN_TTL_SECONDS))),
+            expiresAt: session.expiresAt.pipe(Model.Override),
             createdAt: session.createdAt.pipe(Model.Override),
             lastSeenAt: now.pipe(Model.Override),
         })
@@ -75,15 +77,17 @@ const SessionBearer = HttpRouter.middleware(
                     return yield* httpEffect;
                 }
 
-                const maybeCurrentUser = yield* SessionsRepository.maybeCurrentUser;
-                if (Option.isNone(maybeCurrentUser)) return yield* httpEffect;
+                const currentUser = yield* maybeCurrentUser;
+                if (Option.isNone(currentUser)) return yield* httpEffect;
 
-                const accessToken = yield* Effect.orDie(accessTokenFor(maybeCurrentUser.value));
+                const accessToken = yield* accessTokenFor(currentUser.value).pipe(Effect.option);
+                if (Option.isNone(accessToken)) return yield* httpEffect;
+
                 return yield* Effect.provideService(
                     httpEffect,
                     HttpServerRequest.HttpServerRequest,
                     request.modify({
-                        headers: Headers.set(request.headers, "authorization", `Bearer ${accessToken}`),
+                        headers: Headers.set(request.headers, "authorization", `Bearer ${accessToken.value}`),
                     })
                 );
             },

@@ -1,27 +1,21 @@
-import { Config, Effect, Layer, Option, Schema } from "effect";
-import { HttpEffect, HttpRouter, HttpServerRequest, HttpServerResponse } from "effect/unstable/http";
+import { Effect, Layer, Option } from "effect";
+import { HttpEffect, HttpRouter, HttpServerResponse } from "effect/unstable/http";
 import { HttpApiBuilder, HttpApiError } from "effect/unstable/httpapi";
 
 import { SessionsRepository } from "../../domain/sessions.ts";
 import { UsersRepository } from "../../domain/users.ts";
 import { AuthApi, CurrentSession, SessionCookie } from "../../shared/auth.ts";
+import { cookieName, maybeCurrentUser, PROVIDER_SESSION_COOKIE_NAME, readCookie, SecureCookies } from "../cookies.ts";
 import { sha256 } from "../crypto.ts";
-
-const SecureCookies = Config.string("NODE_ENV").pipe(
-    Config.withDefault("development"),
-    Config.map((env) => env === "production")
-);
 
 const SessionCookieLive = Layer.effect(
     SessionCookie,
     Effect.gen(function* () {
         const sessions = yield* SessionsRepository;
         return Effect.fnUntraced(function* (httpEffect) {
-            const maybeCurrentUser = yield* SessionsRepository.maybeCurrentUser.pipe(
-                Effect.provideService(SessionsRepository, sessions)
-            );
+            const currentUser = yield* maybeCurrentUser.pipe(Effect.provideService(SessionsRepository, sessions));
 
-            if (Option.isNone(maybeCurrentUser)) {
+            if (Option.isNone(currentUser)) {
                 return yield* new HttpApiError.Unauthorized();
             }
 
@@ -29,16 +23,17 @@ const SessionCookieLive = Layer.effect(
                 Effect.succeed(HttpServerResponse.setHeader(response, "cache-control", "no-store"))
             );
 
-            return yield* Effect.provideService(httpEffect, CurrentSession, maybeCurrentUser.value);
+            return yield* Effect.provideService(httpEffect, CurrentSession, currentUser.value);
         });
     })
 );
 
 const expireSessionCookie = Effect.gen(function* () {
     const secureCookies = yield* Effect.orDie(SecureCookies);
+    const name = yield* Effect.orDie(cookieName(PROVIDER_SESSION_COOKIE_NAME));
     yield* HttpEffect.appendPreResponseHandler((_request, response) =>
         Effect.orDie(
-            HttpServerResponse.expireCookie(response, SessionsRepository.PROVIDER_SESSION_COOKIE_NAME, {
+            HttpServerResponse.expireCookie(response, name, {
                 httpOnly: true,
                 path: "/",
                 secure: secureCookies,
@@ -114,21 +109,16 @@ const AuthGroupLive = HttpApiBuilder.group(
 );
 
 const logout = Effect.gen(function* () {
-    const cookies = yield* HttpServerRequest.schemaCookies(
-        Schema.Struct({
-            [SessionsRepository.PROVIDER_SESSION_COOKIE_NAME]: Schema.String,
-        })
-    ).pipe(Effect.option);
-
-    if (Option.isSome(cookies)) {
-        const tokenHash = yield* sha256(cookies.value[SessionsRepository.PROVIDER_SESSION_COOKIE_NAME]);
+    const sessionToken = yield* Effect.orDie(readCookie(PROVIDER_SESSION_COOKIE_NAME));
+    if (Option.isSome(sessionToken)) {
+        const tokenHash = yield* sha256(sessionToken.value);
         yield* Effect.orDie(SessionsRepository.use((repo) => repo.revokeSessionByTokenHash(tokenHash)));
     }
 
     const secureCookies = yield* SecureCookies;
     return yield* HttpServerResponse.expireCookie(
         HttpServerResponse.redirect("/"),
-        SessionsRepository.PROVIDER_SESSION_COOKIE_NAME,
+        yield* cookieName(PROVIDER_SESSION_COOKIE_NAME),
         {
             httpOnly: true,
             path: "/",
@@ -140,5 +130,5 @@ const logout = Effect.gen(function* () {
 
 export const AuthRoutesLive = Layer.mergeAll(
     HttpApiBuilder.layer(AuthApi).pipe(Layer.provide(AuthGroupLive), Layer.provide(SessionCookieLive)),
-    HttpRouter.add("GET", "/logout", logout)
+    HttpRouter.add("POST", "/logout", logout)
 );
