@@ -1,5 +1,5 @@
-import { Config, DateTime, Effect, Layer, Option, Redacted, Schema, String } from "effect";
-import { Cookies, HttpRouter, HttpServerRequest, HttpServerResponse, Url } from "effect/unstable/http";
+import { Config, DateTime, Effect, Layer, Option, Redacted, Schema } from "effect";
+import { type Cookies, HttpRouter, HttpServerRequest, HttpServerResponse, Url } from "effect/unstable/http";
 
 import { Oidc } from "effect-oidc";
 
@@ -79,10 +79,17 @@ const returnToParam = HttpServerRequest.schemaSearchParams(
     Effect.map(Option.filter((value) => value.startsWith("/") && !value.startsWith("//") && !value.startsWith("/\\")))
 );
 
-/** Sends a visitor who needs to be signed in through login first. */
-const bounceToLogin = (returnTo: string, cookies: ReadonlyArray<Cookies.Cookie> = []) =>
-    HttpServerResponse.redirect(`/login?returnTo=${encodeURIComponent(returnTo)}`, {
-        cookies: Cookies.fromIterable(cookies),
+const bounceToLogin = (returnTo: string) =>
+    HttpServerResponse.redirect(`/login?returnTo=${encodeURIComponent(returnTo)}`);
+
+const expireSpentCookies = (provider: OAuthProvider, response: HttpServerResponse.HttpServerResponse) =>
+    Effect.gen(function* () {
+        const secureCookies = yield* SecureCookies;
+        const cookieOptions = { httpOnly: true, path: "/", secure: secureCookies, sameSite: "lax" } as const;
+        return yield* HttpServerResponse.expireCookie(response, provider.stateCookieName, cookieOptions).pipe(
+            Effect.flatMap(HttpServerResponse.expireCookie(provider.codeVerifierCookieName, cookieOptions)),
+            Effect.flatMap(HttpServerResponse.expireCookie(provider.intentCookieName, cookieOptions))
+        );
     });
 
 const start = (
@@ -122,43 +129,30 @@ const start = (
             authorizationRequest.hash.valueOrUndefined
         ).pipe(Effect.fromResult);
 
-        // Store the state in a cookie to verify later
-        const stateCookie = yield* Cookies.makeCookie(provider.stateCookieName, state, {
-            maxAge: "10 minutes",
-            httpOnly: true,
-            path: "/",
-            secure: secureCookies,
-            sameSite: "lax",
-        }).pipe(Effect.fromResult);
-
-        // Store the code verifier in a cookie to verify later
-        const codeVerifierCookie = yield* Cookies.makeCookie(provider.codeVerifierCookieName, codeVerifier, {
-            maxAge: "10 minutes",
-            httpOnly: true,
-            path: "/",
-            secure: secureCookies,
-            sameSite: "lax",
-        }).pipe(Effect.fromResult);
-
         // Remember why we are sending them
         const intent = yield* Schema.encodeEffect(OAuthIntent)({
             returnTo: Option.getOrUndefined(returnTo),
             mode,
         });
 
-        // So the callback knows what to do with the account it gets back
-        const intentCookie = yield* Cookies.makeCookie(provider.intentCookieName, intent, {
+        // The callback verifies the state and code verifier and reads the
+        // intent to know what to do with the account it gets back
+        const cookieOptions = {
             maxAge: "10 minutes",
             httpOnly: true,
             path: "/",
             secure: secureCookies,
             sameSite: "lax",
-        }).pipe(Effect.fromResult);
+        } as const;
 
         // Redirect to the provider's OAuth 2.0 authorization endpoint
-        return HttpServerResponse.redirect(authorizationUrl, {
-            cookies: Cookies.fromIterable([stateCookie, codeVerifierCookie, intentCookie]),
-        });
+        return yield* HttpServerResponse.redirect(authorizationUrl).pipe(
+            HttpServerResponse.setCookies([
+                [provider.stateCookieName, state, cookieOptions],
+                [provider.codeVerifierCookieName, codeVerifier, cookieOptions],
+                [provider.intentCookieName, intent, cookieOptions],
+            ])
+        );
     });
 
 const callback = (provider: OAuthProvider) =>
@@ -226,36 +220,6 @@ const callback = (provider: OAuthProvider) =>
             codeVerifier: codeVerifierCookie,
         });
 
-        // The state cookie has served its purpose, delete it
-        const deleteStateCookie = yield* Cookies.makeCookie(provider.stateCookieName, String.empty, {
-            expires: new Date(0),
-            httpOnly: true,
-            path: "/",
-            secure: secureCookies,
-            sameSite: "lax",
-        }).pipe(Effect.fromResult);
-
-        // The code verifier cookie has served its purpose, delete it
-        const deleteCodeVerifierCookie = yield* Cookies.makeCookie(provider.codeVerifierCookieName, String.empty, {
-            expires: new Date(0),
-            httpOnly: true,
-            path: "/",
-            secure: secureCookies,
-            sameSite: "lax",
-        }).pipe(Effect.fromResult);
-
-        // The intent cookie has served its purpose, delete it
-        const deleteIntentCookie = yield* Cookies.makeCookie(provider.intentCookieName, String.empty, {
-            expires: new Date(0),
-            httpOnly: true,
-            path: "/",
-            secure: secureCookies,
-            sameSite: "lax",
-        }).pipe(Effect.fromResult);
-
-        // Cookies that have served their purpose and should be deleted in the response
-        const spentCookies = [deleteStateCookie, deleteCodeVerifierCookie, deleteIntentCookie];
-
         // Verify the ID token and extract user information
         const idToken = tokens.id_token ?? "";
         const claims = yield* Oidc.verifyIdToken({
@@ -279,11 +243,9 @@ const callback = (provider: OAuthProvider) =>
                 repo.linkOAuthAccount({ ...profile, userId: maybeCurrentUser.value.user.id })
             );
 
-            return HttpServerResponse.redirect(`/account?link=${outcome}`, {
-                cookies: Cookies.fromIterable(spentCookies),
-            });
+            return yield* expireSpentCookies(provider, HttpServerResponse.redirect(`/account?link=${outcome}`));
         } else if (intentCookie.mode === "link" && Option.isNone(maybeCurrentUser)) {
-            return bounceToLogin("/account", spentCookies);
+            return yield* expireSpentCookies(provider, bounceToLogin("/account"));
         }
 
         const sessionToken = randomSecret();
@@ -298,19 +260,22 @@ const callback = (provider: OAuthProvider) =>
             })
         );
 
-        const sessionCookie = yield* Cookies.makeCookie(SessionsRepository.PROVIDER_SESSION_COOKIE_NAME, sessionToken, {
-            expires: DateTime.toDateUtc(session.expiresAt),
-            httpOnly: true,
-            path: "/",
-            secure: secureCookies,
-            sameSite: "lax",
-        }).pipe(Effect.fromResult);
-
         // `returnTo` was checked for an open redirect on the way out, and has
         // been in a cookie of ours ever since
-        return HttpServerResponse.redirect(intentCookie.returnTo ?? "/towers/@me", {
-            cookies: Cookies.fromIterable([sessionCookie, ...spentCookies]),
-        });
+        const response = yield* HttpServerResponse.setCookie(
+            HttpServerResponse.redirect(intentCookie.returnTo ?? "/towers/@me"),
+            SessionsRepository.PROVIDER_SESSION_COOKIE_NAME,
+            sessionToken,
+            {
+                expires: DateTime.toDateUtc(session.expiresAt),
+                httpOnly: true,
+                path: "/",
+                secure: secureCookies,
+                sameSite: "lax",
+            }
+        );
+
+        return yield* expireSpentCookies(provider, response);
     });
 
 export const OAuthRoutesLive = Layer.mergeAll(
