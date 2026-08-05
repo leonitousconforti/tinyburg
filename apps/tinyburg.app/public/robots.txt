@@ -1,3 +1,7 @@
 User-agent: *
-Disallow:
+Disallow: /auth/
+Disallow: /oauth/
+Disallow: /logout
+Disallow: /account
+Disallow: /towers/
 Sitemap: https://tinyburg.app/sitemap.xml
