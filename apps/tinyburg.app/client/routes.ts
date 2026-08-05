@@ -13,7 +13,7 @@ export const DevelopersRoute = r("Developers");
 export const DeveloperAppsRoute = r("DeveloperApps");
 export const TowerMeRoute = r("TowerMe");
 export const TowerLinkRoute = r("TowerLink");
-export const AccountRoute = r("Account", { link: S.Option(S.String) });
+export const AccountRoute = r("Account", { link: S.Option(S.String), error: S.Option(S.String) });
 export const NotFoundRoute = r("NotFound", { path: S.String });
 
 export const AppRoute = S.Union([
@@ -48,11 +48,11 @@ export const developersRouter = pipe(literal("developers"), Route.mapTo(Develope
 export const developerAppsRouter = pipe(literal("developers"), slash(literal("apps")), Route.mapTo(DeveloperAppsRoute));
 export const towerMeRouter = pipe(literal("towers"), slash(literal("@me")), Route.mapTo(TowerMeRoute));
 export const towerLinkRouter = pipe(literal("towers"), slash(literal("@link")), Route.mapTo(TowerLinkRoute));
-// The oauth callback reports how connecting another provider went in the
-// `link` query parameter; the page opens saying so.
+// The oauth callback reports how connecting another provider went: `link` when
+// it worked, `error` when it did not. The page opens saying so either way.
 export const accountRouter = pipe(
     literal("account"),
-    Route.query(S.Struct({ link: S.OptionFromOptional(S.String) })),
+    Route.query(S.Struct({ link: S.OptionFromOptional(S.String), error: S.OptionFromOptional(S.String) })),
     Route.mapTo(AccountRoute)
 );
 

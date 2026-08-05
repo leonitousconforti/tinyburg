@@ -86,6 +86,9 @@ const returnToParam = HttpServerRequest.schemaSearchParams(
 const bounceToLogin = (returnTo: string) =>
     HttpServerResponse.redirect(`/login?returnTo=${encodeURIComponent(returnTo)}`);
 
+const providerError = (error: string): string =>
+    error === "access_denied" ? "oauth_denied" : "invalid_oauth_provider";
+
 const expireSpentCookies =
     (provider: OAuthProviderConfigRealized) => (response: HttpServerResponse.HttpServerResponse) =>
         Effect.gen(function* () {
@@ -122,10 +125,14 @@ const start = (
         const returnTo = mode === "link" ? Option.none<string>() : yield* returnToParam;
 
         const tryMaybeCurrentUser = yield* maybeCurrentUser.pipe(Effect.option);
-        if (Option.isNone(tryMaybeCurrentUser)) return bounceToLogin("/login?error=invalid_oauth_current_user");
+        if (Option.isNone(tryMaybeCurrentUser)) {
+            return HttpServerResponse.redirect("/login?error=invalid_oauth_current_user");
+        }
 
         const currentUser = tryMaybeCurrentUser.value;
-        if (mode === "link" && Option.isNone(currentUser)) return bounceToLogin("/account");
+        if (mode === "link" && Option.isNone(currentUser)) {
+            return bounceToLogin("/account");
+        }
 
         const codeVerifier = randomSecret();
         const state = randomSecret();
@@ -236,7 +243,7 @@ const callback = (provider: OAuthProviderConfigRealized) =>
         // The visitor cancelled at the provider, or the provider refused
         const urlParams = maybeUrlParams.value;
         if ("error" in urlParams) {
-            return yield* failedRedirectByIntent(urlParams.error);
+            return yield* failedRedirectByIntent(providerError(urlParams.error));
         }
 
         // Parse the cookies

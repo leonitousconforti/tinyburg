@@ -2,6 +2,7 @@ import { Match, Option } from "effect";
 
 import type { Html, HtmlBuilder } from "foldkit/html";
 
+import { classifyOAuthError } from "../oauthErrors.ts";
 import { appBackLink } from "../ui/chrome.ts";
 import { discordIcon, googleIcon } from "../ui/icons.ts";
 
@@ -13,22 +14,36 @@ const loginHrefFor = (provider: "google" | "discord", returnTo: Option.Option<st
 
 /**
  * Sign in is a server round trip that lands back here with `?error=` when it
- * could not be completed. The callback deliberately keeps the reason vague, so
- * the visitor gets the one thing that is actually true and actionable: it did
- * not work, and trying again is worth a shot.
+ * could not be completed. Cancelling is not a failure and does not read like
+ * one; the rest differ only in what the visitor should try next.
  */
-const problemFor = (error: string): string =>
-    Match.value(error).pipe(
-        Match.withReturnType<string>(),
-        Match.when("oauth", () => "We couldn't finish signing you in. Please try again."),
-        Match.orElse(() => "Something went wrong signing you in. Please try again.")
+const problemFor = (error: string): { readonly denied: boolean; readonly text: string } =>
+    Match.value(classifyOAuthError(error)).pipe(
+        Match.withReturnType<{ readonly denied: boolean; readonly text: string }>(),
+        Match.when("denied", () => ({
+            denied: true,
+            text: "Sign in was cancelled. You can pick up where you left off whenever you like.",
+        })),
+        Match.when("expired", () => ({
+            denied: false,
+            text: "That sign in attempt expired or was interrupted. Please start again, and check that your browser allows cookies for this site.",
+        })),
+        Match.when("failed", () => ({
+            denied: false,
+            text: "We couldn't finish signing you in. Please try again.",
+        })),
+        Match.exhaustive
     );
 
-const problemBanner = <M>(h: HtmlBuilder<M>, text: string): Html =>
+const problemBanner = <M>(h: HtmlBuilder<M>, denied: boolean, text: string): Html =>
     h.p(
         [
-            h.Role("alert"),
-            h.Class("font-mono mb-6 rounded-lg border-2 border-red-300 bg-red-50 px-4 py-3 text-lg text-red-700"),
+            h.Role(denied ? "status" : "alert"),
+            h.Class(
+                denied
+                    ? "font-mono border-sky-blue bg-sky-light/40 text-sky-dark mb-6 rounded-lg border-2 px-4 py-3 text-lg"
+                    : "font-mono mb-6 rounded-lg border-2 border-red-300 bg-red-50 px-4 py-3 text-lg text-red-700"
+            ),
         ],
         [text]
     );
@@ -58,7 +73,10 @@ export const loginView = <M>(h: HtmlBuilder<M>, returnTo: Option.Option<string>,
                         ]
                     ),
                     ...Option.match(error, {
-                        onSome: (code) => [problemBanner(h, problemFor(code))],
+                        onSome: (code) => {
+                            const { denied, text } = problemFor(code);
+                            return [problemBanner(h, denied, text)];
+                        },
                         onNone: () => [],
                     }),
                     h.div(

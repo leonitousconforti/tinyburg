@@ -122,7 +122,7 @@ const resetPageState = (model: Model, route: AppRoute): Model =>
     evo(model, {
         route: () => route,
         wizard: (wizard) => (route._tag === "TowerLink" ? initialWizard : wizard),
-        account: (account) => (route._tag === "Account" ? enterAccount(route.link, account) : account),
+        account: (account) => (route._tag === "Account" ? enterAccount(route.link, route.error, account) : account),
     });
 
 // UPDATE

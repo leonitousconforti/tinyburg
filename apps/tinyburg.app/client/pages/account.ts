@@ -9,6 +9,7 @@ import { evo } from "foldkit/struct";
 
 import { OAuthAccount, Session } from "../../domain/models.ts";
 import { Auth, type SessionUser } from "../backend.ts";
+import { classifyOAuthError } from "../oauthErrors.ts";
 import { appBackLink } from "../ui/chrome.ts";
 import { discordIcon, googleIcon } from "../ui/icons.ts";
 
@@ -62,8 +63,33 @@ export const initialAccount: AccountModel = {
  * round trip that lands back here with its outcome in the url, so the page
  * opens saying how it went.
  */
-export const enterAccount = (link: Option.Option<string>, previous: AccountModel): AccountModel => {
+export const enterAccount = (
+    link: Option.Option<string>,
+    error: Option.Option<string>,
+    previous: AccountModel
+): AccountModel => {
     const entered: AccountModel = evo(previous, { busy: Option.none, notice: Option.none, problem: Option.none });
+
+    // The callback sets `error` when connecting fell over and `link` when it
+    // got far enough to have an outcome, never both.
+    if (Option.isSome(error)) {
+        return Match.value(classifyOAuthError(error.value)).pipe(
+            Match.withReturnType<AccountModel>(),
+            Match.when("denied", () =>
+                evo(entered, { notice: () => Option.some("Connecting that account was cancelled.") })
+            ),
+            Match.when("expired", () =>
+                evo(entered, {
+                    problem: () => Option.some("That attempt expired or was interrupted. Please try connecting again."),
+                })
+            ),
+            Match.when("failed", () =>
+                evo(entered, { problem: () => Option.some("We couldn't connect that account. Please try again.") })
+            ),
+            Match.exhaustive
+        );
+    }
+
     return Option.match(link, {
         onNone: () => entered,
         onSome: (outcome) =>
