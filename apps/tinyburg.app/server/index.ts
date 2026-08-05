@@ -1,10 +1,10 @@
-import { Config, ConfigProvider, Effect, Layer, Path, String } from "effect";
+import { Config, ConfigProvider, Effect, Layer, String } from "effect";
 import { FetchHttpClient, HttpRouter, HttpServerResponse } from "effect/unstable/http";
 
 import { createServer } from "node:http";
 
 import { NodeHttpServer, NodeRuntime } from "@effect/platform-node";
-import { PgClient, PgMigrator } from "@effect/sql-pg";
+import { PgClient } from "@effect/sql-pg";
 
 import { DevelopersRepository } from "../domain/developers.ts";
 import { OidcRepository } from "../domain/oidc.ts";
@@ -53,12 +53,12 @@ const SqlLive = PgClient.layerConfig({
     transformResultNames: Config.succeed(String.snakeToCamel),
 });
 
-const MigratorLive = Effect.gen(function* () {
-    const path = yield* Path.Path;
-    const migrations = yield* path.fromFileUrl(new URL("../migrations", import.meta.url));
-    const loader = PgMigrator.fromFileSystem(migrations);
-    return PgMigrator.layer({ loader });
-}).pipe(Layer.unwrap);
+// const MigratorLive = Effect.gen(function* () {
+//     const path = yield* Path.Path;
+//     const migrations = yield* path.fromFileUrl(new URL("../migrations", import.meta.url));
+//     const loader = PgMigrator.fromFileSystem(migrations);
+//     return PgMigrator.layer({ loader });
+// }).pipe(Layer.unwrap);
 
 const Repositories = Layer.mergeAll(
     DevelopersRepository.Default,
@@ -70,7 +70,7 @@ const Repositories = Layer.mergeAll(
 
 HttpRouter.serve(AllRoutes).pipe(
     Layer.provide([Repositories, CookiePolicy.Default, OidcKeys.Default, FetchHttpClient.layer]),
-    Layer.provide(MigratorLive),
+    // Layer.provide(MigratorLive),
     Layer.provide(SqlLive),
     Layer.provide(
         NodeHttpServer.layerConfig(createServer, {
