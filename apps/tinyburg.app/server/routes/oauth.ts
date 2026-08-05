@@ -1,3 +1,5 @@
+import type { SqlError } from "effect/unstable/sql";
+
 import { Config, DateTime, Effect, Layer, Option, Redacted, Schema } from "effect";
 import { type Cookies, HttpRouter, HttpServerRequest, HttpServerResponse, Url } from "effect/unstable/http";
 
@@ -5,6 +7,7 @@ import { Oidc } from "effect-oidc";
 
 import { SessionsRepository } from "../../domain/sessions.ts";
 import { UsersRepository } from "../../domain/users.ts";
+import { CookiePolicy, maybeCurrentUser, PROVIDER_SESSION_COOKIE_NAME, readCookie } from "../cookies.ts";
 import { randomSecret, sha256 } from "../crypto.ts";
 
 interface OAuthProvider {
@@ -58,11 +61,6 @@ const discord = {
     }),
 } satisfies OAuthProvider;
 
-const SecureCookies = Config.string("NODE_ENV").pipe(
-    Config.withDefault("development"),
-    Config.map((env) => env === "production")
-);
-
 const OAuthIntent = Schema.fromJsonString(
     Schema.Struct({
         mode: Schema.Literals(["login", "link"]),
@@ -76,7 +74,9 @@ const returnToParam = HttpServerRequest.schemaSearchParams(
     })
 ).pipe(
     Effect.map(({ returnTo }) => Option.fromUndefinedOr(returnTo)),
-    Effect.map(Option.filter((value) => value.startsWith("/") && !value.startsWith("//") && !value.startsWith("/\\")))
+    Effect.map(Option.filter((value) => value.startsWith("/") && !value.startsWith("//") && !value.startsWith("/\\"))),
+    Effect.option,
+    Effect.map(Option.flatten)
 );
 
 const bounceToLogin = (returnTo: string) =>
@@ -84,12 +84,13 @@ const bounceToLogin = (returnTo: string) =>
 
 const expireSpentCookies = (provider: OAuthProvider, response: HttpServerResponse.HttpServerResponse) =>
     Effect.gen(function* () {
-        const secureCookies = yield* SecureCookies;
-        const cookieOptions = { httpOnly: true, path: "/", secure: secureCookies, sameSite: "lax" } as const;
-        return yield* HttpServerResponse.expireCookie(response, provider.stateCookieName, cookieOptions).pipe(
-            Effect.flatMap(HttpServerResponse.expireCookie(provider.codeVerifierCookieName, cookieOptions)),
-            Effect.flatMap(HttpServerResponse.expireCookie(provider.intentCookieName, cookieOptions))
-        );
+        const cookies = yield* CookiePolicy;
+        const cookieOptions = { httpOnly: true, path: "/", secure: cookies.secure, sameSite: "lax" } as const;
+        let expired = response;
+        for (const base of [provider.stateCookieName, provider.codeVerifierCookieName, provider.intentCookieName]) {
+            expired = yield* HttpServerResponse.expireCookie(expired, cookies.name(base), cookieOptions);
+        }
+        return expired;
     });
 
 const start = (
@@ -97,15 +98,15 @@ const start = (
     mode: "link" | "login"
 ): Effect.Effect<
     HttpServerResponse.HttpServerResponse,
-    Cookies.CookiesError | Url.UrlError | Schema.SchemaError | Config.ConfigError,
-    HttpServerRequest.HttpServerRequest | HttpServerRequest.ParsedSearchParams | SessionsRepository
+    Cookies.CookiesError | Url.UrlError | Schema.SchemaError | Config.ConfigError | SqlError.SqlError,
+    CookiePolicy | HttpServerRequest.HttpServerRequest | HttpServerRequest.ParsedSearchParams | SessionsRepository
 > =>
     Effect.gen(function* () {
         const config = yield* provider.config;
-        const secureCookies = yield* SecureCookies;
+        const cookies = yield* CookiePolicy;
 
         const returnTo = mode === "link" ? Option.none<string>() : yield* returnToParam;
-        if (mode === "link" && Option.isNone(yield* SessionsRepository.maybeCurrentUser)) {
+        if (mode === "link" && Option.isNone(yield* maybeCurrentUser)) {
             return bounceToLogin("/account");
         }
 
@@ -141,16 +142,16 @@ const start = (
             maxAge: "10 minutes",
             httpOnly: true,
             path: "/",
-            secure: secureCookies,
+            secure: cookies.secure,
             sameSite: "lax",
         } as const;
 
         // Redirect to the provider's OAuth 2.0 authorization endpoint
         return yield* HttpServerResponse.redirect(authorizationUrl).pipe(
             HttpServerResponse.setCookies([
-                [provider.stateCookieName, state, cookieOptions],
-                [provider.codeVerifierCookieName, codeVerifier, cookieOptions],
-                [provider.intentCookieName, intent, cookieOptions],
+                [cookies.name(provider.stateCookieName), state, cookieOptions],
+                [cookies.name(provider.codeVerifierCookieName), codeVerifier, cookieOptions],
+                [cookies.name(provider.intentCookieName), intent, cookieOptions],
             ])
         );
     });
@@ -158,10 +159,16 @@ const start = (
 const callback = (provider: OAuthProvider) =>
     Effect.gen(function* () {
         const config = yield* provider.config;
-        const secureCookies = yield* SecureCookies;
-        const maybeCurrentUser = yield* SessionsRepository.maybeCurrentUser;
+        const cookies = yield* CookiePolicy;
+        const request = yield* HttpServerRequest.HttpServerRequest;
+        const currentUser = yield* maybeCurrentUser;
 
-        // Parse the url params
+        // Sign in could not be completed; nothing here is the visitor's
+        // fault, so they land back on login rather than on an error page
+        const failed = expireSpentCookies(provider, HttpServerResponse.redirect("/login?error=oauth"));
+
+        // The provider redirects back with either an error or a code; a
+        // visitor who wanders here by hand brings neither
         const urlParams = yield* HttpServerRequest.schemaSearchParams(
             Schema.Union([
                 Schema.Struct({
@@ -172,43 +179,33 @@ const callback = (provider: OAuthProvider) =>
                     state: Schema.String,
                 }),
             ])
-        );
+        ).pipe(Effect.option);
+        if (Option.isNone(urlParams)) return yield* failed;
 
-        // Handle error from OAuth provider
-        if ("error" in urlParams) {
-            return yield* Effect.die(`${provider.name} OAuth error: ${urlParams.error}`);
+        // The visitor cancelled at the provider, or the provider refused
+        if ("error" in urlParams.value) {
+            yield* Effect.logInfo(`${provider.name} oauth callback returned an error`, urlParams.value.error);
+            return yield* failed;
         }
 
-        // Parse the cookies
-        const { codeVerifierCookie, intentCookie } = yield* HttpServerRequest.schemaCookies(
-            Schema.Struct({
-                [provider.stateCookieName]: Schema.Literal(urlParams.state),
-                [provider.codeVerifierCookieName]: Schema.String,
-                [provider.intentCookieName]: OAuthIntent,
-            })
-        ).pipe(
-            Effect.map(
-                ({
-                    [provider.stateCookieName]: stateCookie,
-                    [provider.codeVerifierCookieName]: codeVerifierCookie,
-                    [provider.intentCookieName]: intentCookie,
-                }) => ({
-                    stateCookie: stateCookie as string,
-                    codeVerifierCookie: codeVerifierCookie as string,
-                    intentCookie: intentCookie as typeof OAuthIntent.Type,
+        // The cookies set on the way out. Missing ones mean the ten minute
+        // window closed or the flow never started in this browser; a state
+        // that does not match the one that left is a forged or replayed
+        // callback. Either way the visitor starts over.
+        const stateCookie = yield* readCookie(provider.stateCookieName);
+        const codeVerifierCookie = yield* readCookie(provider.codeVerifierCookieName);
+        const intentCookie = yield* readCookie(provider.intentCookieName).pipe(
+            Effect.flatMap(
+                Option.match({
+                    onNone: () => Effect.succeedNone,
+                    onSome: (raw) => Schema.decodeEffect(OAuthIntent)(raw).pipe(Effect.option),
                 })
             )
         );
-
-        // Parse the headers
-        const headers = yield* HttpServerRequest.schemaHeaders(
-            Schema.Struct({
-                "user-agent": Schema.String,
-                "do-connecting-ip": Schema.optional(Schema.String),
-                "x-real-ip": Schema.optional(Schema.String),
-                "x-forwarded-for": Schema.optional(Schema.String),
-            })
-        );
+        if (Option.isNone(stateCookie) || Option.isNone(codeVerifierCookie) || Option.isNone(intentCookie)) {
+            return yield* failed;
+        }
+        if (stateCookie.value !== urlParams.value.state) return yield* failed;
 
         // Exchange the authorization code for tokens
         const tokens = yield* Oidc.exchangeAuthorizationCode({
@@ -216,35 +213,45 @@ const callback = (provider: OAuthProvider) =>
             clientId: config.clientId,
             clientSecret: Redacted.value(config.clientSecret),
             redirectUri: config.redirectUri,
-            code: urlParams.code,
-            codeVerifier: codeVerifierCookie,
-        });
+            code: urlParams.value.code,
+            codeVerifier: codeVerifierCookie.value,
+        }).pipe(
+            Effect.tapError((error) => Effect.logWarning(`${provider.name} code exchange failed`, error)),
+            Effect.option
+        );
+        if (Option.isNone(tokens)) return yield* failed;
 
         // Verify the ID token and extract user information
-        const idToken = tokens.id_token ?? "";
-        const claims = yield* Oidc.verifyIdToken({
-            jwks: yield* Oidc.fetchJwks(config.jwksUri),
-            clientId: config.clientId,
-            issuer: provider.issuer,
-            idToken,
-        });
+        const claims = yield* Oidc.fetchJwks(config.jwksUri).pipe(
+            Effect.flatMap((jwks) =>
+                Oidc.verifyIdToken({
+                    jwks,
+                    clientId: config.clientId,
+                    issuer: provider.issuer,
+                    idToken: tokens.value.id_token ?? "",
+                })
+            ),
+            Effect.tapError((error) => Effect.logWarning(`${provider.name} id token verification failed`, error)),
+            Effect.option
+        );
+        if (Option.isNone(claims)) return yield* failed;
 
         // What will get inserted into the database
         const profile = {
             provider: provider.name,
-            providerAccountId: claims.sub,
-            displayName: yield* Option.fromNullishOr(claims.name).pipe(Effect.fromOption),
+            providerAccountId: claims.value.sub,
+            displayName: Option.getOrElse(Option.fromNullishOr(claims.value.name), () => "Tinyburg player"),
             avatarUrl: Option.none<string>(),
             email: Option.none<string>(),
         };
 
-        if (intentCookie.mode === "link" && Option.isSome(maybeCurrentUser)) {
+        if (intentCookie.value.mode === "link" && Option.isSome(currentUser)) {
             const outcome = yield* UsersRepository.use((repo) =>
-                repo.linkOAuthAccount({ ...profile, userId: maybeCurrentUser.value.user.id })
+                repo.linkOAuthAccount({ ...profile, userId: currentUser.value.user.id })
             );
 
             return yield* expireSpentCookies(provider, HttpServerResponse.redirect(`/account?link=${outcome}`));
-        } else if (intentCookie.mode === "link" && Option.isNone(maybeCurrentUser)) {
+        } else if (intentCookie.value.mode === "link" && Option.isNone(currentUser)) {
             return yield* expireSpentCookies(provider, bounceToLogin("/account"));
         }
 
@@ -255,7 +262,9 @@ const callback = (provider: OAuthProvider) =>
             repo.createSession({
                 user,
                 tokenHash,
-                userAgent: Option.some(headers["user-agent"].slice(0, 512)),
+                userAgent: Option.fromNullishOr(request.headers["user-agent"]).pipe(
+                    Option.map((value) => value.slice(0, 512))
+                ),
                 ip: Option.none(),
             })
         );
@@ -263,14 +272,14 @@ const callback = (provider: OAuthProvider) =>
         // `returnTo` was checked for an open redirect on the way out, and has
         // been in a cookie of ours ever since
         const response = yield* HttpServerResponse.setCookie(
-            HttpServerResponse.redirect(intentCookie.returnTo ?? "/towers/@me"),
-            SessionsRepository.PROVIDER_SESSION_COOKIE_NAME,
+            HttpServerResponse.redirect(intentCookie.value.returnTo ?? "/towers/@me"),
+            cookies.name(PROVIDER_SESSION_COOKIE_NAME),
             sessionToken,
             {
                 expires: DateTime.toDateUtc(session.expiresAt),
                 httpOnly: true,
                 path: "/",
-                secure: secureCookies,
+                secure: cookies.secure,
                 sameSite: "lax",
             }
         );

@@ -129,14 +129,26 @@ export const towerMeView = <M>(h: HtmlBuilder<M>, user: SessionUser, towers: Lin
                                             h.p([h.Class("font-mono text-xl text-gray-600")], ["🏙️ Mayor of Tinyburg"]),
                                         ]
                                     ),
-                                    h.a(
+                                    // A native form because signing out is a POST: the
+                                    // browser submits, the server revokes and answers
+                                    // with a redirect home.
+                                    h.form(
                                         [
-                                            h.Href("/logout"),
-                                            h.Class(
-                                                "font-pixel bg-dark-blue/80 shadow-pixel hover:shadow-pixel-hover shrink-0 rounded px-4 py-3 text-[0.7rem] text-white no-underline transition-all hover:-translate-x-0.5 hover:-translate-y-0.5"
-                                            ),
+                                            h.Attribute("method", "post"),
+                                            h.Attribute("action", "/logout"),
+                                            h.Class("shrink-0"),
                                         ],
-                                        ["Sign Out"]
+                                        [
+                                            h.button(
+                                                [
+                                                    h.Type("submit"),
+                                                    h.Class(
+                                                        "font-pixel bg-dark-blue/80 shadow-pixel hover:shadow-pixel-hover cursor-pointer rounded px-4 py-3 text-[0.7rem] text-white transition-all hover:-translate-x-0.5 hover:-translate-y-0.5"
+                                                    ),
+                                                ],
+                                                ["Sign Out"]
+                                            ),
+                                        ]
                                     ),
                                 ]
                             ),

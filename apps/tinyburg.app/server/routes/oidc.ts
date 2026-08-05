@@ -1,3 +1,5 @@
+import type { SqlError } from "effect/unstable/sql";
+
 import { Effect, Layer, Option, Schema } from "effect";
 import { HttpRouter, HttpServerRequest, HttpServerResponse } from "effect/unstable/http";
 
@@ -43,7 +45,10 @@ const redirectTo = (redirectUri: string, params: Record<string, string>): string
 const findClient = (clientId: string) => DevelopersRepository.use((repo) => repo.findOAuthClient(clientId));
 
 /** The user signed in on the provider session cookie, if any. */
-const currentUser = Effect.map(maybeCurrentUser, Option.map(({ user }) => user));
+const currentUser = Effect.map(
+    maybeCurrentUser,
+    Option.map(({ user }) => user)
+);
 
 /** Public clients must present no secret; confidential clients must match. */
 const clientSecretMatches = (client: OAuthClient, secret: string | undefined): Effect.Effect<boolean> =>
@@ -67,13 +72,13 @@ const timingSafeEquals = (a: string, b: string): boolean =>
 const issueAuthorizationCode = (
     request: OAuthAuthorizationRequest,
     userId: string
-): Effect.Effect<Option.Option<string>, never, OidcRepository> =>
+): Effect.Effect<Option.Option<string>, SqlError.SqlError | Schema.SchemaError, OidcRepository> =>
     Effect.gen(function* () {
         const code = crypto.randomUUID() + crypto.randomUUID();
         const codeHash = yield* sha256(code);
         const approved = yield* OidcRepository.use((repo) =>
             repo.approveAuthorizationRequest({ requestId: request.id, userId, codeHash })
-        ).pipe(Effect.orDie);
+        );
         return Option.map(approved, (row) => redirectTo(row.redirectUri, { code, state: row.state }));
     });
 
@@ -187,7 +192,7 @@ const authorize = Effect.gen(function* () {
         codeChallenge: params.code_challenge,
         codeHash: Option.none(),
     });
-    const created = yield* OidcRepository.use((repo) => repo.createAuthorizationRequest(insert)).pipe(Effect.orDie);
+    const created = yield* OidcRepository.use((repo) => repo.createAuthorizationRequest(insert));
 
     // Every third party asks permission on every authorization; consent is
     // never remembered. The first party is the app the visitor is already
@@ -216,17 +221,17 @@ const consent = Effect.gen(function* () {
     if (Option.isNone(decoded)) return badRequest("This consent decision is malformed.");
     const { decision, request_id: requestId } = decoded.value;
 
-    const maybeRequest = yield* OidcRepository.use((repo) => repo.findAuthorizationRequest(requestId)).pipe(
-        Effect.orDie
-    );
+    const maybeRequest = yield* OidcRepository.use((repo) => repo.findAuthorizationRequest(requestId));
     if (Option.isNone(maybeRequest) || maybeRequest.value.userId !== user.id) {
         return badRequest("This authorization request has expired. Please start over.");
     }
     const request = maybeRequest.value;
 
     if (decision === "deny") {
+        // Best effort: the visitor already denied, so they get their redirect
+        // even if the cleanup fails; the sweeper purges the row later anyway.
         yield* OidcRepository.use((repo) => repo.deleteAuthorizationRequest(request.id)).pipe(
-            Effect.catchCause(() => Effect.void)
+            Effect.catchCause((cause) => Effect.logWarning("failed to delete a denied authorization request", cause))
         );
         return HttpServerResponse.redirect(
             redirectTo(request.redirectUri, { error: "access_denied", state: request.state })
@@ -264,9 +269,7 @@ const token = Effect.gen(function* () {
     switch (body.grant_type) {
         case "authorization_code": {
             const codeHash = yield* sha256(body.code);
-            const maybeGrant = yield* OidcRepository.use((repo) => repo.consumeAuthorizationCode(codeHash)).pipe(
-                Effect.orDie
-            );
+            const maybeGrant = yield* OidcRepository.use((repo) => repo.consumeAuthorizationCode(codeHash));
             if (Option.isNone(maybeGrant)) return yield* tokenError(400, "invalid_grant");
             const grant = maybeGrant.value;
 
@@ -279,9 +282,7 @@ const token = Effect.gen(function* () {
                 return yield* tokenError(400, "invalid_grant");
             }
 
-            const maybeUser = yield* UsersRepository.use((repo) => repo.findUserById(grant.userId)).pipe(
-                Effect.catchCause(() => Effect.succeedNone)
-            );
+            const maybeUser = yield* UsersRepository.use((repo) => repo.findUserById(grant.userId));
             if (Option.isNone(maybeUser)) return yield* tokenError(400, "invalid_grant");
             const user = maybeUser.value;
 
@@ -294,7 +295,7 @@ const token = Effect.gen(function* () {
                 clientId: client.id,
                 scope: grant.scope,
                 ttlSeconds: ACCESS_TOKEN_TTL_SECONDS,
-            }).pipe(Effect.orDie);
+            });
 
             const idToken = scopes.includes("openid")
                 ? Option.some(
@@ -308,7 +309,7 @@ const token = Effect.gen(function* () {
                           profile: scopes.includes("profile")
                               ? { name: user.displayName, picture: Option.getOrUndefined(user.avatarUrl) }
                               : undefined,
-                      }).pipe(Effect.orDie)
+                      })
                   )
                 : Option.none<string>();
 
@@ -341,7 +342,7 @@ const token = Effect.gen(function* () {
                 clientId: client.id,
                 scope: requested.join(" "),
                 ttlSeconds: ACCESS_TOKEN_TTL_SECONDS,
-            }).pipe(Effect.orDie);
+            });
 
             return yield* HttpServerResponse.json(
                 {
@@ -381,7 +382,7 @@ const bearerClaims = Effect.gen(function* () {
 
     const revoked = yield* Option.match(Option.fromNullishOr(claims.value.jti), {
         onNone: () => Effect.succeed(false),
-        onSome: (jti) => OidcRepository.use((repo) => repo.isTokenRevoked(jti)).pipe(Effect.orDie),
+        onSome: (jti) => OidcRepository.use((repo) => repo.isTokenRevoked(jti)),
     });
     return revoked ? Option.none() : claims;
 });
@@ -399,9 +400,7 @@ const userinfo = Effect.gen(function* () {
         });
     }
 
-    const maybeUser = yield* UsersRepository.use((repo) => repo.findUserById(claims.sub)).pipe(
-        Effect.catchCause(() => Effect.succeedNone)
-    );
+    const maybeUser = yield* UsersRepository.use((repo) => repo.findUserById(claims.sub));
     if (Option.isNone(maybeUser)) return unauthorizedBearer;
     const user = maybeUser.value;
 
@@ -466,7 +465,7 @@ const revoke = Effect.gen(function* () {
             claims.client_id === client.id && claims.jti !== undefined
                 ? OidcRepository.use((repo) =>
                       repo.revokeToken({ jti: claims.jti as string, expiresAt: new Date(claims.exp * 1000) })
-                  ).pipe(Effect.orDie)
+                  )
                 : Effect.void,
     });
 

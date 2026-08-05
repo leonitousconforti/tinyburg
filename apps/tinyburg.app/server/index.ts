@@ -16,6 +16,7 @@ import { OidcKeys } from "./keys.ts";
 import { ApiLive } from "./routes/api.ts";
 import { AuthRoutesLive } from "./routes/auth.ts";
 import { OAuthRoutesLive } from "./routes/oauth.ts";
+import { OidcProviderLive } from "./routes/oidc.ts";
 import { StaticRoutesLive } from "./routes/static.ts";
 
 /**
@@ -37,7 +38,14 @@ const SecurityHeadersLive = HttpRouter.middleware(
     { global: true }
 );
 
-const AllRoutes = Layer.mergeAll(ApiLive, AuthRoutesLive, OAuthRoutesLive, StaticRoutesLive, SecurityHeadersLive);
+const AllRoutes = Layer.mergeAll(
+    ApiLive,
+    AuthRoutesLive,
+    OAuthRoutesLive,
+    OidcProviderLive,
+    StaticRoutesLive,
+    SecurityHeadersLive
+);
 
 const SqlLive = PgClient.layerConfig({
     url: Config.redacted("DATABASE_URL"),
