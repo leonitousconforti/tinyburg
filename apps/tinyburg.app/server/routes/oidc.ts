@@ -455,6 +455,7 @@ const revoke = Effect.gen(function* () {
     const verified = yield* Jwt.verify(decoded.value.token, {
         jwks: keys.jwks,
         issuer: keys.issuer,
+        audience: keys.issuer,
         algorithms: ["ES256"],
     }).pipe(Effect.flatMap(Schema.decodeUnknownEffect(Oidc.AccessTokenClaimsSchema)), Effect.option);
 
