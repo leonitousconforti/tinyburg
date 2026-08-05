@@ -190,8 +190,8 @@ importers:
         specifier: 4.0.0-beta.102
         version: 4.0.0-beta.102
       effect-oidc:
-        specifier: 0.0.4
-        version: 0.0.4(effect@4.0.0-beta.102)
+        specifier: 0.0.6
+        version: 0.0.6(effect@4.0.0-beta.102)
       ioredis:
         specifier: 5.11.1
         version: 5.11.1
@@ -232,8 +232,8 @@ importers:
         specifier: 4.0.0-beta.102
         version: 4.0.0-beta.102
       effect-oidc:
-        specifier: 0.0.4
-        version: 0.0.4(effect@4.0.0-beta.102)
+        specifier: 0.0.6
+        version: 0.0.6(effect@4.0.0-beta.102)
       foldkit:
         specifier: 0.137.0
         version: 0.137.0(@effect/platform-browser@4.0.0-beta.102(effect@4.0.0-beta.102))(effect@4.0.0-beta.102)
@@ -346,8 +346,8 @@ importers:
         specifier: workspace:^
         version: link:../nimblebit-sdk
       effect-oidc:
-        specifier: 0.0.4
-        version: 0.0.4(effect@4.0.0-beta.102)
+        specifier: 0.0.6
+        version: 0.0.6(effect@4.0.0-beta.102)
     devDependencies:
       effect:
         specifier: 4.0.0-beta.102
@@ -1867,8 +1867,8 @@ packages:
     resolution: {integrity: sha512-yS+Q5i3hBf7GBkd4KG8a7eBNNWNGLTaEwwYWUijIYM7zrlYDM0BFXHjjPWlWZ1Rg7UaddZeIDmi9jF3HmqiQ2w==}
     engines: {node: '>=6.0.0'}
 
-  effect-oidc@0.0.4:
-    resolution: {integrity: sha512-xLZ2PeCKsdcAWKzjX+52turHKEBAvdTfLQrj/DxLCuxKc1SOrP1HcX5w4Kv/feKOnF3K6WhIzErQ0PYLQpFxkg==}
+  effect-oidc@0.0.6:
+    resolution: {integrity: sha512-cEOGMiw9wGrCBet8dxM8M82fUuQOlmcX6lG/vr7FkHaerSoK0ZvldTpicAJZy/6A30OTfiF5L6ac6D5eQX0eiA==}
     engines: {node: '>=22.0.0'}
     peerDependencies:
       effect: 4.0.0-beta.102
@@ -4868,7 +4868,7 @@ snapshots:
     dependencies:
       esutils: 2.0.3
 
-  effect-oidc@0.0.4(effect@4.0.0-beta.102):
+  effect-oidc@0.0.6(effect@4.0.0-beta.102):
     dependencies:
       effect: 4.0.0-beta.102
 
