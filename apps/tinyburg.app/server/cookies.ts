@@ -1,4 +1,6 @@
-import { Config, Effect, Option } from "effect";
+import type { SqlError } from "effect/unstable/sql";
+
+import { Config, Context, Effect, Layer, Option, type Schema } from "effect";
 import { HttpServerRequest } from "effect/unstable/http";
 
 import type { Session, User } from "../domain/models.ts";
@@ -10,49 +12,53 @@ import { sha256 } from "./crypto.ts";
 export const PROVIDER_SESSION_COOKIE_NAME = "tinyburg_provider_session";
 
 /**
- * Whether cookies demand https. On unless the environment explicitly says
- * development, so a production deploy that forgets to set NODE_ENV still
- * ships Secure cookies.
+ * The site's cookie policy, resolved once at boot so request handlers never
+ * carry a config failure channel.
+ *
+ * Cookies demand https unless the environment explicitly says development, so
+ * a production deploy that forgets to set NODE_ENV still ships Secure
+ * cookies. Secure cookies also carry the __Host- prefix, which browsers only
+ * accept over https, from the exact host, with no Domain attribute: a hostile
+ * subdomain can then never plant a copy of the session or OAuth round-trip
+ * cookies. Plain names in development, where http would refuse the prefix.
  */
-export const SecureCookies: Config.Config<boolean> = Config.string("NODE_ENV").pipe(
-    Config.withDefault("production"),
-    Config.map((env) => env !== "development")
-);
-
-/**
- * Secure cookies carry the __Host- prefix, which browsers only accept over
- * https, from the exact host, with no Domain attribute. A hostile subdomain
- * can then never plant a copy of the session or OAuth round-trip cookies.
- * Plain names in development, where http would refuse the prefix outright.
- */
-export const cookieName = (base: string): Effect.Effect<string, Config.ConfigError> =>
-    Effect.map(SecureCookies, (secure) => (secure ? `__Host-${base}` : base));
+export class CookiePolicy extends Context.Service<CookiePolicy>()("@tinyburg/tinyburg.app/server/CookiePolicy", {
+    make: Effect.map(Config.string("NODE_ENV").pipe(Config.withDefault("production")), (env) => {
+        const secure = env !== "development";
+        const name = (base: string): string => (secure ? `__Host-${base}` : base);
+        return { secure, name } as const;
+    }),
+}) {
+    static readonly Default = Layer.effect(this, CookiePolicy.make);
+}
 
 /** Reads one of our cookies off the request, prefix-aware. */
 export const readCookie = (
     base: string
-): Effect.Effect<Option.Option<string>, Config.ConfigError, HttpServerRequest.HttpServerRequest> =>
+): Effect.Effect<Option.Option<string>, never, CookiePolicy | HttpServerRequest.HttpServerRequest> =>
     Effect.gen(function* () {
-        const name = yield* cookieName(base);
+        const { name } = yield* CookiePolicy;
         const request = yield* HttpServerRequest.HttpServerRequest;
-        return Option.fromNullishOr(request.cookies[name]);
+        return Option.fromNullishOr(request.cookies[name(base)]);
     });
 
 /**
- * The user and session riding the provider session cookie, if any. None for
- * a missing, expired, or unknown cookie. The annotation is load-bearing: the
- * catchCause fallback otherwise infers an Option union that breaks curried
- * Option combinators at call sites.
+ * The user and session riding the provider session cookie, if any. None for a
+ * missing, expired, or unknown cookie; a repository failure stays in the
+ * error channel rather than reading as signed out. The annotation is
+ * load-bearing: the early return otherwise infers an Option union that breaks
+ * curried Option combinators at call sites.
  */
 export const maybeCurrentUser: Effect.Effect<
     Option.Option<{
         readonly session: Session;
         readonly user: User;
     }>,
-    never,
-    HttpServerRequest.HttpServerRequest | SessionsRepository
+    Schema.SchemaError | SqlError.SqlError,
+    CookiePolicy | HttpServerRequest.HttpServerRequest | SessionsRepository
 > = Effect.gen(function* () {
-    const sessionToken = yield* Effect.flatMap(readCookie(PROVIDER_SESSION_COOKIE_NAME), Effect.fromOption);
-    const sessionTokenHash = yield* sha256(sessionToken);
+    const sessionToken = yield* readCookie(PROVIDER_SESSION_COOKIE_NAME);
+    if (Option.isNone(sessionToken)) return Option.none();
+    const sessionTokenHash = yield* sha256(sessionToken.value);
     return yield* SessionsRepository.use((repo) => repo.findSessionWithUser(sessionTokenHash));
-}).pipe(Effect.catchCause(() => Effect.succeedNone));
+});
