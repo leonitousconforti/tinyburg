@@ -11,7 +11,6 @@ import { Oidc, ResourceServer, Jwt } from "effect-oidc";
 import { DevelopersRepository } from "../../domain/developers.ts";
 import { OidcRepository } from "../../domain/oidc.ts";
 import { SessionsRepository } from "../../domain/sessions.ts";
-import { sha256 } from "../crypto.ts";
 import { OidcKeys } from "../keys.ts";
 
 const accessTokenFor = Effect.fnUntraced(function* ({ session, user }: { session: Session; user: User }) {
@@ -76,17 +75,10 @@ const SessionBearer = HttpRouter.middleware(
                     return yield* httpEffect;
                 }
 
-                const cookie = Option.fromNullishOr(request.cookies[SessionsRepository.PROVIDER_SESSION_COOKIE_NAME]);
-                if (Option.isNone(cookie)) return yield* httpEffect;
+                const maybeCurrentUser = yield* SessionsRepository.maybeCurrentUser;
+                if (Option.isNone(maybeCurrentUser)) return yield* httpEffect;
 
-                const tokenHash = yield* sha256(cookie.value);
-                const maybeSessionAndUser = yield* SessionsRepository.use((repo) =>
-                    repo.findSessionWithUser(tokenHash)
-                ).pipe(Effect.catch(() => Effect.succeedNone));
-
-                if (Option.isNone(maybeSessionAndUser)) return yield* httpEffect;
-                const accessToken = yield* Effect.orDie(accessTokenFor(maybeSessionAndUser.value));
-
+                const accessToken = yield* Effect.orDie(accessTokenFor(maybeCurrentUser.value));
                 return yield* Effect.provideService(
                     httpEffect,
                     HttpServerRequest.HttpServerRequest,

@@ -1,9 +1,11 @@
 import type { SqlConnection, SqlError, Statement } from "effect/unstable/sql";
 
 import { Context, DateTime, Duration, Effect, Layer, Option, Schema, SchemaGetter } from "effect";
+import { HttpServerRequest } from "effect/unstable/http";
 import { Model } from "effect/unstable/schema";
 import { SqlClient, SqlModel, SqlSchema } from "effect/unstable/sql";
 
+import { sha256 } from "../server/crypto.ts";
 import { Session, User } from "./models.ts";
 
 export class SessionsRepository extends Context.Service<SessionsRepository>()(
@@ -197,4 +199,15 @@ export class SessionsRepository extends Context.Service<SessionsRepository>()(
 
     /** The name of the cookie used to store the provider session. */
     static readonly PROVIDER_SESSION_COOKIE_NAME = "tinyburg_provider_session";
+
+    static readonly maybeCurrentUser = Effect.gen(function* () {
+        const cookies = yield* HttpServerRequest.schemaCookies(
+            Schema.Struct({
+                [SessionsRepository.PROVIDER_SESSION_COOKIE_NAME]: Schema.String,
+            })
+        );
+
+        const sessionTokenHash = yield* sha256(cookies[SessionsRepository.PROVIDER_SESSION_COOKIE_NAME]);
+        return yield* SessionsRepository.use((repo) => repo.findSessionWithUser(sessionTokenHash));
+    }).pipe(Effect.catchCause(() => Effect.succeedNone));
 }
