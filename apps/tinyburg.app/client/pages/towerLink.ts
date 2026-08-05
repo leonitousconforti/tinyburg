@@ -3,10 +3,12 @@ import { Effect, Match, Option, Schema as S } from "effect";
 import type { Message as AppMessage } from "../main.ts";
 import type { Html, HtmlBuilder } from "foldkit/html";
 
+import { PlayerEmailSchema, PlayerIdSchema } from "@tinyburg/nimblebit-sdk/NimblebitConfig";
 import { Command, Dom } from "foldkit";
 import { m } from "foldkit/message";
 import { evo } from "foldkit/struct";
 
+import { Api } from "../backend.ts";
 import { appBackLink } from "../ui/chrome.ts";
 
 // MODEL
@@ -83,13 +85,31 @@ export type WizardMessage = typeof WizardMessage.Type;
 
 // COMMAND
 
-// TODO: POST /v1/tinytower/linkedAccounts/link/:friendCode/:email once the
-// LinkedTinytowerAccountsGroup handlers are mounted.
-const requestVerificationCode = (_friendCode: string, _email: string): Effect.Effect<void, Error> => Effect.void;
+// Step one of the round trip with Nimblebit: asking to link a tower makes
+// them email a verification code to the address its cloud save lives under.
+// The friend code and email are branded schemas, so mistyped input fails
+// here, before a request is made.
+const requestVerificationCode = (friendCode: string, email: string) =>
+    Effect.gen(function* () {
+        const api = yield* Api;
+        const playerId = yield* S.decodeEffect(PlayerIdSchema)(friendCode);
+        const playerEmail = yield* S.decodeEffect(PlayerEmailSchema)(email);
+        yield* api.LinkedTinyTowerAccountsGroup.TinyburgLinkedTinyTowerAccountsLink({
+            params: { friendCode: playerId, email: playerEmail },
+            payload: { friendCode: playerId, email: playerEmail },
+        });
+    });
 
-// TODO: PATCH /v1/tinytower/linkedAccounts/verify/:friendCode/:verificationCode
-// once the LinkedTinytowerAccountsGroup handlers are mounted.
-const verifyAndLink = (_friendCode: string, _verificationCode: string): Effect.Effect<void, Error> => Effect.void;
+// Step two: presenting the emailed code proves the tower is theirs and links it.
+const verifyAndLink = (friendCode: string, verificationCode: string) =>
+    Effect.gen(function* () {
+        const api = yield* Api;
+        const playerId = yield* S.decodeEffect(PlayerIdSchema)(friendCode);
+        yield* api.LinkedTinyTowerAccountsGroup.TinyburgLinkedTinyTowerAccountsVerify({
+            params: { friendCode: playerId, verificationCode },
+            payload: { friendCode: playerId, verificationCode },
+        });
+    });
 
 const RequestCode = Command.define("RequestCode", {
     args: { friendCode: S.String, email: S.String },
@@ -138,7 +158,7 @@ const FocusInput = Command.define("FocusInput", {
 
 // UPDATE
 
-type WizardStep = readonly [WizardModel, ReadonlyArray<Command.Command<WizardMessage>>];
+type WizardStep = readonly [WizardModel, ReadonlyArray<Command.Command<WizardMessage, never, Api>>];
 
 export const updateWizard = (wizard: WizardModel, message: WizardMessage): WizardStep =>
     Match.value(message).pipe(

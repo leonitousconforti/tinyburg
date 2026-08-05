@@ -13,7 +13,7 @@ export const DevelopersRoute = r("Developers");
 export const DeveloperAppsRoute = r("DeveloperApps");
 export const TowerMeRoute = r("TowerMe");
 export const TowerLinkRoute = r("TowerLink");
-export const CallbackRoute = r("Callback");
+export const AccountRoute = r("Account", { link: S.Option(S.String) });
 export const NotFoundRoute = r("NotFound", { path: S.String });
 
 export const AppRoute = S.Union([
@@ -27,7 +27,7 @@ export const AppRoute = S.Union([
     DeveloperAppsRoute,
     TowerMeRoute,
     TowerLinkRoute,
-    CallbackRoute,
+    AccountRoute,
     NotFoundRoute,
 ]);
 export type AppRoute = typeof AppRoute.Type;
@@ -46,9 +46,13 @@ export const developersRouter = pipe(literal("developers"), Route.mapTo(Develope
 export const developerAppsRouter = pipe(literal("developers"), slash(literal("apps")), Route.mapTo(DeveloperAppsRoute));
 export const towerMeRouter = pipe(literal("towers"), slash(literal("@me")), Route.mapTo(TowerMeRoute));
 export const towerLinkRouter = pipe(literal("towers"), slash(literal("@link")), Route.mapTo(TowerLinkRoute));
-// The provider redirects here with ?code and ?state; the callback command
-// reads them straight off the url rather than routing on them.
-export const callbackRouter = pipe(literal("auth"), slash(literal("callback")), Route.mapTo(CallbackRoute));
+// The oauth callback reports how connecting another provider went in the
+// `link` query parameter; the page opens saying so.
+export const accountRouter = pipe(
+    literal("account"),
+    Route.query(S.Struct({ link: S.OptionFromOptional(S.String) })),
+    Route.mapTo(AccountRoute)
+);
 
 const routeParser = Route.oneOf(
     homeRouter,
@@ -61,7 +65,7 @@ const routeParser = Route.oneOf(
     developersRouter,
     towerMeRouter,
     towerLinkRouter,
-    callbackRouter
+    accountRouter
 );
 
 export const urlToAppRoute = Route.parseUrlWithFallback(routeParser, NotFoundRoute);

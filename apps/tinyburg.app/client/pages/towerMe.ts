@@ -1,32 +1,37 @@
 import { DateTime, Option } from "effect";
 
-import type { Account } from "../auth.ts";
-import type { LinkedTowers } from "../backend.ts";
+import type { LinkedTowers, SessionUser } from "../backend.ts";
 import type { Html, HtmlBuilder } from "foldkit/html";
 
 import { AsyncData } from "foldkit";
 
 import { appBackLink } from "../ui/chrome.ts";
-import { discordIcon, googleIcon } from "../ui/icons.ts";
 
 const card = "bg-card-bg shadow-pixel-hover border-gold w-full rounded-2xl border-3 p-8";
 
-const connectRow = <M>(h: HtmlBuilder<M>, href: string, icon: Html, label: string): Html =>
+/** A full-width row that leads somewhere else in the account. */
+const navRow = <M>(h: HtmlBuilder<M>, href: string, emoji: string, title: string, detail: string): Html =>
     h.a(
         [
             h.Href(href),
             h.Class(
-                "shadow-pixel hover:shadow-pixel-hover hover:border-sky-blue flex items-center gap-3 rounded-lg border-2 border-gray-300 bg-white px-4 py-3 no-underline transition-all hover:-translate-x-0.5 hover:-translate-y-0.5"
+                "shadow-pixel hover:shadow-pixel-hover hover:border-sky-blue flex w-full items-center gap-3 rounded-lg border-2 border-gray-300 bg-white p-4 no-underline transition-all hover:-translate-x-0.5 hover:-translate-y-0.5"
             ),
         ],
         [
-            icon,
-            h.span([h.Class("font-mono text-xl text-gray-800")], [label]),
-            h.span([h.Class("font-pixel ml-auto shrink-0 text-[0.6rem] text-gray-500")], ["Connect →"]),
+            h.span([h.Class("text-2xl"), h.AriaHidden(true)], [emoji]),
+            h.div(
+                [h.Class("min-w-0")],
+                [
+                    h.div([h.Class("font-mono text-xl text-gray-800")], [title]),
+                    h.div([h.Class("font-mono text-base text-gray-500")], [detail]),
+                ]
+            ),
+            h.span([h.Class("font-pixel ml-auto shrink-0 text-[0.6rem] text-gray-500")], ["→"]),
         ]
     );
 
-const avatar = <M>(h: HtmlBuilder<M>, user: Account): Html =>
+const avatar = <M>(h: HtmlBuilder<M>, user: SessionUser): Html =>
     Option.match(user.avatarUrl, {
         onSome: (avatarUrl) =>
             h.img([
@@ -99,7 +104,7 @@ const towerList = <M>(h: HtmlBuilder<M>, towers: LinkedTowers): Html => {
     });
 };
 
-export const towerMeView = <M>(h: HtmlBuilder<M>, user: Account, towers: LinkedTowers): Html => {
+export const towerMeView = <M>(h: HtmlBuilder<M>, user: SessionUser, towers: LinkedTowers): Html => {
     return h.div(
         [h.Class("relative z-10 flex min-h-screen flex-col items-center p-8 pt-24")],
         [
@@ -158,49 +163,19 @@ export const towerMeView = <M>(h: HtmlBuilder<M>, user: Account, towers: LinkedT
                             towerList(h, towers),
                         ]
                     ),
-                    h.section(
-                        [h.Class(card)],
-                        [
-                            h.h2([h.Class("font-pixel mb-2 text-lg text-gray-800")], ["Sign-In Methods"]),
-                            h.p(
-                                [h.Class("font-mono mb-6 text-lg text-gray-500")],
-                                ["Connect more ways to sign in, so you can always get back to this account."]
-                            ),
-                            h.div(
-                                [h.Class("flex flex-col gap-4")],
-                                [
-                                    connectRow(h, "/auth/google/login", googleIcon(h, "h-6 w-6 shrink-0"), "Google"),
-                                    connectRow(
-                                        h,
-                                        "/auth/discord/login",
-                                        discordIcon(h, "text-discord h-6 w-6 shrink-0"),
-                                        "Discord"
-                                    ),
-                                ]
-                            ),
-                        ]
+                    navRow(
+                        h,
+                        "/account",
+                        "🔐",
+                        "Account & Security",
+                        "Manage where you're signed in and how you sign in"
                     ),
-                    h.a(
-                        [
-                            h.Href("/developers/apps"),
-                            h.Class(
-                                "shadow-pixel hover:shadow-pixel-hover hover:border-sky-blue flex w-full items-center gap-3 rounded-lg border-2 border-gray-300 bg-white p-4 no-underline transition-all hover:-translate-x-0.5 hover:-translate-y-0.5"
-                            ),
-                        ],
-                        [
-                            h.span([h.Class("text-2xl")], ["🛠️"]),
-                            h.div(
-                                [h.Class("min-w-0")],
-                                [
-                                    h.div([h.Class("font-mono text-xl text-gray-800")], ["Developer Portal"]),
-                                    h.div(
-                                        [h.Class("font-mono text-base text-gray-500")],
-                                        ["Register OAuth apps that sign users in with Tinyburg"]
-                                    ),
-                                ]
-                            ),
-                            h.span([h.Class("font-pixel ml-auto shrink-0 text-[0.6rem] text-gray-500")], ["→"]),
-                        ]
+                    navRow(
+                        h,
+                        "/developers/apps",
+                        "🛠️",
+                        "Developer Portal",
+                        "Register OAuth apps that sign users in with Tinyburg"
                     ),
                 ]
             ),

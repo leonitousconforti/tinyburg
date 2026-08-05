@@ -2,7 +2,7 @@ import "./styles/global.css";
 
 import { Runtime } from "foldkit";
 
-import { Api } from "./backend.ts";
+import { BackendLive } from "./backend.ts";
 import { ChangedUrl, ClickedLink, init, Model, update, view } from "./main.ts";
 
 const application = Runtime.makeApplication({
@@ -11,7 +11,7 @@ const application = Runtime.makeApplication({
     update,
     view,
     container: document.getElementById("root"),
-    resources: Api.Default,
+    resources: BackendLive,
     routing: {
         onUrlRequest: (request) => ClickedLink({ request }),
         onUrlChange: (url) => ChangedUrl({ url }),
