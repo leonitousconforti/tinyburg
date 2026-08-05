@@ -19,13 +19,11 @@ export class SessionCookie extends HttpApiMiddleware.Service<SessionCookie, { pr
 const AuthGroup = HttpApiGroup.make("AuthGroup")
     .add(
         HttpApiEndpoint.get("session", "/auth/session", {
-            error: HttpApiError.InternalServerError,
             success: User.json,
         })
     )
     .add(
         HttpApiEndpoint.get("sessions", "/auth/sessions", {
-            error: HttpApiError.InternalServerError,
             success: Schema.Array(
                 Schema.Struct({
                     ...Session.json.fields,
@@ -37,7 +35,6 @@ const AuthGroup = HttpApiGroup.make("AuthGroup")
     .add(
         HttpApiEndpoint.delete("revokeSession", "/auth/sessions/:sessionId", {
             params: { sessionId: Schema.String.check(Schema.isUUID()) },
-            error: HttpApiError.InternalServerError,
             success: Schema.Struct({
                 signedOut: Schema.Boolean,
                 revoked: Schema.Number,
@@ -47,7 +44,6 @@ const AuthGroup = HttpApiGroup.make("AuthGroup")
     .add(
         HttpApiEndpoint.delete("revokeSessions", "/auth/sessions", {
             query: { scope: Schema.Literals(["others", "all"]) },
-            error: HttpApiError.InternalServerError,
             success: Schema.Struct({
                 signedOut: Schema.Boolean,
                 revoked: Schema.Number,
@@ -57,13 +53,12 @@ const AuthGroup = HttpApiGroup.make("AuthGroup")
     .add(
         HttpApiEndpoint.get("accounts", "/auth/accounts", {
             success: Schema.Array(OAuthAccount.json),
-            error: HttpApiError.InternalServerError,
         })
     )
     .add(
         HttpApiEndpoint.delete("unlinkAccount", "/auth/accounts/:provider/:providerAccountId", {
             params: { provider: OAuthAccount.fields.provider, providerAccountId: Schema.String },
-            error: Schema.Union([HttpApiError.Conflict, HttpApiError.InternalServerError]),
+            error: HttpApiError.Conflict,
         })
     )
     .middleware(SessionCookie);
