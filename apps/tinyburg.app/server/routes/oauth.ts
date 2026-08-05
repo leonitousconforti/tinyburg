@@ -168,7 +168,7 @@ const callback = (provider: OAuthProvider) =>
         const maybeCurrentUser = yield* SessionsRepository.maybeCurrentUser;
 
         // Parse the url params
-        const urlParams = yield* HttpServerRequest.schemaBodyUrlParams(
+        const urlParams = yield* HttpServerRequest.schemaSearchParams(
             Schema.Union([
                 Schema.Struct({
                     error: Schema.String,
@@ -298,13 +298,13 @@ const callback = (provider: OAuthProvider) =>
             })
         );
 
-        const sessionCookie = Cookies.makeCookieUnsafe(SessionsRepository.PROVIDER_SESSION_COOKIE_NAME, sessionToken, {
+        const sessionCookie = yield* Cookies.makeCookie(SessionsRepository.PROVIDER_SESSION_COOKIE_NAME, sessionToken, {
             expires: DateTime.toDateUtc(session.expiresAt),
             httpOnly: true,
             path: "/",
             secure: secureCookies,
             sameSite: "lax",
-        });
+        }).pipe(Effect.fromResult);
 
         // `returnTo` was checked for an open redirect on the way out, and has
         // been in a cookie of ours ever since
