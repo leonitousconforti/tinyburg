@@ -144,6 +144,10 @@ const start = (
             return bounceToLogin("/account");
         }
 
+        if (mode === "login" && Option.isSome(currentUser)) {
+            return HttpServerResponse.redirect(Option.getOrElse(returnTo, () => "/towers/@me"));
+        }
+
         const codeVerifier = randomSecret();
         const state = randomSecret();
 
