@@ -1,3 +1,7 @@
+/**
+ * @since 1.0.0
+ */
+
 import * as Schema from "effect/Schema";
 import * as HttpApi from "effect/unstable/httpapi/HttpApi";
 import * as HttpApiEndpoint from "effect/unstable/httpapi/HttpApiEndpoint";
