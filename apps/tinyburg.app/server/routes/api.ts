@@ -11,7 +11,7 @@ import { DevelopersRepository } from "../../domain/developers.ts";
 import { OidcRepository } from "../../domain/oidc.ts";
 import { SessionsRepository } from "../../domain/sessions.ts";
 import { Api } from "../../shared/api.ts";
-import { maybeCurrentUser } from "../cookies.ts";
+import { CookiePolicy, maybeCurrentUser } from "../cookies.ts";
 import { OidcKeys } from "../keys.ts";
 
 const accessTokenFor = Effect.fnUntraced(function* ({ session, user }: { session: Session; user: User }) {
@@ -68,6 +68,7 @@ const accessTokenFor = Effect.fnUntraced(function* ({ session, user }: { session
 const SessionBearer = HttpRouter.middleware(
     Effect.gen(function* () {
         const sessions = yield* SessionsRepository;
+        const cookiePolicy = yield* CookiePolicy;
         const keys = yield* OidcKeys;
 
         return Effect.fnUntraced(
@@ -92,6 +93,7 @@ const SessionBearer = HttpRouter.middleware(
                 );
             },
             Effect.provideService(SessionsRepository, sessions),
+            Effect.provideService(CookiePolicy, cookiePolicy),
             Effect.provideService(OidcKeys, keys)
         );
     })
