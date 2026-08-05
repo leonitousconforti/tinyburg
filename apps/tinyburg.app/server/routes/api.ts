@@ -56,8 +56,6 @@ const accessTokenFor = Effect.fnUntraced(function* ({ session, user }: { session
             accessToken: Option.some(accessToken),
             accessTokenJti: Option.fromNullishOr(claims.jti),
             accessTokenExpiresAt: Option.some(DateTime.addDuration(now, Duration.seconds(ACCESS_TOKEN_TTL_SECONDS))),
-            expiresAt: session.expiresAt.pipe(Model.Override),
-            createdAt: session.createdAt.pipe(Model.Override),
             lastSeenAt: now.pipe(Model.Override),
         })
     );

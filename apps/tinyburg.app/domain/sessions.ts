@@ -1,7 +1,6 @@
 import type { SqlConnection, SqlError, Statement } from "effect/unstable/sql";
 
 import { Context, DateTime, Duration, Effect, Layer, Option, Schedule, Schema, SchemaGetter } from "effect";
-import { Model } from "effect/unstable/schema";
 import { SqlClient, SqlModel, SqlSchema } from "effect/unstable/sql";
 
 import { Session, User } from "./models.ts";
@@ -32,10 +31,7 @@ export class SessionsRepository extends Context.Service<SessionsRepository>()(
                         tokenHash: options.tokenHash,
                         userAgent: options.userAgent,
                         ip: options.ip,
-                        expiresAt: now.pipe(
-                            DateTime.addDuration(options.expiresIn ?? Duration.days(30)),
-                            Model.Override
-                        ),
+                        expiresAt: now.pipe(DateTime.addDuration(options.expiresIn ?? Duration.days(30))),
                     });
 
                     return yield* sessions.insert(newSession);
