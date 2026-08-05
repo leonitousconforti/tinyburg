@@ -72,13 +72,23 @@ const OAuthIntent = Schema.fromJsonString(
     })
 );
 
+const isLocalPath = (value: string): boolean => {
+    const NOWHERE = "https://tinyburg.invalid";
+    if (!value.startsWith("/")) return false;
+    try {
+        return new URL(value, NOWHERE).origin === NOWHERE;
+    } catch {
+        return false;
+    }
+};
+
 const returnToParam = HttpServerRequest.schemaSearchParams(
     Schema.Struct({
         returnTo: Schema.optional(Schema.String),
     })
 ).pipe(
     Effect.map(({ returnTo }) => Option.fromUndefinedOr(returnTo)),
-    Effect.map(Option.filter((value) => value.startsWith("/") && !value.startsWith("//") && !value.startsWith("/\\"))),
+    Effect.map(Option.filter(isLocalPath)),
     Effect.option,
     Effect.map(Option.flatten)
 );
@@ -179,9 +189,9 @@ const start = (
             ]),
             Effect.catch(() => {
                 if (mode === "link") {
-                    return Effect.succeed(bounceToLogin("/account?error=start_failed"));
+                    return Effect.succeed(HttpServerResponse.redirect("/account?error=start_failed"));
                 } else {
-                    return Effect.succeed(bounceToLogin("/login?error=start_failed"));
+                    return Effect.succeed(HttpServerResponse.redirect("/login?error=start_failed"));
                 }
             })
         );
@@ -367,9 +377,12 @@ const callback = (provider: OAuthProviderConfigRealized) =>
             return yield* failedRedirectByIntent("invalid_oauth_session");
         }
 
-        // `returnTo` was checked for an open redirect on the way out, and has
-        // been in a cookie of ours ever since
-        return yield* HttpServerResponse.redirect(intentCookie.returnTo ?? "/towers/@me").pipe(
+        const returnTo = Option.fromNullishOr(intentCookie.returnTo).pipe(
+            Option.filter(isLocalPath),
+            Option.getOrElse(() => "/towers/@me")
+        );
+
+        return yield* HttpServerResponse.redirect(returnTo).pipe(
             HttpServerResponse.setCookie(cookiesPolicy.name(PROVIDER_SESSION_COOKIE_NAME), sessionToken, {
                 expires: DateTime.toDateUtc(maybeSession.value.expiresAt),
                 httpOnly: true,
