@@ -67,7 +67,7 @@ declare const device_newPlayer: Effect.Effect<
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/tinytower-sdk/blob/main/src/TinyTower.ts#L186)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L186)
 
 Since v1.0.0
 
@@ -100,7 +100,7 @@ declare const device_playerDetails: (args_0: {
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/tinytower-sdk/blob/main/src/TinyTower.ts#L224)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L224)
 
 Since v1.0.0
 
@@ -128,7 +128,7 @@ declare const device_registerEmail: (args_0: {
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/tinytower-sdk/blob/main/src/TinyTower.ts#L304)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L304)
 
 Since v1.0.0
 
@@ -145,8 +145,8 @@ declare const device_verifyDevice: (args_0: {
   {
     readonly success: "NewDevice"
     readonly playerId: string & Brand<"PlayerId">
-    readonly playerAuthKey: Redacted.Redacted<string> & Brand<"PlayerAuthKey">
     readonly playerEmail: Redacted.Redacted<string> & Brand<"PlayerEmail">
+    readonly playerAuthKey: Redacted.Redacted<string> & Brand<"PlayerAuthKey">
     readonly playerPhoto?: string | null | undefined
     readonly playerNickname?: string | null | undefined
   },
@@ -155,7 +155,7 @@ declare const device_verifyDevice: (args_0: {
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/tinytower-sdk/blob/main/src/TinyTower.ts#L264)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L264)
 
 Since v1.0.0
 
@@ -183,7 +183,7 @@ declare const raffle_checkEnteredCurrent: (args_0: {
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/tinytower-sdk/blob/main/src/TinyTower.ts#L820)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L820)
 
 Since v1.0.0
 
@@ -211,7 +211,7 @@ declare const raffle_enterMultiRaffle: (args_0: {
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/tinytower-sdk/blob/main/src/TinyTower.ts#L772)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L772)
 
 Since v1.0.0
 
@@ -239,7 +239,7 @@ declare const raffle_enterRaffle: (args_0: {
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/tinytower-sdk/blob/main/src/TinyTower.ts#L724)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L724)
 
 Since v1.0.0
 
@@ -278,7 +278,7 @@ declare const social_getGifts: (args_0: {
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/tinytower-sdk/blob/main/src/TinyTower.ts#L921)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L921)
 
 Since v1.0.0
 
@@ -317,7 +317,7 @@ declare const social_getVisits: (args_0: {
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/tinytower-sdk/blob/main/src/TinyTower.ts#L1190)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L1190)
 
 Since v1.0.0
 
@@ -335,21 +335,20 @@ declare const social_pullFriendMeta: (
   } & { friendId: Schema.Schema.Type<typeof NimblebitConfig.PlayerIdSchema> }
 ) => Effect.Effect<
   {
+    readonly vip: boolean
     readonly stories: number
+    readonly maxGold: number
     readonly doorman: {
+      readonly $unknown: {
+        readonly [x: string]: {
+          readonly value: string
+          readonly $locationMetadata: { readonly after: string | null | undefined }
+        }
+      }
       readonly homeIndex: number
       readonly workIndex: number
       readonly placedDreamJob: boolean
       readonly dreamJobIndex: number
-      readonly vip:
-        | number
-        | "None"
-        | "Engineer"
-        | "TravelAgent"
-        | "Deliveryman"
-        | "BigSpender"
-        | "Celebrity"
-        | "GiftBit"
       readonly attributes: {
         readonly $unknown: ReadonlyArray<string>
         readonly gender: "male" | "female"
@@ -390,12 +389,8 @@ declare const social_pullFriendMeta: (
           readonly recreation: number
         }
       }
-      readonly $unknown: {
-        readonly [x: string]: {
-          readonly value: string
-          readonly $locationMetadata: { readonly after: string | null | undefined }
-        }
-      }
+      readonly vip:
+        number | "None" | "Engineer" | "TravelAgent" | "Deliveryman" | "BigSpender" | "Celebrity" | "GiftBit"
       readonly costume?: string | undefined
       readonly customName?: string | undefined
       readonly pet?:
@@ -521,10 +516,8 @@ declare const social_pullFriendMeta: (
         | "cat_in_a_bag"
         | undefined
     }
-    readonly maxGold: number
     readonly requestedFloorId: number
     readonly ts: string
-    readonly vip: boolean
     readonly bitbook?: string | undefined
   },
   | Schema.SchemaError
@@ -539,7 +532,7 @@ declare const social_pullFriendMeta: (
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/tinytower-sdk/blob/main/src/TinyTower.ts#L1021)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L1021)
 
 Since v1.0.0
 
@@ -569,7 +562,7 @@ declare const social_pullFriendTower: (
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/tinytower-sdk/blob/main/src/TinyTower.ts#L1072)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L1072)
 
 Since v1.0.0
 
@@ -599,7 +592,7 @@ declare const social_receiveGift: (
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/tinytower-sdk/blob/main/src/TinyTower.ts#L972)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L972)
 
 Since v1.0.0
 
@@ -629,7 +622,7 @@ declare const social_retrieveFriendsSnapshotList: (
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/tinytower-sdk/blob/main/src/TinyTower.ts#L1139)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L1139)
 
 Since v1.0.0
 
@@ -663,7 +656,7 @@ declare const social_sendItem: (
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/tinytower-sdk/blob/main/src/TinyTower.ts#L860)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L860)
 
 Since v1.0.0
 
@@ -693,7 +686,7 @@ declare const social_visit: (
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/tinytower-sdk/blob/main/src/TinyTower.ts#L1241)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L1241)
 
 Since v1.0.0
 
@@ -721,7 +714,7 @@ declare const sync_checkForNewerSave: (args_0: {
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/tinytower-sdk/blob/main/src/TinyTower.ts#L483)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L483)
 
 Since v1.0.0
 
@@ -749,7 +742,7 @@ declare const sync_pullSave: (args_0: {
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/tinytower-sdk/blob/main/src/TinyTower.ts#L351)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L351)
 
 Since v1.0.0
 
@@ -779,7 +772,7 @@ declare const sync_pullSnapshot: (
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/tinytower-sdk/blob/main/src/TinyTower.ts#L543)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L543)
 
 Since v1.0.0
 
@@ -809,7 +802,7 @@ declare const sync_pushSave: (
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/tinytower-sdk/blob/main/src/TinyTower.ts#L415)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L415)
 
 Since v1.0.0
 
@@ -839,7 +832,7 @@ declare const sync_pushSnapshot: (
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/tinytower-sdk/blob/main/src/TinyTower.ts#L608)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L608)
 
 Since v1.0.0
 
@@ -858,21 +851,20 @@ declare const sync_retrieveSnapshotList: (args_0: {
     readonly id: number
     readonly timestamp: bigint
     readonly meta: {
+      readonly vip: boolean
       readonly stories: number
+      readonly maxGold: number
       readonly doorman: {
+        readonly $unknown: {
+          readonly [x: string]: {
+            readonly value: string
+            readonly $locationMetadata: { readonly after: string | null | undefined }
+          }
+        }
         readonly homeIndex: number
         readonly workIndex: number
         readonly placedDreamJob: boolean
         readonly dreamJobIndex: number
-        readonly vip:
-          | number
-          | "None"
-          | "Engineer"
-          | "TravelAgent"
-          | "Deliveryman"
-          | "BigSpender"
-          | "Celebrity"
-          | "GiftBit"
         readonly attributes: {
           readonly $unknown: ReadonlyArray<string>
           readonly gender: "male" | "female"
@@ -913,12 +905,8 @@ declare const sync_retrieveSnapshotList: (args_0: {
             readonly recreation: number
           }
         }
-        readonly $unknown: {
-          readonly [x: string]: {
-            readonly value: string
-            readonly $locationMetadata: { readonly after: string | null | undefined }
-          }
-        }
+        readonly vip:
+          number | "None" | "Engineer" | "TravelAgent" | "Deliveryman" | "BigSpender" | "Celebrity" | "GiftBit"
         readonly costume?: string | undefined
         readonly customName?: string | undefined
         readonly pet?:
@@ -1044,10 +1032,8 @@ declare const sync_retrieveSnapshotList: (args_0: {
           | "cat_in_a_bag"
           | undefined
       }
-      readonly maxGold: number
       readonly requestedFloorId: number
       readonly ts: string
-      readonly vip: boolean
       readonly bitbook?: string | undefined
     }
   }>,
@@ -1063,7 +1049,7 @@ declare const sync_retrieveSnapshotList: (args_0: {
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/tinytower-sdk/blob/main/src/TinyTower.ts#L676)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L676)
 
 Since v1.0.0
 
@@ -1218,6 +1204,7 @@ declare const SaveData: Schema.suspend<
                           | "blue egg"
                           | "blue ranger"
                           | "blue suit"
+                          | "book"
                           | "boxer"
                           | "brick"
                           | "bride"
@@ -1238,7 +1225,9 @@ declare const SaveData: Schema.suspend<
                           | "chef"
                           | "chick"
                           | "chicken"
+                          | "chinese_lantern"
                           | "chinese suit"
+                          | "chocolate_egg"
                           | "christmas rudolph"
                           | "christmas_boy"
                           | "christmas_carl"
@@ -1281,9 +1270,11 @@ declare const SaveData: Schema.suspend<
                           | "famous construct"
                           | "farmer"
                           | "fast food uniform"
+                          | "firecracker"
                           | "fireman"
                           | "fishing"
                           | "flower"
+                          | "flower_girl"
                           | "folklore"
                           | "football player"
                           | "french maid"
@@ -1307,6 +1298,7 @@ declare const SaveData: Schema.suspend<
                           | "golden_ornament"
                           | "golfer"
                           | "goth"
+                          | "graduate"
                           | "green ranger"
                           | "groom"
                           | "grunch"
@@ -1323,6 +1315,7 @@ declare const SaveData: Schema.suspend<
                           | "hunter"
                           | "ice cream master"
                           | "ice queen"
+                          | "ice_cream_cone"
                           | "icecube"
                           | "influencer"
                           | "inquisitor"
@@ -1343,6 +1336,8 @@ declare const SaveData: Schema.suspend<
                           | "lecter"
                           | "leprechaun"
                           | "liberty"
+                          | "librarian"
+                          | "lion_dancer"
                           | "lumberjack"
                           | "mad hatter"
                           | "mad scientist"
@@ -1394,6 +1389,7 @@ declare const SaveData: Schema.suspend<
                           | "pool lifeguard"
                           | "potato_bowl"
                           | "princess"
+                          | "professor"
                           | "pumpkin"
                           | "pumpkin_man"
                           | "pumpkin_woman"
@@ -1460,6 +1456,7 @@ declare const SaveData: Schema.suspend<
                           | "turkey_man"
                           | "turkey_woman"
                           | "uncle sam"
+                          | "uni_student"
                           | "unicorn"
                           | "usher"
                           | "vampire"
@@ -2047,6 +2044,7 @@ declare const SaveData: Schema.suspend<
                               | "blue egg"
                               | "blue ranger"
                               | "blue suit"
+                              | "book"
                               | "boxer"
                               | "brick"
                               | "bride"
@@ -2067,7 +2065,9 @@ declare const SaveData: Schema.suspend<
                               | "chef"
                               | "chick"
                               | "chicken"
+                              | "chinese_lantern"
                               | "chinese suit"
+                              | "chocolate_egg"
                               | "christmas rudolph"
                               | "christmas_boy"
                               | "christmas_carl"
@@ -2110,9 +2110,11 @@ declare const SaveData: Schema.suspend<
                               | "famous construct"
                               | "farmer"
                               | "fast food uniform"
+                              | "firecracker"
                               | "fireman"
                               | "fishing"
                               | "flower"
+                              | "flower_girl"
                               | "folklore"
                               | "football player"
                               | "french maid"
@@ -2136,6 +2138,7 @@ declare const SaveData: Schema.suspend<
                               | "golden_ornament"
                               | "golfer"
                               | "goth"
+                              | "graduate"
                               | "green ranger"
                               | "groom"
                               | "grunch"
@@ -2152,6 +2155,7 @@ declare const SaveData: Schema.suspend<
                               | "hunter"
                               | "ice cream master"
                               | "ice queen"
+                              | "ice_cream_cone"
                               | "icecube"
                               | "influencer"
                               | "inquisitor"
@@ -2172,6 +2176,8 @@ declare const SaveData: Schema.suspend<
                               | "lecter"
                               | "leprechaun"
                               | "liberty"
+                              | "librarian"
+                              | "lion_dancer"
                               | "lumberjack"
                               | "mad hatter"
                               | "mad scientist"
@@ -2223,6 +2229,7 @@ declare const SaveData: Schema.suspend<
                               | "pool lifeguard"
                               | "potato_bowl"
                               | "princess"
+                              | "professor"
                               | "pumpkin"
                               | "pumpkin_man"
                               | "pumpkin_woman"
@@ -2289,6 +2296,7 @@ declare const SaveData: Schema.suspend<
                               | "turkey_man"
                               | "turkey_woman"
                               | "uncle sam"
+                              | "uni_student"
                               | "unicorn"
                               | "usher"
                               | "vampire"
@@ -3094,6 +3102,7 @@ declare const SaveData: Schema.suspend<
                                     | "blue egg"
                                     | "blue ranger"
                                     | "blue suit"
+                                    | "book"
                                     | "boxer"
                                     | "brick"
                                     | "bride"
@@ -3114,7 +3123,9 @@ declare const SaveData: Schema.suspend<
                                     | "chef"
                                     | "chick"
                                     | "chicken"
+                                    | "chinese_lantern"
                                     | "chinese suit"
+                                    | "chocolate_egg"
                                     | "christmas rudolph"
                                     | "christmas_boy"
                                     | "christmas_carl"
@@ -3157,9 +3168,11 @@ declare const SaveData: Schema.suspend<
                                     | "famous construct"
                                     | "farmer"
                                     | "fast food uniform"
+                                    | "firecracker"
                                     | "fireman"
                                     | "fishing"
                                     | "flower"
+                                    | "flower_girl"
                                     | "folklore"
                                     | "football player"
                                     | "french maid"
@@ -3183,6 +3196,7 @@ declare const SaveData: Schema.suspend<
                                     | "golden_ornament"
                                     | "golfer"
                                     | "goth"
+                                    | "graduate"
                                     | "green ranger"
                                     | "groom"
                                     | "grunch"
@@ -3199,6 +3213,7 @@ declare const SaveData: Schema.suspend<
                                     | "hunter"
                                     | "ice cream master"
                                     | "ice queen"
+                                    | "ice_cream_cone"
                                     | "icecube"
                                     | "influencer"
                                     | "inquisitor"
@@ -3219,6 +3234,8 @@ declare const SaveData: Schema.suspend<
                                     | "lecter"
                                     | "leprechaun"
                                     | "liberty"
+                                    | "librarian"
+                                    | "lion_dancer"
                                     | "lumberjack"
                                     | "mad hatter"
                                     | "mad scientist"
@@ -3270,6 +3287,7 @@ declare const SaveData: Schema.suspend<
                                     | "pool lifeguard"
                                     | "potato_bowl"
                                     | "princess"
+                                    | "professor"
                                     | "pumpkin"
                                     | "pumpkin_man"
                                     | "pumpkin_woman"
@@ -3336,6 +3354,7 @@ declare const SaveData: Schema.suspend<
                                     | "turkey_man"
                                     | "turkey_woman"
                                     | "uncle sam"
+                                    | "uni_student"
                                     | "unicorn"
                                     | "usher"
                                     | "vampire"
@@ -3969,6 +3988,6 @@ declare const SaveData: Schema.suspend<
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/tinytower-sdk/blob/main/src/TinyTower.ts#L34)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L34)
 
 Since v1.0.0

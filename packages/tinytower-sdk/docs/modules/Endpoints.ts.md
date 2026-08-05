@@ -80,6 +80,7 @@ declare const PlayerMetaData: Schema.encodeKeys<
                     | "blue egg"
                     | "blue ranger"
                     | "blue suit"
+                    | "book"
                     | "boxer"
                     | "brick"
                     | "bride"
@@ -100,7 +101,9 @@ declare const PlayerMetaData: Schema.encodeKeys<
                     | "chef"
                     | "chick"
                     | "chicken"
+                    | "chinese_lantern"
                     | "chinese suit"
+                    | "chocolate_egg"
                     | "christmas rudolph"
                     | "christmas_boy"
                     | "christmas_carl"
@@ -143,9 +146,11 @@ declare const PlayerMetaData: Schema.encodeKeys<
                     | "famous construct"
                     | "farmer"
                     | "fast food uniform"
+                    | "firecracker"
                     | "fireman"
                     | "fishing"
                     | "flower"
+                    | "flower_girl"
                     | "folklore"
                     | "football player"
                     | "french maid"
@@ -169,6 +174,7 @@ declare const PlayerMetaData: Schema.encodeKeys<
                     | "golden_ornament"
                     | "golfer"
                     | "goth"
+                    | "graduate"
                     | "green ranger"
                     | "groom"
                     | "grunch"
@@ -185,6 +191,7 @@ declare const PlayerMetaData: Schema.encodeKeys<
                     | "hunter"
                     | "ice cream master"
                     | "ice queen"
+                    | "ice_cream_cone"
                     | "icecube"
                     | "influencer"
                     | "inquisitor"
@@ -205,6 +212,8 @@ declare const PlayerMetaData: Schema.encodeKeys<
                     | "lecter"
                     | "leprechaun"
                     | "liberty"
+                    | "librarian"
+                    | "lion_dancer"
                     | "lumberjack"
                     | "mad hatter"
                     | "mad scientist"
@@ -256,6 +265,7 @@ declare const PlayerMetaData: Schema.encodeKeys<
                     | "pool lifeguard"
                     | "potato_bowl"
                     | "princess"
+                    | "professor"
                     | "pumpkin"
                     | "pumpkin_man"
                     | "pumpkin_woman"
@@ -322,6 +332,7 @@ declare const PlayerMetaData: Schema.encodeKeys<
                     | "turkey_man"
                     | "turkey_woman"
                     | "uncle sam"
+                    | "uni_student"
                     | "unicorn"
                     | "usher"
                     | "vampire"
@@ -865,6 +876,6 @@ declare const PlayerMetaData: Schema.encodeKeys<
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/tinytower-sdk/blob/main/src/Endpoints.ts#L73)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/Endpoints.ts#L73)
 
 Since v1.0.0

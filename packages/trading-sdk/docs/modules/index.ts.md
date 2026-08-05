@@ -29,6 +29,6 @@ Re-exports all named exports from the "./Sdk.ts" module as `Sdk`.
 export * as Sdk from "./Sdk.ts"
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/trading-sdk/blob/main/src/index.ts#L6)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/trading-sdk/src/index.ts#L6)
 
 Since v1.0.0

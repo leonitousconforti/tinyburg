@@ -27,6 +27,6 @@ Since v1.0.0
 declare const hello: "Doorman!"
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/doorman/blob/main/src/Doorman.ts#L2)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/doorman/src/Doorman.ts#L2)
 
 Since v1.0.0

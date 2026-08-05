@@ -29,6 +29,6 @@ Re-exports all named exports from the "./Doorman.ts" module as `Doorman`.
 export * as Doorman from "./Doorman.ts"
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/packages/doorman/blob/main/src/index.ts#L6)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/doorman/src/index.ts#L6)
 
 Since v1.0.0

@@ -139,7 +139,7 @@ Since v1.0.0
 
 ```ts
 declare const AuthenticatedPlayerSchema: Schema.Struct<{
-  readonly playerAuthKey: Schema.brand<Schema.Redacted<Schema.String>, "PlayerAuthKey">
+  readonly playerAuthKey: Schema.brand<Schema.RedactedFromValue<Schema.String>, "PlayerAuthKey">
   readonly playerId: Schema.brand<Schema.String, "PlayerId">
 }>
 ```
@@ -153,7 +153,7 @@ Since v1.0.0
 **Signature**
 
 ```ts
-declare const NimblebitAuthKeySchema: Schema.brand<Schema.Redacted<Schema.String>, "NimblebitAuthKey">
+declare const NimblebitAuthKeySchema: Schema.brand<Schema.RedactedFromValue<Schema.String>, "NimblebitAuthKey">
 ```
 
 [Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/NimblebitConfig.ts#L64)
@@ -165,7 +165,7 @@ Since v1.0.0
 **Signature**
 
 ```ts
-declare const PlayerAuthKeySchema: Schema.brand<Schema.Redacted<Schema.String>, "PlayerAuthKey">
+declare const PlayerAuthKeySchema: Schema.brand<Schema.RedactedFromValue<Schema.String>, "PlayerAuthKey">
 ```
 
 [Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/NimblebitConfig.ts#L36)
@@ -177,7 +177,7 @@ Since v1.0.0
 **Signature**
 
 ```ts
-declare const PlayerEmailSchema: Schema.brand<Schema.Redacted<Schema.String>, "PlayerEmail">
+declare const PlayerEmailSchema: Schema.brand<Schema.RedactedFromValue<Schema.String>, "PlayerEmail">
 ```
 
 [Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/NimblebitConfig.ts#L30)
@@ -203,7 +203,7 @@ Since v1.0.0
 ```ts
 declare const UnauthenticatedPlayerSchema: Schema.Struct<{
   readonly playerId: Schema.optional<Schema.brand<Schema.String, "PlayerId">>
-  readonly playerEmail: Schema.brand<Schema.Redacted<Schema.String>, "PlayerEmail">
+  readonly playerEmail: Schema.brand<Schema.RedactedFromValue<Schema.String>, "PlayerEmail">
 }>
 ```
 
