@@ -32,13 +32,13 @@ export class Session extends Model.Class<Session>("Session")({
     userAgent: Schema.OptionFromNullishOr(Schema.String, { onNoneEncoding: null }),
     ip: Schema.OptionFromNullishOr(Schema.String, { onNoneEncoding: null }),
     accessToken: Schema.OptionFromNullishOr(Schema.String, { onNoneEncoding: null }).pipe(
-        Model.FieldExcept(["insert"])
+        Model.FieldOnly(["select", "update"])
     ),
     accessTokenExpiresAt: Schema.OptionFromNullishOr(Schema.DateTimeUtcFromDate, { onNoneEncoding: null }).pipe(
-        Model.FieldExcept(["insert"])
+        Model.FieldOnly(["select", "update"])
     ),
     accessTokenJti: Schema.OptionFromNullishOr(Schema.String, { onNoneEncoding: null }).pipe(
-        Model.FieldExcept(["insert"])
+        Model.FieldOnly(["select", "update"])
     ),
 }) {}
 
