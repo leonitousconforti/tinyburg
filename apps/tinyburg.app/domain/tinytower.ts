@@ -1,6 +1,6 @@
 import type { SqlError } from "effect/unstable/sql";
 
-import { Context, Effect, Layer, Schema } from "effect";
+import { Context, Effect, Layer, Schedule, Schema } from "effect";
 import { SqlClient, SqlSchema } from "effect/unstable/sql";
 
 import { TinyTowerAccount } from "./models.ts";
@@ -29,6 +29,15 @@ export class TinyTowerAccountsRepository extends Context.Service<TinyTowerAccoun
                     DELETE FROM tinytower_accounts
                     WHERE user_id = ${options.userId} AND player_id = ${options.playerId}
                 `.pipe(Effect.asVoid);
+
+            yield* sql`DELETE FROM pending_tinytower_accounts WHERE expires_at < NOW()`.pipe(
+                Effect.catchCause((cause) =>
+                    Effect.logWarning(`failed to purge expired pending tinytower accounts`, cause)
+                ),
+                Effect.schedule(Schedule.cron("41 * * * *")),
+                Effect.forkScoped,
+                Effect.asVoid
+            );
 
             return {
                 listForUser,

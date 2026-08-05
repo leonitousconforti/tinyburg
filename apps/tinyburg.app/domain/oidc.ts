@@ -1,6 +1,6 @@
 import type { SqlError } from "effect/unstable/sql";
 
-import { Context, Effect, Layer, Schema } from "effect";
+import { Context, Effect, Layer, Schedule, Schema } from "effect";
 import { SqlClient, SqlSchema, SqlModel } from "effect/unstable/sql";
 
 import { OAuthAuthorizationRequest } from "./models.ts";
@@ -67,6 +67,20 @@ export class OidcRepository extends Context.Service<OidcRepository>()("@tinyburg
                 sql`SELECT 1 FROM revoked_tokens WHERE jti = ${jti} AND expires_at > NOW()`,
                 (rows) => rows.length > 0
             );
+
+        yield* sql`DELETE FROM revoked_tokens WHERE expires_at < NOW()`.pipe(
+            Effect.catchCause((cause) => Effect.logWarning(`failed to purge expired revoked tokens`, cause)),
+            Effect.schedule(Schedule.cron("23 * * * *")),
+            Effect.forkScoped,
+            Effect.asVoid
+        );
+
+        yield* sql`DELETE FROM oauth_authorization_requests WHERE expires_at < NOW()`.pipe(
+            Effect.catchCause((cause) => Effect.logWarning(`failed to purge expired authorization requests`, cause)),
+            Effect.schedule(Schedule.cron("*/15 * * * *")),
+            Effect.forkScoped,
+            Effect.asVoid
+        );
 
         return {
             createAuthorizationRequest,
