@@ -5,12 +5,12 @@ import { Model } from "effect/unstable/schema";
 
 import type { Session, User } from "../../domain/models.ts";
 
-import { Api } from "@tinyburg/trading-sdk/Sdk";
 import { Oidc, ResourceServer, Jwt } from "effect-oidc";
 
 import { DevelopersRepository } from "../../domain/developers.ts";
 import { OidcRepository } from "../../domain/oidc.ts";
 import { SessionsRepository } from "../../domain/sessions.ts";
+import { Api } from "../../shared/api.ts";
 import { OidcKeys } from "../keys.ts";
 
 const accessTokenFor = Effect.fnUntraced(function* ({ session, user }: { session: Session; user: User }) {
