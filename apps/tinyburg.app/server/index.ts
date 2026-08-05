@@ -1,5 +1,5 @@
 import { Config, ConfigProvider, Effect, Layer, Path, String } from "effect";
-import { FetchHttpClient, HttpRouter } from "effect/unstable/http";
+import { FetchHttpClient, HttpRouter, HttpServerResponse } from "effect/unstable/http";
 
 import { createServer } from "node:http";
 
@@ -11,12 +11,33 @@ import { OidcRepository } from "../domain/oidc.ts";
 import { SessionsRepository } from "../domain/sessions.ts";
 import { TinyTowerAccountsRepository } from "../domain/tinytower.ts";
 import { UsersRepository } from "../domain/users.ts";
+import { SecureCookies } from "./cookies.ts";
 import { OidcKeys } from "./keys.ts";
 import { ApiLive } from "./routes/api.ts";
+import { AuthRoutesLive } from "./routes/auth.ts";
 import { OAuthRoutesLive } from "./routes/oauth.ts";
 import { StaticRoutesLive } from "./routes/static.ts";
 
-const AllRoutes = Layer.mergeAll(ApiLive, OAuthRoutesLive, StaticRoutesLive);
+/**
+ * Baseline security headers on every response. Nothing this site serves is
+ * meant to be embedded, least of all the OAuth consent screen, so framing is
+ * denied outright; HSTS rides along whenever cookies demand https.
+ */
+const SecurityHeadersLive = HttpRouter.middleware(
+    Effect.map(SecureCookies, (secure) => {
+        const headers = {
+            "x-content-type-options": "nosniff",
+            "x-frame-options": "DENY",
+            "content-security-policy": "frame-ancestors 'none'",
+            ...(secure ? { "strict-transport-security": "max-age=31536000; includeSubDomains" } : {}),
+        };
+
+        return (httpEffect) => Effect.map(httpEffect, HttpServerResponse.setHeaders(headers));
+    }),
+    { global: true }
+);
+
+const AllRoutes = Layer.mergeAll(ApiLive, AuthRoutesLive, OAuthRoutesLive, StaticRoutesLive, SecurityHeadersLive);
 
 const SqlLive = PgClient.layerConfig({
     url: Config.redacted("DATABASE_URL"),
