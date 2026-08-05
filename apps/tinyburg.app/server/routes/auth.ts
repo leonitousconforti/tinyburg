@@ -18,7 +18,7 @@ const SessionCookieLive = Layer.effect(
             const currentUser = yield* maybeCurrentUser.pipe(
                 Effect.provideService(SessionsRepository, sessions),
                 Effect.provideService(CookiePolicy, cookiePolicy),
-                Effect.orDie
+                Effect.mapError(() => new HttpApiError.InternalServerError())
             );
 
             if (Option.isNone(currentUser)) {
