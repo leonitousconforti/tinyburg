@@ -11,7 +11,7 @@ import { OidcRepository } from "../domain/oidc.ts";
 import { SessionsRepository } from "../domain/sessions.ts";
 import { TinyTowerAccountsRepository } from "../domain/tinytower.ts";
 import { UsersRepository } from "../domain/users.ts";
-import { SecureCookies } from "./cookies.ts";
+import { CookiePolicy } from "./cookies.ts";
 import { OidcKeys } from "./keys.ts";
 import { ApiLive } from "./routes/api.ts";
 import { AuthRoutesLive } from "./routes/auth.ts";
@@ -24,7 +24,7 @@ import { StaticRoutesLive } from "./routes/static.ts";
  * denied outright; HSTS rides along whenever cookies demand https.
  */
 const SecurityHeadersLive = HttpRouter.middleware(
-    Effect.map(SecureCookies, (secure) => {
+    Effect.map(CookiePolicy, ({ secure }) => {
         const headers = {
             "x-content-type-options": "nosniff",
             "x-frame-options": "DENY",
@@ -61,7 +61,7 @@ const Repositories = Layer.mergeAll(
 );
 
 HttpRouter.serve(AllRoutes).pipe(
-    Layer.provide([Repositories, OidcKeys.Default, FetchHttpClient.layer]),
+    Layer.provide([Repositories, CookiePolicy.Default, OidcKeys.Default, FetchHttpClient.layer]),
     Layer.provide(MigratorLive),
     Layer.provide(SqlLive),
     Layer.provide(
