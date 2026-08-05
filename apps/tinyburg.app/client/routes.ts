@@ -1,11 +1,11 @@
-import { type Option, pipe, Schema as S } from "effect";
+import { Option, pipe, Schema as S } from "effect";
 
 import { Route } from "foldkit";
 import { literal, r, slash } from "foldkit/route";
 
 export const HomeRoute = r("Home");
 export const AboutRoute = r("About");
-export const LoginRoute = r("Login", { returnTo: S.Option(S.String) });
+export const LoginRoute = r("Login", { returnTo: S.Option(S.String), error: S.Option(S.String) });
 export const PrivacyRoute = r("Privacy");
 export const TermsRoute = r("Terms");
 export const SponsorsRoute = r("Sponsors");
@@ -34,9 +34,11 @@ export type AppRoute = typeof AppRoute.Type;
 
 export const homeRouter = pipe(Route.root, Route.mapTo(HomeRoute));
 export const aboutRouter = pipe(literal("about"), Route.mapTo(AboutRoute));
+// The oauth callback reports a failed sign in through the `error` query
+// parameter; the page opens saying so rather than pretending nothing happened.
 export const loginRouter = pipe(
     literal("login"),
-    Route.query(S.Struct({ returnTo: S.OptionFromOptional(S.String) })),
+    Route.query(S.Struct({ returnTo: S.OptionFromOptional(S.String), error: S.OptionFromOptional(S.String) })),
     Route.mapTo(LoginRoute)
 );
 export const privacyRouter = pipe(literal("privacy"), Route.mapTo(PrivacyRoute));
@@ -71,4 +73,4 @@ const routeParser = Route.oneOf(
 export const urlToAppRoute = Route.parseUrlWithFallback(routeParser, NotFoundRoute);
 
 /** /login, carrying the page to return to after signing in. */
-export const loginHref = (returnTo: Option.Option<string>): string => loginRouter({ returnTo });
+export const loginHref = (returnTo: Option.Option<string>): string => loginRouter({ returnTo, error: Option.none() });

@@ -1,4 +1,4 @@
-import { Option } from "effect";
+import { Match, Option } from "effect";
 
 import type { Html, HtmlBuilder } from "foldkit/html";
 
@@ -11,13 +11,35 @@ const loginHrefFor = (provider: "google" | "discord", returnTo: Option.Option<st
         onSome: (destination) => `/auth/${provider}/login?returnTo=${encodeURIComponent(destination)}`,
     });
 
+/**
+ * Sign in is a server round trip that lands back here with `?error=` when it
+ * could not be completed. The callback deliberately keeps the reason vague, so
+ * the visitor gets the one thing that is actually true and actionable: it did
+ * not work, and trying again is worth a shot.
+ */
+const problemFor = (error: string): string =>
+    Match.value(error).pipe(
+        Match.withReturnType<string>(),
+        Match.when("oauth", () => "We couldn't finish signing you in. Please try again."),
+        Match.orElse(() => "Something went wrong signing you in. Please try again.")
+    );
+
+const problemBanner = <M>(h: HtmlBuilder<M>, text: string): Html =>
+    h.p(
+        [
+            h.Role("alert"),
+            h.Class("font-mono mb-6 rounded-lg border-2 border-red-300 bg-red-50 px-4 py-3 text-lg text-red-700"),
+        ],
+        [text]
+    );
+
 const perk = <M>(h: HtmlBuilder<M>, icon: string, text: string): Html =>
     h.div(
         [h.Class("text-dark-blue flex items-center gap-3 text-lg")],
         [h.span([h.Class("text-xl")], [icon]), h.span([], [text])]
     );
 
-export const loginView = <M>(h: HtmlBuilder<M>, returnTo: Option.Option<string>): Html =>
+export const loginView = <M>(h: HtmlBuilder<M>, returnTo: Option.Option<string>, error: Option.Option<string>): Html =>
     h.div(
         [h.Class("relative z-10 flex min-h-screen flex-col items-center justify-center p-8")],
         [
@@ -35,6 +57,10 @@ export const loginView = <M>(h: HtmlBuilder<M>, returnTo: Option.Option<string>)
                             ),
                         ]
                     ),
+                    ...Option.match(error, {
+                        onSome: (code) => [problemBanner(h, problemFor(code))],
+                        onNone: () => [],
+                    }),
                     h.div(
                         [h.Class("flex flex-col gap-4")],
                         [

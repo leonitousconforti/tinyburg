@@ -287,7 +287,7 @@ const pageView = (model: Model, h: HtmlBuilder<Message>): Html =>
         Match.tagsExhaustive({
             Home: () => lazyHome(homeView, [h]),
             About: () => lazyAbout(aboutView, [h]),
-            Login: ({ returnTo }) => loginView(h, returnTo),
+            Login: ({ error, returnTo }) => loginView(h, returnTo, error),
             Privacy: () => lazyPrivacy(privacyView, [h]),
             Terms: () => lazyTerms(termsView, [h]),
             Sponsors: () => lazySponsors(sponsorsView, [h]),
