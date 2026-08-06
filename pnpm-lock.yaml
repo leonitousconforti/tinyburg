@@ -209,7 +209,7 @@ importers:
         version: 4.0.0-beta.102(effect@4.0.0-beta.102)
       '@foldkit/vite-plugin':
         specifier: 0.11.3
-        version: 0.11.3(effect@4.0.0-beta.102)(foldkit@0.137.0(@effect/platform-browser@4.0.0-beta.102(effect@4.0.0-beta.102))(effect@4.0.0-beta.102))(vite@8.1.5)
+        version: 0.11.3(effect@4.0.0-beta.102)(foldkit@0.138.0(@effect/platform-browser@4.0.0-beta.102(effect@4.0.0-beta.102))(effect@4.0.0-beta.102))(vite@8.1.5)
       '@fontsource/press-start-2p':
         specifier: 5.3.0
         version: 5.3.0
@@ -235,8 +235,8 @@ importers:
         specifier: 0.0.6
         version: 0.0.6(effect@4.0.0-beta.102)
       foldkit:
-        specifier: 0.137.0
-        version: 0.137.0(@effect/platform-browser@4.0.0-beta.102(effect@4.0.0-beta.102))(effect@4.0.0-beta.102)
+        specifier: 0.138.0
+        version: 0.138.0(@effect/platform-browser@4.0.0-beta.102(effect@4.0.0-beta.102))(effect@4.0.0-beta.102)
       ioredis:
         specifier: 5.11.1
         version: 5.11.1
@@ -397,6 +397,9 @@ packages:
   '@aws-sdk/core@3.977.1':
     resolution: {integrity: sha512-KVtQRtc00ES/y+Sc3vYXeP6pCIcNlBJCZOwvqSy8ZpVGmbM5+IG+AfhuTKQ2oXmIVqZJewaGMMpzPkywC6xg0w==}
     engines: {node: '>=20.0.0'}
+    deprecated: |-
+      Deprecated due to Document number parsing bug in JSON, see
+        https://github.com/aws/aws-sdk-js-v3/issues/8246. Newer version available.
 
   '@aws-sdk/credential-provider-env@3.972.62':
     resolution: {integrity: sha512-BkDrk2cNjed31IKin/Oksb2ziF+gfuyRskFVuT4EU9Mep7M8Y/d8DJG4+anHme4Vuse7CwaEscwEfGyR6mzBhQ==}
@@ -2178,8 +2181,8 @@ packages:
     resolution: {integrity: sha512-PpOwAdQ/YlXQ2vj8a3h8IipDuYRi3wceVQQGYWxNINccq40Anw7BlsEXCMbt1Zt+OLA6Fq9suIpIWD0OsnISlw==}
     engines: {node: '>=8'}
 
-  foldkit@0.137.0:
-    resolution: {integrity: sha512-NuDEs0Qs5mHM5fD6pzeqGWK8q6rAQzuUMzpEEjCgFZoYDwyFyeB6mga0v5dAq0/nbAgCWrEdKYkcFPIlWUPMyw==}
+  foldkit@0.138.0:
+    resolution: {integrity: sha512-fWMpVaUYuvq456BMUcKpGEF7kAtRJiVB/cz4iE8EYow1OpfYOXK0/24roBezOJBPylgc2+oF+PFhhSmK6zCAww==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
       '@effect/platform-browser': 4.0.0-beta.102
@@ -4199,10 +4202,10 @@ snapshots:
   '@esbuild/win32-x64@0.28.1':
     optional: true
 
-  '@foldkit/vite-plugin@0.11.3(effect@4.0.0-beta.102)(foldkit@0.137.0(@effect/platform-browser@4.0.0-beta.102(effect@4.0.0-beta.102))(effect@4.0.0-beta.102))(vite@8.1.5)':
+  '@foldkit/vite-plugin@0.11.3(effect@4.0.0-beta.102)(foldkit@0.138.0(@effect/platform-browser@4.0.0-beta.102(effect@4.0.0-beta.102))(effect@4.0.0-beta.102))(vite@8.1.5)':
     dependencies:
       effect: 4.0.0-beta.102
-      foldkit: 0.137.0(@effect/platform-browser@4.0.0-beta.102(effect@4.0.0-beta.102))(effect@4.0.0-beta.102)
+      foldkit: 0.138.0(@effect/platform-browser@4.0.0-beta.102(effect@4.0.0-beta.102))(effect@4.0.0-beta.102)
       magic-string: 0.30.21
       vite: 8.1.5
       ws: 8.21.1
@@ -5237,7 +5240,7 @@ snapshots:
       locate-path: 5.0.0
       path-exists: 4.0.0
 
-  foldkit@0.137.0(@effect/platform-browser@4.0.0-beta.102(effect@4.0.0-beta.102))(effect@4.0.0-beta.102):
+  foldkit@0.138.0(@effect/platform-browser@4.0.0-beta.102(effect@4.0.0-beta.102))(effect@4.0.0-beta.102):
     dependencies:
       '@effect/platform-browser': 4.0.0-beta.102(effect@4.0.0-beta.102)
       effect: 4.0.0-beta.102
