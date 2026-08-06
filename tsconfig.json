@@ -13,6 +13,7 @@
         { "path": "apps/archivist" },
         { "path": "apps/authproxy" },
         { "path": "apps/auto-gold-bits" },
+        { "path": "apps/discord-bot" },
         { "path": "apps/personas" },
         { "path": "apps/social-circles" },
         { "path": "apps/tinyburg.app" }
