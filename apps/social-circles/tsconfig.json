@@ -1,11 +1,32 @@
 {
     "extends": "../../tsconfig.base.jsonc",
+    "references": [
+        { "path": "../../packages/nimblebit-sdk/tsconfig.src.json" },
+        { "path": "../../packages/tinytower-sdk/tsconfig.src.json" },
+        { "path": "../../packages/trading-sdk/tsconfig.src.json" }
+    ],
+    "include": [
+        "client",
+        "cluster",
+        "domain",
+        "functions",
+        "migrations",
+        "routes",
+        "services",
+        "shared",
+        "workflows",
+        "cookies.ts",
+        "crypto.ts",
+        "index.ts",
+        "vite.config.ts"
+    ],
     "compilerOptions": {
         "noEmit": true,
         "declaration": false,
         "declarationMap": false,
         "composite": false,
         "incremental": false,
+        "types": ["node", "vite/client"],
         "allowImportingTsExtensions": true,
         "rewriteRelativeImportExtensions": false
     }

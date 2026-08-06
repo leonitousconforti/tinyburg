@@ -2,10 +2,10 @@ import { Array, Effect, Function, Graph, type Schema } from "effect";
 
 import type { NimblebitConfig } from "@tinyburg/nimblebit-sdk";
 
-import { Repository } from "../domain/model.ts";
+import { GraphRepository } from "../domain/graph.ts";
 
 export const toDirectedGraph = Effect.gen(function* () {
-    const repo = yield* Repository;
+    const repo = yield* GraphRepository;
     const entries = yield* repo.currentFriendships();
 
     const graph = Graph.directed<Schema.Schema.Type<typeof NimblebitConfig.PlayerIdSchema>, undefined>((mutable) => {
@@ -34,7 +34,7 @@ export const toDirectedGraph = Effect.gen(function* () {
 });
 
 export const toUndirectedGraph = Effect.gen(function* () {
-    const repo = yield* Repository;
+    const repo = yield* GraphRepository;
     const entries = yield* repo.mutualFriendships();
 
     const graph = Graph.undirected<Schema.Schema.Type<typeof NimblebitConfig.PlayerIdSchema>, undefined>((mutable) => {
