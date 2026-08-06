@@ -327,9 +327,6 @@ importers:
       '@tinyburg/insight':
         specifier: workspace:*
         version: link:../insight
-      '@types/pako':
-        specifier: 2.0.4
-        version: 2.0.4
       effect:
         specifier: 4.0.0-beta.102
         version: 4.0.0-beta.102
@@ -1588,9 +1585,6 @@ packages:
 
   '@types/node@26.1.2':
     resolution: {integrity: sha512-Vu4a5UFA9rIIFJ7rB/Vaafh9lrCQszopTCx6KjFboXTGQbPNasehVR5TEiithSDGyd1DEiUByggTZsg8jukeIg==}
-
-  '@types/pako@2.0.4':
-    resolution: {integrity: sha512-VWDCbrLeVXJM9fihYodcLiIv0ku+AlOa/TQ1SvYOaBuyrSKgEcro95LJyIsJ4vSo6BXIxOKxiJAat04CmST9Fw==}
 
   '@types/ws@8.18.1':
     resolution: {integrity: sha512-ThVF6DCVhA8kUGy+aazFQ4kXQ7E1Ty7A3ypFOe0IcJV8O/M511G99AW24irKrW56Wt44yG9+ij8FaqoBGkuBXg==}
@@ -4673,8 +4667,6 @@ snapshots:
   '@types/node@26.1.2':
     dependencies:
       undici-types: 8.3.0
-
-  '@types/pako@2.0.4': {}
 
   '@types/ws@8.18.1':
     dependencies:
