@@ -58,7 +58,7 @@
         "@efffrida/frida-tools": "0.0.47",
         "@efffrida/gplayapi": "0.0.24",
         "@tinyburg/insight": "workspace:*",
-        "@types/pako": "2.0.4",
+        "@types/pako": "3.0.0",
         "effect": "4.0.0-beta.102",
         "ioredis": "5.11.1",
         "vite": "8.1.5",
