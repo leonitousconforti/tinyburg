@@ -4,14 +4,25 @@
         { "path": "../../packages/nimblebit-sdk/tsconfig.src.json" },
         { "path": "../../packages/tinytower-sdk/tsconfig.src.json" }
     ],
-    "include": ["domain", "middleware", "migrations", "routes", "index.ts"],
+    "include": [
+        "client",
+        "domain",
+        "middleware",
+        "migrations",
+        "routes",
+        "shared",
+        "cookies.ts",
+        "crypto.ts",
+        "index.ts",
+        "vite.config.ts"
+    ],
     "compilerOptions": {
         "noEmit": true,
         "declaration": false,
         "declarationMap": false,
         "composite": false,
         "incremental": false,
-        "types": ["node"],
+        "types": ["node", "vite/client"],
         "allowImportingTsExtensions": true,
         "rewriteRelativeImportExtensions": false
     }

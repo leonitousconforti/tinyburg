@@ -122,6 +122,7 @@ export const AuthorizationLive = Layer.effect(
                             scopes: maybeAccount.value.scopes,
                             revoked: maybeAccount.value.revoked,
                             description: maybeAccount.value.description,
+                            ownerSub: maybeAccount.value.ownerSub,
                             rateLimitLimit: maybeAccount.value.rateLimitLimit,
                             rateLimitWindow: maybeAccount.value.rateLimitWindow,
                         });

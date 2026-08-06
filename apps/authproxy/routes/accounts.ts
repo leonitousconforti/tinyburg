@@ -151,6 +151,7 @@ const CreateHandler: HttpApiEndpoint.HandlerWithIdentifier<
         rateLimitLimit: seededAccount.rateLimitLimit,
         scopes: seededAccount.scopes,
         description: Option.none(),
+        ownerSub: Option.none(),
     });
     return yield* repo.insert(newAccount);
 }, Effect.orDie);
@@ -231,6 +232,7 @@ const RevokeHandler: HttpApiEndpoint.HandlerWithIdentifier<
         key: maybeAccount.value.key,
         scopes: maybeAccount.value.scopes,
         description: maybeAccount.value.description,
+        ownerSub: maybeAccount.value.ownerSub,
         rateLimitLimit: maybeAccount.value.rateLimitLimit,
         rateLimitWindow: maybeAccount.value.rateLimitWindow,
         lastUsedAt: Model.Override(maybeAccount.value.lastUsedAt),
@@ -266,6 +268,7 @@ const AuthorizeHandler: HttpApiEndpoint.HandlerWithIdentifier<
         key: maybeAccount.value.key,
         scopes: maybeAccount.value.scopes,
         description: maybeAccount.value.description,
+        ownerSub: maybeAccount.value.ownerSub,
         rateLimitLimit: maybeAccount.value.rateLimitLimit,
         rateLimitWindow: maybeAccount.value.rateLimitWindow,
         lastUsedAt: Model.Override(maybeAccount.value.lastUsedAt),
@@ -296,6 +299,7 @@ const ModifyScopesHandler: HttpApiEndpoint.HandlerWithIdentifier<
         key: maybeAccount.value.key,
         revoked: maybeAccount.value.revoked,
         description: maybeAccount.value.description,
+        ownerSub: maybeAccount.value.ownerSub,
         rateLimitLimit: maybeAccount.value.rateLimitLimit,
         rateLimitWindow: maybeAccount.value.rateLimitWindow,
         lastUsedAt: Model.Override(maybeAccount.value.lastUsedAt),
@@ -326,6 +330,7 @@ const ModifyRateLimitHandler: HttpApiEndpoint.HandlerWithIdentifier<
         key: maybeAccount.value.key,
         revoked: maybeAccount.value.revoked,
         description: maybeAccount.value.description,
+        ownerSub: maybeAccount.value.ownerSub,
         scopes: maybeAccount.value.scopes,
         lastUsedAt: Model.Override(maybeAccount.value.lastUsedAt),
         rateLimitLimit: limit,
@@ -356,6 +361,7 @@ const ModifyDescriptionHandler: HttpApiEndpoint.HandlerWithIdentifier<
         key: maybeAccount.value.key,
         revoked: maybeAccount.value.revoked,
         scopes: maybeAccount.value.scopes,
+        ownerSub: maybeAccount.value.ownerSub,
         rateLimitLimit: maybeAccount.value.rateLimitLimit,
         rateLimitWindow: maybeAccount.value.rateLimitWindow,
         lastUsedAt: Model.Override(maybeAccount.value.lastUsedAt),

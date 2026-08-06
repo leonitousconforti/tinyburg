@@ -7,12 +7,25 @@ import { createServer } from "node:http";
 import { NodeHttpServer, NodeRuntime } from "@effect/platform-node";
 import { PgClient, PgMigrator } from "@effect/sql-pg";
 
+import { CookiePolicy } from "./cookies.ts";
 import { Repository } from "./domain/model.ts";
+import { SessionsRepository } from "./domain/sessions.ts";
 import { AccountsApiLive } from "./routes/accounts.ts";
 import { HealthCheckRoutesLive } from "./routes/health.ts";
+import { OAuthRoutesLive } from "./routes/oauth.ts";
+import { SelfServiceApiLive } from "./routes/selfservice.ts";
+import { StaticRoutesLive } from "./routes/static.ts";
 import { TinyTowerApiLive } from "./routes/tinytower.ts";
+import { TinyburgLookup } from "./tinyburg.ts";
 
-const AllRoutes = Layer.mergeAll(TinyTowerApiLive, AccountsApiLive, HealthCheckRoutesLive);
+const AllRoutes = Layer.mergeAll(
+    TinyTowerApiLive,
+    AccountsApiLive,
+    SelfServiceApiLive,
+    OAuthRoutesLive,
+    HealthCheckRoutesLive,
+    StaticRoutesLive
+);
 
 const SqlLive = PgClient.layerConfig({
     url: Config.redacted("DATABASE_URL"),
@@ -28,7 +41,14 @@ const MigratorLive = Effect.gen(function* () {
 }).pipe(Layer.unwrap);
 
 HttpRouter.serve(AllRoutes, { routerConfig: { maxParamLength: 500 } }).pipe(
-    Layer.provide([RateLimiter.layerStoreMemory, Repository.Live, FetchHttpClient.layer]),
+    Layer.provide([
+        RateLimiter.layerStoreMemory,
+        Repository.Live,
+        SessionsRepository.Default,
+        CookiePolicy.Default,
+        TinyburgLookup.Default.pipe(Layer.provide(FetchHttpClient.layer)),
+        FetchHttpClient.layer,
+    ]),
     Layer.provide(MigratorLive),
     Layer.provide(SqlLive),
     Layer.provide(

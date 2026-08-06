@@ -35,6 +35,7 @@ export class Account extends Model.Class<Account>("Account")({
         })
     ),
     description: Schema.OptionFromNullishOr(Schema.String, { onNoneEncoding: null }),
+    ownerSub: Schema.OptionFromNullishOr(Schema.String.check(Schema.isUUID()), { onNoneEncoding: null }),
     rateLimitLimit: Schema.Int,
     rateLimitWindow: Schema.NumberFromString.pipe(
         Schema.check(Schema.isGreaterThanOrEqualTo(0)),
@@ -65,12 +66,73 @@ export class Repository extends Context.Service<Repository>()("@tinyburg/authpro
             idColumn: "key",
         });
 
+        const listForOwner = SqlSchema.findAll({
+            Request: Schema.String.check(Schema.isUUID()),
+            Result: Account.select,
+            execute: (ownerSub) => sql`
+                SELECT * FROM accounts
+                WHERE owner_sub = ${ownerSub}
+                ORDER BY created_at DESC
+            `,
+        });
+
+        const countForOwner = SqlSchema.findOne({
+            Request: Schema.String.check(Schema.isUUID()),
+            Result: Schema.Struct({ count: Schema.Int }),
+            execute: (ownerSub) => sql`
+                SELECT COUNT(*)::int AS count FROM accounts
+                WHERE owner_sub = ${ownerSub}
+            `,
+        });
+
+        // Rotation swaps the credential in place: the row keeps its scopes,
+        // rate limit and history, only the key changes. Scoped to the owner so
+        // one user can never rotate another's key out from under them.
+        const rotateForOwner = SqlSchema.findOneOption({
+            Request: Schema.Struct({ key: Schema.String.check(Schema.isUUID()), ownerSub: Schema.String }),
+            Result: Account.select,
+            execute: ({ key, ownerSub }) => sql`
+                UPDATE accounts SET key = gen_random_uuid()
+                WHERE key = ${key} AND owner_sub = ${ownerSub}
+                RETURNING *
+            `,
+        });
+
+        const setRevokedForOwner = SqlSchema.findOneOption({
+            Request: Schema.Struct({
+                key: Schema.String.check(Schema.isUUID()),
+                ownerSub: Schema.String,
+                revoked: Schema.Boolean,
+            }),
+            Result: Account.select,
+            execute: ({ key, ownerSub, revoked }) => sql`
+                UPDATE accounts SET revoked = ${revoked}
+                WHERE key = ${key} AND owner_sub = ${ownerSub}
+                RETURNING *
+            `,
+        });
+
+        const deleteForOwner = SqlSchema.findOneOption({
+            Request: Schema.Struct({ key: Schema.String.check(Schema.isUUID()), ownerSub: Schema.String }),
+            Result: Schema.Struct({ key: Schema.String }),
+            execute: ({ key, ownerSub }) => sql`
+                DELETE FROM accounts
+                WHERE key = ${key} AND owner_sub = ${ownerSub}
+                RETURNING key::text
+            `,
+        });
+
         const seededNoneAccount = repoByKey.findById("00000000-0000-0000-0000-000000000001");
         const seededReadonlyAccount = repoByKey.findById("00000000-0000-0000-0000-000000000002");
 
         return {
             ...repoByKey,
             listAll,
+            listForOwner,
+            countForOwner,
+            rotateForOwner,
+            setRevokedForOwner,
+            deleteForOwner,
 
             /** The none account will permit no scopes. */
             seededNoneAccount,
