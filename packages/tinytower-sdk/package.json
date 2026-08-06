@@ -45,7 +45,6 @@
         "codegen": "build-utils prepare-v4",
         "coverage": "vitest --coverage",
         "generate": "node ./scripts/GenerateData.ts",
-        "fixtures": "node ./scripts/PullFixtures.ts",
         "test": "vitest"
     },
     "dependencies": {
