@@ -172,6 +172,24 @@ importers:
         specifier: 5.11.1
         version: 5.11.1
 
+  apps/discord-bot:
+    dependencies:
+      '@effect/platform-node':
+        specifier: 4.0.0-beta.102
+        version: 4.0.0-beta.102(effect@4.0.0-beta.102)
+      '@effect/sql-pg':
+        specifier: 4.0.0-beta.102
+        version: 4.0.0-beta.102(effect@4.0.0-beta.102)
+      effect:
+        specifier: 4.0.0-beta.102
+        version: 4.0.0-beta.102
+      effect-oidc:
+        specifier: 0.0.6
+        version: 0.0.6(effect@4.0.0-beta.102)
+      typescript:
+        specifier: 7.0.2
+        version: 7.0.2
+
   apps/doorman-clone:
     dependencies:
       '@effect/platform-node':
@@ -4117,6 +4135,16 @@ snapshots:
       '@types/ws': 8.18.1
       effect: 4.0.0-beta.102
       ws: 8.21.2
+    transitivePeerDependencies:
+      - bufferutil
+      - utf-8-validate
+
+  '@effect/platform-node@4.0.0-beta.102(effect@4.0.0-beta.102)':
+    dependencies:
+      '@effect/platform-node-shared': 4.0.0-beta.104(effect@4.0.0-beta.102)
+      effect: 4.0.0-beta.102
+      mime: 4.1.0
+      undici: 8.10.0
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
