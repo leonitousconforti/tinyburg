@@ -23,7 +23,7 @@
         "foldkit": "0.138.0",
         "ioredis": "5.11.1",
         "tailwindcss": "4.3.3",
-        "typescript": "6.0.3",
+        "typescript": "7.0.2",
         "vite": "8.1.5"
     }
 }
