@@ -2,7 +2,7 @@ import { Effect, Match, Option, Schema as S } from "effect";
 
 import type { Document, Html, HtmlBuilder } from "foldkit/html";
 
-import { AsyncData, Command, Dom, Navigation, type Runtime, Url } from "foldkit";
+import { AsyncData, Command, Dom, Navigation, Render, type Runtime, Url } from "foldkit";
 import { createLazy } from "foldkit/html";
 import { m } from "foldkit/message";
 import { evo } from "foldkit/struct";
@@ -83,9 +83,14 @@ const Navigate = Command.define("Navigate", {
         Effect.gen(function* () {
             yield* replace ? Navigation.replaceUrl(url) : Navigation.pushUrl(url);
             // Land like a fresh page load would: at the hash target when there
-            // is one, otherwise at the top. The top reset must be instant: the
-            // html-level `scroll-behavior: smooth` would otherwise animate it
-            // through the outgoing page while the new one takes over.
+            // is one, otherwise at the top. Waiting for the url change's own
+            // patch puts the reset after the incoming page exists rather than
+            // on the page still being looked at, which under a View Transition
+            // means it happens behind the outgoing snapshot instead of jerking
+            // the visitor to the top and only then swapping. The top reset must
+            // be instant: the html-level `scroll-behavior: smooth` would
+            // otherwise animate it through the transition.
+            yield* Render.afterCommit;
             const hash = new URL(url, window.location.origin).hash;
             yield* hash === ""
                 ? Effect.sync(() => window.scrollTo({ top: 0, behavior: "instant" }))
@@ -307,10 +312,10 @@ const pageView = (model: Model, h: HtmlBuilder<Message>): Html =>
     );
 
 /**
- * Keys the page wrapper so navigating remounts it, which is what makes the
- * `page-enter` animation replay for the incoming page. Gated pages render
- * empty until the session answer lands, so they stay keyed as pending and
- * remount (animating) when their real content first appears.
+ * Keys the page wrapper so navigating replaces it outright rather than patching
+ * one page's markup into another's shape. Gated pages render empty until the
+ * session answer lands, so they stay keyed as pending and are replaced when
+ * their real content first appears.
  */
 const pageKey = (model: Model): string =>
     requiresSession(model.route) && model.session._tag !== "SignedIn"
@@ -319,5 +324,65 @@ const pageKey = (model: Model): string =>
 
 export const view = (model: Model, h: HtmlBuilder<Message>): Document => ({
     title: routeTitle(model.route),
-    body: h.div([], [clouds(h), h.keyed("div")(pageKey(model), [h.Class("page-enter")], [pageView(model, h)])]),
+    body: h.div([], [clouds(h), h.keyed("div")(pageKey(model), [], [pageView(model, h)])]),
 });
+
+// VIEW TRANSITION
+
+/**
+ * How deep a route sits under the front page. Every page below the front page
+ * carries a back link, and this is the ladder those links walk back up: going
+ * somewhere deeper is a different move than coming back out, and the animation
+ * says which happened. The depths are stated rather than counted from the path
+ * because the url does not carry the hierarchy: /account is reached from
+ * /towers/@me despite sitting on one fewer path segment.
+ */
+const routeDepth = (route: AppRoute): number =>
+    Match.value(route).pipe(
+        Match.withReturnType<number>(),
+        Match.tagsExhaustive({
+            Home: () => 0,
+            About: () => 1,
+            Login: () => 1,
+            Privacy: () => 1,
+            Terms: () => 1,
+            Sponsors: () => 1,
+            Developers: () => 1,
+            TowerMe: () => 1,
+            NotFound: () => 1,
+            DeveloperApps: () => 2,
+            TowerLink: () => 2,
+            Account: () => 2,
+        })
+    );
+
+// Read live rather than sampled once: the visitor can turn the preference on
+// mid-session and the next navigation has to honor it.
+const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+/**
+ * Decides which renders animate. Only the ones that replace the whole page do:
+ * navigating between routes, and a gated page's content arriving to replace the
+ * blank it shows while the session answer is in flight. Everything else (linked
+ * towers landing, a wizard step, an account panel opening) is a detail inside a
+ * page the visitor is already reading, and cross-fading the document underneath
+ * it would read as lag rather than polish.
+ *
+ * Reduced motion opts out here rather than in CSS so no transition starts at
+ * all, which also spares the document the brief freeze one imposes.
+ */
+export const viewTransition: Runtime.ViewTransitionConfig<Model, Message> = ({ message, model, previousModel }) => {
+    if (prefersReducedMotion.matches) return false;
+
+    if (message._tag === "ChangedUrl") {
+        const descent = routeDepth(model.route) - routeDepth(previousModel.route);
+        return { types: [descent > 0 ? "forward" : descent < 0 ? "backward" : "sibling"] };
+    }
+
+    // The session answer is what turns a gated page from blank into its
+    // content. To the visitor that first paint is the page arriving, so it
+    // fades in like one instead of appearing between frames.
+    const revealed =
+        requiresSession(model.route) && previousModel.session._tag !== "SignedIn" && model.session._tag === "SignedIn";
+    return revealed ? { types: ["reveal"] } : false;
+};

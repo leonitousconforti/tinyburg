@@ -78,8 +78,11 @@
     }
 }
 
-/* Drifting cloud background, rendered once in the app shell */
+/* Drifting cloud background, rendered once in the app shell. Naming it lifts it
+   out of the page snapshot the route transition slides around, so the backdrop
+   holds still and only the page moves across it. */
 .clouds {
+    view-transition-name: clouds;
     position: fixed;
     top: 0;
     left: 0;
@@ -307,8 +310,52 @@
     }
 }
 
-.page-enter {
-    animation: page-enter 0.25s ease-out;
+/* Route changes animate through the View Transition API. The browser holds a
+   snapshot of the outgoing page while the incoming one renders, so there is no
+   frame with neither on screen and no height snap between them. `main.ts`
+   decides per navigation which type below applies. */
+::view-transition-old(root),
+::view-transition-new(root) {
+    /* Replacing the browser's default cross-fade wholesale: left in place, its
+       animation and `plus-lighter` blending compound with the rules below and
+       wash the page out mid-transition. */
+    animation: none;
+    mix-blend-mode: normal;
+}
+
+html:active-view-transition-type(forward)::view-transition-old(root) {
+    animation: page-leave-left 0.22s ease-in both;
+}
+
+html:active-view-transition-type(forward)::view-transition-new(root) {
+    animation: page-enter-right 0.28s ease-out both;
+}
+
+html:active-view-transition-type(backward)::view-transition-old(root) {
+    animation: page-leave-right 0.22s ease-in both;
+}
+
+html:active-view-transition-type(backward)::view-transition-new(root) {
+    animation: page-enter-left 0.28s ease-out both;
+}
+
+/* Moving between pages at the same depth has no direction to express, and
+   neither does a gated page's content replacing the blank it held while the
+   session answer was in flight. Both just fade. */
+html:active-view-transition-type(sibling)::view-transition-old(root),
+html:active-view-transition-type(reveal)::view-transition-old(root) {
+    animation: page-fade-out 0.18s ease-in both;
+}
+
+html:active-view-transition-type(sibling)::view-transition-new(root),
+html:active-view-transition-type(reveal)::view-transition-new(root) {
+    animation: page-enter 0.25s ease-out both;
+}
+
+/* The one pill that survives the change of page, slid between its old and new
+   position by the browser rather than faded out and back in. */
+.back-link {
+    view-transition-name: back-link;
 }
 
 @keyframes page-enter {
@@ -316,9 +363,39 @@
         opacity: 0;
         transform: translateY(0.75rem);
     }
+}
+
+@keyframes page-enter-right {
+    from {
+        opacity: 0;
+        transform: translateX(2rem);
+    }
+}
+
+@keyframes page-enter-left {
+    from {
+        opacity: 0;
+        transform: translateX(-2rem);
+    }
+}
+
+@keyframes page-leave-left {
     to {
-        opacity: 1;
-        transform: none;
+        opacity: 0;
+        transform: translateX(-1.5rem);
+    }
+}
+
+@keyframes page-leave-right {
+    to {
+        opacity: 0;
+        transform: translateX(1.5rem);
+    }
+}
+
+@keyframes page-fade-out {
+    to {
+        opacity: 0;
     }
 }
 
@@ -354,9 +431,9 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+    /* Route transitions opt out in `main.ts`, before one is ever started. */
     .cloud,
     .floor,
-    .page-enter,
     .step-enter-forward,
     .step-enter-backward {
         animation: none;
