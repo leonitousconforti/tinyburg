@@ -83,10 +83,12 @@ const Navigate = Command.define("Navigate", {
         Effect.gen(function* () {
             yield* replace ? Navigation.replaceUrl(url) : Navigation.pushUrl(url);
             // Land like a fresh page load would: at the hash target when there
-            // is one, otherwise at the top.
+            // is one, otherwise at the top. The top reset must be instant: the
+            // html-level `scroll-behavior: smooth` would otherwise animate it
+            // through the outgoing page while the new one takes over.
             const hash = new URL(url, window.location.origin).hash;
             yield* hash === ""
-                ? Effect.sync(() => window.scrollTo(0, 0))
+                ? Effect.sync(() => window.scrollTo({ top: 0, behavior: "instant" }))
                 : Dom.scrollIntoView(hash).pipe(Effect.catch(() => Effect.void));
             return CompletedNavigation();
         }),
@@ -304,7 +306,18 @@ const pageView = (model: Model, h: HtmlBuilder<Message>): Html =>
         })
     );
 
+/**
+ * Keys the page wrapper so navigating remounts it, which is what makes the
+ * `page-enter` animation replay for the incoming page. Gated pages render
+ * empty until the session answer lands, so they stay keyed as pending and
+ * remount (animating) when their real content first appears.
+ */
+const pageKey = (model: Model): string =>
+    requiresSession(model.route) && model.session._tag !== "SignedIn"
+        ? `${model.route._tag}#pending`
+        : model.route._tag;
+
 export const view = (model: Model, h: HtmlBuilder<Message>): Document => ({
     title: routeTitle(model.route),
-    body: h.div([], [clouds(h), pageView(model, h)]),
+    body: h.div([], [clouds(h), h.keyed("div")(pageKey(model), [h.Class("page-enter")], [pageView(model, h)])]),
 });

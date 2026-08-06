@@ -307,6 +307,21 @@
     }
 }
 
+.page-enter {
+    animation: page-enter 0.25s ease-out;
+}
+
+@keyframes page-enter {
+    from {
+        opacity: 0;
+        transform: translateY(0.75rem);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
 /* Link-a-tower wizard step transitions */
 .step-enter-forward {
     animation: slide-in-forward 0.25s ease-out;
@@ -341,6 +356,7 @@
 @media (prefers-reduced-motion: reduce) {
     .cloud,
     .floor,
+    .page-enter,
     .step-enter-forward,
     .step-enter-backward {
         animation: none;
