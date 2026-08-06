@@ -23,7 +23,7 @@
         "dist/**/*.d.ts.map"
     ],
     "type": "module",
-    "sideEffects": [],
+    "sideEffects": false,
     "exports": {
         "./package.json": "./package.json",
         ".": "./src/index.ts",
@@ -45,6 +45,7 @@
         "codegen": "build-utils prepare-v4",
         "coverage": "vitest --coverage",
         "generate": "node ./scripts/GenerateData.ts",
+        "fixtures": "node ./scripts/PullFixtures.ts",
         "test": "vitest"
     },
     "dependencies": {
@@ -58,7 +59,6 @@
         "@efffrida/frida-tools": "0.0.47",
         "@efffrida/gplayapi": "0.0.24",
         "@tinyburg/insight": "workspace:*",
-        "@types/pako": "2.0.4",
         "effect": "4.0.0-beta.102",
         "ioredis": "5.11.1",
         "vite": "8.1.5",

@@ -23,7 +23,7 @@
         "dist/**/*.d.ts.map"
     ],
     "type": "module",
-    "sideEffects": [],
+    "sideEffects": false,
     "exports": {
         "./package.json": "./package.json",
         ".": "./src/index.ts",
