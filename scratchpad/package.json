@@ -14,6 +14,6 @@
         "@efffrida/frida-tools": "0.0.47",
         "@efffrida/gplayapi": "0.0.24",
         "effect": "4.0.0-beta.102",
-        "ioredis": "5.11.1"
+        "ioredis": "6.0.0"
     }
 }

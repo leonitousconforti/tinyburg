@@ -60,7 +60,7 @@
         "@tinyburg/insight": "workspace:*",
         "@types/pako": "2.0.4",
         "effect": "4.0.0-beta.102",
-        "ioredis": "5.11.1",
+        "ioredis": "6.0.0",
         "vite": "8.1.5",
         "vitest": "4.1.10"
     },
