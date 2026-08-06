@@ -21,10 +21,10 @@
         "prepare": "effect-tsgo patch"
     },
     "devDependencies": {
-        "@babel/cli": "7.29.7",
-        "@babel/core": "7.29.7",
-        "@babel/plugin-transform-export-namespace-from": "7.29.7",
-        "@babel/plugin-transform-modules-commonjs": "7.29.7",
+        "@babel/cli": "8.0.4",
+        "@babel/core": "8.0.1",
+        "@babel/plugin-transform-export-namespace-from": "8.0.1",
+        "@babel/plugin-transform-modules-commonjs": "8.0.1",
         "@changesets/cli": "2.31.1",
         "@changesets/config": "3.1.4",
         "@effect/build-utils": "0.8.9",
