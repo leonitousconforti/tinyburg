@@ -44,7 +44,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     needs: [build]
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    # TEMPORARILY DISABLED: drop the `false &&` to re-enable deploys
+    if: false && github.ref == 'refs/heads/main' && github.event_name == 'push'
     steps:
       - name: Install doctl
         uses: digitalocean/action-doctl@3cb3953159719656269e044e0e24ca16dd2a690f # v2.5.2
@@ -60,7 +61,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     needs: [build]
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    # TEMPORARILY DISABLED: drop the `false &&` to re-enable deploys
+    if: false && github.ref == 'refs/heads/main' && github.event_name == 'push'
     steps:
       - name: Install doctl
         uses: digitalocean/action-doctl@3cb3953159719656269e044e0e24ca16dd2a690f # v2.5.2
@@ -76,7 +78,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     needs: [build]
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    # TEMPORARILY DISABLED: drop the `false &&` to re-enable deploys
+    if: false && github.ref == 'refs/heads/main' && github.event_name == 'push'
     steps:
       - name: Install doctl
         uses: digitalocean/action-doctl@3cb3953159719656269e044e0e24ca16dd2a690f # v2.5.2
@@ -92,7 +95,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     needs: [build]
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    # TEMPORARILY DISABLED: drop the `false &&` to re-enable deploys
+    if: false && github.ref == 'refs/heads/main' && github.event_name == 'push'
     steps:
       - name: Install doctl
         uses: digitalocean/action-doctl@3cb3953159719656269e044e0e24ca16dd2a690f # v2.5.2
