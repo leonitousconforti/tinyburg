@@ -53,11 +53,13 @@ export class TinyTowerAccount extends Model.Class<TinyTowerAccount>("TinyTowerAc
 
 export class PendingTinyTowerAccount extends Model.Class<PendingTinyTowerAccount>("PendingTinyTowerAccount")({
     id: Schema.String.check(Schema.isUUID()).pipe(Model.FieldExcept(["insert"])),
+    expiresAt: Schema.DateTimeUtcFromDate.pipe(Model.GeneratedByDb),
     userId: Schema.String.check(Schema.isUUID()),
+    createdAt: Model.DateTimeInsertFromDate,
+    burnBotPlayerId: PlayerIdSchema,
+    burnBotAuthKey: PlayerAuthKeySchema,
     playerId: PlayerIdSchema,
     playerEmail: PlayerEmailSchema,
-    createdAt: Model.DateTimeInsertFromDate,
-    expiresAt: Schema.DateTimeUtcFromDate.pipe(Model.GeneratedByDb),
 }) {}
 
 export class OAuthClient extends Model.Class<OAuthClient>("OAuthClient")({
