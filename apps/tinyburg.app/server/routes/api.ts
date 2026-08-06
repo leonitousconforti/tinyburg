@@ -4,12 +4,14 @@ import { HttpApiBuilder, HttpApiError } from "effect/unstable/httpapi";
 import { Model } from "effect/unstable/schema";
 
 import type { Session, User } from "../../domain/models.ts";
+import type { NimblebitConfig } from "@tinyburg/nimblebit-sdk";
 
 import { Oidc, ResourceServer, Jwt } from "effect-oidc";
 
 import { DevelopersRepository } from "../../domain/developers.ts";
 import { OidcRepository } from "../../domain/oidc.ts";
 import { SessionsRepository } from "../../domain/sessions.ts";
+import { TinyTowerAccountsRepository } from "../../domain/tinytower.ts";
 import { Api } from "../../shared/api.ts";
 import { CookiePolicy, maybeCurrentUser } from "../cookies.ts";
 import { OidcKeys } from "../keys.ts";
@@ -115,6 +117,16 @@ const AuthorizationLive = Layer.unwrap(
     )
 );
 
+const CurrentUserLive = HttpRouter.middleware();
+
+const link = Effect.fnUntraced(function* ({
+    playerId,
+    playerEmail,
+}: {
+    playerId: typeof NimblebitConfig.PlayerIdSchema.Type;
+    playerEmail: typeof NimblebitConfig.PlayerEmailSchema.Type;
+}) {});
+
 const LinkedTinyTowerAccountsGroupLive = HttpApiBuilder.group(
     Api,
     "LinkedTinyTowerAccountsGroup",
@@ -142,9 +154,30 @@ const TinyTowerGroupLive = HttpApiBuilder.group(
     })
 );
 
+// The machine-to-machine lookup behind the authproxy's admin gate: which
+// towers a user has linked, right now. Guarded by the `towers:lookup` scope,
+// which only arrives via a client's registered scope and the
+// client_credentials grant - a user's `towers` token cannot reach it.
+const LinkedTinyTowerAccountsLookupGroupLive = HttpApiBuilder.group(
+    Api,
+    "LinkedTinyTowerAccountsLookupGroup",
+    Effect.fnUntraced(function* (handlers) {
+        const towers = yield* TinyTowerAccountsRepository;
+        return handlers.handle("TinyburgLinkedTinyTowerAccountsLookup", ({ params }) =>
+            towers.listForUser(params.sub).pipe(
+                Effect.map((accounts) =>
+                    accounts.map((account) => ({ playerId: account.playerId, createdAt: account.createdAt }))
+                ),
+                Effect.orDie
+            )
+        );
+    })
+);
+
 export const ApiLive = HttpApiBuilder.layer(Api).pipe(
     Layer.provide(LinkedTinyTowerAccountsGroupLive),
     Layer.provide(TinyTowerGroupLive),
+    Layer.provide(LinkedTinyTowerAccountsLookupGroupLive),
     Layer.provide(AuthorizationLive),
     Layer.provide(SessionBearer.layer)
 );

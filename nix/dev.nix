@@ -32,6 +32,7 @@
             postgres = 54320;
             tinyburgApp = 3000;
             authproxy = 3001;
+            socialCircles = 3002;
             heartbeat = 3999;
           };
 
@@ -112,7 +113,16 @@
               namespace = "setup";
               command = ''
                 export PATH=${lib.makeBinPath [ nodejs ]}:$PATH
-                exec node scripts/dev/mkjwk.mjs
+
+                # `ConfigProvider.fromDotEnv()` reads `.env` from the working
+                # directory and dies with ENOENT when there is not one. The file
+                # is gitignored, so a fresh clone has never had it and an
+                # existing checkout can lose it at any time. An empty one is
+                # enough: the dev stack passes real configuration as environment
+                # variables, and this only has to exist to be read.
+                [ -f .env ] || : > .env
+
+                exec node scripts/mkjwk.mjs
               '';
             };
 
@@ -123,7 +133,7 @@
               command = ''
                 export PATH=${lib.makeBinPath [ nodejs ]}:$PATH
                 export PORT=${toString ports.heartbeat}
-                exec node scripts/dev/heartbeat-sink.mjs
+                exec node scripts/heartbeat-sink.mjs
               '';
               readiness_probe = tcpReady ports.heartbeat;
             };
@@ -183,7 +193,10 @@
                   TINYBURG_REDIRECT_URI = "http://localhost:${toString ports.authproxy}/auth/callback";
                 };
               };
-              depends_on."pg".condition = "process_healthy";
+              depends_on = {
+                "pg".condition = "process_healthy";
+                "dev-secrets".condition = "process_completed_successfully";
+              };
               readiness_probe = tcpReady ports.authproxy;
             };
 
@@ -193,13 +206,17 @@
                 entry = "apps/social-circles/index.ts";
                 env = {
                   DATABASE_URL = databaseUrl "social_circles";
+                  PORT = toString ports.socialCircles;
+                  HOST = "127.0.0.1";
                   HEARTBEAT_URL = "http://127.0.0.1:${toString ports.heartbeat}/social-circles";
                 };
               };
               depends_on = {
                 "pg".condition = "process_healthy";
+                "dev-secrets".condition = "process_completed_successfully";
                 "heartbeat-sink".condition = "process_healthy";
               };
+              readiness_probe = tcpReady ports.socialCircles;
             };
 
             # Runs once the tables exist, which is on first boot of each
@@ -209,7 +226,7 @@
               namespace = "setup";
               command = ''
                 export PATH=${lib.makeBinPath [ config.services.postgres.pg.package ]}:$PATH
-                exec bash scripts/dev/seed.sh
+                exec bash scripts/seed.sh
               '';
               environment = {
                 PGHOST = "127.0.0.1";

@@ -3,6 +3,7 @@ import { DateTime, Duration, Effect, Match, Option, Result, Schema as S } from "
 import type { Message as AppMessage } from "../main.ts";
 import type { Html, HtmlBuilder } from "foldkit/html";
 
+import { banner, card, dangerButton, primaryButton, quietButton, smallButton } from "@tinyburg/ui/Chrome";
 import { AsyncData, Command } from "foldkit";
 import { m } from "foldkit/message";
 import { evo } from "foldkit/struct";
@@ -10,7 +11,6 @@ import { evo } from "foldkit/struct";
 import { Account } from "../../domain/model.ts";
 import { ELEVATED_SCOPES, MAX_KEYS_PER_USER, SELF_SERVE_SCOPES } from "../../shared/scopes.ts";
 import { Self, type SessionInfo } from "../backend.ts";
-import { banner, card, dangerButton, primaryButton, quietButton, smallButton } from "../ui/chrome.ts";
 
 /**
  * One key as /self/keys lists it: the same account model the proxy's

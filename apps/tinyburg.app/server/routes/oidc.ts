@@ -1,12 +1,13 @@
 import type { SqlError } from "effect/unstable/sql";
 
-import { Effect, Layer, Option, Schema } from "effect";
+import { DateTime, Effect, Layer, Option, Schema } from "effect";
 import { HttpRouter, HttpServerRequest, HttpServerResponse } from "effect/unstable/http";
 
 import * as crypto from "node:crypto";
 
 import type { OAuthAuthorizationRequest, OAuthClient } from "../../domain/models.ts";
 
+import { TOWERS_READ_SCOPE, TOWERS_SCOPE, TOWERS_WRITE_SCOPE } from "@tinyburg/trading-sdk/Sdk";
 import { Jwt, Oidc } from "effect-oidc";
 
 import { DevelopersRepository } from "../../domain/developers.ts";
@@ -19,6 +20,25 @@ import { OidcKeys } from "../keys.ts";
 
 const ACCESS_TOKEN_TTL_SECONDS = 900;
 const ID_TOKEN_TTL_SECONDS = 900;
+
+/**
+ * How long a refresh token lives before the user has to sign in again.
+ *
+ * Long enough that a scheduled job is not evicted by a quiet fortnight, short
+ * enough that an abandoned grant does not linger forever. Rotation issues a
+ * fresh 30 days on every use, so an actively used grant is effectively
+ * indefinite while an idle one lapses.
+ */
+const REFRESH_TOKEN_TTL_SECONDS = 30 * 24 * 60 * 60;
+
+/**
+ * The scope a client asks for when it needs to act while the user is away.
+ * Without it the token endpoint issues no refresh token at all.
+ */
+const OFFLINE_ACCESS_SCOPE = "offline_access";
+
+/** Refresh tokens are opaque, like authorization codes, and stored only as a hash. */
+const newOpaqueToken = (): string => crypto.randomUUID() + crypto.randomUUID();
 
 const noStore = { "cache-control": "no-store", pragma: "no-cache" };
 
@@ -82,13 +102,53 @@ const issueAuthorizationCode = (
         return Option.map(approved, (row) => redirectTo(row.redirectUri, { code, state: row.state }));
     });
 
+/**
+ * Mints a refresh token and stores its hash, returning the token itself.
+ *
+ * `familyId` defaults to a new family, which is what a fresh authorization
+ * starts; a rotation passes the family it descends from so reuse detection can
+ * tear the whole lineage down at once.
+ */
+const issueRefreshToken = (options: {
+    readonly clientId: string;
+    readonly userId: string;
+    readonly scope: string;
+    readonly familyId?: string | undefined;
+}): Effect.Effect<string, SqlError.SqlError, OidcRepository> =>
+    Effect.gen(function* () {
+        const token = newOpaqueToken();
+        const tokenHash = yield* sha256(token);
+        yield* OidcRepository.use((repo) =>
+            repo.createRefreshToken({
+                tokenHash,
+                clientId: options.clientId,
+                userId: options.userId,
+                scope: options.scope,
+                familyId: options.familyId ?? crypto.randomUUID(),
+                expiresAt: new Date(Date.now() + REFRESH_TOKEN_TTL_SECONDS * 1000),
+            })
+        );
+        return token;
+    });
+
 const escapeHtml = (value: string): string =>
     value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;");
 
+/**
+ * What each scope means, in the second person, for the consent screen.
+ *
+ * These are the words a player decides on, so they say what the application
+ * gains rather than naming the endpoints it unlocks. `offline_access` in
+ * particular has to be honest that the application keeps working once the
+ * browser is closed, because that is the part nobody expects.
+ */
 const scopeDescriptions: Record<string, string> = {
     openid: "Confirm your Tinyburg identity",
     profile: "See your display name and avatar",
     towers: "See and manage the TinyTower saves you have linked",
+    "towers:read": "See the TinyTower saves you have linked, without changing them",
+    "towers:write": "Change the TinyTower saves you have linked, including uploading saves and entering raffles",
+    offline_access: "Keep doing this in the background, even when you are not using it",
 };
 
 /**
@@ -313,6 +373,15 @@ const token = Effect.gen(function* () {
                   )
                 : Option.none<string>();
 
+            /**
+             * A refresh token only exists if the user approved `offline_access`.
+             * Handing one out unasked would quietly convert every sign-in into a
+             * standing grant.
+             */
+            const refreshToken = scopes.includes(OFFLINE_ACCESS_SCOPE)
+                ? Option.some(yield* issueRefreshToken({ clientId: client.id, userId: user.id, scope: grant.scope }))
+                : Option.none<string>();
+
             return yield* HttpServerResponse.json(
                 {
                     access_token: accessToken,
@@ -322,6 +391,10 @@ const token = Effect.gen(function* () {
                     ...Option.match(idToken, {
                         onNone: () => ({}),
                         onSome: (id_token) => ({ id_token }),
+                    }),
+                    ...Option.match(refreshToken, {
+                        onNone: () => ({}),
+                        onSome: (refresh_token) => ({ refresh_token }),
                     }),
                 },
                 { headers: noStore }
@@ -355,9 +428,97 @@ const token = Effect.gen(function* () {
             );
         }
         case "refresh_token": {
-            // Public clients re-authorize silently against the provider
-            // session instead, which keeps no refresh token in the browser.
-            return yield* tokenError(400, "unsupported_grant_type");
+            const tokenHash = yield* sha256(body.refresh_token);
+            const maybeStored = yield* OidcRepository.use((repo) => repo.findRefreshToken(tokenHash));
+            if (Option.isNone(maybeStored)) return yield* tokenError(400, "invalid_grant");
+            const stored = maybeStored.value;
+
+            // A token is only valid for the client it was minted for, so a
+            // leaked token cannot be spent by a different application.
+            if (stored.clientId !== client.id) return yield* tokenError(400, "invalid_grant");
+
+            // The family is already torn down; nothing to distinguish here.
+            if (Option.isSome(stored.revokedAt)) return yield* tokenError(400, "invalid_grant");
+
+            /**
+             * Reuse. Either the real client replayed a token it already spent or
+             * somebody else is spending a stolen one, and there is no way to
+             * tell which, so the whole lineage goes. This is the entire reason
+             * rotation is worth the bookkeeping.
+             */
+            if (Option.isSome(stored.consumedAt)) {
+                const revoked = yield* OidcRepository.use((repo) => repo.revokeRefreshTokenFamily(stored.familyId));
+                yield* Effect.logWarning(
+                    `refresh token reuse detected for client ${client.id}, revoked ${revoked} tokens in family ${stored.familyId}`
+                );
+                return yield* tokenError(400, "invalid_grant");
+            }
+
+            // Plain expiry is not evidence of theft, so the family survives and
+            // the user simply signs in again.
+            const now = yield* DateTime.now;
+            if (DateTime.isGreaterThanOrEqualTo(now, stored.expiresAt)) {
+                return yield* tokenError(400, "invalid_grant");
+            }
+
+            /**
+             * The consume is the real gate: it only updates a row that is still
+             * live, so two simultaneous refreshes with the same token cannot
+             * both win. Losing here means somebody else spent it in the last
+             * few milliseconds, which is the same signal as reuse above.
+             */
+            const consumed = yield* OidcRepository.use((repo) => repo.consumeRefreshToken(tokenHash));
+            if (!consumed) {
+                const revoked = yield* OidcRepository.use((repo) => repo.revokeRefreshTokenFamily(stored.familyId));
+                yield* Effect.logWarning(
+                    `concurrent refresh token use for client ${client.id}, revoked ${revoked} tokens in family ${stored.familyId}`
+                );
+                return yield* tokenError(400, "invalid_grant");
+            }
+
+            /**
+             * The new access token carries exactly the scope the user approved.
+             *
+             * RFC 6749 lets a refresh request narrow this, but the token request
+             * schema carries no `scope` on the refresh grant, so there is
+             * nothing to narrow with. Reading the scope off the stored row
+             * rather than the request is also the stronger guarantee: a refresh
+             * cannot widen a grant even if that field appears later.
+             */
+            const grantedScope = stored.scope;
+
+            const maybeUser = yield* UsersRepository.use((repo) => repo.findUserById(stored.userId));
+            if (Option.isNone(maybeUser)) return yield* tokenError(400, "invalid_grant");
+            const user = maybeUser.value;
+
+            const accessToken = yield* Oidc.issueAccessToken({
+                privateJwk: keys.privateJwk,
+                issuer: keys.issuer,
+                subject: user.id,
+                audience: keys.issuer,
+                clientId: client.id,
+                scope: grantedScope,
+                ttlSeconds: ACCESS_TOKEN_TTL_SECONDS,
+            });
+
+            // The replacement carries the same grant and stays in the family.
+            const rotated = yield* issueRefreshToken({
+                clientId: client.id,
+                userId: user.id,
+                scope: grantedScope,
+                familyId: stored.familyId,
+            });
+
+            return yield* HttpServerResponse.json(
+                {
+                    access_token: accessToken,
+                    token_type: "Bearer",
+                    expires_in: ACCESS_TOKEN_TTL_SECONDS,
+                    scope: grantedScope,
+                    refresh_token: rotated,
+                },
+                { headers: noStore }
+            );
         }
     }
 });
@@ -473,7 +634,26 @@ const revoke = Effect.gen(function* () {
     return HttpServerResponse.empty({ status: 200, headers: noStore });
 });
 
-const discovery = Effect.flatMap(OidcKeys, (keys) => HttpServerResponse.json(Oidc.makeDiscoveryDocument(keys.issuer)));
+/**
+ * The discovery document, with the scopes this provider actually supports.
+ *
+ * `makeDiscoveryDocument` only advertises `openid` and `profile`, which has been
+ * wrong since `towers` was added: a client reading discovery to decide what to
+ * ask for would never learn the scope it needs.
+ */
+const discovery = Effect.flatMap(OidcKeys, (keys) =>
+    HttpServerResponse.json({
+        ...Oidc.makeDiscoveryDocument(keys.issuer),
+        scopes_supported: [
+            "openid",
+            "profile",
+            OFFLINE_ACCESS_SCOPE,
+            TOWERS_SCOPE,
+            TOWERS_READ_SCOPE,
+            TOWERS_WRITE_SCOPE,
+        ],
+    })
+);
 
 const jwks = Effect.gen(function* () {
     const keys = yield* OidcKeys;

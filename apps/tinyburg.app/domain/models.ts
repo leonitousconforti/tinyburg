@@ -85,3 +85,24 @@ export class OAuthAuthorizationRequest extends Model.Class<OAuthAuthorizationReq
     createdAt: Model.DateTimeInsertFromDate,
     expiresAt: Schema.DateTimeUtcFromDate.pipe(Model.GeneratedByDb),
 }) {}
+
+/**
+ * A refresh token, stored as a hash.
+ *
+ * `familyId` links every token descended from one authorization. Presenting a
+ * token that was already consumed revokes the whole family, which is how a
+ * stolen token gets caught: the thief and the legitimate client cannot both
+ * spend the same one.
+ */
+export class RefreshToken extends Model.Class<RefreshToken>("RefreshToken")({
+    id: Schema.String.check(Schema.isUUID()).pipe(Model.FieldExcept(["insert"])),
+    tokenHash: Model.Sensitive(Schema.String),
+    clientId: Schema.String.check(Schema.isUUID()),
+    userId: Schema.String.check(Schema.isUUID()),
+    scope: Schema.String,
+    familyId: Schema.String.check(Schema.isUUID()),
+    issuedAt: Model.DateTimeInsertFromDate,
+    expiresAt: Schema.DateTimeUtcFromDate,
+    consumedAt: Schema.OptionFromNullishOr(Schema.DateTimeUtcFromDate, { onNoneEncoding: null }),
+    revokedAt: Schema.OptionFromNullishOr(Schema.DateTimeUtcFromDate, { onNoneEncoding: null }),
+}) {}

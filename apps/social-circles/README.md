@@ -71,12 +71,28 @@ node --env-file=.env index.ts
 
 ## Status
 
-The dashboard, the sign-in round trip, the workflows, and the cluster all run. What is not yet possible is **unattended crawling**, and it is blocked on two things at tinyburg.app:
+The dashboard, the sign-in round trip, the workflows, the cluster, and unattended crawling all work. tinyburg.app now issues refresh tokens for the `offline_access` scope, so a scheduled crawl can act for a participant who is not at the keyboard.
 
-1. **`offline_access` / refresh tokens.** The provider's token endpoint rejects the `refresh_token` grant and access tokens live 900 seconds. The interactive dashboard works anyway, because a signed-in visitor's session carries a live access token, but a crawl running hours after they closed the tab cannot get one. `services/towers.ts` is written against the intended shape and surfaces the gap as `TowerGrantUnusable` rather than papering over it.
-2. **Scope granularity.** The `towers` scope currently covers pushing saves and entering raffles as well as reading. A study should not hold write access to anyone's tower; this needs splitting, ideally into a scope that returns a friends list rather than a whole save, since the study has no business reading anyone's bitizens.
+The study asks for `openid profile towers:read offline_access`. `towers:read` is the read half of the old `towers` scope, split so a research project cannot also overwrite somebody's tower.
 
-Until (1) lands, enrolling works and the first crawl runs while the visitor is present, but the scheduled passes will report that the grant is unusable.
+Refresh tokens are **rotated** at the provider, with reuse detection: each one is good for exactly one exchange, and presenting a spent token revokes the whole family. `services/towers.ts` therefore stores the replacement on every refresh, and marks the grant invalid if it cannot, since a lost replacement is an unrecoverable grant.
+
+What is still worth narrowing is upstream: `towers:read` returns a whole save when the study only ever wants the friends list. A `towers:friends` scope would be the honest grant to ask for.
+
+### Registering the client at tinyburg.app
+
+```sql
+INSERT INTO oauth_clients (name, secret_hash, scope, redirect_uris)
+VALUES (
+    'Social Circles',
+    NULL,                                                   -- public client, PKCE carries the proof
+    'openid profile towers:read offline_access',
+    ARRAY['https://<social-circles-host>/auth/callback']
+)
+RETURNING id;   -- becomes TINYBURG_CLIENT_ID
+```
+
+A client may only request scopes it is registered for, so `offline_access` has to appear here or no refresh token is ever issued.
 
 ## Datasets
 

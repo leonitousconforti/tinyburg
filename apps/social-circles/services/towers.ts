@@ -8,19 +8,20 @@
  * must be your in-game friend" with a scoped, revocable, auditable grant, and
  * removes the friend-list cap that put a hard ceiling on the old design.
  *
- * ## Upstream gaps
+ * ## Tokens
  *
- * Two things are missing at the provider, and this module is written against
- * the intended shape so the gaps stay visible instead of being worked around:
+ * Two tokens with two jobs. The browser session carries a short-lived access
+ * token, which is what the dashboard uses while the visitor is present. The
+ * `tower_grants` row holds a refresh token, which is what the scheduled crawl
+ * exchanges hours later.
  *
- * 1. `refresh_token` is rejected by tinyburg.app's token endpoint with
- *    `unsupported_grant_type`, and access tokens live 900 seconds. A crawl that
- *    runs hours after the user closed the tab therefore cannot get a token yet.
- *    {@link TowerGrantUnusable} is what that surfaces as.
- * 2. The `towers` scope currently covers pushing saves and entering raffles as
- *    well as reading. A study has no business holding write access to anyone's
- *    tower, so this client asks for the narrowest scope it can and should be
- *    narrowed further once the provider splits it.
+ * The provider rotates refresh tokens and detects reuse, so a stored token is
+ * good for exactly one exchange. Losing the replacement means losing the grant,
+ * which is why {@link GrantsRepository.upsert} overwrites in place rather than
+ * accumulating rows.
+ *
+ * The remaining narrowing worth doing is upstream: `towers:read` still returns a
+ * whole save when the study only ever wants the friends list.
  */
 
 import { Config, Context, Effect, Layer, Option, Redacted, Schema } from "effect";
@@ -32,18 +33,18 @@ import type { PlayerId } from "../domain/model.ts";
 import { PlayerIdSchema } from "@tinyburg/nimblebit-sdk/NimblebitConfig";
 import { Api } from "@tinyburg/trading-sdk/Sdk";
 
-import { unseal } from "../crypto.ts";
+import { seal, unseal } from "../crypto.ts";
 import { GrantsRepository } from "../domain/grants.ts";
 
 /**
  * The scope the study asks for.
  *
- * Read-only is the intent. Once tinyburg.app splits `towers`, this should
- * become the narrowest read scope available, ideally one that returns a friends
- * list rather than a whole save: the study needs the edges, not anyone's
+ * `towers:read` is as narrow as the provider currently goes. It still returns a
+ * whole save when the study only wants the friends list, so there is room for a
+ * narrower `towers:friends` later; the study has no business reading anyone's
  * bitizens or coin balance.
  */
-export const REQUIRED_SCOPE = "openid towers offline_access";
+export const REQUIRED_SCOPE = "openid towers:read offline_access";
 
 /**
  * The stored grant cannot currently be turned into an access token.
@@ -180,6 +181,36 @@ export class TinyburgTowers extends Context.Service<TinyburgTowers>()(
                             })
                     )
                 );
+
+                /**
+                 * The provider rotates: the token we just spent is now dead and
+                 * the response carries its replacement. Storing it is not
+                 * optional bookkeeping, it is the difference between a grant
+                 * that keeps working and one that trips reuse detection on the
+                 * very next crawl and gets its whole family revoked.
+                 *
+                 * If the store fails we are in the worst spot available (the old
+                 * token is spent, the new one is only in memory), so the grant is
+                 * marked invalid rather than left to fail confusingly later. The
+                 * user reconnects and gets a fresh family.
+                 */
+                if (token.refresh_token !== undefined) {
+                    yield* seal(token.refresh_token).pipe(
+                        Effect.flatMap((ciphertext) =>
+                            grants.upsert({
+                                tinyburgUserId,
+                                refreshTokenCiphertext: ciphertext,
+                                scope: token.scope ?? grant.value.scope,
+                            })
+                        ),
+                        Effect.catchCause((cause) =>
+                            Effect.andThen(
+                                Effect.logError("could not store a rotated refresh token, invalidating grant", cause),
+                                Effect.ignore(grants.invalidate(tinyburgUserId))
+                            )
+                        )
+                    );
+                }
 
                 return token.access_token;
             });

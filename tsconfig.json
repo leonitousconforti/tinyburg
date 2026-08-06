@@ -9,6 +9,7 @@
         { "path": "packages/nimblebit-sdk" },
         { "path": "packages/tinytower-sdk" },
         { "path": "packages/trading-sdk" },
+        { "path": "packages/ui" },
         { "path": "apps/archivist" },
         { "path": "apps/authproxy" },
         { "path": "apps/auto-gold-bits" },

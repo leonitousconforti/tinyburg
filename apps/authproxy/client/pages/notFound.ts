@@ -1,6 +1,6 @@
 import type { Html, HtmlBuilder } from "foldkit/html";
 
-import { appBackLink, card } from "../ui/chrome.ts";
+import { appBackLink, card } from "@tinyburg/ui/Chrome";
 
 export const notFoundView = <M>(h: HtmlBuilder<M>): Html =>
     h.div(

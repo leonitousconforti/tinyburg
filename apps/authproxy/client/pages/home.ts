@@ -3,8 +3,9 @@ import { Option } from "effect";
 import type { SessionState } from "../backend.ts";
 import type { Html, HtmlBuilder } from "foldkit/html";
 
+import { card, primaryButton } from "@tinyburg/ui/Chrome";
+
 import { loginHref } from "../routes.ts";
-import { card, primaryButton } from "../ui/chrome.ts";
 
 const codeLine = <M>(h: HtmlBuilder<M>, text: string): Html =>
     h.code(

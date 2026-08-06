@@ -2,8 +2,10 @@ import { Option } from "effect";
 
 import type { Html, HtmlBuilder } from "foldkit/html";
 
+import { appBackLink, card } from "@tinyburg/ui/Chrome";
+import { towerIcon } from "@tinyburg/ui/Icons";
+
 import { startLoginHref } from "../routes.ts";
-import { appBackLink, card, towerIcon } from "../ui/chrome.ts";
 
 /**
  * Sign in is a server round trip that lands back here with `?error=` when it

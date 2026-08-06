@@ -3,6 +3,7 @@ import { Duration, Effect, Match, Option, Result, Schema as S } from "effect";
 import type { Message as AppMessage } from "../main.ts";
 import type { Html, HtmlBuilder } from "foldkit/html";
 
+import { banner, card, dangerButton, primaryButton, quietButton, smallButton } from "@tinyburg/ui/Chrome";
 import { AsyncData, Command } from "foldkit";
 import { m } from "foldkit/message";
 import { evo } from "foldkit/struct";
@@ -11,7 +12,6 @@ import { Account } from "../../domain/model.ts";
 import { Session } from "../../domain/sessions.ts";
 import { ELEVATED_SCOPES, SELF_SERVE_SCOPES } from "../../shared/scopes.ts";
 import { Self } from "../backend.ts";
-import { banner, card, dangerButton, primaryButton, quietButton, smallButton } from "../ui/chrome.ts";
 
 type Key = typeof Account.json.Type;
 

@@ -43,14 +43,14 @@ const CODE_VERIFIER_COOKIE_NAME = "social_circles_oauth_code_verifier";
 const RETURN_TO_COOKIE_NAME = "social_circles_oauth_return_to";
 
 /**
- * `towers` is what lets the study read a friends list; `offline_access` is what
- * would let it keep doing so on a schedule.
+ * `towers:read` lets the study read a friends list; `offline_access` lets it
+ * keep doing so on a schedule.
  *
- * The provider does not implement `offline_access` yet, so asking for it is
- * currently a no-op that costs nothing and starts working the day it lands.
- * Everything interactive works without it.
+ * Read-only is the whole point of asking for `towers:read` rather than the
+ * older `towers`: a research project has no business being able to overwrite
+ * somebody's tower, and the consent screen now says so in as many words.
  */
-const SCOPES = ["openid", "profile", "towers", "offline_access"];
+const SCOPES = ["openid", "profile", "towers:read", "offline_access"];
 
 /** Where a fresh sign-in lands when nothing better was asked for. */
 const HOME_AFTER_LOGIN = "/towers";

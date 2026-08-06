@@ -40,6 +40,11 @@ Nothing else is required. The databases are created on first start, each service
 runs its own migrations as part of its layer stack, the provider's signing key is
 generated into `.dev/oidc.jwk`, and the seed runs once the services are up.
 
+An empty root `.env` is created if one is missing. That file is gitignored and
+unrelated to `.env.dev`, but `ConfigProvider.fromDotEnv()` dies with ENOENT
+rather than treating an absent file as empty, so a checkout without one cannot
+boot tinyburg.app at all.
+
 ## What runs
 
 | Process              | Port  | Notes                                              |
@@ -49,7 +54,7 @@ generated into `.dev/oidc.jwk`, and the seed runs once the services are up.
 | `tinyburg-app-client`| .     | `vite build --watch` into `dist/client`            |
 | `authproxy`          | 3001  | A relying party of `tinyburg-app`, not of production |
 | `authproxy-client`   | .     | `vite build --watch` into `dist/client`            |
-| `social-circles`     | .     | No http server; cluster, crons and workflows        |
+| `social-circles`     | 3002  | Plus the cluster, crons and workflows               |
 | `heartbeat-sink`     | 3999  | Stands in for the uptime monitor                    |
 | `auto-gold-bits`     | .     | Disabled by default, see below                      |
 | `doorman-clone`      | .     | Disabled by default, see below                      |
@@ -59,7 +64,7 @@ a file in `packages/` restarts whichever services import it.
 
 ## What the seed does
 
-`scripts/dev/seed.sh` is idempotent and re-runs on every start. It exists mostly
+`scripts/seed.sh` is idempotent and re-runs on every start. It exists mostly
 to remove a manual step: registering the authproxy as an OAuth client at
 tinyburg.app is otherwise a hand-run `INSERT ... RETURNING id` whose generated id
 has to be pasted into the proxy's configuration. Seeding it under a fixed id lets
@@ -89,5 +94,5 @@ does not break when those are refactored.
   unreachable. Making that endpoint a config with its present value as the
   default is what would earn it a place in the tree.
 - **New files must be `git add`ed.** Nix only sees tracked files, so a brand new
-  file under `nix/` or `scripts/dev/` is invisible to `nix run` until at least
+  file under `nix/` or `scripts/` is invisible to `nix run` until at least
   `git add -N` has been run on it.
