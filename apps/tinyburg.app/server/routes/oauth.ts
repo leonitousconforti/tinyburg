@@ -1,9 +1,17 @@
 import type { SqlError } from "effect/unstable/sql";
 
-import { Config, DateTime, Effect, Layer, Option, Redacted, Result, Schema } from "effect";
-import { type Cookies, HttpRouter, HttpServerRequest, HttpServerResponse, Url } from "effect/unstable/http";
+import { Config, DateTime, Effect, Layer, Option, Redacted, Ref, Result, Schema } from "effect";
+import {
+    type Cookies,
+    HttpClient,
+    type HttpClientError,
+    HttpRouter,
+    HttpServerRequest,
+    HttpServerResponse,
+    Url,
+} from "effect/unstable/http";
 
-import { Oidc } from "effect-oidc";
+import { type Jwt, Oidc } from "effect-oidc";
 
 import { SessionsRepository } from "../../domain/sessions.ts";
 import { UsersRepository } from "../../domain/users.ts";
@@ -29,6 +37,11 @@ interface OAuthProvider {
 
 interface OAuthProviderConfigRealized extends Omit<OAuthProvider, "config"> {
     readonly config: Config.Success<OAuthProvider["config"]>;
+    readonly jwks: Effect.Effect<
+        Schema.Schema.Type<typeof Jwt.JwksSchema>,
+        Schema.SchemaError | HttpClientError.HttpClientError,
+        never
+    >;
 }
 
 const google = {
@@ -300,7 +313,7 @@ const callback = (provider: OAuthProviderConfigRealized) =>
         }
 
         // Verify the ID token and extract user information
-        const maybeClaims = yield* Oidc.fetchJwks(provider.config.jwksUri).pipe(
+        const maybeClaims = yield* provider.jwks.pipe(
             Effect.flatMap((jwks) =>
                 Oidc.verifyIdToken({
                     jwks,
@@ -402,15 +415,38 @@ const callback = (provider: OAuthProviderConfigRealized) =>
 export const OAuthRoutesLive = Effect.gen(function* () {
     const googleConfig = yield* google.config;
     const discordConfig = yield* discord.config;
+    const httpClient = yield* HttpClient.HttpClient;
+
+    const cachedJwks = (jwksUri: string) =>
+        Effect.flatMap(Ref.make(Option.none<Schema.Schema.Type<typeof Jwt.JwksSchema>>()), (lastGood) =>
+            Oidc.fetchJwks(jwksUri).pipe(
+                Effect.provideService(HttpClient.HttpClient, httpClient),
+                Effect.tap((jwks) => Ref.set(lastGood, Option.some(jwks))),
+                Effect.catch((error) =>
+                    Ref.get(lastGood).pipe(
+                        Effect.flatMap(
+                            Option.match({
+                                onNone: () => Effect.fail(error),
+                                onSome: Effect.succeed,
+                            })
+                        )
+                    )
+                ),
+                Effect.cachedInvalidateWithTTL("10 minutes"),
+                Effect.map(([cached, invalidate]) => Effect.tapError(cached, () => invalidate))
+            )
+        );
 
     const googleRealized: OAuthProviderConfigRealized = {
         ...google,
         config: googleConfig,
+        jwks: yield* cachedJwks(googleConfig.jwksUri),
     };
 
     const discordRealized: OAuthProviderConfigRealized = {
         ...discord,
         config: discordConfig,
+        jwks: yield* cachedJwks(discordConfig.jwksUri),
     };
 
     return Layer.mergeAll(
