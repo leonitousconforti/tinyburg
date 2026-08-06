@@ -108,12 +108,27 @@ importers:
 
   apps/authproxy:
     dependencies:
+      '@effect/platform-browser':
+        specifier: 4.0.0-beta.102
+        version: 4.0.0-beta.102(effect@4.0.0-beta.102)
       '@effect/platform-node':
         specifier: 4.0.0-beta.102
         version: 4.0.0-beta.102(effect@4.0.0-beta.102)(ioredis@5.11.1)
       '@effect/sql-pg':
         specifier: 4.0.0-beta.102
         version: 4.0.0-beta.102(effect@4.0.0-beta.102)
+      '@foldkit/vite-plugin':
+        specifier: 0.11.3
+        version: 0.11.3(effect@4.0.0-beta.102)(foldkit@0.138.0(@effect/platform-browser@4.0.0-beta.102(effect@4.0.0-beta.102))(effect@4.0.0-beta.102))(vite@8.1.5)
+      '@fontsource/press-start-2p':
+        specifier: 5.3.0
+        version: 5.3.0
+      '@fontsource/vt323':
+        specifier: 5.3.0
+        version: 5.3.0
+      '@tailwindcss/vite':
+        specifier: 4.3.3
+        version: 4.3.3(vite@8.1.5)
       '@tinyburg/nimblebit-sdk':
         specifier: workspace:*
         version: link:../../packages/nimblebit-sdk
@@ -123,9 +138,24 @@ importers:
       effect:
         specifier: 4.0.0-beta.102
         version: 4.0.0-beta.102
+      effect-oidc:
+        specifier: 0.0.6
+        version: 0.0.6(effect@4.0.0-beta.102)
+      foldkit:
+        specifier: 0.138.0
+        version: 0.138.0(@effect/platform-browser@4.0.0-beta.102(effect@4.0.0-beta.102))(effect@4.0.0-beta.102)
       ioredis:
         specifier: 5.11.1
         version: 5.11.1
+      tailwindcss:
+        specifier: 4.3.3
+        version: 4.3.3
+      typescript:
+        specifier: 7.0.2
+        version: 7.0.2
+      vite:
+        specifier: 8.1.5
+        version: 8.1.5
 
   apps/auto-gold-bits:
     dependencies:
@@ -177,27 +207,57 @@ importers:
 
   apps/social-circles:
     dependencies:
+      '@effect/platform-browser':
+        specifier: 4.0.0-beta.102
+        version: 4.0.0-beta.102(effect@4.0.0-beta.102)
       '@effect/platform-node':
         specifier: 4.0.0-beta.102
         version: 4.0.0-beta.102(effect@4.0.0-beta.102)(ioredis@5.11.1)
       '@effect/sql-pg':
         specifier: 4.0.0-beta.102
         version: 4.0.0-beta.102(effect@4.0.0-beta.102)
+      '@foldkit/vite-plugin':
+        specifier: 0.11.3
+        version: 0.11.3(effect@4.0.0-beta.102)(foldkit@0.138.0(@effect/platform-browser@4.0.0-beta.102(effect@4.0.0-beta.102))(effect@4.0.0-beta.102))(vite@8.1.5)
+      '@fontsource/press-start-2p':
+        specifier: 5.3.0
+        version: 5.3.0
+      '@fontsource/vt323':
+        specifier: 5.3.0
+        version: 5.3.0
+      '@tailwindcss/vite':
+        specifier: 4.3.3
+        version: 4.3.3(vite@8.1.5)
       '@tinyburg/nimblebit-sdk':
         specifier: workspace:*
         version: link:../../packages/nimblebit-sdk
       '@tinyburg/tinytower-sdk':
         specifier: workspace:*
         version: link:../../packages/tinytower-sdk
+      '@tinyburg/trading-sdk':
+        specifier: workspace:*
+        version: link:../../packages/trading-sdk
       effect:
         specifier: 4.0.0-beta.102
         version: 4.0.0-beta.102
       effect-oidc:
         specifier: 0.0.6
         version: 0.0.6(effect@4.0.0-beta.102)
+      foldkit:
+        specifier: 0.138.0
+        version: 0.138.0(@effect/platform-browser@4.0.0-beta.102(effect@4.0.0-beta.102))(effect@4.0.0-beta.102)
       ioredis:
         specifier: 5.11.1
         version: 5.11.1
+      tailwindcss:
+        specifier: 4.3.3
+        version: 4.3.3
+      typescript:
+        specifier: 7.0.2
+        version: 7.0.2
+      vite:
+        specifier: 8.1.5
+        version: 8.1.5
 
   apps/tinyburg.app:
     dependencies:
