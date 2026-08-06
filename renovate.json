@@ -15,6 +15,13 @@
     "nix": {
         "enabled": true
     },
+    "toolSettings": {
+        "nodeMaxMemory": 1024
+    },
+    "env": {
+        "PNPM_WORKERS": "2",
+        "PNPM_MAX_WORKERS": "2"
+    },
     "lockFileMaintenance": {
         "enabled": true,
         "schedule": ["before 5am on monday"],
