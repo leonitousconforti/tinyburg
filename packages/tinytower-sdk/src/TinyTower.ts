@@ -303,7 +303,9 @@ export const device_verifyDevice = Effect.fn("device_verifyDevice")(function* ({
  */
 export const device_registerEmail = Effect.fn("device_registerEmail")(function* ({
     playerEmail,
-}: Schema.Schema.Type<typeof NimblebitConfig.UnauthenticatedPlayerSchema>) {
+}: {
+    playerEmail: typeof NimblebitConfig.PlayerEmailSchema.Type;
+}) {
     const nimblebitAuth = yield* NimblebitAuth.NimblebitAuth;
     const httpClient = yield* HttpClient.HttpClient;
 
