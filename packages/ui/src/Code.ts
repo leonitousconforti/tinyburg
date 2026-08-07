@@ -224,9 +224,7 @@ export const codeBlock = <M>(h: HtmlBuilder<M>, language: Language, source: stri
             h.code(
                 [],
                 highlight(language, source).map((token) =>
-                    token.kind === "plain"
-                        ? token.text
-                        : h.span([h.Class(tokenClass[token.kind])], [token.text])
+                    token.kind === "plain" ? token.text : h.span([h.Class(tokenClass[token.kind])], [token.text])
                 )
             ),
         ]

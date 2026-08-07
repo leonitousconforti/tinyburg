@@ -4,7 +4,6 @@ import { HttpApiBuilder, HttpApiError } from "effect/unstable/httpapi";
 import { Model } from "effect/unstable/schema";
 
 import type { Session, User } from "../../domain/models.ts";
-import type { NimblebitConfig } from "@tinyburg/nimblebit-sdk";
 
 import { Oidc, ResourceServer, Jwt } from "effect-oidc";
 
@@ -116,16 +115,6 @@ const AuthorizationLive = Layer.unwrap(
         })
     )
 );
-
-const CurrentUserLive = HttpRouter.middleware();
-
-const link = Effect.fnUntraced(function* ({
-    playerId,
-    playerEmail,
-}: {
-    playerId: typeof NimblebitConfig.PlayerIdSchema.Type;
-    playerEmail: typeof NimblebitConfig.PlayerEmailSchema.Type;
-}) {});
 
 const LinkedTinyTowerAccountsGroupLive = HttpApiBuilder.group(
     Api,

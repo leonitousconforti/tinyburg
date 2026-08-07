@@ -112,8 +112,7 @@ Registers an email address to a players Nimblebit cloud sync account.
 
 ```ts
 declare const device_registerEmail: (args_0: {
-  readonly playerEmail: Redacted.Redacted<string> & Brand<"PlayerEmail">
-  readonly playerId?: (string & Brand<"PlayerId">) | undefined
+  playerEmail: typeof NimblebitConfig.PlayerEmailSchema.Type
 }) => Effect.Effect<
   "NewDevice" | "NewEmail",
   | Schema.SchemaError
@@ -183,7 +182,7 @@ declare const raffle_checkEnteredCurrent: (args_0: {
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L820)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L822)
 
 Since v1.0.0
 
@@ -211,7 +210,7 @@ declare const raffle_enterMultiRaffle: (args_0: {
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L772)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L774)
 
 Since v1.0.0
 
@@ -239,7 +238,7 @@ declare const raffle_enterRaffle: (args_0: {
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L724)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L726)
 
 Since v1.0.0
 
@@ -278,7 +277,7 @@ declare const social_getGifts: (args_0: {
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L921)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L923)
 
 Since v1.0.0
 
@@ -317,7 +316,7 @@ declare const social_getVisits: (args_0: {
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L1190)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L1192)
 
 Since v1.0.0
 
@@ -532,7 +531,7 @@ declare const social_pullFriendMeta: (
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L1021)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L1023)
 
 Since v1.0.0
 
@@ -562,7 +561,7 @@ declare const social_pullFriendTower: (
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L1072)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L1074)
 
 Since v1.0.0
 
@@ -592,7 +591,7 @@ declare const social_receiveGift: (
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L972)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L974)
 
 Since v1.0.0
 
@@ -622,7 +621,7 @@ declare const social_retrieveFriendsSnapshotList: (
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L1139)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L1141)
 
 Since v1.0.0
 
@@ -656,7 +655,7 @@ declare const social_sendItem: (
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L860)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L862)
 
 Since v1.0.0
 
@@ -686,7 +685,7 @@ declare const social_visit: (
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L1241)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L1243)
 
 Since v1.0.0
 
@@ -714,7 +713,7 @@ declare const sync_checkForNewerSave: (args_0: {
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L483)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L485)
 
 Since v1.0.0
 
@@ -742,7 +741,7 @@ declare const sync_pullSave: (args_0: {
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L351)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L353)
 
 Since v1.0.0
 
@@ -772,7 +771,7 @@ declare const sync_pullSnapshot: (
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L543)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L545)
 
 Since v1.0.0
 
@@ -802,7 +801,7 @@ declare const sync_pushSave: (
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L415)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L417)
 
 Since v1.0.0
 
@@ -832,7 +831,7 @@ declare const sync_pushSnapshot: (
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L608)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L610)
 
 Since v1.0.0
 
@@ -1049,7 +1048,7 @@ declare const sync_retrieveSnapshotList: (args_0: {
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L676)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L678)
 
 Since v1.0.0
 
