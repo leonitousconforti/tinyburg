@@ -20,6 +20,7 @@
         "check": "tsc -b tsconfig.json"
     },
     "dependencies": {
+        "@fontsource/ibm-plex-mono": "5.3.0",
         "@fontsource/press-start-2p": "5.3.0",
         "@fontsource/vt323": "5.3.0"
     },

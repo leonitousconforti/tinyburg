@@ -1,13 +1,12 @@
-import { Effect, Layer, Option, Redacted, Ref, Schema } from "effect";
+import { Config, Effect, Layer, Option, Redacted, Ref, Schema } from "effect";
 import { HttpClient, HttpRouter, HttpServerRequest, HttpServerResponse } from "effect/unstable/http";
 
 import type { Jwt } from "effect-oidc";
 
+import { DiscordREST } from "dfx";
 import { Oidc } from "effect-oidc";
 
 import { sha256 } from "../crypto.ts";
-import { discordConfig } from "../discord/config.ts";
-import { editOriginalResponse } from "../discord/rest.ts";
 import { LinksRepository } from "../domain/links.ts";
 import { tinyburgConfig } from "../tinyburg.ts";
 
@@ -84,8 +83,12 @@ const cancelled = page({
 
 export const CallbackRoutesLive = Effect.gen(function* () {
     const tinyburg = yield* tinyburgConfig;
-    const discord = yield* discordConfig;
     const httpClient = yield* HttpClient.HttpClient;
+
+    // Reporting back into Discord goes through dfx's REST client, so the
+    // follow-up edit inherits its rate limiting rather than racing it.
+    const rest = yield* DiscordREST;
+    const applicationId = yield* Config.string("DISCORD_APPLICATION_ID");
 
     // The provider's signing keys, cached with a last-good fallback so a
     // hiccup fetching them does not read as a failed link.
@@ -187,17 +190,17 @@ export const CallbackRoutesLive = Effect.gen(function* () {
         const name = Option.getOrElse(maybeLink.value.displayName, () => "your Tinyburg account");
 
         // Best effort: rewrite the ephemeral reply so the confirmation shows
-        // up in Discord too. The link is already made either way, so a
-        // failure here is worth a log and nothing more.
-        yield* editOriginalResponse({
-            applicationId: discord.applicationId,
-            interactionToken: pending.interactionToken,
-            content: `Linked to **${name}**.`,
-        }).pipe(
-            Effect.provideService(HttpClient.HttpClient, httpClient),
-            Effect.tapError((error) => Effect.logWarning("could not update the /link reply", error)),
-            Effect.ignore
-        );
+        // up in Discord too, retiring the spent authorization button with it.
+        // The link is already made either way, so a failure here is worth a
+        // log and nothing more.
+        yield* rest
+            .updateOriginalWebhookMessage(applicationId, pending.interactionToken, {
+                payload: { content: `Linked to **${name}**.`, components: [] },
+            })
+            .pipe(
+                Effect.tapError((error) => Effect.logWarning("could not update the /link reply", error)),
+                Effect.ignore
+            );
 
         return linked(name);
     }).pipe(

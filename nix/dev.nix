@@ -33,6 +33,7 @@
             tinyburgApp = 3000;
             authproxy = 3001;
             socialCircles = 3002;
+            discordBot = 3003;
             heartbeat = 3999;
           };
 
@@ -43,6 +44,14 @@
           # service) are constants instead of something copy-pasted out of a
           # `RETURNING id` after every reset.
           authproxyClientId = "00000000-0000-4000-8000-000000000011";
+          discordBotClientId = "00000000-0000-4000-8000-000000000012";
+
+          # The bot is a confidential client, so unlike the authproxy it has a
+          # secret to present at the token endpoint. Fixed and in the clear
+          # here for the same reason `ADMIN_PASSWORD` below is: it authorizes
+          # nothing outside this stack, and generating it would put it back in
+          # the copy-paste-the-id business the seeded constants exist to end.
+          discordBotClientSecret = "dev-only-discord-bot-client-secret";
 
           # A process is ready when it accepts a connection. The http services
           # have health routes, but a port check is uniform and does not care
@@ -102,6 +111,7 @@
               { name = "tinyburg_app"; }
               { name = "authproxy"; }
               { name = "social_circles"; }
+              { name = "discord_bot"; }
             ];
           };
 
@@ -219,6 +229,45 @@
               readiness_probe = tcpReady ports.socialCircles;
             };
 
+            /*
+              Off by default, and the only app here that is.
+
+              Starting it opens a real gateway connection to Discord with a
+              real bot token, which has to come from `.env.dev` as
+              `DISCORD_BOT_TOKEN` and `DISCORD_APPLICATION_ID`; there is no
+              local stand-in for Discord the way there is for the provider
+              next door. dfx also syncs the global command list on connect, so
+              a second instance sharing a token with a deployed bot will fight
+              it over the commands and receive duplicate events.
+
+              The OAuth half needs none of that. `discord_bot` exists whether
+              or not this ever starts, and the callback route can be driven
+              with curl once it does.
+            */
+            discord-bot = {
+              namespace = "apps";
+              disabled = true;
+              command = runNode {
+                entry = "apps/discord-bot/index.ts";
+                env = {
+                  DATABASE_URL = databaseUrl "discord_bot";
+                  PORT = toString ports.discordBot;
+                  HOST = "127.0.0.1";
+                  # A relying party of the app next door, not of the deployed
+                  # provider, exactly as the authproxy is.
+                  TINYBURG_ISSUER = "http://localhost:${toString ports.tinyburgApp}";
+                  TINYBURG_CLIENT_ID = discordBotClientId;
+                  TINYBURG_CLIENT_SECRET = discordBotClientSecret;
+                  TINYBURG_REDIRECT_URI = "http://localhost:${toString ports.discordBot}/discord/callback";
+                };
+              };
+              depends_on = {
+                "pg".condition = "process_healthy";
+                "dev-secrets".condition = "process_completed_successfully";
+              };
+              readiness_probe = tcpReady ports.discordBot;
+            };
+
             # Runs once the tables exist, which is on first boot of each
             # service, because every one of them runs its migrations as part of
             # its layer stack. Idempotent, so re-running it is free.
@@ -235,6 +284,12 @@
                 AUTHPROXY_CLIENT_ID = authproxyClientId;
                 AUTHPROXY_REDIRECT_URI = "http://localhost:${toString ports.authproxy}/auth/callback";
                 SITE_ORIGIN = "http://localhost:${toString ports.tinyburgApp}/";
+                # Registered whether or not the bot is running: the row lives
+                # in tinyburg_app, and seeding it only when the bot happens to
+                # be started would make the seed non-deterministic.
+                DISCORD_BOT_CLIENT_ID = discordBotClientId;
+                DISCORD_BOT_CLIENT_SECRET = discordBotClientSecret;
+                DISCORD_BOT_REDIRECT_URI = "http://localhost:${toString ports.discordBot}/discord/callback";
               };
               depends_on = {
                 "tinyburg-app".condition = "process_healthy";

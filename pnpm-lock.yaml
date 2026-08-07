@@ -176,16 +176,22 @@ importers:
     dependencies:
       '@effect/platform-node':
         specifier: 4.0.0-beta.102
-        version: 4.0.0-beta.102(effect@4.0.0-beta.102)
+        version: 4.0.0-beta.102(effect@4.0.0-beta.102)(ioredis@5.11.1)
       '@effect/sql-pg':
         specifier: 4.0.0-beta.102
         version: 4.0.0-beta.102(effect@4.0.0-beta.102)
+      dfx:
+        specifier: 1.0.15
+        version: 1.0.15(effect@4.0.0-beta.102)
       effect:
         specifier: 4.0.0-beta.102
         version: 4.0.0-beta.102
       effect-oidc:
         specifier: 0.0.6
         version: 0.0.6(effect@4.0.0-beta.102)
+      ioredis:
+        specifier: 5.11.1
+        version: 5.11.1
       typescript:
         specifier: 7.0.2
         version: 7.0.2
@@ -433,6 +439,9 @@ importers:
 
   packages/ui:
     dependencies:
+      '@fontsource/ibm-plex-mono':
+        specifier: 5.3.0
+        version: 5.3.0
       '@fontsource/press-start-2p':
         specifier: 5.3.0
         version: 5.3.0
@@ -1043,6 +1052,9 @@ packages:
       effect: 4.0.0-beta.102
       foldkit: ^0
       vite: ^7.0.0 || ^8.0.0
+
+  '@fontsource/ibm-plex-mono@5.3.0':
+    resolution: {integrity: sha512-eTgnZjZEGk1QtD3ZstF+Vclo2HLAni8YMy34/DxllwZvyz1lR/1RF/xTiAquOBO7MvqBx8D2Ig2WCPMVfdZu7Q==}
 
   '@fontsource/press-start-2p@5.3.0':
     resolution: {integrity: sha512-gxWFxdeDglPhEYSwEeooomcaFK8kSQYLQwVxfnOJeYRj2sPEHXjpVtFgEaYfqzOjuAJGrIcJOipu2KY5YkbyuQ==}
@@ -1659,8 +1671,14 @@ packages:
   '@tybys/wasm-util@0.10.3':
     resolution: {integrity: sha512-F3fo1MYrRJYL3zER0OUOmkutjr1Vp23m7OsSgp7nq4SP6OqX6C/56XFIPAl5bt3zaBRjmW7SGz3u/6LwFpYcOg==}
 
+  '@types/body-parser@1.19.6':
+    resolution: {integrity: sha512-HLFeCYgz89uk22N5Qg3dvGvsv46B8GLvKKo1zKG4NybA8U2DiEO3w9lqGg29t/tfLRJpJ6iQxnVw4OnB7MoM9g==}
+
   '@types/chai@5.2.3':
     resolution: {integrity: sha512-Mw558oeA9fFbv65/y4mHtXDs9bPnFMZAL/jxdPFUpOHHIXX91mcgEHbS5Lahr+pwZFR8A7GQleRWeI6cGFC2UA==}
+
+  '@types/connect@3.4.38':
+    resolution: {integrity: sha512-K6uROf1LD88uDQqJCktA4yzL1YYAK6NgfsI0v/mTgyPKWsX1CnJ0XPSDhViejru1GcRkLWb8RlzFYJRqGUbaug==}
 
   '@types/deep-eql@4.0.2':
     resolution: {integrity: sha512-c9h9dVVMigMPc4bwTvC5dxqtqJZwQPePsWjPlpSOnojbor6pGqdk541lfA7AqFQr5pB1BRdq0juY9db81BwyFw==}
@@ -1668,20 +1686,47 @@ packages:
   '@types/estree@1.0.9':
     resolution: {integrity: sha512-GhdPgy1el4/ImP05X05Uw4cw2/M93BCUmnEvWZNStlCzEKME4Fkk+YpoA5OiHNQmoS7Cafb8Xa3Pya8m1Qrzeg==}
 
+  '@types/express-serve-static-core@4.19.9':
+    resolution: {integrity: sha512-QP2ESEe/ImWY0HDwNAnK9PvEffUyhLTnWkk7KXzHfyeWAnlrDe1fN77bXl6ia8KT3wPlmA7t9/VPRpnf4Ex9sg==}
+
+  '@types/express@4.17.25':
+    resolution: {integrity: sha512-dVd04UKsfpINUnK0yBoYHDF3xu7xVH4BuDotC/xGuycx4CgbP48X/KF/586bcObxT0HENHXEU8Nqtu6NR+eKhw==}
+
   '@types/frida-gum@19.10.0':
     resolution: {integrity: sha512-GBKAzwmamtNPBXEcIve1yJ6BB9ZgyW9al3+f06S+lDAvennOx9GfFQ9RDY9kP5nJrkiiRHLzgbDFjQ/+g+iw1Q==}
 
   '@types/gensync@1.0.5':
     resolution: {integrity: sha512-MbsRCT7mTikHwKZ0X+LVUTLRrZZRLipTuXEO9qOYO+zmjMVk81axyClMROf6uoPD9MRVu46bx8zoR0Ad9q3NAg==}
 
+  '@types/http-errors@2.0.5':
+    resolution: {integrity: sha512-r8Tayk8HJnX0FztbZN7oVqGccWgw98T/0neJphO91KkmOzug1KkofZURD4UaD5uH8AqcFLfdPErnBod0u71/qg==}
+
   '@types/jsesc@2.5.1':
     resolution: {integrity: sha512-9VN+6yxLOPLOav+7PwjZbxiID2bVaeq0ED4qSQmdQTdjnXJSaCVKTR58t15oqH1H5t8Ng2ZX1SabJVoN9Q34bw==}
+
+  '@types/mime@1.3.5':
+    resolution: {integrity: sha512-/pyBZWSLD2n0dcHE3hq8s8ZvcETHtEuF+3E7XVt0Ig2nvsVQXdghHVcEkIWjy9A0wKfTn97a/PSDYohKIlnP/w==}
 
   '@types/node@12.20.55':
     resolution: {integrity: sha512-J8xLz7q2OFulZ2cyGTLE1TbbZcjpno7FaN6zdJNrgAdrJ+DZzh/uFR6YrTb4C+nXakvud8Q4+rbhoIWlYQbUFQ==}
 
   '@types/node@26.1.2':
     resolution: {integrity: sha512-Vu4a5UFA9rIIFJ7rB/Vaafh9lrCQszopTCx6KjFboXTGQbPNasehVR5TEiithSDGyd1DEiUByggTZsg8jukeIg==}
+
+  '@types/qs@6.15.1':
+    resolution: {integrity: sha512-GZHUBZR9hckSUhrxmp1nG6NwdpM9fCunJwyThLW1X3AyHgd9IlHb6VANpQQqDr2o/qQp6McZ3y/IA2rVzKzSbw==}
+
+  '@types/range-parser@1.2.7':
+    resolution: {integrity: sha512-hKormJbkJqzQGhziax5PItDUTMAM9uE2XXQmM37dyd4hVM+5aVl7oVxMVUiVQn2oCQFN/LKCZdvSM0pFRqbSmQ==}
+
+  '@types/send@0.17.6':
+    resolution: {integrity: sha512-Uqt8rPBE8SY0RK8JB1EzVOIZ32uqy8HwdxCnoCOsYrvnswqmFZ/k+9Ikidlk/ImhsdvBsloHbAlewb2IEBV/Og==}
+
+  '@types/send@1.2.1':
+    resolution: {integrity: sha512-arsCikDvlU99zl1g69TcAB3mzZPpxgw0UQnaHeC1Nwb015xp8bknZv5rIfri9xTOcMuaVgvabfIRA7PSZVuZIQ==}
+
+  '@types/serve-static@1.15.10':
+    resolution: {integrity: sha512-tRs1dB+g8Itk72rlSI2ZrW6vZg0YrLI81iQSTkMmOqnqCaNr/8Ek4VwWcN5vZgCYWbg/JJSGBlUaYGAOP73qBw==}
 
   '@types/ws@8.18.1':
     resolution: {integrity: sha512-ThVF6DCVhA8kUGy+aazFQ4kXQ7E1Ty7A3ypFOe0IcJV8O/M511G99AW24irKrW56Wt44yG9+ij8FaqoBGkuBXg==}
@@ -2144,6 +2189,11 @@ packages:
     peerDependencies:
       typescript: ^5.4.4 || ^6.0.2
 
+  dfx@1.0.15:
+    resolution: {integrity: sha512-LqHeOZLcOJB5D0+BUiy6XkthunolbJoSAAIOjXEiux5P6CzXPbJl0EkaWSDXTbkj/F/pdW9lk1zCC4XAl8yG+w==}
+    peerDependencies:
+      effect: '>=4.0.0-beta.101 <5.0.0'
+
   diacritics-map@0.1.0:
     resolution: {integrity: sha512-3omnDTYrGigU0i4cJjvaKwD52B8aoqyX/NEIkukFFkogBemsIbhSa1O414fpTp5nuszJG6lvQ5vBvDVNCbSsaQ==}
     engines: {node: '>=0.8.0'}
@@ -2151,6 +2201,13 @@ packages:
   dir-glob@3.0.1:
     resolution: {integrity: sha512-WkrWp9GR4KXfKGYzOLmTuGVi1UWFfws377n9cc55/tb6DuqyF6pcQ5AbiHEshaDpY9v6oaSr2XCDidGmMwdzIA==}
     engines: {node: '>=8'}
+
+  discord-api-types@0.38.52:
+    resolution: {integrity: sha512-uwe9EKfbjsmgWc2fdFjvDbj+dQqx3lp7wqDCmIha0jInuU+xeQjkCK9tMMn+p7RXfdVQORCInq4cD3U2ymDmyg==}
+
+  discord-verify@1.2.0:
+    resolution: {integrity: sha512-8qlrMROW8DhpzWWzgNq9kpeLDxKanWa4EDVoj/ASVv2nr+dSr4JPmu2tFSydf3hAGI/OIJTnZyD0JulMYIxx4w==}
+    engines: {node: '>=16'}
 
   doctrine@3.0.0:
     resolution: {integrity: sha512-yS+Q5i3hBf7GBkd4KG8a7eBNNWNGLTaEwwYWUijIYM7zrlYDM0BFXHjjPWlWZ1Rg7UaddZeIDmi9jF3HmqiQ2w==}
@@ -4139,16 +4196,6 @@ snapshots:
       - bufferutil
       - utf-8-validate
 
-  '@effect/platform-node@4.0.0-beta.102(effect@4.0.0-beta.102)':
-    dependencies:
-      '@effect/platform-node-shared': 4.0.0-beta.104(effect@4.0.0-beta.102)
-      effect: 4.0.0-beta.102
-      mime: 4.1.0
-      undici: 8.10.0
-    transitivePeerDependencies:
-      - bufferutil
-      - utf-8-validate
-
   '@effect/platform-node@4.0.0-beta.102(effect@4.0.0-beta.102)(ioredis@5.11.1)':
     dependencies:
       '@effect/platform-node-shared': 4.0.0-beta.104(effect@4.0.0-beta.102)
@@ -4343,6 +4390,8 @@ snapshots:
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
+
+  '@fontsource/ibm-plex-mono@5.3.0': {}
 
   '@fontsource/press-start-2p@5.3.0': {}
 
@@ -4754,26 +4803,83 @@ snapshots:
       tslib: 2.8.1
     optional: true
 
+  '@types/body-parser@1.19.6':
+    dependencies:
+      '@types/connect': 3.4.38
+      '@types/node': 26.1.2
+    optional: true
+
   '@types/chai@5.2.3':
     dependencies:
       '@types/deep-eql': 4.0.2
       assertion-error: 2.0.1
 
+  '@types/connect@3.4.38':
+    dependencies:
+      '@types/node': 26.1.2
+    optional: true
+
   '@types/deep-eql@4.0.2': {}
 
   '@types/estree@1.0.9': {}
+
+  '@types/express-serve-static-core@4.19.9':
+    dependencies:
+      '@types/node': 26.1.2
+      '@types/qs': 6.15.1
+      '@types/range-parser': 1.2.7
+      '@types/send': 1.2.1
+    optional: true
+
+  '@types/express@4.17.25':
+    dependencies:
+      '@types/body-parser': 1.19.6
+      '@types/express-serve-static-core': 4.19.9
+      '@types/qs': 6.15.1
+      '@types/serve-static': 1.15.10
+    optional: true
 
   '@types/frida-gum@19.10.0': {}
 
   '@types/gensync@1.0.5': {}
 
+  '@types/http-errors@2.0.5':
+    optional: true
+
   '@types/jsesc@2.5.1': {}
+
+  '@types/mime@1.3.5':
+    optional: true
 
   '@types/node@12.20.55': {}
 
   '@types/node@26.1.2':
     dependencies:
       undici-types: 8.3.0
+
+  '@types/qs@6.15.1':
+    optional: true
+
+  '@types/range-parser@1.2.7':
+    optional: true
+
+  '@types/send@0.17.6':
+    dependencies:
+      '@types/mime': 1.3.5
+      '@types/node': 26.1.2
+    optional: true
+
+  '@types/send@1.2.1':
+    dependencies:
+      '@types/node': 26.1.2
+    optional: true
+
+  '@types/serve-static@1.15.10':
+    dependencies:
+      '@types/http-errors': 2.0.5
+      '@types/node': 26.1.2
+      '@types/send': 0.17.6
+    optional: true
 
   '@types/ws@8.18.1':
     dependencies:
@@ -5208,11 +5314,25 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+  dfx@1.0.15(effect@4.0.0-beta.102):
+    dependencies:
+      discord-api-types: 0.38.52
+      effect: 4.0.0-beta.102
+    optionalDependencies:
+      discord-verify: 1.2.0
+
   diacritics-map@0.1.0: {}
 
   dir-glob@3.0.1:
     dependencies:
       path-type: 4.0.0
+
+  discord-api-types@0.38.52: {}
+
+  discord-verify@1.2.0:
+    dependencies:
+      '@types/express': 4.17.25
+    optional: true
 
   doctrine@3.0.0:
     dependencies:

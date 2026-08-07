@@ -20,7 +20,7 @@ export const tinyburgConfig = Config.all({
     clientId: Config.string("TINYBURG_CLIENT_ID").pipe(Config.withDefault("unconfigured")),
     clientSecret: Config.option(Config.redacted("TINYBURG_CLIENT_SECRET")),
     redirectUri: Config.string("TINYBURG_REDIRECT_URI").pipe(
-        Config.withDefault("http://localhost:3001/discord/callback")
+        Config.withDefault("http://localhost:3003/discord/callback")
     ),
 });
 

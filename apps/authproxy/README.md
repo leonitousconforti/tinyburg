@@ -35,18 +35,18 @@ node index.ts
 | `NODE_ENV`                        | Set `development` for plain http cookies; anything else means Secure + `__Host-`              |
 | `TINYBURG_ISSUER`                 | The OIDC provider, default `https://tinyburg.app`                                             |
 | `TINYBURG_CLIENT_ID`              | The oauth client registered at the provider (default `unconfigured`, boots but sign-in fails) |
-| `TINYBURG_CLIENT_SECRET`          | The client secret; required for admin elevation (client_credentials), optional for sign-in    |
+| `TINYBURG_CLIENT_SECRET`          | Optional; set it when the client is registered confidential                                   |
 | `TINYBURG_REDIRECT_URI`           | `<this host>/auth/callback`, default `http://localhost:3000/auth/callback`                    |
 | `ADMIN_PLAYER_IDS`                | Comma-separated TinyTower player ids whose owners may step up to admin                        |
 | `PORT`/`HOST`                     | Listen address, default `3000`/`0.0.0.0`                                                      |
 
 ### Registering the client at tinyburg.app
 
-The provider stores oauth clients in its `oauth_clients` table and has no registration API yet, so registering the authproxy is one insert against the tinyburg.app database. Register it as a confidential client: `secret_hash` is the SHA-256 of the secret, base64url encoded, and the `towers:lookup` scope is what lets the proxy check admin eligibility (redirect uris are exact-match):
+The provider stores oauth clients in its `oauth_clients` table and has no registration API yet, so registering the authproxy is one insert against the tinyburg.app database. `towers:read` is what lets the elevation round trip ask - with the visitor's consent - which towers they have linked. Confidential is recommended: `secret_hash` is the SHA-256 of the secret, base64url encoded; leave it NULL for a public client (PKCE carries the proof either way, and redirect uris are exact-match):
 
 ```sql
 INSERT INTO oauth_clients (name, secret_hash, scope, redirect_uris)
-VALUES ('Authproxy Self Service', '<base64url-sha256-of-secret>', 'openid profile towers:lookup', ARRAY['https://<authproxy-host>/auth/callback'])
+VALUES ('Authproxy Self Service', '<base64url-sha256-of-secret>', 'openid profile towers:read', ARRAY['https://<authproxy-host>/auth/callback'])
 RETURNING id;   -- becomes TINYBURG_CLIENT_ID
 ```
 
@@ -54,9 +54,9 @@ For local development add `'http://localhost:<port>/auth/callback'` to `redirect
 
 ### Admin
 
-`/admin` in the dashboard manages every key the proxy has issued: grant write scopes, adjust rate limits, revoke or delete any key. Getting in takes step-up authentication on top of a signed-in session, and both factors are checked at elevation time:
+`/admin` in the dashboard manages every key the proxy has issued: grant write scopes, adjust rate limits, revoke or delete any key. Getting in takes step-up authentication on top of a signed-in session:
 
-1. The session's Tinyburg account must currently hold a linked tower whose player id is in `ADMIN_PLAYER_IDS`. This is looked up live against tinyburg.app (`/v1/tinytower/linkedAccounts/lookup/:sub`, guarded by the `towers:lookup` scope) using the client_credentials grant, so unlinking the tower revokes eligibility immediately.
-2. The visitor enters `ADMIN_PASSWORD`.
+1. The visitor enters `ADMIN_PASSWORD`. The verdict is recorded server-side on the session, and the browser is sent to re-authorize at tinyburg.app either way, so nothing reveals whether the password matched.
+2. The re-authorization asks for `towers:read`; the callback verifies the account that consented is the account this session belongs to, then asks the trading api - as the visitor, with their fresh 15-minute token - which towers they have linked. One of them must be in `ADMIN_PLAYER_IDS`. Nothing is stored: no refresh tokens, no snapshots, so unlinking a tower revokes eligibility immediately.
 
-Elevation lasts one hour, is stored on the session (`sessions.admin_until`), dies with the session, and refusals are uniform: the response never says which factor failed. Attempts are rate limited to 5 per 5 minutes per session.
+Elevation lasts one hour, is stored on the session (`sessions.admin_until`), dies with the session, and refusals are uniform: `/admin?error=elevation_failed` never says which factor failed. Password attempts are rate limited to 5 per 5 minutes per session.

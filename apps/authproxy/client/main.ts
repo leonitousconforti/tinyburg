@@ -74,7 +74,7 @@ const resetPageState = (model: Model, route: AppRoute): Model =>
     evo(model, {
         route: () => route,
         keys: (keys) => (route._tag === "Keys" ? enterKeys(keys) : keys),
-        admin: (admin) => (route._tag === "Admin" ? enterAdmin(admin) : admin),
+        admin: (admin) => (route._tag === "Admin" ? enterAdmin(route.error, admin) : admin),
     });
 
 // UPDATE

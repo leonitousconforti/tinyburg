@@ -16,7 +16,7 @@ import { OAuthRoutesLive } from "./routes/oauth.ts";
 import { SelfServiceApiLive } from "./routes/selfservice.ts";
 import { StaticRoutesLive } from "./routes/static.ts";
 import { TinyTowerApiLive } from "./routes/tinytower.ts";
-import { TinyburgLookup } from "./tinyburg.ts";
+import { TelemetryLive } from "./telemetry.ts";
 
 const AllRoutes = Layer.mergeAll(
     TinyTowerApiLive,
@@ -46,7 +46,6 @@ HttpRouter.serve(AllRoutes, { routerConfig: { maxParamLength: 500 } }).pipe(
         Repository.Live,
         SessionsRepository.Default,
         CookiePolicy.Default,
-        TinyburgLookup.Default.pipe(Layer.provide(FetchHttpClient.layer)),
         FetchHttpClient.layer,
     ]),
     Layer.provide(MigratorLive),
@@ -57,6 +56,9 @@ HttpRouter.serve(AllRoutes, { routerConfig: { maxParamLength: 500 } }).pipe(
             host: Config.string("HOST").pipe(Config.withDefault("0.0.0.0")),
         })
     ),
+    // Outermost, so the tracer and logger it installs are the ones every layer
+    // above is built and served with.
+    Layer.provide(TelemetryLive),
     Layer.launch,
     NodeRuntime.runMain
 );

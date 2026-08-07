@@ -93,16 +93,6 @@ const SelfServiceGroup = HttpApiGroup.make("SelfServiceGroup")
             success: Schema.Void,
         })
     )
-    .add(
-        // Step-up: the admin password plus a live check that the session's
-        // sub holds an allowlisted tower. Failure is uniformly Forbidden so
-        // it never says which factor was wrong.
-        HttpApiEndpoint.post("elevate", "/self/elevate", {
-            payload: Schema.Struct({ password: Schema.String }),
-            error: HttpApiError.Forbidden,
-            success: Session.json,
-        })
-    )
     .middleware(SessionCookie);
 
 const AdminGroup = HttpApiGroup.make("AdminGroup")

@@ -8,7 +8,9 @@ export const HomeRoute = r("Home");
 // parameter; the page opens saying so rather than pretending nothing happened.
 export const LoginRoute = r("Login", { returnTo: S.Option(S.String), error: S.Option(S.String) });
 export const KeysRoute = r("Keys");
-export const AdminRoute = r("Admin");
+// The elevation round trip reports a refusal through the `error` query
+// parameter; the page opens saying so rather than pretending nothing happened.
+export const AdminRoute = r("Admin", { error: S.Option(S.String) });
 export const NotFoundRoute = r("NotFound", { path: S.String });
 
 export const AppRoute = S.Union([HomeRoute, LoginRoute, KeysRoute, AdminRoute, NotFoundRoute]);
@@ -21,7 +23,11 @@ export const loginRouter = pipe(
     Route.mapTo(LoginRoute)
 );
 export const keysRouter = pipe(literal("keys"), Route.mapTo(KeysRoute));
-export const adminRouter = pipe(literal("admin"), Route.mapTo(AdminRoute));
+export const adminRouter = pipe(
+    literal("admin"),
+    Route.query(S.Struct({ error: S.OptionFromOptional(S.String) })),
+    Route.mapTo(AdminRoute)
+);
 
 const routeParser = Route.oneOf(homeRouter, loginRouter, keysRouter, adminRouter);
 

@@ -5,6 +5,8 @@ import {
     type Cookies,
     HttpClient,
     type HttpClientError,
+    HttpClientRequest,
+    HttpClientResponse,
     HttpRouter,
     HttpServerRequest,
     HttpServerResponse,
@@ -42,6 +44,13 @@ interface OAuthProviderConfigRealized extends Omit<OAuthProvider, "config"> {
         Schema.SchemaError | HttpClientError.HttpClientError,
         never
     >;
+    /**
+     * Providers that do not carry a `name` claim in their ID token fetch the
+     * display name from their user endpoint instead. Returning `Option.none`
+     * falls back to the ID token claim, so a provider outage costs a nice
+     * name rather than the whole sign in.
+     */
+    readonly fetchDisplayName: (accessToken: string) => Effect.Effect<Option.Option<string>>;
 }
 
 const google = {
@@ -77,6 +86,37 @@ const discord = {
         jwksUri: Config.string("DISCORD_JWKS_URI"),
     }),
 } satisfies OAuthProvider;
+
+/**
+ * The slice of Discord's user object we care about. Discord's ID token
+ * carries no `name` claim, so the display name has to come from here.
+ *
+ * @see https://docs.discord.com/developers/resources/user
+ */
+const DiscordUser = Schema.Struct({
+    /** "the user's display name, if it is set" - null for accounts that never set one. */
+    global_name: Schema.optionalKey(Schema.NullOr(Schema.String)),
+    /** "the user's username, not unique across the platform". */
+    username: Schema.String,
+});
+
+/**
+ * Reads the display name from Discord's user endpoint, which the `identify`
+ * scope grants us. Any failure resolves to `Option.none` rather than
+ * failing the callback.
+ */
+const discordDisplayName =
+    (httpClient: HttpClient.HttpClient) =>
+    (accessToken: string): Effect.Effect<Option.Option<string>> =>
+        HttpClientRequest.get("https://discord.com/api/users/@me").pipe(
+            HttpClientRequest.setHeader("authorization", `Bearer ${accessToken}`),
+            HttpClient.execute,
+            Effect.flatMap(HttpClientResponse.schemaBodyJson(DiscordUser)),
+            Effect.provideService(HttpClient.HttpClient, httpClient),
+            Effect.map((user) => Option.fromNullishOr(user.global_name ?? user.username)),
+            Effect.option,
+            Effect.map(Option.flatten)
+        );
 
 const OAuthIntent = Schema.fromJsonString(
     Schema.Struct({
@@ -328,12 +368,19 @@ const callback = (provider: OAuthProviderConfigRealized) =>
             return yield* failedRedirectByIntent("invalid_oauth_claims");
         }
 
-        // What will get inserted into the database
+        // Providers that leave `name` out of the ID token get a second look
+        // at their own user endpoint before we settle for the placeholder
         const claims = maybeClaims.value;
+        const fetchedName = yield* provider.fetchDisplayName(maybeToken.value.access_token);
+
+        // What will get inserted into the database
         const profile = {
             provider: provider.name,
             providerAccountId: claims.sub,
-            displayName: Option.getOrElse(Option.fromNullishOr(claims.name), () => "Tinyburg player"),
+            displayName: fetchedName.pipe(
+                Option.orElse(() => Option.fromNullishOr(claims.name)),
+                Option.getOrElse(() => "Tinyburg player")
+            ),
             avatarUrl: Option.none<string>(),
             email: Option.none<string>(),
         };
@@ -441,12 +488,15 @@ export const OAuthRoutesLive = Effect.gen(function* () {
         ...google,
         config: googleConfig,
         jwks: yield* cachedJwks(googleConfig.jwksUri),
+        // Google puts `name` in the ID token, so there is nothing to fetch
+        fetchDisplayName: () => Effect.succeed(Option.none()),
     };
 
     const discordRealized: OAuthProviderConfigRealized = {
         ...discord,
         config: discordConfig,
         jwks: yield* cachedJwks(discordConfig.jwksUri),
+        fetchDisplayName: discordDisplayName(httpClient),
     };
 
     return Layer.mergeAll(

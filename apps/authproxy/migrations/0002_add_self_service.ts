@@ -12,6 +12,13 @@ export default Effect.flatMap(
 
         -- Self-service dashboard sessions, created by "sign in with Tinyburg".
         -- Only a hash of the cookie value is stored.
+        --
+        -- admin_until is the step-up elevation window: the session acts as
+        -- admin until this moment, NULL when never elevated. The two
+        -- elevation_* columns are the half-finished handshake around the
+        -- elevation re-authorization round trip: whether the admin password
+        -- matched when the browser left for tinyburg.app, and when it left.
+        -- Server-side because a cookie would let the browser forge the answer.
         CREATE TABLE IF NOT EXISTS sessions (
             id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
             token_hash TEXT UNIQUE NOT NULL,
@@ -19,7 +26,10 @@ export default Effect.flatMap(
             display_name TEXT,
             avatar_url TEXT,
             created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-            expires_at TIMESTAMPTZ NOT NULL
+            expires_at TIMESTAMPTZ NOT NULL,
+            admin_until TIMESTAMPTZ,
+            elevation_password_ok BOOLEAN,
+            elevation_requested_at TIMESTAMPTZ
         );
     `
 );
