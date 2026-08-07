@@ -47,7 +47,7 @@
     "dependencies": {
         "@bufbuild/protobuf": "2.13.0",
         "@efffrida/frida-tools": "0.0.47",
-        "@efffrida/gplayapi": "0.0.24",
+        "@efffrida/gplayapi": "0.0.25",
         "@efffrida/il2cpp-bridge": "0.0.43",
         "@efffrida/platform": "0.0.35",
         "@efffrida/polyfills": "0.0.14",

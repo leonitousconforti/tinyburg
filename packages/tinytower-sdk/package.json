@@ -56,7 +56,7 @@
         "@effect/platform-node": "4.0.0-beta.102",
         "@effect/vitest": "4.0.0-beta.102",
         "@efffrida/frida-tools": "0.0.47",
-        "@efffrida/gplayapi": "0.0.24",
+        "@efffrida/gplayapi": "0.0.25",
         "@tinyburg/insight": "workspace:*",
         "effect": "4.0.0-beta.102",
         "ioredis": "5.11.1",
