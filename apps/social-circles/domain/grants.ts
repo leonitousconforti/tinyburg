@@ -83,6 +83,8 @@ export class GrantsRepository extends Context.Service<GrantsRepository>()(
                           AND g.invalidated_at IS NULL
                         LIMIT 1
                     `,
+                    // Bridges an untyped runtime boundary; the shape is guaranteed by construction, not by the compiler.
+                    // oxlint-disable-next-line typescript/no-unsafe-type-assertion
                     (rows) => Option.fromNullishOr(rows[0]?.["tinyburgUserId"] as string | undefined)
                 );
 

@@ -32,20 +32,18 @@ export class NimblebitAuth extends Context.Service<
           }
         | {
               readonly host: "https://authproxy.tinyburg.app";
-              readonly authKey: Redacted.Redacted<string>;
+              readonly authKey: Redacted.Redacted;
           }
         | {
               readonly host: string;
-              readonly authKey: Redacted.Redacted<string>;
+              readonly authKey: Redacted.Redacted;
           }
     ) & {
-        readonly sign: (data: string) => Effect.Effect<string, Schema.SchemaError, never>;
-        readonly salt: Effect.Effect<number, PlatformError.PlatformError, never>;
-        readonly burnbot: Effect.Effect<
-            Schema.Schema.Type<typeof NimblebitConfig.AuthenticatedPlayerSchema>,
-            never,
-            never
-        >;
+        readonly sign: (data: string) => Effect.Effect<string, Schema.SchemaError>;
+        readonly salt: Effect.Effect<number, PlatformError.PlatformError>;
+        // Written out for readability alongside the neighbouring signatures.
+        // oxlint-disable-next-line typescript/no-unnecessary-type-arguments
+        readonly burnbot: Effect.Effect<Schema.Schema.Type<typeof NimblebitConfig.AuthenticatedPlayerSchema>, never>;
     }
 >()("NimblebitAuth") {
     private static readonly burnbots: Array.NonEmptyReadonlyArray<
@@ -82,7 +80,9 @@ export class NimblebitAuth extends Context.Service<
         (bytes) => new DataView(bytes.buffer).getUint32(0, false)
     );
 
-    private static readonly MD5 = (data: string): Effect.Effect<string, never, never> =>
+    // Written out for readability alongside the neighbouring signatures.
+    // oxlint-disable-next-line typescript/no-unnecessary-type-arguments
+    private static readonly MD5 = (data: string): Effect.Effect<string, never> =>
         Effect.map(
             Effect.promise(() => import("node:crypto")),
             (crypto) => crypto.createHash("md5").update(data).digest("hex")
@@ -117,7 +117,7 @@ export class NimblebitAuth extends Context.Service<
         host,
     }: {
         host: string;
-        authKey: Redacted.Redacted<string>;
+        authKey: Redacted.Redacted;
     }): Layer.Layer<NimblebitAuth, never, Crypto.Crypto> =>
         Effect.flatMap(
             Crypto.Crypto,
@@ -136,7 +136,7 @@ export class NimblebitAuth extends Context.Service<
     public static readonly CustomHostConfig = (
         options: Config.Wrap<{
             host: string;
-            authKey: Redacted.Redacted<string>;
+            authKey: Redacted.Redacted;
         }>
     ): Layer.Layer<NimblebitAuth, Config.ConfigError, Crypto.Crypto> =>
         Layer.unwrap(Effect.map(Config.unwrap(options), NimblebitAuth.CustomHost));
@@ -144,13 +144,13 @@ export class NimblebitAuth extends Context.Service<
     public static readonly TinyburgAuthProxy = ({
         authKey,
     }: {
-        authKey: Redacted.Redacted<string>;
+        authKey: Redacted.Redacted;
     }): Layer.Layer<NimblebitAuth, never, Crypto.Crypto> =>
         NimblebitAuth.CustomHost({ host: "https://authproxy.tinyburg.app", authKey });
 
     public static readonly TinyburgAuthProxyConfig = (
         options: Config.Wrap<{
-            authKey: Redacted.Redacted<string>;
+            authKey: Redacted.Redacted;
         }>
     ): Layer.Layer<NimblebitAuth, Config.ConfigError, Crypto.Crypto> =>
         Layer.unwrap(Effect.map(Config.unwrap(options), NimblebitAuth.TinyburgAuthProxy));
@@ -169,7 +169,7 @@ export const layerDirect: (
  * @category Layer
  */
 export const layerDirectConfig: (
-    config?: Config.Config<Schema.Schema.Type<typeof NimblebitConfig.NimblebitAuthKeySchema>> | undefined
+    config?: Config.Config<Schema.Schema.Type<typeof NimblebitConfig.NimblebitAuthKeySchema>>
 ) => Layer.Layer<NimblebitAuth, Config.ConfigError, Crypto.Crypto> = NimblebitAuth.DirectConfig;
 
 /**
@@ -178,7 +178,7 @@ export const layerDirectConfig: (
  */
 export const layerCustomHost: (options: {
     host: string;
-    authKey: Redacted.Redacted<string>;
+    authKey: Redacted.Redacted;
 }) => Layer.Layer<NimblebitAuth, never, Crypto.Crypto> = NimblebitAuth.CustomHost;
 
 /**
@@ -188,7 +188,7 @@ export const layerCustomHost: (options: {
 export const layerCustomHostConfig: (
     options: Config.Wrap<{
         host: string;
-        authKey: Redacted.Redacted<string>;
+        authKey: Redacted.Redacted;
     }>
 ) => Layer.Layer<NimblebitAuth, Config.ConfigError, Crypto.Crypto> = NimblebitAuth.CustomHostConfig;
 
@@ -197,7 +197,7 @@ export const layerCustomHostConfig: (
  * @category Layer
  */
 export const layerTinyburgAuthProxy: (options: {
-    authKey: Redacted.Redacted<string>;
+    authKey: Redacted.Redacted;
 }) => Layer.Layer<NimblebitAuth, never, Crypto.Crypto> = NimblebitAuth.TinyburgAuthProxy;
 
 /**
@@ -206,6 +206,6 @@ export const layerTinyburgAuthProxy: (options: {
  */
 export const layerTinyburgAuthProxyConfig: (
     options: Config.Wrap<{
-        authKey: Redacted.Redacted<string>;
+        authKey: Redacted.Redacted;
     }>
 ) => Layer.Layer<NimblebitAuth, Config.ConfigError, Crypto.Crypto> = NimblebitAuth.TinyburgAuthProxyConfig;

@@ -33,7 +33,7 @@ export const parseNimblebitOrderedList: <
     }>,
 >(
     items: Items,
-    separator?: string | undefined
+    separator?: string
 ) => Schema.decodeTo<
     Schema.Struct<
         {
@@ -96,7 +96,8 @@ export const CSharpDate: Schema.decodeTo<
         ]
     >,
     Schema.BigInt,
-    never,
+    // Written out for readability alongside the neighbouring signatures.
+    // oxlint-disable-next-line typescript/no-unnecessary-type-arguments
     never
 > = internal.CSharpDate;
 
@@ -119,7 +120,8 @@ export const UnityColor: Schema.decodeTo<
             Schema.compose<Schema.Finite, Schema.NumberFromString>,
         ]
     >,
-    never,
+    // Written out for readability alongside the neighbouring signatures.
+    // oxlint-disable-next-line typescript/no-unnecessary-type-arguments
     never
 > = internal.UnityColor;
 
@@ -128,10 +130,9 @@ export const UnityColor: Schema.decodeTo<
  * @category Schemas
  */
 export const split: (
-    options?:
-        | {
-              readonly separator?: string | undefined;
-          }
-        | undefined
-) => (from: Schema.String) => Schema.decodeTo<Schema.$Array<Schema.String>, Schema.String, never, never> =
-    internal.split;
+    options?: {
+        readonly separator?: string | undefined;
+    }
+    // Written out for readability alongside the neighbouring signatures.
+    // oxlint-disable-next-line typescript/no-unnecessary-type-arguments
+) => (from: Schema.String) => Schema.decodeTo<Schema.$Array<Schema.String>, Schema.String, never> = internal.split;

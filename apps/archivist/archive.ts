@@ -6,6 +6,8 @@ import { GooglePlayApi } from "@efffrida/gplayapi";
 
 const bundleIdentifier = "com.nimblebit.tinytower";
 
+// The early exits return never-typed values; the normal path runs to the end.
+// oxlint-disable-next-line typescript/consistent-return
 export const archiveToS3 = Effect.fnUntraced(function* (options: { offerType: number; versionCode: number | bigint }) {
     const streams = yield* GooglePlayApi.downloadToStreams(bundleIdentifier, options).pipe(Effect.catchNoSuchElement);
 

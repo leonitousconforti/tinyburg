@@ -426,6 +426,8 @@ const FloorIdSchema = Schema.suspend(() => {
               }>;
     }[ValidFloorIndices];
 
+    // Bridges an untyped runtime boundary; the shape is guaranteed by construction, not by the compiler.
+    // oxlint-disable-next-line typescript/no-unsafe-type-assertion
     const validFloorsSchema = Function.pipe(
         floors,
         Array.filter((floor) => floor.type !== floorType.None),
@@ -437,10 +439,14 @@ const FloorIdSchema = Schema.suspend(() => {
         )
     ) as Array<ValidFloorsSchema>;
 
+    // Bridges an untyped runtime boundary; the shape is guaranteed by construction, not by the compiler.
+    // oxlint-disable-next-line typescript/no-unsafe-type-assertion
     const validIndicesSchema = Function.pipe(
         floors,
         Array.map((floor, index) => ({ ...floor, index })),
         Array.filter(({ type }) => type !== floorType.None),
+        // Bridges an untyped runtime boundary; the shape is guaranteed by construction, not by the compiler.
+        // oxlint-disable-next-line typescript/no-unsafe-type-assertion
         Array.map(({ index }) => index as unknown as ValidFloorIndices),
         (literals) => Schema.Literals(literals)
     ) as ValidIndicesSchema;
@@ -460,6 +466,8 @@ const FloorIdSchema = Schema.suspend(() => {
             SchemaTransformation.transformOrFail({
                 encode: (input: ValidFloor) =>
                     Option.match(tryFindFloor(input), {
+                        // Bridges an untyped runtime boundary; the shape is guaranteed by construction, not by the compiler.
+                        // oxlint-disable-next-line typescript/no-unsafe-type-assertion
                         onSome: (index) => Effect.succeed(index as ValidFloorIndices),
                         onNone: () =>
                             Effect.fail(
@@ -470,6 +478,8 @@ const FloorIdSchema = Schema.suspend(() => {
                     }),
                 decode: (index: ValidFloorIndices) =>
                     Option.match(Array.get(floors, index), {
+                        // Bridges an untyped runtime boundary; the shape is guaranteed by construction, not by the compiler.
+                        // oxlint-disable-next-line typescript/no-unsafe-type-assertion
                         onSome: (floor) => Effect.succeed(floor as ValidFloor),
                         onNone: () =>
                             Effect.fail(

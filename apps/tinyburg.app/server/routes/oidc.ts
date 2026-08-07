@@ -305,6 +305,8 @@ const consent = Effect.gen(function* () {
     });
 });
 
+// The early exits return never-typed values; the normal path runs to the end.
+// oxlint-disable-next-line typescript/consistent-return
 const token = Effect.gen(function* () {
     const keys = yield* OidcKeys;
     const request = yield* HttpServerRequest.HttpServerRequest;
@@ -626,6 +628,8 @@ const revoke = Effect.gen(function* () {
         onSome: (claims) =>
             claims.client_id === client.id && claims.jti !== undefined
                 ? OidcRepository.use((repo) =>
+                      // Bridges an untyped runtime boundary; the shape is guaranteed by construction, not by the compiler.
+                      // oxlint-disable-next-line typescript/no-unsafe-type-assertion
                       repo.revokeToken({ jti: claims.jti as string, expiresAt: new Date(claims.exp * 1000) })
                   )
                 : Effect.void,

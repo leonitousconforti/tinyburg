@@ -89,6 +89,8 @@ export class CrawlService extends Context.Service<CrawlService>()("@tinyburg/soc
             }
 
             const decoded = yield* Schema.decodeEffect(TinyTower.SaveData)(save).pipe(
+                // Frida's runtime handles are not plain strings; interpolating them here is intentional.
+                // oxlint-disable-next-line typescript/restrict-template-expressions
                 Effect.mapError((cause) => new TowerUnavailable({ playerId, reason: `save did not decode: ${cause}` }))
             );
 

@@ -34,6 +34,8 @@ const replaceGeneratedContent = (
     filePath: string,
     newContent: string
 ): Effect.Effect<void, Error, FileSystem.FileSystem> =>
+    // The early exits return never-typed values; the normal path runs to the end.
+    // oxlint-disable-next-line typescript/consistent-return
     Effect.gen(function* () {
         const fileSystem = yield* FileSystem.FileSystem;
         const existingContent = yield* fileSystem.readFileString(filePath);
@@ -187,6 +189,8 @@ const Live = pipe(
     Layer.provideMerge(NodeServices.layer)
 );
 
+// The early exits return never-typed values; the normal path runs to the end.
+// oxlint-disable-next-line typescript/consistent-return
 Effect.gen(function* () {
     const path = yield* Path.Path;
     const fileSystem = yield* FileSystem.FileSystem;

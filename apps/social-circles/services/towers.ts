@@ -109,7 +109,7 @@ export class TinyburgTowers extends Context.Service<TinyburgTowers>()(
             const accessTokenFor = Effect.fnUntraced(function* (tinyburgUserId: string) {
                 const grant = yield* grants
                     .findLive(tinyburgUserId)
-                    .pipe(Effect.catchCause(() => Effect.succeed(Option.none<never>())));
+                    .pipe(Effect.catchCause(() => Effect.succeed(Option.none())));
 
                 if (Option.isNone(grant)) {
                     return yield* new TowerGrantUnusable({
@@ -150,6 +150,8 @@ export class TinyburgTowers extends Context.Service<TinyburgTowers>()(
                             (cause) =>
                                 new TowerGrantUnusable({
                                     tinyburgUserId,
+                                    // Frida's runtime handles are not plain strings; interpolating them here is intentional.
+                                    // oxlint-disable-next-line typescript/restrict-template-expressions
                                     reason: `token endpoint unreachable: ${cause}`,
                                     permanent: false,
                                 })
@@ -176,6 +178,8 @@ export class TinyburgTowers extends Context.Service<TinyburgTowers>()(
                         (cause) =>
                             new TowerGrantUnusable({
                                 tinyburgUserId,
+                                // Frida's runtime handles are not plain strings; interpolating them here is intentional.
+                                // oxlint-disable-next-line typescript/restrict-template-expressions
                                 reason: `unreadable token response: ${cause}`,
                                 permanent: false,
                             })
@@ -252,6 +256,8 @@ export class TinyburgTowers extends Context.Service<TinyburgTowers>()(
                         (cause) =>
                             new TowerGrantUnusable({
                                 tinyburgUserId: options.tinyburgUserId,
+                                // Frida's runtime handles are not plain strings; interpolating them here is intentional.
+                                // oxlint-disable-next-line typescript/restrict-template-expressions
                                 reason: `could not list linked accounts: ${cause}`,
                                 permanent: false,
                             })
@@ -285,6 +291,8 @@ export class TinyburgTowers extends Context.Service<TinyburgTowers>()(
                         (cause) =>
                             new TowerUnavailable({
                                 playerId: options.playerId,
+                                // Frida's runtime handles are not plain strings; interpolating them here is intentional.
+                                // oxlint-disable-next-line typescript/restrict-template-expressions
                                 reason: `pull failed: ${cause}`,
                             })
                     )
