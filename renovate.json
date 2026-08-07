@@ -61,7 +61,17 @@
         },
         {
             "description": "Group all Effect-TS packages into one PR",
-            "matchPackageNames": ["effect", "/^@effect//", "!@effect/build-utils", "!@effect/tsgo"],
+            "matchPackageNames": [
+                "effect",
+                "frida",
+                "effect-oidc",
+                "foldkit",
+                "/^@foldkit//",
+                "/^@efffrida//",
+                "/^@effect//",
+                "!@effect/build-utils",
+                "!@effect/tsgo"
+            ],
             "groupName": "Effect-TS packages",
             "addLabels": ["pnpm"]
         },
