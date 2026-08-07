@@ -49,7 +49,7 @@
         "@efffrida/frida-tools": "0.0.47",
         "@efffrida/gplayapi": "0.0.24",
         "@efffrida/il2cpp-bridge": "0.0.43",
-        "@efffrida/platform": "0.0.35",
+        "@efffrida/platform": "0.0.36",
         "@efffrida/polyfills": "0.0.14",
         "@efffrida/rpc": "0.0.50",
         "frida": "17.16.4",
