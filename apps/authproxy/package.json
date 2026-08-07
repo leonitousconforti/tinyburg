@@ -11,7 +11,7 @@
         "@effect/platform-browser": "4.0.0-beta.102",
         "@effect/platform-node": "4.0.0-beta.102",
         "@effect/sql-pg": "4.0.0-beta.102",
-        "@foldkit/vite-plugin": "0.11.3",
+        "@foldkit/vite-plugin": "0.12.0",
         "@tailwindcss/vite": "4.3.3",
         "@tinyburg/nimblebit-sdk": "workspace:*",
         "@tinyburg/tinytower-sdk": "workspace:*",
