@@ -82,7 +82,7 @@ declare const DeviceLive: Layer.Layer<
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/insight/src/index.ts#L83)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/insight/src/index.ts#L86)
 
 Since v1.0.0
 

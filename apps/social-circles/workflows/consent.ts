@@ -25,7 +25,7 @@ import { TinyburgTowers } from "../services/towers.ts";
  * @since 1.0.0
  * @category Errors
  */
-export class ConsentRejected extends Schema.ErrorClass<ConsentRejected>("@tinyburg/social-circles/ConsentRejected")({
+export class ConsentRejected extends Schema.Error<ConsentRejected>("@tinyburg/social-circles/ConsentRejected")({
     _tag: Schema.tag("ConsentRejected"),
     playerId: PlayerIdSchema,
     reason: Schema.String,

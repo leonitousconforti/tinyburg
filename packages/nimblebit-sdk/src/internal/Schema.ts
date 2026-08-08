@@ -86,9 +86,12 @@ export const parseNimblebitOrderedList = <
 
             if (knownEntries.length + unknownEntries.length < items.length) {
                 return Effect.fail(
-                    new SchemaIssue.InvalidValue(Option.some(properties), {
-                        message: `Expected at least ${items.length} properties, but got ${knownEntries.length + unknownEntries.length}`,
-                    })
+                    new SchemaIssue.InvalidValue(
+                        {
+                            message: `Expected at least ${items.length} properties, but got ${knownEntries.length + unknownEntries.length}`,
+                        },
+                        properties
+                    )
                 );
             }
 
@@ -107,9 +110,12 @@ export const parseNimblebitOrderedList = <
             const splitted = str.split(separator);
             if (splitted.length < items.length) {
                 return Effect.fail(
-                    new SchemaIssue.InvalidValue(Option.some(str), {
-                        message: `Expected at least ${items.length} items, but got ${splitted.length}`,
-                    })
+                    new SchemaIssue.InvalidValue(
+                        {
+                            message: `Expected at least ${items.length} items, but got ${splitted.length}`,
+                        },
+                        str
+                    )
                 );
             }
 

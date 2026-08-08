@@ -1,6 +1,6 @@
 import type { SqlError } from "effect/unstable/sql";
 
-import { Effect, Option, Layer, Redacted, Array, DateTime, Duration, type Schema } from "effect";
+import { Effect, Option, Layer, Redacted, Array, DateTime, Duration, Schema } from "effect";
 import { Headers, HttpServerRequest, HttpServerResponse } from "effect/unstable/http";
 import { HttpApiMiddleware, HttpApiSecurity, HttpApiError } from "effect/unstable/httpapi";
 import { RateLimiter } from "effect/unstable/persistence";
@@ -119,15 +119,17 @@ export const AuthorizationLive = Layer.effect(
                     if (
                         Duration.isGreaterThanOrEqualTo(DateTime.distance(accountLastUsedAt, now), Duration.minutes(1))
                     ) {
-                        const updatedAccount = yield* Account.update.makeEffect({
-                            key: maybeAccount.value.key,
-                            scopes: maybeAccount.value.scopes,
-                            revoked: maybeAccount.value.revoked,
-                            description: maybeAccount.value.description,
-                            ownerSub: maybeAccount.value.ownerSub,
-                            rateLimitLimit: maybeAccount.value.rateLimitLimit,
-                            rateLimitWindow: maybeAccount.value.rateLimitWindow,
-                        });
+                        const updatedAccount = yield* Account.update
+                            .makeEffect({
+                                key: maybeAccount.value.key,
+                                scopes: maybeAccount.value.scopes,
+                                revoked: maybeAccount.value.revoked,
+                                description: maybeAccount.value.description,
+                                ownerSub: maybeAccount.value.ownerSub,
+                                rateLimitLimit: maybeAccount.value.rateLimitLimit,
+                                rateLimitWindow: maybeAccount.value.rateLimitWindow,
+                            })
+                            .pipe(Effect.mapError((issue) => new Schema.SchemaError(issue)));
 
                         yield* repo.updateVoid(updatedAccount);
                     }

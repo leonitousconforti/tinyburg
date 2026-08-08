@@ -49,7 +49,7 @@ Since v1.0.0
 ```ts
 declare const layerCustomHost: (options: {
   host: string
-  authKey: Redacted.Redacted<string>
+  authKey: Redacted.Redacted
 }) => Layer.Layer<NimblebitAuth, never, Crypto.Crypto>
 ```
 
@@ -63,7 +63,7 @@ Since v1.0.0
 
 ```ts
 declare const layerCustomHostConfig: (
-  options: Config.Wrap<{ host: string; authKey: Redacted.Redacted<string> }>
+  options: Config.Wrap<{ host: string; authKey: Redacted.Redacted }>
 ) => Layer.Layer<NimblebitAuth, Config.ConfigError, Crypto.Crypto>
 ```
 
@@ -91,7 +91,7 @@ Since v1.0.0
 
 ```ts
 declare const layerDirectConfig: (
-  config?: Config.Config<Schema.Schema.Type<typeof NimblebitConfig.NimblebitAuthKeySchema>> | undefined
+  config?: Config.Config<Schema.Schema.Type<typeof NimblebitConfig.NimblebitAuthKeySchema>>
 ) => Layer.Layer<NimblebitAuth, Config.ConfigError, Crypto.Crypto>
 ```
 
@@ -105,7 +105,7 @@ Since v1.0.0
 
 ```ts
 declare const layerTinyburgAuthProxy: (options: {
-  authKey: Redacted.Redacted<string>
+  authKey: Redacted.Redacted
 }) => Layer.Layer<NimblebitAuth, never, Crypto.Crypto>
 ```
 
@@ -119,7 +119,7 @@ Since v1.0.0
 
 ```ts
 declare const layerTinyburgAuthProxyConfig: (
-  options: Config.Wrap<{ authKey: Redacted.Redacted<string> }>
+  options: Config.Wrap<{ authKey: Redacted.Redacted }>
 ) => Layer.Layer<NimblebitAuth, Config.ConfigError, Crypto.Crypto>
 ```
 

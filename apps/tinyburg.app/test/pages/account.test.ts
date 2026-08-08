@@ -19,8 +19,12 @@ import {
     FetchLinkedAccounts,
     FetchSessions,
     initialAccount,
+    RevokeAll,
+    RevokeOthers,
+    RevokeSession,
     SettledLinkedAccounts,
     SettledSessions,
+    Unlink,
     updateAccount,
 } from "../../client/pages/account.ts";
 
@@ -224,7 +228,7 @@ describe("account page", () => {
                 expect(title("Sign out of this browser")).toBeEnabled(),
 
                 Command.resolveAll(
-                    [{ name: "RevokeSession" }, CompletedRevoke({ revoked: 1, signedOut: false })],
+                    [RevokeSession, CompletedRevoke({ revoked: 1, signedOut: false })],
                     [FetchSessions, SettledSessions({ result: Result.succeed([thisDevice]), asOf: now })]
                 ),
 
@@ -240,7 +244,7 @@ describe("account page", () => {
                 given(loaded([thisDevice, otherDevice], [googleAccount])),
                 click(role("button", { name: "Sign out 1 other session" })),
                 Command.resolveAll(
-                    [{ name: "RevokeOthers" }, CompletedRevoke({ revoked: 3, signedOut: false })],
+                    [RevokeOthers, CompletedRevoke({ revoked: 3, signedOut: false })],
                     [FetchSessions, SettledSessions({ result: Result.succeed([thisDevice]), asOf: now })]
                 ),
                 expect(text("Signed out of 3 sessions.")).toExist()
@@ -257,7 +261,7 @@ describe("account page", () => {
                 page,
                 given(loaded([thisDevice, otherDevice], [googleAccount])),
                 click(role("button", { name: "Sign out everywhere" })),
-                Command.resolveAll([{ name: "RevokeAll" }, CompletedRevoke({ revoked: 2, signedOut: true })]),
+                Command.resolveAll([RevokeAll, CompletedRevoke({ revoked: 2, signedOut: true })]),
                 Command.expectNone(),
                 expect(text("Signed out of 2 sessions.")).toBeAbsent()
             );
@@ -268,10 +272,7 @@ describe("account page", () => {
                 page,
                 given(loaded([thisDevice, otherDevice], [googleAccount])),
                 click(title("Sign out of Firefox on Windows")),
-                Command.resolveAll([
-                    { name: "RevokeSession" },
-                    FailedAction({ message: "That didn't work. Please try again." }),
-                ]),
+                Command.resolveAll([RevokeSession, FailedAction({ message: "That didn't work. Please try again." })]),
                 expect(text("That didn't work. Please try again.")).toExist(),
                 expect(title("Sign out of Firefox on Windows")).toBeEnabled()
             );
@@ -314,7 +315,7 @@ describe("account page", () => {
                 }),
 
                 Command.resolveAll(
-                    [{ name: "Unlink" }, CompletedUnlink()],
+                    [Unlink, CompletedUnlink()],
                     [FetchLinkedAccounts, SettledLinkedAccounts({ result: Result.succeed([discordAccount]) })]
                 ),
 
@@ -352,7 +353,7 @@ describe("account page", () => {
                 page,
                 given(loaded([thisDevice, otherDevice], [googleAccount])),
                 click(role("button", { name: "Sign out 1 other session" })),
-                Command.resolveAll([{ name: "RevokeOthers" }, CompletedRevoke({ revoked: 1, signedOut: false })]),
+                Command.resolveAll([RevokeOthers, CompletedRevoke({ revoked: 1, signedOut: false })]),
 
                 expect(text("Chrome on macOS")).toExist(),
                 expect(text("Firefox on Windows")).toExist(),

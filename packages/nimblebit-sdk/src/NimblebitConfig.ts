@@ -151,7 +151,7 @@ export const PlayerConfig: Config.Config<
         return Effect.fail(
             new Config.ConfigError(
                 new Schema.SchemaError(
-                    new SchemaIssue.InvalidValue(Option.none(), {
+                    new SchemaIssue.InvalidValue({
                         message: "Either email or player salt must be provided, not both.",
                     })
                 )

@@ -63,13 +63,15 @@ export class SessionsRepository extends Context.Service<SessionsRepository>()(
             }): Effect.Effect<Session, Schema.SchemaError | SqlError.SqlError, never> =>
                 Effect.gen(function* () {
                     const now = yield* DateTime.now;
-                    const newSession = yield* Session.insert.makeEffect({
-                        sub: options.sub,
-                        displayName: options.displayName,
-                        avatarUrl: options.avatarUrl,
-                        tokenHash: options.tokenHash,
-                        expiresAt: now.pipe(DateTime.addDuration(options.expiresIn ?? Duration.days(30))),
-                    });
+                    const newSession = yield* Session.insert
+                        .makeEffect({
+                            sub: options.sub,
+                            displayName: options.displayName,
+                            avatarUrl: options.avatarUrl,
+                            tokenHash: options.tokenHash,
+                            expiresAt: now.pipe(DateTime.addDuration(options.expiresIn ?? Duration.days(30))),
+                        })
+                        .pipe(Effect.mapError((issue) => new Schema.SchemaError(issue)));
 
                     return yield* sessions.insert(newSession);
                 });

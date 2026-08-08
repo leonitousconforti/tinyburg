@@ -35,9 +35,18 @@ peerDependencyRules:
   allowedVersions:
     typescript: "7.0.2"
     "@babel/core": "8.0.1"
+    # These still pin effect 4.0.0-beta.104, remove once they catch up to beta.105
+    "effect-oidc>effect": "4.0.0-beta.105"
+    "@efffrida/frida-tools>effect": "4.0.0-beta.105"
+    "@efffrida/gplayapi>effect": "4.0.0-beta.105"
+    "@efffrida/il2cpp-bridge>effect": "4.0.0-beta.105"
+    "@efffrida/platform>effect": "4.0.0-beta.105"
+    "@efffrida/rpc>effect": "4.0.0-beta.105"
 
 minimumReleaseAgeExclude:
   - "effect-oidc"
   - "@efffrida/*"
   - "@effect/*"
   - "effect"
+  - "@foldkit/*"
+  - "foldkit"

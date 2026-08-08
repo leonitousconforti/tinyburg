@@ -72,7 +72,7 @@ declare const parseNimblebitOrderedList: <
   }>
 >(
   items: Items,
-  separator?: string | undefined
+  separator?: string
 ) => Schema.decodeTo<
   Schema.Struct<
     { [K in Items[number]["property"]]: Extract<Items[number], { property: K }>["schema"] } & {
@@ -131,7 +131,7 @@ declare const UnityColor: Schema.decodeTo<
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/NimblebitSchema.ts#L107)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/NimblebitSchema.ts#L108)
 
 Since v1.0.0
 
@@ -140,11 +140,11 @@ Since v1.0.0
 **Signature**
 
 ```ts
-declare const split: (
-  options?: { readonly separator?: string | undefined } | undefined
-) => (from: Schema.String) => Schema.decodeTo<Schema.$Array<Schema.String>, Schema.String, never, never>
+declare const split: (options?: {
+  readonly separator?: string | undefined
+}) => (from: Schema.String) => Schema.decodeTo<Schema.$Array<Schema.String>, Schema.String, never>
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/NimblebitSchema.ts#L130)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/NimblebitSchema.ts#L132)
 
 Since v1.0.0
