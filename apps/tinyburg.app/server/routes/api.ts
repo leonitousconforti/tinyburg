@@ -105,6 +105,10 @@ const AuthorizationLive = Layer.unwrap(
         ResourceServer.layer({
             issuer: keys.issuer,
             audience: keys.issuer,
+            // The provider lives in this very process, so its keys are already
+            // at hand; verifying locally removes the boot-order dependency on
+            // the server fetching its own JWKS endpoint over http.
+            jwks: keys.jwks,
             algorithms: ["ES256"],
             revoked: (claims) =>
                 OidcRepository.use((repo) => {
