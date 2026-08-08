@@ -3,7 +3,7 @@ import { Effect, Match, Option, Schema as S } from "effect";
 import type { TitleMessages } from "./messages/types.ts";
 import type { Document, Html, HtmlBuilder } from "foldkit/html";
 
-import { fromNavigator, Language } from "@tinyburg/ui/Internationalization";
+import { Language, fromNavigator } from "@tinyburg/ui/Internationalization";
 import { AsyncData, Command, Navigation, Render, type Runtime, Url } from "foldkit";
 import { m } from "foldkit/message";
 import { evo } from "foldkit/struct";

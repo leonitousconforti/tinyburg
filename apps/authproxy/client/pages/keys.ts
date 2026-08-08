@@ -4,8 +4,8 @@ import type { Message as AppMessage } from "../main.ts";
 import type { KeysMessages, SharedMessages } from "../messages/types.ts";
 import type { Html, HtmlBuilder } from "foldkit/html";
 
-import { type Language, longDate } from "@tinyburg/ui/Internationalization";
 import { banner, card, dangerButton, primaryButton, quietButton, smallButton } from "@tinyburg/ui/Chrome";
+import { type Language, longDate } from "@tinyburg/ui/Internationalization";
 import { AsyncData, Command } from "foldkit";
 import { m } from "foldkit/message";
 import { evo } from "foldkit/struct";
