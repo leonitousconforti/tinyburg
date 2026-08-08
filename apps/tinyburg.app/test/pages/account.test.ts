@@ -4,10 +4,12 @@ import type { SessionUser } from "../../client/backend.ts";
 import type { Message as AppMessage } from "../../client/main.ts";
 import type { Html, HtmlBuilder } from "foldkit/html";
 
+import { relativeTime } from "@tinyburg/i18n";
 import { AsyncData } from "foldkit";
 import { Scene } from "foldkit/test";
 import { describe, it } from "vitest";
 
+import { en } from "../../client/messages/en.ts";
 import {
     type AccountModel,
     AccountMessage,
@@ -32,6 +34,13 @@ const { all, click, Command, expect, expectAll, given, role, scene, text, title 
 
 // FIXTURES
 
+/*
+  Selectors go through the `en` messages module (and the shared date
+  formatters) rather than repeating the copy, so a wording edit fails in
+  exactly one place.
+*/
+const msgs = en.account;
+
 const user: SessionUser = {
     id: "00000000-0000-4000-8000-000000000001",
     createdAt: DateTime.makeUnsafe("2026-01-04T09:00:00Z"),
@@ -52,6 +61,9 @@ const hoursBefore = (hours: number): DateTime.Utc =>
 const CHROME_MACOS =
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36";
 const FIREFOX_WINDOWS = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:126.0) Gecko/20100101 Firefox/126.0";
+
+const chromeOnMacos = msgs.deviceOn("Chrome", "macOS");
+const firefoxOnWindows = msgs.deviceOn("Firefox", "Windows");
 
 const thisDevice = {
     id: "11111111-1111-4111-8111-111111111111",
@@ -128,7 +140,7 @@ const page = {
         }
         return updateAccount(model, message);
     },
-    view: (model: AccountModel, h: HtmlBuilder<AppMessage>): Html => accountView(h, model, user),
+    view: (model: AccountModel, h: HtmlBuilder<AppMessage>): Html => accountView(h, msgs, "en", model, user),
 };
 
 describe("account page", () => {
@@ -137,7 +149,7 @@ describe("account page", () => {
             scene(
                 page,
                 given(arrivingWith(Option.some("linked"), Option.none())),
-                expect(text("Connected. You can now sign in with it.")).toExist()
+                expect(text(msgs.notices.connected)).toExist()
             );
         });
 
@@ -145,7 +157,7 @@ describe("account page", () => {
             scene(
                 page,
                 given(arrivingWith(Option.none(), Option.some("oauth_denied"))),
-                expect(text("Connecting that account was cancelled.")).toExist()
+                expect(text(msgs.notices.linkCancelled)).toExist()
             );
         });
 
@@ -153,7 +165,7 @@ describe("account page", () => {
             scene(
                 page,
                 given(arrivingWith(Option.some("taken"), Option.none())),
-                expect(text("That account is already connected to a different Tinyburg account.")).toExist()
+                expect(text(msgs.problems.accountTaken)).toExist()
             );
         });
 
@@ -166,7 +178,7 @@ describe("account page", () => {
             scene(
                 page,
                 given(arrivingWith(Option.some("something_new"), Option.none())),
-                expect(text("Where You're Signed In")).toExist(),
+                expect(text(msgs.sessionsHeading)).toExist(),
                 expectAll(all.role("status")).toBeEmpty()
             );
         });
@@ -177,9 +189,9 @@ describe("account page", () => {
             scene(
                 page,
                 given(loaded([thisDevice, otherDevice], [googleAccount, discordAccount])),
-                expect(text("Chrome on macOS")).toExist(),
-                expect(text("This device")).toExist(),
-                expect(text("Firefox on Windows")).toExist()
+                expect(text(chromeOnMacos)).toExist(),
+                expect(text(msgs.thisDevice)).toExist(),
+                expect(text(firefoxOnWindows)).toExist()
             );
         });
 
@@ -187,8 +199,8 @@ describe("account page", () => {
             scene(
                 page,
                 given(loaded([thisDevice, otherDevice], [googleAccount])),
-                expect(text("Last active just now · 203.0.113.7")).toExist(),
-                expect(text("Last active 2 hours ago")).toExist()
+                expect(text(`${msgs.lastActive(relativeTime("en", now, now))} · 203.0.113.7`)).toExist(),
+                expect(text(msgs.lastActive(relativeTime("en", now, hoursBefore(2))))).toExist()
             );
         });
 
@@ -196,13 +208,13 @@ describe("account page", () => {
             scene(
                 page,
                 given(loaded([thisDevice], [googleAccount])),
-                expect(role("button", { name: "No other sessions" })).toBeDisabled()
+                expect(role("button", { name: msgs.noOtherSessions })).toBeDisabled()
             );
 
             scene(
                 page,
                 given(loaded([thisDevice, otherDevice], [googleAccount])),
-                expect(role("button", { name: "Sign out 1 other session" })).toBeEnabled()
+                expect(role("button", { name: msgs.signOutOthers(1) })).toBeEnabled()
             );
         });
     });
@@ -218,23 +230,23 @@ describe("account page", () => {
             scene(
                 page,
                 given(loaded([thisDevice, otherDevice], [googleAccount])),
-                click(title("Sign out of Firefox on Windows")),
+                click(title(msgs.signOutOf(firefoxOnWindows))),
 
                 Command.expectExact({ name: "RevokeSession", args: { sessionId: otherDevice.id } }),
 
-                expect(title("Sign out of Firefox on Windows")).toHaveText("..."),
-                expect(title("Sign out of Firefox on Windows")).toBeDisabled(),
-                expect(title("Sign out of this browser")).toHaveText("Sign out"),
-                expect(title("Sign out of this browser")).toBeEnabled(),
+                expect(title(msgs.signOutOf(firefoxOnWindows))).toHaveText("..."),
+                expect(title(msgs.signOutOf(firefoxOnWindows))).toBeDisabled(),
+                expect(title(msgs.signOutThisBrowser)).toHaveText(msgs.signOut),
+                expect(title(msgs.signOutThisBrowser)).toBeEnabled(),
 
                 Command.resolveAll(
                     [RevokeSession, CompletedRevoke({ revoked: 1, signedOut: false })],
                     [FetchSessions, SettledSessions({ result: Result.succeed([thisDevice]), asOf: now })]
                 ),
 
-                expect(text("Signed out of 1 session.")).toExist(),
-                expect(text("Firefox on Windows")).toBeAbsent(),
-                expect(role("button", { name: "No other sessions" })).toBeDisabled()
+                expect(text(msgs.signedOutSessions(1))).toExist(),
+                expect(text(firefoxOnWindows)).toBeAbsent(),
+                expect(role("button", { name: msgs.noOtherSessions })).toBeDisabled()
             );
         });
 
@@ -242,12 +254,12 @@ describe("account page", () => {
             scene(
                 page,
                 given(loaded([thisDevice, otherDevice], [googleAccount])),
-                click(role("button", { name: "Sign out 1 other session" })),
+                click(role("button", { name: msgs.signOutOthers(1) })),
                 Command.resolveAll(
                     [RevokeOthers, CompletedRevoke({ revoked: 3, signedOut: false })],
                     [FetchSessions, SettledSessions({ result: Result.succeed([thisDevice]), asOf: now })]
                 ),
-                expect(text("Signed out of 3 sessions.")).toExist()
+                expect(text(msgs.signedOutSessions(3))).toExist()
             );
         });
 
@@ -260,10 +272,10 @@ describe("account page", () => {
             scene(
                 page,
                 given(loaded([thisDevice, otherDevice], [googleAccount])),
-                click(role("button", { name: "Sign out everywhere" })),
+                click(role("button", { name: msgs.signOutEverywhere })),
                 Command.resolveAll([RevokeAll, CompletedRevoke({ revoked: 2, signedOut: true })]),
                 Command.expectNone(),
-                expect(text("Signed out of 2 sessions.")).toBeAbsent()
+                expect(text(msgs.signedOutSessions(2))).toBeAbsent()
             );
         });
 
@@ -271,10 +283,10 @@ describe("account page", () => {
             scene(
                 page,
                 given(loaded([thisDevice, otherDevice], [googleAccount])),
-                click(title("Sign out of Firefox on Windows")),
-                Command.resolveAll([RevokeSession, FailedAction({ message: "That didn't work. Please try again." })]),
-                expect(text("That didn't work. Please try again.")).toExist(),
-                expect(title("Sign out of Firefox on Windows")).toBeEnabled()
+                click(title(msgs.signOutOf(firefoxOnWindows))),
+                Command.resolveAll([RevokeSession, FailedAction({ problem: "actionFailed" })]),
+                expect(text(msgs.problems.actionFailed)).toExist(),
+                expect(title(msgs.signOutOf(firefoxOnWindows))).toBeEnabled()
             );
         });
     });
@@ -298,7 +310,7 @@ describe("account page", () => {
             scene(
                 page,
                 given(loaded([thisDevice], [googleAccount])),
-                expect(title("This is the only way you have left to sign in")).toBeDisabled()
+                expect(title(msgs.lastMethodTitle)).toBeDisabled()
             );
         });
 
@@ -306,8 +318,8 @@ describe("account page", () => {
             scene(
                 page,
                 given(loaded([thisDevice], [googleAccount, discordAccount])),
-                expect(title("Disconnect Google")).toBeEnabled(),
-                click(title("Disconnect Google")),
+                expect(title(msgs.disconnectProvider("Google"))).toBeEnabled(),
+                click(title(msgs.disconnectProvider("Google"))),
 
                 Command.expectExact({
                     name: "Unlink",
@@ -319,15 +331,15 @@ describe("account page", () => {
                     [FetchLinkedAccounts, SettledLinkedAccounts({ result: Result.succeed([discordAccount]) })]
                 ),
 
-                expect(text("Disconnected.")).toExist(),
-                expect(title("This is the only way you have left to sign in")).toBeDisabled()
+                expect(text(msgs.notices.disconnected)).toExist(),
+                expect(title(msgs.lastMethodTitle)).toBeDisabled()
             );
         });
     });
 
     describe("loading and failure", () => {
         it("says it is loading before anything has landed", () => {
-            scene(page, given({ ...initialAccount, asOf: now }), expect(text("Loading your sessions...")).toExist());
+            scene(page, given({ ...initialAccount, asOf: now }), expect(text(msgs.loadingSessions)).toExist());
         });
 
         it("shows the failure text in place of the list", () => {
@@ -336,10 +348,10 @@ describe("account page", () => {
                 given({
                     ...initialAccount,
                     asOf: now,
-                    sessions: AsyncData.fail("We couldn't load this. Please try again."),
+                    sessions: AsyncData.fail("loadFailed"),
                 }),
-                expect(text("We couldn't load this. Please try again.")).toExist(),
-                expect(role("button", { name: "Sign out everywhere" })).toBeAbsent()
+                expect(text(msgs.loadFailed)).toExist(),
+                expect(role("button", { name: msgs.signOutEverywhere })).toBeAbsent()
             );
         });
 
@@ -352,11 +364,11 @@ describe("account page", () => {
             scene(
                 page,
                 given(loaded([thisDevice, otherDevice], [googleAccount])),
-                click(role("button", { name: "Sign out 1 other session" })),
+                click(role("button", { name: msgs.signOutOthers(1) })),
                 Command.resolveAll([RevokeOthers, CompletedRevoke({ revoked: 1, signedOut: false })]),
 
-                expect(text("Chrome on macOS")).toExist(),
-                expect(text("Firefox on Windows")).toExist(),
+                expect(text(chromeOnMacos)).toExist(),
+                expect(text(firefoxOnWindows)).toExist(),
 
                 Command.resolve(FetchSessions, SettledSessions({ result: Result.succeed([thisDevice]), asOf: now }))
             );

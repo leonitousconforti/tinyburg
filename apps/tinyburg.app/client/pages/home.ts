@@ -1,27 +1,5 @@
+import type { HomeMessages, SharedMessages } from "../messages/types.ts";
 import type { Html, HtmlBuilder } from "foldkit/html";
-
-const features = [
-    {
-        icon: "🏢",
-        title: "Trade Bitizens",
-        description: "Find dream jobbers for your tower or trade away duplicates",
-    },
-    {
-        icon: "🎨",
-        title: "Costumes & Pets",
-        description: "Collect rare costumes and adorable pets for your bitizens",
-    },
-    {
-        icon: "🏆",
-        title: "Golden Tickets",
-        description: "Exchange resources and help fellow tower builders",
-    },
-    {
-        icon: "🤝",
-        title: "Community",
-        description: "Connect with thousands of active TinyTower players",
-    },
-];
 
 const navLink = <M>(h: HtmlBuilder<M>, href: string, label: string): Html =>
     h.a([h.Href(href), h.Class("hover:text-gold text-xl text-white no-underline transition-colors")], [label]);
@@ -32,23 +10,30 @@ const footerLink = <M>(h: HtmlBuilder<M>, href: string, label: string): Html =>
         [label]
     );
 
-const heroTower = <M>(h: HtmlBuilder<M>): Html =>
+const heroTower = <M>(h: HtmlBuilder<M>, floors: SharedMessages["floors"]): Html =>
     h.div(
         [h.Class("tower tower--hero")],
         [
             h.div([h.Class("floor roof")], ["🏗️"]),
-            h.div([h.Class("floor food")], ["🍕 Food"]),
-            h.div([h.Class("floor retail")], ["🛍️ Retail"]),
-            h.div([h.Class("floor service")], ["✂️ Service"]),
-            h.div([h.Class("floor creative")], ["🎨 Creative"]),
-            h.div([h.Class("floor recreation")], ["🎮 Recreation"]),
-            h.div([h.Class("floor residential")], ["🛏️ Residential"]),
-            h.div([h.Class("floor lobby")], ["🚪 Lobby"]),
+            h.div([h.Class("floor food")], [floors.food]),
+            h.div([h.Class("floor retail")], [floors.retail]),
+            h.div([h.Class("floor service")], [floors.service]),
+            h.div([h.Class("floor creative")], [floors.creative]),
+            h.div([h.Class("floor recreation")], [floors.recreation]),
+            h.div([h.Class("floor residential")], [floors.residential]),
+            h.div([h.Class("floor lobby")], [floors.lobby]),
         ]
     );
 
-export const homeView = <M>(h: HtmlBuilder<M>): Html =>
-    h.div(
+export const homeView = <M>(h: HtmlBuilder<M>, msgs: HomeMessages, shared: SharedMessages): Html => {
+    const features = [
+        { icon: "🏢", ...msgs.features.tradeBitizens },
+        { icon: "🎨", ...msgs.features.costumesPets },
+        { icon: "🏆", ...msgs.features.goldenTickets },
+        { icon: "🤝", ...msgs.features.community },
+    ];
+
+    return h.div(
         [],
         [
             h.header(
@@ -67,10 +52,10 @@ export const homeView = <M>(h: HtmlBuilder<M>): Html =>
                             h.div(
                                 [h.Class("hidden gap-8 md:flex")],
                                 [
-                                    navLink(h, "/trades", "Browse Trades"),
-                                    navLink(h, "/bitizens", "Bitizens"),
-                                    navLink(h, "/costumes", "Costumes"),
-                                    navLink(h, "/about", "About"),
+                                    navLink(h, "/trades", msgs.nav.browseTrades),
+                                    navLink(h, "/bitizens", msgs.nav.bitizens),
+                                    navLink(h, "/costumes", msgs.nav.costumes),
+                                    navLink(h, "/about", msgs.nav.about),
                                 ]
                             ),
                             h.a(
@@ -80,7 +65,7 @@ export const homeView = <M>(h: HtmlBuilder<M>): Html =>
                                         "font-pixel bg-gold text-dark-blue shadow-pixel hover:shadow-pixel-hover px-6 py-3 text-[0.7rem] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5"
                                     ),
                                 ],
-                                ["Log In"]
+                                [msgs.logIn]
                             ),
                         ]
                     ),
@@ -106,7 +91,7 @@ export const homeView = <M>(h: HtmlBuilder<M>): Html =>
                                                 "font-pixel mb-6 text-2xl leading-relaxed text-white drop-shadow-[4px_4px_0_var(--color-dark-blue)] md:text-4xl"
                                             ),
                                         ],
-                                        ["TinyTower Trading"]
+                                        [msgs.heroTitle]
                                     ),
                                     h.p(
                                         [
@@ -114,9 +99,7 @@ export const homeView = <M>(h: HtmlBuilder<M>): Html =>
                                                 "mb-8 text-2xl leading-relaxed text-white drop-shadow-[2px_2px_0_rgba(0,0,0,0.3)]"
                                             ),
                                         ],
-                                        [
-                                            "The community marketplace for trading bitizens, costumes, pets, and more with TinyTower players worldwide",
-                                        ]
+                                        [msgs.heroTagline]
                                     ),
                                     h.div(
                                         [h.Class("flex flex-wrap justify-center gap-4 lg:justify-start")],
@@ -128,7 +111,7 @@ export const homeView = <M>(h: HtmlBuilder<M>): Html =>
                                                         "font-pixel bg-gold text-dark-blue shadow-pixel hover:shadow-pixel-hover px-8 py-4 text-sm transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:bg-[#ffe44d]"
                                                     ),
                                                 ],
-                                                ["Start Trading"]
+                                                [msgs.startTrading]
                                             ),
                                             h.a(
                                                 [
@@ -137,13 +120,13 @@ export const homeView = <M>(h: HtmlBuilder<M>): Html =>
                                                         "font-pixel shadow-pixel hover:shadow-pixel-hover border-3 border-white bg-transparent px-8 py-4 text-sm text-white transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:bg-white/10"
                                                     ),
                                                 ],
-                                                ["Learn More"]
+                                                [msgs.learnMore]
                                             ),
                                         ]
                                     ),
                                 ]
                             ),
-                            h.div([h.Class("flex justify-center")], [heroTower(h)]),
+                            h.div([h.Class("flex justify-center")], [heroTower(h, shared.floors)]),
                         ]
                     ),
                     h.section(
@@ -155,7 +138,7 @@ export const homeView = <M>(h: HtmlBuilder<M>): Html =>
                                         "font-pixel mb-12 text-2xl text-white drop-shadow-[3px_3px_0_var(--color-dark-blue)]"
                                     ),
                                 ],
-                                ["What Can You Trade?"]
+                                [msgs.featuresHeading]
                             ),
                             h.div(
                                 [h.Class("grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4")],
@@ -182,9 +165,9 @@ export const homeView = <M>(h: HtmlBuilder<M>): Html =>
                     h.section(
                         [h.Class("relative z-10 mx-auto flex max-w-6xl flex-wrap justify-center gap-16 px-8 py-16")],
                         [
-                            ["10K+", "Active Traders"],
-                            ["50K+", "Trades Completed"],
-                            ["1M+", "Bitizens Traded"],
+                            ["10K+", msgs.stats.activeTraders],
+                            ["50K+", msgs.stats.tradesCompleted],
+                            ["1M+", msgs.stats.bitizensTraded],
                         ].map(([stat, label]) =>
                             h.div(
                                 [
@@ -206,14 +189,8 @@ export const homeView = <M>(h: HtmlBuilder<M>): Html =>
                             ),
                         ],
                         [
-                            h.h2(
-                                [h.Class("font-pixel text-gold mb-4 text-xl leading-relaxed")],
-                                ["Ready to Build Your Dream Tower?"]
-                            ),
-                            h.p(
-                                [h.Class("mb-8 text-2xl text-white")],
-                                ["Join thousands of players trading bitizens and items every day"]
-                            ),
+                            h.h2([h.Class("font-pixel text-gold mb-4 text-xl leading-relaxed")], [msgs.ctaHeading]),
+                            h.p([h.Class("mb-8 text-2xl text-white")], [msgs.ctaBody]),
                             h.a(
                                 [
                                     h.Href("/login"),
@@ -221,7 +198,7 @@ export const homeView = <M>(h: HtmlBuilder<M>): Html =>
                                         "font-pixel bg-gold text-dark-blue shadow-pixel hover:shadow-pixel-hover inline-block px-10 py-5 text-base transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:bg-[#ffe44d]"
                                     ),
                                 ],
-                                ["Get Started Free"]
+                                [msgs.ctaButton]
                             ),
                         ]
                     ),
@@ -240,7 +217,7 @@ export const homeView = <M>(h: HtmlBuilder<M>): Html =>
                                     h.p(
                                         [h.Class("text-lg leading-relaxed text-white/90")],
                                         [
-                                            "A community-driven trading platform for TinyTower enthusiasts. Not affiliated with NimbleBit. Source code is available on ",
+                                            msgs.footerAbout.before,
                                             h.a(
                                                 [
                                                     h.Href("https://github.com/leonitousconforti/tinyburg"),
@@ -248,8 +225,9 @@ export const homeView = <M>(h: HtmlBuilder<M>): Html =>
                                                     h.Rel("noopener"),
                                                     h.Class("text-gold hover:underline"),
                                                 ],
-                                                ["GitHub"]
+                                                [msgs.footerAbout.linkLabel]
                                             ),
+                                            msgs.footerAbout.after,
                                         ]
                                     ),
                                 ]
@@ -257,41 +235,37 @@ export const homeView = <M>(h: HtmlBuilder<M>): Html =>
                             h.div(
                                 [],
                                 [
-                                    h.h4([h.Class("font-pixel text-gold mb-4 text-sm")], ["Quick Links"]),
-                                    footerLink(h, "/trades", "Browse Trades"),
-                                    footerLink(h, "/bitizens", "Bitizens"),
-                                    footerLink(h, "/costumes", "Costumes"),
+                                    h.h4([h.Class("font-pixel text-gold mb-4 text-sm")], [msgs.quickLinks]),
+                                    footerLink(h, "/trades", msgs.nav.browseTrades),
+                                    footerLink(h, "/bitizens", msgs.nav.bitizens),
+                                    footerLink(h, "/costumes", msgs.nav.costumes),
                                 ]
                             ),
                             h.div(
                                 [],
                                 [
-                                    h.h4([h.Class("font-pixel text-gold mb-4 text-sm")], ["Community"]),
+                                    h.h4([h.Class("font-pixel text-gold mb-4 text-sm")], [msgs.community]),
                                     footerLink(h, "/discord", "Discord"),
                                     footerLink(h, "/reddit", "Reddit"),
-                                    footerLink(h, "/sponsors", "Sponsors"),
+                                    footerLink(h, "/sponsors", msgs.sponsors),
                                 ]
                             ),
                             h.div(
                                 [],
                                 [
-                                    h.h4([h.Class("font-pixel text-gold mb-4 text-sm")], ["Legal"]),
-                                    footerLink(h, "/privacy", "Privacy Policy"),
-                                    footerLink(h, "/terms", "Terms of Service"),
+                                    h.h4([h.Class("font-pixel text-gold mb-4 text-sm")], [msgs.legal]),
+                                    footerLink(h, "/privacy", msgs.privacyPolicy),
+                                    footerLink(h, "/terms", msgs.termsOfService),
                                 ]
                             ),
                         ]
                     ),
                     h.div(
                         [h.Class("mx-auto max-w-6xl border-t border-white/10 px-8 py-6 text-center")],
-                        [
-                            h.p(
-                                [h.Class("text-base text-white/70")],
-                                ["© 2026 Tinyburg. TinyTower is a trademark of NimbleBit LLC."]
-                            ),
-                        ]
+                        [h.p([h.Class("text-base text-white/70")], [msgs.copyright])]
                     ),
                 ]
             ),
         ]
     );
+};
