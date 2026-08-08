@@ -1,5 +1,6 @@
 import { Option } from "effect";
 
+import type { LoginMessages, SharedMessages } from "../messages/types.ts";
 import type { Html, HtmlBuilder } from "foldkit/html";
 
 import { appBackLink, card } from "@tinyburg/ui/Chrome";
@@ -12,23 +13,14 @@ import { startLoginHref } from "../routes.ts";
  * could not be completed. Cancelling is not a failure and does not read like
  * one; the rest differ only in what the visitor should try next.
  */
-const problemFor = (error: string): { readonly denied: boolean; readonly text: string } => {
+const problemFor = (msgs: LoginMessages, error: string): { readonly denied: boolean; readonly text: string } => {
     if (error === "oauth_denied") {
-        return {
-            denied: true,
-            text: "Sign in was cancelled. You can pick up where you left off whenever you like.",
-        };
+        return { denied: true, text: msgs.cancelled };
     }
     if (error === "invalid_oauth_cookies" || error === "invalid_oauth_callback") {
-        return {
-            denied: false,
-            text: "That sign in attempt expired or was interrupted. Please start again, and check that your browser allows cookies for this site.",
-        };
+        return { denied: false, text: msgs.interrupted };
     }
-    return {
-        denied: false,
-        text: "We couldn't finish signing you in. Please try again.",
-    };
+    return { denied: false, text: msgs.failed };
 };
 
 const problemBanner = <M>(h: HtmlBuilder<M>, denied: boolean, text: string): Html =>
@@ -44,27 +36,30 @@ const problemBanner = <M>(h: HtmlBuilder<M>, denied: boolean, text: string): Htm
         [text]
     );
 
-export const loginView = <M>(h: HtmlBuilder<M>, returnTo: Option.Option<string>, error: Option.Option<string>): Html =>
+export const loginView = <M>(
+    h: HtmlBuilder<M>,
+    msgs: LoginMessages,
+    shared: SharedMessages,
+    returnTo: Option.Option<string>,
+    error: Option.Option<string>
+): Html =>
     h.div(
         [h.Class("relative z-10 flex min-h-screen flex-col items-center justify-center p-8")],
         [
-            appBackLink(h, "/", "← Back to Home"),
+            appBackLink(h, "/", shared.backToHome),
             h.div(
                 [h.Class(card + " max-w-md")],
                 [
                     h.div(
                         [h.Class("mb-8 text-center")],
                         [
-                            h.h1([h.Class("font-pixel mb-2 text-lg text-gray-800")], ["Authproxy Self Service"]),
-                            h.p(
-                                [h.Class("font-mono text-xl text-gray-600")],
-                                ["Your Tinyburg account is your identity here — one sign in, no new password."]
-                            ),
+                            h.h1([h.Class("font-pixel mb-2 text-lg text-gray-800")], [msgs.heading]),
+                            h.p([h.Class("font-mono text-xl text-gray-600")], [msgs.subheading]),
                         ]
                     ),
                     ...Option.match(error, {
                         onSome: (code) => {
-                            const { denied, text } = problemFor(code);
+                            const { denied, text } = problemFor(msgs, code);
                             return [problemBanner(h, denied, text)];
                         },
                         onNone: () => [],
@@ -76,17 +71,17 @@ export const loginView = <M>(h: HtmlBuilder<M>, returnTo: Option.Option<string>,
                                 "bg-dark-blue shadow-pixel hover:shadow-pixel-hover flex w-full items-center justify-center gap-3 rounded-lg px-6 py-4 font-mono text-xl text-white no-underline transition-all hover:-translate-x-0.5 hover:-translate-y-0.5"
                             ),
                         ],
-                        [towerIcon(h, "h-6 w-6 shrink-0"), h.span([], ["Sign in with Tinyburg"])]
+                        [towerIcon(h, "h-6 w-6 shrink-0"), h.span([], [msgs.signInWithTinyburg])]
                     ),
                     h.p(
                         [h.Class("font-mono mt-6 text-center text-lg text-gray-500")],
                         [
-                            "No Tinyburg account yet? ",
+                            msgs.noAccountBefore,
                             h.a(
                                 [h.Href("https://tinyburg.app/login"), h.Class("text-sky-dark underline")],
-                                ["Create one at tinyburg.app"]
+                                [msgs.createAccountLink]
                             ),
-                            " first.",
+                            msgs.noAccountAfter,
                         ]
                     ),
                 ]

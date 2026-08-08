@@ -1,5 +1,5 @@
-import type { Language } from "@tinyburg/i18n";
 import type { Messages } from "./types.ts";
+import type { Language } from "@tinyburg/i18n";
 
 import { de } from "./de.ts";
 import { en } from "./en.ts";

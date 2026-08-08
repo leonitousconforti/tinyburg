@@ -1,6 +1,7 @@
 import { Duration, Effect, Match, Option, Result, Schema as S } from "effect";
 
 import type { Message as AppMessage } from "../main.ts";
+import type { AdminMessages, SharedMessages } from "../messages/types.ts";
 import type { Html, HtmlBuilder } from "foldkit/html";
 
 import { banner, card, dangerButton, primaryButton, quietButton, smallButton } from "@tinyburg/ui/Chrome";
@@ -16,7 +17,13 @@ type Key = typeof Account.json.Type;
 
 // MODEL
 
-export const AdminKeys = AsyncData.Schema(S.Array(Account.json), S.String);
+// The model holds language-independent tags for what happened; the view
+// supplies the words from the message catalog.
+const AdminNotice = S.Literals(["saved", "keyDeleted"]);
+const AdminProblem = S.Literals(["elevationFailed", "actionFailed", "rateLimitInvalid"]);
+const LoadFailed = S.Literals(["loadFailed"]);
+
+export const AdminKeys = AsyncData.Schema(S.Array(Account.json), LoadFailed);
 
 const ScopesEditor = S.Struct({ key: S.String, scopes: S.Array(S.String) });
 const RateLimitEditor = S.Struct({ key: S.String, limit: S.String, windowSeconds: S.String });
@@ -28,8 +35,8 @@ export const AdminModel = S.Struct({
     needsElevation: S.Boolean,
 
     busy: S.Option(S.String),
-    notice: S.Option(S.String),
-    problem: S.Option(S.String),
+    notice: S.Option(AdminNotice),
+    problem: S.Option(AdminProblem),
     armedDelete: S.Option(S.String),
 
     // At most one row is being edited at a time.
@@ -49,9 +56,6 @@ export const initialAdmin: AdminModel = {
     rateLimitEditor: Option.none(),
 };
 
-const ELEVATION_FAILED =
-    "Elevation was refused. Check the password, that you approved the tower check, and that your account holds an allowlisted tower.";
-
 /**
  * The admin page as entered: held data stays, transient state clears. The
  * elevation round trip lands back here with its outcome in the url, so the
@@ -61,7 +65,7 @@ export const enterAdmin = (error: Option.Option<string>, previous: AdminModel): 
     evo(previous, {
         busy: Option.none,
         notice: Option.none,
-        problem: () => Option.map(error, () => ELEVATION_FAILED),
+        problem: () => Option.map(error, () => "elevationFailed" as const),
         armedDelete: Option.none,
         scopesEditor: Option.none,
         rateLimitEditor: Option.none,
@@ -69,7 +73,7 @@ export const enterAdmin = (error: Option.Option<string>, previous: AdminModel): 
 
 // MESSAGE
 
-export const SettledAdminKeys = m("SettledAdminKeys", { result: S.Result(S.Array(Account.json), S.String) });
+export const SettledAdminKeys = m("SettledAdminKeys", { result: S.Result(S.Array(Account.json), LoadFailed) });
 
 /** The admin surface refused a plain session; show the step-up form. */
 export const AdminRequiresElevation = m("AdminRequiresElevation");
@@ -86,7 +90,7 @@ export const ClickedAdminSetRevoked = m("ClickedAdminSetRevoked", { key: S.Strin
 export const ClickedAdminDelete = m("ClickedAdminDelete", { key: S.String });
 export const CompletedAdminRowUpdate = m("CompletedAdminRowUpdate");
 export const CompletedAdminDelete = m("CompletedAdminDelete");
-export const FailedAdminAction = m("FailedAdminAction", { message: S.String });
+export const FailedAdminAction = m("FailedAdminAction", { problem: AdminProblem });
 
 /** The session ended somewhere else while this page was open. */
 export const AdminSignedOutElsewhere = m("AdminSignedOutElsewhere");
@@ -112,9 +116,6 @@ export type AdminMessage = typeof AdminMessage.Type;
 
 // COMMAND
 
-const LOAD_FAILED = "We couldn't load the keys. Please try again.";
-const ACTION_FAILED = "That didn't work. Please try again.";
-
 export const FetchAdminKeys = Command.define("FetchAdminKeys", {
     messages: [SettledAdminKeys, AdminRequiresElevation, AdminSignedOutElsewhere],
     execute: Effect.gen(function* () {
@@ -124,7 +125,7 @@ export const FetchAdminKeys = Command.define("FetchAdminKeys", {
     }).pipe(
         Effect.catchTag("Unauthorized", () => Effect.succeed(AdminSignedOutElsewhere())),
         Effect.catchTag("Forbidden", () => Effect.succeed(AdminRequiresElevation())),
-        Effect.catch(() => Effect.succeed(SettledAdminKeys({ result: Result.fail(LOAD_FAILED) })))
+        Effect.catch(() => Effect.succeed(SettledAdminKeys({ result: Result.fail("loadFailed" as const) })))
     ),
 });
 
@@ -139,7 +140,7 @@ const SaveScopes = Command.define("SaveScopes", {
         }).pipe(
             Effect.catchTag("Unauthorized", () => Effect.succeed(AdminSignedOutElsewhere())),
             Effect.catchTag("Forbidden", () => Effect.succeed(AdminRequiresElevation())),
-            Effect.catch(() => Effect.succeed(FailedAdminAction({ message: ACTION_FAILED })))
+            Effect.catch(() => Effect.succeed(FailedAdminAction({ problem: "actionFailed" })))
         ),
 });
 
@@ -157,7 +158,7 @@ const SaveRateLimit = Command.define("SaveRateLimit", {
         }).pipe(
             Effect.catchTag("Unauthorized", () => Effect.succeed(AdminSignedOutElsewhere())),
             Effect.catchTag("Forbidden", () => Effect.succeed(AdminRequiresElevation())),
-            Effect.catch(() => Effect.succeed(FailedAdminAction({ message: ACTION_FAILED })))
+            Effect.catch(() => Effect.succeed(FailedAdminAction({ problem: "actionFailed" })))
         ),
 });
 
@@ -172,7 +173,7 @@ const SetRevokedAdmin = Command.define("SetRevokedAdmin", {
         }).pipe(
             Effect.catchTag("Unauthorized", () => Effect.succeed(AdminSignedOutElsewhere())),
             Effect.catchTag("Forbidden", () => Effect.succeed(AdminRequiresElevation())),
-            Effect.catch(() => Effect.succeed(FailedAdminAction({ message: ACTION_FAILED })))
+            Effect.catch(() => Effect.succeed(FailedAdminAction({ problem: "actionFailed" })))
         ),
 });
 
@@ -187,7 +188,7 @@ const DeleteKeyAdmin = Command.define("DeleteKeyAdmin", {
         }).pipe(
             Effect.catchTag("Unauthorized", () => Effect.succeed(AdminSignedOutElsewhere())),
             Effect.catchTag("Forbidden", () => Effect.succeed(AdminRequiresElevation())),
-            Effect.catch(() => Effect.succeed(FailedAdminAction({ message: ACTION_FAILED })))
+            Effect.catch(() => Effect.succeed(FailedAdminAction({ problem: "actionFailed" })))
         ),
 });
 
@@ -287,7 +288,7 @@ export const updateAdmin = (model: AdminModel, message: AdminMessage): AdminStep
                     ) {
                         return [
                             evo(model, {
-                                problem: () => Option.some("Rate limits need positive whole numbers."),
+                                problem: () => Option.some("rateLimitInvalid" as const),
                             }),
                             [],
                         ];
@@ -310,19 +311,19 @@ export const updateAdmin = (model: AdminModel, message: AdminMessage): AdminStep
             CompletedAdminRowUpdate: () => [
                 evo(refetching(model), {
                     busy: Option.none,
-                    notice: () => Option.some("Saved."),
+                    notice: () => Option.some("saved" as const),
                     scopesEditor: Option.none,
                     rateLimitEditor: Option.none,
                 }),
                 [FetchAdminKeys()],
             ],
             CompletedAdminDelete: () => [
-                evo(refetching(model), { busy: Option.none, notice: () => Option.some("Key deleted.") }),
+                evo(refetching(model), { busy: Option.none, notice: () => Option.some("keyDeleted" as const) }),
                 [FetchAdminKeys()],
             ],
 
-            FailedAdminAction: ({ message }) => [
-                evo(model, { busy: Option.none, problem: () => Option.some(message) }),
+            FailedAdminAction: ({ problem }) => [
+                evo(model, { busy: Option.none, problem: () => Option.some(problem) }),
                 [],
             ],
             AdminSignedOutElsewhere: () => [evo(model, { busy: Option.none }), []],
@@ -345,17 +346,12 @@ const scopeChip = (h: HtmlBuilder<AppMessage>, path: string): Html =>
  * password to the server, which sends the browser through tinyburg.app to
  * re-authorize with `towers:read`, and the outcome lands back on /admin.
  */
-const elevationForm = <M>(h: HtmlBuilder<M>): Html =>
+const elevationForm = <M>(h: HtmlBuilder<M>, msgs: AdminMessages): Html =>
     h.section(
         [h.Class(card + " max-w-md")],
         [
-            h.h2([h.Class("font-pixel mb-2 text-lg text-gray-800")], ["Step Up"]),
-            h.p(
-                [h.Class("font-mono mb-6 text-lg text-gray-500")],
-                [
-                    "Admin actions need more than a session: you enter the admin password, then re-authorize with Tinyburg so the proxy can check - with your consent - that your account holds an allowlisted tower. Elevation lasts an hour.",
-                ]
-            ),
+            h.h2([h.Class("font-pixel mb-2 text-lg text-gray-800")], [msgs.stepUpHeading]),
+            h.p([h.Class("font-mono mb-6 text-lg text-gray-500")], [msgs.stepUpIntro]),
             h.form(
                 [h.Method("post"), h.Action("/auth/elevate"), h.Class("flex flex-col gap-4")],
                 [
@@ -367,15 +363,21 @@ const elevationForm = <M>(h: HtmlBuilder<M>): Html =>
                         h.Class(
                             "font-mono focus:border-sky-blue rounded-lg border-2 border-gray-300 bg-white px-3 py-2 text-xl outline-none"
                         ),
-                        h.Placeholder("Admin password"),
+                        h.Placeholder(msgs.passwordPlaceholder),
                     ]),
-                    h.button([h.Type("submit"), h.Class(primaryButton)], ["Elevate with Tinyburg"]),
+                    h.button([h.Type("submit"), h.Class(primaryButton)], [msgs.elevate]),
                 ]
             ),
         ]
     );
 
-const scopesEditorView = (h: HtmlBuilder<AppMessage>, model: AdminModel, selected: ReadonlyArray<string>): Html =>
+const scopesEditorView = (
+    h: HtmlBuilder<AppMessage>,
+    msgs: AdminMessages,
+    shared: SharedMessages,
+    model: AdminModel,
+    selected: ReadonlyArray<string>
+): Html =>
     h.div(
         [h.Class("flex flex-col gap-3 rounded-lg border-2 border-gray-200 bg-gray-50 p-3")],
         [
@@ -405,9 +407,12 @@ const scopesEditorView = (h: HtmlBuilder<AppMessage>, model: AdminModel, selecte
                             h.Disabled(selected.length === 0 || Option.isSome(model.busy)),
                             h.OnClick(SubmittedAdminEdit()),
                         ],
-                        ["Save scopes"]
+                        [msgs.saveScopes]
                     ),
-                    h.button([h.Type("button"), h.Class(quietButton), h.OnClick(ClickedCancelAdminEdit())], ["Cancel"]),
+                    h.button(
+                        [h.Type("button"), h.Class(quietButton), h.OnClick(ClickedCancelAdminEdit())],
+                        [shared.cancel]
+                    ),
                 ]
             ),
         ]
@@ -415,6 +420,8 @@ const scopesEditorView = (h: HtmlBuilder<AppMessage>, model: AdminModel, selecte
 
 const rateLimitEditorView = (
     h: HtmlBuilder<AppMessage>,
+    msgs: AdminMessages,
+    shared: SharedMessages,
     model: AdminModel,
     editor: { readonly limit: string; readonly windowSeconds: string }
 ): Html => {
@@ -438,8 +445,8 @@ const rateLimitEditorView = (
     return h.div(
         [h.Class("flex flex-wrap items-center gap-3 rounded-lg border-2 border-gray-200 bg-gray-50 p-3")],
         [
-            field("Requests", editor.limit, (value) => ChangedAdminLimit({ value })),
-            field("per seconds", editor.windowSeconds, (value) => ChangedAdminWindow({ value })),
+            field(msgs.requestsLabel, editor.limit, (value) => ChangedAdminLimit({ value })),
+            field(msgs.perSecondsLabel, editor.windowSeconds, (value) => ChangedAdminWindow({ value })),
             h.button(
                 [
                     h.Type("button"),
@@ -447,14 +454,20 @@ const rateLimitEditorView = (
                     h.Disabled(Option.isSome(model.busy)),
                     h.OnClick(SubmittedAdminEdit()),
                 ],
-                ["Save limit"]
+                [msgs.saveLimit]
             ),
-            h.button([h.Type("button"), h.Class(quietButton), h.OnClick(ClickedCancelAdminEdit())], ["Cancel"]),
+            h.button([h.Type("button"), h.Class(quietButton), h.OnClick(ClickedCancelAdminEdit())], [shared.cancel]),
         ]
     );
 };
 
-const adminKeyRow = (h: HtmlBuilder<AppMessage>, key: Key, model: AdminModel): Html => {
+const adminKeyRow = (
+    h: HtmlBuilder<AppMessage>,
+    msgs: AdminMessages,
+    shared: SharedMessages,
+    key: Key,
+    model: AdminModel
+): Html => {
     const busy = Option.contains(model.busy, key.key);
     const armed = Option.contains(model.armedDelete, key.key);
     const editingScopes = model.scopesEditor.pipe(
@@ -480,7 +493,7 @@ const adminKeyRow = (h: HtmlBuilder<AppMessage>, key: Key, model: AdminModel): H
                     key.revoked
                         ? h.span(
                               [h.Class("font-pixel rounded bg-red-700 px-2 py-1 text-[0.5rem] text-white")],
-                              ["Revoked"]
+                              [shared.revokedBadge]
                           )
                         : h.empty,
                 ]
@@ -489,14 +502,14 @@ const adminKeyRow = (h: HtmlBuilder<AppMessage>, key: Key, model: AdminModel): H
                 [h.Class("font-mono text-base text-gray-500")],
                 [
                     Option.match(key.ownerSub, {
-                        onSome: (sub) => `Owner ${sub}`,
-                        onNone: () => "No owner (admin-issued)",
+                        onSome: (sub) => msgs.owner(sub),
+                        onNone: () => msgs.noOwner,
                     }),
                     ...Option.match(key.description, {
                         onSome: (description) => [` · ${description}`],
                         onNone: () => [],
                     }),
-                    ` · ${key.rateLimitLimit} requests / ${Math.round(Duration.toSeconds(key.rateLimitWindow))}s`,
+                    ` · ${shared.rateLimit(key.rateLimitLimit, Math.round(Duration.toSeconds(key.rateLimitWindow)))}`,
                 ]
             ),
             h.div(
@@ -504,11 +517,11 @@ const adminKeyRow = (h: HtmlBuilder<AppMessage>, key: Key, model: AdminModel): H
                 Array.from(key.scopes, (scope) => scopeChip(h, scope))
             ),
             ...Option.match(editingScopes, {
-                onSome: (selected) => [scopesEditorView(h, model, selected)],
+                onSome: (selected) => [scopesEditorView(h, msgs, shared, model, selected)],
                 onNone: () => [],
             }),
             ...Option.match(editingRateLimit, {
-                onSome: (editor) => [rateLimitEditorView(h, model, editor)],
+                onSome: (editor) => [rateLimitEditorView(h, msgs, shared, model, editor)],
                 onNone: () => [],
             }),
             h.div(
@@ -521,7 +534,7 @@ const adminKeyRow = (h: HtmlBuilder<AppMessage>, key: Key, model: AdminModel): H
                             h.Disabled(busy),
                             h.OnClick(ClickedEditScopes({ key: key.key })),
                         ],
-                        ["Scopes"]
+                        [msgs.scopesButton]
                     ),
                     h.button(
                         [
@@ -530,7 +543,7 @@ const adminKeyRow = (h: HtmlBuilder<AppMessage>, key: Key, model: AdminModel): H
                             h.Disabled(busy),
                             h.OnClick(ClickedEditRateLimit({ key: key.key })),
                         ],
-                        ["Rate limit"]
+                        [msgs.rateLimitButton]
                     ),
                     h.button(
                         [
@@ -539,7 +552,7 @@ const adminKeyRow = (h: HtmlBuilder<AppMessage>, key: Key, model: AdminModel): H
                             h.Disabled(busy),
                             h.OnClick(ClickedAdminSetRevoked({ key: key.key, revoked: !key.revoked })),
                         ],
-                        [busy ? "..." : key.revoked ? "Re-enable" : "Revoke"]
+                        [busy ? "..." : key.revoked ? shared.reEnable : shared.revoke]
                     ),
                     h.button(
                         [
@@ -548,7 +561,7 @@ const adminKeyRow = (h: HtmlBuilder<AppMessage>, key: Key, model: AdminModel): H
                             h.Disabled(busy),
                             h.OnClick(ClickedAdminDelete({ key: key.key })),
                         ],
-                        [busy ? "..." : armed ? "Really delete?" : "Delete"]
+                        [busy ? "..." : armed ? shared.reallyDelete : shared.delete]
                     ),
                 ]
             ),
@@ -556,27 +569,29 @@ const adminKeyRow = (h: HtmlBuilder<AppMessage>, key: Key, model: AdminModel): H
     );
 };
 
-const keysTable = (h: HtmlBuilder<AppMessage>, model: AdminModel): Html => {
+const keysTable = (
+    h: HtmlBuilder<AppMessage>,
+    msgs: AdminMessages,
+    shared: SharedMessages,
+    model: AdminModel
+): Html => {
     const list = (keys: ReadonlyArray<Key>): Html =>
         h.div(
             [h.Class("flex flex-col gap-4")],
             keys.length === 0
-                ? [h.p([h.Class("font-mono text-xl text-gray-600")], ["No keys exist yet."])]
-                : keys.map((key) => adminKeyRow(h, key, model))
+                ? [h.p([h.Class("font-mono text-xl text-gray-600")], [msgs.emptyState])]
+                : keys.map((key) => adminKeyRow(h, msgs, shared, key, model))
         );
 
     return h.section(
         [h.Class(card)],
         [
-            h.h2([h.Class("font-pixel mb-2 text-lg text-gray-800")], ["All Keys"]),
-            h.p(
-                [h.Class("font-mono mb-6 text-lg text-gray-500")],
-                ["Every key the proxy has issued, whoever holds it. Write scopes are granted here."]
-            ),
+            h.h2([h.Class("font-pixel mb-2 text-lg text-gray-800")], [msgs.allKeysHeading]),
+            h.p([h.Class("font-mono mb-6 text-lg text-gray-500")], [msgs.allKeysIntro]),
             AsyncData.match(model.keys, {
-                onIdle: () => h.p([h.Class("font-mono text-xl text-gray-600")], ["Loading..."]),
-                onLoading: () => h.p([h.Class("font-mono text-xl text-gray-600")], ["Loading..."]),
-                onFailure: (error) => h.p([h.Class("font-mono text-xl text-red-700")], [error]),
+                onIdle: () => h.p([h.Class("font-mono text-xl text-gray-600")], [msgs.loading]),
+                onLoading: () => h.p([h.Class("font-mono text-xl text-gray-600")], [msgs.loading]),
+                onFailure: () => h.p([h.Class("font-mono text-xl text-red-700")], [msgs.loadFailed]),
                 onRefreshing: list,
                 onStale: ({ data }) => list(data),
                 onSuccess: list,
@@ -585,7 +600,12 @@ const keysTable = (h: HtmlBuilder<AppMessage>, model: AdminModel): Html => {
     );
 };
 
-export const adminView = (h: HtmlBuilder<AppMessage>, model: AdminModel): Html =>
+export const adminView = (
+    h: HtmlBuilder<AppMessage>,
+    msgs: AdminMessages,
+    shared: SharedMessages,
+    model: AdminModel
+): Html =>
     h.div(
         [h.Class("relative z-10 flex min-h-screen flex-col items-center p-8 pt-24")],
         [
@@ -595,19 +615,19 @@ export const adminView = (h: HtmlBuilder<AppMessage>, model: AdminModel): Html =
                     h.div(
                         [h.Class("flex flex-wrap items-center justify-between gap-3")],
                         [
-                            h.h1([h.Class("font-pixel text-dark-blue text-lg")], ["Admin"]),
-                            h.a([h.Href("/keys"), h.Class(quietButton + " no-underline")], ["Your keys"]),
+                            h.h1([h.Class("font-pixel text-dark-blue text-lg")], [msgs.heading]),
+                            h.a([h.Href("/keys"), h.Class(quietButton + " no-underline")], [msgs.yourKeysLink]),
                         ]
                     ),
                     ...Option.match(model.notice, {
-                        onSome: (text) => [banner(h, "notice", text)],
+                        onSome: (notice) => [banner(h, "notice", msgs.notices[notice])],
                         onNone: () => [],
                     }),
                     ...Option.match(model.problem, {
-                        onSome: (text) => [banner(h, "problem", text)],
+                        onSome: (problem) => [banner(h, "problem", msgs.problems[problem])],
                         onNone: () => [],
                     }),
-                    model.needsElevation ? elevationForm(h) : keysTable(h, model),
+                    model.needsElevation ? elevationForm(h, msgs) : keysTable(h, msgs, shared, model),
                 ]
             ),
         ]

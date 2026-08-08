@@ -44,8 +44,7 @@ export const de: Messages = {
         sdkOutro:
             "AUTH_KEY ist der Proxy-Schlüssel, den Sie hier ausgestellt haben; PLAYER_ID und PLAYER_AUTH_KEY benennen den Tower, in dessen Namen Sie handeln. Abgerufene Spielstände kommen als gezippte Nimblebit-Suppe zurück: Geben Sie sie an das SaveData-Schema des SDK, und Sie erhalten Stockwerke, Bitizens, Missionen und Freunde als gewöhnliche typisierte Werte.",
         testKeysHeading: "Öffentliche Testschlüssel",
-        testKeysIntro:
-            "Zwei geteilte Schlüssel stehen zum Ausprobieren bereit. Sie sind pro IP-Adresse ratenbegrenzt:",
+        testKeysIntro: "Zwei geteilte Schlüssel stehen zum Ausprobieren bereit. Sie sind pro IP-Adresse ratenbegrenzt:",
         testKeysOutro:
             "Persönliche Schlüssel sind stattdessen pro Schlüssel ratenbegrenzt und starten mit 10 Anfragen pro Minute. Sie brauchen Schreib-Scopes oder ein höheres Limit? Melden Sie sich auf Discord.",
         footerBefore: "Teil von ",
