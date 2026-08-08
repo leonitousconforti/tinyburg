@@ -3,7 +3,7 @@ import "./styles/global.css";
 import { Runtime } from "foldkit";
 
 import { BackendLive } from "./backend.ts";
-import { ChangedUrl, ClickedLink, init, Model, update, view } from "./main.ts";
+import { ChangedUrl, ClickedLink, Model, init, update, view } from "./main.ts";
 import { initialLanguage } from "./messages/index.ts";
 
 const application = Runtime.makeApplication({

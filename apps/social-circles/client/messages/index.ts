@@ -1,6 +1,6 @@
 import type { Messages } from "./types.ts";
 
-import { fromNavigator, type Language } from "@tinyburg/ui/Internationalization";
+import { type Language, fromNavigator } from "@tinyburg/ui/Internationalization";
 
 import { de } from "./de.ts";
 import { en } from "./en.ts";
