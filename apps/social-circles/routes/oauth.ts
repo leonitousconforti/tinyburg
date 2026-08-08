@@ -21,7 +21,7 @@ import type { Jwt } from "effect-oidc";
 
 import { Oidc } from "effect-oidc";
 
-import { CookiePolicy, maybeCurrentSession, SESSION_COOKIE_NAME } from "../cookies.ts";
+import { CookiePolicy, SESSION_COOKIE_NAME, maybeCurrentSession } from "../cookies.ts";
 import { randomSecret, seal, sha256 } from "../crypto.ts";
 import { GrantsRepository } from "../domain/grants.ts";
 import { SessionsRepository } from "../domain/sessions.ts";

@@ -1,5 +1,5 @@
 import { Duration, Effect, Layer } from "effect";
-import { HttpRouter, HttpServerResponse, HttpClient } from "effect/unstable/http";
+import { HttpClient, HttpRouter, HttpServerResponse } from "effect/unstable/http";
 
 import { NimblebitAuth } from "@tinyburg/nimblebit-sdk";
 import { TinyTower } from "@tinyburg/tinytower-sdk";

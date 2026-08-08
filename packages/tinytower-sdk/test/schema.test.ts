@@ -1,4 +1,4 @@
-import { ManagedRuntime, ConfigProvider, Effect, Layer, Path, Schema } from "effect";
+import { ConfigProvider, Effect, Layer, ManagedRuntime, Path, Schema } from "effect";
 import { FetchHttpClient } from "effect/unstable/http";
 
 import { NodeServices } from "@effect/platform-node";

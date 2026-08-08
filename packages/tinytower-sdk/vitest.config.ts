@@ -1,4 +1,4 @@
-import { mergeConfig, type ViteUserConfig } from "vitest/config";
+import { type ViteUserConfig, mergeConfig } from "vitest/config";
 
 import shared from "../../vitest.shared.ts";
 

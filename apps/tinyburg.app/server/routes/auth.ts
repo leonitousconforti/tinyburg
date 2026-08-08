@@ -5,7 +5,7 @@ import { HttpApiBuilder, HttpApiError } from "effect/unstable/httpapi";
 import { SessionsRepository } from "../../domain/sessions.ts";
 import { UsersRepository } from "../../domain/users.ts";
 import { AuthApi, CurrentSession, SessionCookie } from "../../shared/auth.ts";
-import { CookiePolicy, maybeCurrentUser, PROVIDER_SESSION_COOKIE_NAME } from "../cookies.ts";
+import { CookiePolicy, PROVIDER_SESSION_COOKIE_NAME, maybeCurrentUser } from "../cookies.ts";
 
 const SessionCookieLive = Layer.effect(
     SessionCookie,

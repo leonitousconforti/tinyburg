@@ -11,7 +11,7 @@ import type { SqlError } from "effect/unstable/sql";
 import { Context, Effect, Layer, Schema } from "effect";
 import { SqlClient, SqlSchema } from "effect/unstable/sql";
 
-import { PurgeReceipt, type PlayerId } from "./model.ts";
+import { type PlayerId, PurgeReceipt } from "./model.ts";
 
 export class PurgeRepository extends Context.Service<PurgeRepository>()(
     "@tinyburg/social-circles/domain/PurgeRepository",

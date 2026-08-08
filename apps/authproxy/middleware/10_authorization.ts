@@ -1,11 +1,11 @@
 import type { SqlError } from "effect/unstable/sql";
 
-import { Effect, Option, Layer, Redacted, Array, DateTime, Duration, Schema } from "effect";
+import { Array, DateTime, Duration, Effect, Layer, Option, Redacted, Schema } from "effect";
 import { Headers, HttpServerRequest, HttpServerResponse } from "effect/unstable/http";
-import { HttpApiMiddleware, HttpApiSecurity, HttpApiError } from "effect/unstable/httpapi";
+import { HttpApiError, HttpApiMiddleware, HttpApiSecurity } from "effect/unstable/httpapi";
 import { RateLimiter } from "effect/unstable/persistence";
 
-import { type CurrentAccount, Repository, Account } from "../domain/model.ts";
+import { Account, type CurrentAccount, Repository } from "../domain/model.ts";
 
 export class Authorization extends HttpApiMiddleware.Service<
     Authorization,

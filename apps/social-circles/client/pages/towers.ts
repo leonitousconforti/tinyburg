@@ -1,4 +1,4 @@
-import { DateTime, Match, Option, Result, Schema as S, Effect } from "effect";
+import { DateTime, Effect, Match, Option, Result, Schema as S } from "effect";
 
 import type { Message as AppMessage } from "../main.ts";
 import type { Html, HtmlBuilder } from "foldkit/html";

@@ -17,7 +17,7 @@ import { type Jwt, Oidc } from "effect-oidc";
 
 import { SessionsRepository } from "../../domain/sessions.ts";
 import { UsersRepository } from "../../domain/users.ts";
-import { CookiePolicy, maybeCurrentUser, PROVIDER_SESSION_COOKIE_NAME } from "../cookies.ts";
+import { CookiePolicy, PROVIDER_SESSION_COOKIE_NAME, maybeCurrentUser } from "../cookies.ts";
 import { randomSecret, sha256 } from "../crypto.ts";
 
 interface OAuthProvider {

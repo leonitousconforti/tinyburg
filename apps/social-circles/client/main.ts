@@ -12,11 +12,11 @@ import { loginView } from "./pages/login.ts";
 import { notFoundView } from "./pages/notFound.ts";
 import { privacyView } from "./pages/privacy.ts";
 import {
-    enterTowers,
     FetchTowers,
-    initialTowers,
     TowersMessage,
     TowersModel,
+    enterTowers,
+    initialTowers,
     towersView,
     updateTowers,
 } from "./pages/towers.ts";

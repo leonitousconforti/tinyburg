@@ -1,4 +1,4 @@
-import { Config, Effect, Layer, Option, Redacted, Schema, Function } from "effect";
+import { Config, Effect, Function, Layer, Option, Redacted, Schema } from "effect";
 import {
     HttpApi,
     HttpApiBuilder,

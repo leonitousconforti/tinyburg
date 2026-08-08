@@ -13,7 +13,7 @@
 
 import type { SqlError } from "effect/unstable/sql";
 
-import { Array, Effect, Context, Layer, Schema, pipe } from "effect";
+import { Array, Context, Effect, Layer, Schema, pipe } from "effect";
 import { SqlClient, SqlSchema } from "effect/unstable/sql";
 
 import type { PlayerId } from "./model.ts";

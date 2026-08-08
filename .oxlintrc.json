@@ -49,6 +49,12 @@
             }
         ],
         "typescript/no-import-type-side-effects": "error",
+        "eslint/sort-imports": [
+            "error",
+            {
+                "ignoreDeclarationSort": true
+            }
+        ],
         "import/no-duplicates": "error",
         "import/no-self-import": "error",
         "import/no-empty-named-blocks": "error",

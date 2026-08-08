@@ -1,4 +1,4 @@
-import { Config, Effect, Layer, References, Redacted, ConfigProvider } from "effect";
+import { Config, ConfigProvider, Effect, Layer, Redacted, References } from "effect";
 import { FetchHttpClient } from "effect/unstable/http";
 
 import { S3 } from "@effect-aws/client-s3";
