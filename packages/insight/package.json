@@ -52,7 +52,7 @@
         "@efffrida/platform": "0.0.38",
         "@efffrida/polyfills": "0.0.15",
         "@efffrida/rpc": "0.0.53",
-        "frida": "17.16.4",
+        "frida": "17.17.0",
         "frida-il2cpp-bridge": "0.13.1"
     },
     "devDependencies": {
