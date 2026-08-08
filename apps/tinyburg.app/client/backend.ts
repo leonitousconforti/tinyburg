@@ -52,7 +52,9 @@ export type SessionState = typeof SessionState.Type;
 
 const LinkedTower = S.Struct({ playerId: S.String, createdAt: S.DateTimeUtc });
 
-export const LinkedTowers = AsyncData.Schema(S.Array(LinkedTower), S.String);
+// The failure is a key the view resolves into the visitor's language, not a
+// finished sentence: this command runs without knowing which language that is.
+export const LinkedTowers = AsyncData.Schema(S.Array(LinkedTower), S.Literals(["loadFailed"]));
 export type LinkedTowers = typeof LinkedTowers.schema.Type;
 
 export const GotSession = m("GotSession", { session: SessionState });
@@ -60,7 +62,7 @@ export const GotSession = m("GotSession", { session: SessionState });
 /** The outcome of a towers fetch; update folds it into the current state with
  *  `AsyncData.settle`, which keeps held data as Stale on failure. */
 export const SettledLinkedTowers = m("SettledLinkedTowers", {
-    result: S.Result(S.Array(LinkedTower), S.String),
+    result: S.Result(S.Array(LinkedTower), S.Literals(["loadFailed"])),
 });
 
 /** Asks the server who this browser is. */
@@ -89,10 +91,6 @@ export const FetchLinkedTowers = Command.define("FetchLinkedTowers", {
         // The session expired or was signed out elsewhere; re-running the
         // gating sends the visitor back to login.
         Effect.catchTag("Unauthorized", () => Effect.succeed(GotSession({ session: SignedOut() }))),
-        Effect.catch(() =>
-            Effect.succeed(
-                SettledLinkedTowers({ result: Result.fail("We couldn't load your towers. Please try again.") })
-            )
-        )
+        Effect.catch(() => Effect.succeed(SettledLinkedTowers({ result: Result.fail("loadFailed") })))
     ),
 });

@@ -1,3 +1,4 @@
+import type { DevelopersMessages, SharedMessages } from "../messages/types.ts";
 import type { Html, HtmlBuilder } from "foldkit/html";
 
 import { articleBackLink, articleHeading } from "../ui/chrome.ts";
@@ -6,37 +7,13 @@ import { articleBackLink, articleHeading } from "../ui/chrome.ts";
 // server-rendered page which built them from the configured site origin.
 const site = "https://tinyburg.app";
 
-const endpoints = [
-    { name: "JWKS", url: `${site}/.well-known/jwks.json` },
-    { name: "Discovery", url: `${site}/.well-known/openid-configuration` },
-    { name: "Authorization", url: `${site}/oauth/authorize` },
-    { name: "Token", url: `${site}/oauth/token` },
-    { name: "Userinfo", url: `${site}/oauth/userinfo` },
-];
-
-const scopes = [
-    { name: "openid", description: "Confirm your Tinyburg identity" },
-    { name: "profile", description: "See your display name and avatar" },
-];
-
-const steps = [
-    {
-        title: "Log In to Tinyburg",
-        description: "You need a Tinyburg account to register applications",
-    },
-    {
-        title: "Register Your Application",
-        description: "Give it a name and your redirect uris, then grab your client id and secret",
-    },
-    {
-        title: "Point Your OIDC Library at Us",
-        description: "Most libraries only need the discovery url below to configure themselves",
-    },
-    {
-        title: "Players Sign In",
-        description: "They approve your app once and arrive back at your redirect uri",
-    },
-];
+const endpointUrls = {
+    jwks: `${site}/.well-known/jwks.json`,
+    discovery: `${site}/.well-known/openid-configuration`,
+    authorization: `${site}/oauth/authorize`,
+    token: `${site}/oauth/token`,
+    userinfo: `${site}/oauth/userinfo`,
+};
 
 const featureCard = <M>(h: HtmlBuilder<M>, icon: string, title: string, description: string): Html =>
     h.div(
@@ -48,11 +25,26 @@ const featureCard = <M>(h: HtmlBuilder<M>, icon: string, title: string, descript
         ]
     );
 
-export const developersView = <M>(h: HtmlBuilder<M>): Html =>
-    h.div(
+export const developersView = <M>(h: HtmlBuilder<M>, msgs: DevelopersMessages, shared: SharedMessages): Html => {
+    const endpoints = [
+        { name: msgs.endpointNames.jwks, url: endpointUrls.jwks },
+        { name: msgs.endpointNames.discovery, url: endpointUrls.discovery },
+        { name: msgs.endpointNames.authorization, url: endpointUrls.authorization },
+        { name: msgs.endpointNames.token, url: endpointUrls.token },
+        { name: msgs.endpointNames.userinfo, url: endpointUrls.userinfo },
+    ];
+
+    const scopes = [
+        { name: "openid", description: msgs.scopeDescriptions.openid },
+        { name: "profile", description: msgs.scopeDescriptions.profile },
+    ];
+
+    const steps = [msgs.steps.logIn, msgs.steps.register, msgs.steps.point, msgs.steps.signIn];
+
+    return h.div(
         [h.Class("relative min-h-screen px-4 py-16 sm:px-8 sm:py-20")],
         [
-            articleBackLink(h, "/", "Back"),
+            articleBackLink(h, "/", shared.back),
             h.article(
                 [h.Class("mx-auto max-w-3xl")],
                 [
@@ -70,12 +62,9 @@ export const developersView = <M>(h: HtmlBuilder<M>): Html =>
                                         "font-pixel text-dark-blue mb-2 text-base leading-relaxed sm:text-lg md:text-xl"
                                     ),
                                 ],
-                                ["Tinyburg for Developers"]
+                                [msgs.title]
                             ),
-                            h.p(
-                                [h.Class("text-text-dark/80 text-xl")],
-                                ["Let players bring their Tinyburg account to your app"]
-                            ),
+                            h.p([h.Class("text-text-dark/80 text-xl")], [msgs.tagline]),
                         ]
                     ),
                     h.div(
@@ -88,33 +77,28 @@ export const developersView = <M>(h: HtmlBuilder<M>): Html =>
                             h.section(
                                 [h.Class("pb-8")],
                                 [
-                                    articleHeading(h, "Sign in with Tinyburg"),
-                                    h.p(
-                                        [h.Class("mb-4 text-xl leading-relaxed sm:text-xl")],
-                                        [
-                                            "Tinyburg is an OpenID Connect provider. Building a companion tool, a Discord bot dashboard, or anything else for the TinyTower community? Register an OAuth application and players can sign in to it with the same account they use to trade, no new passwords required.",
-                                        ]
-                                    ),
+                                    articleHeading(h, msgs.signInHeading),
+                                    h.p([h.Class("mb-4 text-xl leading-relaxed sm:text-xl")], [msgs.signInBody]),
                                     h.div(
                                         [h.Class("mt-6 grid grid-cols-1 gap-6 md:grid-cols-3")],
                                         [
                                             featureCard(
                                                 h,
                                                 "🔐",
-                                                "Standard OIDC",
-                                                "Authorization code flow with PKCE and ES256-signed id tokens. Any OpenID Connect client library works out of the box."
+                                                msgs.features.standardOidc.title,
+                                                msgs.features.standardOidc.description
                                             ),
                                             featureCard(
                                                 h,
                                                 "🪶",
-                                                "Minimal Scopes",
-                                                "Apps only see a player's identity, display name, and avatar. Nothing else leaves Tinyburg."
+                                                msgs.features.minimalScopes.title,
+                                                msgs.features.minimalScopes.description
                                             ),
                                             featureCard(
                                                 h,
                                                 "🤝",
-                                                "Player Consent",
-                                                "Players approve exactly what your app can see on a consent screen before any tokens are issued."
+                                                msgs.features.playerConsent.title,
+                                                msgs.features.playerConsent.description
                                             ),
                                         ]
                                     ),
@@ -123,7 +107,7 @@ export const developersView = <M>(h: HtmlBuilder<M>): Html =>
                             h.section(
                                 [h.Class("py-8")],
                                 [
-                                    articleHeading(h, "Getting Started"),
+                                    articleHeading(h, msgs.gettingStartedHeading),
                                     h.div(
                                         [h.Class("mt-4 flex flex-col gap-4")],
                                         steps.map((step, index) =>
@@ -163,24 +147,14 @@ export const developersView = <M>(h: HtmlBuilder<M>): Html =>
                                             )
                                         )
                                     ),
-                                    h.p(
-                                        [h.Class("mt-6 text-xl leading-relaxed sm:text-xl")],
-                                        [
-                                            "Redirect uris must use https, except for localhost while you develop. Client secrets are shown once at registration and stored hashed, so keep yours somewhere safe.",
-                                        ]
-                                    ),
+                                    h.p([h.Class("mt-6 text-xl leading-relaxed sm:text-xl")], [msgs.redirectNote]),
                                 ]
                             ),
                             h.section(
                                 [h.Class("py-8")],
                                 [
-                                    articleHeading(h, "Endpoints"),
-                                    h.p(
-                                        [h.Class("mb-4 text-xl leading-relaxed sm:text-xl")],
-                                        [
-                                            "Everything below is also published in the discovery document, so most setups only ever need the first url.",
-                                        ]
-                                    ),
+                                    articleHeading(h, msgs.endpointsHeading),
+                                    h.p([h.Class("mb-4 text-xl leading-relaxed sm:text-xl")], [msgs.endpointsBody]),
                                     h.div(
                                         [h.Class("flex flex-col gap-3")],
                                         endpoints.map((endpoint) =>
@@ -208,7 +182,7 @@ export const developersView = <M>(h: HtmlBuilder<M>): Html =>
                             h.section(
                                 [h.Class("py-8")],
                                 [
-                                    articleHeading(h, "Scopes"),
+                                    articleHeading(h, msgs.scopesHeading),
                                     h.div(
                                         [h.Class("flex flex-col gap-3")],
                                         scopes.map((scope) =>
@@ -236,11 +210,11 @@ export const developersView = <M>(h: HtmlBuilder<M>): Html =>
                             h.section(
                                 [h.Class("pt-8")],
                                 [
-                                    articleHeading(h, "Ready to Build?"),
+                                    articleHeading(h, msgs.readyHeading),
                                     h.p(
                                         [h.Class("mb-4 text-xl leading-relaxed sm:text-xl")],
                                         [
-                                            "Register your first application and start signing players in. Questions or stuck on something? Ask in the ",
+                                            msgs.readyBefore,
                                             h.a(
                                                 [
                                                     h.Href("https://discord.gg/tinyburg"),
@@ -248,9 +222,9 @@ export const developersView = <M>(h: HtmlBuilder<M>): Html =>
                                                         "text-sky-dark decoration-sky-dark/30 hover:decoration-sky-dark underline decoration-2 underline-offset-2 transition-colors"
                                                     ),
                                                 ],
-                                                ["Tinyburg Discord"]
+                                                [msgs.discordLinkLabel]
                                             ),
-                                            " and we'll help you out.",
+                                            msgs.readyAfter,
                                         ]
                                     ),
                                     h.div(
@@ -263,16 +237,17 @@ export const developersView = <M>(h: HtmlBuilder<M>): Html =>
                                                         "font-pixel bg-gold shadow-pixel hover:shadow-pixel-hover flex items-center justify-center gap-2 rounded-lg px-5 py-4 text-[0.7rem] text-gray-800 transition-all hover:-translate-x-0.5 hover:-translate-y-0.5"
                                                     ),
                                                 ],
-                                                ["Your Applications"]
+                                                [msgs.yourApplications]
                                             ),
                                             h.a(
                                                 [
-                                                    h.Href(endpoints[0]?.url ?? site),
+                                                    // Kept pointing at the first listed endpoint, as before.
+                                                    h.Href(endpointUrls.jwks),
                                                     h.Class(
                                                         "font-pixel bg-dark-blue/95 shadow-pixel hover:shadow-pixel-hover flex items-center justify-center gap-2 rounded-lg px-5 py-4 text-[0.7rem] text-white transition-all hover:-translate-x-0.5 hover:-translate-y-0.5"
                                                     ),
                                                 ],
-                                                ["Discovery Document"]
+                                                [msgs.discoveryDocument]
                                             ),
                                         ]
                                     ),
@@ -284,3 +259,4 @@ export const developersView = <M>(h: HtmlBuilder<M>): Html =>
             ),
         ]
     );
+};

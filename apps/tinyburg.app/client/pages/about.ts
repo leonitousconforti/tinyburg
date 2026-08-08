@@ -1,3 +1,4 @@
+import type { AboutMessages, SharedMessages } from "../messages/types.ts";
 import type { Html, HtmlBuilder } from "foldkit/html";
 
 import { articleBackLink, articleHeading } from "../ui/chrome.ts";
@@ -53,11 +54,11 @@ const faq = <M>(h: HtmlBuilder<M>, question: string, answer: ReadonlyArray<Html 
         ]
     );
 
-export const aboutView = <M>(h: HtmlBuilder<M>): Html =>
+export const aboutView = <M>(h: HtmlBuilder<M>, msgs: AboutMessages, shared: SharedMessages): Html =>
     h.div(
         [h.Class("relative min-h-screen px-4 py-16 sm:px-8 sm:py-20")],
         [
-            articleBackLink(h, "/", "Back"),
+            articleBackLink(h, "/", shared.back),
             h.article(
                 [h.Class("mx-auto max-w-3xl")],
                 [
@@ -75,12 +76,9 @@ export const aboutView = <M>(h: HtmlBuilder<M>): Html =>
                                         "font-pixel text-dark-blue mb-2 text-base leading-relaxed sm:text-lg md:text-xl"
                                     ),
                                 ],
-                                ["About Tinyburg"]
+                                [msgs.title]
                             ),
-                            h.p(
-                                [h.Class("text-text-dark/80 text-xl")],
-                                ["Building connections, one bitizen at a time"]
-                            ),
+                            h.p([h.Class("text-text-dark/80 text-xl")], [msgs.tagline]),
                         ]
                     ),
                     h.div(
@@ -92,37 +90,32 @@ export const aboutView = <M>(h: HtmlBuilder<M>): Html =>
                         [
                             h.section(
                                 [h.Class("pb-8")],
-                                [
-                                    articleHeading(h, "What is Tinyburg?"),
-                                    para(h, [
-                                        "Tinyburg is a community-made trading platform built by TinyTower enthusiasts. We make it easy to find dream job bitizens, trade rare costumes, and connect with fellow tower builders from around the world.",
-                                    ]),
-                                ]
+                                [articleHeading(h, msgs.whatIsHeading), para(h, [msgs.whatIsBody])]
                             ),
                             h.section(
                                 [h.Class("py-8")],
                                 [
-                                    articleHeading(h, "Our Mission"),
+                                    articleHeading(h, msgs.missionHeading),
                                     h.div(
                                         [h.Class("mt-4 grid grid-cols-1 gap-6 md:grid-cols-3")],
                                         [
                                             missionCard(
                                                 h,
                                                 "🎯",
-                                                "Find Dream Jobbers",
-                                                "Stop waiting for random bitizens. Search our database to find the perfect 9-skill dream jobbers for your floors."
+                                                msgs.missions.findDreamJobbers.title,
+                                                msgs.missions.findDreamJobbers.description
                                             ),
                                             missionCard(
                                                 h,
                                                 "🤝",
-                                                "Connect Players",
-                                                "Building a tower is more fun together. Connect with thousands of active players ready to trade and help each other out."
+                                                msgs.missions.connectPlayers.title,
+                                                msgs.missions.connectPlayers.description
                                             ),
                                             missionCard(
                                                 h,
                                                 "🎨",
-                                                "Collect Everything",
-                                                "From rare costumes to adorable pets, trade your way to completing your collection."
+                                                msgs.missions.collectEverything.title,
+                                                msgs.missions.collectEverything.description
                                             ),
                                         ]
                                     ),
@@ -131,34 +124,19 @@ export const aboutView = <M>(h: HtmlBuilder<M>): Html =>
                             h.section(
                                 [h.Class("py-8")],
                                 [
-                                    articleHeading(h, "How It Works"),
+                                    articleHeading(h, msgs.howHeading),
                                     h.div(
                                         [h.Class("mt-4 flex flex-col gap-4")],
                                         [
-                                            step(
-                                                h,
-                                                1,
-                                                "Sign Up",
-                                                "Create your account using Google or Discord in seconds"
-                                            ),
-                                            step(
-                                                h,
-                                                2,
-                                                "Link Your Tower",
-                                                "Use Nimblebit's cloud sync feature to link your tower"
-                                            ),
+                                            step(h, 1, msgs.steps.signUp.title, msgs.steps.signUp.description),
+                                            step(h, 2, msgs.steps.linkTower.title, msgs.steps.linkTower.description),
                                             step(
                                                 h,
                                                 3,
-                                                "Browse & Trade",
-                                                "Find what you need and connect with other players"
+                                                msgs.steps.browseTrade.title,
+                                                msgs.steps.browseTrade.description
                                             ),
-                                            step(
-                                                h,
-                                                4,
-                                                "Build Your Dream Tower",
-                                                "Fill every floor with dream jobbers and rare items"
-                                            ),
+                                            step(h, 4, msgs.steps.buildDream.title, msgs.steps.buildDream.description),
                                         ]
                                     ),
                                 ]
@@ -166,10 +144,8 @@ export const aboutView = <M>(h: HtmlBuilder<M>): Html =>
                             h.section(
                                 [h.Class("py-8")],
                                 [
-                                    articleHeading(h, "Community First"),
-                                    para(h, [
-                                        "Tinyburg is built and maintained by passionate TinyTower players. We're not affiliated with NimbleBit, but we share their love for tiny pixels and tall towers. Our goal is to make the TinyTower community even more connected and helpful.",
-                                    ]),
+                                    articleHeading(h, msgs.communityHeading),
+                                    para(h, [msgs.communityBody]),
                                     h.div(
                                         [h.Class("mt-6 flex flex-col gap-4 md:flex-row")],
                                         [
@@ -180,7 +156,7 @@ export const aboutView = <M>(h: HtmlBuilder<M>): Html =>
                                                         "bg-discord shadow-pixel hover:shadow-pixel-hover flex items-center justify-center gap-2 rounded-lg px-5 py-3 text-lg text-white transition-all hover:-translate-x-0.5 hover:-translate-y-0.5"
                                                     ),
                                                 ],
-                                                [h.span([], ["💬"]), " Join our Discord"]
+                                                [h.span([], ["💬"]), ` ${msgs.joinDiscord}`]
                                             ),
                                             h.a(
                                                 [
@@ -200,10 +176,8 @@ export const aboutView = <M>(h: HtmlBuilder<M>): Html =>
                             h.section(
                                 [h.Class("py-8")],
                                 [
-                                    articleHeading(h, "Open Source"),
-                                    para(h, [
-                                        "Tinyburg is an open source project. We believe in transparency and community contribution. Check out our code, report bugs, or contribute features on GitHub.",
-                                    ]),
+                                    articleHeading(h, msgs.openSourceHeading),
+                                    para(h, [msgs.openSourceBody]),
                                     h.div(
                                         [h.Class("mt-2 flex flex-col gap-4 md:flex-row")],
                                         [
@@ -216,7 +190,7 @@ export const aboutView = <M>(h: HtmlBuilder<M>): Html =>
                                                         "shadow-pixel hover:shadow-pixel-hover flex items-center justify-center gap-2 rounded-lg bg-[#24292e] px-5 py-3 text-lg text-white transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:bg-[#1a1e22]"
                                                     ),
                                                 ],
-                                                [githubIcon(h, "h-5 w-5"), " View on GitHub"]
+                                                [githubIcon(h, "h-5 w-5"), ` ${msgs.viewOnGithub}`]
                                             ),
                                             h.a(
                                                 [
@@ -225,7 +199,7 @@ export const aboutView = <M>(h: HtmlBuilder<M>): Html =>
                                                         "shadow-pixel hover:shadow-pixel-hover flex items-center justify-center gap-2 rounded-lg bg-[#ea4aaa] px-5 py-3 text-lg text-white transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:bg-[#d43a99]"
                                                     ),
                                                 ],
-                                                [h.span([], ["💖"]), " Our Sponsors"]
+                                                [h.span([], ["💖"]), ` ${msgs.ourSponsors}`]
                                             ),
                                         ]
                                     ),
@@ -234,36 +208,15 @@ export const aboutView = <M>(h: HtmlBuilder<M>): Html =>
                             h.section(
                                 [h.Class("pt-8")],
                                 [
-                                    articleHeading(h, "Frequently Asked Questions"),
+                                    articleHeading(h, msgs.faqHeading),
+                                    faq(h, msgs.faqs.free.question, [msgs.faqs.free.answer], false),
+                                    faq(h, msgs.faqs.affiliated.question, [msgs.faqs.affiliated.answer], false),
+                                    faq(h, msgs.faqs.trades.question, [msgs.faqs.trades.answer], false),
                                     faq(
                                         h,
-                                        "Q: Is Tinyburg free?",
+                                        msgs.faqs.dataSafe.question,
                                         [
-                                            "A: Yes! Tinyburg is completely free to use. We're a community project built by players who love the game.",
-                                        ],
-                                        false
-                                    ),
-                                    faq(
-                                        h,
-                                        "Q: Is this affiliated with NimbleBit?",
-                                        [
-                                            "A: No, Tinyburg is an independent fan project. We're not affiliated with, endorsed by, or connected to NimbleBit LLC in any way.",
-                                        ],
-                                        false
-                                    ),
-                                    faq(
-                                        h,
-                                        "Q: How do trades work?",
-                                        [
-                                            "A: Tinyburg helps you find traders and coordinate exchanges. The actual trading can leverage a couple different methods to exchange the items depending on what the items are, such as sending gifts or modifying save data.",
-                                        ],
-                                        false
-                                    ),
-                                    faq(
-                                        h,
-                                        "Is my data safe?",
-                                        [
-                                            "We only collect what's necessary to provide the service. Check our ",
+                                            msgs.faqs.dataSafe.before,
                                             h.a(
                                                 [
                                                     h.Href("/privacy"),
@@ -271,9 +224,9 @@ export const aboutView = <M>(h: HtmlBuilder<M>): Html =>
                                                         "text-sky-dark decoration-sky-dark/30 hover:decoration-sky-dark underline decoration-2 underline-offset-2 transition-colors"
                                                     ),
                                                 ],
-                                                ["Privacy Policy"]
+                                                [msgs.faqs.dataSafe.linkLabel]
                                             ),
-                                            " for full details.",
+                                            msgs.faqs.dataSafe.after,
                                         ],
                                         true
                                     ),

@@ -1,6 +1,7 @@
 import { Effect, Match, Option, Schema as S } from "effect";
 
 import type { Message as AppMessage } from "../main.ts";
+import type { TowerLinkMessages } from "../messages/types.ts";
 import type { Html, HtmlBuilder } from "foldkit/html";
 
 import { PlayerEmailSchema, PlayerIdSchema } from "@tinyburg/nimblebit-sdk/NimblebitConfig";
@@ -25,8 +26,10 @@ export const WizardModel = S.Struct({
     pendingEmail: S.String,
     submitting: S.Boolean,
     verified: S.Boolean,
-    linkError: S.Option(S.String),
-    verifyError: S.Option(S.String),
+    // Errors are stored as keys and turned into copy by the view, which is
+    // the only place that knows the language.
+    linkError: S.Option(S.Literals(["requestFailed"])),
+    verifyError: S.Option(S.Literals(["verifyFailed", "resendFailed"])),
     resend: S.Literals(["idle", "sending", "sent", "cooldown"]),
 });
 export type WizardModel = typeof WizardModel.Type;
@@ -190,10 +193,7 @@ export const updateWizard = (wizard: WizardModel, message: WizardMessage): Wizar
             FailedRequestCode: () => [
                 evo(wizard, {
                     submitting: () => false,
-                    linkError: () =>
-                        Option.some(
-                            "We couldn't reach your tower. Please double-check your friend code and try again."
-                        ),
+                    linkError: () => Option.some("requestFailed" as const),
                 }),
                 [],
             ],
@@ -210,8 +210,7 @@ export const updateWizard = (wizard: WizardModel, message: WizardMessage): Wizar
             FailedVerify: () => [
                 evo(wizard, {
                     submitting: () => false,
-                    verifyError: () =>
-                        Option.some("That code didn't work. Please check it and try again, or resend the email."),
+                    verifyError: () => Option.some("verifyFailed" as const),
                 }),
                 [],
             ],
@@ -227,7 +226,7 @@ export const updateWizard = (wizard: WizardModel, message: WizardMessage): Wizar
             FailedResend: () => [
                 evo(wizard, {
                     resend: () => "cooldown" as const,
-                    verifyError: () => Option.some("We couldn't resend the email. Please try again in a moment."),
+                    verifyError: () => Option.some("resendFailed" as const),
                 }),
                 [ResendCooldown()],
             ],
@@ -260,7 +259,7 @@ const fieldHint = <M>(h: HtmlBuilder<M>, text: string): Html =>
 const stepClass = (wizard: WizardModel): string =>
     wizard.entered === "forward" ? "step-enter-forward" : wizard.entered === "backward" ? "step-enter-backward" : "";
 
-const linkStep = (wizard: WizardModel, h: HtmlBuilder<AppMessage>): Html =>
+const linkStep = (wizard: WizardModel, msgs: TowerLinkMessages, h: HtmlBuilder<AppMessage>): Html =>
     h.keyed("section")(
         "link",
         [h.Class(stepClass(wizard))],
@@ -271,7 +270,7 @@ const linkStep = (wizard: WizardModel, h: HtmlBuilder<AppMessage>): Html =>
                     h.label(
                         [h.Class("flex flex-col gap-2")],
                         [
-                            fieldLabel(h, "Friend Code"),
+                            fieldLabel(h, msgs.friendCodeLabel),
                             h.input([
                                 h.Id("friend-code-input"),
                                 h.Type("text"),
@@ -279,7 +278,7 @@ const linkStep = (wizard: WizardModel, h: HtmlBuilder<AppMessage>): Html =>
                                 h.Required(true),
                                 h.Maxlength(5),
                                 h.Pattern("[0-9A-Z]{1,5}"),
-                                h.Title("Up to 5 letters or numbers"),
+                                h.Title(msgs.friendCodeTitle),
                                 h.Placeholder("ABC12"),
                                 h.Autocomplete("off"),
                                 h.Autocapitalize("characters"),
@@ -290,13 +289,13 @@ const linkStep = (wizard: WizardModel, h: HtmlBuilder<AppMessage>): Html =>
                                     "font-mono rounded-lg border-2 border-gray-300 bg-white p-3 text-center text-3xl tracking-[0.4em] text-gray-800 uppercase focus:border-sky-blue focus:outline-none"
                                 ),
                             ]),
-                            fieldHint(h, "You can find it on the Friends tab in TinyTower"),
+                            fieldHint(h, msgs.friendCodeHint),
                         ]
                     ),
                     h.label(
                         [h.Class("flex flex-col gap-2")],
                         [
-                            fieldLabel(h, "Cloud Sync Email"),
+                            fieldLabel(h, msgs.emailLabel),
                             h.input([
                                 h.Id("email-input"),
                                 h.Type("email"),
@@ -310,23 +309,23 @@ const linkStep = (wizard: WizardModel, h: HtmlBuilder<AppMessage>): Html =>
                                     "font-mono rounded-lg border-2 border-gray-300 bg-white p-3 text-xl text-gray-800 focus:border-sky-blue focus:outline-none"
                                 ),
                             ]),
-                            fieldHint(
-                                h,
-                                "The email your cloud save is registered with. Nimblebit will send a verification code to it."
-                            ),
+                            fieldHint(h, msgs.emailHint),
                         ]
                     ),
-                    errorBox(h, wizard.linkError),
+                    errorBox(
+                        h,
+                        Option.map(wizard.linkError, (key) => msgs.errors[key])
+                    ),
                     h.button(
                         [h.Type("submit"), h.Disabled(wizard.submitting), h.Class(submitButtonClass)],
-                        [wizard.submitting ? "Sending..." : "Send Verification Code"]
+                        [wizard.submitting ? msgs.sending : msgs.sendCode]
                     ),
                 ]
             ),
         ]
     );
 
-const verifyStep = (wizard: WizardModel, h: HtmlBuilder<AppMessage>): Html =>
+const verifyStep = (wizard: WizardModel, msgs: TowerLinkMessages, h: HtmlBuilder<AppMessage>): Html =>
     h.keyed("section")(
         "verify",
         [h.Class(stepClass(wizard))],
@@ -337,9 +336,9 @@ const verifyStep = (wizard: WizardModel, h: HtmlBuilder<AppMessage>): Html =>
                     h.p(
                         [h.Class("font-mono text-lg text-dark-blue")],
                         [
-                            "📬 Nimblebit sent a verification code to ",
+                            msgs.sentCodeBefore,
                             h.strong([h.Class("break-all")], [wizard.pendingEmail]),
-                            ". It can take a minute to arrive.",
+                            msgs.sentCodeAfter,
                         ]
                     ),
                 ]
@@ -350,7 +349,7 @@ const verifyStep = (wizard: WizardModel, h: HtmlBuilder<AppMessage>): Html =>
                     h.label(
                         [h.Class("flex flex-col gap-2")],
                         [
-                            fieldLabel(h, "Verification Code"),
+                            fieldLabel(h, msgs.codeLabel),
                             h.input([
                                 h.Id("verification-code-input"),
                                 h.Type("text"),
@@ -367,23 +366,20 @@ const verifyStep = (wizard: WizardModel, h: HtmlBuilder<AppMessage>): Html =>
                                     "font-mono rounded-lg border-2 border-gray-300 bg-white p-3 text-center text-3xl tracking-[0.4em] text-gray-800 focus:border-sky-blue focus:outline-none"
                                 ),
                             ]),
-                            fieldHint(h, "No email? Check your spam folder"),
+                            fieldHint(h, msgs.codeHint),
                         ]
                     ),
-                    errorBox(h, wizard.verifyError),
+                    errorBox(
+                        h,
+                        Option.map(wizard.verifyError, (key) => msgs.errors[key])
+                    ),
                     h.button(
                         [
                             h.Type("submit"),
                             h.Disabled(wizard.submitting || wizard.verified),
                             h.Class(submitButtonClass),
                         ],
-                        [
-                            wizard.verified
-                                ? "Linked! Redirecting..."
-                                : wizard.submitting
-                                  ? "Verifying..."
-                                  : "Link My Tower",
-                        ]
+                        [wizard.verified ? msgs.linked : wizard.submitting ? msgs.verifying : msgs.linkMyTower]
                     ),
                 ]
             ),
@@ -396,7 +392,7 @@ const verifyStep = (wizard: WizardModel, h: HtmlBuilder<AppMessage>): Html =>
                             h.OnClick(ClickedBack()),
                             h.Class("font-mono text-sky-dark cursor-pointer text-lg hover:underline"),
                         ],
-                        ["← Go back"]
+                        [msgs.goBack]
                     ),
                     h.button(
                         [
@@ -407,29 +403,26 @@ const verifyStep = (wizard: WizardModel, h: HtmlBuilder<AppMessage>): Html =>
                                 "font-mono text-sky-dark cursor-pointer text-lg hover:underline disabled:cursor-not-allowed"
                             ),
                         ],
-                        [wizard.resend === "sent" ? "Sent!" : "Resend email"]
+                        [wizard.resend === "sent" ? msgs.sent : msgs.resend]
                     ),
                 ]
             ),
         ]
     );
 
-export const towerLinkView = (h: HtmlBuilder<AppMessage>, wizard: WizardModel): Html =>
+export const towerLinkView = (h: HtmlBuilder<AppMessage>, msgs: TowerLinkMessages, wizard: WizardModel): Html =>
     h.div(
         [h.Class("relative z-10 flex min-h-screen flex-col items-center justify-center p-8")],
         [
-            appBackLink(h, "/towers/@me", "← My Towers"),
+            appBackLink(h, "/towers/@me", msgs.backToTowers),
             h.div(
                 [h.Class("bg-card-bg shadow-pixel-hover border-gold w-full max-w-md rounded-2xl border-3 p-8")],
                 [
                     h.div(
                         [h.Class("mb-6 text-center")],
                         [
-                            h.h1([h.Class("font-pixel mb-2 text-lg text-gray-800")], ["Link Your Tower"]),
-                            h.p(
-                                [h.Class("font-mono text-xl text-gray-600")],
-                                ["Connect your TinyTower cloud save to start trading with players worldwide"]
-                            ),
+                            h.h1([h.Class("font-pixel mb-2 text-lg text-gray-800")], [msgs.heading]),
+                            h.p([h.Class("font-mono text-xl text-gray-600")], [msgs.subheading]),
                         ]
                     ),
                     h.div(
@@ -438,7 +431,7 @@ export const towerLinkView = (h: HtmlBuilder<AppMessage>, wizard: WizardModel): 
                             h.div([h.Class("bg-gold h-2 flex-1 rounded-full"), h.AriaHidden(true)], []),
                             h.span(
                                 [h.Class("font-pixel shrink-0 text-[0.55rem] text-gray-500")],
-                                [wizard.step === "link" ? "Step 1 of 2" : "Step 2 of 2"]
+                                [wizard.step === "link" ? msgs.step1 : msgs.step2]
                             ),
                             h.div(
                                 [
@@ -451,7 +444,7 @@ export const towerLinkView = (h: HtmlBuilder<AppMessage>, wizard: WizardModel): 
                             ),
                         ]
                     ),
-                    wizard.step === "link" ? linkStep(wizard, h) : verifyStep(wizard, h),
+                    wizard.step === "link" ? linkStep(wizard, msgs, h) : verifyStep(wizard, msgs, h),
                 ]
             ),
         ]

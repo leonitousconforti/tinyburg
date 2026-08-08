@@ -1,8 +1,10 @@
 import { DateTime, Effect, Match, Option, Result, Schema as S } from "effect";
 
 import type { Message as AppMessage } from "../main.ts";
+import type { AccountMessages } from "../messages/types.ts";
 import type { Html, HtmlBuilder } from "foldkit/html";
 
+import { type Language, longDate, relativeTime } from "@tinyburg/ui/Internationalization";
 import { AsyncData, Command } from "foldkit";
 import { m } from "foldkit/message";
 import { evo } from "foldkit/struct";
@@ -28,8 +30,30 @@ type SessionSummary = typeof SessionSummary.Type;
 
 // MODEL
 
-export const Sessions = AsyncData.Schema(S.Array(SessionSummary), S.String);
-export const LinkedAccounts = AsyncData.Schema(S.Array(OAuthAccount.json), S.String);
+/**
+ * What the page has to say about itself is stored as keys (plus any data the
+ * phrasing needs) rather than finished sentences: commands and update run
+ * without knowing the language, so only the view turns these into copy.
+ */
+export const AccountNotice = S.Union([
+    S.Literals(["connected", "alreadyConnected", "disconnected", "linkCancelled"]),
+    S.Struct({ revoked: S.Number }),
+]);
+export type AccountNotice = typeof AccountNotice.Type;
+
+export const AccountProblem = S.Literals([
+    "linkExpired",
+    "linkFailed",
+    "accountTaken",
+    "actionFailed",
+    "lastSignInMethod",
+]);
+export type AccountProblem = typeof AccountProblem.Type;
+
+const LoadFailed = S.Literals(["loadFailed"]);
+
+export const Sessions = AsyncData.Schema(S.Array(SessionSummary), LoadFailed);
+export const LinkedAccounts = AsyncData.Schema(S.Array(OAuthAccount.json), LoadFailed);
 
 export const AccountModel = S.Struct({
     sessions: Sessions.schema,
@@ -42,8 +66,8 @@ export const AccountModel = S.Struct({
 
     // The row currently mid-request, so only its own button says so.
     busy: S.Option(S.String),
-    notice: S.Option(S.String),
-    problem: S.Option(S.String),
+    notice: S.Option(AccountNotice),
+    problem: S.Option(AccountProblem),
 });
 export type AccountModel = typeof AccountModel.Type;
 
@@ -75,17 +99,9 @@ export const enterAccount = (
     if (Option.isSome(error)) {
         return Match.value(classifyOAuthError(error.value)).pipe(
             Match.withReturnType<AccountModel>(),
-            Match.when("denied", () =>
-                evo(entered, { notice: () => Option.some("Connecting that account was cancelled.") })
-            ),
-            Match.when("expired", () =>
-                evo(entered, {
-                    problem: () => Option.some("That attempt expired or was interrupted. Please try connecting again."),
-                })
-            ),
-            Match.when("failed", () =>
-                evo(entered, { problem: () => Option.some("We couldn't connect that account. Please try again.") })
-            ),
+            Match.when("denied", () => evo(entered, { notice: () => Option.some("linkCancelled" as const) })),
+            Match.when("expired", () => evo(entered, { problem: () => Option.some("linkExpired" as const) })),
+            Match.when("failed", () => evo(entered, { problem: () => Option.some("linkFailed" as const) })),
             Match.exhaustive
         );
     }
@@ -95,18 +111,11 @@ export const enterAccount = (
         onSome: (outcome) =>
             Match.value(outcome).pipe(
                 Match.withReturnType<AccountModel>(),
-                Match.when("linked", () =>
-                    evo(entered, { notice: () => Option.some("Connected. You can now sign in with it.") })
-                ),
+                Match.when("linked", () => evo(entered, { notice: () => Option.some("connected" as const) })),
                 Match.when("alreadyLinked", () =>
-                    evo(entered, { notice: () => Option.some("That account was already connected.") })
+                    evo(entered, { notice: () => Option.some("alreadyConnected" as const) })
                 ),
-                Match.when("taken", () =>
-                    evo(entered, {
-                        problem: () =>
-                            Option.some("That account is already connected to a different Tinyburg account."),
-                    })
-                ),
+                Match.when("taken", () => evo(entered, { problem: () => Option.some("accountTaken" as const) })),
                 Match.orElse(() => entered)
             ),
     });
@@ -117,11 +126,11 @@ export const enterAccount = (
 // Fetches settle into a Result; update folds it into the current state with
 // `AsyncData.settle`, which keeps held data as Stale on failure.
 export const SettledSessions = m("SettledSessions", {
-    result: S.Result(S.Array(SessionSummary), S.String),
+    result: S.Result(S.Array(SessionSummary), LoadFailed),
     asOf: S.DateTimeUtc,
 });
 export const SettledLinkedAccounts = m("SettledLinkedAccounts", {
-    result: S.Result(S.Array(OAuthAccount.json), S.String),
+    result: S.Result(S.Array(OAuthAccount.json), LoadFailed),
 });
 export const ClickedRevokeSession = m("ClickedRevokeSession", { sessionId: S.String });
 export const ClickedRevokeOthers = m("ClickedRevokeOthers");
@@ -132,7 +141,7 @@ export const ClickedUnlink = m("ClickedUnlink", {
 });
 export const CompletedRevoke = m("CompletedRevoke", { revoked: S.Number, signedOut: S.Boolean });
 export const CompletedUnlink = m("CompletedUnlink");
-export const FailedAction = m("FailedAction", { message: S.String });
+export const FailedAction = m("FailedAction", { problem: AccountProblem });
 
 /** The session ended somewhere else while this page was open. */
 export const SignedOutElsewhere = m("SignedOutElsewhere");
@@ -153,9 +162,6 @@ export type AccountMessage = typeof AccountMessage.Type;
 
 // COMMAND
 
-const LOAD_FAILED = "We couldn't load this. Please try again.";
-const ACTION_FAILED = "That didn't work. Please try again.";
-
 export const FetchSessions = Command.define("FetchSessions", {
     messages: [SettledSessions, SignedOutElsewhere],
     execute: Effect.gen(function* () {
@@ -165,7 +171,7 @@ export const FetchSessions = Command.define("FetchSessions", {
     }).pipe(
         Effect.catchTag("Unauthorized", () => Effect.succeed(SignedOutElsewhere())),
         Effect.catch(() =>
-            Effect.map(DateTime.now, (asOf) => SettledSessions({ result: Result.fail(LOAD_FAILED), asOf }))
+            Effect.map(DateTime.now, (asOf) => SettledSessions({ result: Result.fail("loadFailed"), asOf }))
         )
     ),
 });
@@ -178,7 +184,7 @@ export const FetchLinkedAccounts = Command.define("FetchLinkedAccounts", {
         return SettledLinkedAccounts({ result: Result.succeed(accounts) });
     }).pipe(
         Effect.catchTag("Unauthorized", () => Effect.succeed(SignedOutElsewhere())),
-        Effect.catch(() => Effect.succeed(SettledLinkedAccounts({ result: Result.fail(LOAD_FAILED) })))
+        Effect.catch(() => Effect.succeed(SettledLinkedAccounts({ result: Result.fail("loadFailed") })))
     ),
 });
 
@@ -191,7 +197,7 @@ export const RevokeSession = Command.define("RevokeSession", {
             return CompletedRevoke(yield* auth.AuthGroup.revokeSession({ params: { sessionId } }));
         }).pipe(
             Effect.catchTag("Unauthorized", () => Effect.succeed(SignedOutElsewhere())),
-            Effect.catch(() => Effect.succeed(FailedAction({ message: ACTION_FAILED })))
+            Effect.catch(() => Effect.succeed(FailedAction({ problem: "actionFailed" })))
         ),
 });
 
@@ -202,7 +208,7 @@ export const RevokeOthers = Command.define("RevokeOthers", {
         return CompletedRevoke(yield* auth.AuthGroup.revokeSessions({ query: { scope: "others" } }));
     }).pipe(
         Effect.catchTag("Unauthorized", () => Effect.succeed(SignedOutElsewhere())),
-        Effect.catch(() => Effect.succeed(FailedAction({ message: ACTION_FAILED })))
+        Effect.catch(() => Effect.succeed(FailedAction({ problem: "actionFailed" })))
     ),
 });
 
@@ -213,7 +219,7 @@ export const RevokeAll = Command.define("RevokeAll", {
         return CompletedRevoke(yield* auth.AuthGroup.revokeSessions({ query: { scope: "all" } }));
     }).pipe(
         Effect.catchTag("Unauthorized", () => Effect.succeed(SignedOutElsewhere())),
-        Effect.catch(() => Effect.succeed(FailedAction({ message: ACTION_FAILED })))
+        Effect.catch(() => Effect.succeed(FailedAction({ problem: "actionFailed" })))
     ),
 });
 
@@ -229,12 +235,8 @@ export const Unlink = Command.define("Unlink", {
             Effect.catchTag("Unauthorized", () => Effect.succeed(SignedOutElsewhere())),
             // The server refuses to remove the last way in; the button is
             // disabled for it, but a stale page can still ask.
-            Effect.catchTag("Conflict", () =>
-                Effect.succeed(
-                    FailedAction({ message: "That's your only way to sign in, so it has to stay connected." })
-                )
-            ),
-            Effect.catch(() => Effect.succeed(FailedAction({ message: ACTION_FAILED })))
+            Effect.catchTag("Conflict", () => Effect.succeed(FailedAction({ problem: "lastSignInMethod" }))),
+            Effect.catch(() => Effect.succeed(FailedAction({ problem: "actionFailed" })))
         ),
 });
 
@@ -274,10 +276,7 @@ export const updateAccount = (model: AccountModel, message: AccountMessage): Acc
                     : [
                           evo(model, {
                               busy: Option.none,
-                              notice: () =>
-                                  Option.some(
-                                      revoked === 1 ? "Signed out of 1 session." : `Signed out of ${revoked} sessions.`
-                                  ),
+                              notice: () => Option.some({ revoked }),
                               sessions: (sessions) => Option.getOrElse(AsyncData.revalidate(sessions), () => sessions),
                           }),
                           [FetchSessions()],
@@ -286,13 +285,13 @@ export const updateAccount = (model: AccountModel, message: AccountMessage): Acc
             CompletedUnlink: () => [
                 evo(model, {
                     busy: Option.none,
-                    notice: () => Option.some("Disconnected."),
+                    notice: () => Option.some("disconnected" as const),
                     accounts: (accounts) => Option.getOrElse(AsyncData.revalidate(accounts), () => accounts),
                 }),
                 [FetchLinkedAccounts()],
             ],
 
-            FailedAction: ({ message }) => [evo(model, { busy: Option.none, problem: () => Option.some(message) }), []],
+            FailedAction: ({ problem }) => [evo(model, { busy: Option.none, problem: () => Option.some(problem) }), []],
 
             SignedOutElsewhere: () => [evo(model, { busy: Option.none }), []],
         })
@@ -313,7 +312,7 @@ const quietButton =
  * visitor actually recognises a session by. Anything unfamiliar keeps its raw
  * string rather than being guessed at and named wrongly.
  */
-const describeUserAgent = (userAgent: string): string => {
+const describeUserAgent = (msgs: AccountMessages, userAgent: string): string => {
     const browser = /\bEdg\//.test(userAgent)
         ? "Edge"
         : /\bOPR\/|\bOpera\b/.test(userAgent)
@@ -340,24 +339,8 @@ const describeUserAgent = (userAgent: string): string => {
                   ? "Linux"
                   : undefined;
 
-    if (browser !== undefined && platform !== undefined) return `${browser} on ${platform}`;
+    if (browser !== undefined && platform !== undefined) return msgs.deviceOn(browser, platform);
     return browser ?? platform ?? userAgent;
-};
-
-const relative = (asOf: DateTime.Utc, when: DateTime.Utc): string => {
-    const seconds = Math.round((DateTime.toEpochMillis(asOf) - DateTime.toEpochMillis(when)) / 1000);
-    if (seconds < 90) return "just now";
-
-    const minutes = Math.round(seconds / 60);
-    if (minutes < 60) return `${minutes} minutes ago`;
-
-    const hours = Math.round(minutes / 60);
-    if (hours < 24) return hours === 1 ? "an hour ago" : `${hours} hours ago`;
-
-    const days = Math.round(hours / 24);
-    if (days < 30) return days === 1 ? "yesterday" : `${days} days ago`;
-
-    return DateTime.format(when, { locale: "en-US", month: "long", day: "numeric", year: "numeric" });
 };
 
 const banner = (h: HtmlBuilder<AppMessage>, tone: "notice" | "problem", text: string): Html =>
@@ -373,11 +356,17 @@ const banner = (h: HtmlBuilder<AppMessage>, tone: "notice" | "problem", text: st
         [text]
     );
 
-const sessionRow = (h: HtmlBuilder<AppMessage>, session: SessionSummary, model: AccountModel): Html => {
+const sessionRow = (
+    h: HtmlBuilder<AppMessage>,
+    msgs: AccountMessages,
+    language: Language,
+    session: SessionSummary,
+    model: AccountModel
+): Html => {
     const busy = Option.contains(model.busy, session.id);
     const name = Option.match(session.userAgent, {
-        onSome: describeUserAgent,
-        onNone: () => "Unknown device",
+        onSome: (userAgent) => describeUserAgent(msgs, userAgent),
+        onNone: () => msgs.unknownDevice,
     });
 
     return h.keyed("div")(
@@ -400,7 +389,7 @@ const sessionRow = (h: HtmlBuilder<AppMessage>, session: SessionSummary, model: 
                             session.current
                                 ? h.span(
                                       [h.Class("font-pixel bg-sky-dark rounded px-2 py-1 text-[0.5rem] text-white")],
-                                      ["This device"]
+                                      [msgs.thisDevice]
                                   )
                                 : h.empty,
                         ]
@@ -408,7 +397,7 @@ const sessionRow = (h: HtmlBuilder<AppMessage>, session: SessionSummary, model: 
                     h.div(
                         [h.Class("font-mono text-base text-gray-500")],
                         [
-                            `Last active ${relative(model.asOf, session.lastSeenAt)}`,
+                            msgs.lastActive(relativeTime(language, model.asOf, session.lastSeenAt)),
                             ...Option.match(session.ip, {
                                 onSome: (ip) => [` · ${ip}`],
                                 onNone: () => [],
@@ -417,14 +406,7 @@ const sessionRow = (h: HtmlBuilder<AppMessage>, session: SessionSummary, model: 
                     ),
                     h.div(
                         [h.Class("font-mono text-base text-gray-500")],
-                        [
-                            `Signed in ${DateTime.format(session.createdAt, {
-                                locale: "en-US",
-                                month: "long",
-                                day: "numeric",
-                                year: "numeric",
-                            })}`,
-                        ]
+                        [msgs.signedInOn(longDate(language, session.createdAt))]
                     ),
                 ]
             ),
@@ -433,23 +415,28 @@ const sessionRow = (h: HtmlBuilder<AppMessage>, session: SessionSummary, model: 
                     h.Type("button"),
                     h.Class(dangerButton),
                     h.Disabled(busy),
-                    h.Title(session.current ? "Sign out of this browser" : `Sign out of ${name}`),
+                    h.Title(session.current ? msgs.signOutThisBrowser : msgs.signOutOf(name)),
                     h.OnClick(ClickedRevokeSession({ sessionId: session.id })),
                 ],
-                [busy ? "..." : "Sign out"]
+                [busy ? "..." : msgs.signOut]
             ),
         ]
     );
 };
 
-const sessionsSection = (h: HtmlBuilder<AppMessage>, model: AccountModel): Html => {
+const sessionsSection = (
+    h: HtmlBuilder<AppMessage>,
+    msgs: AccountMessages,
+    language: Language,
+    model: AccountModel
+): Html => {
     const list = (sessions: ReadonlyArray<SessionSummary>): Html => {
         const others = sessions.filter((session) => !session.current).length;
 
         return h.div(
             [h.Class("flex flex-col gap-4")],
             [
-                ...sessions.map((session) => sessionRow(h, session, model)),
+                ...sessions.map((session) => sessionRow(h, msgs, language, session, model)),
                 h.div(
                     [h.Class("flex flex-wrap gap-3 pt-2")],
                     [
@@ -460,13 +447,7 @@ const sessionsSection = (h: HtmlBuilder<AppMessage>, model: AccountModel): Html 
                                 h.Disabled(others === 0 || Option.isSome(model.busy)),
                                 h.OnClick(ClickedRevokeOthers()),
                             ],
-                            [
-                                others === 0
-                                    ? "No other sessions"
-                                    : others === 1
-                                      ? "Sign out 1 other session"
-                                      : `Sign out ${others} other sessions`,
-                            ]
+                            [others === 0 ? msgs.noOtherSessions : msgs.signOutOthers(others)]
                         ),
                         h.button(
                             [
@@ -475,7 +456,7 @@ const sessionsSection = (h: HtmlBuilder<AppMessage>, model: AccountModel): Html 
                                 h.Disabled(Option.isSome(model.busy)),
                                 h.OnClick(ClickedRevokeAll()),
                             ],
-                            ["Sign out everywhere"]
+                            [msgs.signOutEverywhere]
                         ),
                     ]
                 ),
@@ -486,15 +467,12 @@ const sessionsSection = (h: HtmlBuilder<AppMessage>, model: AccountModel): Html 
     return h.section(
         [h.Class(card)],
         [
-            h.h2([h.Class("font-pixel mb-2 text-lg text-gray-800")], ["Where You're Signed In"]),
-            h.p(
-                [h.Class("font-mono mb-6 text-lg text-gray-500")],
-                ["Every browser holding a session for this account. Sign out of any you don't recognise."]
-            ),
+            h.h2([h.Class("font-pixel mb-2 text-lg text-gray-800")], [msgs.sessionsHeading]),
+            h.p([h.Class("font-mono mb-6 text-lg text-gray-500")], [msgs.sessionsBody]),
             AsyncData.match(model.sessions, {
-                onIdle: () => h.p([h.Class("font-mono text-xl text-gray-600")], ["Loading your sessions..."]),
-                onLoading: () => h.p([h.Class("font-mono text-xl text-gray-600")], ["Loading your sessions..."]),
-                onFailure: (error) => h.p([h.Class("font-mono text-xl text-red-700")], [error]),
+                onIdle: () => h.p([h.Class("font-mono text-xl text-gray-600")], [msgs.loadingSessions]),
+                onLoading: () => h.p([h.Class("font-mono text-xl text-gray-600")], [msgs.loadingSessions]),
+                onFailure: () => h.p([h.Class("font-mono text-xl text-red-700")], [msgs.loadFailed]),
                 onRefreshing: list,
                 onStale: ({ data }) => list(data),
                 onSuccess: list,
@@ -511,7 +489,13 @@ const providerIcon = (h: HtmlBuilder<AppMessage>, provider: OAuthProviderName): 
 
 const providerLabel = (provider: OAuthProviderName): string => (provider === "discord" ? "Discord" : "Google");
 
-const linkedRow = (h: HtmlBuilder<AppMessage>, account: LinkedAccount, model: AccountModel, last: boolean): Html => {
+const linkedRow = (
+    h: HtmlBuilder<AppMessage>,
+    msgs: AccountMessages,
+    account: LinkedAccount,
+    model: AccountModel,
+    last: boolean
+): Html => {
     const busy = Option.contains(model.busy, account.providerAccountId);
     const detail = Option.orElse(account.email, () => account.displayName);
 
@@ -539,11 +523,7 @@ const linkedRow = (h: HtmlBuilder<AppMessage>, account: LinkedAccount, model: Ac
                     h.Type("button"),
                     h.Class(dangerButton),
                     h.Disabled(busy || last),
-                    h.Title(
-                        last
-                            ? "This is the only way you have left to sign in"
-                            : `Disconnect ${providerLabel(account.provider)}`
-                    ),
+                    h.Title(last ? msgs.lastMethodTitle : msgs.disconnectProvider(providerLabel(account.provider))),
                     h.OnClick(
                         ClickedUnlink({
                             provider: account.provider,
@@ -551,13 +531,13 @@ const linkedRow = (h: HtmlBuilder<AppMessage>, account: LinkedAccount, model: Ac
                         })
                     ),
                 ],
-                [busy ? "..." : "Disconnect"]
+                [busy ? "..." : msgs.disconnect]
             ),
         ]
     );
 };
 
-const connectRow = (h: HtmlBuilder<AppMessage>, provider: OAuthProviderName): Html =>
+const connectRow = (h: HtmlBuilder<AppMessage>, msgs: AccountMessages, provider: OAuthProviderName): Html =>
     h.a(
         [
             h.Href(linkHref(provider)),
@@ -568,13 +548,13 @@ const connectRow = (h: HtmlBuilder<AppMessage>, provider: OAuthProviderName): Ht
         [
             providerIcon(h, provider),
             h.span([h.Class("font-mono text-xl text-gray-800")], [providerLabel(provider)]),
-            h.span([h.Class("font-pixel ml-auto shrink-0 text-[0.6rem] text-gray-500")], ["Connect →"]),
+            h.span([h.Class("font-pixel ml-auto shrink-0 text-[0.6rem] text-gray-500")], [msgs.connect]),
         ]
     );
 
 const ALL_PROVIDERS: ReadonlyArray<OAuthProviderName> = ["google", "discord"];
 
-const accountsSection = (h: HtmlBuilder<AppMessage>, model: AccountModel): Html => {
+const accountsSection = (h: HtmlBuilder<AppMessage>, msgs: AccountMessages, model: AccountModel): Html => {
     const list = (accounts: ReadonlyArray<LinkedAccount>): Html => {
         const linked = new Set(accounts.map((account) => account.provider));
         const unlinked = ALL_PROVIDERS.filter((provider) => !linked.has(provider));
@@ -582,8 +562,8 @@ const accountsSection = (h: HtmlBuilder<AppMessage>, model: AccountModel): Html 
         return h.div(
             [h.Class("flex flex-col gap-4")],
             [
-                ...accounts.map((account) => linkedRow(h, account, model, accounts.length === 1)),
-                ...unlinked.map((provider) => connectRow(h, provider)),
+                ...accounts.map((account) => linkedRow(h, msgs, account, model, accounts.length === 1)),
+                ...unlinked.map((provider) => connectRow(h, msgs, provider)),
             ]
         );
     };
@@ -591,15 +571,12 @@ const accountsSection = (h: HtmlBuilder<AppMessage>, model: AccountModel): Html 
     return h.section(
         [h.Class(card)],
         [
-            h.h2([h.Class("font-pixel mb-2 text-lg text-gray-800")], ["Sign-In Methods"]),
-            h.p(
-                [h.Class("font-mono mb-6 text-lg text-gray-500")],
-                ["Connect more ways to sign in, so you can always get back to this account."]
-            ),
+            h.h2([h.Class("font-pixel mb-2 text-lg text-gray-800")], [msgs.methodsHeading]),
+            h.p([h.Class("font-mono mb-6 text-lg text-gray-500")], [msgs.methodsBody]),
             AsyncData.match(model.accounts, {
-                onIdle: () => h.p([h.Class("font-mono text-xl text-gray-600")], ["Loading..."]),
-                onLoading: () => h.p([h.Class("font-mono text-xl text-gray-600")], ["Loading..."]),
-                onFailure: (error) => h.p([h.Class("font-mono text-xl text-red-700")], [error]),
+                onIdle: () => h.p([h.Class("font-mono text-xl text-gray-600")], [msgs.loading]),
+                onLoading: () => h.p([h.Class("font-mono text-xl text-gray-600")], [msgs.loading]),
+                onFailure: () => h.p([h.Class("font-mono text-xl text-red-700")], [msgs.loadFailed]),
                 onRefreshing: list,
                 onStale: ({ data }) => list(data),
                 onSuccess: list,
@@ -608,25 +585,35 @@ const accountsSection = (h: HtmlBuilder<AppMessage>, model: AccountModel): Html 
     );
 };
 
-export const accountView = (h: HtmlBuilder<AppMessage>, model: AccountModel, user: SessionUser): Html =>
+/** A stored notice key (plus any data it carries) turned into this language's copy. */
+const noticeText = (msgs: AccountMessages, notice: AccountNotice): string =>
+    typeof notice === "string" ? msgs.notices[notice] : msgs.signedOutSessions(notice.revoked);
+
+export const accountView = (
+    h: HtmlBuilder<AppMessage>,
+    msgs: AccountMessages,
+    language: Language,
+    model: AccountModel,
+    user: SessionUser
+): Html =>
     h.div(
         [h.Class("relative z-10 flex min-h-screen flex-col items-center p-8 pt-24")],
         [
-            appBackLink(h, "/towers/@me", "← Back to My Towers"),
+            appBackLink(h, "/towers/@me", msgs.backToTowers),
             h.div(
                 [h.Class("flex w-full max-w-2xl flex-col gap-6")],
                 [
-                    h.h1([h.Class("font-pixel text-dark-blue text-lg")], [`${user.displayName}'s account`]),
+                    h.h1([h.Class("font-pixel text-dark-blue text-lg")], [msgs.heading(user.displayName)]),
                     ...Option.match(model.notice, {
-                        onSome: (text) => [banner(h, "notice", text)],
+                        onSome: (notice) => [banner(h, "notice", noticeText(msgs, notice))],
                         onNone: () => [],
                     }),
                     ...Option.match(model.problem, {
-                        onSome: (text) => [banner(h, "problem", text)],
+                        onSome: (problem) => [banner(h, "problem", msgs.problems[problem])],
                         onNone: () => [],
                     }),
-                    sessionsSection(h, model),
-                    accountsSection(h, model),
+                    sessionsSection(h, msgs, language, model),
+                    accountsSection(h, msgs, model),
                 ]
             ),
         ]

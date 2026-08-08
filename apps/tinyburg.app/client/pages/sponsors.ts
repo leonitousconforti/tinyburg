@@ -1,3 +1,4 @@
+import type { SharedMessages, SponsorsMessages } from "../messages/types.ts";
 import type { Html, HtmlBuilder } from "foldkit/html";
 
 import { articleBackLink, articleHeading } from "../ui/chrome.ts";
@@ -62,11 +63,11 @@ const pastSponsorChip = <M>(h: HtmlBuilder<M>, sponsor: Sponsor): Html =>
         ]
     );
 
-export const sponsorsView = <M>(h: HtmlBuilder<M>): Html =>
+export const sponsorsView = <M>(h: HtmlBuilder<M>, msgs: SponsorsMessages, shared: SharedMessages): Html =>
     h.div(
         [h.Class("relative min-h-screen px-4 py-16 sm:px-8 sm:py-20")],
         [
-            articleBackLink(h, "/", "Back"),
+            articleBackLink(h, "/", shared.back),
             h.article(
                 [h.Class("mx-auto max-w-3xl")],
                 [
@@ -84,12 +85,9 @@ export const sponsorsView = <M>(h: HtmlBuilder<M>): Html =>
                                         "font-pixel text-dark-blue mb-2 text-base leading-relaxed sm:text-lg md:text-xl"
                                     ),
                                 ],
-                                ["Thank You, Sponsors!"]
+                                [msgs.title]
                             ),
-                            h.p(
-                                [h.Class("text-text-dark/80 text-xl")],
-                                ["The people keeping the lights on in every floor"]
-                            ),
+                            h.p([h.Class("text-text-dark/80 text-xl")], [msgs.tagline]),
                         ]
                     ),
                     h.div(
@@ -102,12 +100,7 @@ export const sponsorsView = <M>(h: HtmlBuilder<M>): Html =>
                             h.section(
                                 [h.Class("pb-8")],
                                 [
-                                    h.p(
-                                        [h.Class("mb-6 text-xl leading-relaxed sm:text-xl")],
-                                        [
-                                            "Tinyburg is free, open source, and run by volunteers. The servers, the database, and the treasury that escrows every trade are all paid for by the generous people on this page who sponsor the project on GitHub. Every single one of them makes the tower a little taller.",
-                                        ]
-                                    ),
+                                    h.p([h.Class("mb-6 text-xl leading-relaxed sm:text-xl")], [msgs.intro]),
                                     h.a(
                                         [
                                             h.Href(sponsorsUrl),
@@ -117,14 +110,14 @@ export const sponsorsView = <M>(h: HtmlBuilder<M>): Html =>
                                                 "font-pixel shadow-pixel hover:shadow-pixel-hover inline-flex items-center gap-2 rounded-lg bg-[#ea4aaa] px-5 py-4 text-[0.65rem] text-white transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:bg-[#d43a99]"
                                             ),
                                         ],
-                                        [h.span([], ["💖"]), " Become a Sponsor"]
+                                        [h.span([], ["💖"]), ` ${msgs.becomeSponsor}`]
                                     ),
                                 ]
                             ),
                             h.section(
                                 [h.Class("py-8")],
                                 [
-                                    articleHeading(h, "Current Sponsors"),
+                                    articleHeading(h, msgs.currentHeading),
                                     currentSponsors.length === 0
                                         ? h.div(
                                               [
@@ -134,10 +127,7 @@ export const sponsorsView = <M>(h: HtmlBuilder<M>): Html =>
                                               ],
                                               [
                                                   h.span([h.Class("mb-3 block text-4xl")], ["🌱"]),
-                                                  h.p(
-                                                      [h.Class("text-xl leading-relaxed")],
-                                                      ["No sponsors yet. Be the first bitizen on this floor!"]
-                                                  ),
+                                                  h.p([h.Class("text-xl leading-relaxed")], [msgs.noSponsors]),
                                               ]
                                           )
                                         : h.div(
@@ -150,13 +140,8 @@ export const sponsorsView = <M>(h: HtmlBuilder<M>): Html =>
                                 ? h.section(
                                       [h.Class("py-8")],
                                       [
-                                          articleHeading(h, "Past Sponsors"),
-                                          h.p(
-                                              [h.Class("mb-4 text-xl leading-relaxed")],
-                                              [
-                                                  "Once a sponsor, always appreciated. Thank you for helping along the way!",
-                                              ]
-                                          ),
+                                          articleHeading(h, msgs.pastHeading),
+                                          h.p([h.Class("mb-4 text-xl leading-relaxed")], [msgs.pastBody]),
                                           h.div(
                                               [h.Class("flex flex-wrap gap-3")],
                                               pastSponsors.map((sponsor) => pastSponsorChip(h, sponsor))
@@ -167,13 +152,8 @@ export const sponsorsView = <M>(h: HtmlBuilder<M>): Html =>
                             h.section(
                                 [h.Class("pt-8")],
                                 [
-                                    articleHeading(h, "Other Ways to Help"),
-                                    h.p(
-                                        [h.Class("mb-6 text-xl leading-relaxed")],
-                                        [
-                                            "Sponsoring is not the only way to support Tinyburg. Report bugs, contribute a feature, or just hang out and help other tower builders in the community.",
-                                        ]
-                                    ),
+                                    articleHeading(h, msgs.otherWaysHeading),
+                                    h.p([h.Class("mb-6 text-xl leading-relaxed")], [msgs.otherWaysBody]),
                                     h.div(
                                         [h.Class("flex flex-col gap-4 md:flex-row")],
                                         [
@@ -186,7 +166,7 @@ export const sponsorsView = <M>(h: HtmlBuilder<M>): Html =>
                                                         "shadow-pixel hover:shadow-pixel-hover flex items-center justify-center gap-2 rounded-lg bg-[#24292e] px-5 py-3 text-lg text-white transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:bg-[#1a1e22]"
                                                     ),
                                                 ],
-                                                [h.span([], ["⭐"]), " Star on GitHub"]
+                                                [h.span([], ["⭐"]), ` ${msgs.starOnGithub}`]
                                             ),
                                             h.a(
                                                 [
@@ -195,7 +175,7 @@ export const sponsorsView = <M>(h: HtmlBuilder<M>): Html =>
                                                         "bg-discord shadow-pixel hover:shadow-pixel-hover flex items-center justify-center gap-2 rounded-lg px-5 py-3 text-lg text-white transition-all hover:-translate-x-0.5 hover:-translate-y-0.5"
                                                     ),
                                                 ],
-                                                [h.span([], ["💬"]), " Join our Discord"]
+                                                [h.span([], ["💬"]), ` ${msgs.joinDiscord}`]
                                             ),
                                         ]
                                     ),
