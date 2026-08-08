@@ -3,7 +3,7 @@ import { FetchHttpClient } from "effect/unstable/http";
 import { RpcClient } from "effect/unstable/rpc";
 
 import { NodeServices, NodeRuntime } from "@effect/platform-node";
-import { GooglePlayApi } from "@efffrida/gplayapi";
+import { AndroidDevice, GooglePlayApi, PlayAccount } from "@efffrida/gplayapi";
 import { AgentLive, DeviceLive } from "@tinyburg/insight/node/index";
 import { Rpcs } from "@tinyburg/insight/shared/Rpcs";
 
@@ -184,7 +184,7 @@ const generateData = Effect.gen(function* () {
 }).pipe(Effect.scoped, Effect.provide(Layer.provideMerge(AgentLive, DeviceLive)));
 
 const Live = pipe(
-    GooglePlayApi.AndroidDevice.EmbeddedPixel7aLive,
+    Layer.mergeAll(AndroidDevice.EmbeddedPixel7aLive, PlayAccount.layerConfig()),
     Layer.provideMerge(FetchHttpClient.layer),
     Layer.provideMerge(NodeServices.layer)
 );

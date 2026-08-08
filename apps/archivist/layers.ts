@@ -3,7 +3,7 @@ import { FetchHttpClient } from "effect/unstable/http";
 
 import { S3 } from "@effect-aws/client-s3";
 import { NodeServices } from "@effect/platform-node";
-import { GooglePlayApi } from "@efffrida/gplayapi";
+import { AndroidDevice, PlayAccount } from "@efffrida/gplayapi";
 
 const DoSpacesLive = Layer.unwrap(
     Effect.gen(function* () {
@@ -23,10 +23,11 @@ const DoSpacesLive = Layer.unwrap(
 
 export const Live = Layer.mergeAll(
     DoSpacesLive,
-    FetchHttpClient.layer,
-    GooglePlayApi.AndroidDevice.EmbeddedPixel7aLive,
+    AndroidDevice.EmbeddedPixel7aLive,
+    PlayAccount.layerConfig(),
     Layer.succeed(References.MinimumLogLevel, "Debug")
 ).pipe(
+    Layer.provideMerge(FetchHttpClient.layer),
     Layer.provideMerge(ConfigProvider.layerAdd(ConfigProvider.fromDotEnv())),
     Layer.provideMerge(NodeServices.layer)
 );
