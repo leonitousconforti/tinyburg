@@ -1,6 +1,6 @@
 {
     "extends": "../../tsconfig.base.jsonc",
-    "references": [],
+    "references": [{ "path": "../../packages/i18n/tsconfig.src.json" }],
     "include": ["domain", "migrations", "routes", "crypto.ts", "index.ts", "interactions.ts", "tinyburg.ts"],
     "compilerOptions": {
         "noEmit": true,

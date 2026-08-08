@@ -15,6 +15,7 @@
         "@fontsource/press-start-2p": "5.3.0",
         "@fontsource/vt323": "5.3.0",
         "@tailwindcss/vite": "4.3.3",
+        "@tinyburg/i18n": "workspace:*",
         "@tinyburg/nimblebit-sdk": "workspace:*",
         "@tinyburg/tinytower-sdk": "workspace:*",
         "@tinyburg/trading-sdk": "workspace:*",
