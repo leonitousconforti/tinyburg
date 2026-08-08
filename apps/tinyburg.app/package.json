@@ -19,6 +19,7 @@
         "@tinyburg/tinytower-sdk": "workspace:*",
         "@tinyburg/trading-sdk": "workspace:^",
         "@tinyburg/ui": "workspace:*",
+        "@tinyburg/web-auth": "workspace:*",
         "effect": "4.0.0-beta.105",
         "effect-oidc": "0.0.8",
         "foldkit": "0.140.1",

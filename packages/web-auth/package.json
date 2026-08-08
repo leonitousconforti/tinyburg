@@ -1,0 +1,25 @@
+{
+    "name": "@tinyburg/web-auth",
+    "version": "0.0.0",
+    "private": true,
+    "description": "Shared web session plumbing for tinyburg apps: cookie policy, secret hashing, and redirect guards",
+    "homepage": "https://github.com/leonitousconforti/tinyburg",
+    "license": "GPL-3.0-only",
+    "author": "Leo Conforti <leo@leoconforti.us> (https://leoconforti.us)",
+    "type": "module",
+    "exports": {
+        "./package.json": "./package.json",
+        ".": "./src/index.ts",
+        "./*": "./src/*.ts"
+    },
+    "scripts": {
+        "build": "tsc -b tsconfig.build.json",
+        "check": "tsc -b tsconfig.json"
+    },
+    "devDependencies": {
+        "effect": "4.0.0-beta.105"
+    },
+    "peerDependencies": {
+        "effect": "4.0.0-beta.105"
+    }
+}
