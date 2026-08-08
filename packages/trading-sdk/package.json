@@ -46,7 +46,7 @@
     },
     "dependencies": {
         "@tinyburg/nimblebit-sdk": "workspace:^",
-        "effect-oidc": "0.0.8"
+        "effect-oidc": "0.0.9"
     },
     "devDependencies": {
         "effect": "4.0.0-beta.105"
