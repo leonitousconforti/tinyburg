@@ -36,6 +36,8 @@ export class PurgeRepository extends Context.Service<PurgeRepository>()(
                              WHERE cf.from_player = ${playerId} OR cf.to_player = ${playerId}) AS edges
                     `,
                     (rows) => {
+                        // Bridges an untyped runtime boundary; the shape is guaranteed by construction, not by the compiler.
+                        // oxlint-disable-next-line typescript/no-unsafe-type-assertion
                         const row = rows[0] as { events: string | number; edges: string | number } | undefined;
                         return {
                             events: Number(row?.events ?? 0),

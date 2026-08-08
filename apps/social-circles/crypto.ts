@@ -58,7 +58,7 @@ export const seal = (plaintext: string): Effect.Effect<string, Config.ConfigErro
  * Fails rather than returning garbage when the payload has been tampered with:
  * GCM's auth tag is checked on `final()`, so a modified ciphertext throws.
  */
-export const unseal = (sealed: string): Effect.Effect<Redacted.Redacted<string>, Config.ConfigError | SealError> =>
+export const unseal = (sealed: string): Effect.Effect<Redacted.Redacted, Config.ConfigError | SealError> =>
     Effect.flatMap(sealingKey, (key) =>
         Effect.try({
             try: () => {
@@ -66,10 +66,10 @@ export const unseal = (sealed: string): Effect.Effect<Redacted.Redacted<string>,
                 if (parts.length !== 4 || parts[0] !== VERSION) {
                     throw new Error(`unrecognised sealed value`);
                 }
-                const decipher = crypto.createDecipheriv("aes-256-gcm", key, Buffer.from(parts[1]!, "base64url"));
-                decipher.setAuthTag(Buffer.from(parts[3]!, "base64url"));
+                const decipher = crypto.createDecipheriv("aes-256-gcm", key, Buffer.from(parts[1], "base64url"));
+                decipher.setAuthTag(Buffer.from(parts[3], "base64url"));
                 const plaintext = Buffer.concat([
-                    decipher.update(Buffer.from(parts[2]!, "base64url")),
+                    decipher.update(Buffer.from(parts[2], "base64url")),
                     decipher.final(),
                 ]);
                 return Redacted.make(plaintext.toString("utf8"));

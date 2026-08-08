@@ -138,6 +138,8 @@ export class GraphRepository extends Context.Service<GraphRepository>()(
                         FROM consents
                         WHERE revoked_at IS NULL AND player_id = ANY(${candidates}::text[])
                     `,
+                    // Bridges an untyped runtime boundary; the shape is guaranteed by construction, not by the compiler.
+                    // oxlint-disable-next-line typescript/no-unsafe-type-assertion
                     Effect.map((rows) => new Set(rows.map((row) => row["playerId"] as PlayerId)))
                 );
 
@@ -229,10 +231,14 @@ export class GraphRepository extends Context.Service<GraphRepository>()(
                         ) fc ON TRUE
                     `,
                     Array.map((row) => ({
+                        // Bridges an untyped runtime boundary; the shape is guaranteed by construction, not by the compiler.
+                        // oxlint-disable-next-line typescript/no-unsafe-type-assertion
                         playerId: row["playerId"] as PlayerId,
                         enrolled: row["enrolled"] === true,
                         totalFriends: Number(row["totalFriends"] ?? 0),
                         consentedFriends: Number(row["consentedFriends"] ?? 0),
+                        // Bridges an untyped runtime boundary; the shape is guaranteed by construction, not by the compiler.
+                        // oxlint-disable-next-line typescript/no-unsafe-type-assertion
                         lastSuccessAt: (row["lastSuccessAt"] ?? null) as Date | null,
                     }))
                 );

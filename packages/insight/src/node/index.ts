@@ -71,6 +71,9 @@ export const AgentWatched = <A, E, R>(
     | Exclude<Exclude<Exclude<R, RpcClient.Protocol>, FridaScript.FridaScript>, FridaSession.FridaSession>
 > =>
     FridaScript.watch(
+        // `Layer.fresh` is the point here: every watched script gets its own protocol instance
+        // rather than sharing one composed at an outer entry point.
+        // oxlint-disable-next-line effecttsgo/strict-effect-provide
         Effect.provide(effect, Layer.fresh(ProtocolLive)),
         new URL("../frida/Agent.ts", import.meta.url),
         { platform: JsPlatform.Browser }
@@ -100,6 +103,8 @@ export const DeviceLive: Layer.Layer<
         extraEmulatorArgs: ["-gpu", "swiftshader_indirect"],
     }),
     Effect.fnUntraced(
+        // The early exits return never-typed values; the normal path runs to the end.
+        // oxlint-disable-next-line typescript/consistent-return
         function* (deviceCtx: Context.Context<FridaDevice.FridaDevice>) {
             const device = Context.get(deviceCtx, FridaDevice.FridaDevice);
             const emulatorName = String.replace("android-emulator://", "")(device.host);

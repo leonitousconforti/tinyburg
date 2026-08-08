@@ -157,6 +157,8 @@ const SelfServiceGroupLive = HttpApiBuilder.group(
                 })
             )
             .handle("deleteKey", ({ params }) =>
+                // The early exits return never-typed values; the normal path runs to the end.
+                // oxlint-disable-next-line typescript/consistent-return
                 Effect.gen(function* () {
                     const { session } = yield* CurrentSession;
                     const deleted = yield* repo

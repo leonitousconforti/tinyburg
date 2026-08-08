@@ -10,6 +10,8 @@ import { type CurrentAccount, Repository, Account } from "../domain/model.ts";
 export class Authorization extends HttpApiMiddleware.Service<
     Authorization,
     {
+        // Written out to mirror the neighbouring signatures.
+        // oxlint-disable-next-line typescript/no-redundant-type-constituents
         provides: CurrentAccount & never;
     }
 >()("Authorization", {

@@ -106,6 +106,8 @@ export class CrawlStateRepository extends Context.Service<CrawlStateRepository>(
             const lastSaveVersion = (playerId: PlayerId): Effect.Effect<string | null, SqlError.SqlError, never> =>
                 Effect.map(
                     sql`SELECT last_save_version FROM crawl_state WHERE player_id = ${playerId}`,
+                    // Bridges an untyped runtime boundary; the shape is guaranteed by construction, not by the compiler.
+                    // oxlint-disable-next-line typescript/no-unsafe-type-assertion
                     (rows) => (rows[0]?.["lastSaveVersion"] as string | undefined) ?? null
                 );
 

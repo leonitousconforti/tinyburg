@@ -53,6 +53,8 @@ const accessTokenFor = Effect.fnUntraced(function* ({ session, user }: { session
 
     yield* SessionsRepository.use((repo) =>
         repo.storeAccessToken({
+            // The payload is serialized before it leaves this call, so the class prototype is irrelevant.
+            // oxlint-disable-next-line typescript/no-misused-spread
             ...session,
             accessToken: Option.some(accessToken),
             accessTokenJti: Option.fromNullishOr(claims.jti),

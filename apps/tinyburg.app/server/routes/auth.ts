@@ -57,6 +57,8 @@ const AuthGroupLive = HttpApiBuilder.group(
                 Effect.gen(function* () {
                     const { session: current, user } = yield* CurrentSession;
                     const sessions = yield* SessionsRepository.use((repo) => repo.listForUser(user.id));
+                    // The payload is serialized before it leaves this call, so the class prototype is irrelevant.
+                    // oxlint-disable-next-line typescript/no-misused-spread
                     return sessions.map((found) => ({ ...found, current: found.id === current.id }));
                 }).pipe(Effect.mapError(() => new HttpApiError.InternalServerError()))
             )
@@ -96,6 +98,8 @@ const AuthGroupLive = HttpApiBuilder.group(
                 }).pipe(Effect.mapError(() => new HttpApiError.InternalServerError()))
             )
             .handle("unlinkAccount", ({ params }) =>
+                // The early exits return never-typed values; the normal path runs to the end.
+                // oxlint-disable-next-line typescript/consistent-return
                 Effect.gen(function* () {
                     const { user } = yield* CurrentSession;
                     const unlinked = yield* UsersRepository.use((repo) =>

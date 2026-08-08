@@ -24,6 +24,8 @@ const program = Effect.gen(function* () {
     for (const bitizenGift of bitizenGifts) {
         // Upgrade their skills to 9s
         const bitizen = yield* Schema.decodeEffect(Bitizens.Bitizen)(bitizenGift.contents);
+        // Bridges an untyped runtime boundary; the shape is guaranteed by construction, not by the compiler.
+        // oxlint-disable-next-line typescript/no-unsafe-type-assertion
         const mutableBitizen = bitizen as Types.DeepMutable<typeof bitizen>;
         mutableBitizen.attributes.skills.creative = 9;
         mutableBitizen.attributes.skills.food = 9;

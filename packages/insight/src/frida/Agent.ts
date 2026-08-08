@@ -203,6 +203,8 @@ const RpcsLive = Rpcs.toLayer(
                 const types = readEnum(FloorTypeClass);
                 const floors = pipe(
                     FloorsField.value,
+                    // Passed straight into an Effect combinator that calls it with the right receiver.
+                    // oxlint-disable-next-line typescript/unbound-method
                     Extensions.Dictionary.lift<number, Il2Cpp.Object>,
                     (floorInfo) => floorInfo.entries,
                     Array.map(([floorIndex, floorObject]) => {
@@ -317,6 +319,8 @@ const RpcsLive = Rpcs.toLayer(
                 const mediaTypes = readEnum(PostMediaTypeClass);
                 const posts = pipe(
                     PostsField.value,
+                    // Passed straight into an Effect combinator that calls it with the right receiver.
+                    // oxlint-disable-next-line typescript/unbound-method
                     Extensions.Dictionary.lift<number, Il2Cpp.Object>,
                     (postDict) => postDict.values,
                     Array.map((postObject) => liftNimblebitDSO(postObject).toRecord()),
@@ -347,6 +351,8 @@ const RpcsLive = Rpcs.toLayer(
                     Array.fromIterable<Il2Cpp.Field.Type>,
                     Array.filterMap(readString)
                 );
+                // Passed straight into an Effect combinator that calls it with the right receiver.
+                // oxlint-disable-next-line typescript/unbound-method
                 const readObjectList = Function.compose(Extensions.List.lift<Il2Cpp.Object>, readStringArray);
 
                 const LocalizationManagerInstance = Il2Cpp.gc.choose(LocalizationManager)[0];
@@ -383,6 +389,8 @@ const RpcsLive = Rpcs.toLayer(
                 const TipMissionsField = yield* tryFieldCached<Il2Cpp.Object>(VMissionDataClass, "tipMissions");
                 const TutorialMissionsField = yield* tryFieldCached<Il2Cpp.Object>(VMissionDataClass, "tutMissions");
                 const values = Function.compose(
+                    // Passed straight into an Effect combinator that calls it with the right receiver.
+                    // oxlint-disable-next-line typescript/unbound-method
                     Extensions.Dictionary.lift<number, Il2Cpp.Object>,
                     (dict) => dict.values
                 );

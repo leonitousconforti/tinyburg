@@ -69,6 +69,8 @@ export const parseNimblebitOrderedList = <
     );
 
     type Fields = { [K in Items[number]["property"]]: Extract<Items[number], { property: K }>["schema"] };
+    // Bridges an untyped runtime boundary; the shape is guaranteed by construction, not by the compiler.
+    // oxlint-disable-next-line typescript/no-unsafe-type-assertion
     const fieldEntries = Object.fromEntries(items.map((item) => Tuple.make(item.property, item.schema))) as Fields;
     const to = Schema.Struct({ $unknown: Schema.Array(Schema.String), ...fieldEntries });
     const from = Schema.String;
@@ -77,6 +79,8 @@ export const parseNimblebitOrderedList = <
         // { a: "123", b: "456" } -> "123,456"
         encode: (properties: (typeof to)["Encoded"]): Effect.Effect<string, SchemaIssue.Issue, never> => {
             const allEntries = Object.entries(properties);
+            // Bridges an untyped runtime boundary; the shape is guaranteed by construction, not by the compiler.
+            // oxlint-disable-next-line typescript/no-unsafe-type-assertion
             const unknownEntries = (properties as unknown as { readonly $unknown: Array<string> })["$unknown"];
             const knownEntries = Array.filter(allEntries, ([key]) => HashMap.has(indexesByProperty, key));
 
@@ -115,6 +119,8 @@ export const parseNimblebitOrderedList = <
                 .map((property, index) => [items[index].property, property] as const);
 
             const properties = [...knownProperties, unknownProperties];
+            // Bridges an untyped runtime boundary; the shape is guaranteed by construction, not by the compiler.
+            // oxlint-disable-next-line typescript/no-unsafe-type-assertion
             const obj = Object.fromEntries(properties) as (typeof to)["Encoded"];
             return Effect.succeed(obj);
         },
@@ -128,7 +134,9 @@ const decodeRegexCache = Effect.runSync(
     Cache.make({
         capacity: 200,
         timeToLive: Duration.minutes(10),
-        lookup: (key: PropertyKey): Effect.Effect<RegExp, never, never> =>
+        // Written out for readability alongside the neighbouring signatures.
+        // oxlint-disable-next-line typescript/no-unnecessary-type-arguments
+        lookup: (key: PropertyKey): Effect.Effect<RegExp, never> =>
             Effect.sync(() => new RegExp(`\\[${String(key)}\\]([\\s\\S]*?)\\[${String(key)}\\]`, "m")),
     })
 );
@@ -208,6 +216,8 @@ export const parseNimblebitObject = <
         HashMap.get(reverseNames, nimblebitSaveDataKey).pipe(Option.getOrElse(() => nimblebitSaveDataKey));
 
     const from = Schema.String;
+    // Bridges an untyped runtime boundary; the shape is guaranteed by construction, not by the compiler.
+    // oxlint-disable-next-line typescript/no-unsafe-type-assertion
     const to = struct.mapFields(
         Struct.assign({
             $unknown: Schema.Record(
@@ -237,6 +247,8 @@ export const parseNimblebitObject = <
     const transformation = SchemaTransformation.transform({
         // { a: "123", b: "456" } -> "[a]123[a][b]456[b]"
         encode: (properties: (typeof to)["Encoded"]): string => {
+            // Bridges an untyped runtime boundary; the shape is guaranteed by construction, not by the compiler.
+            // oxlint-disable-next-line typescript/no-unsafe-type-assertion
             const { $unknown, ...knownProperties } = properties as unknown as {
                 $unknown: Record<
                     string,
@@ -331,6 +343,8 @@ export const parseNimblebitObject = <
             }
 
             const allEntries = [...outEntries, ["$unknown", unknownEntries]];
+            // Bridges an untyped runtime boundary; the shape is guaranteed by construction, not by the compiler.
+            // oxlint-disable-next-line typescript/no-unsafe-type-assertion
             return Object.fromEntries(allEntries) as (typeof to)["Encoded"];
         },
     });
