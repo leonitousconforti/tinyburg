@@ -1,8 +1,10 @@
-import { DateTime, Effect, Match, Option, Result, Schema as S } from "effect";
+import { Match, Option, Result, Schema as S, Effect } from "effect";
 
 import type { Message as AppMessage } from "../main.ts";
+import type { TowersMessages } from "../messages/types.ts";
 import type { Html, HtmlBuilder } from "foldkit/html";
 
+import { type Language, longDate } from "@tinyburg/ui/Internationalization";
 import { PlayerIdSchema } from "@tinyburg/nimblebit-sdk/NimblebitConfig";
 import { AsyncData, Command } from "foldkit";
 import { m } from "foldkit/message";
@@ -10,6 +12,7 @@ import { evo } from "foldkit/struct";
 
 import { Circle, TowerStatus } from "../../shared/api.ts";
 import { Self, type SessionInfo } from "../backend.ts";
+import { initialLanguage, messagesFor } from "../messages/index.ts";
 import { banner, card, dangerButton, primaryButton, quietButton } from "../ui/chrome.ts";
 
 type Tower = typeof TowerStatus.Type;
@@ -88,9 +91,10 @@ export type TowersMessage = typeof TowersMessage.Type;
 
 // COMMAND
 
-const LOAD_FAILED =
-    "We couldn't reach tinyburg.app to check which towers you own. Try signing in again, and if it keeps happening the provider may be down.";
-const ACTION_FAILED = "That didn't work. Please try again.";
+// The language is decided once at init and never changes (no switcher), so
+// commands and update may resolve the text they put into the model directly
+// from `initialLanguage` rather than threading it through the runtime.
+const towersMsgs = (): TowersMessages => messagesFor(initialLanguage).towers;
 
 export const FetchTowers = Command.define("FetchTowers", {
     messages: [SettledTowers, SignedOutElsewhere],
@@ -100,7 +104,7 @@ export const FetchTowers = Command.define("FetchTowers", {
         return SettledTowers({ result: Result.succeed(towers) });
     }).pipe(
         Effect.catchTag("Unauthorized", () => Effect.succeed(SignedOutElsewhere())),
-        Effect.catch(() => Effect.succeed(SettledTowers({ result: Result.fail(LOAD_FAILED) })))
+        Effect.catch(() => Effect.succeed(SettledTowers({ result: Result.fail(towersMsgs().loadFailed) })))
     ),
 });
 
@@ -114,15 +118,8 @@ const Enroll = Command.define("Enroll", {
             return CompletedEnroll({ crawled: result.crawled });
         }).pipe(
             Effect.catchTag("Unauthorized", () => Effect.succeed(SignedOutElsewhere())),
-            Effect.catchTag("Forbidden", () =>
-                Effect.succeed(
-                    FailedAction({
-                        message:
-                            "tinyburg.app could not confirm you own that tower. Make sure it is still linked to your Tinyburg account.",
-                    })
-                )
-            ),
-            Effect.catch(() => Effect.succeed(FailedAction({ message: ACTION_FAILED })))
+            Effect.catchTag("Forbidden", () => Effect.succeed(FailedAction({ message: towersMsgs().enrollForbidden }))),
+            Effect.catch(() => Effect.succeed(FailedAction({ message: towersMsgs().actionFailed })))
         ),
 });
 
@@ -136,12 +133,8 @@ const Withdraw = Command.define("Withdraw", {
             return CompletedWithdraw({ eventsRemoved: receipt.eventsRemoved });
         }).pipe(
             Effect.catchTag("Unauthorized", () => Effect.succeed(SignedOutElsewhere())),
-            Effect.catchTag("NotFound", () =>
-                Effect.succeed(
-                    FailedAction({ message: "That tower is not taking part, so there was nothing to remove." })
-                )
-            ),
-            Effect.catch(() => Effect.succeed(FailedAction({ message: ACTION_FAILED })))
+            Effect.catchTag("NotFound", () => Effect.succeed(FailedAction({ message: towersMsgs().withdrawNotFound }))),
+            Effect.catch(() => Effect.succeed(FailedAction({ message: towersMsgs().actionFailed })))
         ),
 });
 
@@ -155,7 +148,7 @@ const FetchCircle = Command.define("FetchCircle", {
             return SettledCircle({ circle });
         }).pipe(
             Effect.catchTag("Unauthorized", () => Effect.succeed(SignedOutElsewhere())),
-            Effect.catch(() => Effect.succeed(FailedAction({ message: ACTION_FAILED })))
+            Effect.catch(() => Effect.succeed(FailedAction({ message: towersMsgs().actionFailed })))
         ),
 });
 
@@ -186,12 +179,7 @@ export const updateTowers = (model: TowersModel, message: TowersMessage): Towers
             CompletedEnroll: ({ crawled }) => [
                 evo(refetch(model), {
                     busy: Option.none,
-                    notice: () =>
-                        Option.some(
-                            crawled
-                                ? "You're taking part. Your circle is below."
-                                : "You're taking part. We couldn't read your tower just now, so your circle will appear after the next scheduled pass."
-                        ),
+                    notice: () => Option.some(crawled ? towersMsgs().enrolledCrawled : towersMsgs().enrolledPending),
                 }),
                 [FetchTowers()],
             ],
@@ -207,10 +195,7 @@ export const updateTowers = (model: TowersModel, message: TowersMessage): Towers
                 evo(refetch(model), {
                     busy: Option.none,
                     circle: Option.none,
-                    notice: () =>
-                        Option.some(
-                            `Removed. ${eventsRemoved} record${eventsRemoved === 1 ? "" : "s"} about you were deleted, and you are no longer in the study.`
-                        ),
+                    notice: () => Option.some(towersMsgs().withdrawn(eventsRemoved)),
                 }),
                 [FetchTowers()],
             ],
@@ -228,10 +213,10 @@ export const updateTowers = (model: TowersModel, message: TowersMessage): Towers
 
 // VIEW
 
-const formatLastCrawled = (tower: Tower): string =>
+const formatLastCrawled = (msgs: TowersMessages, language: Language, tower: Tower): string =>
     Option.match(tower.lastCrawledAt, {
-        onNone: () => "not read yet",
-        onSome: (when) => `last read ${DateTime.toDateUtc(when).toLocaleDateString()}`,
+        onNone: () => msgs.notReadYet,
+        onSome: (when) => msgs.lastRead(longDate(language, when)),
     });
 
 /**
@@ -241,34 +226,29 @@ const formatLastCrawled = (tower: Tower): string =>
  * "we kept 4 of your 27 friends" is the single most honest thing the study can
  * say about what its data actually is.
  */
-const samplingLine = (h: HtmlBuilder<AppMessage>, tower: Tower): Html =>
+const samplingLine = (h: HtmlBuilder<AppMessage>, msgs: TowersMessages, language: Language, tower: Tower): Html =>
     h.p(
         [h.Class("font-mono text-base text-gray-500")],
         [
             tower.totalFriends === 0
-                ? `In the study · ${formatLastCrawled(tower)}`
-                : `${tower.circleSize} of your ${tower.totalFriends} friends are also taking part · ${formatLastCrawled(tower)}`,
+                ? msgs.inTheStudy(formatLastCrawled(msgs, language, tower))
+                : msgs.circleSummary(tower.circleSize, tower.totalFriends, formatLastCrawled(msgs, language, tower)),
         ]
     );
 
-const circleList = (h: HtmlBuilder<AppMessage>, circle: typeof Circle.Type): Html =>
+const circleList = (h: HtmlBuilder<AppMessage>, msgs: TowersMessages, circle: typeof Circle.Type): Html =>
     h.div(
         [h.Class("mt-3 rounded-lg border-2 border-gray-200 bg-white p-4")],
         [
             h.div(
                 [h.Class("mb-3 flex items-center justify-between gap-3")],
                 [
-                    h.h3([h.Class("font-pixel text-[0.7rem] text-gray-800")], ["Your circle"]),
-                    h.button([h.Type("button"), h.Class(quietButton), h.OnClick(ClickedHideCircle())], ["Hide"]),
+                    h.h3([h.Class("font-pixel text-[0.7rem] text-gray-800")], [msgs.yourCircle]),
+                    h.button([h.Type("button"), h.Class(quietButton), h.OnClick(ClickedHideCircle())], [msgs.hide]),
                 ]
             ),
             circle.friends.length === 0
-                ? h.p(
-                      [h.Class("font-mono text-lg text-gray-600")],
-                      [
-                          "Nobody in your friends list has joined yet. A connection only appears once both people are taking part.",
-                      ]
-                  )
+                ? h.p([h.Class("font-mono text-lg text-gray-600")], [msgs.emptyCircle])
                 : h.div(
                       [h.Class("flex flex-wrap gap-2")],
                       circle.friends.map((friend) =>
@@ -285,7 +265,13 @@ const circleList = (h: HtmlBuilder<AppMessage>, circle: typeof Circle.Type): Htm
         ]
     );
 
-const towerRow = (h: HtmlBuilder<AppMessage>, tower: Tower, model: TowersModel): Html => {
+const towerRow = (
+    h: HtmlBuilder<AppMessage>,
+    msgs: TowersMessages,
+    language: Language,
+    tower: Tower,
+    model: TowersModel
+): Html => {
     const busy = Option.contains(model.busy, tower.playerId);
     const armed = Option.contains(model.armedWithdraw, tower.playerId);
     const showingCircle = Option.match(model.circle, {
@@ -307,7 +293,7 @@ const towerRow = (h: HtmlBuilder<AppMessage>, tower: Tower, model: TowersModel):
                                       "font-mono rounded border-2 border-green-300 bg-green-50 px-2 py-1 text-base text-green-700"
                                   ),
                               ],
-                              ["Taking part"]
+                              [msgs.takingPart]
                           )
                         : h.span(
                               [
@@ -315,19 +301,14 @@ const towerRow = (h: HtmlBuilder<AppMessage>, tower: Tower, model: TowersModel):
                                       "font-mono rounded border-2 border-gray-300 bg-gray-50 px-2 py-1 text-base text-gray-600"
                                   ),
                               ],
-                              ["Not taking part"]
+                              [msgs.notTakingPart]
                           ),
                 ]
             ),
 
             tower.enrolled
-                ? samplingLine(h, tower)
-                : h.p(
-                      [h.Class("font-mono text-base text-gray-500")],
-                      [
-                          "Joining shares only your friends list, and only connections where the other person has joined too.",
-                      ]
-                  ),
+                ? samplingLine(h, msgs, language, tower)
+                : h.p([h.Class("font-mono text-base text-gray-500")], [msgs.joiningShares]),
 
             h.div(
                 [h.Class("flex flex-wrap gap-2")],
@@ -340,17 +321,17 @@ const towerRow = (h: HtmlBuilder<AppMessage>, tower: Tower, model: TowersModel):
                                   h.Disabled(busy),
                                   h.OnClick(ClickedCircle({ playerId: tower.playerId })),
                               ],
-                              [busy ? "..." : "See my circle"]
+                              [busy ? "..." : msgs.seeMyCircle]
                           ),
                           h.button(
                               [
                                   h.Type("button"),
                                   h.Class(dangerButton),
                                   h.Disabled(busy),
-                                  h.Title("Withdraw and delete everything the study holds about this tower"),
+                                  h.Title(msgs.withdrawTitle),
                                   h.OnClick(ClickedWithdraw({ playerId: tower.playerId })),
                               ],
-                              [busy ? "..." : armed ? "Really leave and delete?" : "Leave and delete my data"]
+                              [busy ? "..." : armed ? msgs.reallyLeave : msgs.leaveAndDelete]
                           ),
                       ]
                     : [
@@ -361,7 +342,7 @@ const towerRow = (h: HtmlBuilder<AppMessage>, tower: Tower, model: TowersModel):
                                   h.Disabled(busy),
                                   h.OnClick(ClickedEnroll({ playerId: tower.playerId })),
                               ],
-                              [busy ? "Joining..." : "Take part"]
+                              [busy ? msgs.joining : msgs.takePart]
                           ),
                       ]
             ),
@@ -369,54 +350,51 @@ const towerRow = (h: HtmlBuilder<AppMessage>, tower: Tower, model: TowersModel):
             ...(showingCircle
                 ? Option.match(model.circle, {
                       onNone: () => [],
-                      onSome: (circle) => [circleList(h, circle)],
+                      onSome: (circle) => [circleList(h, msgs, circle)],
                   })
                 : []),
         ]
     );
 };
 
-const towersSection = (h: HtmlBuilder<AppMessage>, model: TowersModel): Html => {
+const towersSection = (
+    h: HtmlBuilder<AppMessage>,
+    msgs: TowersMessages,
+    language: Language,
+    model: TowersModel
+): Html => {
     const list = (towers: ReadonlyArray<Tower>): Html =>
         towers.length === 0
             ? h.div(
                   [h.Class("flex flex-col gap-3")],
                   [
-                      h.p(
-                          [h.Class("font-mono text-xl text-gray-600")],
-                          ["You haven't linked a TinyTower account to your Tinyburg account yet."]
-                      ),
+                      h.p([h.Class("font-mono text-xl text-gray-600")], [msgs.noLinkedTowers]),
                       h.p(
                           [h.Class("font-mono text-lg text-gray-500")],
                           [
-                              "Linking is how we know a tower is really yours. ",
+                              msgs.linkingExplains,
                               h.a(
                                   [h.Href("https://tinyburg.app/account/towers"), h.Class("text-sky-dark underline")],
-                                  ["Link one at tinyburg.app"]
+                                  [msgs.linkOne]
                               ),
-                              ", then come back.",
+                              msgs.thenComeBack,
                           ]
                       ),
                   ]
               )
             : h.div(
                   [h.Class("flex flex-col gap-4")],
-                  towers.map((tower) => towerRow(h, tower, model))
+                  towers.map((tower) => towerRow(h, msgs, language, tower, model))
               );
 
     return h.section(
         [h.Class(card)],
         [
-            h.h2([h.Class("font-pixel mb-2 text-lg text-gray-800")], ["Your Towers"]),
-            h.p(
-                [h.Class("font-mono mb-6 text-lg text-gray-500")],
-                [
-                    "Each tower decides for itself. Taking part shares that tower's friends list; leaving erases everything the study holds about it.",
-                ]
-            ),
+            h.h2([h.Class("font-pixel mb-2 text-lg text-gray-800")], [msgs.heading]),
+            h.p([h.Class("font-mono mb-6 text-lg text-gray-500")], [msgs.headingBody]),
             AsyncData.match(model.towers, {
-                onIdle: () => h.p([h.Class("font-mono text-xl text-gray-600")], ["Loading your towers..."]),
-                onLoading: () => h.p([h.Class("font-mono text-xl text-gray-600")], ["Loading your towers..."]),
+                onIdle: () => h.p([h.Class("font-mono text-xl text-gray-600")], [msgs.loading]),
+                onLoading: () => h.p([h.Class("font-mono text-xl text-gray-600")], [msgs.loading]),
                 onFailure: (error) => h.p([h.Class("font-mono text-xl text-red-700")], [error]),
                 onRefreshing: list,
                 onStale: ({ data }) => list(data),
@@ -426,7 +404,13 @@ const towersSection = (h: HtmlBuilder<AppMessage>, model: TowersModel): Html => 
     );
 };
 
-export const towersView = (h: HtmlBuilder<AppMessage>, model: TowersModel, session: SessionInfo): Html =>
+export const towersView = (
+    h: HtmlBuilder<AppMessage>,
+    msgs: TowersMessages,
+    language: Language,
+    model: TowersModel,
+    session: SessionInfo
+): Html =>
     h.div(
         [h.Class("relative z-10 flex min-h-screen flex-col items-center p-8 pt-24")],
         [
@@ -440,14 +424,14 @@ export const towersView = (h: HtmlBuilder<AppMessage>, model: TowersModel, sessi
                                 [h.Class("font-pixel text-dark-blue text-lg")],
                                 [
                                     Option.match(session.displayName, {
-                                        onSome: (name) => `${name}'s social circles`,
-                                        onNone: () => "Your social circles",
+                                        onSome: (name) => msgs.namedSocialCircles(name),
+                                        onNone: () => msgs.yourSocialCircles,
                                     }),
                                 ]
                             ),
                             h.form(
                                 [h.Method("post"), h.Action("/logout")],
-                                [h.button([h.Type("submit"), h.Class(quietButton)], ["Sign out"])]
+                                [h.button([h.Type("submit"), h.Class(quietButton)], [msgs.signOut])]
                             ),
                         ]
                     ),
@@ -459,13 +443,13 @@ export const towersView = (h: HtmlBuilder<AppMessage>, model: TowersModel, sessi
                         onSome: (text) => [banner(h, "problem", text)],
                         onNone: () => [],
                     }),
-                    towersSection(h, model),
+                    towersSection(h, msgs, language, model),
                     h.p(
                         [h.Class("font-mono text-center text-lg text-white/80")],
                         [
-                            "What we collect and why is written out on the ",
-                            h.a([h.Href("/privacy"), h.Class("text-gold underline")], ["privacy page"]),
-                            ".",
+                            msgs.privacyPrefix,
+                            h.a([h.Href("/privacy"), h.Class("text-gold underline")], [msgs.privacyLink]),
+                            msgs.privacySuffix,
                         ]
                     ),
                 ]

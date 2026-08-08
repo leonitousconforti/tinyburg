@@ -1,12 +1,15 @@
 import { Effect, Match, Option, Schema as S } from "effect";
 
+import type { TitleMessages } from "./messages/types.ts";
 import type { Document, Html, HtmlBuilder } from "foldkit/html";
 
+import { Language } from "@tinyburg/ui/Internationalization";
 import { AsyncData, Command, Navigation, Render, type Runtime, Url } from "foldkit";
 import { m } from "foldkit/message";
 import { evo } from "foldkit/struct";
 
 import { type Backend, CheckingSession, FetchSession, GotSession, SessionState, SignedOut } from "./backend.ts";
+import { initialLanguage, messagesFor } from "./messages/index.ts";
 import { homeView } from "./pages/home.ts";
 import { loginView } from "./pages/login.ts";
 import { notFoundView } from "./pages/notFound.ts";
@@ -28,6 +31,9 @@ export const Model = S.Struct({
     route: AppRoute,
     session: SessionState,
     towers: TowersModel,
+
+    // Decided once at init from the browser's preferences; nothing changes it.
+    language: Language,
 });
 export type Model = typeof Model.Type;
 
@@ -155,6 +161,7 @@ export const init: Runtime.RoutingApplicationInit<Model, Message, void, Backend>
                 route,
                 session: CheckingSession(),
                 towers: initialTowers,
+                language: initialLanguage,
             },
             route
         )
@@ -164,32 +171,36 @@ export const init: Runtime.RoutingApplicationInit<Model, Message, void, Backend>
 
 // VIEW
 
-const routeTitle = (route: AppRoute): string =>
+const routeTitle = (route: AppRoute, titles: TitleMessages): string =>
     Match.value(route).pipe(
         Match.withReturnType<string>(),
         Match.tagsExhaustive({
-            Home: () => "TinyTower Social Circles | An Opt-In Friend Network Study",
-            Login: () => "Sign In | Social Circles",
-            Towers: () => "Your Towers | Social Circles",
-            Privacy: () => "What You'd Be Sharing | Social Circles",
-            NotFound: () => "Page Not Found | Social Circles",
+            Home: () => titles.home,
+            Login: () => titles.login,
+            Towers: () => titles.towers,
+            Privacy: () => titles.privacy,
+            NotFound: () => titles.notFound,
         })
     );
 
-const pageView = (model: Model, h: HtmlBuilder<Message>): Html =>
-    Match.value(model.route).pipe(
+const pageView = (model: Model, h: HtmlBuilder<Message>): Html => {
+    const msgs = messagesFor(model.language);
+    return Match.value(model.route).pipe(
         Match.withReturnType<Html>(),
         Match.tagsExhaustive({
-            Home: () => homeView(h, model.session),
-            Login: ({ error, returnTo }) => loginView(h, returnTo, error),
+            Home: () => homeView(h, msgs.home, model.session),
+            Login: ({ error, returnTo }) => loginView(h, msgs.login, returnTo, error),
             // The gated page renders nothing until the session answer lands;
             // enterRoute has already sent a signed out visitor to login.
             Towers: () =>
-                model.session._tag === "SignedIn" ? towersView(h, model.towers, model.session.session) : h.empty,
+                model.session._tag === "SignedIn"
+                    ? towersView(h, msgs.towers, model.language, model.towers, model.session.session)
+                    : h.empty,
             Privacy: () => privacyView(h),
-            NotFound: () => notFoundView(h),
+            NotFound: () => notFoundView(h, msgs.notFound),
         })
     );
+};
 
 /**
  * Keys the page wrapper so navigating replaces it outright rather than patching
@@ -201,6 +212,6 @@ const pageKey = (model: Model): string =>
         : model.route._tag;
 
 export const view = (model: Model, h: HtmlBuilder<Message>): Document => ({
-    title: routeTitle(model.route),
+    title: routeTitle(model.route, messagesFor(model.language).titles),
     body: h.div([], [h.keyed("div")(pageKey(model), [], [pageView(model, h)])]),
 });
