@@ -1,12 +1,14 @@
 import { Effect, Layer, Option, Result } from "effect";
 import { Url } from "effect/unstable/http";
 
+import { fromDiscordLocale } from "@tinyburg/i18n";
 import { Discord, Ix, UI } from "dfx";
 import { InteractionsRegistry } from "dfx/gateway";
 import { Oidc } from "effect-oidc";
 
 import { randomSecret, sha256 } from "./crypto.ts";
 import { LinksRepository } from "./domain/links.ts";
+import { botMessagesFor } from "./messages.ts";
 import { LINK_SCOPES, tinyburgConfig } from "./tinyburg.ts";
 
 /**
@@ -19,6 +21,11 @@ import { LINK_SCOPES, tinyburgConfig } from "./tinyburg.ts";
  * `contexts` and `integration_types` let the commands run in a guild, in the
  * bot's DMs, or as a user-installed app, so someone can link privately
  * without a server admin having to install anything.
+ *
+ * Replies are localized from `interaction.locale`; the command names and
+ * descriptions below deliberately stay English. Discord localizes those
+ * through its own `name_localizations` / `description_localizations`
+ * registration fields, which are out of scope here.
  */
 
 const INTEGRATION_TYPES = [
@@ -78,6 +85,16 @@ const invokingUserId = Effect.map(Ix.Interaction, (interaction) =>
     Option.fromNullishOr(interaction.member?.user.id ?? interaction.user?.id)
 );
 
+/**
+ * What language to reply in. Discord guarantees `locale` on every
+ * application command interaction; the `in` check only narrows away the PING
+ * interaction, whose type omits the field and which never reaches a handler.
+ */
+const interactionMessages = Effect.map(
+    Ix.Interaction,
+    (interaction) => botMessagesFor[fromDiscordLocale("locale" in interaction ? interaction.locale : undefined)]
+);
+
 export const InteractionsLive = Layer.effectDiscard(
     Effect.gen(function* () {
         const registry = yield* InteractionsRegistry;
@@ -96,15 +113,16 @@ export const InteractionsLive = Layer.effectDiscard(
                 contexts: CONTEXTS,
             },
             Effect.gen(function* () {
+                const messages = yield* interactionMessages;
                 const discordUserId = yield* invokingUserId;
                 if (Option.isNone(discordUserId)) {
-                    return ephemeral("I could not tell who ran that command.");
+                    return ephemeral(messages.unknownInvoker);
                 }
 
                 const existing = yield* links.findLinkByDiscordUserId(discordUserId.value);
                 if (Option.isSome(existing)) {
-                    const name = Option.getOrElse(existing.value.displayName, () => "a Tinyburg account");
-                    return ephemeral(`This Discord account is already linked to **${name}**. Run \`/unlink\` first.`);
+                    const name = Option.getOrElse(existing.value.displayName, () => messages.fallbackAccountName);
+                    return ephemeral(messages.alreadyLinked(name));
                 }
 
                 const state = randomSecret();
@@ -139,12 +157,8 @@ export const InteractionsLive = Layer.effectDiscard(
                 });
 
                 return ephemeralWithLink({
-                    content: [
-                        "Sign in at tinyburg.app to link your account. This link works once and expires in 10 minutes.",
-                        "",
-                        "It only asks to confirm who you are: your towers stay private until you grant that separately.",
-                    ].join("\n"),
-                    label: "Link my Tinyburg account",
+                    content: messages.linkPrompt,
+                    label: messages.linkButtonLabel,
                     url: authorizationUrl.href,
                 });
             })
@@ -167,23 +181,28 @@ export const InteractionsLive = Layer.effectDiscard(
             },
             (context) =>
                 Effect.gen(function* () {
+                    const messages = yield* interactionMessages;
                     const invokerId = yield* invokingUserId;
                     if (Option.isNone(invokerId)) {
-                        return ephemeral("I could not tell who ran that command.");
+                        return ephemeral(messages.unknownInvoker);
                     }
 
                     const target = context.optionValueOptional("user").pipe(Option.getOrElse(() => invokerId.value));
+                    const askingAboutSelf = target === invokerId.value;
 
                     const found = yield* links.findLinkByDiscordUserId(target);
-                    const subject = target === invokerId.value ? "You have" : `<@${target}> has`;
-
                     if (Option.isNone(found)) {
-                        const hint = target === invokerId.value ? " Run `/link` to connect one." : "";
-                        return ephemeral(`${subject} not linked a Tinyburg account.${hint}`);
+                        return ephemeral(
+                            askingAboutSelf ? messages.whoisSelfNotLinked : messages.whoisOtherNotLinked(`<@${target}>`)
+                        );
                     }
 
-                    const name = Option.getOrElse(found.value.displayName, () => "a Tinyburg account");
-                    return ephemeral(`${subject} linked **${name}**.`);
+                    const name = Option.getOrElse(found.value.displayName, () => messages.fallbackAccountName);
+                    return ephemeral(
+                        askingAboutSelf
+                            ? messages.whoisSelfLinked(name)
+                            : messages.whoisOtherLinked(`<@${target}>`, name)
+                    );
                 })
         );
 
@@ -195,16 +214,15 @@ export const InteractionsLive = Layer.effectDiscard(
                 contexts: CONTEXTS,
             },
             Effect.gen(function* () {
+                const messages = yield* interactionMessages;
                 const discordUserId = yield* invokingUserId;
                 if (Option.isNone(discordUserId)) {
-                    return ephemeral("I could not tell who ran that command.");
+                    return ephemeral(messages.unknownInvoker);
                 }
 
                 const removed = yield* links.deleteLinkByDiscordUserId(discordUserId.value);
 
-                return Option.isNone(removed)
-                    ? ephemeral("This Discord account is not linked to a Tinyburg account.")
-                    : ephemeral("Unlinked. Your Tinyburg account no longer answers to this Discord account.");
+                return Option.isNone(removed) ? ephemeral(messages.notLinked) : ephemeral(messages.unlinked);
             })
         );
 
