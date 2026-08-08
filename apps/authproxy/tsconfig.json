@@ -13,10 +13,13 @@
         "migrations",
         "routes",
         "shared",
+        "test",
         "cookies.ts",
         "crypto.ts",
         "index.ts",
-        "vite.config.ts"
+        "vite.config.ts",
+        "vitest.config.ts",
+        "vitest.setup.ts"
     ],
     "compilerOptions": {
         "noEmit": true,
