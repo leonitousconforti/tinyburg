@@ -7,6 +7,7 @@ import * as crypto from "node:crypto";
 
 import type { OAuthAuthorizationRequest, OAuthClient } from "../../domain/models.ts";
 
+import { fromAcceptLanguage, type Language } from "@tinyburg/i18n";
 import { TOWERS_READ_SCOPE, TOWERS_SCOPE, TOWERS_WRITE_SCOPE } from "@tinyburg/trading-sdk/Sdk";
 import { Jwt, Oidc } from "effect-oidc";
 
@@ -17,6 +18,7 @@ import { UsersRepository } from "../../domain/users.ts";
 import { maybeCurrentUser } from "../cookies.ts";
 import { sha256 } from "../crypto.ts";
 import { OidcKeys } from "../keys.ts";
+import { consentMessagesFor } from "./consentMessages.ts";
 
 const ACCESS_TOKEN_TTL_SECONDS = 900;
 const ID_TOKEN_TTL_SECONDS = 900;
@@ -43,7 +45,9 @@ const newOpaqueToken = (): string => crypto.randomUUID() + crypto.randomUUID();
 const noStore = { "cache-control": "no-store", pragma: "no-cache" };
 
 /** A plain-text page for authorize errors that must never reach the client's
- *  redirect uri (unknown client, unregistered redirect, malformed request). */
+ *  redirect uri (unknown client, unregistered redirect, malformed request).
+ *  Intentionally untranslated: OAuth protocol errors are developer-facing and
+ *  stay English by convention. */
 const badRequest = (message: string) => HttpServerResponse.text(message, { status: 400 });
 
 const tokenError = (status: number, error: string) => HttpServerResponse.json({ error }, { status, headers: noStore });
@@ -135,35 +139,19 @@ const escapeHtml = (value: string): string =>
     value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;");
 
 /**
- * What each scope means, in the second person, for the consent screen.
- *
- * These are the words a player decides on, so they say what the application
- * gains rather than naming the endpoints it unlocks. `offline_access` in
- * particular has to be honest that the application keeps working once the
- * browser is closed, because that is the part nobody expects.
- */
-const scopeDescriptions: Record<string, string> = {
-    openid: "Confirm your Tinyburg identity",
-    profile: "See your display name and avatar",
-    towers: "See and manage the TinyTower saves you have linked",
-    "towers:read": "See the TinyTower saves you have linked, without changing them",
-    "towers:write": "Change the TinyTower saves you have linked, including uploading saves and entering raffles",
-    offline_access: "Keep doing this in the background, even when you are not using it",
-};
-
-/**
  * The consent screen is server-rendered rather than a SPA route: during a
  * third-party authorization the browser holds no access token for the SPA to
  * authenticate with, only the provider session cookie this page runs on.
  */
-const consentPage = (client: OAuthClient, request: OAuthAuthorizationRequest) =>
-    HttpServerResponse.html(
+const consentPage = (client: OAuthClient, request: OAuthAuthorizationRequest, language: Language) => {
+    const msgs = consentMessagesFor[language];
+    return HttpServerResponse.html(
         `<!doctype html>
-<html lang="en">
+<html lang="${language}">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width" />
-<title>Authorize ${escapeHtml(client.name)} | Tinyburg</title>
+<title>${msgs.title(escapeHtml(client.name))}</title>
 <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 <style>
   :root { color-scheme: light }
@@ -188,22 +176,23 @@ const consentPage = (client: OAuthClient, request: OAuthAuthorizationRequest) =>
 <body>
   <main class="card">
     <h1>${escapeHtml(client.name)}</h1>
-    <p class="lead">wants to access your Tinyburg account</p>
+    <p class="lead">${msgs.wantsAccess}</p>
     <ul>
       ${scopesOf(request.scope)
-          .map((scope) => `<li>✅ ${escapeHtml(scopeDescriptions[scope] ?? scope)}</li>`)
+          .map((scope) => `<li>✅ ${escapeHtml(msgs.scopeDescriptions[scope] ?? scope)}</li>`)
           .join("\n      ")}
     </ul>
     <form method="post" action="/oauth/consent" class="row">
       <input type="hidden" name="request_id" value="${escapeHtml(request.id)}" />
-      <button class="approve" type="submit" name="decision" value="approve">Authorize</button>
-      <button class="deny" type="submit" name="decision" value="deny">Cancel</button>
+      <button class="approve" type="submit" name="decision" value="approve">${msgs.authorize}</button>
+      <button class="deny" type="submit" name="decision" value="deny">${msgs.cancel}</button>
     </form>
-    <p class="dest">After authorizing you'll be sent back to ${escapeHtml(new URL(request.redirectUri).host)}</p>
+    <p class="dest">${msgs.destination(escapeHtml(new URL(request.redirectUri).host))}</p>
   </main>
 </body>
 </html>`
     ).pipe(HttpServerResponse.setHeader("cache-control", "no-store"));
+};
 
 // GET /oauth/authorize - the browser entry point of the code flow. Visitors
 // without a provider session bounce through /login and come back here; bad
@@ -257,7 +246,10 @@ const authorize = Effect.gen(function* () {
     // Every third party asks permission on every authorization; consent is
     // never remembered. The first party is the app the visitor is already
     // using, so prompting it to authorize itself would be noise.
-    if (client.id !== DevelopersRepository.FIRST_PARTY_CLIENT_ID) return consentPage(client, created);
+    if (client.id !== DevelopersRepository.FIRST_PARTY_CLIENT_ID) {
+        const language = fromAcceptLanguage(request.headers["accept-language"]);
+        return consentPage(client, created, language);
+    }
 
     const redirect = yield* issueAuthorizationCode(created, user.id);
     return Option.match(redirect, {
