@@ -182,7 +182,7 @@ export const FetchLinkedAccounts = Command.define("FetchLinkedAccounts", {
     ),
 });
 
-const RevokeSession = Command.define("RevokeSession", {
+export const RevokeSession = Command.define("RevokeSession", {
     args: { sessionId: S.String },
     messages: [CompletedRevoke, FailedAction, SignedOutElsewhere],
     execute: ({ sessionId }) =>
@@ -195,7 +195,7 @@ const RevokeSession = Command.define("RevokeSession", {
         ),
 });
 
-const RevokeOthers = Command.define("RevokeOthers", {
+export const RevokeOthers = Command.define("RevokeOthers", {
     messages: [CompletedRevoke, FailedAction, SignedOutElsewhere],
     execute: Effect.gen(function* () {
         const auth = yield* Auth;
@@ -206,7 +206,7 @@ const RevokeOthers = Command.define("RevokeOthers", {
     ),
 });
 
-const RevokeAll = Command.define("RevokeAll", {
+export const RevokeAll = Command.define("RevokeAll", {
     messages: [CompletedRevoke, FailedAction, SignedOutElsewhere],
     execute: Effect.gen(function* () {
         const auth = yield* Auth;
@@ -217,7 +217,7 @@ const RevokeAll = Command.define("RevokeAll", {
     ),
 });
 
-const Unlink = Command.define("Unlink", {
+export const Unlink = Command.define("Unlink", {
     args: { provider: OAuthAccount.fields.provider, providerAccountId: S.String },
     messages: [CompletedUnlink, FailedAction, SignedOutElsewhere],
     execute: ({ provider, providerAccountId }) =>

@@ -83,6 +83,6 @@ export const unseal = (sealed: string): Effect.Effect<Redacted.Redacted, Config.
  * was altered. Deliberately carries no detail: the caller's only correct
  * response is to treat the grant as lost and ask the user to reconnect.
  */
-export class SealError extends Schema.ErrorClass<SealError>("@tinyburg/social-circles/SealError")({
+export class SealError extends Schema.Error<SealError>("@tinyburg/social-circles/SealError")({
     _tag: Schema.tag("SealError"),
 }) {}

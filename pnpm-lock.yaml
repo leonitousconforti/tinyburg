@@ -34,8 +34,8 @@ importers:
         specifier: 0.8.9
         version: 0.8.9
       '@effect/docgen':
-        specifier: 4.0.0-beta.102
-        version: 4.0.0-beta.102(ioredis@5.11.1)(tsx@4.23.8)(typescript@7.0.2)
+        specifier: 4.0.0-beta.105
+        version: 4.0.0-beta.105(ioredis@5.11.1)(tsx@4.23.8)(typescript@7.0.2)
       '@effect/tsgo':
         specifier: 0.32.1
         version: 0.32.1
@@ -49,8 +49,8 @@ importers:
         specifier: 0.5.0
         version: 0.5.0(@babel/core@8.0.1)
       effect:
-        specifier: 4.0.0-beta.102
-        version: 4.0.0-beta.102
+        specifier: 4.0.0-beta.105
+        version: 4.0.0-beta.105
       glob:
         specifier: 13.0.6
         version: 13.0.6
@@ -92,16 +92,16 @@ importers:
         version: 2.13.0
       '@effect-aws/client-s3':
         specifier: 2.0.0-beta.6
-        version: 2.0.0-beta.6(effect@4.0.0-beta.102)
+        version: 2.0.0-beta.6(effect@4.0.0-beta.105)
       '@effect/platform-node':
-        specifier: 4.0.0-beta.102
-        version: 4.0.0-beta.102(effect@4.0.0-beta.102)(ioredis@5.11.1)
+        specifier: 4.0.0-beta.105
+        version: 4.0.0-beta.105(effect@4.0.0-beta.105)(ioredis@5.11.1)
       '@efffrida/gplayapi':
-        specifier: 0.0.24
-        version: 0.0.24(@bufbuild/protobuf@2.13.0)(effect@4.0.0-beta.102)
+        specifier: 0.0.26
+        version: 0.0.26(@bufbuild/protobuf@2.13.0)(effect@4.0.0-beta.105)
       effect:
-        specifier: 4.0.0-beta.102
-        version: 4.0.0-beta.102
+        specifier: 4.0.0-beta.105
+        version: 4.0.0-beta.105
       ioredis:
         specifier: 5.11.1
         version: 5.11.1
@@ -109,17 +109,17 @@ importers:
   apps/authproxy:
     dependencies:
       '@effect/platform-browser':
-        specifier: 4.0.0-beta.102
-        version: 4.0.0-beta.102(effect@4.0.0-beta.102)
+        specifier: 4.0.0-beta.105
+        version: 4.0.0-beta.105(effect@4.0.0-beta.105)
       '@effect/platform-node':
-        specifier: 4.0.0-beta.102
-        version: 4.0.0-beta.102(effect@4.0.0-beta.102)(ioredis@5.11.1)
+        specifier: 4.0.0-beta.105
+        version: 4.0.0-beta.105(effect@4.0.0-beta.105)(ioredis@5.11.1)
       '@effect/sql-pg':
-        specifier: 4.0.0-beta.102
-        version: 4.0.0-beta.102(effect@4.0.0-beta.102)
+        specifier: 4.0.0-beta.105
+        version: 4.0.0-beta.105(effect@4.0.0-beta.105)
       '@foldkit/vite-plugin':
-        specifier: 0.11.3
-        version: 0.11.3(effect@4.0.0-beta.102)(foldkit@0.138.0(@effect/platform-browser@4.0.0-beta.102(effect@4.0.0-beta.102))(effect@4.0.0-beta.102))(vite@8.2.1)
+        specifier: 0.12.1
+        version: 0.12.1(effect@4.0.0-beta.105)(foldkit@0.140.1(@effect/platform-browser@4.0.0-beta.105(effect@4.0.0-beta.105))(effect@4.0.0-beta.105))(vite@8.2.1)
       '@tailwindcss/vite':
         specifier: 4.3.3
         version: 4.3.3(vite@8.2.1)
@@ -133,14 +133,14 @@ importers:
         specifier: workspace:*
         version: link:../../packages/ui
       effect:
-        specifier: 4.0.0-beta.102
-        version: 4.0.0-beta.102
+        specifier: 4.0.0-beta.105
+        version: 4.0.0-beta.105
       effect-oidc:
-        specifier: 0.0.6
-        version: 0.0.6(effect@4.0.0-beta.102)
+        specifier: 0.0.8
+        version: 0.0.8(effect@4.0.0-beta.105)
       foldkit:
-        specifier: 0.138.0
-        version: 0.138.0(@effect/platform-browser@4.0.0-beta.102(effect@4.0.0-beta.102))(effect@4.0.0-beta.102)
+        specifier: 0.140.1
+        version: 0.140.1(@effect/platform-browser@4.0.0-beta.105(effect@4.0.0-beta.105))(effect@4.0.0-beta.105)
       ioredis:
         specifier: 5.11.1
         version: 5.11.1
@@ -157,8 +157,8 @@ importers:
   apps/auto-gold-bits:
     dependencies:
       '@effect/platform-node':
-        specifier: 4.0.0-beta.102
-        version: 4.0.0-beta.102(effect@4.0.0-beta.102)(ioredis@5.11.1)
+        specifier: 4.0.0-beta.105
+        version: 4.0.0-beta.105(effect@4.0.0-beta.105)(ioredis@5.11.1)
       '@tinyburg/nimblebit-sdk':
         specifier: workspace:*
         version: link:../../packages/nimblebit-sdk
@@ -166,8 +166,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/tinytower-sdk
       effect:
-        specifier: 4.0.0-beta.102
-        version: 4.0.0-beta.102
+        specifier: 4.0.0-beta.105
+        version: 4.0.0-beta.105
       ioredis:
         specifier: 5.11.1
         version: 5.11.1
@@ -175,20 +175,20 @@ importers:
   apps/discord-bot:
     dependencies:
       '@effect/platform-node':
-        specifier: 4.0.0-beta.102
-        version: 4.0.0-beta.102(effect@4.0.0-beta.102)(ioredis@5.11.1)
+        specifier: 4.0.0-beta.105
+        version: 4.0.0-beta.105(effect@4.0.0-beta.105)(ioredis@5.11.1)
       '@effect/sql-pg':
-        specifier: 4.0.0-beta.102
-        version: 4.0.0-beta.102(effect@4.0.0-beta.102)
+        specifier: 4.0.0-beta.105
+        version: 4.0.0-beta.105(effect@4.0.0-beta.105)
       dfx:
         specifier: 1.0.15
-        version: 1.0.15(effect@4.0.0-beta.102)
+        version: 1.0.15(effect@4.0.0-beta.105)
       effect:
-        specifier: 4.0.0-beta.102
-        version: 4.0.0-beta.102
+        specifier: 4.0.0-beta.105
+        version: 4.0.0-beta.105
       effect-oidc:
-        specifier: 0.0.6
-        version: 0.0.6(effect@4.0.0-beta.102)
+        specifier: 0.0.8
+        version: 0.0.8(effect@4.0.0-beta.105)
       ioredis:
         specifier: 5.11.1
         version: 5.11.1
@@ -199,8 +199,8 @@ importers:
   apps/doorman-clone:
     dependencies:
       '@effect/platform-node':
-        specifier: 4.0.0-beta.102
-        version: 4.0.0-beta.102(effect@4.0.0-beta.102)(ioredis@5.11.1)
+        specifier: 4.0.0-beta.105
+        version: 4.0.0-beta.105(effect@4.0.0-beta.105)(ioredis@5.11.1)
       '@tinyburg/nimblebit-sdk':
         specifier: workspace:*
         version: link:../../packages/nimblebit-sdk
@@ -208,8 +208,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/tinytower-sdk
       effect:
-        specifier: 4.0.0-beta.102
-        version: 4.0.0-beta.102
+        specifier: 4.0.0-beta.105
+        version: 4.0.0-beta.105
       ioredis:
         specifier: 5.11.1
         version: 5.11.1
@@ -217,11 +217,11 @@ importers:
   apps/personas:
     dependencies:
       '@effect/platform-node':
-        specifier: 4.0.0-beta.102
-        version: 4.0.0-beta.102(effect@4.0.0-beta.102)(ioredis@5.11.1)
+        specifier: 4.0.0-beta.105
+        version: 4.0.0-beta.105(effect@4.0.0-beta.105)(ioredis@5.11.1)
       effect:
-        specifier: 4.0.0-beta.102
-        version: 4.0.0-beta.102
+        specifier: 4.0.0-beta.105
+        version: 4.0.0-beta.105
       ioredis:
         specifier: 5.11.1
         version: 5.11.1
@@ -229,17 +229,17 @@ importers:
   apps/social-circles:
     dependencies:
       '@effect/platform-browser':
-        specifier: 4.0.0-beta.102
-        version: 4.0.0-beta.102(effect@4.0.0-beta.102)
+        specifier: 4.0.0-beta.105
+        version: 4.0.0-beta.105(effect@4.0.0-beta.105)
       '@effect/platform-node':
-        specifier: 4.0.0-beta.102
-        version: 4.0.0-beta.102(effect@4.0.0-beta.102)(ioredis@5.11.1)
+        specifier: 4.0.0-beta.105
+        version: 4.0.0-beta.105(effect@4.0.0-beta.105)(ioredis@5.11.1)
       '@effect/sql-pg':
-        specifier: 4.0.0-beta.102
-        version: 4.0.0-beta.102(effect@4.0.0-beta.102)
+        specifier: 4.0.0-beta.105
+        version: 4.0.0-beta.105(effect@4.0.0-beta.105)
       '@foldkit/vite-plugin':
-        specifier: 0.11.3
-        version: 0.11.3(effect@4.0.0-beta.102)(foldkit@0.138.0(@effect/platform-browser@4.0.0-beta.102(effect@4.0.0-beta.102))(effect@4.0.0-beta.102))(vite@8.2.1)
+        specifier: 0.12.1
+        version: 0.12.1(effect@4.0.0-beta.105)(foldkit@0.140.1(@effect/platform-browser@4.0.0-beta.105(effect@4.0.0-beta.105))(effect@4.0.0-beta.105))(vite@8.2.1)
       '@fontsource/press-start-2p':
         specifier: 5.3.0
         version: 5.3.0
@@ -259,14 +259,14 @@ importers:
         specifier: workspace:*
         version: link:../../packages/trading-sdk
       effect:
-        specifier: 4.0.0-beta.102
-        version: 4.0.0-beta.102
+        specifier: 4.0.0-beta.105
+        version: 4.0.0-beta.105
       effect-oidc:
-        specifier: 0.0.6
-        version: 0.0.6(effect@4.0.0-beta.102)
+        specifier: 0.0.8
+        version: 0.0.8(effect@4.0.0-beta.105)
       foldkit:
-        specifier: 0.138.0
-        version: 0.138.0(@effect/platform-browser@4.0.0-beta.102(effect@4.0.0-beta.102))(effect@4.0.0-beta.102)
+        specifier: 0.140.1
+        version: 0.140.1(@effect/platform-browser@4.0.0-beta.105(effect@4.0.0-beta.105))(effect@4.0.0-beta.105)
       ioredis:
         specifier: 5.11.1
         version: 5.11.1
@@ -283,17 +283,17 @@ importers:
   apps/tinyburg.app:
     dependencies:
       '@effect/platform-browser':
-        specifier: 4.0.0-beta.102
-        version: 4.0.0-beta.102(effect@4.0.0-beta.102)
+        specifier: 4.0.0-beta.105
+        version: 4.0.0-beta.105(effect@4.0.0-beta.105)
       '@effect/platform-node':
-        specifier: 4.0.0-beta.102
-        version: 4.0.0-beta.102(effect@4.0.0-beta.102)(ioredis@5.11.1)
+        specifier: 4.0.0-beta.105
+        version: 4.0.0-beta.105(effect@4.0.0-beta.105)(ioredis@5.11.1)
       '@effect/sql-pg':
-        specifier: 4.0.0-beta.102
-        version: 4.0.0-beta.102(effect@4.0.0-beta.102)
+        specifier: 4.0.0-beta.105
+        version: 4.0.0-beta.105(effect@4.0.0-beta.105)
       '@foldkit/vite-plugin':
-        specifier: 0.11.3
-        version: 0.11.3(effect@4.0.0-beta.102)(foldkit@0.138.0(@effect/platform-browser@4.0.0-beta.102(effect@4.0.0-beta.102))(effect@4.0.0-beta.102))(vite@8.2.1)
+        specifier: 0.12.1
+        version: 0.12.1(effect@4.0.0-beta.105)(foldkit@0.140.1(@effect/platform-browser@4.0.0-beta.105(effect@4.0.0-beta.105))(effect@4.0.0-beta.105))(vite@8.2.1)
       '@fontsource/press-start-2p':
         specifier: 5.3.0
         version: 5.3.0
@@ -316,14 +316,14 @@ importers:
         specifier: workspace:*
         version: link:../../packages/ui
       effect:
-        specifier: 4.0.0-beta.102
-        version: 4.0.0-beta.102
+        specifier: 4.0.0-beta.105
+        version: 4.0.0-beta.105
       effect-oidc:
-        specifier: 0.0.6
-        version: 0.0.6(effect@4.0.0-beta.102)
+        specifier: 0.0.8
+        version: 0.0.8(effect@4.0.0-beta.105)
       foldkit:
-        specifier: 0.138.0
-        version: 0.138.0(@effect/platform-browser@4.0.0-beta.102(effect@4.0.0-beta.102))(effect@4.0.0-beta.102)
+        specifier: 0.140.1
+        version: 0.140.1(@effect/platform-browser@4.0.0-beta.105(effect@4.0.0-beta.105))(effect@4.0.0-beta.105)
       ioredis:
         specifier: 5.11.1
         version: 5.11.1
@@ -347,23 +347,23 @@ importers:
         specifier: 2.13.0
         version: 2.13.0
       '@efffrida/frida-tools':
-        specifier: 0.0.47
-        version: 0.0.47(effect@4.0.0-beta.102)
+        specifier: 0.0.49
+        version: 0.0.49(effect@4.0.0-beta.105)
       '@efffrida/gplayapi':
-        specifier: 0.0.24
-        version: 0.0.24(@bufbuild/protobuf@2.13.0)(effect@4.0.0-beta.102)
+        specifier: 0.0.26
+        version: 0.0.26(@bufbuild/protobuf@2.13.0)(effect@4.0.0-beta.105)
       '@efffrida/il2cpp-bridge':
-        specifier: 0.0.43
-        version: 0.0.43(effect@4.0.0-beta.102)
+        specifier: 0.0.45
+        version: 0.0.45(effect@4.0.0-beta.105)
       '@efffrida/platform':
-        specifier: 0.0.35
-        version: 0.0.35(effect@4.0.0-beta.102)
+        specifier: 0.0.37
+        version: 0.0.37(effect@4.0.0-beta.105)
       '@efffrida/polyfills':
-        specifier: 0.0.14
-        version: 0.0.14
+        specifier: 0.0.15
+        version: 0.0.15
       '@efffrida/rpc':
-        specifier: 0.0.50
-        version: 0.0.50(effect@4.0.0-beta.102)
+        specifier: 0.0.52
+        version: 0.0.52(effect@4.0.0-beta.105)
       frida:
         specifier: 17.16.4
         version: 17.16.4
@@ -375,14 +375,14 @@ importers:
         specifier: 19.10.0
         version: 19.10.0
       effect:
-        specifier: 4.0.0-beta.102
-        version: 4.0.0-beta.102
+        specifier: 4.0.0-beta.105
+        version: 4.0.0-beta.105
 
   packages/nimblebit-sdk:
     devDependencies:
       effect:
-        specifier: 4.0.0-beta.102
-        version: 4.0.0-beta.102
+        specifier: 4.0.0-beta.105
+        version: 4.0.0-beta.105
 
   packages/tinytower-sdk:
     dependencies:
@@ -397,23 +397,23 @@ importers:
         specifier: 2.13.0
         version: 2.13.0
       '@effect/platform-node':
-        specifier: 4.0.0-beta.102
-        version: 4.0.0-beta.102(effect@4.0.0-beta.102)(ioredis@5.11.1)
+        specifier: 4.0.0-beta.105
+        version: 4.0.0-beta.105(effect@4.0.0-beta.105)(ioredis@5.11.1)
       '@effect/vitest':
-        specifier: 4.0.0-beta.102
-        version: 4.0.0-beta.102(effect@4.0.0-beta.102)(vitest@4.1.10(vite@8.2.1))
+        specifier: 4.0.0-beta.105
+        version: 4.0.0-beta.105(effect@4.0.0-beta.105)(vitest@4.1.10(vite@8.2.1))
       '@efffrida/frida-tools':
-        specifier: 0.0.47
-        version: 0.0.47(effect@4.0.0-beta.102)
+        specifier: 0.0.49
+        version: 0.0.49(effect@4.0.0-beta.105)
       '@efffrida/gplayapi':
-        specifier: 0.0.24
-        version: 0.0.24(@bufbuild/protobuf@2.13.0)(effect@4.0.0-beta.102)
+        specifier: 0.0.26
+        version: 0.0.26(@bufbuild/protobuf@2.13.0)(effect@4.0.0-beta.105)
       '@tinyburg/insight':
         specifier: workspace:*
         version: link:../insight
       effect:
-        specifier: 4.0.0-beta.102
-        version: 4.0.0-beta.102
+        specifier: 4.0.0-beta.105
+        version: 4.0.0-beta.105
       ioredis:
         specifier: 5.11.1
         version: 5.11.1
@@ -430,12 +430,12 @@ importers:
         specifier: workspace:^
         version: link:../nimblebit-sdk
       effect-oidc:
-        specifier: 0.0.6
-        version: 0.0.6(effect@4.0.0-beta.102)
+        specifier: 0.0.8
+        version: 0.0.8(effect@4.0.0-beta.105)
     devDependencies:
       effect:
-        specifier: 4.0.0-beta.102
-        version: 4.0.0-beta.102
+        specifier: 4.0.0-beta.105
+        version: 4.0.0-beta.105
 
   packages/ui:
     dependencies:
@@ -450,14 +450,14 @@ importers:
         version: 5.3.0
     devDependencies:
       '@effect/platform-browser':
-        specifier: 4.0.0-beta.102
-        version: 4.0.0-beta.102(effect@4.0.0-beta.102)
+        specifier: 4.0.0-beta.105
+        version: 4.0.0-beta.105(effect@4.0.0-beta.105)
       effect:
-        specifier: 4.0.0-beta.102
-        version: 4.0.0-beta.102
+        specifier: 4.0.0-beta.105
+        version: 4.0.0-beta.105
       foldkit:
-        specifier: 0.138.0
-        version: 0.138.0(@effect/platform-browser@4.0.0-beta.102(effect@4.0.0-beta.102))(effect@4.0.0-beta.102)
+        specifier: 0.140.1
+        version: 0.140.1(@effect/platform-browser@4.0.0-beta.105(effect@4.0.0-beta.105))(effect@4.0.0-beta.105)
 
   scratchpad:
     dependencies:
@@ -475,17 +475,17 @@ importers:
         specifier: 2.13.0
         version: 2.13.0
       '@effect/platform-node':
-        specifier: 4.0.0-beta.102
-        version: 4.0.0-beta.102(effect@4.0.0-beta.102)(ioredis@5.11.1)
+        specifier: 4.0.0-beta.105
+        version: 4.0.0-beta.105(effect@4.0.0-beta.105)(ioredis@5.11.1)
       '@efffrida/frida-tools':
-        specifier: 0.0.47
-        version: 0.0.47(effect@4.0.0-beta.102)
+        specifier: 0.0.49
+        version: 0.0.49(effect@4.0.0-beta.105)
       '@efffrida/gplayapi':
-        specifier: 0.0.24
-        version: 0.0.24(@bufbuild/protobuf@2.13.0)(effect@4.0.0-beta.102)
+        specifier: 0.0.26
+        version: 0.0.26(@bufbuild/protobuf@2.13.0)(effect@4.0.0-beta.105)
       effect:
-        specifier: 4.0.0-beta.102
-        version: 4.0.0-beta.102
+        specifier: 4.0.0-beta.105
+        version: 4.0.0-beta.105
       ioredis:
         specifier: 5.11.1
         version: 5.11.1
@@ -574,10 +574,6 @@ packages:
     hasBin: true
     peerDependencies:
       '@babel/core': ^8.0.0
-
-  '@babel/code-frame@7.29.7':
-    resolution: {integrity: sha512-Aup7aUOfpbAUg2ROOJN6Iw5f9DMBlzu0mIkm/malLQFN/YQgO48wCj0Kxa3sEHJvPVFg7siR+qRInwXd2qhQKw==}
-    engines: {node: '>=6.9.0'}
 
   '@babel/code-frame@8.0.0':
     resolution: {integrity: sha512-dYYg153EyN2Ekbqw2zAsbd6/JR+9N2SEoC7YV2GyyqMM7x9bLDTjBD6XBhSMLH0wtIVyJj03jWNriQhaN+eoCw==}
@@ -770,8 +766,8 @@ packages:
     engines: {node: '>=16.17.1'}
     hasBin: true
 
-  '@effect/docgen@4.0.0-beta.102':
-    resolution: {integrity: sha512-6Xoqr2EJ5ZFKX5NvFID6Zw6XSD4ihnwyBqLeru0LA3grG8W4CjVesByefry2mqQ5YER4ZzX3nHq3jUpN6NnSHg==}
+  '@effect/docgen@4.0.0-beta.105':
+    resolution: {integrity: sha512-4KJXzchvFp0kS+BJbEP7Oi0MdKjPQ317iVoDE3ATy5joS4pDqwLjW2zTFL4fAgOqkLumcX/+zqW5JqSeIOCvqg==}
     engines: {node: '>=18.0.0'}
     hasBin: true
     peerDependencies:
@@ -783,28 +779,28 @@ packages:
     engines: {node: '>=0.10.0'}
     hasBin: true
 
-  '@effect/platform-browser@4.0.0-beta.102':
-    resolution: {integrity: sha512-DXXVt+oOpukqI3lEaGvvXQxSobzIy3lAsIQvlpVK+MuYBm1o4FHZrHKbrOFItDUvSR1t0kiTncFPRi01YaJUmA==}
+  '@effect/platform-browser@4.0.0-beta.105':
+    resolution: {integrity: sha512-ts6js/MzhptBEfAXkxtyWq0fDK1snISNUWdziw4J5vf8g+1yIujpk4tgFN0dhQcRnhzVJZVDEAUoiwTQW1Bp8A==}
     peerDependencies:
-      effect: ^4.0.0-beta.102
+      effect: ^4.0.0-beta.105
 
-  '@effect/platform-node-shared@4.0.0-beta.104':
-    resolution: {integrity: sha512-wZQWlreuCfR+Ip6E93h2Wo56lFdBTflzSErFKxvrAW06/ORa7yZMD4oq4Ow5aU5+AlQgomQSEeBKM7uao4ZewQ==}
+  '@effect/platform-node-shared@4.0.0-beta.105':
+    resolution: {integrity: sha512-UfeC8cFm4sP+XW14OO66CcOGJ8PcD102hH0kLwj8xUVL6nYIDGE/SJvlfVmFx+9OWF6rnjfXjMV6vyl6mCdhCQ==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
-      effect: ^4.0.0-beta.104
+      effect: ^4.0.0-beta.105
 
-  '@effect/platform-node@4.0.0-beta.102':
-    resolution: {integrity: sha512-wYVAU9jAePT+gouMr/EVz1CaW6yDLjPAgXYeEFLz7wugT5iZhFRag6mqajV/wwN3bzWP2fzZHokLuPmqD/rqeA==}
+  '@effect/platform-node@4.0.0-beta.105':
+    resolution: {integrity: sha512-gOHtgE9PqCT8aiiM0W7ZSbu4M2/jPGfJOKWuyBCxofNV5Np36fFY55FSa1MtyG+vjOjlD5btNY2i6i/SPtRqTA==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
-      effect: ^4.0.0-beta.102
-      ioredis: ^5.7.0
+      effect: ^4.0.0-beta.105
+      ioredis: '>=5.7.0 <6.0.0'
 
-  '@effect/sql-pg@4.0.0-beta.102':
-    resolution: {integrity: sha512-02a+fNfECWCZIZcgHl7OLQN2jZj42gq90EdwdnvR3KA6GLGypY02swABS4zFtaW9H80rTa0ukqVnTdcO/DT5GQ==}
+  '@effect/sql-pg@4.0.0-beta.105':
+    resolution: {integrity: sha512-Jz2DYIR+lyPdExOeYKV2BRcNZ/kj3Ldyz3xqDsT3nRM2zWo/9zWKH7XON/P1pvTbIxJPwuS63MPd4F6GYtz+bA==}
     peerDependencies:
-      effect: ^4.0.0-beta.102
+      effect: ^4.0.0-beta.105
 
   '@effect/tsgo-darwin-arm64@0.32.1':
     resolution: {integrity: sha512-0aIAEzrPO4EzFf64UtPjsQM9rFLOikgA7xgTsJLXr6idXNxtwMp85/+h4mLg6z5KUfy0J6h4Pi0029hCMxLDoQ==}
@@ -845,40 +841,40 @@ packages:
     resolution: {integrity: sha512-OtBvBxOx5DkwYKTP9nK2UdkWL+pFZsCAdwTqhwRmG+fUyY7MLc30y4+24/p7M6BJk6X8gjKqoEEM3fATEs2qkg==}
     hasBin: true
 
-  '@effect/vitest@4.0.0-beta.102':
-    resolution: {integrity: sha512-4dipFAYG6imOzrY3zy3BgzCJkbb9xESyzUef0WSx8bsK0/SpITqbJpdwKeOyDWLZ+rimjua8IbTFMAde865pIQ==}
+  '@effect/vitest@4.0.0-beta.105':
+    resolution: {integrity: sha512-2t1J/H/+9hAKDC1S3iFyUVZJhdMpKvuggnOGNXPTmxZcVdxG/VkhjQjo7wzOHWs6SZcX8Cr/EsB+uiVAn9G0Ng==}
     peerDependencies:
-      effect: ^4.0.0-beta.102
-      vitest: ^3.0.0 || ^4.0.0
+      effect: ^4.0.0-beta.105
+      vitest: '>=4.1.0 <5.0.0'
 
-  '@efffrida/frida-tools@0.0.47':
-    resolution: {integrity: sha512-x/VA52R3wFZh17vldBYegBaOqZqsxy2A7rI3pfaAVoo6TH0MIfF7gzpoWZvQ/zeObCBGedQAoFD/KFS+2O8vSw==}
+  '@efffrida/frida-tools@0.0.49':
+    resolution: {integrity: sha512-BKsTYmB1VPMe3GGxxBsFsSqZaYlNkc4VMxix547j1DLTVQNrJDm3J8kxIFcZEEZjDa96kVDmNPrgLg2O0klZqg==}
     peerDependencies:
-      effect: 4.0.0-beta.102
+      effect: 4.0.0-beta.104
 
-  '@efffrida/gplayapi@0.0.24':
-    resolution: {integrity: sha512-1NnDW9nmyHS5UFXqdE+fkg+b4mKjieaysHFSouoH7uCQHCf9rwVKYNIYQVFSIx9XvbMt0bnkkVICT/NUl6C9Jw==}
+  '@efffrida/gplayapi@0.0.26':
+    resolution: {integrity: sha512-G89mHGtak6cyss032FAt++FOA21r1JBOTA4utb53OCNYH4eBSLNix0BcN9qK8PxM2M1ikI+ZLLt9xH2RaCCH3w==}
     peerDependencies:
       '@bufbuild/protobuf': 2.13.0
-      effect: 4.0.0-beta.102
+      effect: 4.0.0-beta.104
 
-  '@efffrida/il2cpp-bridge@0.0.43':
-    resolution: {integrity: sha512-oEJ20fm63r25HBJQgFSZkKKbqQrZgv6DQFcEyyXpkosIoB+OWXemN6RvyWH3q/TScQsBRSalwJqjmIG758CHFg==}
+  '@efffrida/il2cpp-bridge@0.0.45':
+    resolution: {integrity: sha512-W912mAx5PmLgTAAo0pu43pLngfM8UgCti9j8hTVIWR97BsaSKuEusy1bzw86sg3qdvuRDvBRbIeSwe9N2Mn87Q==}
     peerDependencies:
-      effect: 4.0.0-beta.102
+      effect: 4.0.0-beta.104
 
-  '@efffrida/platform@0.0.35':
-    resolution: {integrity: sha512-WfI6y90UByfJnpv54fsV65/xKggRaCEtQ1QZmXKA7KKB6ljpRXaXLmnLIoxYsy1enXaUe8oTpGgfwWIgsQv6sA==}
+  '@efffrida/platform@0.0.37':
+    resolution: {integrity: sha512-5/Hh3M2TrU6Z3l1o3J4XxjWMhLdKJ5x6XuNsD6nQSG17J/HYh9FOFjFGn5z61azlnxG/ukDhol1ueOu20oOAJA==}
     peerDependencies:
-      effect: 4.0.0-beta.102
+      effect: 4.0.0-beta.104
 
-  '@efffrida/polyfills@0.0.14':
-    resolution: {integrity: sha512-PyabpPi9kBnX9qsjNznAEkngjxWtfKUaAL5NNIntYp6YDP5yI2Nop0J0LyvY8+MrP5M0c4P+uT6JHIJtgA1X+Q==}
+  '@efffrida/polyfills@0.0.15':
+    resolution: {integrity: sha512-lLK25JJG6H8LHiykoKLCszN56uHv1+nkXmKjL3+dlybseGZBAHJzDV5arKpNJsTYSgQiA03NYOxXlsrAtXFl/Q==}
 
-  '@efffrida/rpc@0.0.50':
-    resolution: {integrity: sha512-sxAFRFMR5NcdwGnkDETSecRNvuha4ElTV45yZo7A/MUlTelkuC7KPI3tafPBptJFy9HlEanQZiHYReAWyXZFnw==}
+  '@efffrida/rpc@0.0.52':
+    resolution: {integrity: sha512-Z9Y6CX9aqqLfqO8k3Ql6EcGNDTWuLYohTe9H8syDYl8LBMvWSJfZBLzFsfUVkoY0gfTfOa9c/j4kJF+uwhMp/g==}
     peerDependencies:
-      effect: 4.0.0-beta.102
+      effect: 4.0.0-beta.104
 
   '@esbuild/aix-ppc64@0.28.1':
     resolution: {integrity: sha512-Svl7tq8k/08+p6CXPpRjQ1fKX+1odH/BQbb48fV6fj3CWHhsoIOoY87w1oHXm0qEpkIK3ZfVgp0hed3XBXzXMQ==}
@@ -1036,11 +1032,11 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@foldkit/vite-plugin@0.11.3':
-    resolution: {integrity: sha512-5kf542FTIejzcl3rjY+mxADUxHNd7HyFhipO73srBd/2cQpIRddlrjAlsFo8/3Ahinjzxe1ekzeUX+5GmRM15Q==}
+  '@foldkit/vite-plugin@0.12.1':
+    resolution: {integrity: sha512-26zBD9Vk17Nf9zaD3qJdjnqh/Dh2lfXCJTi8+a1aKlVBfLQ98dJKk8kgfZCjRK3FkPXElwV/wJSRzuHUYD+l9A==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
-      effect: 4.0.0-beta.102
+      effect: 4.0.0-beta.105
       foldkit: ^0
       vite: ^7.0.0 || ^8.0.0
 
@@ -2189,14 +2185,14 @@ packages:
     resolution: {integrity: sha512-yS+Q5i3hBf7GBkd4KG8a7eBNNWNGLTaEwwYWUijIYM7zrlYDM0BFXHjjPWlWZ1Rg7UaddZeIDmi9jF3HmqiQ2w==}
     engines: {node: '>=6.0.0'}
 
-  effect-oidc@0.0.6:
-    resolution: {integrity: sha512-cEOGMiw9wGrCBet8dxM8M82fUuQOlmcX6lG/vr7FkHaerSoK0ZvldTpicAJZy/6A30OTfiF5L6ac6D5eQX0eiA==}
+  effect-oidc@0.0.8:
+    resolution: {integrity: sha512-RPdQlJGdLsyLUKHNFVZDwXagmvNxMG/ZLvMNdiNin4ErSx5d5oS2+xcZtkRea1cu9wP6907GR5iYaRuaH1gJpg==}
     engines: {node: '>=22.0.0'}
     peerDependencies:
-      effect: 4.0.0-beta.102
+      effect: 4.0.0-beta.104
 
-  effect@4.0.0-beta.102:
-    resolution: {integrity: sha512-z8Y+Q76Hh/kjLFZrXu8tGn6e+tDsg45R+UHhxd190pXxD53OGwf/G/zDxXTkse4HJ5mobNZfitLfUCp4fMvu6w==}
+  effect@4.0.0-beta.105:
+    resolution: {integrity: sha512-7U5OzWVNlpnZFvXiZfOeu8V+dCQUa3Om569HnYG2Dx8C8V6uoKS920kFJkIDEYVhlSGhzkRqaGKmYY9bPkBMMQ==}
 
   electron-to-chromium@1.5.401:
     resolution: {integrity: sha512-H6ViHN68nGYlChEvlIU67fn8O2/tpbWQPwck98yaJmh+08LSvHiydzDQ6oXNccLU3kNRVIRS9A4mA7CG+i6fLQ==}
@@ -2298,9 +2294,6 @@ packages:
     resolution: {integrity: sha512-7MptL8U0cqcFdzIzwOTHoilX9x5BrNqye7Z/LuC7kCMRio1EMSyqRK3BEAUD7sXRq4iT4AzTVuZdhgQ2TCvYLg==}
     engines: {node: '>=8.6.0'}
 
-  fast-text-encoding@1.0.6:
-    resolution: {integrity: sha512-VhXlQgj9ioXCqGstD37E/HBeqEGV/qOD/kmbVG8h5xKBYvM1L3lR1Zn4555cQ8GkYbJa8aJSipLPndE1k6zK2w==}
-
   fastq@1.20.1:
     resolution: {integrity: sha512-GGToxJ/w1x32s/D2EKND7kTil4n8OVk/9mycTc4VDza13lOvpUZTGX3mFSCtV9ksdGBVzvsyAVLM6mHFThxXxw==}
 
@@ -2329,19 +2322,16 @@ packages:
     resolution: {integrity: sha512-YsGpe3WHLK8ZYi4tWDg2Jy3ebRz2rXowDxnld4bkQB00cc/1Zw9AWnC0i9ztDJitivtQvaI9KaLyKrc+hBW0yg==}
     engines: {node: '>=8'}
 
-  find-my-way-ts@0.1.6:
-    resolution: {integrity: sha512-a85L9ZoXtNAey3Y6Z+eBWW658kO/MwR7zIafkIUPUMf3isZG0NCs2pjW2wtjxAKuJPxMAsHUIP4ZPGv0o5gyTA==}
-
   find-up@4.1.0:
     resolution: {integrity: sha512-PpOwAdQ/YlXQ2vj8a3h8IipDuYRi3wceVQQGYWxNINccq40Anw7BlsEXCMbt1Zt+OLA6Fq9suIpIWD0OsnISlw==}
     engines: {node: '>=8'}
 
-  foldkit@0.138.0:
-    resolution: {integrity: sha512-fWMpVaUYuvq456BMUcKpGEF7kAtRJiVB/cz4iE8EYow1OpfYOXK0/24roBezOJBPylgc2+oF+PFhhSmK6zCAww==}
+  foldkit@0.140.1:
+    resolution: {integrity: sha512-rFMX0KQRHoqIQHkHb9QkacZY9fDQxK+/JjG8Op3j7Q0u5R1BvJ8KDCPBovVXYFWKUvoVS710x5K5k5z26Fn0ug==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
-      '@effect/platform-browser': 4.0.0-beta.102
-      effect: 4.0.0-beta.102
+      '@effect/platform-browser': 4.0.0-beta.105
+      effect: 4.0.0-beta.105
 
   for-in@1.0.2:
     resolution: {integrity: sha512-7EwmXrOjyL+ChxMhmG5lnW9MPt1aIeZEwKhQzoBUdTV0N3zuwWDZYVJatDvZ2OyzPUvdIAZDsCetk3coyMfcnQ==}
@@ -2353,6 +2343,10 @@ packages:
 
   frida@17.16.4:
     resolution: {integrity: sha512-HM5MIkiwqkm/OVaCp8pc2nWPW2dVWawL4y7z06m3xidNLYv6koez/lNpayxwXrrY067Emhdu6dWsnAC8MOtk/w==}
+    engines: {node: '>=16'}
+
+  frida@17.17.0:
+    resolution: {integrity: sha512-6R20Qx9nxdx9jPo55K2q3uNO/8MU/FWUvZfPnv466JMRuANPsiR5GogpFuHWhOd5X8XcQLdVWoPgZHnDCcxApQ==}
     engines: {node: '>=16'}
 
   fs-constants@1.0.0:
@@ -2450,10 +2444,6 @@ packages:
 
   ini@1.3.8:
     resolution: {integrity: sha512-JV/yugV2uzW5iMRSiZAyDtQd+nxtUnjeLt0acNdw98kKLrvuRVyB80tsREOE7yvGVgalhZ6RNXCmEHkUKBKxew==}
-
-  ini@7.0.0:
-    resolution: {integrity: sha512-ifK0CgjALofS5bkrcTy4RaQ9Vx2Knf/eLeIO+NaswQEpH1UblrtTSCIvN71qQDMq0PeQ/SSPojvEJp9vvvfr+w==}
-    engines: {node: ^22.22.2 || ^24.15.0 || >=26.0.0}
 
   ioredis@5.11.1:
     resolution: {integrity: sha512-ehuGcf94bQXhfagULNXrJdfnWO38v070jxSx/qE87Kjzmu2fU7ro5EFAb+OPituLqgfyuQaym5DlrNydW2sJ9A==}
@@ -2558,9 +2548,6 @@ packages:
 
   js-tokens@10.0.0:
     resolution: {integrity: sha512-lM/UBzQmfJRo9ABXbPWemivdCW8V2G8FHaHdypQaIy523snUjog0W71ayWXTjiR+ixeMyVHN2XcpnTd/liPg/Q==}
-
-  js-tokens@4.0.0:
-    resolution: {integrity: sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==}
 
   js-yaml@3.15.1:
     resolution: {integrity: sha512-S99WuO3HlhO3XN41EtYUNl9zzXjoJx7QvmipxsJVxtCBT0YHEFy+iOJhjSvrmV12nYhWpZaM8lPHkJm0yUMbag==}
@@ -2868,9 +2855,6 @@ packages:
 
   msgpackr@2.0.5:
     resolution: {integrity: sha512-cef05H/dSYpLpqp3sj/qyZh5vhUYCalnaLO7j1yOmpsR0y/XwLVtK7r5gn+U/F7CTEfMowcGhlUQJDLcLf7jcA==}
-
-  multipasta@0.2.8:
-    resolution: {integrity: sha512-ZPWuMKyv0cSO29f7hozp+k6+crZbQijV8ipMvxNxRf2SwtYGTX1ZX89Kd20VV4H9Znonx+EQn+iy1wGQsJ+b+Q==}
 
   nanoid@3.3.17:
     resolution: {integrity: sha512-xQLf0A3HOMlgHq0n247/LRuAOYmB7dXJ/DvAxGvsSBij45XtBSmQycu+F8ODbHwns/XyFZagyL1+J0Offw1E0g==}
@@ -3400,6 +3384,9 @@ packages:
     resolution: {integrity: sha512-wK0Ri4fOGjv/XPy8SBHZChl8CM7uMc5VML7SqiQ0zG7+J5Vr+RMQDoHa2CNT6KHUnTGIXH34UDMkPzAUyapBZg==}
     engines: {node: '>=8'}
 
+  text-encoding-utf-8@1.0.2:
+    resolution: {integrity: sha512-8bw4MY9WjdsD2aMtO0OzOCY3pXGYNx2d2FfHRVUKkiCPDWjKuOlhLVASS+pD7VkLTVjW268LYJHwsnPFlBpbAg==}
+
   through2@2.0.5:
     resolution: {integrity: sha512-/mrRod8xqpA+IHSLyGCQ2s8SPHiCDEeQJSep1jqLYeEUClOFG2Qsh+4FU6G9VeqpZnGW/Su8LQGc4YKni5rYSQ==}
 
@@ -3429,10 +3416,6 @@ packages:
   to-regex-range@5.0.1:
     resolution: {integrity: sha512-65P7iz6X5yEr1cwcgvQxbbIw7Uk3gOy5dIdtZ4rDveLqhrdJP+Li/Hx6tyK0NEb+2GCyneCMJiGqrADCSNk8sQ==}
     engines: {node: '>=8.0'}
-
-  toml@4.3.0:
-    resolution: {integrity: sha512-lVb8X9BsPVuH0M4BKeS91tXAmJvCjQ5UIyAbQFaxkKGyUFK2RPkhwaFSQH8vbpl1d23eu/IBH+dwVMHWaq9A5A==}
-    engines: {node: '>=20'}
 
   ts-api-utils@2.5.0:
     resolution: {integrity: sha512-OJ/ibxhPlqrMM0UiNHJ/0CKQkoKF243/AEmplt3qpRgkW8VG7IfOS41h7V8TjITqdByHzrjcS/2si+y4lIh8NA==}
@@ -3630,11 +3613,6 @@ packages:
     resolution: {integrity: sha512-LKYU1iAXJXUgAXn9URjiu+MWhyUXHsvfp7mcuYm9dSUKK0/CjtrUwFAxD82/mCWbtLsGjFIad0wIsod4zrTAEQ==}
     engines: {node: '>=0.4'}
 
-  yaml@2.9.0:
-    resolution: {integrity: sha512-2AvhNX3mb8zd6Zy7INTtSpl1F15HW6Wnqj0srWlkKLcpYl/gMIMJiyuGq2KeI2YFxUPjdlB+3Lc10seMLtL4cA==}
-    engines: {node: '>= 14.6'}
-    hasBin: true
-
 snapshots:
 
   '@aws-sdk/checksums@3.1000.26':
@@ -3820,12 +3798,6 @@ snapshots:
       convert-source-map: 2.0.0
       glob: 13.0.6
       slash: 5.1.0
-
-  '@babel/code-frame@7.29.7':
-    dependencies:
-      '@babel/helper-validator-identifier': 7.29.7
-      js-tokens: 4.0.0
-      picocolors: 1.1.1
 
   '@babel/code-frame@8.0.0':
     dependencies:
@@ -4104,34 +4076,34 @@ snapshots:
 
   '@discoveryjs/json-ext@1.1.0': {}
 
-  '@effect-aws/client-s3@2.0.0-beta.6(effect@4.0.0-beta.102)':
+  '@effect-aws/client-s3@2.0.0-beta.6(effect@4.0.0-beta.105)':
     dependencies:
       '@aws-sdk/client-s3': 3.1103.0
       '@aws-sdk/s3-request-presigner': 3.1103.0
       '@aws-sdk/types': 3.974.2
-      '@effect-aws/commons': 1.0.0-beta.4(effect@4.0.0-beta.102)
-      effect: 4.0.0-beta.102
+      '@effect-aws/commons': 1.0.0-beta.4(effect@4.0.0-beta.105)
+      effect: 4.0.0-beta.105
 
-  '@effect-aws/commons@1.0.0-beta.4(effect@4.0.0-beta.102)':
+  '@effect-aws/commons@1.0.0-beta.4(effect@4.0.0-beta.105)':
     dependencies:
       '@smithy/protocol-http': 5.5.16
       '@smithy/smithy-client': 4.14.16
       '@smithy/types': 4.16.1
-      effect: 4.0.0-beta.102
+      effect: 4.0.0-beta.105
 
   '@effect/build-utils@0.8.9':
     dependencies:
       micromatch: 4.0.8
       pkg-entry-points: 1.1.2
 
-  '@effect/docgen@4.0.0-beta.102(ioredis@5.11.1)(tsx@4.23.8)(typescript@7.0.2)':
+  '@effect/docgen@4.0.0-beta.105(ioredis@5.11.1)(tsx@4.23.8)(typescript@7.0.2)':
     dependencies:
-      '@babel/code-frame': 7.29.7
+      '@babel/code-frame': 8.0.0
       '@effect/markdown-toc': 0.1.0
-      '@effect/platform-node': 4.0.0-beta.102(effect@4.0.0-beta.102)(ioredis@5.11.1)
+      '@effect/platform-node': 4.0.0-beta.105(effect@4.0.0-beta.105)(ioredis@5.11.1)
       chalk: 5.6.2
       doctrine: 3.0.0
-      effect: 4.0.0-beta.102
+      effect: 4.0.0-beta.105
       glob: 13.0.6
       prettier: 3.9.6
       ts-morph: 27.0.2
@@ -4158,24 +4130,23 @@ snapshots:
       repeat-string: 1.6.1
       strip-color: 0.1.0
 
-  '@effect/platform-browser@4.0.0-beta.102(effect@4.0.0-beta.102)':
+  '@effect/platform-browser@4.0.0-beta.105(effect@4.0.0-beta.105)':
     dependencies:
-      effect: 4.0.0-beta.102
-      multipasta: 0.2.8
+      effect: 4.0.0-beta.105
 
-  '@effect/platform-node-shared@4.0.0-beta.104(effect@4.0.0-beta.102)':
+  '@effect/platform-node-shared@4.0.0-beta.105(effect@4.0.0-beta.105)':
     dependencies:
       '@types/ws': 8.18.1
-      effect: 4.0.0-beta.102
+      effect: 4.0.0-beta.105
       ws: 8.21.2
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
 
-  '@effect/platform-node@4.0.0-beta.102(effect@4.0.0-beta.102)(ioredis@5.11.1)':
+  '@effect/platform-node@4.0.0-beta.105(effect@4.0.0-beta.105)(ioredis@5.11.1)':
     dependencies:
-      '@effect/platform-node-shared': 4.0.0-beta.104(effect@4.0.0-beta.102)
-      effect: 4.0.0-beta.102
+      '@effect/platform-node-shared': 4.0.0-beta.105(effect@4.0.0-beta.105)
+      effect: 4.0.0-beta.105
       ioredis: 5.11.1
       mime: 4.1.0
       undici: 8.10.0
@@ -4183,9 +4154,9 @@ snapshots:
       - bufferutil
       - utf-8-validate
 
-  '@effect/sql-pg@4.0.0-beta.102(effect@4.0.0-beta.102)':
+  '@effect/sql-pg@4.0.0-beta.105(effect@4.0.0-beta.105)':
     dependencies:
-      effect: 4.0.0-beta.102
+      effect: 4.0.0-beta.105
       pg: 8.22.0
       pg-connection-string: 2.14.0
       pg-cursor: 2.21.0(pg@8.22.0)
@@ -4225,42 +4196,42 @@ snapshots:
       '@effect/tsgo-win32-arm64': 0.32.1
       '@effect/tsgo-win32-x64': 0.32.1
 
-  '@effect/vitest@4.0.0-beta.102(effect@4.0.0-beta.102)(vitest@4.1.10(vite@8.2.1))':
+  '@effect/vitest@4.0.0-beta.105(effect@4.0.0-beta.105)(vitest@4.1.10(vite@8.2.1))':
     dependencies:
-      effect: 4.0.0-beta.102
+      effect: 4.0.0-beta.105
       vitest: 4.1.10(vite@8.2.1)
 
-  '@efffrida/frida-tools@0.0.47(effect@4.0.0-beta.102)':
+  '@efffrida/frida-tools@0.0.49(effect@4.0.0-beta.105)':
     dependencies:
-      effect: 4.0.0-beta.102
-      frida: 17.16.4
+      effect: 4.0.0-beta.105
+      frida: 17.17.0
 
-  '@efffrida/gplayapi@0.0.24(@bufbuild/protobuf@2.13.0)(effect@4.0.0-beta.102)':
+  '@efffrida/gplayapi@0.0.26(@bufbuild/protobuf@2.13.0)(effect@4.0.0-beta.105)':
     dependencies:
       '@bufbuild/protobuf': 2.13.0
-      effect: 4.0.0-beta.102
+      effect: 4.0.0-beta.105
 
-  '@efffrida/il2cpp-bridge@0.0.43(effect@4.0.0-beta.102)':
+  '@efffrida/il2cpp-bridge@0.0.45(effect@4.0.0-beta.105)':
     dependencies:
-      effect: 4.0.0-beta.102
+      effect: 4.0.0-beta.105
       frida-il2cpp-bridge: 0.13.1
 
-  '@efffrida/platform@0.0.35(effect@4.0.0-beta.102)':
+  '@efffrida/platform@0.0.37(effect@4.0.0-beta.105)':
     dependencies:
-      effect: 4.0.0-beta.102
+      effect: 4.0.0-beta.105
 
-  '@efffrida/polyfills@0.0.14':
+  '@efffrida/polyfills@0.0.15':
     dependencies:
       abort-controller: 3.0.0
       event-target-polyfill: 0.0.4
-      fast-text-encoding: 1.0.6
+      text-encoding-utf-8: 1.0.2
 
-  '@efffrida/rpc@0.0.50(effect@4.0.0-beta.102)':
+  '@efffrida/rpc@0.0.52(effect@4.0.0-beta.105)':
     dependencies:
-      '@efffrida/frida-tools': 0.0.47(effect@4.0.0-beta.102)
-      '@efffrida/platform': 0.0.35(effect@4.0.0-beta.102)
-      '@efffrida/polyfills': 0.0.14
-      effect: 4.0.0-beta.102
+      '@efffrida/frida-tools': 0.0.49(effect@4.0.0-beta.105)
+      '@efffrida/platform': 0.0.37(effect@4.0.0-beta.105)
+      '@efffrida/polyfills': 0.0.15
+      effect: 4.0.0-beta.105
 
   '@esbuild/aix-ppc64@0.28.1':
     optional: true
@@ -4340,10 +4311,10 @@ snapshots:
   '@esbuild/win32-x64@0.28.1':
     optional: true
 
-  '@foldkit/vite-plugin@0.11.3(effect@4.0.0-beta.102)(foldkit@0.138.0(@effect/platform-browser@4.0.0-beta.102(effect@4.0.0-beta.102))(effect@4.0.0-beta.102))(vite@8.2.1)':
+  '@foldkit/vite-plugin@0.12.1(effect@4.0.0-beta.105)(foldkit@0.140.1(@effect/platform-browser@4.0.0-beta.105(effect@4.0.0-beta.105))(effect@4.0.0-beta.105))(vite@8.2.1)':
     dependencies:
-      effect: 4.0.0-beta.102
-      foldkit: 0.138.0(@effect/platform-browser@4.0.0-beta.102(effect@4.0.0-beta.102))(effect@4.0.0-beta.102)
+      effect: 4.0.0-beta.105
+      foldkit: 0.140.1(@effect/platform-browser@4.0.0-beta.105(effect@4.0.0-beta.105))(effect@4.0.0-beta.105)
       magic-string: 0.30.21
       vite: 8.2.1
       ws: 8.21.2
@@ -5255,10 +5226,10 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  dfx@1.0.15(effect@4.0.0-beta.102):
+  dfx@1.0.15(effect@4.0.0-beta.105):
     dependencies:
       discord-api-types: 0.38.52
-      effect: 4.0.0-beta.102
+      effect: 4.0.0-beta.105
     optionalDependencies:
       discord-verify: 1.2.0
 
@@ -5279,22 +5250,17 @@ snapshots:
     dependencies:
       esutils: 2.0.3
 
-  effect-oidc@0.0.6(effect@4.0.0-beta.102):
+  effect-oidc@0.0.8(effect@4.0.0-beta.105):
     dependencies:
-      effect: 4.0.0-beta.102
+      effect: 4.0.0-beta.105
 
-  effect@4.0.0-beta.102:
+  effect@4.0.0-beta.105:
     dependencies:
       '@standard-schema/spec': 1.1.0
       fast-check: 4.9.0
-      find-my-way-ts: 0.1.6
-      ini: 7.0.0
       kubernetes-types: 1.30.0
       msgpackr: 2.0.5
-      multipasta: 0.2.8
-      toml: 4.3.0
       uuid: 14.0.1
-      yaml: 2.9.0
 
   electron-to-chromium@1.5.401: {}
 
@@ -5403,8 +5369,6 @@ snapshots:
       merge2: 1.4.1
       micromatch: 4.0.8
 
-  fast-text-encoding@1.0.6: {}
-
   fastq@1.20.1:
     dependencies:
       reusify: 1.1.0
@@ -5441,23 +5405,27 @@ snapshots:
     dependencies:
       to-regex-range: 5.0.1
 
-  find-my-way-ts@0.1.6: {}
-
   find-up@4.1.0:
     dependencies:
       locate-path: 5.0.0
       path-exists: 4.0.0
 
-  foldkit@0.138.0(@effect/platform-browser@4.0.0-beta.102(effect@4.0.0-beta.102))(effect@4.0.0-beta.102):
+  foldkit@0.140.1(@effect/platform-browser@4.0.0-beta.105(effect@4.0.0-beta.105))(effect@4.0.0-beta.105):
     dependencies:
-      '@effect/platform-browser': 4.0.0-beta.102(effect@4.0.0-beta.102)
-      effect: 4.0.0-beta.102
+      '@effect/platform-browser': 4.0.0-beta.105(effect@4.0.0-beta.105)
+      effect: 4.0.0-beta.105
 
   for-in@1.0.2: {}
 
   frida-il2cpp-bridge@0.13.1: {}
 
   frida@17.16.4:
+    dependencies:
+      bindings: 1.5.0
+      minimatch: 10.2.6
+      prebuild-install: 7.1.3
+
+  frida@17.17.0:
     dependencies:
       bindings: 1.5.0
       minimatch: 10.2.6
@@ -5555,8 +5523,6 @@ snapshots:
 
   ini@1.3.8: {}
 
-  ini@7.0.0: {}
-
   ioredis@5.11.1:
     dependencies:
       '@ioredis/commands': 1.10.0
@@ -5641,8 +5607,6 @@ snapshots:
   jiti@2.7.0: {}
 
   js-tokens@10.0.0: {}
-
-  js-tokens@4.0.0: {}
 
   js-yaml@3.15.1:
     dependencies:
@@ -5899,8 +5863,6 @@ snapshots:
   msgpackr@2.0.5:
     optionalDependencies:
       msgpackr-extract: 3.0.4
-
-  multipasta@0.2.8: {}
 
   nanoid@3.3.17: {}
 
@@ -6434,6 +6396,8 @@ snapshots:
 
   term-size@2.2.1: {}
 
+  text-encoding-utf-8@1.0.2: {}
+
   through2@2.0.5:
     dependencies:
       readable-stream: 2.3.8
@@ -6459,8 +6423,6 @@ snapshots:
   to-regex-range@5.0.1:
     dependencies:
       is-number: 7.0.0
-
-  toml@4.3.0: {}
 
   ts-api-utils@2.5.0(typescript@5.9.3):
     dependencies:
@@ -6638,5 +6600,3 @@ snapshots:
   ws@8.21.2: {}
 
   xtend@4.0.2: {}
-
-  yaml@2.9.0: {}

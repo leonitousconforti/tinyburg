@@ -55,12 +55,12 @@ declare const device_newPlayer: Effect.Effect<
     readonly playerId: string & Brand<"PlayerId">
     readonly playerSs: Redacted.Redacted<string> & Brand<"PlayerAuthKey">
   },
-  | Schema.SchemaError
   | NimblebitError
   | Forbidden
   | BadRequest
   | Unauthorized
   | InternalServerError
+  | Schema.SchemaError
   | PlatformError
   | HttpClientError,
   NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
@@ -88,12 +88,12 @@ declare const device_playerDetails: (args_0: {
     readonly registered: boolean
     readonly blacklisted: boolean
   },
-  | Schema.SchemaError
   | NimblebitError
   | Forbidden
   | BadRequest
   | Unauthorized
   | InternalServerError
+  | Schema.SchemaError
   | PlatformError
   | HttpClientError,
   NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
@@ -115,12 +115,12 @@ declare const device_registerEmail: (args_0: {
   playerEmail: typeof NimblebitConfig.PlayerEmailSchema.Type
 }) => Effect.Effect<
   "NewDevice" | "NewEmail",
-  | Schema.SchemaError
   | NimblebitError
   | Forbidden
   | BadRequest
   | Unauthorized
   | InternalServerError
+  | Schema.SchemaError
   | PlatformError
   | HttpClientError,
   NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
@@ -149,7 +149,7 @@ declare const device_verifyDevice: (args_0: {
     readonly playerPhoto?: string | null | undefined
     readonly playerNickname?: string | null | undefined
   },
-  Schema.SchemaError | NimblebitError | Forbidden | BadRequest | Unauthorized | InternalServerError | HttpClientError,
+  NimblebitError | Forbidden | BadRequest | Unauthorized | InternalServerError | Schema.SchemaError | HttpClientError,
   NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
 >
 ```
@@ -170,12 +170,12 @@ declare const raffle_checkEnteredCurrent: (args_0: {
   readonly playerId: string & Brand<"PlayerId">
 }) => Effect.Effect<
   boolean,
-  | Schema.SchemaError
   | NimblebitError
   | Forbidden
   | BadRequest
   | Unauthorized
   | InternalServerError
+  | Schema.SchemaError
   | PlatformError
   | HttpClientError,
   NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
@@ -198,12 +198,12 @@ declare const raffle_enterMultiRaffle: (args_0: {
   readonly playerId: string & Brand<"PlayerId">
 }) => Effect.Effect<
   void,
-  | Schema.SchemaError
   | NimblebitError
   | Forbidden
   | BadRequest
   | Unauthorized
   | InternalServerError
+  | Schema.SchemaError
   | PlatformError
   | HttpClientError,
   NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
@@ -226,12 +226,12 @@ declare const raffle_enterRaffle: (args_0: {
   readonly playerId: string & Brand<"PlayerId">
 }) => Effect.Effect<
   void,
-  | Schema.SchemaError
   | NimblebitError
   | Forbidden
   | BadRequest
   | Unauthorized
   | InternalServerError
+  | Schema.SchemaError
   | PlatformError
   | HttpClientError,
   NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
@@ -265,12 +265,12 @@ declare const social_getGifts: (args_0: {
       readonly c: unknown
     }>
   },
-  | Schema.SchemaError
   | NimblebitError
   | Forbidden
   | BadRequest
   | Unauthorized
   | InternalServerError
+  | Schema.SchemaError
   | PlatformError
   | HttpClientError,
   NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
@@ -304,12 +304,12 @@ declare const social_getVisits: (args_0: {
       readonly c: unknown
     }>
   },
-  | Schema.SchemaError
   | NimblebitError
   | Forbidden
   | BadRequest
   | Unauthorized
   | InternalServerError
+  | Schema.SchemaError
   | PlatformError
   | HttpClientError,
   NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
@@ -519,12 +519,12 @@ declare const social_pullFriendMeta: (
     readonly ts: string
     readonly bitbook?: string | undefined
   },
-  | Schema.SchemaError
   | NimblebitError
   | Forbidden
   | BadRequest
   | Unauthorized
   | InternalServerError
+  | Schema.SchemaError
   | PlatformError
   | HttpClientError,
   NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
@@ -549,12 +549,12 @@ declare const social_pullFriendTower: (
   } & { friendId: Schema.Schema.Type<typeof NimblebitConfig.PlayerIdSchema> }
 ) => Effect.Effect<
   { saveId: number; data: string },
-  | Schema.SchemaError
   | NimblebitError
   | Forbidden
   | BadRequest
   | Unauthorized
   | InternalServerError
+  | Schema.SchemaError
   | PlatformError
   | HttpClientError,
   NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
@@ -579,12 +579,12 @@ declare const social_receiveGift: (
   } & { giftId: number }
 ) => Effect.Effect<
   void,
-  | Schema.SchemaError
   | NimblebitError
   | Forbidden
   | BadRequest
   | Unauthorized
   | InternalServerError
+  | Schema.SchemaError
   | PlatformError
   | HttpClientError,
   NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
@@ -609,12 +609,12 @@ declare const social_retrieveFriendsSnapshotList: (
   } & { friendId: Schema.Schema.Type<typeof NimblebitConfig.PlayerIdSchema> }
 ) => Effect.Effect<
   ReadonlyArray<{ readonly meta: any; readonly snapshotId: number; readonly created: Date }>,
-  | Schema.SchemaError
   | NimblebitError
   | Forbidden
   | BadRequest
   | Unauthorized
   | InternalServerError
+  | Schema.SchemaError
   | PlatformError
   | HttpClientError,
   NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
@@ -643,12 +643,12 @@ declare const social_sendItem: (
   }
 ) => Effect.Effect<
   void,
-  | Schema.SchemaError
   | NimblebitError
   | Forbidden
   | BadRequest
   | Unauthorized
   | InternalServerError
+  | Schema.SchemaError
   | PlatformError
   | HttpClientError,
   NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
@@ -673,12 +673,12 @@ declare const social_visit: (
   } & { friendId: Schema.Schema.Type<typeof NimblebitConfig.PlayerIdSchema> }
 ) => Effect.Effect<
   void,
-  | Schema.SchemaError
   | NimblebitError
   | Forbidden
   | BadRequest
   | Unauthorized
   | InternalServerError
+  | Schema.SchemaError
   | PlatformError
   | HttpClientError,
   NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
@@ -701,12 +701,12 @@ declare const sync_checkForNewerSave: (args_0: {
   readonly playerId: string & Brand<"PlayerId">
 }) => Effect.Effect<
   number,
-  | Schema.SchemaError
   | NimblebitError
   | Forbidden
   | BadRequest
   | Unauthorized
   | InternalServerError
+  | Schema.SchemaError
   | PlatformError
   | HttpClientError,
   NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
@@ -729,12 +729,12 @@ declare const sync_pullSave: (args_0: {
   readonly playerId: string & Brand<"PlayerId">
 }) => Effect.Effect<
   { saveId: number; data: string },
-  | Schema.SchemaError
   | NimblebitError
   | Forbidden
   | BadRequest
   | Unauthorized
   | InternalServerError
+  | Schema.SchemaError
   | PlatformError
   | HttpClientError,
   NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
@@ -759,12 +759,12 @@ declare const sync_pullSnapshot: (
   } & { snapshotId: number }
 ) => Effect.Effect<
   { snapshotId: number; data: string },
-  | Schema.SchemaError
   | NimblebitError
   | Forbidden
   | BadRequest
   | Unauthorized
   | InternalServerError
+  | Schema.SchemaError
   | PlatformError
   | HttpClientError,
   NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
@@ -789,12 +789,12 @@ declare const sync_pushSave: (
   } & { data: Schema.Schema.Type<typeof SaveData> }
 ) => Effect.Effect<
   void,
-  | Schema.SchemaError
   | NimblebitError
   | Forbidden
   | BadRequest
   | Unauthorized
   | InternalServerError
+  | Schema.SchemaError
   | PlatformError
   | HttpClientError,
   NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
@@ -819,12 +819,12 @@ declare const sync_pushSnapshot: (
   } & { data: Schema.Schema.Type<typeof SaveData> }
 ) => Effect.Effect<
   void,
-  | Schema.SchemaError
   | NimblebitError
   | Forbidden
   | BadRequest
   | Unauthorized
   | InternalServerError
+  | Schema.SchemaError
   | PlatformError
   | HttpClientError,
   NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
@@ -1036,12 +1036,12 @@ declare const sync_retrieveSnapshotList: (args_0: {
       readonly bitbook?: string | undefined
     }
   }>,
-  | Schema.SchemaError
   | NimblebitError
   | Forbidden
   | BadRequest
   | Unauthorized
   | InternalServerError
+  | Schema.SchemaError
   | PlatformError
   | HttpClientError,
   NimblebitAuth.NimblebitAuth | HttpClient.HttpClient

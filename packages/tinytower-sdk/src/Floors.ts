@@ -471,9 +471,12 @@ const FloorIdSchema = Schema.suspend(() => {
                         onSome: (index) => Effect.succeed(index as ValidFloorIndices),
                         onNone: () =>
                             Effect.fail(
-                                new SchemaIssue.InvalidValue(Option.some(input), {
-                                    message: "Unknown floor",
-                                })
+                                new SchemaIssue.InvalidValue(
+                                    {
+                                        message: "Unknown floor",
+                                    },
+                                    input
+                                )
                             ),
                     }),
                 decode: (index: ValidFloorIndices) =>
@@ -483,9 +486,12 @@ const FloorIdSchema = Schema.suspend(() => {
                         onSome: (floor) => Effect.succeed(floor as ValidFloor),
                         onNone: () =>
                             Effect.fail(
-                                new SchemaIssue.InvalidValue(Option.some(index), {
-                                    message: "Unknown floor index",
-                                })
+                                new SchemaIssue.InvalidValue(
+                                    {
+                                        message: "Unknown floor index",
+                                    },
+                                    index
+                                )
                             ),
                     }),
             })

@@ -1360,9 +1360,12 @@ export const BitizenAttributes = Schema.suspend(() => {
 
                     if (Option.isNone(firstNameIndex) || Option.isNone(lastNameIndex)) {
                         return Effect.fail(
-                            new SchemaIssue.InvalidValue(Option.some(customI.name), {
-                                message: `Bitizen name ${customI.name} not found in internal lists, cannot encode`,
-                            })
+                            new SchemaIssue.InvalidValue(
+                                {
+                                    message: `Bitizen name ${customI.name} not found in internal lists, cannot encode`,
+                                },
+                                customI.name
+                            )
                         );
                     }
 
@@ -1426,9 +1429,12 @@ export const BitizenAttributes = Schema.suspend(() => {
 
                     if (Option.isNone(firstName) || Option.isNone(lastName)) {
                         return Effect.fail(
-                            new SchemaIssue.InvalidValue(Option.some(nimblebit), {
-                                message: `Bitizen name indexes ${nimblebit.firstNameIndex},${nimblebit.lastNameIndex} not found in internal lists, cannot decode`,
-                            })
+                            new SchemaIssue.InvalidValue(
+                                {
+                                    message: `Bitizen name indexes ${nimblebit.firstNameIndex},${nimblebit.lastNameIndex} not found in internal lists, cannot decode`,
+                                },
+                                nimblebit
+                            )
                         );
                     }
 

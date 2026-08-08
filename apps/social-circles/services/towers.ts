@@ -52,15 +52,15 @@ export const REQUIRED_SCOPE = "openid towers:read offline_access";
  * @since 1.0.0
  * @category Errors
  */
-export class TowerGrantUnusable extends Schema.ErrorClass<TowerGrantUnusable>(
-    "@tinyburg/social-circles/TowerGrantUnusable"
-)({
-    _tag: Schema.tag("TowerGrantUnusable"),
-    tinyburgUserId: Schema.String,
-    reason: Schema.String,
-    /** Whether the grant is dead for good, as opposed to a transient outage. */
-    permanent: Schema.Boolean,
-}) {}
+export class TowerGrantUnusable extends Schema.Error<TowerGrantUnusable>("@tinyburg/social-circles/TowerGrantUnusable")(
+    {
+        _tag: Schema.tag("TowerGrantUnusable"),
+        tinyburgUserId: Schema.String,
+        reason: Schema.String,
+        /** Whether the grant is dead for good, as opposed to a transient outage. */
+        permanent: Schema.Boolean,
+    }
+) {}
 
 /**
  * A player's tower could not be read.
@@ -68,7 +68,7 @@ export class TowerGrantUnusable extends Schema.ErrorClass<TowerGrantUnusable>(
  * @since 1.0.0
  * @category Errors
  */
-export class TowerUnavailable extends Schema.ErrorClass<TowerUnavailable>("@tinyburg/social-circles/TowerUnavailable")({
+export class TowerUnavailable extends Schema.Error<TowerUnavailable>("@tinyburg/social-circles/TowerUnavailable")({
     _tag: Schema.tag("TowerUnavailable"),
     playerId: PlayerIdSchema,
     reason: Schema.String,
