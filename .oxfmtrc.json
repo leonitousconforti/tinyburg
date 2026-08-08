@@ -7,10 +7,15 @@
         "**/.tsbuildinfo",
         "**/generated/**",
         ".agents/**/*",
-        "**/index.ts",
         "repos/**",
         "**/CHANGELOG.md",
-        "!apps/**/index.ts"
+        // These index.ts files are generated from index.ts.tpl templates, so formatting them
+        // would drift from the generator's output.
+        "packages/bitprints/src/index.ts",
+        "packages/doorman/src/index.ts",
+        "packages/nimblebit-sdk/src/index.ts",
+        "packages/tinytower-sdk/src/index.ts",
+        "packages/trading-sdk/src/index.ts"
     ],
     "sortPackageJson": true,
     "trailingComma": "es5",
