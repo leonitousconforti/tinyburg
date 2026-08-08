@@ -11,7 +11,7 @@
         "@effect/sql-pg": "4.0.0-beta.105",
         "dfx": "1.0.15",
         "effect": "4.0.0-beta.105",
-        "effect-oidc": "0.0.8",
+        "effect-oidc": "0.0.9",
         "ioredis": "5.11.1",
         "typescript": "7.0.2"
     }
