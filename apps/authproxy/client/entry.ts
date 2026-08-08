@@ -3,7 +3,7 @@ import "./styles/global.css";
 import { Runtime } from "foldkit";
 
 import { BackendLive } from "./backend.ts";
-import { ChangedUrl, ClickedLink, Model, init, update, view } from "./main.ts";
+import { ChangedUrl, ClickedLink, init, initialLanguage, Model, update, view } from "./main.ts";
 
 const application = Runtime.makeApplication({
     Model,
@@ -17,5 +17,9 @@ const application = Runtime.makeApplication({
         onUrlChange: (url) => ChangedUrl({ url }),
     },
 });
+
+// index.html is served statically, so the document language can only be
+// corrected here, once the negotiated answer is known.
+document.documentElement.lang = initialLanguage;
 
 Runtime.run(application);
