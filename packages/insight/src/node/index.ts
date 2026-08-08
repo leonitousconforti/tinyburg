@@ -1,33 +1,33 @@
 import type { HttpClient, HttpClientError } from "effect/unstable/http";
 
 import {
-    Effect,
-    Layer,
-    Stream,
-    type Path,
-    type Config,
     type Cause,
-    type Exit,
-    type Crypto,
-    type Schema,
-    type PlatformError,
-    type FileSystem,
-    Tuple,
-    Duration,
+    type Config,
     Context,
+    type Crypto,
+    Duration,
+    Effect,
+    type Exit,
+    type FileSystem,
+    Layer,
+    type Path,
+    type PlatformError,
+    type Schema,
+    Stream,
     String,
+    Tuple,
 } from "effect";
 import { ChildProcess, ChildProcessSpawner } from "effect/unstable/process";
-import { RpcSerialization, type RpcClient } from "effect/unstable/rpc";
+import { type RpcClient, RpcSerialization } from "effect/unstable/rpc";
 
 import {
-    FridaScript,
-    FridaSession,
     FridaDevice,
     FridaDeviceAcquisitionError,
+    FridaScript,
+    FridaSession,
     type FridaSessionError,
 } from "@efffrida/frida-tools";
-import { GooglePlayApi, type AndroidDevice, type PlayAccount } from "@efffrida/gplayapi";
+import { type AndroidDevice, GooglePlayApi, type PlayAccount } from "@efffrida/gplayapi";
 import { FridaRpcClient } from "@efffrida/rpc/node";
 import { JsPlatform } from "frida";
 

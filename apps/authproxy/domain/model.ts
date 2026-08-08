@@ -1,6 +1,6 @@
-import { Context, Effect, Schema, Layer, SchemaGetter } from "effect";
+import { Context, Effect, Layer, Schema, SchemaGetter } from "effect";
 import { Model } from "effect/unstable/schema";
-import { SqlClient, SqlSchema, SqlModel } from "effect/unstable/sql";
+import { SqlClient, SqlModel, SqlSchema } from "effect/unstable/sql";
 
 /**
  * The current account in context, provided by middleware.

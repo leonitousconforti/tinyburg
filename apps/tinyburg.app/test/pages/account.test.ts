@@ -9,22 +9,22 @@ import { Scene } from "foldkit/test";
 import { describe, it } from "vitest";
 
 import {
-    type AccountModel,
     AccountMessage,
-    accountView,
+    type AccountModel,
     CompletedRevoke,
     CompletedUnlink,
-    enterAccount,
     FailedAction,
     FetchLinkedAccounts,
     FetchSessions,
-    initialAccount,
     RevokeAll,
     RevokeOthers,
     RevokeSession,
     SettledLinkedAccounts,
     SettledSessions,
     Unlink,
+    accountView,
+    enterAccount,
+    initialAccount,
     updateAccount,
 } from "../../client/pages/account.ts";
 

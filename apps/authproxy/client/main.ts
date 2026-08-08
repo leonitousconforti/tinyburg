@@ -10,14 +10,14 @@ import { type Backend, CheckingSession, FetchSession, GotSession, SessionState, 
 import {
     AdminMessage,
     AdminModel,
+    FetchAdminKeys,
     adminView,
     enterAdmin,
-    FetchAdminKeys,
     initialAdmin,
     updateAdmin,
 } from "./pages/admin.ts";
 import { homeView } from "./pages/home.ts";
-import { enterKeys, FetchKeys, initialKeys, KeysMessage, KeysModel, keysView, updateKeys } from "./pages/keys.ts";
+import { FetchKeys, KeysMessage, KeysModel, enterKeys, initialKeys, keysView, updateKeys } from "./pages/keys.ts";
 import { loginView } from "./pages/login.ts";
 import { notFoundView } from "./pages/notFound.ts";
 import { AppRoute, loginHref, urlToAppRoute } from "./routes.ts";

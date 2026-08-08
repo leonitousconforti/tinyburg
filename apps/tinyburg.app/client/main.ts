@@ -22,10 +22,10 @@ import { aboutView } from "./pages/about.ts";
 import {
     AccountMessage,
     AccountModel,
-    accountView,
-    enterAccount,
     FetchLinkedAccounts,
     FetchSessions,
+    accountView,
+    enterAccount,
     initialAccount,
     updateAccount,
 } from "./pages/account.ts";
@@ -37,7 +37,7 @@ import { notFoundView } from "./pages/notFound.ts";
 import { privacyView } from "./pages/privacy.ts";
 import { sponsorsView } from "./pages/sponsors.ts";
 import { termsView } from "./pages/terms.ts";
-import { initialWizard, towerLinkView, updateWizard, WizardMessage, WizardModel } from "./pages/towerLink.ts";
+import { WizardMessage, WizardModel, initialWizard, towerLinkView, updateWizard } from "./pages/towerLink.ts";
 import { towerMeView } from "./pages/towerMe.ts";
 import { AppRoute, loginHref, urlToAppRoute } from "./routes.ts";
 import { clouds } from "./ui/chrome.ts";

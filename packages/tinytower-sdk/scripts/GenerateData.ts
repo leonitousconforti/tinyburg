@@ -1,8 +1,8 @@
-import { Array, Effect, Layer, Order, pipe, Record, FileSystem, Path } from "effect";
+import { Array, Effect, FileSystem, Layer, Order, Path, Record, pipe } from "effect";
 import { FetchHttpClient } from "effect/unstable/http";
 import { RpcClient } from "effect/unstable/rpc";
 
-import { NodeServices, NodeRuntime } from "@effect/platform-node";
+import { NodeRuntime, NodeServices } from "@effect/platform-node";
 import { AndroidDevice, GooglePlayApi, PlayAccount } from "@efffrida/gplayapi";
 import { AgentLive, DeviceLive } from "@tinyburg/insight/node/index";
 import { Rpcs } from "@tinyburg/insight/shared/Rpcs";

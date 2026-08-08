@@ -5,7 +5,7 @@ import { Model } from "effect/unstable/schema";
 
 import type { Session, User } from "../../domain/models.ts";
 
-import { Oidc, ResourceServer, Jwt } from "effect-oidc";
+import { Jwt, Oidc, ResourceServer } from "effect-oidc";
 
 import { DevelopersRepository } from "../../domain/developers.ts";
 import { OidcRepository } from "../../domain/oidc.ts";

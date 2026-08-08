@@ -16,7 +16,7 @@ import type { Jwt } from "effect-oidc";
 
 import { Oidc } from "effect-oidc";
 
-import { CookiePolicy, maybeCurrentSession, SESSION_COOKIE_NAME } from "../cookies.ts";
+import { CookiePolicy, SESSION_COOKIE_NAME, maybeCurrentSession } from "../cookies.ts";
 import { randomSecret, sha256 } from "../crypto.ts";
 import { SessionsRepository } from "../domain/sessions.ts";
 // "Sign in with Tinyburg": the authproxy is an OIDC relying party of

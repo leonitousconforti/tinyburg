@@ -1,4 +1,4 @@
-import { Config, Effect, Layer, String, Path } from "effect";
+import { Config, Effect, Layer, Path, String } from "effect";
 import { FetchHttpClient, HttpRouter } from "effect/unstable/http";
 import { RateLimiter } from "effect/unstable/persistence";
 
