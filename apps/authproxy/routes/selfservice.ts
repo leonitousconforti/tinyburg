@@ -1,18 +1,13 @@
-import { Config, DateTime, Duration, Effect, Layer, Option, Redacted } from "effect";
+import { DateTime, Duration, Effect, Layer, Option } from "effect";
 import { HttpEffect, HttpServerResponse } from "effect/unstable/http";
 import { HttpApiBuilder, HttpApiError } from "effect/unstable/httpapi";
-import { RateLimiter } from "effect/unstable/persistence";
 import { Model } from "effect/unstable/schema";
 
-import * as crypto from "node:crypto";
-
 import { CookiePolicy, maybeCurrentSession } from "../cookies.ts";
-import { sha256 } from "../crypto.ts";
 import { Account, Repository } from "../domain/model.ts";
 import { SessionsRepository } from "../domain/sessions.ts";
 import { AdminSessionCookie, CurrentSession, SelfServiceApi, SessionCookie } from "../shared/api.ts";
 import { DEFAULT_RATE_LIMIT, MAX_KEYS_PER_USER, SELF_SERVE_SCOPE_PATHS } from "../shared/scopes.ts";
-import { TinyburgLookup } from "../tinyburg.ts";
 
 const SessionCookieLive = Layer.effect(
     SessionCookie,
@@ -82,23 +77,6 @@ const SelfServiceGroupLive = HttpApiBuilder.group(
     "SelfServiceGroup",
     Effect.fnUntraced(function* (handlers) {
         const repo = yield* Repository;
-        const sessions = yield* SessionsRepository;
-        const lookup = yield* TinyburgLookup;
-        const rateLimiter = yield* RateLimiter.make;
-
-        const adminPassword = yield* Config.redacted("ADMIN_PASSWORD");
-        const adminPlayerIds = yield* Config.string("ADMIN_PLAYER_IDS").pipe(
-            Config.withDefault(""),
-            Config.map(
-                (raw) =>
-                    new Set(
-                        raw
-                            .split(",")
-                            .map((playerId) => playerId.trim())
-                            .filter((playerId) => playerId !== "")
-                    )
-            )
-        );
 
         return handlers
             .handle("session", () => Effect.map(CurrentSession, ({ session }) => session))
@@ -190,54 +168,6 @@ const SelfServiceGroupLive = HttpApiBuilder.group(
                     if (Option.isNone(deleted)) {
                         return yield* new HttpApiError.NotFound();
                     }
-                })
-            )
-            .handle("elevate", ({ payload }) =>
-                Effect.gen(function* () {
-                    const { session } = yield* CurrentSession;
-
-                    // The endpoint is a password oracle, so attempts are
-                    // strictly rate limited per session.
-                    yield* rateLimiter
-                        .consume({
-                            onExceeded: "fail",
-                            algorithm: "fixed-window",
-                            key: `elevate:${session.id}`,
-                            limit: 5,
-                            window: Duration.minutes(5),
-                        })
-                        .pipe(Effect.mapError(() => new HttpApiError.Forbidden()));
-
-                    // Hash both sides before comparing: equal lengths for the
-                    // timing-safe comparison, and no length leak.
-                    const presented = yield* sha256(payload.password);
-                    const expected = yield* sha256(Redacted.value(adminPassword));
-                    const passwordOk = crypto.timingSafeEqual(Buffer.from(presented), Buffer.from(expected));
-
-                    // Eligibility is evaluated live: which towers does this
-                    // sub have linked at tinyburg.app right now. A lookup
-                    // failure reads as not eligible, never as a pass.
-                    const linked = yield* lookup.linkedPlayerIds(session.sub).pipe(
-                        Effect.map(Option.some),
-                        Effect.catch(() => Effect.succeed(Option.none<ReadonlySet<string>>()))
-                    );
-                    const eligible = Option.match(linked, {
-                        onNone: () => false,
-                        onSome: (playerIds) =>
-                            adminPlayerIds.size > 0 &&
-                            Array.from(adminPlayerIds).some((playerId) => playerIds.has(playerId)),
-                    });
-
-                    // One uniform refusal: which factor failed stays private.
-                    if (!passwordOk || !eligible) {
-                        return yield* new HttpApiError.Forbidden();
-                    }
-
-                    const elevated = yield* sessions.elevate(session.id).pipe(Effect.orDie);
-                    return yield* Option.match(elevated, {
-                        onNone: () => new HttpApiError.Forbidden(),
-                        onSome: Effect.succeed,
-                    });
                 })
             );
     })

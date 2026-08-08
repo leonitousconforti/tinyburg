@@ -1,18 +1,24 @@
 import { Effect, Match, Option } from "effect";
 
+import type { BundleIdentifier } from "./games.ts";
+
 import { S3 } from "@effect-aws/client-s3";
 import { NodeStream } from "@effect/platform-node";
 import { GooglePlayApi } from "@efffrida/gplayapi";
 
-const bundleIdentifier = "com.nimblebit.tinytower";
-
-// The early exits return never-typed values; the normal path runs to the end.
-// oxlint-disable-next-line typescript/consistent-return
-export const archiveToS3 = Effect.fnUntraced(function* (options: { offerType: number; versionCode: number | bigint }) {
-    const streams = yield* GooglePlayApi.downloadToStreams(bundleIdentifier, options).pipe(Effect.catchNoSuchElement);
+export const archiveToS3 = Effect.fnUntraced(function* (options: {
+    bundleIdentifier: BundleIdentifier;
+    offerType: number;
+    versionCode: number | bigint;
+}) {
+    const streams = yield* GooglePlayApi.downloadToStreams(options.bundleIdentifier, options).pipe(
+        Effect.catchNoSuchElement
+    );
 
     if (Option.isNone(streams)) {
-        return yield* Effect.logInfo(`No delivery data available for version ${options.versionCode}`);
+        return yield* Effect.logInfo(
+            `No delivery data available for ${options.bundleIdentifier} version ${options.versionCode}`
+        );
     }
 
     for (const { stream, integrity, size, name } of streams.value) {
@@ -43,7 +49,7 @@ export const archiveToS3 = Effect.fnUntraced(function* (options: { offerType: nu
         const maybeExistingUpload = yield* Effect.flatMap(S3, (s3) =>
             s3.getObject({
                 Bucket: "tinyburg-cold",
-                Key: `archivist/${options?.versionCode}/${name}`,
+                Key: `archivist/${options.bundleIdentifier}/${options.versionCode}/${name}`,
             })
         ).pipe(
             Effect.flatMap(Effect.succeedSome),
@@ -61,11 +67,11 @@ export const archiveToS3 = Effect.fnUntraced(function* (options: { offerType: nu
 
             if (existingUploadIntegrity !== integrityBase64) {
                 yield* Effect.logDebug(
-                    `Integrity check for existing upload ${name} version ${options.versionCode} failed`
+                    `Integrity check for existing upload ${options.bundleIdentifier}/${name} version ${options.versionCode} failed`
                 );
             } else {
                 return yield* Effect.logDebug(
-                    `Integrity check for existing upload ${name} version ${options.versionCode} passed`
+                    `Integrity check for existing upload ${options.bundleIdentifier}/${name} version ${options.versionCode} passed`
                 );
             }
         }
@@ -77,13 +83,15 @@ export const archiveToS3 = Effect.fnUntraced(function* (options: { offerType: nu
                 ContentLength: Number(size),
                 Body: NodeStream.toReadableNever(stream),
                 ChecksumAlgorithm: checksumAlgorithm,
-                Key: `archivist/${options?.versionCode}/${name}`,
+                Key: `archivist/${options.bundleIdentifier}/${options.versionCode}/${name}`,
                 ...("SHA-1" in integrity ? { ChecksumSHA1: integrityBase64 } : {}),
                 ...("SHA-256" in integrity ? { ChecksumSHA256: integrityBase64 } : {}),
                 ...("SHA-512" in integrity ? { ChecksumSHA512: integrityBase64 } : {}),
             })
         );
 
-        yield* Effect.logDebug(`Successfully uploaded ${name} version ${options.versionCode} to S3`);
+        yield* Effect.logDebug(
+            `Successfully uploaded ${options.bundleIdentifier}/${name} version ${options.versionCode} to S3`
+        );
     }
 });

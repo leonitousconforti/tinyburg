@@ -10,6 +10,13 @@
 export * as Chrome from "./Chrome.ts";
 
 /**
+ * Syntax highlighting for the code samples on our pages.
+ *
+ * @since 1.0.0
+ */
+export * as Code from "./Code.ts";
+
+/**
  * Inline SVG icon builders.
  *
  * @since 1.0.0

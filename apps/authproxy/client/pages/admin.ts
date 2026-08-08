@@ -9,7 +9,6 @@ import { m } from "foldkit/message";
 import { evo } from "foldkit/struct";
 
 import { Account } from "../../domain/model.ts";
-import { Session } from "../../domain/sessions.ts";
 import { ELEVATED_SCOPES, SELF_SERVE_SCOPES } from "../../shared/scopes.ts";
 import { Self } from "../backend.ts";
 
@@ -27,7 +26,6 @@ export const AdminModel = S.Struct({
 
     // The admin surface answered Forbidden: the session needs the step-up.
     needsElevation: S.Boolean,
-    password: S.String,
 
     busy: S.Option(S.String),
     notice: S.Option(S.String),
@@ -43,7 +41,6 @@ export type AdminModel = typeof AdminModel.Type;
 export const initialAdmin: AdminModel = {
     keys: AdminKeys.Idle(),
     needsElevation: false,
-    password: "",
     busy: Option.none(),
     notice: Option.none(),
     problem: Option.none(),
@@ -52,13 +49,19 @@ export const initialAdmin: AdminModel = {
     rateLimitEditor: Option.none(),
 };
 
-/** The admin page as entered: held data stays, transient state clears. */
-export const enterAdmin = (previous: AdminModel): AdminModel =>
+const ELEVATION_FAILED =
+    "Elevation was refused. Check the password, that you approved the tower check, and that your account holds an allowlisted tower.";
+
+/**
+ * The admin page as entered: held data stays, transient state clears. The
+ * elevation round trip lands back here with its outcome in the url, so the
+ * page opens saying how it went.
+ */
+export const enterAdmin = (error: Option.Option<string>, previous: AdminModel): AdminModel =>
     evo(previous, {
-        password: () => "",
         busy: Option.none,
         notice: Option.none,
-        problem: Option.none,
+        problem: () => Option.map(error, () => ELEVATION_FAILED),
         armedDelete: Option.none,
         scopesEditor: Option.none,
         rateLimitEditor: Option.none,
@@ -70,10 +73,6 @@ export const SettledAdminKeys = m("SettledAdminKeys", { result: S.Result(S.Array
 
 /** The admin surface refused a plain session; show the step-up form. */
 export const AdminRequiresElevation = m("AdminRequiresElevation");
-export const ChangedAdminPassword = m("ChangedAdminPassword", { value: S.String });
-export const SubmittedElevation = m("SubmittedElevation");
-export const CompletedElevation = m("CompletedElevation", { session: Session.json });
-export const FailedElevation = m("FailedElevation");
 
 export const ClickedEditScopes = m("ClickedEditScopes", { key: S.String });
 export const ToggledAdminScope = m("ToggledAdminScope", { path: S.String });
@@ -95,10 +94,6 @@ export const AdminSignedOutElsewhere = m("AdminSignedOutElsewhere");
 export const AdminMessage = S.Union([
     SettledAdminKeys,
     AdminRequiresElevation,
-    ChangedAdminPassword,
-    SubmittedElevation,
-    CompletedElevation,
-    FailedElevation,
     ClickedEditScopes,
     ToggledAdminScope,
     ClickedEditRateLimit,
@@ -119,7 +114,6 @@ export type AdminMessage = typeof AdminMessage.Type;
 
 const LOAD_FAILED = "We couldn't load the keys. Please try again.";
 const ACTION_FAILED = "That didn't work. Please try again.";
-const ELEVATION_FAILED = "Elevation was refused. Check the password and that your account holds an allowlisted tower.";
 
 export const FetchAdminKeys = Command.define("FetchAdminKeys", {
     messages: [SettledAdminKeys, AdminRequiresElevation, AdminSignedOutElsewhere],
@@ -132,20 +126,6 @@ export const FetchAdminKeys = Command.define("FetchAdminKeys", {
         Effect.catchTag("Forbidden", () => Effect.succeed(AdminRequiresElevation())),
         Effect.catch(() => Effect.succeed(SettledAdminKeys({ result: Result.fail(LOAD_FAILED) })))
     ),
-});
-
-const Elevate = Command.define("Elevate", {
-    args: { password: S.String },
-    messages: [CompletedElevation, FailedElevation, AdminSignedOutElsewhere],
-    execute: ({ password }) =>
-        Effect.gen(function* () {
-            const self = yield* Self;
-            const session = yield* self.SelfServiceGroup.elevate({ payload: { password } });
-            return CompletedElevation({ session });
-        }).pipe(
-            Effect.catchTag("Unauthorized", () => Effect.succeed(AdminSignedOutElsewhere())),
-            Effect.catch(() => Effect.succeed(FailedElevation()))
-        ),
 });
 
 const SaveScopes = Command.define("SaveScopes", {
@@ -237,21 +217,6 @@ export const updateAdmin = (model: AdminModel, message: AdminMessage): AdminStep
 
             AdminRequiresElevation: () => [
                 evo(model, { needsElevation: () => true, busy: Option.none, keys: () => AdminKeys.Idle() }),
-                [],
-            ],
-            ChangedAdminPassword: ({ value }) => [evo(model, { password: () => value }), []],
-            SubmittedElevation: () => [starting(model, "elevate"), [Elevate({ password: model.password })]],
-            CompletedElevation: () => [
-                evo(model, {
-                    busy: Option.none,
-                    needsElevation: () => false,
-                    password: () => "",
-                    notice: () => Option.some("Elevated for one hour."),
-                }),
-                [FetchAdminKeys()],
-            ],
-            FailedElevation: () => [
-                evo(model, { busy: Option.none, password: () => "", problem: () => Option.some(ELEVATION_FAILED) }),
                 [],
             ],
 
@@ -375,45 +340,40 @@ const scopeChip = (h: HtmlBuilder<AppMessage>, path: string): Html =>
         [scopeLabels.get(path) ?? path]
     );
 
-const elevationForm = (h: HtmlBuilder<AppMessage>, model: AdminModel): Html => {
-    const busy = Option.contains(model.busy, "elevate");
-
-    return h.section(
+/**
+ * The step-up is a server round trip, not an api call: the form posts the
+ * password to the server, which sends the browser through tinyburg.app to
+ * re-authorize with `towers:read`, and the outcome lands back on /admin.
+ */
+const elevationForm = <M>(h: HtmlBuilder<M>): Html =>
+    h.section(
         [h.Class(card + " max-w-md")],
         [
             h.h2([h.Class("font-pixel mb-2 text-lg text-gray-800")], ["Step Up"]),
             h.p(
                 [h.Class("font-mono mb-6 text-lg text-gray-500")],
                 [
-                    "Admin actions need more than a session: your Tinyburg account must hold an allowlisted tower, and you enter the admin password. Elevation lasts an hour.",
+                    "Admin actions need more than a session: you enter the admin password, then re-authorize with Tinyburg so the proxy can check - with your consent - that your account holds an allowlisted tower. Elevation lasts an hour.",
                 ]
             ),
-            h.div(
-                [h.Class("flex flex-col gap-4")],
+            h.form(
+                [h.Method("post"), h.Action("/auth/elevate"), h.Class("flex flex-col gap-4")],
                 [
                     h.input([
                         h.Type("password"),
+                        h.Attribute("name", "password"),
+                        h.Attribute("autocomplete", "current-password"),
+                        h.Required(true),
                         h.Class(
                             "font-mono focus:border-sky-blue rounded-lg border-2 border-gray-300 bg-white px-3 py-2 text-xl outline-none"
                         ),
                         h.Placeholder("Admin password"),
-                        h.Value(model.password),
-                        h.OnInput((value) => ChangedAdminPassword({ value })),
                     ]),
-                    h.button(
-                        [
-                            h.Type("button"),
-                            h.Class(primaryButton),
-                            h.Disabled(model.password === "" || busy),
-                            h.OnClick(SubmittedElevation()),
-                        ],
-                        [busy ? "..." : "Elevate"]
-                    ),
+                    h.button([h.Type("submit"), h.Class(primaryButton)], ["Elevate with Tinyburg"]),
                 ]
             ),
         ]
     );
-};
 
 const scopesEditorView = (h: HtmlBuilder<AppMessage>, model: AdminModel, selected: ReadonlyArray<string>): Html =>
     h.div(
@@ -647,7 +607,7 @@ export const adminView = (h: HtmlBuilder<AppMessage>, model: AdminModel): Html =
                         onSome: (text) => [banner(h, "problem", text)],
                         onNone: () => [],
                     }),
-                    model.needsElevation ? elevationForm(h, model) : keysTable(h, model),
+                    model.needsElevation ? elevationForm(h) : keysTable(h, model),
                 ]
             ),
         ]

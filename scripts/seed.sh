@@ -13,6 +13,9 @@ set -euo pipefail
 : "${AUTHPROXY_CLIENT_ID:?}"
 : "${AUTHPROXY_REDIRECT_URI:?}"
 : "${SITE_ORIGIN:?}"
+: "${DISCORD_BOT_CLIENT_ID:?}"
+: "${DISCORD_BOT_CLIENT_SECRET:?}"
+: "${DISCORD_BOT_REDIRECT_URI:?}"
 
 # The id is fixed in migration 0003 so that the code can recognize the SPA it
 # serves; the seed only widens its redirect list to include the local origin.
@@ -23,7 +26,10 @@ psql --dbname tinyburg_app --quiet --no-psqlrc --set ON_ERROR_STOP=1 \
     --set client_id="$AUTHPROXY_CLIENT_ID" \
     --set redirect_uri="$AUTHPROXY_REDIRECT_URI" \
     --set first_party_id="$FIRST_PARTY_CLIENT_ID" \
-    --set site_origin="$SITE_ORIGIN" <<'SQL'
+    --set site_origin="$SITE_ORIGIN" \
+    --set discord_bot_client_id="$DISCORD_BOT_CLIENT_ID" \
+    --set discord_bot_secret="$DISCORD_BOT_CLIENT_SECRET" \
+    --set discord_bot_redirect_uri="$DISCORD_BOT_REDIRECT_URI" <<'SQL'
 -- Registering the authproxy at the provider is otherwise a hand-run INSERT
 -- whose generated id has to be pasted into the proxy's configuration. Seeding
 -- it under an id the dev stack already knows removes that step entirely.
@@ -49,6 +55,27 @@ UPDATE oauth_clients
 SET redirect_uris = array_append(redirect_uris, :'site_origin')
 WHERE id = :'first_party_id'::uuid
   AND NOT (:'site_origin' = ANY (redirect_uris));
+
+-- The Discord bot, registered the same way, but as a confidential client: its
+-- callback is a bare redirect with no cookie of the bot's to anchor it, so the
+-- secret is the second factor at the token endpoint.
+--
+-- `secret_hash` is SHA-256 as unpadded base64url, which is what the provider's
+-- `sha256` helper produces and compares against. Derived here rather than
+-- written out as a constant so the secret and its hash cannot drift apart.
+INSERT INTO oauth_clients (id, owner_user_id, name, secret_hash, scope, redirect_uris)
+VALUES (
+    :'discord_bot_client_id'::uuid,
+    NULL,
+    'Tinyburg Discord Bot (local)',
+    replace(translate(encode(sha256(:'discord_bot_secret'::bytea), 'base64'), '+/', '-_'), '=', ''),
+    'openid profile',
+    ARRAY[:'discord_bot_redirect_uri']
+)
+ON CONFLICT (id) DO UPDATE
+    SET redirect_uris = EXCLUDED.redirect_uris,
+        secret_hash = EXCLUDED.secret_hash,
+        name = EXCLUDED.name;
 
 -- A user to hang local data off. Signing in with a real provider account
 -- creates its own; this one exists so that seeded towers and keys have an

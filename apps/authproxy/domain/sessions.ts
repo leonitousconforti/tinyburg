@@ -23,6 +23,15 @@ export class Session extends Model.Class<Session>("Session")({
     adminUntil: Schema.OptionFromNullishOr(Schema.DateTimeUtcFromDate, { onNoneEncoding: null }).pipe(
         Model.FieldExcept(["insert"])
     ),
+    // The half-finished elevation: whether the password matched when the
+    // re-authorization round trip left for tinyburg.app, and when it left.
+    // Server-side because a cookie would let the browser forge the answer.
+    elevationPasswordOk: Schema.OptionFromNullishOr(Schema.Boolean, { onNoneEncoding: null }).pipe(
+        Model.FieldOnly(["select", "update"])
+    ),
+    elevationRequestedAt: Schema.OptionFromNullishOr(Schema.DateTimeUtcFromDate, { onNoneEncoding: null }).pipe(
+        Model.FieldOnly(["select", "update"])
+    ),
 }) {}
 
 /**
@@ -75,17 +84,43 @@ export class SessionsRepository extends Context.Service<SessionsRepository>()(
             const revokeSessionByTokenHash = (tokenHash: string): Effect.Effect<void, SqlError.SqlError, never> =>
                 Effect.asVoid(sql`DELETE FROM sessions WHERE token_hash = ${tokenHash}`);
 
-            // The elevation window is stated here rather than taken as an
-            // argument so a compromised handler cannot ask for more.
-            const elevate = SqlSchema.findOneOption({
-                Request: Schema.String.check(Schema.isUUID()),
+            // Elevation is a two-step handshake around the re-authorization
+            // round trip. beginElevation records the password verdict as the
+            // browser leaves; completeElevation grants the hour only if that
+            // verdict was yes and the round trip came back inside its window.
+            // Both windows are stated here rather than taken as arguments so
+            // a compromised handler cannot ask for more.
+            const beginElevation = SqlSchema.findOneOption({
+                Request: Schema.Struct({ sessionId: Schema.String.check(Schema.isUUID()), passwordOk: Schema.Boolean }),
                 Result: Session.select,
-                execute: (sessionId) => sql`
-                    UPDATE sessions SET admin_until = NOW() + INTERVAL '1 hour'
+                execute: ({ passwordOk, sessionId }) => sql`
+                    UPDATE sessions SET elevation_password_ok = ${passwordOk}, elevation_requested_at = NOW()
                     WHERE id = ${sessionId} AND expires_at > NOW()
                     RETURNING *
                 `,
             });
+
+            const completeElevation = SqlSchema.findOneOption({
+                Request: Schema.String.check(Schema.isUUID()),
+                Result: Session.select,
+                execute: (sessionId) => sql`
+                    UPDATE sessions SET
+                        admin_until = NOW() + INTERVAL '1 hour',
+                        elevation_password_ok = NULL,
+                        elevation_requested_at = NULL
+                    WHERE id = ${sessionId}
+                      AND expires_at > NOW()
+                      AND elevation_password_ok = TRUE
+                      AND elevation_requested_at > NOW() - INTERVAL '10 minutes'
+                    RETURNING *
+                `,
+            });
+
+            const clearElevation = (sessionId: string): Effect.Effect<void, SqlError.SqlError, never> =>
+                Effect.asVoid(sql`
+                    UPDATE sessions SET elevation_password_ok = NULL, elevation_requested_at = NULL
+                    WHERE id = ${sessionId}
+                `);
 
             yield* sql`DELETE FROM sessions WHERE expires_at < NOW()`.pipe(
                 Effect.catchCause((cause) => Effect.logWarning(`failed to purge expired sessions`, cause)),
@@ -98,7 +133,9 @@ export class SessionsRepository extends Context.Service<SessionsRepository>()(
                 createSession,
                 findSession,
                 revokeSessionByTokenHash,
-                elevate,
+                beginElevation,
+                completeElevation,
+                clearElevation,
             };
         }),
     }

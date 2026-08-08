@@ -1,0 +1,15 @@
+{
+    "extends": "../../tsconfig.base.jsonc",
+    "references": [],
+    "include": ["domain", "migrations", "routes", "crypto.ts", "index.ts", "interactions.ts", "tinyburg.ts"],
+    "compilerOptions": {
+        "noEmit": true,
+        "declaration": false,
+        "declarationMap": false,
+        "composite": false,
+        "incremental": false,
+        "types": ["node"],
+        "allowImportingTsExtensions": true,
+        "rewriteRelativeImportExtensions": false
+    }
+}

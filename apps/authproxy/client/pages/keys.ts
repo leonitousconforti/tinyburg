@@ -32,8 +32,9 @@ export const KeysModel = S.Struct({
     notice: S.Option(S.String),
     problem: S.Option(S.String),
 
-    // Keys shown in full rather than masked.
-    revealed: S.Array(S.String),
+    // Keys minted in this sitting. A key is shown in full the once, right
+    // after it is created or rotated; every later look at it is masked.
+    justMinted: S.Array(S.String),
 
     // Deleting takes two clicks: the first arms the button, the second acts.
     armedDelete: S.Option(S.String),
@@ -53,17 +54,21 @@ export const initialKeys: KeysModel = {
     busy: Option.none(),
     notice: Option.none(),
     problem: Option.none(),
-    revealed: [],
+    justMinted: [],
     armedDelete: Option.none(),
     form: closedForm,
 };
 
-/** The keys page as entered: held data stays, transient row state clears. */
+/**
+ * The keys page as entered: held data stays, transient row state clears.
+ * Leaving and coming back counts as a later look, so nothing stays unmasked.
+ */
 export const enterKeys = (previous: KeysModel): KeysModel =>
     evo(previous, {
         busy: Option.none,
         notice: Option.none,
         problem: Option.none,
+        justMinted: () => [],
         armedDelete: Option.none,
         form: () => closedForm,
     });
@@ -90,7 +95,6 @@ export const CompletedDelete = m("CompletedDelete");
 
 export const ClickedCopy = m("ClickedCopy", { key: S.String });
 export const CopiedKey = m("CopiedKey");
-export const ToggledReveal = m("ToggledReveal", { key: S.String });
 
 export const FailedAction = m("FailedAction", { message: S.String });
 
@@ -113,7 +117,6 @@ export const KeysMessage = S.Union([
     CompletedDelete,
     ClickedCopy,
     CopiedKey,
-    ToggledReveal,
     FailedAction,
     SignedOutElsewhere,
 ]);
@@ -214,7 +217,7 @@ const CopyKey = Command.define("CopyKey", {
         Effect.tryPromise(() => navigator.clipboard.writeText(key)).pipe(
             Effect.as(CopiedKey()),
             Effect.catch(() =>
-                Effect.succeed(FailedAction({ message: "We couldn't reach your clipboard. Reveal and copy by hand." }))
+                Effect.succeed(FailedAction({ message: "We couldn't reach your clipboard. Please try again." }))
             )
         ),
 });
@@ -282,24 +285,15 @@ export const updateKeys = (model: KeysModel, message: KeysMessage): KeysStep =>
 
             ClickedCopy: ({ key }) => [model, [CopyKey({ key })]],
             CopiedKey: () => [evo(model, { notice: () => Option.some("Copied to your clipboard.") }), []],
-            ToggledReveal: ({ key }) => [
-                evo(model, {
-                    revealed: (revealed) =>
-                        revealed.includes(key)
-                            ? revealed.filter((revealedKey) => revealedKey !== key)
-                            : [...revealed, key],
-                }),
-                [],
-            ],
 
             // A fresh credential is the one moment the full key matters, so it
-            // arrives revealed.
+            // arrives unmasked. Every later look at the row is masked.
             CompletedCreate: ({ key }) => [
                 evo(refetch(model), {
                     busy: Option.none,
                     form: () => closedForm,
                     notice: () => Option.some("Key created. It works immediately."),
-                    revealed: (revealed) => [...revealed, key.key],
+                    justMinted: (minted) => [...minted, key.key],
                 }),
                 [FetchKeys()],
             ],
@@ -308,7 +302,7 @@ export const updateKeys = (model: KeysModel, message: KeysMessage): KeysStep =>
                     busy: Option.none,
                     notice: () =>
                         Option.some("Key rotated. The old key stopped working the moment the new one was minted."),
-                    revealed: (revealed) => [...revealed, key.key],
+                    justMinted: (minted) => [...minted, key.key],
                 }),
                 [FetchKeys()],
             ],
@@ -353,7 +347,7 @@ const scopeChip = (h: HtmlBuilder<AppMessage>, path: string): Html =>
 
 const keyRow = (h: HtmlBuilder<AppMessage>, key: Key, model: KeysModel): Html => {
     const busy = Option.contains(model.busy, key.key);
-    const revealed = model.revealed.includes(key.key);
+    const minted = model.justMinted.includes(key.key);
     const armed = Option.contains(model.armedDelete, key.key);
 
     return h.keyed("div")(
@@ -370,8 +364,8 @@ const keyRow = (h: HtmlBuilder<AppMessage>, key: Key, model: KeysModel): Html =>
                 [h.Class("flex flex-wrap items-center gap-2")],
                 [
                     h.code(
-                        [h.Class("font-mono min-w-0 flex-1 text-xl break-all text-gray-800")],
-                        [revealed ? key.key : maskKey(key.key)]
+                        [h.Class("font-code min-w-0 flex-1 text-lg break-all text-gray-800")],
+                        [minted ? key.key : maskKey(key.key)]
                     ),
                     key.revoked
                         ? h.span(
@@ -399,10 +393,6 @@ const keyRow = (h: HtmlBuilder<AppMessage>, key: Key, model: KeysModel): Html =>
             h.div(
                 [h.Class("flex flex-wrap gap-2")],
                 [
-                    h.button(
-                        [h.Type("button"), h.Class(smallButton), h.OnClick(ToggledReveal({ key: key.key }))],
-                        [revealed ? "Hide" : "Reveal"]
-                    ),
                     h.button(
                         [h.Type("button"), h.Class(smallButton), h.OnClick(ClickedCopy({ key: key.key }))],
                         ["Copy"]
@@ -593,9 +583,7 @@ const keysSection = (h: HtmlBuilder<AppMessage>, model: KeysModel): Html => {
             h.h2([h.Class("font-pixel mb-2 text-lg text-gray-800")], ["Your API Keys"]),
             h.p(
                 [h.Class("font-mono mb-6 text-lg text-gray-500")],
-                [
-                    "Send a key as a bearer token: Authorization: Bearer <key>. Rotate any key you may have leaked, and delete the ones you no longer use.",
-                ]
+                ["Rotate any key you may have leaked, and delete the ones you no longer use."]
             ),
             AsyncData.match(model.keys, {
                 onIdle: () => h.p([h.Class("font-mono text-xl text-gray-600")], ["Loading your keys..."]),

@@ -30,6 +30,7 @@
                 "name": "@effect/language-service",
                 "transform": "@effect/language-service/transform",
                 "namespaceImportPackages": ["effect", "@effect/*"],
+                "ignoreEffectWarningsInTscExitCode": true,
                 "diagnosticSeverity": {
                     "abortControllerInEffect": "warning",
                     "asyncFunction": "warning",
