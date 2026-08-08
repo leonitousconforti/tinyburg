@@ -2,7 +2,7 @@ import type { HttpClient, HttpClientError } from "effect/unstable/http";
 
 import {
     type Cause,
-    type Config,
+    Config,
     Context,
     type Crypto,
     Duration,
@@ -10,7 +10,7 @@ import {
     type Exit,
     type FileSystem,
     Layer,
-    type Path,
+    Path,
     type PlatformError,
     type Schema,
     Stream,
@@ -38,13 +38,21 @@ const ProtocolLive = Layer.provide(FridaRpcClient.layerProtocolFrida(), NdJsonSe
  * @since 1.0.0
  * @category Frida
  */
-export const SessionLive = FridaSession.layer("com.nimblebit.tinytower");
+export const SessionLive: Layer.Layer<
+    FridaSession.FridaSession,
+    FridaSessionError.FridaSessionError,
+    FridaDevice.FridaDevice
+> = FridaSession.layer("com.nimblebit.tinytower");
 
 /**
  * @since 1.0.0
  * @category Frida
  */
-export const ScriptLive = Layer.provideMerge(
+export const ScriptLive: Layer.Layer<
+    FridaScript.FridaScript | FridaSession.FridaSession,
+    FridaSessionError.FridaSessionError,
+    FridaDevice.FridaDevice
+> = Layer.provideMerge(
     FridaScript.layer(new URL("../frida/Agent.ts", import.meta.url), {
         platform: JsPlatform.Browser,
     }),
@@ -55,7 +63,11 @@ export const ScriptLive = Layer.provideMerge(
  * @since 1.0.0
  * @category Agent
  */
-export const AgentLive = Layer.provideMerge(ProtocolLive, ScriptLive);
+export const AgentLive: Layer.Layer<
+    FridaScript.FridaScript | FridaSession.FridaSession | RpcClient.Protocol,
+    FridaSessionError.FridaSessionError,
+    FridaDevice.FridaDevice
+> = Layer.provideMerge(ProtocolLive, ScriptLive);
 
 /**
  * @since 1.0.0
@@ -108,6 +120,8 @@ export const DeviceLive: Layer.Layer<
         // The early exits return never-typed values; the normal path runs to the end.
         // oxlint-disable-next-line typescript/consistent-return
         function* (deviceCtx: Context.Context<FridaDevice.FridaDevice>) {
+            const path = yield* Path.Path;
+
             const device = Context.get(deviceCtx, FridaDevice.FridaDevice);
             const emulatorName = String.replace("android-emulator://", "")(device.host);
             const childProcessSpawner = yield* ChildProcessSpawner.ChildProcessSpawner;
@@ -118,7 +132,19 @@ export const DeviceLive: Layer.Layer<
                 "emulator.name": emulatorName,
             });
 
-            const installCommand = ChildProcess.make("/Users/leo.conforti/Library/Android/sdk/platform-tools/adb", [
+            // Take straight from @efffrida/frida-tools for how it resolves adb
+            const androidSdk = yield* Config.string("ANDROID_SDK").pipe(
+                Config.map((androidSdk) => ({
+                    adbExecutable: path.join(androidSdk, "platform-tools", "adb"),
+                    emulatorExecutable: path.join(androidSdk, "emulator", "emulator"),
+                })),
+                Config.withDefault({
+                    adbExecutable: "adb",
+                    emulatorExecutable: "emulator",
+                })
+            );
+
+            const installCommand = ChildProcess.make(androidSdk.adbExecutable, [
                 "-s",
                 emulatorName,
                 "install-multiple",

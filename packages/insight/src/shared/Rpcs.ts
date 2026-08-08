@@ -11,15 +11,15 @@ export const TowerCredentials = Schema.Struct({
 export class GameState extends Schema.Class<GameState>("GameState")({
     bux: Schema.Int,
     coins: Schema.Int,
-    elevatorSpeed: Schema.Number,
+    elevatorSpeed: Schema.Finite,
     goldenTickets: Schema.Int,
-    // allTimeGoldenTickets: Schema.Number,
-    // numberOfFloors: Schema.Number,
-    // numberOfBitizens: Schema.Number,
-    // numberOfRoofsUnlocked: Schema.Number,
-    // numberOfLobbiesUnlocked: Schema.Number,
-    // numberOfCostumesUnlocked: Schema.Number,
-    // numberOfElevatorsUnlocked: Schema.Number,
+    // allTimeGoldenTickets: Schema.Finite,
+    // numberOfFloors: Schema.Finite,
+    // numberOfBitizens: Schema.Finite,
+    // numberOfRoofsUnlocked: Schema.Finite,
+    // numberOfLobbiesUnlocked: Schema.Finite,
+    // numberOfCostumesUnlocked: Schema.Finite,
+    // numberOfElevatorsUnlocked: Schema.Finite,
     // gameScreen: Schema.String,
 }) {}
 
@@ -28,7 +28,7 @@ export class Rpcs extends RpcGroup.make(
         success: Schema.String,
     }),
     Rpc.make("SetFps", {
-        payload: Schema.Number,
+        payload: Schema.Finite,
         success: Schema.Void,
     }),
     Rpc.make("GetTowerCredentials", {
@@ -60,18 +60,13 @@ export class Rpcs extends RpcGroup.make(
         success: Schema.Array(Schema.String),
     }),
     Rpc.make("GetAllCostumes", {
-        success: Schema.Record(
-            Schema.String,
-            Schema.Record(Schema.String, Schema.Union([Schema.String, Schema.Number, Schema.Boolean]))
-        ),
+        success: Schema.Record(Schema.String, Schema.Record(Schema.String, Schema.String)),
     }),
     Rpc.make("GetAllBitbookPosts", {
         success: Schema.Struct({
             eventTypes: Schema.Record(Schema.String, Schema.String),
             mediaTypes: Schema.Record(Schema.String, Schema.String),
-            posts: Schema.Array(
-                Schema.Record(Schema.String, Schema.Union([Schema.String, Schema.Number, Schema.Boolean]))
-            ),
+            posts: Schema.Array(Schema.Record(Schema.String, Schema.String)),
         }),
     }),
     Rpc.make("GetAllBitizenData", {
@@ -92,21 +87,12 @@ export class Rpcs extends RpcGroup.make(
     Rpc.make("GetAllMissions", {
         success: Schema.Struct({
             types: Schema.Record(Schema.String, Schema.String),
-            tutorialMissions: Schema.Array(
-                Schema.Record(Schema.String, Schema.Union([Schema.String, Schema.Number, Schema.Boolean]))
-            ),
-            tipMissions: Schema.Array(
-                Schema.Record(Schema.String, Schema.Union([Schema.String, Schema.Number, Schema.Boolean]))
-            ),
-            missions: Schema.Array(
-                Schema.Record(Schema.String, Schema.Union([Schema.String, Schema.Number, Schema.Boolean]))
-            ),
+            tutorialMissions: Schema.Array(Schema.Record(Schema.String, Schema.String)),
+            tipMissions: Schema.Array(Schema.Record(Schema.String, Schema.String)),
+            missions: Schema.Array(Schema.Record(Schema.String, Schema.String)),
         }),
     }),
     Rpc.make("GetAllPets", {
-        success: Schema.Record(
-            Schema.String,
-            Schema.Record(Schema.String, Schema.Union([Schema.String, Schema.Number, Schema.Boolean]))
-        ),
+        success: Schema.Record(Schema.String, Schema.Record(Schema.String, Schema.Boolean)),
     })
 ) {}
