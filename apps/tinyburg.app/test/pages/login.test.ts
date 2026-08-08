@@ -5,12 +5,16 @@ import type { Html, HtmlBuilder } from "foldkit/html";
 import { Scene } from "foldkit/test";
 import { describe, it } from "vitest";
 
+import { en } from "../../client/messages/en.ts";
 import { loginView } from "../../client/pages/login.ts";
 
 /*
   The login page is a pure view: every affordance on it is a server round trip
   behind an `<a href>`, so there are no Messages and update never runs. The
   Model is only what `main.ts` reads out of the url and hands to `loginView`.
+
+  Selectors go through the `en` messages module rather than repeating the
+  copy, so an edit to the wording fails in exactly one place.
 */
 type Model = Readonly<{
     returnTo: Option.Option<string>;
@@ -19,7 +23,7 @@ type Model = Readonly<{
 
 const page = {
     update: (model: Model, _message: never): readonly [Model, ReadonlyArray<never>] => [model, []],
-    view: (model: Model, h: HtmlBuilder<never>): Html => loginView(h, model.returnTo, model.error),
+    view: (model: Model, h: HtmlBuilder<never>): Html => loginView(h, en.login, en.shared, model.returnTo, model.error),
 };
 
 const arriving: Model = { returnTo: Option.none(), error: Option.none() };
@@ -33,9 +37,9 @@ describe("login page", () => {
         scene(
             page,
             given(arriving),
-            expect(role("heading", { name: "Welcome to Tinyburg" })).toExist(),
-            expect(role("link", { name: "Continue with Google" })).toHaveAttr("href", "/auth/google/login"),
-            expect(role("link", { name: "Continue with Discord" })).toHaveAttr("href", "/auth/discord/login"),
+            expect(role("heading", { name: en.login.heading })).toExist(),
+            expect(role("link", { name: en.login.continueWithGoogle })).toHaveAttr("href", "/auth/google/login"),
+            expect(role("link", { name: en.login.continueWithDiscord })).toHaveAttr("href", "/auth/discord/login"),
             expect(role("status")).toBeAbsent(),
             expect(role("alert")).toBeAbsent()
         );
@@ -45,11 +49,11 @@ describe("login page", () => {
         scene(
             page,
             given({ ...arriving, returnTo: Option.some("/towers/@me") }),
-            expect(role("link", { name: "Continue with Google" })).toHaveAttr(
+            expect(role("link", { name: en.login.continueWithGoogle })).toHaveAttr(
                 "href",
                 "/auth/google/login?returnTo=%2Ftowers%2F%40me"
             ),
-            expect(role("link", { name: "Continue with Discord" })).toHaveAttr(
+            expect(role("link", { name: en.login.continueWithDiscord })).toHaveAttr(
                 "href",
                 "/auth/discord/login?returnTo=%2Ftowers%2F%40me"
             )
@@ -66,7 +70,7 @@ describe("login page", () => {
         scene(
             page,
             given(withError("oauth_denied")),
-            expect(role("status")).toContainText("Sign in was cancelled"),
+            expect(role("status")).toContainText(en.login.problems.denied),
             expect(role("alert")).toBeAbsent()
         );
     });
@@ -77,8 +81,7 @@ describe("login page", () => {
             scene(
                 page,
                 given(withError(code)),
-                expect(role("alert")).toContainText("expired or was interrupted"),
-                expect(role("alert")).toContainText("allows cookies"),
+                expect(role("alert")).toContainText(en.login.problems.expired),
                 expect(role("status")).toBeAbsent()
             );
         }
@@ -93,7 +96,7 @@ describe("login page", () => {
         scene(
             page,
             given(withError("some_code_nobody_has_written_yet")),
-            expect(role("alert")).toHaveText("We couldn't finish signing you in. Please try again."),
+            expect(role("alert")).toHaveText(en.login.problems.failed),
             expect(role("status")).toBeAbsent()
         );
     });
@@ -102,8 +105,8 @@ describe("login page", () => {
         scene(
             page,
             given(arriving),
-            expect(text("Terms of Service")).toHaveAttr("href", "/terms"),
-            expect(text("Privacy Policy")).toHaveAttr("href", "/privacy")
+            expect(text(en.login.termsOfService)).toHaveAttr("href", "/terms"),
+            expect(text(en.login.privacyPolicy)).toHaveAttr("href", "/privacy")
         );
     });
 });

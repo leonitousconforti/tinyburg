@@ -2,7 +2,7 @@ import { Effect, Match, Option, Schema as S } from "effect";
 
 import type { Document, Html, HtmlBuilder } from "foldkit/html";
 
-import { fromNavigator, Language } from "@tinyburg/ui/Internationalization";
+import { Language, fromNavigator } from "@tinyburg/ui/Internationalization";
 import { AsyncData, Command, Dom, Navigation, Render, type Runtime, Url } from "foldkit";
 import { createLazy } from "foldkit/html";
 import { m } from "foldkit/message";
@@ -19,7 +19,7 @@ import {
     SettledLinkedTowers,
     SignedOut,
 } from "./backend.ts";
-import { type Messages, messagesFor, type TitleMessages } from "./messages/index.ts";
+import { type Messages, type TitleMessages, messagesFor } from "./messages/index.ts";
 import { aboutView } from "./pages/about.ts";
 import {
     AccountMessage,
