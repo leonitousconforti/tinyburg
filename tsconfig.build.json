@@ -8,6 +8,7 @@
     "references": [
         { "path": "packages/bitprints/tsconfig.build.json" },
         { "path": "packages/doorman/tsconfig.build.json" },
+        { "path": "packages/i18n/tsconfig.build.json" },
         { "path": "packages/insight/tsconfig.build.json" },
         { "path": "packages/nimblebit-sdk/tsconfig.build.json" },
         { "path": "packages/tinytower-sdk/tsconfig.build.json" },

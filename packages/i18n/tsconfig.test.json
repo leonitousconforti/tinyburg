@@ -1,0 +1,15 @@
+{
+    "$schema": "https://json.schemastore.org/tsconfig",
+    "extends": "../../tsconfig.base.jsonc",
+    "include": ["test/**/*.test.ts"],
+    "references": [{ "path": "tsconfig.src.json" }],
+    "compilerOptions": {
+        "tsBuildInfoFile": ".tsbuildinfo/test.tsbuildinfo",
+        "outDir": ".tsbuildinfo/test",
+        "noEmit": true,
+        "erasableSyntaxOnly": false,
+        "rewriteRelativeImportExtensions": false,
+        "allowImportingTsExtensions": true,
+        "types": ["node"]
+    }
+}
