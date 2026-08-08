@@ -27,7 +27,7 @@ import {
     FridaDeviceAcquisitionError,
     type FridaSessionError,
 } from "@efffrida/frida-tools";
-import { GooglePlayApi } from "@efffrida/gplayapi";
+import { GooglePlayApi, type AndroidDevice, type PlayAccount } from "@efffrida/gplayapi";
 import { FridaRpcClient } from "@efffrida/rpc/node";
 import { JsPlatform } from "frida";
 
@@ -90,12 +90,14 @@ export const DeviceLive: Layer.Layer<
     | HttpClientError.HttpClientError
     | Schema.SchemaError
     | PlatformError.PlatformError
-    | Cause.NoSuchElementError,
+    | Cause.NoSuchElementError
+    | PlayAccount.PlayAccountError,
     | FileSystem.FileSystem
     | ChildProcessSpawner.ChildProcessSpawner
     | Path.Path
     | HttpClient.HttpClient
-    | GooglePlayApi.AndroidDeviceService
+    | AndroidDevice.AndroidDeviceService
+    | PlayAccount.PlayAccount
     | Crypto.Crypto
 > = Layer.tap(
     FridaDevice.layerAndroidEmulatorDeviceConfig("Small_Phone", {
