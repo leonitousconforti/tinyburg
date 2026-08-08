@@ -8,6 +8,7 @@ import * as crypto from "node:crypto";
 import type { OAuthAuthorizationRequest, OAuthClient } from "../../domain/models.ts";
 
 import { TOWERS_READ_SCOPE, TOWERS_SCOPE, TOWERS_WRITE_SCOPE } from "@tinyburg/trading-sdk/Sdk";
+import { sha256 } from "@tinyburg/web-auth/Crypto";
 import { Jwt, Oidc } from "effect-oidc";
 
 import { DevelopersRepository } from "../../domain/developers.ts";
@@ -15,7 +16,6 @@ import { OAuthAuthorizationRequest as AuthorizationRequestModel } from "../../do
 import { OidcRepository } from "../../domain/oidc.ts";
 import { UsersRepository } from "../../domain/users.ts";
 import { maybeCurrentUser } from "../cookies.ts";
-import { sha256 } from "../crypto.ts";
 import { OidcKeys } from "../keys.ts";
 
 const ACCESS_TOKEN_TTL_SECONDS = 900;

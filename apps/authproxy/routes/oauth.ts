@@ -11,10 +11,11 @@ import { RateLimiter } from "effect/unstable/persistence";
 
 import * as crypto from "node:crypto";
 
+import { randomSecret, sha256 } from "@tinyburg/web-auth/Crypto";
+import { isLocalPath, returnToParam } from "@tinyburg/web-auth/Redirect";
 import { RelyingParty } from "effect-oidc";
 
 import { CookiePolicy, maybeCurrentSession, SESSION_COOKIE_NAME } from "../cookies.ts";
-import { randomSecret, sha256 } from "../crypto.ts";
 import { SessionsRepository } from "../domain/sessions.ts";
 // "Sign in with Tinyburg": the authproxy is an OIDC relying party of
 // tinyburg.app's provider. Authorization code + PKCE; the client may be
@@ -46,27 +47,6 @@ const OAuthIntent = Schema.fromJsonString(
         mode: Schema.Literals(["login", "elevate"]),
         returnTo: Schema.optional(Schema.String),
     })
-);
-
-const isLocalPath = (value: string): boolean => {
-    const NOWHERE = "https://authproxy.invalid";
-    if (!value.startsWith("/")) return false;
-    try {
-        return new URL(value, NOWHERE).origin === NOWHERE;
-    } catch {
-        return false;
-    }
-};
-
-const returnToParam = HttpServerRequest.schemaSearchParams(
-    Schema.Struct({
-        returnTo: Schema.optional(Schema.String),
-    })
-).pipe(
-    Effect.map(({ returnTo }) => Option.fromUndefinedOr(returnTo)),
-    Effect.map(Option.filter(isLocalPath)),
-    Effect.option,
-    Effect.map(Option.flatten)
 );
 
 /** The linked-towers list, as the trading api serves it to its owner. */

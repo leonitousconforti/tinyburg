@@ -3,7 +3,8 @@
     "references": [
         { "path": "../../packages/nimblebit-sdk/tsconfig.src.json" },
         { "path": "../../packages/tinytower-sdk/tsconfig.src.json" },
-        { "path": "../../packages/ui/tsconfig.src.json" }
+        { "path": "../../packages/ui/tsconfig.src.json" },
+        { "path": "../../packages/web-auth/tsconfig.src.json" }
     ],
     "include": [
         "client",
@@ -13,7 +14,6 @@
         "routes",
         "shared",
         "cookies.ts",
-        "crypto.ts",
         "index.ts",
         "vite.config.ts"
     ],

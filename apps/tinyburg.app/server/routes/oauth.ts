@@ -8,12 +8,13 @@ import {
     HttpServerResponse,
 } from "effect/unstable/http";
 
+import { randomSecret, sha256 } from "@tinyburg/web-auth/Crypto";
+import { isLocalPath, returnToParam } from "@tinyburg/web-auth/Redirect";
 import { RelyingParty } from "effect-oidc";
 
 import { SessionsRepository } from "../../domain/sessions.ts";
 import { UsersRepository } from "../../domain/users.ts";
 import { CookiePolicy, maybeCurrentUser, PROVIDER_SESSION_COOKIE_NAME } from "../cookies.ts";
-import { randomSecret, sha256 } from "../crypto.ts";
 
 interface OAuthProvider {
     readonly name: "google" | "discord";
@@ -115,27 +116,6 @@ const OAuthIntent = Schema.fromJsonString(
         mode: Schema.Literals(["login", "link"]),
         returnTo: Schema.optional(Schema.String),
     })
-);
-
-const isLocalPath = (value: string): boolean => {
-    const NOWHERE = "https://tinyburg.invalid";
-    if (!value.startsWith("/")) return false;
-    try {
-        return new URL(value, NOWHERE).origin === NOWHERE;
-    } catch {
-        return false;
-    }
-};
-
-const returnToParam = HttpServerRequest.schemaSearchParams(
-    Schema.Struct({
-        returnTo: Schema.optional(Schema.String),
-    })
-).pipe(
-    Effect.map(({ returnTo }) => Option.fromUndefinedOr(returnTo)),
-    Effect.map(Option.filter(isLocalPath)),
-    Effect.option,
-    Effect.map(Option.flatten)
 );
 
 const bounceToLogin = (returnTo: string) =>

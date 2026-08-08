@@ -132,6 +132,9 @@ importers:
       '@tinyburg/ui':
         specifier: workspace:*
         version: link:../../packages/ui
+      '@tinyburg/web-auth':
+        specifier: workspace:*
+        version: link:../../packages/web-auth
       effect:
         specifier: 4.0.0-beta.105
         version: 4.0.0-beta.105
@@ -315,6 +318,9 @@ importers:
       '@tinyburg/ui':
         specifier: workspace:*
         version: link:../../packages/ui
+      '@tinyburg/web-auth':
+        specifier: workspace:*
+        version: link:../../packages/web-auth
       effect:
         specifier: 4.0.0-beta.105
         version: 4.0.0-beta.105
@@ -458,6 +464,12 @@ importers:
       foldkit:
         specifier: 0.140.1
         version: 0.140.1(@effect/platform-browser@4.0.0-beta.105(effect@4.0.0-beta.105))(effect@4.0.0-beta.105)
+
+  packages/web-auth:
+    devDependencies:
+      effect:
+        specifier: 4.0.0-beta.105
+        version: 4.0.0-beta.105
 
   scratchpad:
     dependencies:
