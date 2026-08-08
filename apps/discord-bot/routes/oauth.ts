@@ -3,11 +3,13 @@ import { HttpClient, HttpRouter, HttpServerRequest, HttpServerResponse } from "e
 
 import type { Jwt } from "effect-oidc";
 
+import { type Language, fromAcceptLanguage } from "@tinyburg/ui/Internationalization";
 import { DiscordREST } from "dfx";
 import { Oidc } from "effect-oidc";
 
 import { sha256 } from "../crypto.ts";
 import { LinksRepository } from "../domain/links.ts";
+import { botMessagesFor } from "../messages.ts";
 import { tinyburgConfig } from "../tinyburg.ts";
 
 /**
@@ -24,12 +26,17 @@ import { tinyburgConfig } from "../tinyburg.ts";
  * so the URL is never posted where someone else can take it.
  */
 
-const page = (options: { readonly title: string; readonly body: string; readonly status: number }) =>
+const page = (options: {
+    readonly language: Language;
+    readonly title: string;
+    readonly body: string;
+    readonly status: number;
+}) =>
     HttpServerResponse.html(
         // Passed as a string rather than used as a template tag: the tagged
         // form returns an Effect, and nothing interpolated here is effectful.
         `<!doctype html>
-<html lang="en">
+<html lang="${options.language}">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width" />
@@ -54,10 +61,11 @@ const page = (options: { readonly title: string; readonly body: string; readonly
 </html>`
     ).pipe(HttpServerResponse.setStatus(options.status));
 
-const linked = (name: string) =>
+const linked = (language: Language, name: string) =>
     page({
-        title: "Linked",
-        body: `Your Tinyburg account <strong>${name}</strong> is now linked to Discord. You can close this tab and go back.`,
+        language,
+        title: botMessagesFor[language].linkedTitle,
+        body: botMessagesFor[language].linkedBody(name),
         status: 200,
     });
 
@@ -68,18 +76,25 @@ const linked = (name: string) =>
  * provider refused - are all things an attacker probing callback URLs would
  * like to learn, and none of them are things the person in front of the page
  * can act on differently. The detail goes to the log instead.
+ *
+ * Functions of the language rather than module constants: a constant would
+ * bake the default language in at module load.
  */
-const failed = page({
-    title: "Could not link",
-    body: "That link did not work. It may have expired or already been used. Run <strong>/link</strong> in Discord to start again.",
-    status: 400,
-});
+const failed = (language: Language) =>
+    page({
+        language,
+        title: botMessagesFor[language].failedTitle,
+        body: botMessagesFor[language].failedBody,
+        status: 400,
+    });
 
-const cancelled = page({
-    title: "Not linked",
-    body: "Nothing was linked. You can run <strong>/link</strong> in Discord if you change your mind.",
-    status: 200,
-});
+const cancelled = (language: Language) =>
+    page({
+        language,
+        title: botMessagesFor[language].cancelledTitle,
+        body: botMessagesFor[language].cancelledBody,
+        status: 200,
+    });
 
 export const CallbackRoutesLive = Effect.gen(function* () {
     const tinyburg = yield* tinyburgConfig;
@@ -113,101 +128,113 @@ export const CallbackRoutesLive = Effect.gen(function* () {
             )
     );
 
-    const callback = Effect.gen(function* () {
-        const refuse = (reason: string) => Effect.as(Effect.logInfo(`link callback refused: ${reason}`), failed);
+    const handleCallback = (language: Language) =>
+        Effect.gen(function* () {
+            const messages = botMessagesFor[language];
+            const refuse = (reason: string) =>
+                Effect.as(Effect.logInfo(`link callback refused: ${reason}`), failed(language));
 
-        const maybeUrlParams = yield* HttpServerRequest.schemaSearchParams(
-            Schema.Union([
-                Schema.Struct({ error: Schema.String }),
-                Schema.Struct({ code: Schema.String, state: Schema.String }),
-            ])
-        ).pipe(Effect.option);
-        if (Option.isNone(maybeUrlParams)) {
-            return yield* refuse("malformed callback");
-        }
+            const maybeUrlParams = yield* HttpServerRequest.schemaSearchParams(
+                Schema.Union([
+                    Schema.Struct({ error: Schema.String }),
+                    Schema.Struct({ code: Schema.String, state: Schema.String }),
+                ])
+            ).pipe(Effect.option);
+            if (Option.isNone(maybeUrlParams)) {
+                return yield* refuse("malformed callback");
+            }
 
-        const urlParams = maybeUrlParams.value;
-        if ("error" in urlParams) {
-            return urlParams.error === "access_denied" ? cancelled : yield* refuse(urlParams.error);
-        }
+            const urlParams = maybeUrlParams.value;
+            if ("error" in urlParams) {
+                return urlParams.error === "access_denied" ? cancelled(language) : yield* refuse(urlParams.error);
+            }
 
-        // Claiming the pending link consumes it, so a replayed URL gets
-        // nothing even if the code were somehow still good.
-        const stateHash = yield* sha256(urlParams.state);
-        const maybePending = yield* LinksRepository.use((repo) => repo.claimPendingLink(stateHash)).pipe(
-            Effect.option,
-            Effect.map(Option.flatten)
-        );
-        if (Option.isNone(maybePending)) {
-            return yield* refuse("no pending link for this state");
-        }
-        const pending = maybePending.value;
-
-        const maybeToken = yield* Oidc.exchangeAuthorizationCode({
-            tokenEndpoint: `${tinyburg.issuer}/oauth/token`,
-            clientId: tinyburg.clientId,
-            clientSecret: Option.map(tinyburg.clientSecret, Redacted.value).pipe(Option.getOrUndefined),
-            redirectUri: tinyburg.redirectUri,
-            code: urlParams.code,
-            codeVerifier: pending.codeVerifier,
-        }).pipe(Effect.option);
-        if (Option.isNone(maybeToken)) {
-            return yield* refuse("token exchange failed");
-        }
-
-        // The id token is the only thing that says who authorized. The access
-        // token is deliberately dropped on the floor: this slice reads
-        // nothing from the trading api, so keeping it would be holding a
-        // capability with no use for it.
-        const maybeClaims = yield* cachedJwks.pipe(
-            Effect.flatMap((jwks) =>
-                Oidc.verifyIdToken({
-                    jwks,
-                    clientId: tinyburg.clientId,
-                    issuer: tinyburg.issuer,
-                    idToken: maybeToken.value.id_token ?? "",
-                })
-            ),
-            Effect.option
-        );
-        if (Option.isNone(maybeClaims)) {
-            return yield* refuse("id token did not verify");
-        }
-        const claims = maybeClaims.value;
-
-        const maybeLink = yield* LinksRepository.use((repo) =>
-            repo.upsertLink({
-                discordUserId: pending.discordUserId,
-                sub: claims.sub,
-                displayName: claims.name ?? null,
-                avatarUrl: claims.picture ?? null,
-            })
-        ).pipe(Effect.option);
-        if (Option.isNone(maybeLink)) {
-            return yield* refuse("could not store the link");
-        }
-
-        const name = Option.getOrElse(maybeLink.value.displayName, () => "your Tinyburg account");
-
-        // Best effort: rewrite the ephemeral reply so the confirmation shows
-        // up in Discord too, retiring the spent authorization button with it.
-        // The link is already made either way, so a failure here is worth a
-        // log and nothing more.
-        yield* rest
-            .updateOriginalWebhookMessage(applicationId, pending.interactionToken, {
-                payload: { content: `Linked to **${name}**.`, components: [] },
-            })
-            .pipe(
-                Effect.tapError((error) => Effect.logWarning("could not update the /link reply", error)),
-                Effect.ignore
+            // Claiming the pending link consumes it, so a replayed URL gets
+            // nothing even if the code were somehow still good.
+            const stateHash = yield* sha256(urlParams.state);
+            const maybePending = yield* LinksRepository.use((repo) => repo.claimPendingLink(stateHash)).pipe(
+                Effect.option,
+                Effect.map(Option.flatten)
             );
+            if (Option.isNone(maybePending)) {
+                return yield* refuse("no pending link for this state");
+            }
+            const pending = maybePending.value;
 
-        return linked(name);
-    }).pipe(
-        Effect.tapDefect((defect) => Effect.logError("link callback died", defect)),
-        Effect.catchDefect(() => Effect.succeed(failed)),
-        Effect.satisfiesErrorType<never>()
-    );
+            const maybeToken = yield* Oidc.exchangeAuthorizationCode({
+                tokenEndpoint: `${tinyburg.issuer}/oauth/token`,
+                clientId: tinyburg.clientId,
+                clientSecret: Option.map(tinyburg.clientSecret, Redacted.value).pipe(Option.getOrUndefined),
+                redirectUri: tinyburg.redirectUri,
+                code: urlParams.code,
+                codeVerifier: pending.codeVerifier,
+            }).pipe(Effect.option);
+            if (Option.isNone(maybeToken)) {
+                return yield* refuse("token exchange failed");
+            }
+
+            // The id token is the only thing that says who authorized. The access
+            // token is deliberately dropped on the floor: this slice reads
+            // nothing from the trading api, so keeping it would be holding a
+            // capability with no use for it.
+            const maybeClaims = yield* cachedJwks.pipe(
+                Effect.flatMap((jwks) =>
+                    Oidc.verifyIdToken({
+                        jwks,
+                        clientId: tinyburg.clientId,
+                        issuer: tinyburg.issuer,
+                        idToken: maybeToken.value.id_token ?? "",
+                    })
+                ),
+                Effect.option
+            );
+            if (Option.isNone(maybeClaims)) {
+                return yield* refuse("id token did not verify");
+            }
+            const claims = maybeClaims.value;
+
+            const maybeLink = yield* LinksRepository.use((repo) =>
+                repo.upsertLink({
+                    discordUserId: pending.discordUserId,
+                    sub: claims.sub,
+                    displayName: claims.name ?? null,
+                    avatarUrl: claims.picture ?? null,
+                })
+            ).pipe(Effect.option);
+            if (Option.isNone(maybeLink)) {
+                return yield* refuse("could not store the link");
+            }
+
+            const name = Option.getOrElse(maybeLink.value.displayName, () => messages.fallbackYourAccountName);
+
+            // Best effort: rewrite the ephemeral reply so the confirmation shows
+            // up in Discord too, retiring the spent authorization button with it.
+            // The link is already made either way, so a failure here is worth a
+            // log and nothing more. The Discord locale is not stored with the
+            // pending link, so the browser's language is the best proxy for the
+            // person who ran /link - they are the same person by construction.
+            yield* rest
+                .updateOriginalWebhookMessage(applicationId, pending.interactionToken, {
+                    payload: { content: messages.linkedFollowUp(name), components: [] },
+                })
+                .pipe(
+                    Effect.tapError((error) => Effect.logWarning("could not update the /link reply", error)),
+                    Effect.ignore
+                );
+
+            return linked(language, name);
+        }).pipe(
+            Effect.tapDefect((defect) => Effect.logError("link callback died", defect)),
+            Effect.catchDefect(() => Effect.succeed(failed(language)))
+        );
+
+    // A browser context, not a Discord one: the person may finish the round
+    // trip on a different device, so the page language is negotiated from
+    // Accept-Language rather than from the interaction's stored locale.
+    const callback = Effect.gen(function* () {
+        const request = yield* HttpServerRequest.HttpServerRequest;
+        return yield* handleCallback(fromAcceptLanguage(request.headers["accept-language"]));
+    }).pipe(Effect.satisfiesErrorType<never>());
 
     return HttpRouter.add("GET", "/discord/callback", callback);
 }).pipe(Layer.unwrap);
