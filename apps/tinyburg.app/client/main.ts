@@ -2,6 +2,7 @@ import { Effect, Match, Option, Schema as S } from "effect";
 
 import type { Document, Html, HtmlBuilder } from "foldkit/html";
 
+import { Language, fromNavigator } from "@tinyburg/ui/Internationalization";
 import { AsyncData, Command, Dom, Navigation, Render, type Runtime, Url } from "foldkit";
 import { createLazy } from "foldkit/html";
 import { m } from "foldkit/message";
@@ -18,6 +19,7 @@ import {
     SettledLinkedTowers,
     SignedOut,
 } from "./backend.ts";
+import { type Messages, type TitleMessages, messagesFor } from "./messages/index.ts";
 import { aboutView } from "./pages/about.ts";
 import {
     AccountMessage,
@@ -50,8 +52,19 @@ export const Model = S.Struct({
     linkedTowers: LinkedTowers.schema,
     wizard: WizardModel,
     account: AccountModel,
+    language: Language,
 });
 export type Model = typeof Model.Type;
+
+/**
+ * Negotiated once from the browser's preferences at module load (precedent:
+ * the module-scope `matchMedia` below). There is no switcher yet, so the
+ * language is plain model data that never changes after init. Guarded for the
+ * node test environment, which has no `navigator`.
+ */
+export const initialLanguage = fromNavigator(
+    typeof navigator === "undefined" ? [] : (navigator.languages ?? [navigator.language])
+);
 
 // MESSAGE
 
@@ -251,6 +264,7 @@ export const init: Runtime.RoutingApplicationInit<Model, Message, void, Backend>
                 linkedTowers: LinkedTowers.Idle(),
                 wizard: initialWizard,
                 account: initialAccount,
+                language: initialLanguage,
             },
             route
         )
@@ -260,22 +274,22 @@ export const init: Runtime.RoutingApplicationInit<Model, Message, void, Backend>
 
 // VIEW
 
-const routeTitle = (route: AppRoute): string =>
+const routeTitle = (route: AppRoute, titles: TitleMessages): string =>
     Match.value(route).pipe(
         Match.withReturnType<string>(),
         Match.tagsExhaustive({
-            Home: () => "TinyTower Trading | Trade Bitizens, Costumes & More",
-            About: () => "About | Tinyburg",
-            Login: () => "Log In | Tinyburg",
-            Privacy: () => "Privacy Policy | Tinyburg",
-            Terms: () => "Terms of Service | Tinyburg",
-            Sponsors: () => "Sponsors | Tinyburg",
-            Developers: () => "Developers | Tinyburg",
-            DeveloperApps: () => "OAuth Applications | Tinyburg",
-            TowerMe: () => "My Towers | Tinyburg",
-            TowerLink: () => "Link Your Tower | Tinyburg",
-            Account: () => "Account & Security | Tinyburg",
-            NotFound: () => "Page Not Found | Tinyburg",
+            Home: () => titles.home,
+            About: () => titles.about,
+            Login: () => titles.login,
+            Privacy: () => titles.privacy,
+            Terms: () => titles.terms,
+            Sponsors: () => titles.sponsors,
+            Developers: () => titles.developers,
+            DeveloperApps: () => titles.developerApps,
+            TowerMe: () => titles.towerMe,
+            TowerLink: () => titles.towerLink,
+            Account: () => titles.account,
+            NotFound: () => titles.notFound,
         })
     );
 
@@ -288,26 +302,34 @@ const lazyDevelopers = createLazy();
 const lazyDeveloperApps = createLazy();
 const lazyNotFound = createLazy();
 
-const pageView = (model: Model, h: HtmlBuilder<Message>): Html =>
+// The msgs slices ride in every lazy arg array (`messagesFor` is
+// reference-stable per language, so memoization still holds); leaving one out
+// would silently pin stale copy if a language switcher ever lands.
+const pageView = (model: Model, msgs: Messages, h: HtmlBuilder<Message>): Html =>
     Match.value(model.route).pipe(
         Match.withReturnType<Html>(),
         Match.tagsExhaustive({
-            Home: () => lazyHome(homeView, [h]),
-            About: () => lazyAbout(aboutView, [h]),
-            Login: ({ error, returnTo }) => loginView(h, returnTo, error),
+            Home: () => lazyHome(homeView, [h, msgs.home, msgs.shared]),
+            About: () => lazyAbout(aboutView, [h, msgs.about, msgs.shared]),
+            Login: ({ error, returnTo }) => loginView(h, msgs.login, msgs.shared, returnTo, error),
             Privacy: () => lazyPrivacy(privacyView, [h]),
             Terms: () => lazyTerms(termsView, [h]),
-            Sponsors: () => lazySponsors(sponsorsView, [h]),
-            Developers: () => lazyDevelopers(developersView, [h]),
-            DeveloperApps: () => lazyDeveloperApps(developerAppsView, [h]),
+            Sponsors: () => lazySponsors(sponsorsView, [h, msgs.sponsors, msgs.shared]),
+            Developers: () => lazyDevelopers(developersView, [h, msgs.developers, msgs.shared]),
+            DeveloperApps: () => lazyDeveloperApps(developerAppsView, [h, msgs.developerApps, msgs.shared]),
             // Gated pages render nothing until the session answer lands;
             // enterRoute has already sent a signed out visitor to login.
             TowerMe: () =>
-                model.session._tag === "SignedIn" ? towerMeView(h, model.session.user, model.linkedTowers) : h.empty,
-            TowerLink: () => (model.session._tag === "SignedIn" ? towerLinkView(h, model.wizard) : h.empty),
+                model.session._tag === "SignedIn"
+                    ? towerMeView(h, msgs.towerMe, msgs.shared, model.language, model.session.user, model.linkedTowers)
+                    : h.empty,
+            TowerLink: () =>
+                model.session._tag === "SignedIn" ? towerLinkView(h, msgs.towerLink, model.wizard) : h.empty,
             Account: () =>
-                model.session._tag === "SignedIn" ? accountView(h, model.account, model.session.user) : h.empty,
-            NotFound: () => lazyNotFound(notFoundView, [h]),
+                model.session._tag === "SignedIn"
+                    ? accountView(h, msgs.account, model.language, model.account, model.session.user)
+                    : h.empty,
+            NotFound: () => lazyNotFound(notFoundView, [h, msgs.notFound, msgs.shared]),
         })
     );
 
@@ -322,10 +344,13 @@ const pageKey = (model: Model): string =>
         ? `${model.route._tag}#pending`
         : model.route._tag;
 
-export const view = (model: Model, h: HtmlBuilder<Message>): Document => ({
-    title: routeTitle(model.route),
-    body: h.div([], [clouds(h), h.keyed("div")(pageKey(model), [], [pageView(model, h)])]),
-});
+export const view = (model: Model, h: HtmlBuilder<Message>): Document => {
+    const msgs = messagesFor(model.language);
+    return {
+        title: routeTitle(model.route, msgs.titles),
+        body: h.div([], [clouds(h), h.keyed("div")(pageKey(model), [], [pageView(model, msgs, h)])]),
+    };
+};
 
 // VIEW TRANSITION
 

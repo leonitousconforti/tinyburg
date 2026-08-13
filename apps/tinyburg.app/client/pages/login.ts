@@ -1,5 +1,6 @@
 import { Match, Option } from "effect";
 
+import type { LoginMessages, SharedMessages } from "../messages/types.ts";
 import type { Html, HtmlBuilder } from "foldkit/html";
 
 import { classifyOAuthError } from "../oauthErrors.ts";
@@ -17,21 +18,12 @@ const loginHrefFor = (provider: "google" | "discord", returnTo: Option.Option<st
  * could not be completed. Cancelling is not a failure and does not read like
  * one; the rest differ only in what the visitor should try next.
  */
-const problemFor = (error: string): { readonly denied: boolean; readonly text: string } =>
+const problemFor = (msgs: LoginMessages, error: string): { readonly denied: boolean; readonly text: string } =>
     Match.value(classifyOAuthError(error)).pipe(
         Match.withReturnType<{ readonly denied: boolean; readonly text: string }>(),
-        Match.when("denied", () => ({
-            denied: true,
-            text: "Sign in was cancelled. You can pick up where you left off whenever you like.",
-        })),
-        Match.when("expired", () => ({
-            denied: false,
-            text: "That sign in attempt expired or was interrupted. Please start again, and check that your browser allows cookies for this site.",
-        })),
-        Match.when("failed", () => ({
-            denied: false,
-            text: "We couldn't finish signing you in. Please try again.",
-        })),
+        Match.when("denied", () => ({ denied: true, text: msgs.problems.denied })),
+        Match.when("expired", () => ({ denied: false, text: msgs.problems.expired })),
+        Match.when("failed", () => ({ denied: false, text: msgs.problems.failed })),
         Match.exhaustive
     );
 
@@ -54,27 +46,30 @@ const perk = <M>(h: HtmlBuilder<M>, icon: string, text: string): Html =>
         [h.span([h.Class("text-xl")], [icon]), h.span([], [text])]
     );
 
-export const loginView = <M>(h: HtmlBuilder<M>, returnTo: Option.Option<string>, error: Option.Option<string>): Html =>
+export const loginView = <M>(
+    h: HtmlBuilder<M>,
+    msgs: LoginMessages,
+    shared: SharedMessages,
+    returnTo: Option.Option<string>,
+    error: Option.Option<string>
+): Html =>
     h.div(
         [h.Class("relative z-10 flex min-h-screen flex-col items-center justify-center p-8")],
         [
-            appBackLink(h, "/", "← Back to Home"),
+            appBackLink(h, "/", shared.backToHome),
             h.div(
                 [h.Class("bg-card-bg shadow-pixel-hover border-gold w-full max-w-md rounded-2xl border-3 p-8")],
                 [
                     h.div(
                         [h.Class("mb-8 text-center")],
                         [
-                            h.h1([h.Class("font-pixel mb-2 text-lg text-gray-800")], ["Welcome to Tinyburg"]),
-                            h.p(
-                                [h.Class("font-mono text-xl text-gray-600")],
-                                ["Sign in or create an account to get started"]
-                            ),
+                            h.h1([h.Class("font-pixel mb-2 text-lg text-gray-800")], [msgs.heading]),
+                            h.p([h.Class("font-mono text-xl text-gray-600")], [msgs.subheading]),
                         ]
                     ),
                     ...Option.match(error, {
                         onSome: (code) => {
-                            const { denied, text } = problemFor(code);
+                            const { denied, text } = problemFor(msgs, code);
                             return [problemBanner(h, denied, text)];
                         },
                         onNone: () => [],
@@ -89,7 +84,7 @@ export const loginView = <M>(h: HtmlBuilder<M>, returnTo: Option.Option<string>,
                                         "shadow-pixel hover:shadow-pixel-hover hover:border-sky-blue flex w-full items-center justify-center gap-3 rounded-lg border-2 border-gray-300 bg-white px-6 py-4 font-mono text-xl text-gray-800 no-underline transition-all hover:-translate-x-0.5 hover:-translate-y-0.5"
                                     ),
                                 ],
-                                [googleIcon(h, "h-6 w-6 shrink-0"), h.span([], ["Continue with Google"])]
+                                [googleIcon(h, "h-6 w-6 shrink-0"), h.span([], [msgs.continueWithGoogle])]
                             ),
                             h.a(
                                 [
@@ -98,16 +93,16 @@ export const loginView = <M>(h: HtmlBuilder<M>, returnTo: Option.Option<string>,
                                         "bg-discord shadow-pixel hover:shadow-pixel-hover flex w-full items-center justify-center gap-3 rounded-lg px-6 py-4 font-mono text-xl text-white no-underline transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:bg-[#4752c4]"
                                     ),
                                 ],
-                                [discordIcon(h, "h-6 w-6 shrink-0"), h.span([], ["Continue with Discord"])]
+                                [discordIcon(h, "h-6 w-6 shrink-0"), h.span([], [msgs.continueWithDiscord])]
                             ),
                         ]
                     ),
                     h.div(
                         [h.Class("bg-sky-blue/10 border-sky-blue/20 mt-8 flex flex-col gap-2 rounded-lg border-2 p-4")],
                         [
-                            perk(h, "🎯", "Find dream job bitizens"),
-                            perk(h, "🤝", "Trade with thousands of players"),
-                            perk(h, "🎨", "Collect rare costumes & pets"),
+                            perk(h, "🎯", msgs.perks.dreamJobs),
+                            perk(h, "🤝", msgs.perks.trade),
+                            perk(h, "🎨", msgs.perks.collect),
                         ]
                     ),
                     h.div(
@@ -116,15 +111,15 @@ export const loginView = <M>(h: HtmlBuilder<M>, returnTo: Option.Option<string>,
                             h.p(
                                 [h.Class("text-text-dark/70 text-base")],
                                 [
-                                    "By continuing, you agree to our ",
+                                    msgs.agreeBefore,
                                     h.a(
                                         [h.Href("/terms"), h.Class("text-sky-dark no-underline hover:underline")],
-                                        ["Terms of Service"]
+                                        [msgs.termsOfService]
                                     ),
-                                    " and ",
+                                    msgs.agreeAnd,
                                     h.a(
                                         [h.Href("/privacy"), h.Class("text-sky-dark no-underline hover:underline")],
-                                        ["Privacy Policy"]
+                                        [msgs.privacyPolicy]
                                     ),
                                 ]
                             ),

@@ -1,8 +1,10 @@
-import { DateTime, Option } from "effect";
+import { type DateTime, Option } from "effect";
 
 import type { LinkedTowers, SessionUser } from "../backend.ts";
+import type { SharedMessages, TowerMeMessages } from "../messages/types.ts";
 import type { Html, HtmlBuilder } from "foldkit/html";
 
+import { type Language, longDate } from "@tinyburg/ui/Internationalization";
 import { AsyncData } from "foldkit";
 
 import { appBackLink } from "../ui/chrome.ts";
@@ -31,12 +33,12 @@ const navRow = <M>(h: HtmlBuilder<M>, href: string, emoji: string, title: string
         ]
     );
 
-const avatar = <M>(h: HtmlBuilder<M>, user: SessionUser): Html =>
+const avatar = <M>(h: HtmlBuilder<M>, msgs: TowerMeMessages, user: SessionUser): Html =>
     Option.match(user.avatarUrl, {
         onSome: (avatarUrl) =>
             h.img([
                 h.Src(avatarUrl),
-                h.Alt(`Avatar for ${user.displayName}`),
+                h.Alt(msgs.avatarAlt(user.displayName)),
                 h.Referrerpolicy("no-referrer"),
                 h.Class("h-16 w-16 shrink-0 rounded-lg border-2 border-gray-300 bg-white object-cover"),
             ]),
@@ -53,7 +55,7 @@ const avatar = <M>(h: HtmlBuilder<M>, user: SessionUser): Html =>
     });
 
 /** The linked towers section, driven by the trading api. */
-const towerList = <M>(h: HtmlBuilder<M>, towers: LinkedTowers): Html => {
+const towerList = <M>(h: HtmlBuilder<M>, msgs: TowerMeMessages, language: Language, towers: LinkedTowers): Html => {
     const empty = (message: string, detail: string): Html =>
         h.div(
             [h.Class("rounded-lg border-2 border-dashed border-gray-300 p-8 text-center")],
@@ -66,10 +68,7 @@ const towerList = <M>(h: HtmlBuilder<M>, towers: LinkedTowers): Html => {
 
     const linked = (data: ReadonlyArray<{ readonly playerId: string; readonly createdAt: DateTime.Utc }>): Html =>
         data.length === 0
-            ? empty(
-                  "No towers linked yet",
-                  "Link your TinyTower save to sync your bitizens and start trading with players worldwide."
-              )
+            ? empty(msgs.noTowers, msgs.noTowersDetailLong)
             : h.div(
                   [h.Class("flex flex-col gap-4")],
                   data.map((tower) =>
@@ -80,14 +79,7 @@ const towerList = <M>(h: HtmlBuilder<M>, towers: LinkedTowers): Html => {
                               h.div([h.Class("font-mono text-2xl tracking-[0.2em] text-gray-800")], [tower.playerId]),
                               h.div(
                                   [h.Class("font-mono text-base text-gray-500")],
-                                  [
-                                      `Linked ${DateTime.format(tower.createdAt, {
-                                          locale: "en-US",
-                                          month: "long",
-                                          day: "numeric",
-                                          year: "numeric",
-                                      })}`,
-                                  ]
+                                  [msgs.linkedOn(longDate(language, tower.createdAt))]
                               ),
                           ]
                       )
@@ -95,20 +87,27 @@ const towerList = <M>(h: HtmlBuilder<M>, towers: LinkedTowers): Html => {
               );
 
     return AsyncData.match(towers, {
-        onIdle: () => empty("No towers linked yet", "Link your TinyTower save to start trading."),
-        onLoading: () => h.p([h.Class("font-mono text-xl text-gray-600")], ["Loading your towers..."]),
-        onFailure: (error) => h.p([h.Class("font-mono text-xl text-red-700")], [error]),
+        onIdle: () => empty(msgs.noTowers, msgs.noTowersDetailShort),
+        onLoading: () => h.p([h.Class("font-mono text-xl text-gray-600")], [msgs.loadingTowers]),
+        onFailure: () => h.p([h.Class("font-mono text-xl text-red-700")], [msgs.towersLoadFailed]),
         onRefreshing: linked,
         onStale: ({ data }) => linked(data),
         onSuccess: linked,
     });
 };
 
-export const towerMeView = <M>(h: HtmlBuilder<M>, user: SessionUser, towers: LinkedTowers): Html => {
+export const towerMeView = <M>(
+    h: HtmlBuilder<M>,
+    msgs: TowerMeMessages,
+    shared: SharedMessages,
+    language: Language,
+    user: SessionUser,
+    towers: LinkedTowers
+): Html => {
     return h.div(
         [h.Class("relative z-10 flex min-h-screen flex-col items-center p-8 pt-24")],
         [
-            appBackLink(h, "/", "← Back to Home"),
+            appBackLink(h, "/", shared.backToHome),
             h.div(
                 [h.Class("flex w-full max-w-2xl flex-col gap-6")],
                 [
@@ -118,7 +117,7 @@ export const towerMeView = <M>(h: HtmlBuilder<M>, user: SessionUser, towers: Lin
                             h.div(
                                 [h.Class("flex flex-wrap items-center gap-4")],
                                 [
-                                    avatar(h, user),
+                                    avatar(h, msgs, user),
                                     h.div(
                                         [h.Class("min-w-0 flex-1")],
                                         [
@@ -126,7 +125,7 @@ export const towerMeView = <M>(h: HtmlBuilder<M>, user: SessionUser, towers: Lin
                                                 [h.Class("font-pixel mb-2 text-lg wrap-break-word text-gray-800")],
                                                 [user.displayName]
                                             ),
-                                            h.p([h.Class("font-mono text-xl text-gray-600")], ["🏙️ Mayor of Tinyburg"]),
+                                            h.p([h.Class("font-mono text-xl text-gray-600")], [msgs.mayor]),
                                         ]
                                     ),
                                     // A native form because signing out is a POST: the
@@ -146,7 +145,7 @@ export const towerMeView = <M>(h: HtmlBuilder<M>, user: SessionUser, towers: Lin
                                                         "font-pixel bg-dark-blue/80 shadow-pixel hover:shadow-pixel-hover cursor-pointer rounded px-4 py-3 text-[0.7rem] text-white transition-all hover:-translate-x-0.5 hover:-translate-y-0.5"
                                                     ),
                                                 ],
-                                                ["Sign Out"]
+                                                [msgs.signOut]
                                             ),
                                         ]
                                     ),
@@ -160,7 +159,7 @@ export const towerMeView = <M>(h: HtmlBuilder<M>, user: SessionUser, towers: Lin
                             h.div(
                                 [h.Class("mb-6 flex items-center justify-between gap-4")],
                                 [
-                                    h.h2([h.Class("font-pixel text-lg text-gray-800")], ["My Towers"]),
+                                    h.h2([h.Class("font-pixel text-lg text-gray-800")], [msgs.towersHeading]),
                                     h.a(
                                         [
                                             h.Href("/towers/@link"),
@@ -168,27 +167,15 @@ export const towerMeView = <M>(h: HtmlBuilder<M>, user: SessionUser, towers: Lin
                                                 "bg-gold shadow-pixel hover:shadow-pixel-hover font-pixel shrink-0 rounded-lg px-4 py-3 text-[0.7rem] text-gray-800 no-underline transition-all hover:-translate-x-0.5 hover:-translate-y-0.5"
                                             ),
                                         ],
-                                        ["+ Link a Tower"]
+                                        [msgs.linkATower]
                                     ),
                                 ]
                             ),
-                            towerList(h, towers),
+                            towerList(h, msgs, language, towers),
                         ]
                     ),
-                    navRow(
-                        h,
-                        "/account",
-                        "🔐",
-                        "Account & Security",
-                        "Manage where you're signed in and how you sign in"
-                    ),
-                    navRow(
-                        h,
-                        "/developers/apps",
-                        "🛠️",
-                        "Developer Portal",
-                        "Register OAuth apps that sign users in with Tinyburg"
-                    ),
+                    navRow(h, "/account", "🔐", msgs.accountRow.title, msgs.accountRow.detail),
+                    navRow(h, "/developers/apps", "🛠️", msgs.developerRow.title, msgs.developerRow.detail),
                 ]
             ),
         ]
