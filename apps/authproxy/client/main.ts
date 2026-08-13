@@ -1,12 +1,15 @@
 import { Effect, Match, Option, Schema as S } from "effect";
 
+import type { TitleMessages } from "./messages/types.ts";
 import type { Document, Html, HtmlBuilder } from "foldkit/html";
 
+import { Language, fromNavigator } from "@tinyburg/ui/Internationalization";
 import { AsyncData, Command, Navigation, Render, type Runtime, Url } from "foldkit";
 import { m } from "foldkit/message";
 import { evo } from "foldkit/struct";
 
 import { type Backend, CheckingSession, FetchSession, GotSession, SessionState, SignedOut } from "./backend.ts";
+import { messagesFor } from "./messages/index.ts";
 import {
     AdminMessage,
     AdminModel,
@@ -26,11 +29,21 @@ import { AppRoute, loginHref, urlToAppRoute } from "./routes.ts";
 
 export const Model = S.Struct({
     route: AppRoute,
+    language: Language,
     session: SessionState,
     keys: KeysModel,
     admin: AdminModel,
 });
 export type Model = typeof Model.Type;
+
+/**
+ * Negotiated once at boot: the browser's languages against the ones tinyburg
+ * speaks. Module scope so `entry.ts` can stamp `<html lang>` with the same
+ * answer; guarded so importing this module in tests never touches a browser.
+ */
+export const initialLanguage = fromNavigator(
+    typeof navigator === "undefined" ? [] : (navigator.languages ?? [navigator.language])
+);
 
 // MESSAGE
 
@@ -184,6 +197,7 @@ export const init: Runtime.RoutingApplicationInit<Model, Message, void, Backend>
         resetPageState(
             {
                 route,
+                language: initialLanguage,
                 session: CheckingSession(),
                 keys: initialKeys,
                 admin: initialAdmin,
@@ -196,31 +210,38 @@ export const init: Runtime.RoutingApplicationInit<Model, Message, void, Backend>
 
 // VIEW
 
-const routeTitle = (route: AppRoute): string =>
+const routeTitle = (route: AppRoute, titles: TitleMessages): string =>
     Match.value(route).pipe(
         Match.withReturnType<string>(),
         Match.tagsExhaustive({
-            Home: () => "Tinyburg Authproxy | API Keys for Nimblebit's Servers",
-            Login: () => "Sign In | Tinyburg Authproxy",
-            Keys: () => "Your API Keys | Tinyburg Authproxy",
-            Admin: () => "Admin | Tinyburg Authproxy",
-            NotFound: () => "Page Not Found | Tinyburg Authproxy",
+            Home: () => titles.home,
+            Login: () => titles.login,
+            Keys: () => titles.keys,
+            Admin: () => titles.admin,
+            NotFound: () => titles.notFound,
         })
     );
 
-const pageView = (model: Model, h: HtmlBuilder<Message>): Html =>
-    Match.value(model.route).pipe(
+const pageView = (model: Model, h: HtmlBuilder<Message>): Html => {
+    const msgs = messagesFor(model.language);
+
+    return Match.value(model.route).pipe(
         Match.withReturnType<Html>(),
         Match.tagsExhaustive({
-            Home: () => homeView(h, model.session),
-            Login: ({ error, returnTo }) => loginView(h, returnTo, error),
+            Home: () => homeView(h, msgs.home, model.session),
+            Login: ({ error, returnTo }) => loginView(h, msgs.login, msgs.shared, returnTo, error),
             // The gated page renders nothing until the session answer lands;
             // enterRoute has already sent a signed out visitor to login.
-            Keys: () => (model.session._tag === "SignedIn" ? keysView(h, model.keys, model.session.session) : h.empty),
-            Admin: () => (model.session._tag === "SignedIn" ? adminView(h, model.admin) : h.empty),
-            NotFound: () => notFoundView(h),
+            Keys: () =>
+                model.session._tag === "SignedIn"
+                    ? keysView(h, msgs.keys, msgs.shared, model.language, model.keys, model.session.session)
+                    : h.empty,
+            Admin: () =>
+                model.session._tag === "SignedIn" ? adminView(h, msgs.admin, msgs.shared, model.admin) : h.empty,
+            NotFound: () => notFoundView(h, msgs.notFound, msgs.shared),
         })
     );
+};
 
 /**
  * Keys the page wrapper so navigating replaces it outright rather than
@@ -232,6 +253,6 @@ const pageKey = (model: Model): string =>
         : model.route._tag;
 
 export const view = (model: Model, h: HtmlBuilder<Message>): Document => ({
-    title: routeTitle(model.route),
+    title: routeTitle(model.route, messagesFor(model.language).titles),
     body: h.div([], [h.keyed("div")(pageKey(model), [], [pageView(model, h)])]),
 });

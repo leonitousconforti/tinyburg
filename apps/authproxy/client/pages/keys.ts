@@ -1,9 +1,11 @@
-import { DateTime, Duration, Effect, Match, Option, Result, Schema as S } from "effect";
+import { Duration, Effect, Match, Option, Result, Schema as S } from "effect";
 
 import type { Message as AppMessage } from "../main.ts";
+import type { KeysMessages, SharedMessages } from "../messages/types.ts";
 import type { Html, HtmlBuilder } from "foldkit/html";
 
 import { banner, card, dangerButton, primaryButton, quietButton, smallButton } from "@tinyburg/ui/Chrome";
+import { type Language, longDate } from "@tinyburg/ui/Internationalization";
 import { AsyncData, Command } from "foldkit";
 import { m } from "foldkit/message";
 import { evo } from "foldkit/struct";
@@ -21,7 +23,15 @@ type Key = typeof Account.json.Type;
 
 // MODEL
 
-export const Keys = AsyncData.Schema(S.Array(Account.json), S.String);
+// The model holds language-independent tags for what happened; the view
+// supplies the words from the message catalog.
+const KeysNotice = S.Literals(["copied", "created", "rotated", "revoked", "reEnabled", "deleted"]);
+type KeysNotice = typeof KeysNotice.Type;
+const KeysProblem = S.Literals(["actionFailed", "createRefused", "clipboardFailed"]);
+type KeysProblem = typeof KeysProblem.Type;
+const LoadFailed = S.Literals(["loadFailed"]);
+
+export const Keys = AsyncData.Schema(S.Array(Account.json), LoadFailed);
 
 export const KeysModel = S.Struct({
     keys: Keys.schema,
@@ -29,8 +39,8 @@ export const KeysModel = S.Struct({
     // The row currently mid-request, so only its own button says so. The
     // create form uses the sentinel "create".
     busy: S.Option(S.String),
-    notice: S.Option(S.String),
-    problem: S.Option(S.String),
+    notice: S.Option(KeysNotice),
+    problem: S.Option(KeysProblem),
 
     // Keys minted in this sitting. A key is shown in full the once, right
     // after it is created or rotated; every later look at it is masked.
@@ -75,7 +85,7 @@ export const enterKeys = (previous: KeysModel): KeysModel =>
 
 // MESSAGE
 
-export const SettledKeys = m("SettledKeys", { result: S.Result(S.Array(Account.json), S.String) });
+export const SettledKeys = m("SettledKeys", { result: S.Result(S.Array(Account.json), LoadFailed) });
 
 export const ClickedOpenCreate = m("ClickedOpenCreate");
 export const ClickedCancelCreate = m("ClickedCancelCreate");
@@ -96,7 +106,7 @@ export const CompletedDelete = m("CompletedDelete");
 export const ClickedCopy = m("ClickedCopy", { key: S.String });
 export const CopiedKey = m("CopiedKey");
 
-export const FailedAction = m("FailedAction", { message: S.String });
+export const FailedAction = m("FailedAction", { problem: KeysProblem });
 
 /** The session ended somewhere else while this page was open. */
 export const SignedOutElsewhere = m("SignedOutElsewhere");
@@ -124,9 +134,6 @@ export type KeysMessage = typeof KeysMessage.Type;
 
 // COMMAND
 
-const LOAD_FAILED = "We couldn't load your keys. Please try again.";
-const ACTION_FAILED = "That didn't work. Please try again.";
-
 export const FetchKeys = Command.define("FetchKeys", {
     messages: [SettledKeys, SignedOutElsewhere],
     execute: Effect.gen(function* () {
@@ -135,7 +142,7 @@ export const FetchKeys = Command.define("FetchKeys", {
         return SettledKeys({ result: Result.succeed(keys) });
     }).pipe(
         Effect.catchTag("Unauthorized", () => Effect.succeed(SignedOutElsewhere())),
-        Effect.catch(() => Effect.succeed(SettledKeys({ result: Result.fail(LOAD_FAILED) })))
+        Effect.catch(() => Effect.succeed(SettledKeys({ result: Result.fail("loadFailed" as const) })))
     ),
 });
 
@@ -155,14 +162,8 @@ const CreateKey = Command.define("CreateKey", {
             return CompletedCreate({ key });
         }).pipe(
             Effect.catchTag("Unauthorized", () => Effect.succeed(SignedOutElsewhere())),
-            Effect.catchTag("BadRequest", () =>
-                Effect.succeed(
-                    FailedAction({
-                        message: `That request was refused. Keys need at least one scope, and each account may hold at most ${MAX_KEYS_PER_USER} keys.`,
-                    })
-                )
-            ),
-            Effect.catch(() => Effect.succeed(FailedAction({ message: ACTION_FAILED })))
+            Effect.catchTag("BadRequest", () => Effect.succeed(FailedAction({ problem: "createRefused" }))),
+            Effect.catch(() => Effect.succeed(FailedAction({ problem: "actionFailed" })))
         ),
 });
 
@@ -176,7 +177,7 @@ const RotateKey = Command.define("RotateKey", {
             return CompletedRotate({ key: rotated });
         }).pipe(
             Effect.catchTag("Unauthorized", () => Effect.succeed(SignedOutElsewhere())),
-            Effect.catch(() => Effect.succeed(FailedAction({ message: ACTION_FAILED })))
+            Effect.catch(() => Effect.succeed(FailedAction({ problem: "actionFailed" })))
         ),
 });
 
@@ -192,7 +193,7 @@ const SetRevoked = Command.define("SetRevoked", {
             return CompletedSetRevoked({ key: updated });
         }).pipe(
             Effect.catchTag("Unauthorized", () => Effect.succeed(SignedOutElsewhere())),
-            Effect.catch(() => Effect.succeed(FailedAction({ message: ACTION_FAILED })))
+            Effect.catch(() => Effect.succeed(FailedAction({ problem: "actionFailed" })))
         ),
 });
 
@@ -206,7 +207,7 @@ const DeleteKey = Command.define("DeleteKey", {
             return CompletedDelete();
         }).pipe(
             Effect.catchTag("Unauthorized", () => Effect.succeed(SignedOutElsewhere())),
-            Effect.catch(() => Effect.succeed(FailedAction({ message: ACTION_FAILED })))
+            Effect.catch(() => Effect.succeed(FailedAction({ problem: "actionFailed" })))
         ),
 });
 
@@ -216,9 +217,7 @@ const CopyKey = Command.define("CopyKey", {
     execute: ({ key }) =>
         Effect.tryPromise(() => navigator.clipboard.writeText(key)).pipe(
             Effect.as(CopiedKey()),
-            Effect.catch(() =>
-                Effect.succeed(FailedAction({ message: "We couldn't reach your clipboard. Please try again." }))
-            )
+            Effect.catch(() => Effect.succeed(FailedAction({ problem: "clipboardFailed" })))
         ),
 });
 
@@ -284,7 +283,7 @@ export const updateKeys = (model: KeysModel, message: KeysMessage): KeysStep =>
                     : [evo(model, { armedDelete: () => Option.some(key), problem: Option.none }), []],
 
             ClickedCopy: ({ key }) => [model, [CopyKey({ key })]],
-            CopiedKey: () => [evo(model, { notice: () => Option.some("Copied to your clipboard.") }), []],
+            CopiedKey: () => [evo(model, { notice: () => Option.some("copied" as const) }), []],
 
             // A fresh credential is the one moment the full key matters, so it
             // arrives unmasked. Every later look at the row is masked.
@@ -292,7 +291,7 @@ export const updateKeys = (model: KeysModel, message: KeysMessage): KeysStep =>
                 evo(refetch(model), {
                     busy: Option.none,
                     form: () => closedForm,
-                    notice: () => Option.some("Key created. It works immediately."),
+                    notice: () => Option.some("created" as const),
                     justMinted: (minted) => [...minted, key.key],
                 }),
                 [FetchKeys()],
@@ -300,8 +299,7 @@ export const updateKeys = (model: KeysModel, message: KeysMessage): KeysStep =>
             CompletedRotate: ({ key }) => [
                 evo(refetch(model), {
                     busy: Option.none,
-                    notice: () =>
-                        Option.some("Key rotated. The old key stopped working the moment the new one was minted."),
+                    notice: () => Option.some("rotated" as const),
                     justMinted: (minted) => [...minted, key.key],
                 }),
                 [FetchKeys()],
@@ -309,20 +307,19 @@ export const updateKeys = (model: KeysModel, message: KeysMessage): KeysStep =>
             CompletedSetRevoked: ({ key }) => [
                 evo(refetch(model), {
                     busy: Option.none,
-                    notice: () =>
-                        Option.some(key.revoked ? "Key revoked. Requests with it now fail." : "Key re-enabled."),
+                    notice: () => Option.some(key.revoked ? ("revoked" as const) : ("reEnabled" as const)),
                 }),
                 [FetchKeys()],
             ],
             CompletedDelete: () => [
                 evo(refetch(model), {
                     busy: Option.none,
-                    notice: () => Option.some("Key deleted."),
+                    notice: () => Option.some("deleted" as const),
                 }),
                 [FetchKeys()],
             ],
 
-            FailedAction: ({ message }) => [evo(model, { busy: Option.none, problem: () => Option.some(message) }), []],
+            FailedAction: ({ problem }) => [evo(model, { busy: Option.none, problem: () => Option.some(problem) }), []],
 
             SignedOutElsewhere: () => [evo(model, { busy: Option.none }), []],
         })
@@ -336,8 +333,8 @@ const scopeLabels: ReadonlyMap<string, string> = new Map(
 
 const maskKey = (key: string): string => `${key.slice(0, 8)}-····-····-····-············`;
 
-const formatDate = (when: DateTime.Utc): string =>
-    DateTime.format(when, { locale: "en-US", month: "long", day: "numeric", year: "numeric" });
+const problemText = (msgs: KeysMessages, problem: KeysProblem): string =>
+    problem === "createRefused" ? msgs.problems.createRefused(MAX_KEYS_PER_USER) : msgs.problems[problem];
 
 const scopeChip = (h: HtmlBuilder<AppMessage>, path: string): Html =>
     h.span(
@@ -345,7 +342,14 @@ const scopeChip = (h: HtmlBuilder<AppMessage>, path: string): Html =>
         [scopeLabels.get(path) ?? path]
     );
 
-const keyRow = (h: HtmlBuilder<AppMessage>, key: Key, model: KeysModel): Html => {
+const keyRow = (
+    h: HtmlBuilder<AppMessage>,
+    msgs: KeysMessages,
+    shared: SharedMessages,
+    language: Language,
+    key: Key,
+    model: KeysModel
+): Html => {
     const busy = Option.contains(model.busy, key.key);
     const minted = model.justMinted.includes(key.key);
     const armed = Option.contains(model.armedDelete, key.key);
@@ -370,7 +374,7 @@ const keyRow = (h: HtmlBuilder<AppMessage>, key: Key, model: KeysModel): Html =>
                     key.revoked
                         ? h.span(
                               [h.Class("font-pixel rounded bg-red-700 px-2 py-1 text-[0.5rem] text-white")],
-                              ["Revoked"]
+                              [shared.revokedBadge]
                           )
                         : h.empty,
                 ]
@@ -386,8 +390,8 @@ const keyRow = (h: HtmlBuilder<AppMessage>, key: Key, model: KeysModel): Html =>
             h.p(
                 [h.Class("font-mono text-base text-gray-500")],
                 [
-                    `Created ${formatDate(key.createdAt)} · Last used ${formatDate(key.lastUsedAt)} · ` +
-                        `${key.rateLimitLimit} requests / ${Math.round(Duration.toSeconds(key.rateLimitWindow))}s`,
+                    `${msgs.createdLastUsed(longDate(language, key.createdAt), longDate(language, key.lastUsedAt))} · ` +
+                        shared.rateLimit(key.rateLimitLimit, Math.round(Duration.toSeconds(key.rateLimitWindow))),
                 ]
             ),
             h.div(
@@ -395,17 +399,17 @@ const keyRow = (h: HtmlBuilder<AppMessage>, key: Key, model: KeysModel): Html =>
                 [
                     h.button(
                         [h.Type("button"), h.Class(smallButton), h.OnClick(ClickedCopy({ key: key.key }))],
-                        ["Copy"]
+                        [msgs.copy]
                     ),
                     h.button(
                         [
                             h.Type("button"),
                             h.Class(smallButton),
                             h.Disabled(busy),
-                            h.Title("Mint a new key for this row; the old key stops working immediately"),
+                            h.Title(msgs.rotateTitle),
                             h.OnClick(ClickedRotate({ key: key.key })),
                         ],
-                        [busy ? "..." : "Rotate"]
+                        [busy ? "..." : msgs.rotate]
                     ),
                     h.button(
                         [
@@ -414,7 +418,7 @@ const keyRow = (h: HtmlBuilder<AppMessage>, key: Key, model: KeysModel): Html =>
                             h.Disabled(busy),
                             h.OnClick(ClickedSetRevoked({ key: key.key, revoked: !key.revoked })),
                         ],
-                        [busy ? "..." : key.revoked ? "Re-enable" : "Revoke"]
+                        [busy ? "..." : key.revoked ? shared.reEnable : shared.revoke]
                     ),
                     h.button(
                         [
@@ -423,7 +427,7 @@ const keyRow = (h: HtmlBuilder<AppMessage>, key: Key, model: KeysModel): Html =>
                             h.Disabled(busy),
                             h.OnClick(ClickedDelete({ key: key.key })),
                         ],
-                        [busy ? "..." : armed ? "Really delete?" : "Delete"]
+                        [busy ? "..." : armed ? shared.reallyDelete : shared.delete]
                     ),
                 ]
             ),
@@ -479,7 +483,7 @@ const elevatedRow = (h: HtmlBuilder<AppMessage>, label: string, description: str
         ]
     );
 
-const createForm = (h: HtmlBuilder<AppMessage>, model: KeysModel): Html => {
+const createForm = (h: HtmlBuilder<AppMessage>, msgs: KeysMessages, shared: SharedMessages, model: KeysModel): Html => {
     const creating = Option.contains(model.busy, "create");
 
     return h.div(
@@ -488,27 +492,24 @@ const createForm = (h: HtmlBuilder<AppMessage>, model: KeysModel): Html => {
             h.label(
                 [h.Class("flex flex-col gap-1")],
                 [
-                    h.span([h.Class("font-pixel text-[0.55rem] text-gray-600")], ["What is this key for?"]),
+                    h.span([h.Class("font-pixel text-[0.55rem] text-gray-600")], [msgs.descriptionLabel]),
                     h.input([
                         h.Type("text"),
                         h.Class(
                             "font-mono focus:border-sky-blue rounded-lg border-2 border-gray-300 bg-white px-3 py-2 text-xl outline-none"
                         ),
-                        h.Placeholder("Optional description, e.g. my tower stats bot"),
+                        h.Placeholder(msgs.descriptionPlaceholder),
                         h.Value(model.form.description),
                         h.OnInput((value) => ChangedDescription({ value })),
                     ]),
                 ]
             ),
-            h.p([h.Class("font-pixel text-[0.55rem] text-gray-600")], ["Read-only scopes (pick at least one)"]),
+            h.p([h.Class("font-pixel text-[0.55rem] text-gray-600")], [msgs.readOnlyScopesLabel]),
             h.div(
                 [h.Class("grid gap-2 sm:grid-cols-2")],
                 SELF_SERVE_SCOPES.map((scope) => scopeCheckbox(h, model, scope.path, scope.label, scope.description))
             ),
-            h.p(
-                [h.Class("font-pixel text-[0.55rem] text-gray-600")],
-                ["Write scopes are granted by hand — reach out on Discord"]
-            ),
+            h.p([h.Class("font-pixel text-[0.55rem] text-gray-600")], [msgs.writeScopesNote]),
             h.div(
                 [h.Class("grid gap-2 sm:grid-cols-2")],
                 ELEVATED_SCOPES.map((scope) => elevatedRow(h, scope.label, scope.description))
@@ -523,7 +524,7 @@ const createForm = (h: HtmlBuilder<AppMessage>, model: KeysModel): Html => {
                             h.Disabled(model.form.scopes.length === 0 || creating),
                             h.OnClick(SubmittedCreate()),
                         ],
-                        [creating ? "..." : "Create key"]
+                        [creating ? "..." : msgs.createKey]
                     ),
                     h.button(
                         [
@@ -532,7 +533,7 @@ const createForm = (h: HtmlBuilder<AppMessage>, model: KeysModel): Html => {
                             h.Disabled(creating),
                             h.OnClick(ClickedCancelCreate()),
                         ],
-                        ["Cancel"]
+                        [shared.cancel]
                     ),
                 ]
             ),
@@ -540,21 +541,22 @@ const createForm = (h: HtmlBuilder<AppMessage>, model: KeysModel): Html => {
     );
 };
 
-const keysSection = (h: HtmlBuilder<AppMessage>, model: KeysModel): Html => {
+const keysSection = (
+    h: HtmlBuilder<AppMessage>,
+    msgs: KeysMessages,
+    shared: SharedMessages,
+    language: Language,
+    model: KeysModel
+): Html => {
     const list = (keys: ReadonlyArray<Key>): Html =>
         h.div(
             [h.Class("flex flex-col gap-4")],
             [
                 ...(keys.length === 0
-                    ? [
-                          h.p(
-                              [h.Class("font-mono text-xl text-gray-600")],
-                              ["No keys yet. Create one and start calling the proxy."]
-                          ),
-                      ]
-                    : keys.map((key) => keyRow(h, key, model))),
+                    ? [h.p([h.Class("font-mono text-xl text-gray-600")], [msgs.emptyState])]
+                    : keys.map((key) => keyRow(h, msgs, shared, language, key, model))),
                 model.form.open
-                    ? createForm(h, model)
+                    ? createForm(h, msgs, shared, model)
                     : h.div(
                           [],
                           [
@@ -565,12 +567,12 @@ const keysSection = (h: HtmlBuilder<AppMessage>, model: KeysModel): Html => {
                                       h.Disabled(keys.length >= MAX_KEYS_PER_USER),
                                       h.Title(
                                           keys.length >= MAX_KEYS_PER_USER
-                                              ? `Each account may hold at most ${MAX_KEYS_PER_USER} keys`
-                                              : "Provision a new key"
+                                              ? msgs.maxKeysTitle(MAX_KEYS_PER_USER)
+                                              : msgs.provisionTitle
                                       ),
                                       h.OnClick(ClickedOpenCreate()),
                                   ],
-                                  ["+ New key"]
+                                  [msgs.newKey]
                               ),
                           ]
                       ),
@@ -580,15 +582,12 @@ const keysSection = (h: HtmlBuilder<AppMessage>, model: KeysModel): Html => {
     return h.section(
         [h.Class(card)],
         [
-            h.h2([h.Class("font-pixel mb-2 text-lg text-gray-800")], ["Your API Keys"]),
-            h.p(
-                [h.Class("font-mono mb-6 text-lg text-gray-500")],
-                ["Rotate any key you may have leaked, and delete the ones you no longer use."]
-            ),
+            h.h2([h.Class("font-pixel mb-2 text-lg text-gray-800")], [msgs.sectionHeading]),
+            h.p([h.Class("font-mono mb-6 text-lg text-gray-500")], [msgs.sectionIntro]),
             AsyncData.match(model.keys, {
-                onIdle: () => h.p([h.Class("font-mono text-xl text-gray-600")], ["Loading your keys..."]),
-                onLoading: () => h.p([h.Class("font-mono text-xl text-gray-600")], ["Loading your keys..."]),
-                onFailure: (error) => h.p([h.Class("font-mono text-xl text-red-700")], [error]),
+                onIdle: () => h.p([h.Class("font-mono text-xl text-gray-600")], [msgs.loading]),
+                onLoading: () => h.p([h.Class("font-mono text-xl text-gray-600")], [msgs.loading]),
+                onFailure: () => h.p([h.Class("font-mono text-xl text-red-700")], [msgs.loadFailed]),
                 onRefreshing: list,
                 onStale: ({ data }) => list(data),
                 onSuccess: list,
@@ -597,7 +596,14 @@ const keysSection = (h: HtmlBuilder<AppMessage>, model: KeysModel): Html => {
     );
 };
 
-export const keysView = (h: HtmlBuilder<AppMessage>, model: KeysModel, session: SessionInfo): Html =>
+export const keysView = (
+    h: HtmlBuilder<AppMessage>,
+    msgs: KeysMessages,
+    shared: SharedMessages,
+    language: Language,
+    model: KeysModel,
+    session: SessionInfo
+): Html =>
     h.div(
         [h.Class("relative z-10 flex min-h-screen flex-col items-center p-8 pt-24")],
         [
@@ -611,26 +617,26 @@ export const keysView = (h: HtmlBuilder<AppMessage>, model: KeysModel, session: 
                                 [h.Class("font-pixel text-dark-blue text-lg")],
                                 [
                                     Option.match(session.displayName, {
-                                        onSome: (name) => `${name}'s API keys`,
-                                        onNone: () => "Your API keys",
+                                        onSome: (name) => msgs.headingFor(name),
+                                        onNone: () => msgs.heading,
                                     }),
                                 ]
                             ),
                             h.form(
                                 [h.Method("post"), h.Action("/logout")],
-                                [h.button([h.Type("submit"), h.Class(quietButton)], ["Sign out"])]
+                                [h.button([h.Type("submit"), h.Class(quietButton)], [msgs.signOut])]
                             ),
                         ]
                     ),
                     ...Option.match(model.notice, {
-                        onSome: (text) => [banner(h, "notice", text)],
+                        onSome: (notice) => [banner(h, "notice", msgs.notices[notice])],
                         onNone: () => [],
                     }),
                     ...Option.match(model.problem, {
-                        onSome: (text) => [banner(h, "problem", text)],
+                        onSome: (problem) => [banner(h, "problem", problemText(msgs, problem))],
                         onNone: () => [],
                     }),
-                    keysSection(h, model),
+                    keysSection(h, msgs, shared, language, model),
                 ]
             ),
         ]
