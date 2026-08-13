@@ -1,4 +1,4 @@
-import { Config, DateTime, Duration, Effect, Layer, Option, Redacted, Ref, Result, Schema } from "effect";
+import { Config, DateTime, Duration, Effect, Layer, Option, Redacted, Schema } from "effect";
 import {
     HttpClient,
     HttpClientRequest,
@@ -6,15 +6,12 @@ import {
     HttpRouter,
     HttpServerRequest,
     HttpServerResponse,
-    Url,
 } from "effect/unstable/http";
 import { RateLimiter } from "effect/unstable/persistence";
 
 import * as crypto from "node:crypto";
 
-import type { Jwt } from "effect-oidc";
-
-import { Oidc } from "effect-oidc";
+import { RelyingParty } from "effect-oidc";
 
 import { CookiePolicy, SESSION_COOKIE_NAME, maybeCurrentSession } from "../cookies.ts";
 import { randomSecret, sha256 } from "../crypto.ts";
@@ -23,10 +20,6 @@ import { SessionsRepository } from "../domain/sessions.ts";
 // tinyburg.app's provider. Authorization code + PKCE; the client may be
 // public (no secret registered) since PKCE carries the proof.
 import { tinyburgConfig } from "../tinyburg.ts";
-
-const STATE_COOKIE_NAME = "authproxy_oauth_state";
-const CODE_VERIFIER_COOKIE_NAME = "authproxy_oauth_code_verifier";
-const INTENT_COOKIE_NAME = "authproxy_oauth_intent";
 
 /** Signing in asks for identity only. */
 const LOGIN_SCOPES = ["openid", "profile"];
@@ -44,8 +37,9 @@ const HOME_AFTER_LOGIN = "/keys";
 
 /**
  * Why the browser was sent to the provider: to sign in, or to prove tower
- * ownership for admin elevation. The callback reads it to know what to do
- * with the tokens it gets back.
+ * ownership for admin elevation. It rides the relying party's payload cookie
+ * through the round trip, and the callback reads it to know what to do with
+ * the tokens it gets back.
  */
 const OAuthIntent = Schema.fromJsonString(
     Schema.Struct({
@@ -83,67 +77,29 @@ const LinkedTowers = Schema.Array(
     })
 );
 
+/**
+ * The callback failure reasons, mapped onto the error strings the login page
+ * already knows how to explain.
+ */
+const loginErrorMessage: Record<RelyingParty.CallbackError["reason"], string> = {
+    InvalidCallback: "invalid_oauth_callback",
+    AccessDenied: "oauth_denied",
+    ProviderError: "invalid_oauth_provider",
+    StateMismatch: "invalid_oauth_cookies",
+    ExchangeFailed: "invalid_oauth_token",
+    InvalidIdToken: "invalid_oauth_claims",
+};
+
 interface TinyburgRealized {
-    readonly issuer: string;
-    readonly clientId: string;
-    readonly clientSecret: Option.Option<Redacted.Redacted>;
-    readonly redirectUri: string;
-    readonly jwks: Effect.Effect<Schema.Schema.Type<typeof Jwt.JwksSchema>, unknown, never>;
+    /** Sends the browser to the provider asking for identity only. */
+    readonly loginParty: RelyingParty.RelyingParty;
+    /** Sends the browser to the provider asking for `towers:read` on top. */
+    readonly elevateParty: RelyingParty.RelyingParty;
     readonly adminPassword: Redacted.Redacted;
     readonly adminPlayerIds: ReadonlySet<string>;
     readonly linkedPlayerIds: (accessToken: string) => Effect.Effect<ReadonlySet<string>, unknown, never>;
     readonly elevationRateLimiter: RateLimiter.RateLimiter;
 }
-
-/** Sends the browser to the provider, remembering why in the intent cookie. */
-const beginAuthorization = (
-    tinyburg: TinyburgRealized,
-    options: {
-        readonly scopes: ReadonlyArray<string>;
-        readonly intent: typeof OAuthIntent.Type;
-        readonly failTo: string;
-    }
-) =>
-    Effect.gen(function* () {
-        const cookies = yield* CookiePolicy;
-
-        const codeVerifier = randomSecret();
-        const state = randomSecret();
-
-        const authorizationRequest = Oidc.authorizationRequest({
-            authorizationEndpoint: `${tinyburg.issuer}/oauth/authorize`,
-            clientId: tinyburg.clientId,
-            redirectUri: tinyburg.redirectUri,
-            scopes: options.scopes,
-            state,
-            codeChallenge: yield* sha256(codeVerifier),
-        });
-
-        const authorizationUrl = Url.make(
-            authorizationRequest.url,
-            authorizationRequest.urlParams,
-            authorizationRequest.hash.valueOrUndefined
-        ).pipe(Result.getOrThrow);
-
-        const intentSerialized = yield* Schema.encodeEffect(OAuthIntent)(options.intent).pipe(Effect.orDie);
-
-        const cookieOptions = {
-            maxAge: "10 minutes",
-            httpOnly: true,
-            path: "/",
-            secure: cookies.secure,
-            sameSite: "lax",
-        } as const;
-
-        return yield* HttpServerResponse.redirect(authorizationUrl).pipe(
-            HttpServerResponse.setCookies([
-                [cookies.name(STATE_COOKIE_NAME), state, cookieOptions],
-                [cookies.name(CODE_VERIFIER_COOKIE_NAME), codeVerifier, cookieOptions],
-                [cookies.name(INTENT_COOKIE_NAME), intentSerialized, cookieOptions],
-            ]),
-            Effect.catch(() => Effect.succeed(HttpServerResponse.redirect(options.failTo)))
-        );
-    });
 
 const login = (tinyburg: TinyburgRealized) =>
     Effect.gen(function* () {
@@ -159,11 +115,14 @@ const login = (tinyburg: TinyburgRealized) =>
             return HttpServerResponse.redirect(Option.getOrElse(returnTo, () => HOME_AFTER_LOGIN));
         }
 
-        return yield* beginAuthorization(tinyburg, {
-            scopes: LOGIN_SCOPES,
-            intent: { mode: "login", returnTo: Option.getOrUndefined(returnTo) },
-            failTo: "/login?error=start_failed",
-        });
+        const intent = yield* Schema.encodeEffect(OAuthIntent)({
+            mode: "login",
+            returnTo: Option.getOrUndefined(returnTo),
+        }).pipe(Effect.orDie);
+
+        return yield* tinyburg.loginParty
+            .beginAuthorization({ payload: intent })
+            .pipe(Effect.catch(() => Effect.succeed(HttpServerResponse.redirect("/login?error=start_failed"))));
     }).pipe(Effect.satisfiesErrorType<never>());
 
 /**
@@ -220,127 +179,51 @@ const elevate = (tinyburg: TinyburgRealized) =>
             return refused;
         }
 
-        return yield* beginAuthorization(tinyburg, {
-            scopes: ELEVATE_SCOPES,
-            intent: { mode: "elevate" },
-            failTo: "/admin?error=elevation_failed",
-        });
+        const intent = yield* Schema.encodeEffect(OAuthIntent)({ mode: "elevate" }).pipe(Effect.orDie);
+
+        return yield* tinyburg.elevateParty
+            .beginAuthorization({ payload: intent })
+            .pipe(Effect.catch(() => Effect.succeed(refused)));
     }).pipe(Effect.satisfiesErrorType<never>());
-
-const expireSpentCookies = (response: HttpServerResponse.HttpServerResponse) =>
-    Effect.gen(function* () {
-        const cookies = yield* CookiePolicy;
-
-        const expireOptions = {
-            httpOnly: true,
-            path: "/",
-            secure: cookies.secure,
-            sameSite: "lax",
-        } as const;
-
-        return yield* Effect.succeed(response).pipe(
-            Effect.flatMap(HttpServerResponse.expireCookie(cookies.name(STATE_COOKIE_NAME), expireOptions)),
-            Effect.flatMap(HttpServerResponse.expireCookie(cookies.name(CODE_VERIFIER_COOKIE_NAME), expireOptions)),
-            Effect.flatMap(HttpServerResponse.expireCookie(cookies.name(INTENT_COOKIE_NAME), expireOptions))
-        );
-    });
 
 const callback = (tinyburg: TinyburgRealized) =>
     Effect.gen(function* () {
-        const cookiesPolicy = yield* CookiePolicy;
+        // Both parties share one cookie prefix, so either can complete the
+        // round trip; scopes only matter on the way out.
+        const party = tinyburg.loginParty;
 
         // The intent decides where failures land: sign-in problems go to the
         // login page with a reason, elevation problems go to the admin page
         // with one uniform code that never says which factor failed.
-        const maybeIntentCookie = yield* HttpServerRequest.schemaCookies(
-            Schema.Struct({
-                [cookiesPolicy.name(INTENT_COOKIE_NAME)]: OAuthIntent,
-            })
-        ).pipe(
-            Effect.map((cookies) => cookies[cookiesPolicy.name(INTENT_COOKIE_NAME)]),
-            Effect.option
+        const maybeIntent = yield* party.payload.pipe(
+            Effect.flatMap(
+                Option.match({
+                    onNone: () => Effect.succeed(Option.none<typeof OAuthIntent.Type>()),
+                    onSome: (raw) => Schema.decodeEffect(OAuthIntent)(raw).pipe(Effect.option),
+                })
+            )
         );
-        if (Option.isNone(maybeIntentCookie)) {
+        if (Option.isNone(maybeIntent)) {
             return yield* HttpServerResponse.redirect("/login?error=invalid_oauth_intent").pipe(
-                expireSpentCookies,
+                party.expireTransactionCookies,
                 Effect.orDie
             );
         }
 
-        const intent = maybeIntentCookie.value;
+        const intent = maybeIntent.value;
         const failed = (errorMessage: string) =>
             HttpServerResponse.redirect(
                 intent.mode === "elevate"
                     ? "/admin?error=elevation_failed"
                     : `/login?error=${encodeURIComponent(errorMessage)}`
-            ).pipe(expireSpentCookies, Effect.orDie);
+            ).pipe(party.expireTransactionCookies, Effect.orDie);
 
-        // The provider redirects back with either an error or a code
-        const maybeUrlParams = yield* HttpServerRequest.schemaSearchParams(
-            Schema.Union([
-                Schema.Struct({
-                    error: Schema.String,
-                }),
-                Schema.Struct({
-                    code: Schema.String,
-                    state: Schema.String,
-                }),
-            ])
-        ).pipe(Effect.option);
-        if (Option.isNone(maybeUrlParams)) {
-            return yield* failed("invalid_oauth_callback");
+        const outcome = yield* Effect.result(party.completeAuthorization);
+        if (outcome._tag === "Failure") {
+            return yield* failed(loginErrorMessage[outcome.failure.reason]);
         }
 
-        // The visitor cancelled at the provider, or the provider refused
-        const urlParams = maybeUrlParams.value;
-        if ("error" in urlParams) {
-            return yield* failed(urlParams.error === "access_denied" ? "oauth_denied" : "invalid_oauth_provider");
-        }
-
-        // The state cookie must match the state the provider echoed back
-        const maybeCookies = yield* HttpServerRequest.schemaCookies(
-            Schema.Struct({
-                [cookiesPolicy.name(STATE_COOKIE_NAME)]: Schema.Literal(urlParams.state),
-                [cookiesPolicy.name(CODE_VERIFIER_COOKIE_NAME)]: Schema.String,
-            })
-        ).pipe(Effect.option);
-        if (Option.isNone(maybeCookies)) {
-            return yield* failed("invalid_oauth_cookies");
-        }
-
-        const cookies = maybeCookies.value;
-        const codeVerifierCookie = cookies[cookiesPolicy.name(CODE_VERIFIER_COOKIE_NAME)];
-
-        // Exchange the authorization code for tokens
-        const maybeToken = yield* Oidc.exchangeAuthorizationCode({
-            tokenEndpoint: `${tinyburg.issuer}/oauth/token`,
-            clientId: tinyburg.clientId,
-            clientSecret: Option.map(tinyburg.clientSecret, Redacted.value).pipe(Option.getOrUndefined),
-            redirectUri: tinyburg.redirectUri,
-            code: urlParams.code,
-            codeVerifier: codeVerifierCookie,
-        }).pipe(Effect.option);
-        if (Option.isNone(maybeToken)) {
-            return yield* failed("invalid_oauth_token");
-        }
-
-        // Verify the ID token and extract user information
-        const maybeClaims = yield* tinyburg.jwks.pipe(
-            Effect.flatMap((jwks) =>
-                Oidc.verifyIdToken({
-                    jwks,
-                    clientId: tinyburg.clientId,
-                    issuer: tinyburg.issuer,
-                    idToken: maybeToken.value.id_token ?? "",
-                })
-            ),
-            Effect.option
-        );
-        if (Option.isNone(maybeClaims)) {
-            return yield* failed("invalid_oauth_claims");
-        }
-
-        const claims = maybeClaims.value;
+        const { claims, tokens } = outcome.success;
 
         if (intent.mode === "elevate") {
             const tryCurrentSession = yield* maybeCurrentSession.pipe(Effect.option, Effect.map(Option.flatten));
@@ -362,7 +245,7 @@ const callback = (tinyburg: TinyburgRealized) =>
             // Which towers does this account hold, right now, by their own
             // freshly consented token. A lookup failure reads as not eligible,
             // never as a pass.
-            const linked = yield* tinyburg.linkedPlayerIds(maybeToken.value.access_token).pipe(
+            const linked = yield* tinyburg.linkedPlayerIds(tokens.access_token).pipe(
                 Effect.map(Option.some),
                 Effect.catch(() => Effect.succeed(Option.none<ReadonlySet<string>>()))
             );
@@ -388,7 +271,7 @@ const callback = (tinyburg: TinyburgRealized) =>
                 return yield* failed("elevation_failed");
             }
 
-            return yield* HttpServerResponse.redirect("/admin").pipe(expireSpentCookies, Effect.orDie);
+            return yield* HttpServerResponse.redirect("/admin").pipe(party.expireTransactionCookies, Effect.orDie);
         }
 
         const sessionToken = randomSecret();
@@ -406,20 +289,21 @@ const callback = (tinyburg: TinyburgRealized) =>
             return yield* failed("invalid_oauth_session");
         }
 
+        const cookiePolicy = yield* CookiePolicy;
         const returnTo = Option.fromNullishOr(intent.returnTo).pipe(
             Option.filter(isLocalPath),
             Option.getOrElse(() => HOME_AFTER_LOGIN)
         );
 
         return yield* HttpServerResponse.redirect(returnTo).pipe(
-            HttpServerResponse.setCookie(cookiesPolicy.name(SESSION_COOKIE_NAME), sessionToken, {
+            HttpServerResponse.setCookie(cookiePolicy.name(SESSION_COOKIE_NAME), sessionToken, {
                 expires: DateTime.toDateUtc(maybeSession.value.expiresAt),
                 httpOnly: true,
                 path: "/",
-                secure: cookiesPolicy.secure,
+                secure: cookiePolicy.secure,
                 sameSite: "lax",
             }),
-            Effect.flatMap(expireSpentCookies),
+            Effect.flatMap(party.expireTransactionCookies),
             Effect.catch(() => failed("invalid_oauth_response"))
         );
     }).pipe(Effect.satisfiesErrorType<never>());
@@ -444,6 +328,7 @@ const logout = Effect.gen(function* () {
 
 export const OAuthRoutesLive = Effect.gen(function* () {
     const config = yield* tinyburgConfig;
+    const cookiePolicy = yield* CookiePolicy;
     const httpClient = yield* HttpClient.HttpClient;
     const elevationRateLimiter = yield* RateLimiter.make;
 
@@ -461,28 +346,28 @@ export const OAuthRoutesLive = Effect.gen(function* () {
         )
     );
 
-    // The provider's signing keys, cached with a last-good fallback so a
-    // hiccup fetching them does not read as a failed sign in.
-    const cachedJwks = yield* Effect.flatMap(
-        Ref.make(Option.none<Schema.Schema.Type<typeof Jwt.JwksSchema>>()),
-        (lastGood) =>
-            Oidc.fetchJwks(`${config.issuer}/.well-known/jwks.json`).pipe(
-                Effect.provideService(HttpClient.HttpClient, httpClient),
-                Effect.tap((jwks) => Ref.set(lastGood, Option.some(jwks))),
-                Effect.catch((error) =>
-                    Ref.get(lastGood).pipe(
-                        Effect.flatMap(
-                            Option.match({
-                                onNone: () => Effect.fail(error),
-                                onSome: Effect.succeed,
-                            })
-                        )
-                    )
-                ),
-                Effect.cachedInvalidateWithTTL("10 minutes"),
-                Effect.map(([cached, invalidate]) => Effect.tapError(cached, () => invalidate))
-            )
-    );
+    // One registration at the provider, two scope sets: signing in asks for
+    // identity only, elevation re-authorizes with towers:read on top. Both
+    // share one cookie prefix, so the single callback route completes either
+    // flow.
+    const relyingParty = (scopes: ReadonlyArray<string>) =>
+        RelyingParty.make({
+            issuer: config.issuer,
+            authorizationEndpoint: `${config.issuer}/oauth/authorize`,
+            tokenEndpoint: `${config.issuer}/oauth/token`,
+            jwksUri: `${config.issuer}/.well-known/jwks.json`,
+            clientId: config.clientId,
+            clientSecret: Option.getOrUndefined(config.clientSecret),
+            redirectUri: config.redirectUri,
+            scopes,
+            cookies: {
+                prefix: "authproxy_oauth",
+                name: cookiePolicy.name,
+                secure: cookiePolicy.secure,
+            },
+        });
+    const loginParty = yield* relyingParty(LOGIN_SCOPES);
+    const elevateParty = yield* relyingParty(ELEVATE_SCOPES);
 
     const linkedPlayerIds = (accessToken: string): Effect.Effect<ReadonlySet<string>, unknown, never> =>
         HttpClientRequest.get(`${config.issuer}/v1/tinytower/linkedAccounts/list`).pipe(
@@ -494,11 +379,8 @@ export const OAuthRoutesLive = Effect.gen(function* () {
         );
 
     const tinyburg: TinyburgRealized = {
-        issuer: config.issuer,
-        clientId: config.clientId,
-        clientSecret: config.clientSecret,
-        redirectUri: config.redirectUri,
-        jwks: cachedJwks,
+        loginParty,
+        elevateParty,
         adminPassword,
         adminPlayerIds,
         linkedPlayerIds,
