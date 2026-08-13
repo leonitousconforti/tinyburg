@@ -180,6 +180,9 @@ importers:
       '@effect/sql-pg':
         specifier: 4.0.0-beta.105
         version: 4.0.0-beta.105(effect@4.0.0-beta.105)
+      '@tinyburg/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
       dfx:
         specifier: 1.0.15
         version: 1.0.15(effect@4.0.0-beta.105)
@@ -258,6 +261,9 @@ importers:
       '@tinyburg/trading-sdk':
         specifier: workspace:*
         version: link:../../packages/trading-sdk
+      '@tinyburg/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
       effect:
         specifier: 4.0.0-beta.105
         version: 4.0.0-beta.105

@@ -34,5 +34,13 @@
         "@effect/platform-browser": "4.0.0-beta.105",
         "effect": "4.0.0-beta.105",
         "foldkit": "0.140.1"
+    },
+    "peerDependenciesMeta": {
+        "@effect/platform-browser": {
+            "optional": true
+        },
+        "foldkit": {
+            "optional": true
+        }
     }
 }
