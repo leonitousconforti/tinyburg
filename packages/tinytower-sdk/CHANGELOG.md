@@ -9,7 +9,7 @@
 ### Patch Changes
 
 - Updated dependencies [b9b405a]
-  - @tinyburg/nimblebit-sdk@0.1.0
+    - @tinyburg/nimblebit-sdk@0.1.0
 
 ## 0.0.2
 
@@ -17,4 +17,4 @@
 
 - a766e8a: Bump tinytower version and regenerate data
 - Updated dependencies [a766e8a]
-  - @tinyburg/nimblebit-sdk@0.0.2
+    - @tinyburg/nimblebit-sdk@0.0.2
