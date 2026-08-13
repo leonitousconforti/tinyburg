@@ -2,11 +2,12 @@
   The local development stack.
 
   Datastores and services are one process-compose tree, so `dev` is the only
-  command anyone has to know. Postgres comes from services-flake and keeps its
-  state in `.dev/`, which means "start over" is `rm -rf .dev`, not a volume
-  prune. The apps are plain `node --watch` processes rather than containers, so
-  a save restarts the one service that changed and `r` in the process-compose
-  TUI restarts whichever process is selected.
+  command anyone has to know. Postgres comes from services-flake, one instance
+  per service, and each keeps its state under `.dev/postgres/<service>`, which
+  means "start over" is `rm -rf .dev` for all of them or one directory for one
+  of them, not a volume prune. The apps are plain `node --watch` processes
+  rather than containers, so a save restarts the one service that changed and
+  `r` in the process-compose TUI restarts whichever process is selected.
 
   There is no object storage here. Archivist is the only service that wants any,
   and it names the DigitalOcean Spaces endpoint inline, so a local MinIO would
@@ -29,7 +30,6 @@
           corepack = pkgs.corepack.override { nodejs-slim = nodejs; };
 
           ports = {
-            postgres = 54320;
             tinyburgApp = 3000;
             authproxy = 3001;
             socialCircles = 3002;
@@ -37,7 +37,57 @@
             heartbeat = 3999;
           };
 
-          databaseUrl = dbName: "postgres://postgres@127.0.0.1:${toString ports.postgres}/${dbName}";
+          /*
+            One Postgres per service, rather than one instance holding four
+            databases. The services never join across each other, so a shared
+            instance bought nothing but a shared blast radius: one wedged
+            cluster, one bad migration or one `rm -rf` took all four services
+            with it, and a version bump had to be agreed on by all of them at
+            once. Each entry below is its own process, data directory and port.
+
+            Keyed by the process name of the service that owns it, so the
+            instance behind `authproxy` is always `authproxy-postgres`, and
+            every port is deliberately not 5432 so a machine-wide Postgres is
+            left alone.
+          */
+          databases = {
+            tinyburg-app = {
+              port = 54320;
+              name = "tinyburg_app";
+            };
+            authproxy = {
+              port = 54321;
+              name = "authproxy";
+            };
+            social-circles = {
+              port = 54322;
+              name = "social_circles";
+            };
+            discord-bot = {
+              port = 54323;
+              name = "discord_bot";
+            };
+          };
+
+          postgresFor = service: "${service}-postgres";
+
+          databaseUrl =
+            service:
+            "postgres://postgres@127.0.0.1:${toString databases.${service}.port}/${databases.${service}.name}";
+
+          # services-flake names an instance's two processes after the instance
+          # itself, so four instances put eight processes at the top of the tree
+          # unless they are given a namespace of their own.
+          postgresNamespaces = lib.concatMapAttrs (
+            service: _:
+            let
+              pg = postgresFor service;
+            in
+            {
+              ${pg}.namespace = "data";
+              "${pg}-init".namespace = "data";
+            }
+          ) databases;
 
           # Seeded rather than generated, so the ids that have to appear in two
           # places at once (a row in one database, an env var read by another
@@ -98,24 +148,19 @@
         {
           imports = [ inputs.services-flake.processComposeModules.default ];
 
-          services.postgres."pg" = {
-            enable = true;
-            dataDir = "./.dev/postgres";
-            listen_addresses = "127.0.0.1";
-            port = ports.postgres;
-            superuser = "postgres";
+          services.postgres = lib.mapAttrs' (
+            service: db:
+            lib.nameValuePair (postgresFor service) {
+              enable = true;
+              dataDir = "./.dev/postgres/${service}";
+              listen_addresses = "127.0.0.1";
+              port = db.port;
+              superuser = "postgres";
+              initialDatabases = [ { name = db.name; } ];
+            }
+          ) databases;
 
-            # One instance, one database per service. The services never join
-            # across each other, so the only thing shared is the port.
-            initialDatabases = [
-              { name = "tinyburg_app"; }
-              { name = "authproxy"; }
-              { name = "social_circles"; }
-              { name = "discord_bot"; }
-            ];
-          };
-
-          settings.processes = {
+          settings.processes = postgresNamespaces // {
             # The provider signs its tokens with a key that must not be a
             # committed constant even in development, so one is generated on
             # first run and kept out of git.
@@ -158,7 +203,7 @@
               command = runNode {
                 entry = "apps/tinyburg.app/server/index.ts";
                 env = {
-                  DATABASE_URL = databaseUrl "tinyburg_app";
+                  DATABASE_URL = databaseUrl "tinyburg-app";
                   PORT = toString ports.tinyburgApp;
                   HOST = "127.0.0.1";
                   SITE_URL = "http://localhost:${toString ports.tinyburgApp}";
@@ -174,7 +219,7 @@
                 extra = ''export OIDC_PRIVATE_JWK="$(cat .dev/oidc.jwk)"'';
               };
               depends_on = {
-                "pg".condition = "process_healthy";
+                ${postgresFor "tinyburg-app"}.condition = "process_healthy";
                 "dev-secrets".condition = "process_completed_successfully";
               };
               readiness_probe = tcpReady ports.tinyburgApp;
@@ -204,7 +249,7 @@
                 };
               };
               depends_on = {
-                "pg".condition = "process_healthy";
+                ${postgresFor "authproxy"}.condition = "process_healthy";
                 "dev-secrets".condition = "process_completed_successfully";
               };
               readiness_probe = tcpReady ports.authproxy;
@@ -215,14 +260,14 @@
               command = runNode {
                 entry = "apps/social-circles/index.ts";
                 env = {
-                  DATABASE_URL = databaseUrl "social_circles";
+                  DATABASE_URL = databaseUrl "social-circles";
                   PORT = toString ports.socialCircles;
                   HOST = "127.0.0.1";
                   HEARTBEAT_URL = "http://127.0.0.1:${toString ports.heartbeat}/social-circles";
                 };
               };
               depends_on = {
-                "pg".condition = "process_healthy";
+                ${postgresFor "social-circles"}.condition = "process_healthy";
                 "dev-secrets".condition = "process_completed_successfully";
                 "heartbeat-sink".condition = "process_healthy";
               };
@@ -240,9 +285,10 @@
               a second instance sharing a token with a deployed bot will fight
               it over the commands and receive duplicate events.
 
-              The OAuth half needs none of that. `discord_bot` exists whether
-              or not this ever starts, and the callback route can be driven
-              with curl once it does.
+              The OAuth half needs none of that. `discord-bot-postgres` runs
+              whether or not this ever starts, so the database is there the
+              moment it does, and the callback route can be driven with curl
+              once it is up.
             */
             discord-bot = {
               namespace = "apps";
@@ -250,7 +296,7 @@
               command = runNode {
                 entry = "apps/discord-bot/index.ts";
                 env = {
-                  DATABASE_URL = databaseUrl "discord_bot";
+                  DATABASE_URL = databaseUrl "discord-bot";
                   PORT = toString ports.discordBot;
                   HOST = "127.0.0.1";
                   # A relying party of the app next door, not of the deployed
@@ -262,7 +308,7 @@
                 };
               };
               depends_on = {
-                "pg".condition = "process_healthy";
+                ${postgresFor "discord-bot"}.condition = "process_healthy";
                 "dev-secrets".condition = "process_completed_successfully";
               };
               readiness_probe = tcpReady ports.discordBot;
@@ -274,13 +320,19 @@
             seed = {
               namespace = "setup";
               command = ''
-                export PATH=${lib.makeBinPath [ config.services.postgres.pg.package ]}:$PATH
+                # For `psql`, which every instance ships the same version of,
+                # so which one this comes from does not matter.
+                export PATH=${
+                  lib.makeBinPath [ config.services.postgres.${postgresFor "tinyburg-app"}.package ]
+                }:$PATH
                 exec bash scripts/seed.sh
               '';
               environment = {
-                PGHOST = "127.0.0.1";
-                PGPORT = toString ports.postgres;
-                PGUSER = "postgres";
+                # Two databases on two instances, so the seed is handed a
+                # connection string apiece rather than a `PGHOST`/`PGPORT` pair
+                # that could only ever point at one of them.
+                TINYBURG_APP_DATABASE_URL = databaseUrl "tinyburg-app";
+                AUTHPROXY_DATABASE_URL = databaseUrl "authproxy";
                 AUTHPROXY_CLIENT_ID = authproxyClientId;
                 AUTHPROXY_REDIRECT_URI = "http://localhost:${toString ports.authproxy}/auth/callback";
                 SITE_ORIGIN = "http://localhost:${toString ports.tinyburgApp}/";

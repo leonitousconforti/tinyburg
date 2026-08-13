@@ -10,6 +10,10 @@
 
 set -euo pipefail
 
+# Each service has a Postgres of its own, so there is no one host and port that
+# reaches both of these; they are passed in as whole connection strings.
+: "${TINYBURG_APP_DATABASE_URL:?}"
+: "${AUTHPROXY_DATABASE_URL:?}"
 : "${AUTHPROXY_CLIENT_ID:?}"
 : "${AUTHPROXY_REDIRECT_URI:?}"
 : "${SITE_ORIGIN:?}"
@@ -22,7 +26,7 @@ set -euo pipefail
 FIRST_PARTY_CLIENT_ID="0868602a-9bf8-4e6e-ba20-ccd2b3acc832"
 
 echo "seeding tinyburg_app"
-psql --dbname tinyburg_app --quiet --no-psqlrc --set ON_ERROR_STOP=1 \
+psql --dbname "$TINYBURG_APP_DATABASE_URL" --quiet --no-psqlrc --set ON_ERROR_STOP=1 \
     --set client_id="$AUTHPROXY_CLIENT_ID" \
     --set redirect_uri="$AUTHPROXY_REDIRECT_URI" \
     --set first_party_id="$FIRST_PARTY_CLIENT_ID" \
@@ -86,7 +90,7 @@ ON CONFLICT (id) DO NOTHING;
 SQL
 
 echo "seeding authproxy"
-psql --dbname authproxy --quiet --no-psqlrc --set ON_ERROR_STOP=1 <<'SQL'
+psql --dbname "$AUTHPROXY_DATABASE_URL" --quiet --no-psqlrc --set ON_ERROR_STOP=1 <<'SQL'
 -- The two public keys are already seeded by migration 0001, but both are rate
 -- limited to 3 requests a minute, which is a wall you hit immediately when
 -- iterating. This one carries the same readonly scopes with a limit nobody

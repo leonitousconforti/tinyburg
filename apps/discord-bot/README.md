@@ -68,10 +68,10 @@ ephemerally, so the URL is never posted anywhere another person can take it.
 | `PORT`                   | Defaults to 3003, for the OAuth callback only  |
 
 In development `nix run .#dev` supplies all of these except the two Discord
-ones. It creates the `discord_bot` database on its own Postgres (port 54320),
-points the bot at the local provider rather than the deployed one, and seeds
-the matching OAuth client, so nothing has to be registered by hand and the
-machine-wide Postgres on 5432 is left alone.
+ones. It runs a Postgres of the bot's own, `discord-bot-postgres` on port 54323,
+holding nothing but `discord_bot`; points the bot at the local provider rather
+than the deployed one; and seeds the matching OAuth client, so nothing has to be
+registered by hand and the machine-wide Postgres on 5432 is left alone.
 
 The process is **off by default** in that stack, because starting it opens a
 real gateway connection. Put `DISCORD_BOT_TOKEN` and `DISCORD_APPLICATION_ID`
@@ -99,7 +99,7 @@ Everything on the OAuth side can be driven directly. Insert a pending link
 with a known state and hit the callback:
 
 ```sh
-DB="postgres://postgres@127.0.0.1:54320/discord_bot"
+DB="postgres://postgres@127.0.0.1:54323/discord_bot"
 STATE=whatever
 HASH=$(node -e "console.log(require('node:crypto').createHash('sha256').update('$STATE').digest('base64url'))")
 psql "$DB" -c "INSERT INTO discord_pending_links (state_hash, code_verifier, discord_user_id, interaction_token)

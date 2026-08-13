@@ -1,6 +1,6 @@
 # The local development stack
 
-One command brings up Postgres and every service that talks to it:
+One command brings up every service and the Postgres each one owns:
 
 ```sh
 nix run .#dev
@@ -10,8 +10,9 @@ Run it from the repository root. Postgres keeps its data in `.dev/`, which is
 relative to the working directory, and the app processes are started by path.
 
 Inside the process-compose TUI, `r` restarts the selected process, `s` stops it,
-and `F5`/`F6` scroll its log. Everything is grouped into namespaces (`infra`,
-`apps`, `workers`, `setup`) so the tree stays readable as services are added.
+and `F5`/`F6` scroll its log. Everything is grouped into namespaces (`data`,
+`infra`, `apps`, `workers`, `setup`) so the tree stays readable as services are
+added.
 
 To run a subset:
 
@@ -19,7 +20,8 @@ To run a subset:
 nix run .#dev -- tinyburg-app authproxy
 ```
 
-Starting over is `rm -rf .dev`. There are no containers or volumes to prune.
+Starting over is `rm -rf .dev` for everything, or `rm -rf .dev/postgres/authproxy`
+for one service's database. There are no containers or volumes to prune.
 
 ## First run
 
@@ -47,20 +49,44 @@ boot tinyburg.app at all.
 
 ## What runs
 
-| Process              | Port  | Notes                                              |
-| -------------------- | ----- | -------------------------------------------------- |
-| `pg`                 | 54320 | Three databases: `tinyburg_app`, `authproxy`, `social_circles`. Not 5432, so a machine-wide Postgres is left alone. |
-| `tinyburg-app`       | 3000  | Also the OIDC provider the other services sign in against |
-| `tinyburg-app-client`| .     | `vite build --watch` into `dist/client`            |
-| `authproxy`          | 3001  | A relying party of `tinyburg-app`, not of production |
-| `authproxy-client`   | .     | `vite build --watch` into `dist/client`            |
-| `social-circles`     | 3002  | Plus the cluster, crons and workflows               |
-| `heartbeat-sink`     | 3999  | Stands in for the uptime monitor                    |
-| `auto-gold-bits`     | .     | Disabled by default, see below                      |
-| `doorman-clone`      | .     | Disabled by default, see below                      |
+| Process                   | Port  | Notes                                              |
+| ------------------------- | ----- | -------------------------------------------------- |
+| `tinyburg-app-postgres`   | 54320 | `tinyburg_app`                                      |
+| `authproxy-postgres`      | 54321 | `authproxy`                                         |
+| `social-circles-postgres` | 54322 | `social_circles`                                    |
+| `discord-bot-postgres`    | 54323 | `discord_bot`, and runs even though the bot does not |
+| `tinyburg-app`            | 3000  | Also the OIDC provider the other services sign in against |
+| `tinyburg-app-client`     | .     | `vite build --watch` into `dist/client`            |
+| `authproxy`               | 3001  | A relying party of `tinyburg-app`, not of production |
+| `authproxy-client`        | .     | `vite build --watch` into `dist/client`            |
+| `social-circles`          | 3002  | Plus the cluster, crons and workflows               |
+| `heartbeat-sink`          | 3999  | Stands in for the uptime monitor                    |
+| `auto-gold-bits`          | .     | Disabled by default, see below                      |
+| `doorman-clone`           | .     | Disabled by default, see below                      |
 
 Services are `node --watch`, so saving a file restarts only that service. Saving
 a file in `packages/` restarts whichever services import it.
+
+## One Postgres per service
+
+Every service that needs a database gets an instance of its own, named after it
+and holding nothing else. The services never join across each other, so a shared
+instance bought nothing but a shared blast radius: one wedged cluster, one bad
+migration or one `rm -rf` stopped all four of them, and a version bump had to be
+agreed on by all four at once. Now a service's database can be reset, restarted,
+or moved to a different Postgres without the others noticing.
+
+The cost is four processes instead of one, and four ports to keep straight. None
+of them is 5432, so a machine-wide Postgres is still left alone.
+
+Adding a service means one entry in the `databases` attrset in `dev.nix`: a port
+and a database name, keyed by the process name of the service that owns it. The
+instance, its data directory, its readiness probe and its `DATABASE_URL` are all
+derived from that.
+
+An existing checkout from before the split has a four-database cluster left at
+`.dev/postgres/` alongside the new per-service directories. Nothing reads it any
+more; `rm -rf .dev` is the cleanest way to be rid of it.
 
 ## What the seed does
 
