@@ -61,7 +61,7 @@
         "effect": "4.0.0-beta.105",
         "ioredis": "5.11.1",
         "vite": "8.2.1",
-        "vitest": "4.1.10"
+        "vitest": "4.1.11"
     },
     "peerDependencies": {
         "effect": "4.0.0-beta.105"
