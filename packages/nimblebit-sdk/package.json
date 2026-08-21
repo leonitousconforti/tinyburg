@@ -45,10 +45,10 @@
         "codegen": "build-utils prepare-v4"
     },
     "devDependencies": {
-        "effect": "4.0.0-beta.105"
+        "effect": "4.0.0-rc.111"
     },
     "peerDependencies": {
-        "effect": "4.0.0-beta.105"
+        "effect": "4.0.0-rc.111"
     },
     "tags": [
         "nimblebit",
