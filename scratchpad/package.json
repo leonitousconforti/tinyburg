@@ -10,10 +10,10 @@
     },
     "devDependencies": {
         "@bufbuild/protobuf": "2.13.0",
-        "@effect/platform-node": "4.0.0-beta.105",
-        "@efffrida/frida-tools": "0.0.50",
-        "@efffrida/gplayapi": "0.0.27",
-        "effect": "4.0.0-beta.105",
-        "ioredis": "5.11.1"
+        "@effect/platform-node": "4.0.0-rc.111",
+        "@efffrida/frida-tools": "0.0.52",
+        "@efffrida/gplayapi": "0.0.29",
+        "effect": "4.0.0-rc.111",
+        "redis": "6.2.1"
     }
 }
