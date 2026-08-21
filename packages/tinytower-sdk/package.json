@@ -59,7 +59,7 @@
         "@efffrida/gplayapi": "0.0.29",
         "@tinyburg/insight": "workspace:*",
         "effect": "4.0.0-rc.111",
-        "ioredis": "5.11.1",
+        "redis": "6.2.1",
         "vite": "8.2.1",
         "vitest": "4.1.11"
     },

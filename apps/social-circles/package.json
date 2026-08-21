@@ -20,9 +20,9 @@
         "@tinyburg/trading-sdk": "workspace:*",
         "@tinyburg/ui": "workspace:*",
         "effect": "4.0.0-rc.111",
-        "effect-oidc": "0.0.10",
+        "effect-oidc": "0.0.11",
         "foldkit": "0.148.1",
-        "ioredis": "5.11.1",
+        "redis": "6.2.1",
         "tailwindcss": "4.3.3",
         "typescript": "7.0.2",
         "vite": "8.2.1"

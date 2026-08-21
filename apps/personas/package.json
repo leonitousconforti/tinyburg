@@ -6,6 +6,6 @@
     "dependencies": {
         "@effect/platform-node": "4.0.0-rc.111",
         "effect": "4.0.0-rc.111",
-        "ioredis": "5.11.1"
+        "redis": "6.2.1"
     }
 }
