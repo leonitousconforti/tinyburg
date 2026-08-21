@@ -60,7 +60,7 @@
         "@tinyburg/insight": "workspace:*",
         "effect": "4.0.0-beta.105",
         "ioredis": "5.11.1",
-        "vite": "8.2.1",
+        "vite": "8.2.2",
         "vitest": "4.1.11"
     },
     "peerDependencies": {
