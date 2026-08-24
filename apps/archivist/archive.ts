@@ -1,4 +1,4 @@
-import { Effect, Match, Option } from "effect";
+import { Array, Effect, Match, Option, Order, Result, Schema, Stream } from "effect";
 
 import type { BundleIdentifier } from "./games.ts";
 
@@ -6,13 +6,51 @@ import { S3 } from "@effect-aws/client-s3";
 import { NodeStream } from "@effect/platform-node";
 import { GooglePlayApi } from "@efffrida/gplayapi";
 
-export const BUCKET = "tinyburg";
-export const prefixFor = (bundleIdentifier: BundleIdentifier): string => `archivist/${bundleIdentifier}/`;
-export const keyFor = (options: {
+const BUCKET = "tinyburg";
+const prefixFor = (bundleIdentifier: BundleIdentifier): string => `archivist/${bundleIdentifier}/`;
+const keyFor = (options: {
     readonly bundleIdentifier: BundleIdentifier;
     readonly versionCode: number | bigint;
     readonly name: string;
 }): string => `${prefixFor(options.bundleIdentifier)}${options.versionCode}/${options.name}`;
+
+export const highestArchivedVersion = Effect.fnUntraced(function* (bundleIdentifier: BundleIdentifier) {
+    const s3 = yield* S3;
+
+    const pages = yield* s3
+        .listObjectsV2Stream({
+            Bucket: BUCKET,
+            Prefix: prefixFor(bundleIdentifier),
+            Delimiter: "/",
+        })
+        .pipe(Stream.runCollect);
+
+    const commonPrefixes = Array.flatMap(pages, (page) => page.CommonPrefixes ?? []);
+    const prefixes = Array.filterMap(commonPrefixes, (common) => Result.fromNullishOr(common.Prefix, () => void 0));
+
+    const parsedNames = yield* Effect.all(
+        Array.map(prefixes, (prefix) =>
+            Schema.decodeUnknownEffect(
+                Schema.TemplateLiteralParser([
+                    prefixFor(bundleIdentifier),
+                    "/",
+                    Schema.BigIntFromString,
+                    "/",
+                    Schema.String,
+                ])
+            )(prefix)
+        )
+    );
+
+    const versionCodes = Array.map(
+        parsedNames,
+        ([_bundleIdentifier, _slash, versionCode, _slash2, _name]) => versionCode
+    );
+
+    return Array.isReadonlyArrayNonEmpty(versionCodes)
+        ? Option.some(Array.max(versionCodes, Order.BigInt))
+        : Option.none();
+});
 
 export const archiveToS3 = Effect.fnUntraced(
     // The early exits return never-typed values; the normal path runs to the end.
