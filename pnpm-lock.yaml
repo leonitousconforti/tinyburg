@@ -34,8 +34,8 @@ importers:
         specifier: 0.8.9
         version: 0.8.9
       '@effect/docgen':
-        specifier: 4.0.0-beta.105
-        version: 4.0.0-beta.105(ioredis@5.11.1)(tsx@4.23.12)(typescript@7.0.2)
+        specifier: 4.0.0-rc.111
+        version: 4.0.0-rc.111(redis@6.2.1)(tsx@4.23.12)(typescript@7.0.2)
       '@effect/tsgo':
         specifier: 0.36.5
         version: 0.36.5
@@ -49,14 +49,11 @@ importers:
         specifier: 0.5.0
         version: 0.5.0(@babel/core@8.0.1)
       effect:
-        specifier: 4.0.0-beta.105
-        version: 4.0.0-beta.105
+        specifier: 4.0.0-rc.111
+        version: 4.0.0-rc.111
       glob:
         specifier: 13.0.6
         version: 13.0.6
-      ioredis:
-        specifier: 5.11.1
-        version: 5.11.1
       madge:
         specifier: 8.0.0
         version: 8.0.0(typescript@7.0.2)
@@ -69,6 +66,9 @@ importers:
       oxlint-tsgolint:
         specifier: 7.0.2001
         version: 7.0.2001
+      redis:
+        specifier: 6.2.1
+        version: 6.2.1
       rimraf:
         specifier: 6.1.3
         version: 6.1.3
@@ -88,38 +88,38 @@ importers:
   apps/archivist:
     dependencies:
       '@bufbuild/protobuf':
-        specifier: 2.13.0
-        version: 2.13.0
+        specifier: 2.14.0
+        version: 2.14.0
       '@effect-aws/client-s3':
         specifier: 2.0.0-beta.6
-        version: 2.0.0-beta.6(effect@4.0.0-beta.105)
+        version: 2.0.0-beta.6(effect@4.0.0-rc.111)
       '@effect/platform-node':
-        specifier: 4.0.0-beta.105
-        version: 4.0.0-beta.105(effect@4.0.0-beta.105)(ioredis@5.11.1)
+        specifier: 4.0.0-rc.111
+        version: 4.0.0-rc.111(effect@4.0.0-rc.111)(redis@6.2.1)
       '@efffrida/gplayapi':
-        specifier: 0.0.27
-        version: 0.0.27(@bufbuild/protobuf@2.13.0)(effect@4.0.0-beta.105)
+        specifier: 0.0.30
+        version: 0.0.30(@bufbuild/protobuf@2.14.0)(effect@4.0.0-rc.111)
       effect:
-        specifier: 4.0.0-beta.105
-        version: 4.0.0-beta.105
-      ioredis:
-        specifier: 5.11.1
-        version: 5.11.1
+        specifier: 4.0.0-rc.111
+        version: 4.0.0-rc.111
+      redis:
+        specifier: 6.2.1
+        version: 6.2.1
 
   apps/authproxy:
     dependencies:
       '@effect/platform-browser':
-        specifier: 4.0.0-beta.105
-        version: 4.0.0-beta.105(effect@4.0.0-beta.105)
+        specifier: 4.0.0-rc.111
+        version: 4.0.0-rc.111(effect@4.0.0-rc.111)
       '@effect/platform-node':
-        specifier: 4.0.0-beta.105
-        version: 4.0.0-beta.105(effect@4.0.0-beta.105)(ioredis@5.11.1)
+        specifier: 4.0.0-rc.111
+        version: 4.0.0-rc.111(effect@4.0.0-rc.111)(redis@6.2.1)
       '@effect/sql-pg':
-        specifier: 4.0.0-beta.105
-        version: 4.0.0-beta.105(effect@4.0.0-beta.105)
+        specifier: 4.0.0-rc.111
+        version: 4.0.0-rc.111(effect@4.0.0-rc.111)
       '@foldkit/vite-plugin':
-        specifier: 0.12.1
-        version: 0.12.1(effect@4.0.0-beta.105)(foldkit@0.140.1(@effect/platform-browser@4.0.0-beta.105(effect@4.0.0-beta.105))(effect@4.0.0-beta.105))(vite@8.2.1)
+        specifier: 0.17.0
+        version: 0.17.0(effect@4.0.0-rc.111)(foldkit@0.150.0(effect@4.0.0-rc.111))(vite@8.2.1)
       '@tailwindcss/vite':
         specifier: 4.3.3
         version: 4.3.3(vite@8.2.1)
@@ -129,21 +129,24 @@ importers:
       '@tinyburg/tinytower-sdk':
         specifier: workspace:*
         version: link:../../packages/tinytower-sdk
+      '@tinyburg/trading-sdk':
+        specifier: workspace:*
+        version: link:../../packages/trading-sdk
       '@tinyburg/ui':
         specifier: workspace:*
         version: link:../../packages/ui
       effect:
-        specifier: 4.0.0-beta.105
-        version: 4.0.0-beta.105
+        specifier: 4.0.0-rc.111
+        version: 4.0.0-rc.111
       effect-oidc:
-        specifier: 0.0.9
-        version: 0.0.9(effect@4.0.0-beta.105)
+        specifier: 0.0.13
+        version: 0.0.13(effect@4.0.0-rc.111)
       foldkit:
-        specifier: 0.140.1
-        version: 0.140.1(@effect/platform-browser@4.0.0-beta.105(effect@4.0.0-beta.105))(effect@4.0.0-beta.105)
-      ioredis:
-        specifier: 5.11.1
-        version: 5.11.1
+        specifier: 0.150.0
+        version: 0.150.0(effect@4.0.0-rc.111)
+      redis:
+        specifier: 6.2.1
+        version: 6.2.1
       tailwindcss:
         specifier: 4.3.3
         version: 4.3.3
@@ -157,8 +160,8 @@ importers:
   apps/auto-gold-bits:
     dependencies:
       '@effect/platform-node':
-        specifier: 4.0.0-beta.105
-        version: 4.0.0-beta.105(effect@4.0.0-beta.105)(ioredis@5.11.1)
+        specifier: 4.0.0-rc.111
+        version: 4.0.0-rc.111(effect@4.0.0-rc.111)(redis@6.2.1)
       '@tinyburg/nimblebit-sdk':
         specifier: workspace:*
         version: link:../../packages/nimblebit-sdk
@@ -166,44 +169,50 @@ importers:
         specifier: workspace:*
         version: link:../../packages/tinytower-sdk
       effect:
-        specifier: 4.0.0-beta.105
-        version: 4.0.0-beta.105
-      ioredis:
-        specifier: 5.11.1
-        version: 5.11.1
+        specifier: 4.0.0-rc.111
+        version: 4.0.0-rc.111
+      redis:
+        specifier: 6.2.1
+        version: 6.2.1
 
   apps/discord-bot:
     dependencies:
       '@effect/platform-node':
-        specifier: 4.0.0-beta.105
-        version: 4.0.0-beta.105(effect@4.0.0-beta.105)(ioredis@5.11.1)
+        specifier: 4.0.0-rc.111
+        version: 4.0.0-rc.111(effect@4.0.0-rc.111)(redis@6.2.1)
       '@effect/sql-pg':
-        specifier: 4.0.0-beta.105
-        version: 4.0.0-beta.105(effect@4.0.0-beta.105)
+        specifier: 4.0.0-rc.111
+        version: 4.0.0-rc.111(effect@4.0.0-rc.111)
       '@tinyburg/ui':
         specifier: workspace:*
         version: link:../../packages/ui
       dfx:
         specifier: 1.0.15
-        version: 1.0.15(effect@4.0.0-beta.105)
+        version: 1.0.15(effect@4.0.0-rc.111)
       effect:
-        specifier: 4.0.0-beta.105
-        version: 4.0.0-beta.105
+        specifier: 4.0.0-rc.111
+        version: 4.0.0-rc.111
       effect-oidc:
-        specifier: 0.0.9
-        version: 0.0.9(effect@4.0.0-beta.105)
-      ioredis:
-        specifier: 5.11.1
-        version: 5.11.1
+        specifier: 0.0.13
+        version: 0.0.13(effect@4.0.0-rc.111)
+      foldkit:
+        specifier: 0.150.0
+        version: 0.150.0(effect@4.0.0-rc.111)
+      redis:
+        specifier: 6.2.1
+        version: 6.2.1
       typescript:
         specifier: 7.0.2
         version: 7.0.2
+      vite:
+        specifier: 8.2.1
+        version: 8.2.1
 
   apps/doorman-clone:
     dependencies:
       '@effect/platform-node':
-        specifier: 4.0.0-beta.105
-        version: 4.0.0-beta.105(effect@4.0.0-beta.105)(ioredis@5.11.1)
+        specifier: 4.0.0-rc.111
+        version: 4.0.0-rc.111(effect@4.0.0-rc.111)(redis@6.2.1)
       '@tinyburg/nimblebit-sdk':
         specifier: workspace:*
         version: link:../../packages/nimblebit-sdk
@@ -211,38 +220,26 @@ importers:
         specifier: workspace:*
         version: link:../../packages/tinytower-sdk
       effect:
-        specifier: 4.0.0-beta.105
-        version: 4.0.0-beta.105
-      ioredis:
-        specifier: 5.11.1
-        version: 5.11.1
-
-  apps/personas:
-    dependencies:
-      '@effect/platform-node':
-        specifier: 4.0.0-beta.105
-        version: 4.0.0-beta.105(effect@4.0.0-beta.105)(ioredis@5.11.1)
-      effect:
-        specifier: 4.0.0-beta.105
-        version: 4.0.0-beta.105
-      ioredis:
-        specifier: 5.11.1
-        version: 5.11.1
+        specifier: 4.0.0-rc.111
+        version: 4.0.0-rc.111
+      redis:
+        specifier: 6.2.1
+        version: 6.2.1
 
   apps/social-circles:
     dependencies:
       '@effect/platform-browser':
-        specifier: 4.0.0-beta.105
-        version: 4.0.0-beta.105(effect@4.0.0-beta.105)
+        specifier: 4.0.0-rc.111
+        version: 4.0.0-rc.111(effect@4.0.0-rc.111)
       '@effect/platform-node':
-        specifier: 4.0.0-beta.105
-        version: 4.0.0-beta.105(effect@4.0.0-beta.105)(ioredis@5.11.1)
+        specifier: 4.0.0-rc.111
+        version: 4.0.0-rc.111(effect@4.0.0-rc.111)(redis@6.2.1)
       '@effect/sql-pg':
-        specifier: 4.0.0-beta.105
-        version: 4.0.0-beta.105(effect@4.0.0-beta.105)
+        specifier: 4.0.0-rc.111
+        version: 4.0.0-rc.111(effect@4.0.0-rc.111)
       '@foldkit/vite-plugin':
-        specifier: 0.12.1
-        version: 0.12.1(effect@4.0.0-beta.105)(foldkit@0.140.1(@effect/platform-browser@4.0.0-beta.105(effect@4.0.0-beta.105))(effect@4.0.0-beta.105))(vite@8.2.1)
+        specifier: 0.17.0
+        version: 0.17.0(effect@4.0.0-rc.111)(foldkit@0.150.0(effect@4.0.0-rc.111))(vite@8.2.1)
       '@fontsource/press-start-2p':
         specifier: 5.3.0
         version: 5.3.0
@@ -265,17 +262,17 @@ importers:
         specifier: workspace:*
         version: link:../../packages/ui
       effect:
-        specifier: 4.0.0-beta.105
-        version: 4.0.0-beta.105
+        specifier: 4.0.0-rc.111
+        version: 4.0.0-rc.111
       effect-oidc:
-        specifier: 0.0.9
-        version: 0.0.9(effect@4.0.0-beta.105)
+        specifier: 0.0.13
+        version: 0.0.13(effect@4.0.0-rc.111)
       foldkit:
-        specifier: 0.140.1
-        version: 0.140.1(@effect/platform-browser@4.0.0-beta.105(effect@4.0.0-beta.105))(effect@4.0.0-beta.105)
-      ioredis:
-        specifier: 5.11.1
-        version: 5.11.1
+        specifier: 0.150.0
+        version: 0.150.0(effect@4.0.0-rc.111)
+      redis:
+        specifier: 6.2.1
+        version: 6.2.1
       tailwindcss:
         specifier: 4.3.3
         version: 4.3.3
@@ -289,17 +286,17 @@ importers:
   apps/tinyburg.app:
     dependencies:
       '@effect/platform-browser':
-        specifier: 4.0.0-beta.105
-        version: 4.0.0-beta.105(effect@4.0.0-beta.105)
+        specifier: 4.0.0-rc.111
+        version: 4.0.0-rc.111(effect@4.0.0-rc.111)
       '@effect/platform-node':
-        specifier: 4.0.0-beta.105
-        version: 4.0.0-beta.105(effect@4.0.0-beta.105)(ioredis@5.11.1)
+        specifier: 4.0.0-rc.111
+        version: 4.0.0-rc.111(effect@4.0.0-rc.111)(redis@6.2.1)
       '@effect/sql-pg':
-        specifier: 4.0.0-beta.105
-        version: 4.0.0-beta.105(effect@4.0.0-beta.105)
+        specifier: 4.0.0-rc.111
+        version: 4.0.0-rc.111(effect@4.0.0-rc.111)
       '@foldkit/vite-plugin':
-        specifier: 0.12.1
-        version: 0.12.1(effect@4.0.0-beta.105)(foldkit@0.140.1(@effect/platform-browser@4.0.0-beta.105(effect@4.0.0-beta.105))(effect@4.0.0-beta.105))(vite@8.2.1)
+        specifier: 0.17.0
+        version: 0.17.0(effect@4.0.0-rc.111)(foldkit@0.150.0(effect@4.0.0-rc.111))(vite@8.2.1)
       '@fontsource/press-start-2p':
         specifier: 5.3.0
         version: 5.3.0
@@ -322,17 +319,17 @@ importers:
         specifier: workspace:*
         version: link:../../packages/ui
       effect:
-        specifier: 4.0.0-beta.105
-        version: 4.0.0-beta.105
+        specifier: 4.0.0-rc.111
+        version: 4.0.0-rc.111
       effect-oidc:
-        specifier: 0.0.9
-        version: 0.0.9(effect@4.0.0-beta.105)
+        specifier: 0.0.13
+        version: 0.0.13(effect@4.0.0-rc.111)
       foldkit:
-        specifier: 0.140.1
-        version: 0.140.1(@effect/platform-browser@4.0.0-beta.105(effect@4.0.0-beta.105))(effect@4.0.0-beta.105)
-      ioredis:
-        specifier: 5.11.1
-        version: 5.11.1
+        specifier: 0.150.0
+        version: 0.150.0(effect@4.0.0-rc.111)
+      redis:
+        specifier: 6.2.1
+        version: 6.2.1
       tailwindcss:
         specifier: 4.3.3
         version: 4.3.3
@@ -350,26 +347,26 @@ importers:
   packages/insight:
     dependencies:
       '@bufbuild/protobuf':
-        specifier: 2.13.0
-        version: 2.13.0
+        specifier: 2.14.0
+        version: 2.14.0
       '@efffrida/frida-tools':
-        specifier: 0.0.50
-        version: 0.0.50(effect@4.0.0-beta.105)
+        specifier: 0.0.53
+        version: 0.0.53(effect@4.0.0-rc.111)
       '@efffrida/gplayapi':
-        specifier: 0.0.27
-        version: 0.0.27(@bufbuild/protobuf@2.13.0)(effect@4.0.0-beta.105)
+        specifier: 0.0.30
+        version: 0.0.30(@bufbuild/protobuf@2.14.0)(effect@4.0.0-rc.111)
       '@efffrida/il2cpp-bridge':
-        specifier: 0.0.46
-        version: 0.0.46(effect@4.0.0-beta.105)
+        specifier: 0.0.49
+        version: 0.0.49(effect@4.0.0-rc.111)
       '@efffrida/platform':
-        specifier: 0.0.38
-        version: 0.0.38(effect@4.0.0-beta.105)
+        specifier: 0.0.41
+        version: 0.0.41(effect@4.0.0-rc.111)
       '@efffrida/polyfills':
         specifier: 0.0.15
         version: 0.0.15
       '@efffrida/rpc':
-        specifier: 0.0.53
-        version: 0.0.53(effect@4.0.0-beta.105)
+        specifier: 0.0.56
+        version: 0.0.56(effect@4.0.0-rc.111)
       frida:
         specifier: 17.17.0
         version: 17.17.0
@@ -381,14 +378,14 @@ importers:
         specifier: 19.10.0
         version: 19.10.0
       effect:
-        specifier: 4.0.0-beta.105
-        version: 4.0.0-beta.105
+        specifier: 4.0.0-rc.111
+        version: 4.0.0-rc.111
 
   packages/nimblebit-sdk:
     devDependencies:
       effect:
-        specifier: 4.0.0-beta.105
-        version: 4.0.0-beta.105
+        specifier: 4.0.0-rc.111
+        version: 4.0.0-rc.111
 
   packages/tinytower-sdk:
     dependencies:
@@ -400,29 +397,29 @@ importers:
         version: 3.0.1
     devDependencies:
       '@bufbuild/protobuf':
-        specifier: 2.13.0
-        version: 2.13.0
+        specifier: 2.14.0
+        version: 2.14.0
       '@effect/platform-node':
-        specifier: 4.0.0-beta.105
-        version: 4.0.0-beta.105(effect@4.0.0-beta.105)(ioredis@5.11.1)
+        specifier: 4.0.0-rc.111
+        version: 4.0.0-rc.111(effect@4.0.0-rc.111)(redis@6.2.1)
       '@effect/vitest':
-        specifier: 4.0.0-beta.105
-        version: 4.0.0-beta.105(effect@4.0.0-beta.105)(vitest@4.1.11(vite@8.2.1))
+        specifier: 4.0.0-rc.111
+        version: 4.0.0-rc.111(effect@4.0.0-rc.111)(vitest@4.1.11(vite@8.2.1))
       '@efffrida/frida-tools':
-        specifier: 0.0.50
-        version: 0.0.50(effect@4.0.0-beta.105)
+        specifier: 0.0.53
+        version: 0.0.53(effect@4.0.0-rc.111)
       '@efffrida/gplayapi':
-        specifier: 0.0.27
-        version: 0.0.27(@bufbuild/protobuf@2.13.0)(effect@4.0.0-beta.105)
+        specifier: 0.0.30
+        version: 0.0.30(@bufbuild/protobuf@2.14.0)(effect@4.0.0-rc.111)
       '@tinyburg/insight':
         specifier: workspace:*
         version: link:../insight
       effect:
-        specifier: 4.0.0-beta.105
-        version: 4.0.0-beta.105
-      ioredis:
-        specifier: 5.11.1
-        version: 5.11.1
+        specifier: 4.0.0-rc.111
+        version: 4.0.0-rc.111
+      redis:
+        specifier: 6.2.1
+        version: 6.2.1
       vite:
         specifier: 8.2.1
         version: 8.2.1
@@ -436,12 +433,12 @@ importers:
         specifier: workspace:^
         version: link:../nimblebit-sdk
       effect-oidc:
-        specifier: 0.0.9
-        version: 0.0.9(effect@4.0.0-beta.105)
+        specifier: 0.0.13
+        version: 0.0.13(effect@4.0.0-rc.111)
     devDependencies:
       effect:
-        specifier: 4.0.0-beta.105
-        version: 4.0.0-beta.105
+        specifier: 4.0.0-rc.111
+        version: 4.0.0-rc.111
 
   packages/ui:
     dependencies:
@@ -456,14 +453,14 @@ importers:
         version: 5.3.0
     devDependencies:
       '@effect/platform-browser':
-        specifier: 4.0.0-beta.105
-        version: 4.0.0-beta.105(effect@4.0.0-beta.105)
+        specifier: 4.0.0-rc.111
+        version: 4.0.0-rc.111(effect@4.0.0-rc.111)
       effect:
-        specifier: 4.0.0-beta.105
-        version: 4.0.0-beta.105
+        specifier: 4.0.0-rc.111
+        version: 4.0.0-rc.111
       foldkit:
-        specifier: 0.140.1
-        version: 0.140.1(@effect/platform-browser@4.0.0-beta.105(effect@4.0.0-beta.105))(effect@4.0.0-beta.105)
+        specifier: 0.150.0
+        version: 0.150.0(effect@4.0.0-rc.111)
 
   scratchpad:
     dependencies:
@@ -478,23 +475,23 @@ importers:
         version: link:../packages/tinytower-sdk
     devDependencies:
       '@bufbuild/protobuf':
-        specifier: 2.13.0
-        version: 2.13.0
+        specifier: 2.14.0
+        version: 2.14.0
       '@effect/platform-node':
-        specifier: 4.0.0-beta.105
-        version: 4.0.0-beta.105(effect@4.0.0-beta.105)(ioredis@5.11.1)
+        specifier: 4.0.0-rc.111
+        version: 4.0.0-rc.111(effect@4.0.0-rc.111)(redis@6.2.1)
       '@efffrida/frida-tools':
-        specifier: 0.0.50
-        version: 0.0.50(effect@4.0.0-beta.105)
+        specifier: 0.0.53
+        version: 0.0.53(effect@4.0.0-rc.111)
       '@efffrida/gplayapi':
-        specifier: 0.0.27
-        version: 0.0.27(@bufbuild/protobuf@2.13.0)(effect@4.0.0-beta.105)
+        specifier: 0.0.30
+        version: 0.0.30(@bufbuild/protobuf@2.14.0)(effect@4.0.0-rc.111)
       effect:
-        specifier: 4.0.0-beta.105
-        version: 4.0.0-beta.105
-      ioredis:
-        specifier: 5.11.1
-        version: 5.11.1
+        specifier: 4.0.0-rc.111
+        version: 4.0.0-rc.111
+      redis:
+        specifier: 6.2.1
+        version: 6.2.1
 
 packages:
 
@@ -687,8 +684,8 @@ packages:
     resolution: {integrity: sha512-6zABk/ECA/QYSCQ1NGiVwwbQerUCZ+TQbp64Q3AgmfNvurHH0j8TtXa1qbShXA6qqkpAj4V5W8pP6mLe1mcMqA==}
     engines: {node: '>=18'}
 
-  '@bufbuild/protobuf@2.13.0':
-    resolution: {integrity: sha512-acq7c49vxfm1ggJ95P70TX7ABDM0vxr1SYD3BB0o0jnBLB4OAqeHyKuN+cD3w80gXEDQ2zxHpR6CUeA+O/aU9g==}
+  '@bufbuild/protobuf@2.14.0':
+    resolution: {integrity: sha512-C3UGsiCwSprE2NKIIFA3hCDlpXTMCAXRZuEVp88L1GY36Y41+rYL5fryE+nOFhp4p4JPQvdV8PQ4DWgHgeTE+w==}
 
   '@changesets/apply-release-plan@8.0.0':
     resolution: {integrity: sha512-kUd2pbf1w5/AYmBMb0Tt+rkIPCjFJdT0SZMrkOjJT/WV/QbtmvkyB5jkV0oaNPheavprZk+SfUiozUti7TIL2w==}
@@ -782,8 +779,8 @@ packages:
     engines: {node: '>=16.17.1'}
     hasBin: true
 
-  '@effect/docgen@4.0.0-beta.105':
-    resolution: {integrity: sha512-4KJXzchvFp0kS+BJbEP7Oi0MdKjPQ317iVoDE3ATy5joS4pDqwLjW2zTFL4fAgOqkLumcX/+zqW5JqSeIOCvqg==}
+  '@effect/docgen@4.0.0-rc.111':
+    resolution: {integrity: sha512-Jtud0LPSbwqjsf8ksCoxN6vNgf5k0iM/FzZMjmi8a9+pIcth2mKBhuSul3b/JfUj4QQrx3tqXyQz+tI4ltJ17A==}
     engines: {node: '>=18.0.0'}
     hasBin: true
     peerDependencies:
@@ -795,28 +792,28 @@ packages:
     engines: {node: '>=0.10.0'}
     hasBin: true
 
-  '@effect/platform-browser@4.0.0-beta.105':
-    resolution: {integrity: sha512-ts6js/MzhptBEfAXkxtyWq0fDK1snISNUWdziw4J5vf8g+1yIujpk4tgFN0dhQcRnhzVJZVDEAUoiwTQW1Bp8A==}
+  '@effect/platform-browser@4.0.0-rc.111':
+    resolution: {integrity: sha512-4SmaYB4zWsmuM82V8Dgida2yupzEWlv6/QoDL2Ogj1jOPq65KUx3VjQKcNn2NenOR6SFRWaWsUWrnxwA2IPFzg==}
     peerDependencies:
-      effect: ^4.0.0-beta.105
+      effect: ^4.0.0-rc.111
 
-  '@effect/platform-node-shared@4.0.0-beta.107':
-    resolution: {integrity: sha512-y6BqcRi86BfTJv+tvDrob4ozYVHxxlHYcn/zIQqZjXI9CvKnkgD6ng+38G1o45c4f2ucU+6HRI9POCmFdMoVGA==}
+  '@effect/platform-node-shared@4.0.0-rc.111':
+    resolution: {integrity: sha512-iES0Q9vmjhaUKqeW9ceonuD45MUg/Ouk08LzRSptZ+B5qB0w9WlRjDmUz5TJmY2betNop5FRI5k4AD4mtQt3Bw==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
-      effect: ^4.0.0-beta.107
+      effect: ^4.0.0-rc.111
 
-  '@effect/platform-node@4.0.0-beta.105':
-    resolution: {integrity: sha512-gOHtgE9PqCT8aiiM0W7ZSbu4M2/jPGfJOKWuyBCxofNV5Np36fFY55FSa1MtyG+vjOjlD5btNY2i6i/SPtRqTA==}
+  '@effect/platform-node@4.0.0-rc.111':
+    resolution: {integrity: sha512-oy1i7HsOGg/5r+DuBe5+ddmnUhnXmyZFPFPXZCBdO/RQpHK3PIFe1/2UMGxZE+ngDymrSksuQTSgQLF6P+MLqw==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
-      effect: ^4.0.0-beta.105
-      ioredis: '>=5.7.0 <6.0.0'
+      effect: ^4.0.0-rc.111
+      redis: '>=5.0.0 <7.0.0'
 
-  '@effect/sql-pg@4.0.0-beta.105':
-    resolution: {integrity: sha512-Jz2DYIR+lyPdExOeYKV2BRcNZ/kj3Ldyz3xqDsT3nRM2zWo/9zWKH7XON/P1pvTbIxJPwuS63MPd4F6GYtz+bA==}
+  '@effect/sql-pg@4.0.0-rc.111':
+    resolution: {integrity: sha512-QjYFyN5cUlJGJWzXA8GHh7BJydc2K8ImIFvG3kf8f/Nv3w6ZuycuRKIW3TUNtOmHtVvqr/OugPFtyvHYhkDEbg==}
     peerDependencies:
-      effect: ^4.0.0-beta.105
+      effect: ^4.0.0-rc.111
 
   '@effect/tsgo-darwin-arm64@0.36.5':
     resolution: {integrity: sha512-+JPS65Ekod5NS41Kg9OIyuUsygNcSw5/4Y+UNbY6Wob6dvP+CkEa51pGBAmHKQp3Z/D3g/A9GNE66ndu9kz8dw==}
@@ -857,40 +854,40 @@ packages:
     resolution: {integrity: sha512-BHxVjeRK1/XlqYHWXkbT4W9JpOrT3sNA2wrfwQPBTojD5OSyxI2TUIltobYhWudyfuCrn770qP6uOpDjdrmghA==}
     hasBin: true
 
-  '@effect/vitest@4.0.0-beta.105':
-    resolution: {integrity: sha512-2t1J/H/+9hAKDC1S3iFyUVZJhdMpKvuggnOGNXPTmxZcVdxG/VkhjQjo7wzOHWs6SZcX8Cr/EsB+uiVAn9G0Ng==}
+  '@effect/vitest@4.0.0-rc.111':
+    resolution: {integrity: sha512-YDaEVT+grREBVMzykRNFtJwGxy02achzT0WXZYwMJA4ukzuB9krkgQ5roc3N6zhC3NQq/j4IyM32/Pcov7AhHw==}
     peerDependencies:
-      effect: ^4.0.0-beta.105
+      effect: ^4.0.0-rc.111
       vitest: '>=4.1.0 <5.0.0'
 
-  '@efffrida/frida-tools@0.0.50':
-    resolution: {integrity: sha512-U+/l6k7achgyKFYiPb2AgOg2C9jnGnWzz6hPmN3kkYiJgbVOqQheniKzG8rkvXsLuPdrIS4NyCzn4J837Msxfg==}
+  '@efffrida/frida-tools@0.0.53':
+    resolution: {integrity: sha512-CwXTn8nP6UE7BkoHH9Cd9W0e7j7Bw3sRqlyIqdujScWiWfOsY6EXxt0d57okt+WsNtuASexv4+34ZGoRIWHGoQ==}
     peerDependencies:
-      effect: 4.0.0-beta.105
+      effect: 4.0.0-rc.111
 
-  '@efffrida/gplayapi@0.0.27':
-    resolution: {integrity: sha512-pIqbt/CK614B6iTm77q4+k6ZY6vBPxlazKHx1c0+jGJ1t+6GbJmub1oXPiaxiQeF2sRodQrxe87iW3ZtzeK6eg==}
+  '@efffrida/gplayapi@0.0.30':
+    resolution: {integrity: sha512-gT7yI0mDg7MXSohaUe7tFcWw/guDl0zbLJxSZRILziDuRI6cZRC/zMqoc+7DZQlzzzPAr9q/G5K6TkBBcw/5hg==}
     peerDependencies:
-      '@bufbuild/protobuf': 2.13.0
-      effect: 4.0.0-beta.105
+      '@bufbuild/protobuf': 2.14.0
+      effect: 4.0.0-rc.111
 
-  '@efffrida/il2cpp-bridge@0.0.46':
-    resolution: {integrity: sha512-H0+hWYqRFNfuR0m9uMMVtu2emH3utTQoE2969IQkF/skT4bQ0PltkFheSU3dWS077H+a33ExCsNh/pRkcuHdHQ==}
+  '@efffrida/il2cpp-bridge@0.0.49':
+    resolution: {integrity: sha512-x83GQWERul8XbsnrKadFTnO0VtVPJD+HxgmGD85TenRtVbDDsIW2bxzHjtcILxFqsed9rB+IevTcg1cxN+B5jQ==}
     peerDependencies:
-      effect: 4.0.0-beta.105
+      effect: 4.0.0-rc.111
 
-  '@efffrida/platform@0.0.38':
-    resolution: {integrity: sha512-4SQ/CHGvUaphcSi4gS+DJWyS8LNnUCYMRytEadmRT3G7oUATT2maqKDtfeeN06XJV4eFgOVEoTm0Vv8KdBUNgQ==}
+  '@efffrida/platform@0.0.41':
+    resolution: {integrity: sha512-nMRB0DJigKpmrwjlz/zjiPKhjk4WkkdmwB8q7kb1IloH8ArCS5UIQUMiNxbxF0xXZqvU1EmayGaKcQE7eskr3Q==}
     peerDependencies:
-      effect: 4.0.0-beta.105
+      effect: 4.0.0-rc.111
 
   '@efffrida/polyfills@0.0.15':
     resolution: {integrity: sha512-lLK25JJG6H8LHiykoKLCszN56uHv1+nkXmKjL3+dlybseGZBAHJzDV5arKpNJsTYSgQiA03NYOxXlsrAtXFl/Q==}
 
-  '@efffrida/rpc@0.0.53':
-    resolution: {integrity: sha512-3LZ8kRwbH5ZyyscqqTxZDYBG82bY66TC2h+GHIvXDe6Bzfa5iwFxnwfesl5IKze1OUgXJBWInID3a4t/5GxwPA==}
+  '@efffrida/rpc@0.0.56':
+    resolution: {integrity: sha512-WBlP6SS+rzpscQftIiXX7GsW1iTn9PKQEI7ZaZpMuiY0gfCJ30pN+m1IOo7HDh3uKzrxgfx84dzQW6oBugEVPA==}
     peerDependencies:
-      effect: 4.0.0-beta.105
+      effect: 4.0.0-rc.111
 
   '@esbuild/aix-ppc64@0.28.2':
     resolution: {integrity: sha512-XExcO+dvLKvVtNTibSTBej1NCAbaGhWn9Ww1ZPx80qsahhPFe/8jgWP0IchNe0F3HwkU7n8ejhH8bjonqht8mQ==}
@@ -1048,12 +1045,12 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@foldkit/vite-plugin@0.12.1':
-    resolution: {integrity: sha512-26zBD9Vk17Nf9zaD3qJdjnqh/Dh2lfXCJTi8+a1aKlVBfLQ98dJKk8kgfZCjRK3FkPXElwV/wJSRzuHUYD+l9A==}
-    engines: {node: '>=18.0.0'}
+  '@foldkit/vite-plugin@0.17.0':
+    resolution: {integrity: sha512-C7OjQg0AG7D1jTisaX1V1CLzJAftup/aDGWsR3gqDik8bDSGgjIrFnupLxd3IJF7x/j1LVf6FDniHPIFizNIwQ==}
+    engines: {node: '>=20.19.0'}
     peerDependencies:
-      effect: 4.0.0-beta.105
-      foldkit: ^0
+      effect: 4.0.0-rc.111
+      foldkit: '>=0.148.0'
       vite: ^7.0.0 || ^8.0.0
 
   '@fontsource/ibm-plex-mono@5.3.0':
@@ -1064,9 +1061,6 @@ packages:
 
   '@fontsource/vt323@5.3.0':
     resolution: {integrity: sha512-3w33Rg/0+R1587HQfz4t7Q7e0GGeCqr3wmzIwqdGInUnrGEwMA5eX39GP4Z9wpTQnwfhVOhYuxuRwRUeIcicbw==}
-
-  '@ioredis/commands@1.10.0':
-    resolution: {integrity: sha512-UmeW7z4LfctwoQ5wkhVzgq8tXkreED2xZGpX+Bg+zA+WJFZCT6c062AfCK/Dfk81xZnnwdhJCUMkitihRaoC2Q==}
 
   '@jridgewell/gen-mapping@0.3.13':
     resolution: {integrity: sha512-2kkt/7niJ6MgEPxF0bYdQ6etZaA+fQvDcLKckhy1yIQOzaoKjBBjSj63/aLVjYE3qhRt5dvM+uUyfCg6UKCBbA==}
@@ -1407,6 +1401,42 @@ packages:
     resolution: {integrity: sha512-pOr5+q1fLYKwFN3LAJuGZEnfXDcQ73zqgDHMtGy+K+uIoUqyY+6MeDCWFwfu+4EFuq76I5EPFofoNAI+Bmmq4A==}
     engines: {node: '>=22.13'}
 
+  '@redis/bloom@6.2.1':
+    resolution: {integrity: sha512-huQgNLaCIZfQ9SeLn4q9124uOUd8HbZDYHwwUzNcRgHqCHiHKl2dDxMqJCeWh8cMqZAoWuHR8XnWbDMIf+o7ag==}
+    engines: {node: '>= 20.0.0'}
+    peerDependencies:
+      '@redis/client': ^6.2.1
+
+  '@redis/client@6.2.1':
+    resolution: {integrity: sha512-LzxBY7SIBvvJiyCgcaJZZakE3fJrZZ++i24+EDW9fKpCl68D35uJcKFpZZwCfOoG9WZTbyZlMzMeM0gtOAMU9Q==}
+    engines: {node: '>= 20.0.0'}
+    peerDependencies:
+      '@node-rs/xxhash': ^1.1.0
+      '@opentelemetry/api': '>=1 <2'
+    peerDependenciesMeta:
+      '@node-rs/xxhash':
+        optional: true
+      '@opentelemetry/api':
+        optional: true
+
+  '@redis/json@6.2.1':
+    resolution: {integrity: sha512-AFIUJ8Gj0DaaSBHYuSt8+O0oYWM+50OK1c0OmodB7XERIA8+BbyV3O4v76f9iccWasd1/7qjfZTpuzexUaZtrQ==}
+    engines: {node: '>= 20.0.0'}
+    peerDependencies:
+      '@redis/client': ^6.2.1
+
+  '@redis/search@6.2.1':
+    resolution: {integrity: sha512-2vfOAOyYFE7UUw3sBBlkqqruBtOUS4HRY5MtW4hp83llrwvtrTE4r22CEqXddlV+54zkLxBE4nmsIJ/dpezQrQ==}
+    engines: {node: '>= 20.0.0'}
+    peerDependencies:
+      '@redis/client': ^6.2.1
+
+  '@redis/time-series@6.2.1':
+    resolution: {integrity: sha512-kiYniph04dJOole+L359B6C9E+jYS2uDP7hca6Onj0xF38ZIpyxARO0Iq0W4ZRn1e8Q6vqW00QFZVSMRA/2Ijw==}
+    engines: {node: '>= 20.0.0'}
+    peerDependencies:
+      '@redis/client': ^6.2.1
+
   '@rolldown/binding-android-arm64@1.2.3':
     resolution: {integrity: sha512-zrJtHDcaZJ1Fp7xf4hNl+7seH9Cn/N5TwLYkhgXREtBwAd/jaqW3uqeHxpDugJLVICWg4eW44kOQEGJ1r6jCGw==}
     engines: {node: ^20.19.0 || >=22.12.0}
@@ -1645,8 +1675,8 @@ packages:
     resolution: {integrity: sha512-w071DSzP94YfN6XiWhOxnLpYT3uqtxJBDYdh6Jdjzt+Ce6DNspJsPQgpC7rbts/B8tEkq0LHoYuIF/O5Jh5rPg==}
     engines: {node: '>=18'}
 
-  '@ts-morph/common@0.28.1':
-    resolution: {integrity: sha512-W74iWf7ILp1ZKNYXY5qbddNaml7e9Sedv5lvU1V8lftlitkc9Pq1A+jlH23ltDgWYeZFFEqGCD1Ies9hqu3O+g==}
+  '@ts-morph/common@0.29.0':
+    resolution: {integrity: sha512-35oUmphHbJvQ/+UTwFNme/t2p3FoKiGJ5auTjjpNTop2dyREspirjMy82PLSC1pnDJ8ah1GU98hwpVt64YXQsg==}
 
   '@types/body-parser@1.19.6':
     resolution: {integrity: sha512-HLFeCYgz89uk22N5Qg3dvGvsv46B8GLvKKo1zKG4NybA8U2DiEO3w9lqGg29t/tfLRJpJ6iQxnVw4OnB7MoM9g==}
@@ -2000,9 +2030,9 @@ packages:
     resolution: {integrity: sha512-oKnbhFyRIXpUuez8iBMmyEa4nbj4IOQyuhc/wy9kY7/WVPcwIO9VA668Pu8RkO7+0G76SLROeyw9CpQ061i4mA==}
     engines: {node: '>=10'}
 
-  chalk@5.6.2:
-    resolution: {integrity: sha512-7NzBL0rN6fMUW+f7A6Io4h40qQlG+xGmtMxfbnH/K7TAtt8JQWVQK+6g0UXKMeVJoyV5EkkNsErQ8pVD3bLHbA==}
-    engines: {node: ^12.17.0 || ^14.13 || >=16.0.0}
+  chalk@6.0.0:
+    resolution: {integrity: sha512-2uNTXIuTTxk7ciZgAU1BQcgnchcG0xXnrs6jzkQfj9SsRa9M2s5zE8WT96hS6KmG4MzWHSrvH43DF1m4XRkrFg==}
+    engines: {node: '>=22'}
 
   chokidar@5.0.0:
     resolution: {integrity: sha512-TQMmc3w+5AxjpL8iIiwebF73dRDF4fBIieAqGn9RGCWaEVwQ6Fb2cGe31Yns0RRIzii5goJ1Y7xbMwo1TxMplw==}
@@ -2023,8 +2053,8 @@ packages:
     resolution: {integrity: sha512-JQHZ2QMW6l3aH/j6xCqQThY/9OH4D/9ls34cgkUBiEeocRTU04tHfKPBsUK1PqZCUQM7GiA0IIXJSuXHI64Kbg==}
     engines: {node: '>=0.8'}
 
-  cluster-key-slot@1.1.1:
-    resolution: {integrity: sha512-rwHwUfXL40Chm1r08yrhU3qpUvdVlgkKNeyeGPOxnW8/SyVDvgRaed/Uz54AqWNaTCAThlj6QAs3TZcKI0xDEw==}
+  cluster-key-slot@1.1.2:
+    resolution: {integrity: sha512-RMr0FhtfXemyinomL4hrWcYJxmX6deFdCxpJzhDttxgO1+bcCnkk+9drydLVDmAMG7NE6aN/fl4F7ucU/90gAA==}
     engines: {node: '>=0.10.0'}
 
   code-block-writer@13.0.3:
@@ -2084,10 +2114,6 @@ packages:
 
   defaults@1.0.4:
     resolution: {integrity: sha512-eFuaLoy/Rxalv2kr+lqMlUnrDWV+3j4pljOIJgLIhI058IQfWJ7vXhyEIHu+HtC738klGALYxOKDO0bQP3tg8A==}
-
-  denque@2.1.0:
-    resolution: {integrity: sha512-HVQE3AAb/pxF8fQAoiqpvg9i3evqug3hoiwakOyZAwJm+6vZehbkYXZ0l4JxS+I3QxM97v5aaRNhj8v5oBhekw==}
-    engines: {node: '>=0.10'}
 
   dependency-tree@11.5.0:
     resolution: {integrity: sha512-K9zBwKDZrot3RkxizugpVSdImxULAg4Ycp3+ydy2r561k96oiiw6nfsOR15fwNDQ5BF2UXe+2JFM/H5Xz4MGQg==}
@@ -2161,14 +2187,14 @@ packages:
     resolution: {integrity: sha512-yS+Q5i3hBf7GBkd4KG8a7eBNNWNGLTaEwwYWUijIYM7zrlYDM0BFXHjjPWlWZ1Rg7UaddZeIDmi9jF3HmqiQ2w==}
     engines: {node: '>=6.0.0'}
 
-  effect-oidc@0.0.9:
-    resolution: {integrity: sha512-EVish6t9ILvCz6TIq3Px/In0GZYpM1J7WVN9dWR5ir5BXfG4BVj57E7rs+MNbXabIfdwjBPdIumnXIAK6H6KFw==}
+  effect-oidc@0.0.13:
+    resolution: {integrity: sha512-4FVV0NnSaojMVZ/Hru4w5Eqny337j03LB0QpTQXdyWQ7WhMacLcT3hPslJn5e/Ij2Dav7jKMB5BYGx79ZIpmQg==}
     engines: {node: '>=22.0.0'}
     peerDependencies:
-      effect: 4.0.0-beta.105
+      effect: 4.0.0-rc.111
 
-  effect@4.0.0-beta.105:
-    resolution: {integrity: sha512-7U5OzWVNlpnZFvXiZfOeu8V+dCQUa3Om569HnYG2Dx8C8V6uoKS920kFJkIDEYVhlSGhzkRqaGKmYY9bPkBMMQ==}
+  effect@4.0.0-rc.111:
+    resolution: {integrity: sha512-ASd5L58EIR0CUNueZNKKjSsyOCd+2alxOAIaTcHaqkJkPsaYSsw5Cg/cfANk5K4Jr2YsX756xvX11shzqsreWA==}
 
   electron-to-chromium@1.5.403:
     resolution: {integrity: sha512-MQsYmdaLzvaCX5j+ZZBr5Fm6uCCnPQcRtlvmvRlWqrXy+BH2O4ffXIAScF+JQznQWB9brWp4lSD9Z4yNmaf2BA==}
@@ -2187,6 +2213,10 @@ packages:
   entities@7.0.1:
     resolution: {integrity: sha512-TWrgLOFUQTH994YUyl1yT4uyavY5nNB5muff+RtWaqNVCAK408b5ZnnbNAUEWLTCpum9w6arT70i1XdQ4UeOPA==}
     engines: {node: '>=0.12'}
+
+  entities@8.0.0:
+    resolution: {integrity: sha512-zwfzJecQ/Uej6tusMqwAqU/6KL2XaB2VZ2Jg54Je6ahNBGNH6Ek6g3jjNCF0fG9EWQKGZNddNjU5F1ZQn/sBnA==}
+    engines: {node: '>=20.19.0'}
 
   es-errors@1.3.0:
     resolution: {integrity: sha512-Zf5H2Kxt2xjTvbJvP2ZWLEICxA6j+hAmMzIlypy4xcBg1vKVnx89Wy0GbS+kf5cwCVFFzdCFh2XSCFNULS6csw==}
@@ -2293,12 +2323,11 @@ packages:
     resolution: {integrity: sha512-YsGpe3WHLK8ZYi4tWDg2Jy3ebRz2rXowDxnld4bkQB00cc/1Zw9AWnC0i9ztDJitivtQvaI9KaLyKrc+hBW0yg==}
     engines: {node: '>=8'}
 
-  foldkit@0.140.1:
-    resolution: {integrity: sha512-rFMX0KQRHoqIQHkHb9QkacZY9fDQxK+/JjG8Op3j7Q0u5R1BvJ8KDCPBovVXYFWKUvoVS710x5K5k5z26Fn0ug==}
-    engines: {node: '>=18.0.0'}
+  foldkit@0.150.0:
+    resolution: {integrity: sha512-dRn6Rogi4Vrs9WoB+fPryN1liuRYT0ICoZCeBjhTIHrCCvULpB8K7RBXvF++d0UjRKMK7UWru4SnrCpbNBKHBg==}
+    engines: {node: '>=20.19.0'}
     peerDependencies:
-      '@effect/platform-browser': 4.0.0-beta.105
-      effect: 4.0.0-beta.105
+      effect: 4.0.0-rc.111
 
   for-in@1.0.2:
     resolution: {integrity: sha512-7EwmXrOjyL+ChxMhmG5lnW9MPt1aIeZEwKhQzoBUdTV0N3zuwWDZYVJatDvZ2OyzPUvdIAZDsCetk3coyMfcnQ==}
@@ -2306,6 +2335,10 @@ packages:
 
   frida-il2cpp-bridge@0.13.1:
     resolution: {integrity: sha512-qXjdcdI+KM5wnjCwqZTe/Tas/2pClXpDhcVWjiaQFxzSun+1vaoHEWlnMe4F09Vdz/vGkkjFOPKfvDem2A8UOQ==}
+    hasBin: true
+
+  frida-il2cpp-bridge@0.13.2:
+    resolution: {integrity: sha512-tLQrGEADcMUCwSgw8LfQiNxRWYEPQAHUp2Dr4wbRYXrwLegP5ccTotGnDCiWzKByNkWo/ON82ReBaWcx20IEEA==}
     hasBin: true
 
   frida@17.17.0:
@@ -2383,10 +2416,6 @@ packages:
 
   ini@1.3.8:
     resolution: {integrity: sha512-JV/yugV2uzW5iMRSiZAyDtQd+nxtUnjeLt0acNdw98kKLrvuRVyB80tsREOE7yvGVgalhZ6RNXCmEHkUKBKxew==}
-
-  ioredis@5.11.1:
-    resolution: {integrity: sha512-ehuGcf94bQXhfagULNXrJdfnWO38v070jxSx/qE87Kjzmu2fU7ro5EFAb+OPituLqgfyuQaym5DlrNydW2sJ9A==}
-    engines: {node: '>=12.22.0'}
 
   is-buffer@1.1.6:
     resolution: {integrity: sha512-NcdALwpXkTm5Zvvbk7owOUSvVvBKDgKP5/ewfXEznmQFfs4ZRmanOeKBTjRVjka3QFoN6XJ+9F3USqfHqTaU5w==}
@@ -2500,9 +2529,6 @@ packages:
   kind-of@6.0.3:
     resolution: {integrity: sha512-dcS1ul+9tmeD95T+x28/ehLgd9mENa3LsvDTtzm3vyBEO7RPptvAD+t44WVXaUjTBRcrpFeFlC8WCruUR456hw==}
     engines: {node: '>=0.10.0'}
-
-  kubernetes-types@1.30.0:
-    resolution: {integrity: sha512-Dew1okvhM/SQcIa2rcgujNndZwU8VnSapDgdxlYoB84ZlpAD43U6KLAFqYo17ykSFGHNPrg0qry0bP+GJd9v7Q==}
 
   launch-editor@2.14.1:
     resolution: {integrity: sha512-QWBrQsMpH7gPr965dsKD/3cKWiNoTjpATQf++Xq63N6sKRGMwlVXz41O1IZTMfZQgBctD/K5Zt06+/I6pP6+HA==}
@@ -2852,6 +2878,9 @@ packages:
     resolution: {integrity: sha512-kHt7kzLoS9VBZfUsiKjv43mr91ea+U05EyKkEtqp7vNbHxmaVuEqN7XxeEVnGrMtYOAxGrDElSi96K7EgO1zCA==}
     engines: {node: '>=6'}
 
+  parse5@8.0.1:
+    resolution: {integrity: sha512-z1e/HMG90obSGeidlli3hj7cbocou0/wa5HacvI3ASx34PecNjNQeaHNo5WIZpWofN9kgkqV1q5YvXe3F0FoPw==}
+
   path-browserify@1.0.1:
     resolution: {integrity: sha512-b7uo2UCUOYZcnF/3ID0lulOJi/bafxa1xPe7ZPsammBSpjSWQkjNxlt635YGS2MiR9GjvuXCtz2emr3jbsz98g==}
 
@@ -3027,13 +3056,9 @@ packages:
     resolution: {integrity: sha512-Kko+Y5XQ6fM+Ce3dq3m9YGxnacYZYl9cA1wZjaF3Vbry2L3i1qVg8+CAgNPsXRArPMUMCaOR7oa9Nqntc43JKA==}
     engines: {node: '>= 20.19.0'}
 
-  redis-errors@1.2.0:
-    resolution: {integrity: sha512-1qny3OExCf0UvUV/5wpYKf2YwPcOqXzkwKKSmKHiE6ZMQs5heeE/c8eXK+PNllPvmjgAbfnsbpkGZWy8cBpn9w==}
-    engines: {node: '>=4'}
-
-  redis-parser@3.0.0:
-    resolution: {integrity: sha512-DJnGAeenTdpMEH6uAJRK/uiyEIH9WVsUmoLwzudwGJUwZPp80PDBWPHXSAGNPwNvIXAbe7MSUB1zQFugFml66A==}
-    engines: {node: '>=4'}
+  redis@6.2.1:
+    resolution: {integrity: sha512-Z9VHtgYs48PiQC77X9O2Er8Hj4T+5BtFjT91/vi5Is1D04N72cA946ZslM1ImJw8ZctFBZWAVjM7S5wJNeHMpg==}
+    engines: {node: '>= 20.0.0'}
 
   remarkable@1.7.4:
     resolution: {integrity: sha512-e6NKUXgX95whv7IgddywbeN/ItCkWbISmc2DiqHJb0wTrqZIexqdco5b8Z3XZoo/48IdNVKM9ZCvTPJ4F5uvhg==}
@@ -3141,9 +3166,6 @@ packages:
   stackback@0.0.2:
     resolution: {integrity: sha512-1XMJE5fQo1jGH6Y/7ebnwPOBEkIEnT4QF32d5R1+VXdXveM0IBMJt8zfaxX1P3QhVwrYe+576+jkANtSS2mBbw==}
 
-  standard-as-callback@2.1.0:
-    resolution: {integrity: sha512-qoRRSyROncaz1z0mvYqIE4lCd9p2R90i6GxW3uZv5ucSu8tU7B5HXUP1gG8pVZsYNVaXjk8ClXHPttLyxAL48A==}
-
   std-env@4.2.0:
     resolution: {integrity: sha512-oCUKSupKTHX53EyjDtuZQ64pjLJ6yYCtpmEw0goYxtjG9KpbRe8KAsl2tBUGU9DyMcJ0RwJ8GqJAFzMXcXW1Rw==}
 
@@ -3250,8 +3272,8 @@ packages:
     resolution: {integrity: sha512-XyLVuhBVvdJTJr2FJJV2L1pc4MwSjMhcunRVgDE9k4wbb2ee7ORYnPewxMWUav12vxyfUM686MSGsqnVRIInuw==}
     engines: {node: '>=18'}
 
-  ts-morph@27.0.2:
-    resolution: {integrity: sha512-fhUhgeljcrdZ+9DZND1De1029PrE+cMkIP7ooqkLRTrRLTqcki2AstsyJm0vRNbTbVCNJ0idGlbBrfqc7/nA8w==}
+  ts-morph@28.0.0:
+    resolution: {integrity: sha512-Wp3tnZ2bzwxyTZMtgWVzXDfm7lB1Drz+y9DmmYH/L702PQhPyVrp3pkou3yIz4qjS14GY9kcpmLiOOMvl8oG1g==}
 
   tsconfck@3.1.6:
     resolution: {integrity: sha512-ks6Vjr/jEw0P1gmOVwutM3B7fWxoWBL2KRDb1JfqGVawBmO5UsvmWOQFGHBPl5yxYz4eERr19E6L7NMv+Fej4w==}
@@ -3307,10 +3329,6 @@ packages:
 
   util-deprecate@1.0.2:
     resolution: {integrity: sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==}
-
-  uuid@14.0.1:
-    resolution: {integrity: sha512-6ZxzVpzDXDa3bJWaHilVayA+BH/1zmxCJoVgvmqJnid/gPoKHxUrS/aC/T6LGQtNHT+XHG9fXPJB4d+IrU30Ew==}
-    hasBin: true
 
   vite@8.2.1:
     resolution: {integrity: sha512-EU/eS7BH3XROHh2YnBefjM6DBKA6ZeMZEYQbj7NLWg5wHYlhB8B/Mayd5XsgWq+NFYccDOTemRpdETWR6Ka/lw==}
@@ -3741,7 +3759,7 @@ snapshots:
 
   '@bcoe/v8-coverage@1.0.2': {}
 
-  '@bufbuild/protobuf@2.13.0': {}
+  '@bufbuild/protobuf@2.14.0': {}
 
   '@changesets/apply-release-plan@8.0.0':
     dependencies:
@@ -3866,43 +3884,43 @@ snapshots:
 
   '@discoveryjs/json-ext@1.1.0': {}
 
-  '@effect-aws/client-s3@2.0.0-beta.6(effect@4.0.0-beta.105)':
+  '@effect-aws/client-s3@2.0.0-beta.6(effect@4.0.0-rc.111)':
     dependencies:
       '@aws-sdk/client-s3': 3.1106.0
       '@aws-sdk/s3-request-presigner': 3.1106.0
       '@aws-sdk/types': 3.974.2
-      '@effect-aws/commons': 1.0.0-beta.4(effect@4.0.0-beta.105)
-      effect: 4.0.0-beta.105
+      '@effect-aws/commons': 1.0.0-beta.4(effect@4.0.0-rc.111)
+      effect: 4.0.0-rc.111
 
-  '@effect-aws/commons@1.0.0-beta.4(effect@4.0.0-beta.105)':
+  '@effect-aws/commons@1.0.0-beta.4(effect@4.0.0-rc.111)':
     dependencies:
       '@smithy/protocol-http': 5.5.16
       '@smithy/smithy-client': 4.14.16
       '@smithy/types': 4.16.1
-      effect: 4.0.0-beta.105
+      effect: 4.0.0-rc.111
 
   '@effect/build-utils@0.8.9':
     dependencies:
       micromatch: 4.0.8
       pkg-entry-points: 1.1.2
 
-  '@effect/docgen@4.0.0-beta.105(ioredis@5.11.1)(tsx@4.23.12)(typescript@7.0.2)':
+  '@effect/docgen@4.0.0-rc.111(redis@6.2.1)(tsx@4.23.12)(typescript@7.0.2)':
     dependencies:
       '@babel/code-frame': 8.0.0
       '@effect/markdown-toc': 0.1.0
-      '@effect/platform-node': 4.0.0-beta.105(effect@4.0.0-beta.105)(ioredis@5.11.1)
-      chalk: 5.6.2
+      '@effect/platform-node': 4.0.0-rc.111(effect@4.0.0-rc.111)(redis@6.2.1)
+      chalk: 6.0.0
       doctrine: 3.0.0
-      effect: 4.0.0-beta.105
+      effect: 4.0.0-rc.111
       glob: 13.0.6
       prettier: 3.9.6
-      ts-morph: 27.0.2
+      ts-morph: 28.0.0
       tsconfck: 3.1.6(typescript@7.0.2)
       tsx: 4.23.12
       typescript: 7.0.2
     transitivePeerDependencies:
       - bufferutil
-      - ioredis
+      - redis
       - utf-8-validate
 
   '@effect/markdown-toc@0.1.0':
@@ -3920,33 +3938,33 @@ snapshots:
       repeat-string: 1.6.1
       strip-color: 0.1.0
 
-  '@effect/platform-browser@4.0.0-beta.105(effect@4.0.0-beta.105)':
+  '@effect/platform-browser@4.0.0-rc.111(effect@4.0.0-rc.111)':
     dependencies:
-      effect: 4.0.0-beta.105
+      effect: 4.0.0-rc.111
 
-  '@effect/platform-node-shared@4.0.0-beta.107(effect@4.0.0-beta.105)':
+  '@effect/platform-node-shared@4.0.0-rc.111(effect@4.0.0-rc.111)':
     dependencies:
       '@types/ws': 8.18.1
-      effect: 4.0.0-beta.105
+      effect: 4.0.0-rc.111
       ws: 8.21.3
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
 
-  '@effect/platform-node@4.0.0-beta.105(effect@4.0.0-beta.105)(ioredis@5.11.1)':
+  '@effect/platform-node@4.0.0-rc.111(effect@4.0.0-rc.111)(redis@6.2.1)':
     dependencies:
-      '@effect/platform-node-shared': 4.0.0-beta.107(effect@4.0.0-beta.105)
-      effect: 4.0.0-beta.105
-      ioredis: 5.11.1
+      '@effect/platform-node-shared': 4.0.0-rc.111(effect@4.0.0-rc.111)
+      effect: 4.0.0-rc.111
       mime: 4.1.0
+      redis: 6.2.1
       undici: 8.10.0
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
 
-  '@effect/sql-pg@4.0.0-beta.105(effect@4.0.0-beta.105)':
+  '@effect/sql-pg@4.0.0-rc.111(effect@4.0.0-rc.111)':
     dependencies:
-      effect: 4.0.0-beta.105
+      effect: 4.0.0-rc.111
       pg: 8.23.0
       pg-connection-string: 2.14.0
       pg-cursor: 2.22.0(pg@8.23.0)
@@ -3986,29 +4004,29 @@ snapshots:
       '@effect/tsgo-win32-arm64': 0.36.5
       '@effect/tsgo-win32-x64': 0.36.5
 
-  '@effect/vitest@4.0.0-beta.105(effect@4.0.0-beta.105)(vitest@4.1.11(vite@8.2.1))':
+  '@effect/vitest@4.0.0-rc.111(effect@4.0.0-rc.111)(vitest@4.1.11(vite@8.2.1))':
     dependencies:
-      effect: 4.0.0-beta.105
+      effect: 4.0.0-rc.111
       vitest: 4.1.11(vite@8.2.1)
 
-  '@efffrida/frida-tools@0.0.50(effect@4.0.0-beta.105)':
+  '@efffrida/frida-tools@0.0.53(effect@4.0.0-rc.111)':
     dependencies:
-      effect: 4.0.0-beta.105
+      effect: 4.0.0-rc.111
       frida: 17.17.0
 
-  '@efffrida/gplayapi@0.0.27(@bufbuild/protobuf@2.13.0)(effect@4.0.0-beta.105)':
+  '@efffrida/gplayapi@0.0.30(@bufbuild/protobuf@2.14.0)(effect@4.0.0-rc.111)':
     dependencies:
-      '@bufbuild/protobuf': 2.13.0
-      effect: 4.0.0-beta.105
+      '@bufbuild/protobuf': 2.14.0
+      effect: 4.0.0-rc.111
 
-  '@efffrida/il2cpp-bridge@0.0.46(effect@4.0.0-beta.105)':
+  '@efffrida/il2cpp-bridge@0.0.49(effect@4.0.0-rc.111)':
     dependencies:
-      effect: 4.0.0-beta.105
-      frida-il2cpp-bridge: 0.13.1
+      effect: 4.0.0-rc.111
+      frida-il2cpp-bridge: 0.13.2
 
-  '@efffrida/platform@0.0.38(effect@4.0.0-beta.105)':
+  '@efffrida/platform@0.0.41(effect@4.0.0-rc.111)':
     dependencies:
-      effect: 4.0.0-beta.105
+      effect: 4.0.0-rc.111
 
   '@efffrida/polyfills@0.0.15':
     dependencies:
@@ -4016,12 +4034,12 @@ snapshots:
       event-target-polyfill: 0.0.4
       text-encoding-utf-8: 1.0.2
 
-  '@efffrida/rpc@0.0.53(effect@4.0.0-beta.105)':
+  '@efffrida/rpc@0.0.56(effect@4.0.0-rc.111)':
     dependencies:
-      '@efffrida/frida-tools': 0.0.50(effect@4.0.0-beta.105)
-      '@efffrida/platform': 0.0.38(effect@4.0.0-beta.105)
+      '@efffrida/frida-tools': 0.0.53(effect@4.0.0-rc.111)
+      '@efffrida/platform': 0.0.41(effect@4.0.0-rc.111)
       '@efffrida/polyfills': 0.0.15
-      effect: 4.0.0-beta.105
+      effect: 4.0.0-rc.111
 
   '@esbuild/aix-ppc64@0.28.2':
     optional: true
@@ -4101,10 +4119,10 @@ snapshots:
   '@esbuild/win32-x64@0.28.2':
     optional: true
 
-  '@foldkit/vite-plugin@0.12.1(effect@4.0.0-beta.105)(foldkit@0.140.1(@effect/platform-browser@4.0.0-beta.105(effect@4.0.0-beta.105))(effect@4.0.0-beta.105))(vite@8.2.1)':
+  '@foldkit/vite-plugin@0.17.0(effect@4.0.0-rc.111)(foldkit@0.150.0(effect@4.0.0-rc.111))(vite@8.2.1)':
     dependencies:
-      effect: 4.0.0-beta.105
-      foldkit: 0.140.1(@effect/platform-browser@4.0.0-beta.105(effect@4.0.0-beta.105))(effect@4.0.0-beta.105)
+      effect: 4.0.0-rc.111
+      foldkit: 0.150.0(effect@4.0.0-rc.111)
       magic-string: 0.30.21
       vite: 8.2.1
       ws: 8.21.3
@@ -4117,8 +4135,6 @@ snapshots:
   '@fontsource/press-start-2p@5.3.0': {}
 
   '@fontsource/vt323@5.3.0': {}
-
-  '@ioredis/commands@1.10.0': {}
 
   '@jridgewell/gen-mapping@0.3.13':
     dependencies:
@@ -4308,6 +4324,26 @@ snapshots:
 
   '@pnpm/deps.graph-sequencer@1100.0.1': {}
 
+  '@redis/bloom@6.2.1(@redis/client@6.2.1)':
+    dependencies:
+      '@redis/client': 6.2.1
+
+  '@redis/client@6.2.1':
+    dependencies:
+      cluster-key-slot: 1.1.2
+
+  '@redis/json@6.2.1(@redis/client@6.2.1)':
+    dependencies:
+      '@redis/client': 6.2.1
+
+  '@redis/search@6.2.1(@redis/client@6.2.1)':
+    dependencies:
+      '@redis/client': 6.2.1
+
+  '@redis/time-series@6.2.1(@redis/client@6.2.1)':
+    dependencies:
+      '@redis/client': 6.2.1
+
   '@rolldown/binding-android-arm64@1.2.3':
     optional: true
 
@@ -4481,7 +4517,7 @@ snapshots:
       '@ts-graphviz/ast': 2.0.7
       '@ts-graphviz/common': 2.1.5
 
-  '@ts-morph/common@0.28.1':
+  '@ts-morph/common@0.29.0':
     dependencies:
       minimatch: 10.2.6
       path-browserify: 1.0.1
@@ -4845,7 +4881,7 @@ snapshots:
       ansi-styles: 4.3.0
       supports-color: 7.2.0
 
-  chalk@5.6.2: {}
+  chalk@6.0.0: {}
 
   chokidar@5.0.0:
     dependencies:
@@ -4861,7 +4897,7 @@ snapshots:
 
   clone@1.0.4: {}
 
-  cluster-key-slot@1.1.1: {}
+  cluster-key-slot@1.1.2: {}
 
   code-block-writer@13.0.3: {}
 
@@ -4907,8 +4943,6 @@ snapshots:
   defaults@1.0.4:
     dependencies:
       clone: 1.0.4
-
-  denque@2.1.0: {}
 
   dependency-tree@11.5.0:
     dependencies:
@@ -4978,10 +5012,10 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  dfx@1.0.15(effect@4.0.0-beta.105):
+  dfx@1.0.15(effect@4.0.0-rc.111):
     dependencies:
       discord-api-types: 0.38.53
-      effect: 4.0.0-beta.105
+      effect: 4.0.0-rc.111
     optionalDependencies:
       discord-verify: 1.2.0
 
@@ -4998,17 +5032,15 @@ snapshots:
     dependencies:
       esutils: 2.0.3
 
-  effect-oidc@0.0.9(effect@4.0.0-beta.105):
+  effect-oidc@0.0.13(effect@4.0.0-rc.111):
     dependencies:
-      effect: 4.0.0-beta.105
+      effect: 4.0.0-rc.111
 
-  effect@4.0.0-beta.105:
+  effect@4.0.0-rc.111:
     dependencies:
       '@standard-schema/spec': 1.1.0
       fast-check: 4.9.0
-      kubernetes-types: 1.30.0
       msgpackr: 2.0.5
-      uuid: 14.0.1
 
   electron-to-chromium@1.5.403: {}
 
@@ -5024,6 +5056,8 @@ snapshots:
       tapable: 2.3.3
 
   entities@7.0.1: {}
+
+  entities@8.0.0: {}
 
   es-errors@1.3.0: {}
 
@@ -5144,14 +5178,16 @@ snapshots:
     dependencies:
       to-regex-range: 5.0.1
 
-  foldkit@0.140.1(@effect/platform-browser@4.0.0-beta.105(effect@4.0.0-beta.105))(effect@4.0.0-beta.105):
+  foldkit@0.150.0(effect@4.0.0-rc.111):
     dependencies:
-      '@effect/platform-browser': 4.0.0-beta.105(effect@4.0.0-beta.105)
-      effect: 4.0.0-beta.105
+      effect: 4.0.0-rc.111
+      parse5: 8.0.1
 
   for-in@1.0.2: {}
 
   frida-il2cpp-bridge@0.13.1: {}
+
+  frida-il2cpp-bridge@0.13.2: {}
 
   frida@17.17.0:
     dependencies:
@@ -5219,18 +5255,6 @@ snapshots:
   inherits@2.0.4: {}
 
   ini@1.3.8: {}
-
-  ioredis@5.11.1:
-    dependencies:
-      '@ioredis/commands': 1.10.0
-      cluster-key-slot: 1.1.1
-      debug: 4.4.3
-      denque: 2.1.0
-      redis-errors: 1.2.0
-      redis-parser: 3.0.0
-      standard-as-callback: 2.1.0
-    transitivePeerDependencies:
-      - supports-color
 
   is-buffer@1.1.6: {}
 
@@ -5311,8 +5335,6 @@ snapshots:
   kind-of@5.1.0: {}
 
   kind-of@6.0.3: {}
-
-  kubernetes-types@1.30.0: {}
 
   launch-editor@2.14.1:
     dependencies:
@@ -5649,6 +5671,10 @@ snapshots:
 
   parse-ms@2.1.0: {}
 
+  parse5@8.0.1:
+    dependencies:
+      entities: 8.0.0
+
   path-browserify@1.0.1: {}
 
   path-parse@1.0.7: {}
@@ -5839,11 +5865,16 @@ snapshots:
 
   readdirp@5.1.1: {}
 
-  redis-errors@1.2.0: {}
-
-  redis-parser@3.0.0:
+  redis@6.2.1:
     dependencies:
-      redis-errors: 1.2.0
+      '@redis/bloom': 6.2.1(@redis/client@6.2.1)
+      '@redis/client': 6.2.1
+      '@redis/json': 6.2.1(@redis/client@6.2.1)
+      '@redis/search': 6.2.1(@redis/client@6.2.1)
+      '@redis/time-series': 6.2.1(@redis/client@6.2.1)
+    transitivePeerDependencies:
+      - '@node-rs/xxhash'
+      - '@opentelemetry/api'
 
   remarkable@1.7.4:
     dependencies:
@@ -5942,8 +5973,6 @@ snapshots:
   sprintf-js@1.0.3: {}
 
   stackback@0.0.2: {}
-
-  standard-as-callback@2.1.0: {}
 
   std-env@4.2.0: {}
 
@@ -6045,9 +6074,9 @@ snapshots:
       '@ts-graphviz/common': 2.1.5
       '@ts-graphviz/core': 2.0.7
 
-  ts-morph@27.0.2:
+  ts-morph@28.0.0:
     dependencies:
-      '@ts-morph/common': 0.28.1
+      '@ts-morph/common': 0.29.0
       code-block-writer: 13.0.3
 
   tsconfck@3.1.6(typescript@7.0.2):
@@ -6110,8 +6139,6 @@ snapshots:
       picocolors: 1.1.1
 
   util-deprecate@1.0.2: {}
-
-  uuid@14.0.1: {}
 
   vite@8.2.1:
     dependencies:

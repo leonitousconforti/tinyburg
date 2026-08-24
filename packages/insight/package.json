@@ -45,22 +45,22 @@
         "codegen": "build-utils prepare-v4"
     },
     "dependencies": {
-        "@bufbuild/protobuf": "2.13.0",
-        "@efffrida/frida-tools": "0.0.50",
-        "@efffrida/gplayapi": "0.0.27",
-        "@efffrida/il2cpp-bridge": "0.0.46",
-        "@efffrida/platform": "0.0.38",
+        "@bufbuild/protobuf": "2.14.0",
+        "@efffrida/frida-tools": "0.0.53",
+        "@efffrida/gplayapi": "0.0.30",
+        "@efffrida/il2cpp-bridge": "0.0.49",
+        "@efffrida/platform": "0.0.41",
         "@efffrida/polyfills": "0.0.15",
-        "@efffrida/rpc": "0.0.53",
+        "@efffrida/rpc": "0.0.56",
         "frida": "17.17.0",
         "frida-il2cpp-bridge": "0.13.1"
     },
     "devDependencies": {
         "@types/frida-gum": "19.10.0",
-        "effect": "4.0.0-beta.105"
+        "effect": "4.0.0-rc.111"
     },
     "peerDependencies": {
-        "effect": "4.0.0-beta.105"
+        "effect": "4.0.0-rc.111"
     },
     "tags": [
         "nimblebit",

@@ -26,14 +26,14 @@
         "@fontsource/vt323": "5.3.0"
     },
     "devDependencies": {
-        "@effect/platform-browser": "4.0.0-beta.105",
-        "effect": "4.0.0-beta.105",
-        "foldkit": "0.140.1"
+        "@effect/platform-browser": "4.0.0-rc.111",
+        "effect": "4.0.0-rc.111",
+        "foldkit": "0.150.0"
     },
     "peerDependencies": {
-        "@effect/platform-browser": "4.0.0-beta.105",
-        "effect": "4.0.0-beta.105",
-        "foldkit": "0.140.1"
+        "@effect/platform-browser": "4.0.0-rc.111",
+        "effect": "4.0.0-rc.111",
+        "foldkit": "0.150.0"
     },
     "peerDependenciesMeta": {
         "@effect/platform-browser": {
