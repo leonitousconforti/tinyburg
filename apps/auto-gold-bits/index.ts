@@ -1,16 +1,25 @@
-import { Array, Config, Effect, Layer, Redacted, Schema, type Types } from "effect";
-import { FetchHttpClient, HttpClient } from "effect/unstable/http";
+// oxlint-disable typescript/no-unsafe-type-assertion
+
+import { Array, Config, ConfigProvider, Effect, Layer, Schema, type Types } from "effect";
+import { FetchHttpClient } from "effect/unstable/http";
 
 import { NodeRuntime, NodeServices } from "@effect/platform-node";
 import { NimblebitAuth, NimblebitConfig } from "@tinyburg/nimblebit-sdk";
 import { Bitizens, SyncItemType, TinyTower } from "@tinyburg/tinytower-sdk";
 
+const DotEnvLive = Effect.map(ConfigProvider.fromDotEnv(), ConfigProvider.nested("AUTOGOLDBITS"));
+const ConfigLive = ConfigProvider.nested(ConfigProvider.fromEnv(), "AUTOGOLDBITS");
+
 const Live = Layer.merge(
     FetchHttpClient.layer,
     NimblebitAuth.layerTinyburgAuthProxyConfig({
-        authKey: Config.redacted("AUTH_KEY"),
+        authKey: Config.redacted("AUTHPROXY_AUTH_KEY"),
     })
-).pipe(Layer.provide(NodeServices.layer));
+).pipe(
+    Layer.provideMerge(ConfigProvider.layer(ConfigLive)),
+    Layer.provideMerge(ConfigProvider.layerAdd(DotEnvLive)),
+    Layer.provide(NodeServices.layer)
+);
 
 const program = Effect.gen(function* () {
     const authenticatedPlayer = yield* NimblebitConfig.AuthenticatedPlayerConfig;
@@ -24,8 +33,6 @@ const program = Effect.gen(function* () {
     for (const bitizenGift of bitizenGifts) {
         // Upgrade their skills to 9s
         const bitizen = yield* Schema.decodeEffect(Bitizens.Bitizen)(bitizenGift.contents);
-        // Bridges an untyped runtime boundary; the shape is guaranteed by construction, not by the compiler.
-        // oxlint-disable-next-line typescript/no-unsafe-type-assertion
         const mutableBitizen = bitizen as Types.DeepMutable<typeof bitizen>;
         mutableBitizen.attributes.skills.creative = 9;
         mutableBitizen.attributes.skills.food = 9;
@@ -55,10 +62,6 @@ const program = Effect.gen(function* () {
         // Finally, mark the gift as received so Nimblebit doesn't think we still have it
         yield* TinyTower.social_receiveGift({ ...authenticatedPlayer, giftId: bitizenGift.id });
     }
-
-    // Heartbeat for monitoring
-    const heartbeatUrl = yield* Config.redacted("HEARTBEAT_URL");
-    yield* HttpClient.get(Redacted.value(heartbeatUrl));
 });
 
 program.pipe(Effect.provide(Live), NodeRuntime.runMain);

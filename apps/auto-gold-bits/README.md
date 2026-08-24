@@ -8,8 +8,4 @@ Send your bitizens to `DF4NP`
 
 ## Self hosting
 
-You need to request an api key with at least the following scopes: `social_getGifts`, `social_pullFriendMeta`, `social_sendItem`, and `social_receiveItem`.
-
-## Coming soon
-
-A "deploy on DigitalOcean" one-click deploy button that lets you host this yourself.
+You need to request an api key with at least the following scopes: `social_getGifts`, `social_pullFriendMeta`, `social_sendItem`, and `social_receiveGift`.
