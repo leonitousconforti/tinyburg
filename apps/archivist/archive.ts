@@ -6,6 +6,14 @@ import { S3 } from "@effect-aws/client-s3";
 import { NodeStream } from "@effect/platform-node";
 import { GooglePlayApi } from "@efffrida/gplayapi";
 
+export const BUCKET = "tinyburg";
+export const prefixFor = (bundleIdentifier: BundleIdentifier): string => `archivist/${bundleIdentifier}/`;
+export const keyFor = (options: {
+    readonly bundleIdentifier: BundleIdentifier;
+    readonly versionCode: number | bigint;
+    readonly name: string;
+}): string => `${prefixFor(options.bundleIdentifier)}${options.versionCode}/${options.name}`;
+
 export const archiveToS3 = Effect.fnUntraced(
     // The early exits return never-typed values; the normal path runs to the end.
     // oxlint-disable-next-line typescript/consistent-return
@@ -47,8 +55,8 @@ export const archiveToS3 = Effect.fnUntraced(
 
             const maybeExistingUpload = yield* Effect.flatMap(S3, (s3) =>
                 s3.getObject({
-                    Bucket: "tinyburg-cold",
-                    Key: `archivist/${options.bundleIdentifier}/${options.versionCode}/${name}`,
+                    Bucket: BUCKET,
+                    Key: keyFor({ ...options, name }),
                 })
             ).pipe(
                 Effect.flatMap(Effect.succeedSome),
@@ -79,11 +87,11 @@ export const archiveToS3 = Effect.fnUntraced(
             yield* S3.use((s3) =>
                 s3.putObject({
                     ACL: "private",
-                    Bucket: "tinyburg-cold",
+                    Bucket: BUCKET,
                     ContentLength: Number(size),
                     Body: NodeStream.toReadableNever(stream),
                     ChecksumAlgorithm: checksumAlgorithm,
-                    Key: `archivist/${options.bundleIdentifier}/${options.versionCode}/${name}`,
+                    Key: keyFor({ ...options, name }),
                     ...("SHA-1" in integrity ? { ChecksumSHA1: integrityBase64 } : {}),
                     ...("SHA-256" in integrity ? { ChecksumSHA256: integrityBase64 } : {}),
                     ...("SHA-512" in integrity ? { ChecksumSHA512: integrityBase64 } : {}),
