@@ -51,7 +51,7 @@ const ConfigLive = ConfigProvider.nested(ConfigProvider.fromEnv(), "ARCHIVIST");
 export const Live = Layer.mergeAll(
     ObjectStorageLive,
     AndroidDevice.EmbeddedPixel7aLive,
-    PlayAccount.layerConfig(),
+    PlayAccount.layerAuroraDispenser(),
     Layer.succeed(References.MinimumLogLevel, "Debug")
 ).pipe(
     Layer.provideMerge(PacedHttpLive),
