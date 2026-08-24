@@ -1,40 +1,46 @@
-import { Config, Effect, Layer, Redacted } from "effect";
-import { FetchHttpClient, HttpClient } from "effect/unstable/http";
+import { Config, ConfigProvider, Effect, Layer, Schema } from "effect";
+import { FetchHttpClient } from "effect/unstable/http";
 
 import { NodeRuntime, NodeServices } from "@effect/platform-node";
 import { NimblebitAuth, NimblebitConfig } from "@tinyburg/nimblebit-sdk";
-import { TinyTower } from "@tinyburg/tinytower-sdk";
+import { Bitizens, SyncItemType, TinyTower } from "@tinyburg/tinytower-sdk";
+
+const DotEnvLive = Effect.map(ConfigProvider.fromDotEnv(), ConfigProvider.nested("DOORMANCLONE"));
+const ConfigLive = ConfigProvider.nested(ConfigProvider.fromEnv(), "DOORMANCLONE");
 
 const Live = Layer.merge(
     FetchHttpClient.layer,
     NimblebitAuth.layerTinyburgAuthProxyConfig({
-        authKey: Config.redacted("AUTH_KEY"),
+        authKey: Config.redacted("AUTHPROXY_AUTH_KEY"),
     })
-).pipe(Layer.provide(NodeServices.layer));
+).pipe(
+    Layer.provideMerge(ConfigProvider.layer(ConfigLive)),
+    Layer.provideMerge(ConfigProvider.layerAdd(DotEnvLive)),
+    Layer.provide(NodeServices.layer)
+);
 
 const program = Effect.gen(function* () {
     const authenticatedPlayer = yield* NimblebitConfig.AuthenticatedPlayerConfig;
-    const { visits } = yield* TinyTower.social_getVisits(authenticatedPlayer);
+
+    const { total, visits } = yield* TinyTower.social_getVisits(authenticatedPlayer);
+    yield* Effect.logInfo(`Have ${total} visits waiting`);
 
     for (const visit of visits) {
-        yield* Effect.log(visit);
+        const bitizen = yield* Schema.decodeEffect(Bitizens.Bitizen)(visit.contents);
+        const encodedBitizen = yield* Schema.encodeEffect(Bitizens.Bitizen)(bitizen);
 
-        // yield* TinyTower.social_sendItem({
-        //     ...authenticatedPlayer,
-        //     friendId: visit.from,
-        //     itemType: SyncItemType.SyncItemType.Play,
-        //     itemStr: `bit:${visit.contents}`,
-        // });
+        yield* TinyTower.social_sendItem({
+            ...authenticatedPlayer,
+            friendId: visit.from,
+            itemType: SyncItemType.SyncItemType.Play,
+            itemStr: `bit:${encodedBitizen}`,
+        });
 
-        // yield* TinyTower.social_receiveGift({
-        //     ...authenticatedPlayer,
-        //     giftId: visit.id,
-        // });
+        yield* TinyTower.social_receiveGift({
+            ...authenticatedPlayer,
+            giftId: visit.id,
+        });
     }
-
-    // Heartbeat for monitoring
-    const heartbeatUrl = yield* Config.redacted("HEARTBEAT_URL");
-    yield* HttpClient.get(Redacted.value(heartbeatUrl));
 });
 
 program.pipe(Effect.provide(Live), NodeRuntime.runMain);

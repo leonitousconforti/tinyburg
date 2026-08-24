@@ -1,0 +1,17 @@
+{
+    "extends": "../../tsconfig.base.jsonc",
+    "references": [
+        { "path": "../../packages/nimblebit-sdk/tsconfig.src.json" },
+        { "path": "../../packages/tinytower-sdk/tsconfig.src.json" }
+    ],
+    "include": ["index.ts"],
+    "compilerOptions": {
+        "noEmit": true,
+        "declaration": false,
+        "declarationMap": false,
+        "composite": false,
+        "incremental": false,
+        "allowImportingTsExtensions": true,
+        "rewriteRelativeImportExtensions": false
+    }
+}
