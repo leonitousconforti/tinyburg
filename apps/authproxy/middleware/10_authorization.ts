@@ -1,16 +1,15 @@
-import type { SqlError } from "effect/unstable/sql";
-
 import { Array, DateTime, Duration, Effect, Layer, Option, Redacted, Schema } from "effect";
 import { Headers, HttpServerRequest, HttpServerResponse } from "effect/unstable/http";
 import { HttpApiError, HttpApiMiddleware, HttpApiSecurity } from "effect/unstable/httpapi";
 import { RateLimiter } from "effect/unstable/persistence";
+import { SqlError } from "effect/unstable/sql";
 
 import { Account, type CurrentAccount, Repository } from "../domain/model.ts";
 
 export class Authorization extends HttpApiMiddleware.Service<
     Authorization,
     {
-        // Written out to mirror the neighbouring signatures.
+        // Written out to mirror the neighboring signatures.
         // oxlint-disable-next-line typescript/no-redundant-type-constituents
         provides: CurrentAccount & never;
     }
@@ -65,8 +64,8 @@ export const AuthorizationLive = Layer.effect(
 
         const catch500s = <A, E, R>(effect: Effect.Effect<A, E | SqlError.SqlError | Schema.SchemaError, R>) =>
             effect.pipe(
-                Effect.catchTag("SqlError", () => new HttpApiError.InternalServerError()),
-                Effect.catchTag("SchemaError", () => new HttpApiError.InternalServerError())
+                Effect.catchIf(Schema.isSchemaError, () => new HttpApiError.InternalServerError()),
+                Effect.catchIf(SqlError.isSqlError, () => new HttpApiError.InternalServerError())
             );
 
         return {

@@ -43,7 +43,6 @@ export const AuthProxyApiDecodeHashLive = Layer.effect(
                 .sign(decodedHash.value)
                 .pipe(Effect.mapError(() => new HttpApiError.InternalServerError()));
 
-            // return yield* httpEffect;
             return yield* Effect.updateService(httpEffect, HttpRouter.RouteContext, (previousRouteContext) => ({
                 ...previousRouteContext,
                 params: {
