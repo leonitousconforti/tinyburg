@@ -45,8 +45,7 @@ const PacedHttpLive = Layer.effect(
     })
 ).pipe(Layer.provide([FetchHttpClient.layer, RateLimiter.layerStoreMemory]));
 
-const DotEnvLive = Effect.map(ConfigProvider.fromDotEnv(), ConfigProvider.nested("ARCHIVIST"));
-const ConfigLive = ConfigProvider.nested(ConfigProvider.fromEnv(), "ARCHIVIST");
+const ConfigProviderLive = ConfigProvider.fromEnv().pipe(ConfigProvider.nested("ARCHIVIST"), ConfigProvider.layer);
 
 export const Live = Layer.mergeAll(
     ObjectStorageLive,
@@ -55,7 +54,6 @@ export const Live = Layer.mergeAll(
     Layer.succeed(References.MinimumLogLevel, "Debug")
 ).pipe(
     Layer.provideMerge(PacedHttpLive),
-    Layer.provideMerge(ConfigProvider.layer(ConfigLive)),
-    Layer.provideMerge(ConfigProvider.layerAdd(DotEnvLive)),
+    Layer.provideMerge(ConfigProviderLive),
     Layer.provideMerge(NodeServices.layer)
 );

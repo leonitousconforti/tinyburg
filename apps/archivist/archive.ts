@@ -1,4 +1,4 @@
-import { Array, Effect, Match, Option, Order, Result, Schema, Stream } from "effect";
+import { Array, Config, Effect, Match, Option, Order, Result, Schema, Stream } from "effect";
 
 import type { BundleIdentifier } from "./games.ts";
 
@@ -6,7 +6,7 @@ import { S3 } from "@effect-aws/client-s3";
 import { NodeStream } from "@effect/platform-node";
 import { GooglePlayApi } from "@efffrida/gplayapi";
 
-const BUCKET = "tinyburg";
+const bucketName = Config.string("SPACES_BUCKET");
 const prefixFor = (bundleIdentifier: BundleIdentifier): string => `archivist/${bundleIdentifier}/`;
 const keyFor = (options: {
     readonly bundleIdentifier: BundleIdentifier;
@@ -16,10 +16,11 @@ const keyFor = (options: {
 
 export const highestArchivedVersion = Effect.fnUntraced(function* (bundleIdentifier: BundleIdentifier) {
     const s3 = yield* S3;
+    const bucket = yield* bucketName;
 
     const pages = yield* s3
         .listObjectsV2Stream({
-            Bucket: BUCKET,
+            Bucket: bucket,
             Prefix: prefixFor(bundleIdentifier),
             Delimiter: "/",
         })
@@ -56,6 +57,7 @@ export const archiveToS3 = Effect.fnUntraced(
     // The early exits return never-typed values; the normal path runs to the end.
     // oxlint-disable-next-line typescript/consistent-return
     function* (options: { bundleIdentifier: BundleIdentifier; offerType: number; versionCode: number | bigint }) {
+        const bucket = yield* bucketName;
         const streams = yield* GooglePlayApi.downloadToStreams(options.bundleIdentifier, options).pipe(
             Effect.catchNoSuchElement
         );
@@ -93,7 +95,7 @@ export const archiveToS3 = Effect.fnUntraced(
 
             const maybeExistingUpload = yield* Effect.flatMap(S3, (s3) =>
                 s3.getObject({
-                    Bucket: BUCKET,
+                    Bucket: bucket,
                     Key: keyFor({ ...options, name }),
                 })
             ).pipe(
@@ -125,7 +127,7 @@ export const archiveToS3 = Effect.fnUntraced(
             yield* S3.use((s3) =>
                 s3.putObject({
                     ACL: "private",
-                    Bucket: BUCKET,
+                    Bucket: bucket,
                     ContentLength: Number(size),
                     Body: NodeStream.toReadableNever(stream),
                     ChecksumAlgorithm: checksumAlgorithm,
