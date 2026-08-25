@@ -15,14 +15,11 @@
         "routes",
         "services",
         "shared",
-        "test",
         "workflows",
         "cookies.ts",
         "crypto.ts",
         "index.ts",
-        "vite.config.ts",
-        "vitest.config.ts",
-        "vitest.setup.ts"
+        "vite.config.ts"
     ],
     "compilerOptions": {
         "noEmit": true,

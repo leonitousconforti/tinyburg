@@ -1,6 +1,7 @@
 {
     "$schema": "https://json.schemastore.org/tsconfig",
     "extends": "../../tsconfig.base.jsonc",
+    "references": [{ "path": "../tinytower-sdk/tsconfig.src.json" }],
     "include": ["src"],
     "compilerOptions": {
         "tsBuildInfoFile": ".tsbuildinfo/src.tsbuildinfo",

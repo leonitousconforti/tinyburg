@@ -435,6 +435,9 @@ importers:
       '@tinyburg/nimblebit-sdk':
         specifier: workspace:^
         version: link:../nimblebit-sdk
+      '@tinyburg/tinytower-sdk':
+        specifier: workspace:^
+        version: link:../tinytower-sdk
       effect-oidc:
         specifier: 0.0.14
         version: 0.0.14(effect@4.0.0-rc.111)
