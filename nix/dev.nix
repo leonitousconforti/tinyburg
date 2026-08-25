@@ -1,32 +1,16 @@
-/*
-  The local development stack.
-
-  Datastores and services are one process-compose tree, so `dev` is the only
-  command anyone has to know. Postgres comes from services-flake, one instance
-  per service, and each keeps its state under `.dev/postgres/<service>`, which
-  means "start over" is `rm -rf .dev` for all of them or one directory for one
-  of them, not a volume prune. The apps are plain `node --watch` processes
-  rather than containers, so a save restarts the one service that changed and
-  `r` in the process-compose TUI restarts whichever process is selected.
-
-  There is no object storage here. Archivist is the only service that wants any,
-  and it names the DigitalOcean Spaces endpoint inline, so a local MinIO would
-  sit unreachable; nixpkgs also currently marks MinIO insecure. Making the
-  endpoint a config with its present value as the default is what would earn it
-  a place in this tree.
-
-  Everything binds to 127.0.0.1 on non-default ports; a machine-wide Postgres
-  on 5432 is left alone.
-*/
-{ inputs, ... }:
-{
+{ inputs, ... }: {
   perSystem =
-    { pkgs, lib, ... }:
+    {
+      pkgs,
+      lib,
+      ...
+    }:
     {
       process-compose."dev" =
         { config, ... }:
         let
           nodejs = pkgs.nodejs-slim_latest;
+          seaweed = config.services.seaweedfs.seaweedfs;
           corepack = pkgs.corepack.override { nodejs-slim = nodejs; };
 
           ports = {
@@ -34,22 +18,19 @@
             authproxy = 3001;
             socialCircles = 3002;
             discordBot = 3003;
-            heartbeat = 3999;
           };
 
-          /*
-            One Postgres per service, rather than one instance holding four
-            databases. The services never join across each other, so a shared
-            instance bought nothing but a shared blast radius: one wedged
-            cluster, one bad migration or one `rm -rf` took all four services
-            with it, and a version bump had to be agreed on by all of them at
-            once. Each entry below is its own process, data directory and port.
+          namespaces = {
+            apps = "1-apps";
+            workers = "2-workers";
+            setup = "3-setup";
+            infra = "4-infra";
+          };
 
-            Keyed by the process name of the service that owns it, so the
-            instance behind `authproxy` is always `authproxy-postgres`, and
-            every port is deliberately not 5432 so a machine-wide Postgres is
-            left alone.
-          */
+          archiveBucket = "tinyburg";
+          archiveAccessKey = "tinyburg-local";
+          archiveSecretKey = "tinyburg-local-secret";
+
           databases = {
             tinyburg-app = {
               port = 54320;
@@ -69,84 +50,99 @@
             };
           };
 
+          backendFor = service: "${service}-backend";
           postgresFor = service: "${service}-postgres";
-
           databaseUrl =
             service:
             "postgres://postgres@127.0.0.1:${toString databases.${service}.port}/${databases.${service}.name}";
 
-          # services-flake names an instance's two processes after the instance
-          # itself, so four instances put eight processes at the top of the tree
-          # unless they are given a namespace of their own.
           postgresNamespaces = lib.concatMapAttrs (
             service: _:
             let
               pg = postgresFor service;
             in
             {
-              ${pg}.namespace = "data";
-              "${pg}-init".namespace = "data";
+              ${pg}.namespace = namespaces.infra;
+              "${pg}-init".namespace = namespaces.infra;
             }
           ) databases;
 
-          # Seeded rather than generated, so the ids that have to appear in two
-          # places at once (a row in one database, an env var read by another
-          # service) are constants instead of something copy-pasted out of a
-          # `RETURNING id` after every reset.
-          authproxyClientId = "00000000-0000-4000-8000-000000000011";
-          discordBotClientId = "00000000-0000-4000-8000-000000000012";
-
-          # The bot is a confidential client, so unlike the authproxy it has a
-          # secret to present at the token endpoint. Fixed and in the clear
-          # here for the same reason `ADMIN_PASSWORD` below is: it authorizes
-          # nothing outside this stack, and generating it would put it back in
-          # the copy-paste-the-id business the seeded constants exist to end.
-          discordBotClientSecret = "dev-only-discord-bot-client-secret";
-
-          # A process is ready when it accepts a connection. The http services
-          # have health routes, but a port check is uniform and does not care
-          # what any one of them decided to call its endpoint.
-          tcpReady = port: {
-            exec.command = "${lib.getExe pkgs.bash} -c '</dev/tcp/127.0.0.1/${toString port}'";
-            initial_delay_seconds = 2;
-            period_seconds = 2;
-            failure_threshold = 60;
-          };
-
           exports = lib.mapAttrsToList (name: value: "export ${name}=${lib.escapeShellArg value}");
 
-          /*
-            Secrets come from `.env.dev` (gitignored, never in the nix store),
-            structure comes from nix. The exports run after the sourcing so the
-            wiring below always wins: `.env.dev` supplies provider credentials,
-            not ports and connection strings.
-          */
           runNode =
             {
               entry,
               env ? { },
-              extra ? "",
             }:
             ''
-              export PATH=${lib.makeBinPath [ nodejs corepack ]}:$PATH
-              set -a
-              [ -f .env.dev ] && . ./.env.dev
-              set +a
+              export PATH=${
+                lib.makeBinPath [
+                  nodejs
+                  corepack
+                ]
+              }:$PATH
               ${lib.concatStringsSep "\n" (exports env)}
-              ${extra}
               exec node --watch --watch-preserve-output ${entry}
             '';
 
-          # `vite build --watch` rather than a vite dev server, because both
-          # SPAs are served out of `dist/client` by their own Effect server in
-          # development exactly as in production. One origin, no proxy table.
           runVite = filter: ''
-            export PATH=${lib.makeBinPath [ nodejs corepack ]}:$PATH
+            export PATH=${
+              lib.makeBinPath [
+                nodejs
+                corepack
+              ]
+            }:$PATH
             exec pnpm --filter ${filter} exec vite build --watch
           '';
+
+          backend =
+            {
+              service,
+              entry,
+              port,
+              env ? { },
+              disabled ? false,
+              depends_on ? { },
+            }:
+            {
+              namespace = namespaces.apps;
+              inherit disabled;
+              command = runNode {
+                inherit entry;
+                env = {
+                  DATABASE_URL = databaseUrl service;
+                  PORT = toString port;
+                  HOST = "127.0.0.1";
+                }
+                // env;
+              };
+              depends_on = {
+                ${postgresFor service}.condition = "process_healthy";
+              }
+              // depends_on;
+            };
+
+          worker =
+            {
+              entry,
+              env ? { },
+              depends_on ? { },
+            }:
+            {
+              namespace = namespaces.workers;
+              disabled = true;
+              inherit depends_on;
+              command = runNode { inherit entry env; };
+            };
+
+          client = filter: {
+            namespace = namespaces.apps;
+            command = runVite filter;
+          };
         in
         {
           imports = [ inputs.services-flake.processComposeModules.default ];
+          cli.environment.PC_DISABLE_DOTENV = true;
 
           services.postgres = lib.mapAttrs' (
             service: db:
@@ -157,226 +153,117 @@
               port = db.port;
               superuser = "postgres";
               initialDatabases = [ { name = db.name; } ];
+              extensions = extensions: [ extensions.pg_cron ];
+              settings = {
+                shared_preload_libraries = "pg_cron";
+                "cron.database_name" = db.name;
+              };
             }
           ) databases;
 
+          services.seaweedfs.seaweedfs = {
+            enable = true;
+            dataDir = "./.dev/seaweedfs";
+            host = "127.0.0.1";
+            filer.enable = true;
+            s3 = {
+              enable = true;
+              config = pkgs.writeText "seaweedfs-s3.json" (
+                builtins.toJSON {
+                  identities = [
+                    {
+                      name = "archivist";
+                      credentials = [
+                        {
+                          accessKey = archiveAccessKey;
+                          secretKey = archiveSecretKey;
+                        }
+                      ];
+                      actions = [
+                        "Admin"
+                        "Read"
+                        "Write"
+                        "List"
+                        "Tagging"
+                      ];
+                    }
+                  ];
+                }
+              );
+            };
+          };
+
           settings.processes = postgresNamespaces // {
-            # The provider signs its tokens with a key that must not be a
-            # committed constant even in development, so one is generated on
-            # first run and kept out of git.
-            dev-secrets = {
-              namespace = "setup";
+            seaweedfs.namespace = namespaces.infra;
+
+            seaweedfs-bucket = {
+              namespace = namespaces.infra;
+              depends_on."seaweedfs".condition = "process_healthy";
               command = ''
-                export PATH=${lib.makeBinPath [ nodejs ]}:$PATH
-
-                # `ConfigProvider.fromDotEnv()` reads `.env` from the working
-                # directory and dies with ENOENT when there is not one. The file
-                # is gitignored, so a fresh clone has never had it and an
-                # existing checkout can lose it at any time. An empty one is
-                # enough: the dev stack passes real configuration as environment
-                # variables, and this only has to exist to be read.
-                [ -f .env ] || : > .env
-
-                exec node scripts/mkjwk.mjs
+                echo "s3.bucket.create -name ${archiveBucket}" \
+                  | ${lib.getExe seaweed.package} shell \
+                      -master=127.0.0.1:${toString seaweed.master.port}
               '';
             };
 
-            # Three services want somewhere to report liveness and refuse to
-            # boot without it. Locally that is a sink that logs and returns 200.
-            heartbeat-sink = {
-              namespace = "infra";
-              command = ''
-                export PATH=${lib.makeBinPath [ nodejs ]}:$PATH
-                export PORT=${toString ports.heartbeat}
-                exec node scripts/heartbeat-sink.mjs
-              '';
-              readiness_probe = tcpReady ports.heartbeat;
+            tinyburg-app-client = client "@tinyburg/tinyburg.app";
+            ${backendFor "tinyburg-app"} = backend {
+              service = "tinyburg-app";
+              entry = "apps/tinyburg.app/server/index.ts";
+              port = ports.tinyburgApp;
+              env = {
+                NODE_ENV = "development";
+                LOG_LEVEL = "Debug";
+                SITE_URL = "http://localhost:${toString ports.tinyburgApp}";
+                GOOGLE_REDIRECT_URI = "http://localhost:${toString ports.tinyburgApp}/auth/google/callback";
+                DISCORD_REDIRECT_URI = "http://localhost:${toString ports.tinyburgApp}/auth/discord/callback";
+                GOOGLE_JWKS_URI = "https://www.googleapis.com/oauth2/v3/certs";
+                DISCORD_JWKS_URI = "https://discord.com/api/oauth2/keys";
+              };
             };
 
-            tinyburg-app-client = {
-              namespace = "apps";
-              command = runVite "@tinyburg/tinyburg.app";
+            authproxy-client = client "@tinyburg/authproxy";
+            ${backendFor "authproxy"} = backend {
+              service = "authproxy";
+              entry = "apps/authproxy/index.ts";
+              port = ports.authproxy;
+              env = {
+                NODE_ENV = "development";
+                TINYBURG_OAUTH_ISSUER = "http://localhost:${toString ports.tinyburgApp}";
+                TINYBURG_OAUTH_REDIRECT_URI = "http://localhost:${toString ports.authproxy}/auth/callback";
+              };
             };
 
-            tinyburg-app = {
-              namespace = "apps";
-              command = runNode {
-                entry = "apps/tinyburg.app/server/index.ts";
-                env = {
-                  DATABASE_URL = databaseUrl "tinyburg-app";
-                  PORT = toString ports.tinyburgApp;
-                  HOST = "127.0.0.1";
-                  SITE_URL = "http://localhost:${toString ports.tinyburgApp}";
-                  # Anything but `development` means Secure cookies and the
-                  # `__Host-` prefix, which plain http cannot satisfy.
-                  NODE_ENV = "development";
-                  LOG_LEVEL = "Debug";
-                  GOOGLE_REDIRECT_URI = "http://localhost:${toString ports.tinyburgApp}/auth/google/callback";
-                  DISCORD_REDIRECT_URI = "http://localhost:${toString ports.tinyburgApp}/auth/discord/callback";
-                  GOOGLE_JWKS_URI = "https://www.googleapis.com/oauth2/v3/certs";
-                  DISCORD_JWKS_URI = "https://discord.com/api/oauth2/keys";
-                };
-                extra = ''export OIDC_PRIVATE_JWK="$(cat .dev/oidc.jwk)"'';
-              };
-              depends_on = {
-                ${postgresFor "tinyburg-app"}.condition = "process_healthy";
-                "dev-secrets".condition = "process_completed_successfully";
-              };
-              readiness_probe = tcpReady ports.tinyburgApp;
+            social-circles-client = client "@tinyburg/social-circles";
+            ${backendFor "social-circles"} = backend {
+              service = "social-circles";
+              entry = "apps/social-circles/index.ts";
+              port = ports.socialCircles;
             };
 
-            authproxy-client = {
-              namespace = "apps";
-              command = runVite "@tinyburg/authproxy";
-            };
-
-            authproxy = {
-              namespace = "apps";
-              command = runNode {
-                entry = "apps/authproxy/index.ts";
-                env = {
-                  DATABASE_URL = databaseUrl "authproxy";
-                  PORT = toString ports.authproxy;
-                  HOST = "127.0.0.1";
-                  NODE_ENV = "development";
-                  ADMIN_USERNAME = "admin";
-                  ADMIN_PASSWORD = "admin";
-                  # The proxy is a relying party of the app next door, not of
-                  # the deployed provider.
-                  TINYBURG_ISSUER = "http://localhost:${toString ports.tinyburgApp}";
-                  TINYBURG_CLIENT_ID = authproxyClientId;
-                  TINYBURG_REDIRECT_URI = "http://localhost:${toString ports.authproxy}/auth/callback";
-                };
-              };
-              depends_on = {
-                ${postgresFor "authproxy"}.condition = "process_healthy";
-                "dev-secrets".condition = "process_completed_successfully";
-              };
-              readiness_probe = tcpReady ports.authproxy;
-            };
-
-            social-circles = {
-              namespace = "apps";
-              command = runNode {
-                entry = "apps/social-circles/index.ts";
-                env = {
-                  DATABASE_URL = databaseUrl "social-circles";
-                  PORT = toString ports.socialCircles;
-                  HOST = "127.0.0.1";
-                  HEARTBEAT_URL = "http://127.0.0.1:${toString ports.heartbeat}/social-circles";
-                };
-              };
-              depends_on = {
-                ${postgresFor "social-circles"}.condition = "process_healthy";
-                "dev-secrets".condition = "process_completed_successfully";
-                "heartbeat-sink".condition = "process_healthy";
-              };
-              readiness_probe = tcpReady ports.socialCircles;
-            };
-
-            /*
-              Off by default, and the only app here that is.
-
-              Starting it opens a real gateway connection to Discord with a
-              real bot token, which has to come from `.env.dev` as
-              `DISCORD_BOT_TOKEN` and `DISCORD_APPLICATION_ID`; there is no
-              local stand-in for Discord the way there is for the provider
-              next door. dfx also syncs the global command list on connect, so
-              a second instance sharing a token with a deployed bot will fight
-              it over the commands and receive duplicate events.
-
-              The OAuth half needs none of that. `discord-bot-postgres` runs
-              whether or not this ever starts, so the database is there the
-              moment it does, and the callback route can be driven with curl
-              once it is up.
-            */
-            discord-bot = {
-              namespace = "apps";
+            ${backendFor "discord-bot"} = backend {
+              service = "discord-bot";
+              entry = "apps/discord-bot/index.ts";
+              port = ports.discordBot;
               disabled = true;
-              command = runNode {
-                entry = "apps/discord-bot/index.ts";
-                env = {
-                  DATABASE_URL = databaseUrl "discord-bot";
-                  PORT = toString ports.discordBot;
-                  HOST = "127.0.0.1";
-                  # A relying party of the app next door, not of the deployed
-                  # provider, exactly as the authproxy is.
-                  TINYBURG_ISSUER = "http://localhost:${toString ports.tinyburgApp}";
-                  TINYBURG_CLIENT_ID = discordBotClientId;
-                  TINYBURG_CLIENT_SECRET = discordBotClientSecret;
-                  TINYBURG_REDIRECT_URI = "http://localhost:${toString ports.discordBot}/discord/callback";
-                };
-              };
-              depends_on = {
-                ${postgresFor "discord-bot"}.condition = "process_healthy";
-                "dev-secrets".condition = "process_completed_successfully";
-              };
-              readiness_probe = tcpReady ports.discordBot;
-            };
-
-            # Runs once the tables exist, which is on first boot of each
-            # service, because every one of them runs its migrations as part of
-            # its layer stack. Idempotent, so re-running it is free.
-            seed = {
-              namespace = "setup";
-              command = ''
-                # For `psql`, which every instance ships the same version of,
-                # so which one this comes from does not matter.
-                export PATH=${
-                  lib.makeBinPath [ config.services.postgres.${postgresFor "tinyburg-app"}.package ]
-                }:$PATH
-                exec bash scripts/seed.sh
-              '';
-              environment = {
-                # Two databases on two instances, so the seed is handed a
-                # connection string apiece rather than a `PGHOST`/`PGPORT` pair
-                # that could only ever point at one of them.
-                TINYBURG_APP_DATABASE_URL = databaseUrl "tinyburg-app";
-                AUTHPROXY_DATABASE_URL = databaseUrl "authproxy";
-                AUTHPROXY_CLIENT_ID = authproxyClientId;
-                AUTHPROXY_REDIRECT_URI = "http://localhost:${toString ports.authproxy}/auth/callback";
-                SITE_ORIGIN = "http://localhost:${toString ports.tinyburgApp}/";
-                # Registered whether or not the bot is running: the row lives
-                # in tinyburg_app, and seeding it only when the bot happens to
-                # be started would make the seed non-deterministic.
-                DISCORD_BOT_CLIENT_ID = discordBotClientId;
-                DISCORD_BOT_CLIENT_SECRET = discordBotClientSecret;
-                DISCORD_BOT_REDIRECT_URI = "http://localhost:${toString ports.discordBot}/discord/callback";
-              };
-              depends_on = {
-                "tinyburg-app".condition = "process_healthy";
-                "authproxy".condition = "process_healthy";
+              env = {
+                NODE_ENV = "development";
+                TINYBURG_ISSUER = "http://localhost:${toString ports.tinyburgApp}";
+                TINYBURG_REDIRECT_URI = "http://localhost:${toString ports.discordBot}/discord/callback";
               };
             };
 
-            /*
-              The workers are one-shot scripts rather than servers, so they are
-              off by default and started from the TUI when you want a run.
-
-              Both of them build their client with
-              `NimblebitAuth.layerTinyburgAuthProxyConfig`, whose host is the
-              deployed proxy, so a run here reaches production. Pointing them
-              at the local proxy is a swap to `layerCustomHostConfig`; until
-              then, treat starting these as touching prod.
-            */
-            auto-gold-bits = {
-              namespace = "workers";
-              disabled = true;
-              command = runNode {
-                entry = "apps/auto-gold-bits/index.ts";
-                env.HEARTBEAT_URL = "http://127.0.0.1:${toString ports.heartbeat}/auto-gold-bits";
+            auto-gold-bits = worker { entry = "apps/auto-gold-bits/index.ts"; };
+            doorman-clone = worker { entry = "apps/doorman-clone/index.ts"; };
+            archivist = worker {
+              entry = "apps/archivist/index.ts";
+              depends_on."seaweedfs-bucket".condition = "process_completed_successfully";
+              env = {
+                ARCHIVIST_S3_ENDPOINT = "http://127.0.0.1:${toString seaweed.s3.port}";
+                ARCHIVIST_S3_FORCE_PATH_STYLE = "true";
+                ARCHIVIST_SPACES_KEY = archiveAccessKey;
+                ARCHIVIST_SPACES_SECRET = archiveSecretKey;
               };
-              depends_on."heartbeat-sink".condition = "process_healthy";
-            };
-
-            doorman-clone = {
-              namespace = "workers";
-              disabled = true;
-              command = runNode {
-                entry = "apps/doorman-clone/index.ts";
-                env.HEARTBEAT_URL = "http://127.0.0.1:${toString ports.heartbeat}/doorman-clone";
-              };
-              depends_on."heartbeat-sink".condition = "process_healthy";
             };
           };
         };
