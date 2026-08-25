@@ -50,7 +50,6 @@
             };
           };
 
-          backendFor = service: "${service}-backend";
           postgresFor = service: "${service}-postgres";
           databaseUrl =
             service:
@@ -207,7 +206,7 @@
             };
 
             tinyburg-app-client = client "@tinyburg/tinyburg.app";
-            ${backendFor "tinyburg-app"} = backend {
+            tinyburg-app-backend = backend {
               service = "tinyburg-app";
               entry = "apps/tinyburg.app/server/index.ts";
               port = ports.tinyburgApp;
@@ -223,7 +222,7 @@
             };
 
             authproxy-client = client "@tinyburg/authproxy";
-            ${backendFor "authproxy"} = backend {
+            authproxy-backend = backend {
               service = "authproxy";
               entry = "apps/authproxy/index.ts";
               port = ports.authproxy;
@@ -232,16 +231,20 @@
                 TINYBURG_OAUTH_ISSUER = "http://localhost:${toString ports.tinyburgApp}";
                 TINYBURG_OAUTH_REDIRECT_URI = "http://localhost:${toString ports.authproxy}/auth/callback";
               };
+              depends_on = {
+                tinyburg-app-backend.condition = "process_started";
+                tinyburg-app-client.condition = "process_started";
+              };
             };
 
             social-circles-client = client "@tinyburg/social-circles";
-            ${backendFor "social-circles"} = backend {
+            social-circles-backend = backend {
               service = "social-circles";
               entry = "apps/social-circles/index.ts";
               port = ports.socialCircles;
             };
 
-            ${backendFor "discord-bot"} = backend {
+            discord-bot-backend = backend {
               service = "discord-bot";
               entry = "apps/discord-bot/index.ts";
               port = ports.discordBot;
@@ -251,6 +254,10 @@
                 TINYBURG_ISSUER = "http://localhost:${toString ports.tinyburgApp}";
                 TINYBURG_REDIRECT_URI = "http://localhost:${toString ports.discordBot}/discord/callback";
               };
+              depends_on = {
+                tinyburg-app-backend.condition = "process_started";
+                tinyburg-app-client.condition = "process_started";
+              };
             };
 
             auto-gold-bits = worker { entry = "apps/auto-gold-bits/index.ts"; };
@@ -259,10 +266,10 @@
               entry = "apps/archivist/index.ts";
               depends_on."seaweedfs-bucket".condition = "process_completed_successfully";
               env = {
-                ARCHIVIST_S3_ENDPOINT = "http://127.0.0.1:${toString seaweed.s3.port}";
-                ARCHIVIST_S3_FORCE_PATH_STYLE = "true";
-                ARCHIVIST_SPACES_KEY = archiveAccessKey;
-                ARCHIVIST_SPACES_SECRET = archiveSecretKey;
+                S3_ENDPOINT = "http://127.0.0.1:${toString seaweed.s3.port}";
+                S3_FORCE_PATH_STYLE = "true";
+                SPACES_KEY = archiveAccessKey;
+                SPACES_SECRET = archiveSecretKey;
               };
             };
           };
