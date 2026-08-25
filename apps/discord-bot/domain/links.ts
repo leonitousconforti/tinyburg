@@ -1,6 +1,6 @@
 import type { SqlError } from "effect/unstable/sql";
 
-import { Context, Effect, Layer, Schedule, Schema } from "effect";
+import { Context, Effect, Layer, Schema } from "effect";
 import { Model } from "effect/unstable/schema";
 import { SqlClient, SqlSchema } from "effect/unstable/sql";
 
@@ -148,13 +148,6 @@ export class LinksRepository extends Context.Service<LinksRepository>()(
                 DELETE FROM discord_links WHERE discord_user_id = ${discordUserId} RETURNING *
             `,
             });
-
-            yield* sql`DELETE FROM discord_pending_links WHERE expires_at < NOW()`.pipe(
-                Effect.catchCause((cause) => Effect.logWarning(`failed to purge expired pending links`, cause)),
-                Effect.schedule(Schedule.cron("17 * * * *")),
-                Effect.forkScoped,
-                Effect.asVoid
-            );
 
             return {
                 beginLink,

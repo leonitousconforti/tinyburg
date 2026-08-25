@@ -1,5 +1,5 @@
 import { Config, Effect, Layer, Option, Redacted, Ref, Schema } from "effect";
-import { HttpClient, HttpRouter, HttpServerRequest, HttpServerResponse } from "effect/unstable/http";
+import { HttpClient, HttpRouter, HttpServerRequest } from "effect/unstable/http";
 
 import type { Jwt } from "effect-oidc";
 
@@ -10,7 +10,8 @@ import { Oidc } from "effect-oidc";
 import { sha256 } from "../crypto.ts";
 import { LinksRepository } from "../domain/links.ts";
 import { botMessagesFor } from "../messages.ts";
-import { tinyburgConfig } from "../tinyburg.ts";
+import * as ResultPage from "../pages/result.ts";
+import { TinyburgClient } from "../tinyburg.ts";
 
 /**
  * Where the browser lands after authorizing at tinyburg.app.
@@ -26,40 +27,19 @@ import { tinyburgConfig } from "../tinyburg.ts";
  * so the URL is never posted where someone else can take it.
  */
 
+/**
+ * One outcome, as a response.
+ *
+ * The title and body are handed over as plain text; `pages/result.ts` renders
+ * them, which is also what escapes them. That matters for `linked` below, whose
+ * body names a Tinyburg display name its owner chose.
+ */
 const page = (options: {
     readonly language: Language;
     readonly title: string;
     readonly body: string;
     readonly status: number;
-}) =>
-    HttpServerResponse.html(
-        // Passed as a string rather than used as a template tag: the tagged
-        // form returns an Effect, and nothing interpolated here is effectful.
-        `<!doctype html>
-<html lang="${options.language}">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width" />
-<title>${options.title} | Tinyburg</title>
-<style>
-  :root { color-scheme: light }
-  body { margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center;
-         font-family: ui-monospace, SFMono-Regular, monospace; color:#2c3e50;
-         background:linear-gradient(180deg,#87ceeb 0%,#4fa4d4 50%,#2d7bb3 100%); padding:2rem }
-  .card { background:rgba(255,255,255,.95); border:3px solid #ffd700; border-radius:1rem;
-          box-shadow:6px 6px 0 rgba(0,0,0,.25); padding:2rem; max-width:28rem; width:100%; text-align:center }
-  h1 { font-size:1.25rem; margin:0 0 .75rem }
-  p { margin:0; color:#4a5568; line-height:1.6 }
-</style>
-</head>
-<body>
-  <main class="card">
-    <h1>${options.title}</h1>
-    <p>${options.body}</p>
-  </main>
-</body>
-</html>`
-    ).pipe(HttpServerResponse.setStatus(options.status));
+}) => ResultPage.respond({ language: options.language, title: options.title, body: options.body }, options.status);
 
 const linked = (language: Language, name: string) =>
     page({
@@ -97,13 +77,13 @@ const cancelled = (language: Language) =>
     });
 
 export const CallbackRoutesLive = Effect.gen(function* () {
-    const tinyburg = yield* tinyburgConfig;
+    const tinyburg = yield* TinyburgClient;
     const httpClient = yield* HttpClient.HttpClient;
 
     // Reporting back into Discord goes through dfx's REST client, so the
     // follow-up edit inherits its rate limiting rather than racing it.
     const rest = yield* DiscordREST;
-    const applicationId = yield* Config.string("DISCORD_APPLICATION_ID");
+    const applicationId = yield* Config.string("APPLICATION_ID");
 
     // The provider's signing keys, cached with a last-good fallback so a
     // hiccup fetching them does not read as a failed link.
@@ -132,7 +112,7 @@ export const CallbackRoutesLive = Effect.gen(function* () {
         Effect.gen(function* () {
             const messages = botMessagesFor[language];
             const refuse = (reason: string) =>
-                Effect.as(Effect.logInfo(`link callback refused: ${reason}`), failed(language));
+                Effect.andThen(Effect.logInfo(`link callback refused: ${reason}`), failed(language));
 
             const maybeUrlParams = yield* HttpServerRequest.schemaSearchParams(
                 Schema.Union([
@@ -146,7 +126,9 @@ export const CallbackRoutesLive = Effect.gen(function* () {
 
             const urlParams = maybeUrlParams.value;
             if ("error" in urlParams) {
-                return urlParams.error === "access_denied" ? cancelled(language) : yield* refuse(urlParams.error);
+                return urlParams.error === "access_denied"
+                    ? yield* cancelled(language)
+                    : yield* refuse(urlParams.error);
             }
 
             // Claiming the pending link consumes it, so a replayed URL gets
@@ -222,10 +204,10 @@ export const CallbackRoutesLive = Effect.gen(function* () {
                     Effect.ignore
                 );
 
-            return linked(language, name);
+            return yield* linked(language, name);
         }).pipe(
             Effect.tapDefect((defect) => Effect.logError("link callback died", defect)),
-            Effect.catchDefect(() => Effect.succeed(failed(language)))
+            Effect.catchDefect(() => failed(language))
         );
 
     // A browser context, not a Discord one: the person may finish the round

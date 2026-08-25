@@ -56,26 +56,39 @@ ephemerally, so the URL is never posted anywhere another person can take it.
 
 ## Configuration
 
-| Variable                 | Notes                                          |
-| ------------------------ | ---------------------------------------------- |
-| `DATABASE_URL`           | Postgres; migrations run at boot               |
-| `DISCORD_BOT_TOKEN`      | The gateway connection authenticates with it   |
-| `DISCORD_APPLICATION_ID` | Used to address the follow-up reply edit       |
-| `TINYBURG_ISSUER`        | Defaults to `https://tinyburg.app`             |
-| `TINYBURG_CLIENT_ID`     | The bot's OAuth client at tinyburg.app         |
-| `TINYBURG_CLIENT_SECRET` | The bot is a confidential client               |
-| `TINYBURG_REDIRECT_URI`  | Must exactly match the registered redirect URI |
-| `PORT`                   | Defaults to 3003, for the OAuth callback only  |
+| Variable                      | Notes                                                                                                       |
+| ----------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `DATABASE_URL`                | Postgres; migrations run at boot                                                                            |
+| `TOKEN`                       | The gateway connection authenticates with it (`DISCORDBOT_TOKEN` in `.env`)                                 |
+| `APPLICATION_ID`              | Used to address the follow-up reply edit                                                                    |
+| `TINYBURG_ISSUER`             | Defaults to `https://tinyburg.app`                                                                          |
+| `TINYBURG_CLIENT_ID`          | The bot's OAuth client at tinyburg.app; required unless the bot may register itself, see below              |
+| `TINYBURG_CLIENT_SECRET`      | The bot is a confidential client                                                                            |
+| `TINYBURG_REGISTRATION_TOKEN` | Optional; the provider's initial access token, lets an unconfigured bot register itself outside development |
+| `TINYBURG_REDIRECT_URI`       | Must exactly match the registered redirect URI                                                              |
+| `NODE_ENV`                    | `development` permits self-registration without a token                                                     |
+| `PORT`                        | Defaults to 3003, for the OAuth callback only                                                               |
 
 In development `nix run .#dev` supplies all of these except the two Discord
 ones. It runs a Postgres of the bot's own, `discord-bot-postgres` on port 54323,
 holding nothing but `discord_bot`; points the bot at the local provider rather
-than the deployed one; and seeds the matching OAuth client, so nothing has to be
-registered by hand and the machine-wide Postgres on 5432 is left alone.
+than the deployed one; and leaves `TINYBURG_CLIENT_ID` unset with
+`NODE_ENV=development`, so the bot registers itself there at boot (RFC 7591,
+which the provider offers openly in development) and is issued its client id
+and secret rather than being told them. Registration is idempotent, keyed by
+the `software_id` the bot sends (`tinyburg-discord-bot`), so it happens on
+every boot, returns the same client, and leaves the bot nothing to store; the
+secret it is issued is fresh each run and lives only in memory. Nothing has to
+be registered by hand, and the machine-wide Postgres on 5432 is left alone.
+
+Outside development an unset client id is a missing required setting, unless
+`TINYBURG_REGISTRATION_TOKEN` holds the initial access token the provider was
+configured with (`TINYBURGAPP_REGISTRATION_TOKEN`); then the bot registers
+itself the same way on first boot, presenting the token.
 
 The process is **off by default** in that stack, because starting it opens a
-real gateway connection. Put `DISCORD_BOT_TOKEN` and `DISCORD_APPLICATION_ID`
-in `.env.dev`, then start `discord-bot` from the process-compose TUI.
+real gateway connection. Put `DISCORDBOT_TOKEN` and `DISCORDBOT_APPLICATION_ID`
+in `.env`, then start `discord-bot` from the process-compose TUI.
 
 Port 3003 because the dev stack already hands 3000 to tinyburg.app, 3001 to
 authproxy, and 3002 to social-circles. Note that a second process binding
@@ -83,10 +96,11 @@ authproxy, and 3002 to social-circles. Note that a second process binding
 "Listening" without ever receiving a request, so a mysteriously 404ing route
 is worth an `lsof -i :<port>` before it is worth debugging.
 
-Deployed, one registration has to happen first: at tinyburg.app, register an
-OAuth client whose redirect URI is `https://<host>/discord/callback` and whose
-scope is `openid profile`. The Discord side needs only a bot token; dfx syncs
-the commands itself.
+Deployed, one registration has to happen first, either by hand at tinyburg.app
+(an OAuth client whose redirect URI is `https://<host>/discord/callback` and
+whose scope is `openid profile`, then `TINYBURG_CLIENT_ID` and
+`TINYBURG_CLIENT_SECRET`) or by the bot itself with a registration token. The
+Discord side needs only a bot token; dfx syncs the commands itself.
 
 ## Testing locally
 
@@ -124,3 +138,26 @@ game reference commands, and marketplace surfacing once escrow exists.
 Nothing in this bot should ever mutate a tower save. Escrow deposits, splices,
 and doorman-style automation belong behind an explicit confirmation in the web
 app, not behind a chat command.
+
+## Scheduled sweeps
+
+A pending link is a `/link` that was started and never finished; the row holds
+a PKCE verifier and an interaction token. They are swept hourly by
+`cluster/sweepers.ts`.
+
+It was previously a fiber forked inside the links repository, which is correct
+only while exactly one process is running - which is also the only way this bot
+can run, since a second instance sharing the token fights the first over the
+global command list. `ClusterCron` states that constraint rather than relying
+on it, so the day a second replica does come up the sweep does not double-run
+while the gateway question is dealt with separately. The `SingleRunner` in
+`cluster/runtime.ts` creates its own `cluster_*` tables on first boot.
+
+## The callback page
+
+The page the browser lands on after `/link` is `pages/result.ts`, a Foldkit
+view rendered statically on the server - no script, nothing to hydrate. It
+names a Tinyburg display name, which its owner chose, so the escaping is the
+point: interpolating that into markup by hand is a decision that has to be got
+right every time it is written, and letting the serializer decide is one got
+right once.

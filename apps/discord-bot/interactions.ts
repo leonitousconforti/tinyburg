@@ -9,7 +9,7 @@ import { Oidc } from "effect-oidc";
 import { randomSecret, sha256 } from "./crypto.ts";
 import { LinksRepository } from "./domain/links.ts";
 import { botMessagesFor } from "./messages.ts";
-import { LINK_SCOPES, tinyburgConfig } from "./tinyburg.ts";
+import { LINK_SCOPES, TinyburgClient } from "./tinyburg.ts";
 
 /**
  * The bot's command surface.
@@ -71,7 +71,13 @@ const ephemeralWithLink = (options: { readonly content: string; readonly label: 
             flags: Discord.MessageFlags.Ephemeral,
             allowed_mentions: { parse: [] },
             components: [
-                UI.row([UI.button({ style: Discord.ButtonStyleTypes.LINK, label: options.label, url: options.url })]),
+                UI.row([
+                    UI.button({
+                        style: Discord.ButtonStyleTypes.LINK,
+                        label: options.label,
+                        url: options.url,
+                    }),
+                ]),
             ],
         },
     });
@@ -98,7 +104,7 @@ const interactionMessages = Effect.map(
 export const InteractionsLive = Layer.effectDiscard(
     Effect.gen(function* () {
         const registry = yield* InteractionsRegistry;
-        const tinyburg = yield* tinyburgConfig;
+        const tinyburg = yield* TinyburgClient;
 
         // Resolved here rather than inside the handlers: dfx registers an
         // interaction builder whose requirements are already `never`, so the

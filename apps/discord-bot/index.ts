@@ -1,4 +1,4 @@
-import { Config, Effect, Layer, Path, String } from "effect";
+import { Config, ConfigProvider, Effect, Layer, Path, String } from "effect";
 import { FetchHttpClient, HttpRouter } from "effect/unstable/http";
 
 import { createServer } from "node:http";
@@ -12,6 +12,8 @@ import { LinksRepository } from "./domain/links.ts";
 import { InteractionsLive } from "./interactions.ts";
 import { HealthCheckRoutesLive } from "./routes/health.ts";
 import { CallbackRoutesLive } from "./routes/oauth.ts";
+import { StandaloneStylesheetLive } from "./routes/standalone.ts";
+import { TinyburgClient } from "./tinyburg.ts";
 
 /**
  * The bot runs two things at once.
@@ -21,6 +23,8 @@ import { CallbackRoutesLive } from "./routes/oauth.ts";
  * step. The OAuth callback is a browser redirect, so it still needs a real
  * HTTP server; `/link` is the seam between them.
  */
+
+const DotEnvLive = Effect.map(ConfigProvider.fromDotEnv(), ConfigProvider.nested("DISCORDBOT"));
 
 const SqlLive = PgClient.layerConfig({
     url: Config.redacted("DATABASE_URL"),
@@ -39,12 +43,14 @@ const DiscordLive = DiscordIxLive.pipe(
     Layer.provide(NodeSocket.layerWebSocketConstructor),
     Layer.provide(
         DiscordConfig.layerConfig({
-            token: Config.redacted("DISCORD_BOT_TOKEN"),
+            token: Config.redacted("TOKEN"),
         })
     )
 );
 
-const HttpLive = HttpRouter.serve(Layer.mergeAll(CallbackRoutesLive, HealthCheckRoutesLive)).pipe(
+const HttpLive = HttpRouter.serve(
+    Layer.mergeAll(CallbackRoutesLive, HealthCheckRoutesLive, StandaloneStylesheetLive)
+).pipe(
     Layer.provide(
         NodeHttpServer.layerConfig(createServer, {
             // 3000/3001/3002 belong to tinyburg.app, authproxy, and
@@ -57,11 +63,21 @@ const HttpLive = HttpRouter.serve(Layer.mergeAll(CallbackRoutesLive, HealthCheck
 
 Layer.mergeAll(InteractionsLive, HttpLive).pipe(
     Layer.provide(DiscordLive),
-    Layer.provide([LinksRepository.Default, FetchHttpClient.layer]),
+    // The client registration, if the bot makes one, needs the provider over
+    // http and its own database, and it has to come after the migrator so the
+    // table it keeps the registration in exists.
+    Layer.provide([
+        LinksRepository.Default,
+        TinyburgClient.Default.pipe(Layer.provide(FetchHttpClient.layer)),
+        FetchHttpClient.layer,
+    ]),
     Layer.provide(MigratorLive),
     Layer.provide(SqlLive),
-    // The migrator reads its files off disk, so it needs the node services
-    // the http server used to bring along implicitly.
+    // The environment as it comes, `.env` nested under the service name; see
+    // `tinyburg.app`'s server entrypoint for why they differ.
+    Layer.provideMerge(ConfigProvider.layerAdd(DotEnvLive)),
+    // The migrator and the `.env` reader both go to disk, so they need the
+    // node services the http server used to bring along implicitly.
     Layer.provide(NodeServices.layer),
     Layer.launch,
     NodeRuntime.runMain
