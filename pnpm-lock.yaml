@@ -139,8 +139,8 @@ importers:
         specifier: 4.0.0-rc.111
         version: 4.0.0-rc.111
       effect-oidc:
-        specifier: 0.0.13
-        version: 0.0.13(effect@4.0.0-rc.111)
+        specifier: 0.0.14
+        version: 0.0.14(effect@4.0.0-rc.111)
       foldkit:
         specifier: 0.150.0
         version: 0.150.0(effect@4.0.0-rc.111)
@@ -183,6 +183,9 @@ importers:
       '@effect/sql-pg':
         specifier: 4.0.0-rc.111
         version: 4.0.0-rc.111(effect@4.0.0-rc.111)
+      '@tinyburg/trading-sdk':
+        specifier: workspace:*
+        version: link:../../packages/trading-sdk
       '@tinyburg/ui':
         specifier: workspace:*
         version: link:../../packages/ui
@@ -193,8 +196,8 @@ importers:
         specifier: 4.0.0-rc.111
         version: 4.0.0-rc.111
       effect-oidc:
-        specifier: 0.0.13
-        version: 0.0.13(effect@4.0.0-rc.111)
+        specifier: 0.0.14
+        version: 0.0.14(effect@4.0.0-rc.111)
       foldkit:
         specifier: 0.150.0
         version: 0.150.0(effect@4.0.0-rc.111)
@@ -265,8 +268,8 @@ importers:
         specifier: 4.0.0-rc.111
         version: 4.0.0-rc.111
       effect-oidc:
-        specifier: 0.0.13
-        version: 0.0.13(effect@4.0.0-rc.111)
+        specifier: 0.0.14
+        version: 0.0.14(effect@4.0.0-rc.111)
       foldkit:
         specifier: 0.150.0
         version: 0.150.0(effect@4.0.0-rc.111)
@@ -322,8 +325,8 @@ importers:
         specifier: 4.0.0-rc.111
         version: 4.0.0-rc.111
       effect-oidc:
-        specifier: 0.0.13
-        version: 0.0.13(effect@4.0.0-rc.111)
+        specifier: 0.0.14
+        version: 0.0.14(effect@4.0.0-rc.111)
       foldkit:
         specifier: 0.150.0
         version: 0.150.0(effect@4.0.0-rc.111)
@@ -433,8 +436,8 @@ importers:
         specifier: workspace:^
         version: link:../nimblebit-sdk
       effect-oidc:
-        specifier: 0.0.13
-        version: 0.0.13(effect@4.0.0-rc.111)
+        specifier: 0.0.14
+        version: 0.0.14(effect@4.0.0-rc.111)
     devDependencies:
       effect:
         specifier: 4.0.0-rc.111
@@ -2187,8 +2190,8 @@ packages:
     resolution: {integrity: sha512-yS+Q5i3hBf7GBkd4KG8a7eBNNWNGLTaEwwYWUijIYM7zrlYDM0BFXHjjPWlWZ1Rg7UaddZeIDmi9jF3HmqiQ2w==}
     engines: {node: '>=6.0.0'}
 
-  effect-oidc@0.0.13:
-    resolution: {integrity: sha512-4FVV0NnSaojMVZ/Hru4w5Eqny337j03LB0QpTQXdyWQ7WhMacLcT3hPslJn5e/Ij2Dav7jKMB5BYGx79ZIpmQg==}
+  effect-oidc@0.0.14:
+    resolution: {integrity: sha512-VGmKsIWigbXY4fTWWy4dpESIvopNYq3ngxV39VTqu4uJTtu/60dfCh/oGL4jrsi5d3oHMMh+tYOcKHVkcqq/xw==}
     engines: {node: '>=22.0.0'}
     peerDependencies:
       effect: 4.0.0-rc.111
@@ -5032,7 +5035,7 @@ snapshots:
     dependencies:
       esutils: 2.0.3
 
-  effect-oidc@0.0.13(effect@4.0.0-rc.111):
+  effect-oidc@0.0.14(effect@4.0.0-rc.111):
     dependencies:
       effect: 4.0.0-rc.111
 

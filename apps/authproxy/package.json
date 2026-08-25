@@ -18,7 +18,7 @@
         "@tinyburg/trading-sdk": "workspace:*",
         "@tinyburg/ui": "workspace:*",
         "effect": "4.0.0-rc.111",
-        "effect-oidc": "0.0.13",
+        "effect-oidc": "0.0.14",
         "foldkit": "0.150.0",
         "redis": "6.2.1",
         "tailwindcss": "4.3.3",
