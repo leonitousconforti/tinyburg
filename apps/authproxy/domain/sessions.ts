@@ -1,6 +1,6 @@
 import type { SqlError } from "effect/unstable/sql";
 
-import { Context, DateTime, Duration, Effect, Layer, type Option, Schedule, Schema } from "effect";
+import { Context, DateTime, Duration, Effect, Layer, type Option, Schema } from "effect";
 import { Model } from "effect/unstable/schema";
 import { SqlClient, SqlModel, SqlSchema } from "effect/unstable/sql";
 
@@ -86,12 +86,6 @@ export class SessionsRepository extends Context.Service<SessionsRepository>()(
             const revokeSessionByTokenHash = (tokenHash: string): Effect.Effect<void, SqlError.SqlError, never> =>
                 Effect.asVoid(sql`DELETE FROM sessions WHERE token_hash = ${tokenHash}`);
 
-            // Elevation is a two-step handshake around the re-authorization
-            // round trip. beginElevation records the password verdict as the
-            // browser leaves; completeElevation grants the hour only if that
-            // verdict was yes and the round trip came back inside its window.
-            // Both windows are stated here rather than taken as arguments so
-            // a compromised handler cannot ask for more.
             const beginElevation = SqlSchema.findOneOption({
                 Request: Schema.Struct({ sessionId: Schema.String.check(Schema.isUUID()), passwordOk: Schema.Boolean }),
                 Result: Session.select,
@@ -123,13 +117,6 @@ export class SessionsRepository extends Context.Service<SessionsRepository>()(
                     UPDATE sessions SET elevation_password_ok = NULL, elevation_requested_at = NULL
                     WHERE id = ${sessionId}
                 `);
-
-            yield* sql`DELETE FROM sessions WHERE expires_at < NOW()`.pipe(
-                Effect.catchCause((cause) => Effect.logWarning(`failed to purge expired sessions`, cause)),
-                Effect.schedule(Schedule.cron("43 * * * *")),
-                Effect.forkScoped,
-                Effect.asVoid
-            );
 
             return {
                 createSession,

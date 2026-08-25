@@ -13,6 +13,22 @@ export class CurrentAccount extends Context.Service<CurrentAccount, Account>()(
 ) {}
 
 /**
+ * The key of the seeded account that permits no scopes at all.
+ *
+ * @since 1.0.0
+ * @category Constants
+ */
+export const NONE_ACCOUNT_KEY = "00000000-0000-0000-0000-000000000001";
+
+/**
+ * The key of the seeded public account that carries the read-only scopes.
+ *
+ * @since 1.0.0
+ * @category Constants
+ */
+export const READONLY_ACCOUNT_KEY = "00000000-0000-0000-0000-000000000002";
+
+/**
  * An account in the authproxy system.
  *
  * @since 1.0.0
@@ -20,14 +36,14 @@ export class CurrentAccount extends Context.Service<CurrentAccount, Account>()(
  */
 export class Account extends Model.Class<Account>("Account")({
     id: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)).pipe(Model.GeneratedByDb),
-    createdAt: Model.DateTimeInsertFromDate,
+    revoked: Schema.Boolean.pipe(Model.FieldExcept(["insert"])),
     lastUsedAt: Model.DateTimeUpdateFromDate,
+    createdAt: Model.DateTimeInsertFromDate,
     key: Schema.Union([
         Schema.String.check(Schema.isUUID()),
-        Schema.Literal("00000000-0000-0000-0000-000000000001"),
-        Schema.Literal("00000000-0000-0000-0000-000000000002"),
+        Schema.Literal(NONE_ACCOUNT_KEY),
+        Schema.Literal(READONLY_ACCOUNT_KEY),
     ]).pipe(Model.FieldExcept(["insert"])),
-    revoked: Schema.Boolean.pipe(Model.FieldExcept(["insert"])),
     scopes: Schema.UniqueArray(Schema.String).pipe(
         Schema.decodeTo(Schema.ReadonlySet(Schema.String), {
             encode: SchemaGetter.transform((set) => Array.from(set)),
@@ -37,7 +53,7 @@ export class Account extends Model.Class<Account>("Account")({
     description: Schema.OptionFromNullishOr(Schema.String, { onNoneEncoding: null }),
     ownerSub: Schema.OptionFromNullishOr(Schema.String.check(Schema.isUUID()), { onNoneEncoding: null }),
     rateLimitLimit: Schema.Int,
-    rateLimitWindow: Schema.NumberFromString.pipe(
+    rateLimitWindow: Schema.FiniteFromString.pipe(
         Schema.check(Schema.isGreaterThanOrEqualTo(0)),
         Schema.decodeTo(Schema.Int),
         Schema.decodeTo(Schema.DurationFromMillis)
@@ -54,16 +70,16 @@ export class Repository extends Context.Service<Repository>()("@tinyburg/authpro
     make: Effect.gen(function* () {
         const sql = yield* SqlClient.SqlClient;
 
-        const listAll = SqlSchema.findAll({
-            Request: Schema.Void,
-            Result: Account.select,
-            execute: () => sql`SELECT * FROM accounts`,
-        });
-
         const repoByKey = yield* SqlModel.makeRepository(Account, {
             spanPrefix: "@tinyburg/authproxy/model/Repository/ByKey",
             tableName: "accounts",
             idColumn: "key",
+        });
+
+        const listAll = SqlSchema.findAll({
+            Request: Schema.Void,
+            Result: Account.select,
+            execute: () => sql`SELECT * FROM accounts`,
         });
 
         const listForOwner = SqlSchema.findAll({
@@ -85,11 +101,11 @@ export class Repository extends Context.Service<Repository>()("@tinyburg/authpro
             `,
         });
 
-        // Rotation swaps the credential in place: the row keeps its scopes,
-        // rate limit and history, only the key changes. Scoped to the owner so
-        // one user can never rotate another's key out from under them.
         const rotateForOwner = SqlSchema.findOneOption({
-            Request: Schema.Struct({ key: Schema.String.check(Schema.isUUID()), ownerSub: Schema.String }),
+            Request: Schema.Struct({
+                key: Schema.String.check(Schema.isUUID()),
+                ownerSub: Schema.String,
+            }),
             Result: Account.select,
             execute: ({ key, ownerSub }) => sql`
                 UPDATE accounts SET key = gen_random_uuid()
@@ -122,8 +138,8 @@ export class Repository extends Context.Service<Repository>()("@tinyburg/authpro
             `,
         });
 
-        const seededNoneAccount = repoByKey.findById("00000000-0000-0000-0000-000000000001");
-        const seededReadonlyAccount = repoByKey.findById("00000000-0000-0000-0000-000000000002");
+        const seededNoneAccount = repoByKey.findById(NONE_ACCOUNT_KEY);
+        const seededReadonlyAccount = repoByKey.findById(READONLY_ACCOUNT_KEY);
 
         return {
             ...repoByKey,
