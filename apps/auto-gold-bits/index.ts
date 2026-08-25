@@ -7,19 +7,14 @@ import { NodeRuntime, NodeServices } from "@effect/platform-node";
 import { NimblebitAuth, NimblebitConfig } from "@tinyburg/nimblebit-sdk";
 import { Bitizens, SyncItemType, TinyTower } from "@tinyburg/tinytower-sdk";
 
-const DotEnvLive = Effect.map(ConfigProvider.fromDotEnv(), ConfigProvider.nested("AUTOGOLDBITS"));
-const ConfigLive = ConfigProvider.nested(ConfigProvider.fromEnv(), "AUTOGOLDBITS");
+const ConfigProviderLive = ConfigProvider.fromEnv().pipe(ConfigProvider.nested("AUTOGOLDBITS"), ConfigProvider.layer);
 
 const Live = Layer.merge(
     FetchHttpClient.layer,
     NimblebitAuth.layerTinyburgAuthProxyConfig({
         authKey: Config.redacted("AUTHPROXY_AUTH_KEY"),
     })
-).pipe(
-    Layer.provideMerge(ConfigProvider.layer(ConfigLive)),
-    Layer.provideMerge(ConfigProvider.layerAdd(DotEnvLive)),
-    Layer.provide(NodeServices.layer)
-);
+).pipe(Layer.provideMerge(ConfigProviderLive), Layer.provide(NodeServices.layer));
 
 const program = Effect.gen(function* () {
     const authenticatedPlayer = yield* NimblebitConfig.AuthenticatedPlayerConfig;
