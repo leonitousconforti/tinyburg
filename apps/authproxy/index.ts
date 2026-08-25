@@ -1,7 +1,8 @@
-import { Config, Effect, Layer, Path, String } from "effect";
+import { Config, ConfigProvider, Effect, Layer, Path, String } from "effect";
 import { FetchHttpClient, HttpRouter } from "effect/unstable/http";
 import { RateLimiter } from "effect/unstable/persistence";
 
+// @effect-diagnostics-next-line nodeBuiltinImport:off
 import { createServer } from "node:http";
 
 import { NodeHttpServer, NodeRuntime } from "@effect/platform-node";
@@ -10,17 +11,14 @@ import { PgClient, PgMigrator } from "@effect/sql-pg";
 import { CookiePolicy } from "./cookies.ts";
 import { Repository } from "./domain/model.ts";
 import { SessionsRepository } from "./domain/sessions.ts";
-import { AccountsApiLive } from "./routes/accounts.ts";
 import { HealthCheckRoutesLive } from "./routes/health.ts";
 import { OAuthRoutesLive } from "./routes/oauth.ts";
 import { SelfServiceApiLive } from "./routes/selfservice.ts";
 import { StaticRoutesLive } from "./routes/static.ts";
 import { TinyTowerApiLive } from "./routes/tinytower.ts";
-import { TelemetryLive } from "./telemetry.ts";
 
 const AllRoutes = Layer.mergeAll(
     TinyTowerApiLive,
-    AccountsApiLive,
     SelfServiceApiLive,
     OAuthRoutesLive,
     HealthCheckRoutesLive,
@@ -40,6 +38,7 @@ const MigratorLive = Effect.gen(function* () {
     return PgMigrator.layer({ loader });
 }).pipe(Layer.unwrap);
 
+const ConfigProviderLive = ConfigProvider.fromEnv().pipe(ConfigProvider.nested("AUTHPROXY"), ConfigProvider.layer);
 HttpRouter.serve(AllRoutes, { routerConfig: { maxParamLength: 500 } }).pipe(
     Layer.provide([
         RateLimiter.layerStoreMemory,
@@ -56,9 +55,8 @@ HttpRouter.serve(AllRoutes, { routerConfig: { maxParamLength: 500 } }).pipe(
             host: Config.string("HOST").pipe(Config.withDefault("0.0.0.0")),
         })
     ),
-    // Outermost, so the tracer and logger it installs are the ones every layer
-    // above is built and served with.
-    Layer.provide(TelemetryLive),
+    Layer.provideMerge(ConfigProviderLive),
+    Layer.provideMerge(NodeHttpServer.layerHttpServices),
     Layer.launch,
     NodeRuntime.runMain
 );
