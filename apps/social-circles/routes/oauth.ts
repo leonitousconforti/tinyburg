@@ -14,6 +14,8 @@
  *   `tower_grants` and is what the scheduled crawl uses hours later.
  */
 
+import type { HttpClientError } from "effect/unstable/http";
+
 import { Config, DateTime, Effect, Layer, Option, Redacted, Ref, Result, Schema } from "effect";
 import { HttpClient, HttpRouter, HttpServerRequest, HttpServerResponse, Url } from "effect/unstable/http";
 
@@ -81,7 +83,16 @@ interface TinyburgRealized {
     readonly clientId: string;
     readonly clientSecret: Option.Option<Redacted.Redacted>;
     readonly redirectUri: string;
-    readonly jwks: Effect.Effect<Schema.Schema.Type<typeof Jwt.JwksSchema>, unknown, never>;
+    /**
+     * The signing keys, already cached. Spelled out rather than left as
+     * `unknown`, so a caller can see that a failure here is a fetch or a decode
+     * and not something it should be catching broadly.
+     */
+    readonly jwks: Effect.Effect<
+        Schema.Schema.Type<typeof Jwt.JwksSchema>,
+        HttpClientError.HttpClientError | Schema.SchemaError,
+        never
+    >;
 }
 
 const login = (tinyburg: TinyburgRealized) =>

@@ -2,7 +2,7 @@ import { Context, Effect, Layer, Schema as S } from "effect";
 import { HttpApiClient } from "effect/unstable/httpapi";
 
 import { Command, Http } from "foldkit";
-import { m } from "foldkit/message";
+import { defineMessageUnion } from "foldkit/message";
 import { ts } from "foldkit/schema";
 
 import { Session } from "../domain/sessions.ts";
@@ -36,18 +36,28 @@ export const SignedIn = ts("SignedIn", { session: Session.json });
 export const SessionState = S.Union([SignedOut, CheckingSession, SignedIn]);
 export type SessionState = typeof SessionState.Type;
 
-export const GotSession = m("GotSession", { session: SessionState });
+/**
+ * What the backend tells the application.
+ *
+ * One union rather than a constructor per message: `defineMessageUnion`
+ * declares the whole set at once and hangs the constructors off the result, so
+ * the union and its members cannot drift apart.
+ */
+export const BackendMessage = defineMessageUnion({
+    GotSession: { session: SessionState },
+});
+export type BackendMessage = typeof BackendMessage.Type;
 
 /** Asks the server who this browser is. */
 export const FetchSession = Command.define("FetchSession", {
-    messages: [GotSession],
+    messages: [BackendMessage.GotSession],
     execute: Effect.gen(function* () {
         const self = yield* Self;
         const session = yield* self.SelfServiceGroup.session();
-        return GotSession({ session: SignedIn({ session }) });
+        return BackendMessage.GotSession({ session: SignedIn({ session }) });
     }).pipe(
         // Unauthorized is a plain signed-out answer. Anything else gets the
         // same treatment, because a gated page cannot render on a maybe.
-        Effect.catch(() => Effect.succeed(GotSession({ session: SignedOut() })))
+        Effect.catch(() => Effect.succeed(BackendMessage.GotSession({ session: SignedOut() })))
     ),
 });

@@ -5,10 +5,10 @@ import type { Document, Html, HtmlBuilder } from "foldkit/html";
 
 import { Language } from "@tinyburg/ui/Internationalization";
 import { AsyncData, Command, Navigation, Render, type Runtime, Url } from "foldkit";
-import { m } from "foldkit/message";
+import { defineMessageUnion } from "foldkit/message";
 import { evo } from "foldkit/struct";
 
-import { type Backend, CheckingSession, FetchSession, GotSession, SessionState, SignedOut } from "./backend.ts";
+import { type Backend, BackendMessage, CheckingSession, FetchSession, SessionState, SignedOut } from "./backend.ts";
 import { initialLanguage, messagesFor } from "./messages/index.ts";
 import { homeView } from "./pages/home.ts";
 import { loginView } from "./pages/login.ts";
@@ -39,11 +39,21 @@ export type Model = typeof Model.Type;
 
 // MESSAGE
 
-export const ClickedLink = m("ClickedLink", { request: Navigation.UrlRequest });
-export const ChangedUrl = m("ChangedUrl", { url: Url.Url });
-export const CompletedNavigation = m("CompletedNavigation");
+/** The application's own messages: everything about where the browser is. */
+export const NavigationMessage = defineMessageUnion({
+    ClickedLink: { request: Navigation.UrlRequest },
+    ChangedUrl: { url: Url.Url },
+    CompletedNavigation: {},
+});
+export type NavigationMessage = typeof NavigationMessage.Type;
 
-export const Message = S.Union([ClickedLink, ChangedUrl, CompletedNavigation, GotSession, TowersMessage]);
+/**
+ * Everything the runtime may dispatch, which is the application's own messages
+ * plus one union per module that owns some. Each of those is a
+ * `defineMessageUnion` in its own file, so this stays a list of unions rather
+ * than a list of individual constructors.
+ */
+export const Message = S.Union([NavigationMessage, BackendMessage, TowersMessage]);
 export type Message = typeof Message.Type;
 
 type Step = readonly [Model, ReadonlyArray<Command.Command<Message, never, Backend>>];
@@ -52,20 +62,20 @@ type Step = readonly [Model, ReadonlyArray<Command.Command<Message, never, Backe
 
 const Navigate = Command.define("Navigate", {
     args: { url: S.String, replace: S.Boolean },
-    messages: [CompletedNavigation],
+    messages: [NavigationMessage.CompletedNavigation],
     execute: ({ replace, url }) =>
         Effect.gen(function* () {
             yield* replace ? Navigation.replaceUrl(url) : Navigation.pushUrl(url);
             yield* Render.afterCommit;
             yield* Effect.sync(() => window.scrollTo({ top: 0, behavior: "instant" }));
-            return CompletedNavigation();
+            return NavigationMessage.CompletedNavigation();
         }),
 });
 
 const LoadExternal = Command.define("LoadExternal", {
     args: { href: S.String },
-    messages: [CompletedNavigation],
-    execute: ({ href }) => Navigation.load(href).pipe(Effect.as(CompletedNavigation())),
+    messages: [NavigationMessage.CompletedNavigation],
+    execute: ({ href }) => Navigation.load(href).pipe(Effect.as(NavigationMessage.CompletedNavigation())),
 });
 
 // Paths the server owns: the sign-in round trip and sign out. Clicking one has

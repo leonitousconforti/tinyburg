@@ -7,7 +7,7 @@ import type { Html, HtmlBuilder } from "foldkit/html";
 import { PlayerIdSchema } from "@tinyburg/nimblebit-sdk/NimblebitConfig";
 import { type Language, longDate } from "@tinyburg/ui/Internationalization";
 import { AsyncData, Command } from "foldkit";
-import { m } from "foldkit/message";
+import { defineMessageUnion } from "foldkit/message";
 import { evo } from "foldkit/struct";
 
 import { Circle, TowerStatus } from "../../shared/api.ts";
@@ -58,35 +58,31 @@ export const enterTowers = (previous: TowersModel): TowersModel =>
 
 // MESSAGE
 
-export const SettledTowers = m("SettledTowers", { result: S.Result(S.Array(TowerStatus), S.String) });
+/**
+ * Everything this page can say.
+ *
+ * `defineMessageUnion` declares the union and its constructors together, so a
+ * variant cannot be added without joining the union or removed while something
+ * still matches on it.
+ */
+export const TowersMessage = defineMessageUnion({
+    SettledTowers: { result: S.Result(S.Array(TowerStatus), S.String) },
 
-export const ClickedEnroll = m("ClickedEnroll", { playerId: PlayerIdSchema });
-export const CompletedEnroll = m("CompletedEnroll", { crawled: S.Boolean });
+    ClickedEnroll: { playerId: PlayerIdSchema },
+    CompletedEnroll: { crawled: S.Boolean },
 
-export const ClickedWithdraw = m("ClickedWithdraw", { playerId: PlayerIdSchema });
-export const CompletedWithdraw = m("CompletedWithdraw", { eventsRemoved: S.Finite });
+    ClickedWithdraw: { playerId: PlayerIdSchema },
+    CompletedWithdraw: { eventsRemoved: S.Finite },
 
-export const ClickedCircle = m("ClickedCircle", { playerId: PlayerIdSchema });
-export const SettledCircle = m("SettledCircle", { circle: Circle });
-export const ClickedHideCircle = m("ClickedHideCircle");
+    ClickedCircle: { playerId: PlayerIdSchema },
+    SettledCircle: { circle: Circle },
+    ClickedHideCircle: {},
 
-export const FailedAction = m("FailedAction", { message: S.String });
+    FailedAction: { message: S.String },
 
-/** The session ended somewhere else while this page was open. */
-export const SignedOutElsewhere = m("SignedOutElsewhere");
-
-export const TowersMessage = S.Union([
-    SettledTowers,
-    ClickedEnroll,
-    CompletedEnroll,
-    ClickedWithdraw,
-    CompletedWithdraw,
-    ClickedCircle,
-    SettledCircle,
-    ClickedHideCircle,
-    FailedAction,
-    SignedOutElsewhere,
-]);
+    /** The session ended somewhere else while this page was open. */
+    SignedOutElsewhere: {},
+});
 export type TowersMessage = typeof TowersMessage.Type;
 
 // COMMAND
@@ -97,58 +93,64 @@ export type TowersMessage = typeof TowersMessage.Type;
 const towersMsgs = (): TowersMessages => messagesFor(initialLanguage).towers;
 
 export const FetchTowers = Command.define("FetchTowers", {
-    messages: [SettledTowers, SignedOutElsewhere],
+    messages: [TowersMessage.SettledTowers, TowersMessage.SignedOutElsewhere],
     execute: Effect.gen(function* () {
         const self = yield* Self;
         const towers = yield* self.SelfServiceGroup.towers();
-        return SettledTowers({ result: Result.succeed(towers) });
+        return TowersMessage.SettledTowers({ result: Result.succeed(towers) });
     }).pipe(
-        Effect.catchTag("Unauthorized", () => Effect.succeed(SignedOutElsewhere())),
-        Effect.catch(() => Effect.succeed(SettledTowers({ result: Result.fail(towersMsgs().loadFailed) })))
+        Effect.catchTag("Unauthorized", () => Effect.succeed(TowersMessage.SignedOutElsewhere())),
+        Effect.catch(() =>
+            Effect.succeed(TowersMessage.SettledTowers({ result: Result.fail(towersMsgs().loadFailed) }))
+        )
     ),
 });
 
 const Enroll = Command.define("Enroll", {
     args: { playerId: PlayerIdSchema },
-    messages: [CompletedEnroll, FailedAction, SignedOutElsewhere],
+    messages: [TowersMessage.CompletedEnroll, TowersMessage.FailedAction, TowersMessage.SignedOutElsewhere],
     execute: ({ playerId }) =>
         Effect.gen(function* () {
             const self = yield* Self;
             const result = yield* self.SelfServiceGroup.enroll({ params: { playerId } });
-            return CompletedEnroll({ crawled: result.crawled });
+            return TowersMessage.CompletedEnroll({ crawled: result.crawled });
         }).pipe(
-            Effect.catchTag("Unauthorized", () => Effect.succeed(SignedOutElsewhere())),
-            Effect.catchTag("Forbidden", () => Effect.succeed(FailedAction({ message: towersMsgs().enrollForbidden }))),
-            Effect.catch(() => Effect.succeed(FailedAction({ message: towersMsgs().actionFailed })))
+            Effect.catchTag("Unauthorized", () => Effect.succeed(TowersMessage.SignedOutElsewhere())),
+            Effect.catchTag("Forbidden", () =>
+                Effect.succeed(TowersMessage.FailedAction({ message: towersMsgs().enrollForbidden }))
+            ),
+            Effect.catch(() => Effect.succeed(TowersMessage.FailedAction({ message: towersMsgs().actionFailed })))
         ),
 });
 
 const Withdraw = Command.define("Withdraw", {
     args: { playerId: PlayerIdSchema },
-    messages: [CompletedWithdraw, FailedAction, SignedOutElsewhere],
+    messages: [TowersMessage.CompletedWithdraw, TowersMessage.FailedAction, TowersMessage.SignedOutElsewhere],
     execute: ({ playerId }) =>
         Effect.gen(function* () {
             const self = yield* Self;
             const receipt = yield* self.SelfServiceGroup.withdraw({ params: { playerId } });
-            return CompletedWithdraw({ eventsRemoved: receipt.eventsRemoved });
+            return TowersMessage.CompletedWithdraw({ eventsRemoved: receipt.eventsRemoved });
         }).pipe(
-            Effect.catchTag("Unauthorized", () => Effect.succeed(SignedOutElsewhere())),
-            Effect.catchTag("NotFound", () => Effect.succeed(FailedAction({ message: towersMsgs().withdrawNotFound }))),
-            Effect.catch(() => Effect.succeed(FailedAction({ message: towersMsgs().actionFailed })))
+            Effect.catchTag("Unauthorized", () => Effect.succeed(TowersMessage.SignedOutElsewhere())),
+            Effect.catchTag("NotFound", () =>
+                Effect.succeed(TowersMessage.FailedAction({ message: towersMsgs().withdrawNotFound }))
+            ),
+            Effect.catch(() => Effect.succeed(TowersMessage.FailedAction({ message: towersMsgs().actionFailed })))
         ),
 });
 
 const FetchCircle = Command.define("FetchCircle", {
     args: { playerId: PlayerIdSchema },
-    messages: [SettledCircle, FailedAction, SignedOutElsewhere],
+    messages: [TowersMessage.SettledCircle, TowersMessage.FailedAction, TowersMessage.SignedOutElsewhere],
     execute: ({ playerId }) =>
         Effect.gen(function* () {
             const self = yield* Self;
             const circle = yield* self.SelfServiceGroup.circle({ params: { playerId } });
-            return SettledCircle({ circle });
+            return TowersMessage.SettledCircle({ circle });
         }).pipe(
-            Effect.catchTag("Unauthorized", () => Effect.succeed(SignedOutElsewhere())),
-            Effect.catch(() => Effect.succeed(FailedAction({ message: towersMsgs().actionFailed })))
+            Effect.catchTag("Unauthorized", () => Effect.succeed(TowersMessage.SignedOutElsewhere())),
+            Effect.catch(() => Effect.succeed(TowersMessage.FailedAction({ message: towersMsgs().actionFailed })))
         ),
 });
 
@@ -244,7 +246,10 @@ const circleList = (h: HtmlBuilder<AppMessage>, msgs: TowersMessages, circle: ty
                 [h.Class("mb-3 flex items-center justify-between gap-3")],
                 [
                     h.h3([h.Class("font-pixel text-[0.7rem] text-gray-800")], [msgs.yourCircle]),
-                    h.button([h.Type("button"), h.Class(quietButton), h.OnClick(ClickedHideCircle())], [msgs.hide]),
+                    h.button(
+                        [h.Type("button"), h.Class(quietButton), h.OnClick(TowersMessage.ClickedHideCircle())],
+                        [msgs.hide]
+                    ),
                 ]
             ),
             circle.friends.length === 0
@@ -319,7 +324,7 @@ const towerRow = (
                                   h.Type("button"),
                                   h.Class(primaryButton),
                                   h.Disabled(busy),
-                                  h.OnClick(ClickedCircle({ playerId: tower.playerId })),
+                                  h.OnClick(TowersMessage.ClickedCircle({ playerId: tower.playerId })),
                               ],
                               [busy ? "..." : msgs.seeMyCircle]
                           ),
@@ -329,7 +334,7 @@ const towerRow = (
                                   h.Class(dangerButton),
                                   h.Disabled(busy),
                                   h.Title(msgs.withdrawTitle),
-                                  h.OnClick(ClickedWithdraw({ playerId: tower.playerId })),
+                                  h.OnClick(TowersMessage.ClickedWithdraw({ playerId: tower.playerId })),
                               ],
                               [busy ? "..." : armed ? msgs.reallyLeave : msgs.leaveAndDelete]
                           ),
@@ -340,7 +345,7 @@ const towerRow = (
                                   h.Type("button"),
                                   h.Class(primaryButton),
                                   h.Disabled(busy),
-                                  h.OnClick(ClickedEnroll({ playerId: tower.playerId })),
+                                  h.OnClick(TowersMessage.ClickedEnroll({ playerId: tower.playerId })),
                               ],
                               [busy ? msgs.joining : msgs.takePart]
                           ),

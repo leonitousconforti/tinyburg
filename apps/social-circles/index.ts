@@ -7,7 +7,7 @@
  * than a stepping stone; see `cluster/runtime.ts`.
  */
 
-import { Config, Effect, Layer, Path, String } from "effect";
+import { Config, ConfigProvider, Effect, Layer, Path, String } from "effect";
 import { FetchHttpClient, HttpRouter } from "effect/unstable/http";
 
 import { createServer } from "node:http";
@@ -35,6 +35,8 @@ import { PurgeWorkflowLive } from "./workflows/purge.ts";
 
 /** Static last, so its SPA fallback never shadows a route the study owns. */
 const AllRoutes = Layer.mergeAll(SelfServiceApiLive, OAuthRoutesLive, StaticRoutesLive);
+
+const DotEnvLive = Effect.map(ConfigProvider.fromDotEnv(), ConfigProvider.nested("SOCIALCIRCLES"));
 
 const SqlLive = PgClient.layerConfig({
     url: Config.redacted("DATABASE_URL"),
@@ -93,6 +95,10 @@ Layer.mergeAll(
             host: Config.string("HOST").pipe(Config.withDefault("0.0.0.0")),
         })
     ),
+    // The environment as it comes, `.env` nested under the service name; see
+    // `tinyburg.app`'s server entrypoint for why they differ.
+    Layer.provideMerge(ConfigProvider.layerAdd(DotEnvLive)),
+    Layer.provide(NodeServices.layer),
     Layer.launch,
     NodeRuntime.runMain
 );
