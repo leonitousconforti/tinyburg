@@ -38,7 +38,8 @@ const MigratorLive = Effect.gen(function* () {
     return PgMigrator.layer({ loader });
 }).pipe(Layer.unwrap);
 
-const ConfigProviderLive = ConfigProvider.fromEnv().pipe(ConfigProvider.nested("AUTHPROXY"), ConfigProvider.layer);
+const ConfigProviderLive = ConfigProvider.fromEnv().pipe(ConfigProvider.nested("AUTHPROXY"));
+
 HttpRouter.serve(AllRoutes, { routerConfig: { maxParamLength: 500 } }).pipe(
     Layer.provide([
         RateLimiter.layerStoreMemory,
@@ -55,7 +56,7 @@ HttpRouter.serve(AllRoutes, { routerConfig: { maxParamLength: 500 } }).pipe(
             host: Config.string("HOST").pipe(Config.withDefault("0.0.0.0")),
         })
     ),
-    Layer.provideMerge(ConfigProviderLive),
+    Layer.provideMerge(ConfigProvider.layerAdd(ConfigProviderLive, { asPrimary: true })),
     Layer.provideMerge(NodeHttpServer.layerHttpServices),
     Layer.launch,
     NodeRuntime.runMain
