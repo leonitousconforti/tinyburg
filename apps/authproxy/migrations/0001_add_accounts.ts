@@ -1,6 +1,8 @@
 import { Effect } from "effect";
 import { SqlClient } from "effect/unstable/sql";
 
+import { NONE_ACCOUNT_KEY, READONLY_ACCOUNT_KEY } from "../domain/model.ts";
+
 export default Effect.flatMap(
     SqlClient.SqlClient,
     (sql) => sql`
@@ -21,12 +23,12 @@ export default Effect.flatMap(
 
         -- "None" account with no permitted scopes
         INSERT INTO accounts (key, description, rate_limit_limit, rate_limit_window, scopes)
-        VALUES ('00000000-0000-0000-0000-000000000001', 'Default None Account', 3, (EXTRACT(EPOCH FROM INTERVAL '1 minute') * 1000)::BIGINT, ARRAY[]::TEXT[])
+        VALUES (${sql.literal(`'${NONE_ACCOUNT_KEY}'`)}, 'Default None Account', 3, (EXTRACT(EPOCH FROM INTERVAL '1 minute') * 1000)::BIGINT, ARRAY[]::TEXT[])
         ON CONFLICT (key) DO NOTHING;
 
         -- "Default" account with read-only scopes
         INSERT INTO accounts (key, description, rate_limit_limit, rate_limit_window, scopes)
-        VALUES ('00000000-0000-0000-0000-000000000002', 'Default Readonly Account', 3, (EXTRACT(EPOCH FROM INTERVAL '1 minute') * 1000)::BIGINT, ARRAY[
+        VALUES (${sql.literal(`'${READONLY_ACCOUNT_KEY}'`)}, 'Default Readonly Account', 3, (EXTRACT(EPOCH FROM INTERVAL '1 minute') * 1000)::BIGINT, ARRAY[
             '/player_details/tt/',
             '/sync/pull/tt/',
             '/sync/current_version/tt/',
