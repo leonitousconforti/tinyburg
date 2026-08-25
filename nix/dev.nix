@@ -27,10 +27,6 @@
             infra = "4-infra";
           };
 
-          archiveBucket = "tinyburg";
-          archiveAccessKey = "tinyburg-local";
-          archiveSecretKey = "tinyburg-local-secret";
-
           databases = {
             tinyburg-app = {
               port = 54320;
@@ -141,7 +137,6 @@
         in
         {
           imports = [ inputs.services-flake.processComposeModules.default ];
-          cli.environment.PC_DISABLE_DOTENV = true;
 
           services.postgres = lib.mapAttrs' (
             service: db:
@@ -165,41 +160,20 @@
             dataDir = "./.dev/seaweedfs";
             host = "127.0.0.1";
             filer.enable = true;
-            s3 = {
-              enable = true;
-              config = pkgs.writeText "seaweedfs-s3.json" (
-                builtins.toJSON {
-                  identities = [
-                    {
-                      name = "archivist";
-                      credentials = [
-                        {
-                          accessKey = archiveAccessKey;
-                          secretKey = archiveSecretKey;
-                        }
-                      ];
-                      actions = [
-                        "Admin"
-                        "Read"
-                        "Write"
-                        "List"
-                        "Tagging"
-                      ];
-                    }
-                  ];
-                }
-              );
-            };
+            s3.enable = true;
           };
 
           settings.processes = postgresNamespaces // {
             seaweedfs.namespace = namespaces.infra;
-
             seaweedfs-bucket = {
               namespace = namespaces.infra;
               depends_on."seaweedfs".condition = "process_healthy";
               command = ''
-                echo "s3.bucket.create -name ${archiveBucket}" \
+                : "''${ARCHIVIST_SPACES_KEY:?set it in .env}"
+                : "''${ARCHIVIST_SPACES_SECRET:?set it in .env}"
+                printf '%s\n' \
+                  "s3.configure -user archivist -access_key $ARCHIVIST_SPACES_KEY -secret_key $ARCHIVIST_SPACES_SECRET -actions Admin,Read,Write,List,Tagging -apply" \
+                  "s3.bucket.create -name $ARCHIVIST_SPACES_BUCKET" \
                   | ${lib.getExe seaweed.package} shell \
                       -master=127.0.0.1:${toString seaweed.master.port}
               '';
@@ -265,12 +239,6 @@
             archivist = worker {
               entry = "apps/archivist/index.ts";
               depends_on."seaweedfs-bucket".condition = "process_completed_successfully";
-              env = {
-                S3_ENDPOINT = "http://127.0.0.1:${toString seaweed.s3.port}";
-                S3_FORCE_PATH_STYLE = "true";
-                SPACES_KEY = archiveAccessKey;
-                SPACES_SECRET = archiveSecretKey;
-              };
             };
           };
         };
