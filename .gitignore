@@ -26,8 +26,8 @@ Assembly-CSharp.dll
 .env.*
 !.env.example
 
-# Local development stack state: postgres and minio data dirs, and the
-# generated OIDC signing key. Deleting this directory is how you start over.
+# Local development stack state: the postgres and seaweedfs data dirs.
+# Deleting this directory is how you start over.
 .dev/
 
 # My files
