@@ -58,7 +58,10 @@
             in
             {
               ${pg}.namespace = namespaces.infra;
-              "${pg}-init".namespace = namespaces.infra;
+              "${pg}-init" = {
+                namespace = namespaces.infra;
+                depends_on."dev-dirs".condition = "process_completed_successfully";
+              };
             }
           ) databases;
 
@@ -164,7 +167,15 @@
           };
 
           settings.processes = postgresNamespaces // {
-            seaweedfs.namespace = namespaces.infra;
+            dev-dirs = {
+              namespace = namespaces.setup;
+              command = "${lib.getExe' pkgs.coreutils "mkdir"} -p .dev/postgres .dev/seaweedfs";
+            };
+
+            seaweedfs = {
+              namespace = namespaces.infra;
+              depends_on."dev-dirs".condition = "process_completed_successfully";
+            };
             seaweedfs-bucket = {
               namespace = namespaces.infra;
               depends_on."seaweedfs".condition = "process_healthy";
