@@ -32,3 +32,6 @@ Assembly-CSharp.dll
 
 # My files
 specs/
+
+# Local-only reverse-engineering scratch
+/hacks/
