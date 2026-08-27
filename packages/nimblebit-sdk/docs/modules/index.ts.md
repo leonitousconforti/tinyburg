@@ -20,8 +20,12 @@ Since v1.0.0
   - [NimblebitConfig (namespace export)](#nimblebitconfig-namespace-export)
 - [Errors](#errors)
   - [NimblebitError (namespace export)](#nimblebiterror-namespace-export)
+- [Games](#games)
+  - [NimblebitGame (namespace export)](#nimblebitgame-namespace-export)
 - [Schemas](#schemas)
   - [NimblebitSchema (namespace export)](#nimblebitschema-namespace-export)
+- [Scopes](#scopes)
+  - [NimblebitScopes (namespace export)](#nimblebitscopes-namespace-export)
 
 ---
 
@@ -73,6 +77,22 @@ export * as NimblebitError from "./NimblebitError.ts"
 
 Since v1.0.0
 
+# Games
+
+## NimblebitGame (namespace export)
+
+Re-exports all named exports from the "./NimblebitGame.ts" module as `NimblebitGame`.
+
+**Signature**
+
+```ts
+export * as NimblebitGame from "./NimblebitGame.ts"
+```
+
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/index.ts#L37)
+
+Since v1.0.0
+
 # Schemas
 
 ## NimblebitSchema (namespace export)
@@ -85,6 +105,22 @@ Re-exports all named exports from the "./NimblebitSchema.ts" module as `Nimblebi
 export * as NimblebitSchema from "./NimblebitSchema.ts"
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/index.ts#L36)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/index.ts#L45)
+
+Since v1.0.0
+
+# Scopes
+
+## NimblebitScopes (namespace export)
+
+Re-exports all named exports from the "./NimblebitScopes.ts" module as `NimblebitScopes`.
+
+**Signature**
+
+```ts
+export * as NimblebitScopes from "./NimblebitScopes.ts"
+```
+
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/index.ts#L76)
 
 Since v1.0.0

@@ -113,15 +113,14 @@ export const UnityColor: Schema.decodeTo<
     }>,
     Schema.TemplateLiteralParser<
         readonly [
-            Schema.compose<Schema.Finite, Schema.NumberFromString>,
+            Schema.compose<Schema.Finite, Schema.FiniteFromString>,
             ":",
-            Schema.compose<Schema.Finite, Schema.NumberFromString>,
+            Schema.compose<Schema.Finite, Schema.FiniteFromString>,
             ":",
-            Schema.compose<Schema.Finite, Schema.NumberFromString>,
+            Schema.compose<Schema.Finite, Schema.FiniteFromString>,
         ]
     >,
-    // Written out for readability alongside the neighbouring signatures.
-    // oxlint-disable-next-line typescript/no-unnecessary-type-arguments
+    never,
     never
 > = internal.UnityColor;
 
@@ -129,10 +128,7 @@ export const UnityColor: Schema.decodeTo<
  * @since 1.0.0
  * @category Schemas
  */
-export const split: (
-    options?: {
-        readonly separator?: string | undefined;
-    }
-    // Written out for readability alongside the neighbouring signatures.
-    // oxlint-disable-next-line typescript/no-unnecessary-type-arguments
-) => (from: Schema.String) => Schema.decodeTo<Schema.$Array<Schema.String>, Schema.String, never> = internal.split;
+export const split: (options?: {
+    readonly separator?: string | undefined;
+}) => (from: Schema.String) => Schema.decodeTo<Schema.$Array<Schema.String>, Schema.String, never, never> =
+    internal.split;

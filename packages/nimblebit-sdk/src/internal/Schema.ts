@@ -384,11 +384,11 @@ export const CSharpDate = Schema.BigInt.pipe(
 
 /** @internal */
 export const UnityColor = Schema.TemplateLiteralParser([
-    Schema.NumberFromString.pipe(Schema.decodeTo(Schema.Finite)),
+    Schema.FiniteFromString.pipe(Schema.decodeTo(Schema.Finite)),
     ":",
-    Schema.NumberFromString.pipe(Schema.decodeTo(Schema.Finite)),
+    Schema.FiniteFromString.pipe(Schema.decodeTo(Schema.Finite)),
     ":",
-    Schema.NumberFromString.pipe(Schema.decodeTo(Schema.Finite)),
+    Schema.FiniteFromString.pipe(Schema.decodeTo(Schema.Finite)),
 ]).pipe(
     Schema.decodeTo(
         Schema.Struct({

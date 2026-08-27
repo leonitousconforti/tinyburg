@@ -54,5 +54,8 @@
         "nimblebit",
         "tinytower",
         "tinytowers"
-    ]
+    ],
+    "dependencies": {
+        "effect-oidc": "0.1.0"
+    }
 }

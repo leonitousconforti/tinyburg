@@ -12,10 +12,13 @@ import * as Config from "effect/Config";
 import * as Context from "effect/Context";
 import * as Crypto from "effect/Crypto";
 import * as Effect from "effect/Effect";
+import * as Function from "effect/Function";
 import * as Layer from "effect/Layer";
 import * as Random from "effect/Random";
 import * as Redacted from "effect/Redacted";
 import * as Schema from "effect/Schema";
+
+import type { NimblebitGame } from "./NimblebitGame.ts";
 
 import * as NimblebitConfig from "./NimblebitConfig.ts";
 
@@ -41,12 +44,36 @@ export class NimblebitAuth extends Context.Service<
     ) & {
         readonly sign: (data: string) => Effect.Effect<string, Schema.SchemaError>;
         readonly salt: Effect.Effect<number, PlatformError.PlatformError>;
-        // Written out for readability alongside the neighbouring signatures.
-        // oxlint-disable-next-line typescript/no-unnecessary-type-arguments
-        readonly burnbot: Effect.Effect<Schema.Schema.Type<typeof NimblebitConfig.AuthenticatedPlayerSchema>, never>;
+        readonly burnbot: (
+            game: NimblebitGame
+        ) => Effect.Effect<Schema.Schema.Type<typeof NimblebitConfig.AuthenticatedPlayerSchema>, never, never>;
     }
 >()("NimblebitAuth") {
-    private static readonly burnbots: Array.NonEmptyReadonlyArray<
+    private static readonly bitcityBurnBots: Array.NonEmptyReadonlyArray<
+        Schema.Schema.Type<typeof NimblebitConfig.AuthenticatedPlayerSchema>
+    > = [] as const;
+
+    private static readonly discozooBurnBots: Array.NonEmptyReadonlyArray<
+        Schema.Schema.Type<typeof NimblebitConfig.AuthenticatedPlayerSchema>
+    > = [] as const;
+
+    private static readonly legotowerBurnBots: Array.NonEmptyReadonlyArray<
+        Schema.Schema.Type<typeof NimblebitConfig.AuthenticatedPlayerSchema>
+    > = [] as const;
+
+    private static readonly pocketplanesBurnBots: Array.NonEmptyReadonlyArray<
+        Schema.Schema.Type<typeof NimblebitConfig.AuthenticatedPlayerSchema>
+    > = [] as const;
+
+    private static readonly pockettrainsBurnBots: Array.NonEmptyReadonlyArray<
+        Schema.Schema.Type<typeof NimblebitConfig.AuthenticatedPlayerSchema>
+    > = [] as const;
+
+    private static readonly tinytowerClassicBurnBots: Array.NonEmptyReadonlyArray<
+        Schema.Schema.Type<typeof NimblebitConfig.AuthenticatedPlayerSchema>
+    > = [] as const;
+
+    private static readonly tinytowerBurnBots: Array.NonEmptyReadonlyArray<
         Schema.Schema.Type<typeof NimblebitConfig.AuthenticatedPlayerSchema>
     > = [
         {
@@ -75,14 +102,50 @@ export class NimblebitAuth extends Context.Service<
         },
     ] as const;
 
+    private static readonly tinytowerVegasBurnBots: Array.NonEmptyReadonlyArray<
+        Schema.Schema.Type<typeof NimblebitConfig.AuthenticatedPlayerSchema>
+    > = [] as const;
+
+    private static readonly burnbot: (
+        game: NimblebitGame
+    ) => Effect.Effect<Schema.Schema.Type<typeof NimblebitConfig.AuthenticatedPlayerSchema>, never, never> = (game) => {
+        switch (game) {
+            case "bitcity": {
+                return Random.shuffle(NimblebitAuth.bitcityBurnBots).pipe(Effect.map((bots) => bots[0]));
+            }
+            case "discozoo": {
+                return Random.shuffle(NimblebitAuth.discozooBurnBots).pipe(Effect.map((bots) => bots[0]));
+            }
+            case "legotower": {
+                return Random.shuffle(NimblebitAuth.legotowerBurnBots).pipe(Effect.map((bots) => bots[0]));
+            }
+            case "pocketplanes": {
+                return Random.shuffle(NimblebitAuth.pocketplanesBurnBots).pipe(Effect.map((bots) => bots[0]));
+            }
+            case "pockettrains": {
+                return Random.shuffle(NimblebitAuth.pockettrainsBurnBots).pipe(Effect.map((bots) => bots[0]));
+            }
+            case "tinytowerclassic": {
+                return Random.shuffle(NimblebitAuth.tinytowerClassicBurnBots).pipe(Effect.map((bots) => bots[0]));
+            }
+            case "tinytower": {
+                return Random.shuffle(NimblebitAuth.tinytowerBurnBots).pipe(Effect.map((bots) => bots[0]));
+            }
+            case "tinytowervegas": {
+                return Random.shuffle(NimblebitAuth.tinytowerVegasBurnBots).pipe(Effect.map((bots) => bots[0]));
+            }
+            default: {
+                return Function.absurd(game);
+            }
+        }
+    };
+
     private static readonly Salt: Effect.Effect<number, PlatformError.PlatformError, Crypto.Crypto> = Effect.map(
         Crypto.Crypto.use((crypto) => crypto.randomBytes(4)),
         (bytes) => new DataView(bytes.buffer).getUint32(0, false)
     );
 
-    // Written out for readability alongside the neighbouring signatures.
-    // oxlint-disable-next-line typescript/no-unnecessary-type-arguments
-    private static readonly MD5 = (data: string): Effect.Effect<string, never> =>
+    private static readonly MD5 = (data: string): Effect.Effect<string, never, never> =>
         Effect.map(
             Effect.promise(() => import("node:crypto")),
             (crypto) => crypto.createHash("md5").update(data).digest("hex")
@@ -91,19 +154,13 @@ export class NimblebitAuth extends Context.Service<
     public static readonly Direct = (
         authKey: Schema.Schema.Type<typeof NimblebitConfig.NimblebitAuthKeySchema>
     ): Layer.Layer<NimblebitAuth, never, Crypto.Crypto> =>
-        Effect.flatMap(
-            Crypto.Crypto,
-            Effect.fnUntraced(function* (crypto) {
-                const randomBurnBot = yield* Random.shuffle(NimblebitAuth.burnbots);
-                return {
-                    sign: (data: string) => NimblebitAuth.MD5(data + Redacted.value(authKey)),
-                    salt: NimblebitAuth.Salt.pipe(Effect.provideService(Crypto.Crypto, crypto)),
-                    burnbot: Effect.sync(() => randomBurnBot[0]),
-                    host: "https://sync.nimblebit.com",
-                    authKey,
-                };
-            })
-        ).pipe(Layer.effect(this));
+        Effect.map(Crypto.Crypto, (crypto) => ({
+            sign: (data: string) => NimblebitAuth.MD5(data + Redacted.value(authKey)),
+            salt: NimblebitAuth.Salt.pipe(Effect.provideService(Crypto.Crypto, crypto)),
+            burnbot: NimblebitAuth.burnbot,
+            host: "https://sync.nimblebit.com",
+            authKey,
+        })).pipe(Layer.effect(this));
 
     public static readonly DirectConfig = (
         config: Config.Config<
@@ -119,19 +176,13 @@ export class NimblebitAuth extends Context.Service<
         host: string;
         authKey: Redacted.Redacted;
     }): Layer.Layer<NimblebitAuth, never, Crypto.Crypto> =>
-        Effect.flatMap(
-            Crypto.Crypto,
-            Effect.fnUntraced(function* (crypto) {
-                const randomBurnBot = yield* Random.shuffle(NimblebitAuth.burnbots);
-                return {
-                    salt: NimblebitAuth.Salt.pipe(Effect.provideService(Crypto.Crypto, crypto)),
-                    sign: Schema.encodeEffect(Schema.StringFromBase64Url),
-                    burnbot: Effect.sync(() => randomBurnBot[0]),
-                    authKey,
-                    host,
-                };
-            })
-        ).pipe(Layer.effect(this));
+        Effect.map(Crypto.Crypto, (crypto) => ({
+            salt: NimblebitAuth.Salt.pipe(Effect.provideService(Crypto.Crypto, crypto)),
+            sign: Schema.encodeEffect(Schema.StringFromBase64Url),
+            burnbot: NimblebitAuth.burnbot,
+            authKey,
+            host,
+        })).pipe(Layer.effect(this));
 
     public static readonly CustomHostConfig = (
         options: Config.Wrap<{
