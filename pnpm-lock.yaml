@@ -452,8 +452,8 @@ importers:
         specifier: 17.17.0
         version: 17.17.0
       frida-il2cpp-bridge:
-        specifier: 0.13.1
-        version: 0.13.1
+        specifier: 0.13.2
+        version: 0.13.2
     devDependencies:
       '@types/frida-gum':
         specifier: 19.10.0
@@ -2508,10 +2508,6 @@ packages:
   for-in@1.0.2:
     resolution: {integrity: sha512-7EwmXrOjyL+ChxMhmG5lnW9MPt1aIeZEwKhQzoBUdTV0N3zuwWDZYVJatDvZ2OyzPUvdIAZDsCetk3coyMfcnQ==}
     engines: {node: '>=0.10.0'}
-
-  frida-il2cpp-bridge@0.13.1:
-    resolution: {integrity: sha512-qXjdcdI+KM5wnjCwqZTe/Tas/2pClXpDhcVWjiaQFxzSun+1vaoHEWlnMe4F09Vdz/vGkkjFOPKfvDem2A8UOQ==}
-    hasBin: true
 
   frida-il2cpp-bridge@0.13.2:
     resolution: {integrity: sha512-tLQrGEADcMUCwSgw8LfQiNxRWYEPQAHUp2Dr4wbRYXrwLegP5ccTotGnDCiWzKByNkWo/ON82ReBaWcx20IEEA==}
@@ -5366,8 +5362,6 @@ snapshots:
       parse5: 8.0.1
 
   for-in@1.0.2: {}
-
-  frida-il2cpp-bridge@0.13.1: {}
 
   frida-il2cpp-bridge@0.13.2: {}
 
