@@ -123,24 +123,45 @@ importers:
       '@tailwindcss/vite':
         specifier: 4.3.3
         version: 4.3.3(vite@8.2.1)
+      '@tinyburg/bitcity-sdk':
+        specifier: workspace:*
+        version: link:../../packages/bitcity-sdk
+      '@tinyburg/disco-zoo-sdk':
+        specifier: workspace:*
+        version: link:../../packages/disco-zoo-sdk
+      '@tinyburg/lego-tower-sdk':
+        specifier: workspace:*
+        version: link:../../packages/lego-tower-sdk
       '@tinyburg/nimblebit-sdk':
         specifier: workspace:*
         version: link:../../packages/nimblebit-sdk
+      '@tinyburg/pocket-planes-sdk':
+        specifier: workspace:*
+        version: link:../../packages/pocket-planes-sdk
+      '@tinyburg/pocket-trains-sdk':
+        specifier: workspace:*
+        version: link:../../packages/pocket-trains-sdk
+      '@tinyburg/shared-ui':
+        specifier: workspace:*
+        version: link:../shared-ui
+      '@tinyburg/tinytower-classic-sdk':
+        specifier: workspace:*
+        version: link:../../packages/tinytower-classic-sdk
       '@tinyburg/tinytower-sdk':
         specifier: workspace:*
         version: link:../../packages/tinytower-sdk
+      '@tinyburg/tinytower-vegas-sdk':
+        specifier: workspace:*
+        version: link:../../packages/tinytower-vegas-sdk
       '@tinyburg/trading-sdk':
         specifier: workspace:*
         version: link:../../packages/trading-sdk
-      '@tinyburg/ui':
-        specifier: workspace:*
-        version: link:../../packages/ui
       effect:
         specifier: 4.0.0-rc.111
         version: 4.0.0-rc.111
       effect-oidc:
-        specifier: 0.0.14
-        version: 0.0.14(effect@4.0.0-rc.111)
+        specifier: 0.1.0
+        version: 0.1.0(effect@4.0.0-rc.111)
       foldkit:
         specifier: 0.150.0
         version: 0.150.0(effect@4.0.0-rc.111)
@@ -183,12 +204,12 @@ importers:
       '@effect/sql-pg':
         specifier: 4.0.0-rc.111
         version: 4.0.0-rc.111(effect@4.0.0-rc.111)
+      '@tinyburg/shared-ui':
+        specifier: workspace:*
+        version: link:../shared-ui
       '@tinyburg/trading-sdk':
         specifier: workspace:*
         version: link:../../packages/trading-sdk
-      '@tinyburg/ui':
-        specifier: workspace:*
-        version: link:../../packages/ui
       dfx:
         specifier: 1.0.15
         version: 1.0.15(effect@4.0.0-rc.111)
@@ -196,8 +217,8 @@ importers:
         specifier: 4.0.0-rc.111
         version: 4.0.0-rc.111
       effect-oidc:
-        specifier: 0.0.14
-        version: 0.0.14(effect@4.0.0-rc.111)
+        specifier: 0.1.0
+        version: 0.1.0(effect@4.0.0-rc.111)
       foldkit:
         specifier: 0.150.0
         version: 0.150.0(effect@4.0.0-rc.111)
@@ -229,6 +250,28 @@ importers:
         specifier: 6.2.1
         version: 6.2.1
 
+  apps/shared-ui:
+    dependencies:
+      '@fontsource/ibm-plex-mono':
+        specifier: 5.3.0
+        version: 5.3.0
+      '@fontsource/press-start-2p':
+        specifier: 5.3.0
+        version: 5.3.0
+      '@fontsource/vt323':
+        specifier: 5.3.0
+        version: 5.3.0
+    devDependencies:
+      '@effect/platform-browser':
+        specifier: 4.0.0-rc.111
+        version: 4.0.0-rc.111(effect@4.0.0-rc.111)
+      effect:
+        specifier: 4.0.0-rc.111
+        version: 4.0.0-rc.111
+      foldkit:
+        specifier: 0.150.0
+        version: 0.150.0(effect@4.0.0-rc.111)
+
   apps/social-circles:
     dependencies:
       '@effect/platform-browser':
@@ -255,21 +298,21 @@ importers:
       '@tinyburg/nimblebit-sdk':
         specifier: workspace:*
         version: link:../../packages/nimblebit-sdk
+      '@tinyburg/shared-ui':
+        specifier: workspace:*
+        version: link:../shared-ui
       '@tinyburg/tinytower-sdk':
         specifier: workspace:*
         version: link:../../packages/tinytower-sdk
       '@tinyburg/trading-sdk':
         specifier: workspace:*
         version: link:../../packages/trading-sdk
-      '@tinyburg/ui':
-        specifier: workspace:*
-        version: link:../../packages/ui
       effect:
         specifier: 4.0.0-rc.111
         version: 4.0.0-rc.111
       effect-oidc:
-        specifier: 0.0.14
-        version: 0.0.14(effect@4.0.0-rc.111)
+        specifier: 0.1.0
+        version: 0.1.0(effect@4.0.0-rc.111)
       foldkit:
         specifier: 0.150.0
         version: 0.150.0(effect@4.0.0-rc.111)
@@ -312,21 +355,24 @@ importers:
       '@tinyburg/nimblebit-sdk':
         specifier: workspace:*
         version: link:../../packages/nimblebit-sdk
+      '@tinyburg/shared-ui':
+        specifier: workspace:*
+        version: link:../shared-ui
+      '@tinyburg/tinytower-classic-sdk':
+        specifier: workspace:*
+        version: link:../../packages/tinytower-classic-sdk
       '@tinyburg/tinytower-sdk':
         specifier: workspace:*
         version: link:../../packages/tinytower-sdk
       '@tinyburg/trading-sdk':
         specifier: workspace:^
         version: link:../../packages/trading-sdk
-      '@tinyburg/ui':
-        specifier: workspace:*
-        version: link:../../packages/ui
       effect:
         specifier: 4.0.0-rc.111
         version: 4.0.0-rc.111
       effect-oidc:
-        specifier: 0.0.14
-        version: 0.0.14(effect@4.0.0-rc.111)
+        specifier: 0.1.0
+        version: 0.1.0(effect@4.0.0-rc.111)
       foldkit:
         specifier: 0.150.0
         version: 0.150.0(effect@4.0.0-rc.111)
@@ -343,7 +389,39 @@ importers:
         specifier: 8.2.1
         version: 8.2.1
 
+  packages/bitcity-sdk:
+    dependencies:
+      '@tinyburg/nimblebit-sdk':
+        specifier: workspace:*
+        version: link:../nimblebit-sdk
+      effect-oidc:
+        specifier: 0.1.0
+        version: 0.1.0
+      pako:
+        specifier: 3.0.1
+        version: 3.0.1
+    devDependencies:
+      effect:
+        specifier: 4.0.0-rc.111
+        version: 4.0.0-rc.111
+
   packages/bitprints: {}
+
+  packages/disco-zoo-sdk:
+    dependencies:
+      '@tinyburg/nimblebit-sdk':
+        specifier: workspace:*
+        version: link:../nimblebit-sdk
+      effect-oidc:
+        specifier: 0.1.0
+        version: 0.1.0
+      pako:
+        specifier: 3.0.1
+        version: 3.0.1
+    devDependencies:
+      effect:
+        specifier: 4.0.0-rc.111
+        version: 4.0.0-rc.111
 
   packages/doorman: {}
 
@@ -384,7 +462,78 @@ importers:
         specifier: 4.0.0-rc.111
         version: 4.0.0-rc.111
 
+  packages/lego-tower-sdk:
+    dependencies:
+      '@tinyburg/nimblebit-sdk':
+        specifier: workspace:*
+        version: link:../nimblebit-sdk
+      effect-oidc:
+        specifier: 0.1.0
+        version: 0.1.0
+      pako:
+        specifier: 3.0.1
+        version: 3.0.1
+    devDependencies:
+      effect:
+        specifier: 4.0.0-rc.111
+        version: 4.0.0-rc.111
+
   packages/nimblebit-sdk:
+    dependencies:
+      effect-oidc:
+        specifier: 0.1.0
+        version: 0.1.0(effect@4.0.0-rc.111)
+    devDependencies:
+      effect:
+        specifier: 4.0.0-rc.111
+        version: 4.0.0-rc.111
+
+  packages/pocket-planes-sdk:
+    dependencies:
+      '@tinyburg/nimblebit-sdk':
+        specifier: workspace:*
+        version: link:../nimblebit-sdk
+      effect-oidc:
+        specifier: 0.1.0
+        version: 0.1.0
+      pako:
+        specifier: 3.0.1
+        version: 3.0.1
+    devDependencies:
+      effect:
+        specifier: 4.0.0-rc.111
+        version: 4.0.0-rc.111
+
+  packages/pocket-trains-sdk:
+    dependencies:
+      '@tinyburg/nimblebit-sdk':
+        specifier: workspace:*
+        version: link:../nimblebit-sdk
+      effect-oidc:
+        specifier: 0.1.0
+        version: 0.1.0
+      pako:
+        specifier: 3.0.1
+        version: 3.0.1
+    devDependencies:
+      effect:
+        specifier: 4.0.0-rc.111
+        version: 4.0.0-rc.111
+
+  packages/tinytower-classic-sdk:
+    dependencies:
+      '@tinyburg/nimblebit-sdk':
+        specifier: workspace:*
+        version: link:../nimblebit-sdk
+      '@tinyburg/tinytower-sdk':
+        specifier: workspace:*
+        version: link:../tinytower-sdk
+      effect-oidc:
+        specifier: 0.1.0
+        version: 0.1.0(effect@4.0.0-rc.111)
+      pako:
+        specifier: 3.0.1
+        version: 3.0.1
     devDependencies:
       effect:
         specifier: 4.0.0-rc.111
@@ -395,6 +544,9 @@ importers:
       '@tinyburg/nimblebit-sdk':
         specifier: workspace:*
         version: link:../nimblebit-sdk
+      effect-oidc:
+        specifier: 0.1.0
+        version: 0.1.0(effect@4.0.0-rc.111)
       pako:
         specifier: 3.0.1
         version: 3.0.1
@@ -430,43 +582,40 @@ importers:
         specifier: 4.1.11
         version: 4.1.11(vite@8.2.1)
 
-  packages/trading-sdk:
+  packages/tinytower-vegas-sdk:
     dependencies:
       '@tinyburg/nimblebit-sdk':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../nimblebit-sdk
-      '@tinyburg/tinytower-sdk':
-        specifier: workspace:^
-        version: link:../tinytower-sdk
       effect-oidc:
-        specifier: 0.0.14
-        version: 0.0.14(effect@4.0.0-rc.111)
+        specifier: 0.1.0
+        version: 0.1.0
+      pako:
+        specifier: 3.0.1
+        version: 3.0.1
     devDependencies:
       effect:
         specifier: 4.0.0-rc.111
         version: 4.0.0-rc.111
 
-  packages/ui:
+  packages/trading-sdk:
     dependencies:
-      '@fontsource/ibm-plex-mono':
-        specifier: 5.3.0
-        version: 5.3.0
-      '@fontsource/press-start-2p':
-        specifier: 5.3.0
-        version: 5.3.0
-      '@fontsource/vt323':
-        specifier: 5.3.0
-        version: 5.3.0
+      '@tinyburg/nimblebit-sdk':
+        specifier: workspace:^
+        version: link:../nimblebit-sdk
+      '@tinyburg/tinytower-classic-sdk':
+        specifier: workspace:^
+        version: link:../tinytower-classic-sdk
+      '@tinyburg/tinytower-sdk':
+        specifier: workspace:^
+        version: link:../tinytower-sdk
+      effect-oidc:
+        specifier: 0.1.0
+        version: 0.1.0(effect@4.0.0-rc.111)
     devDependencies:
-      '@effect/platform-browser':
-        specifier: 4.0.0-rc.111
-        version: 4.0.0-rc.111(effect@4.0.0-rc.111)
       effect:
         specifier: 4.0.0-rc.111
         version: 4.0.0-rc.111
-      foldkit:
-        specifier: 0.150.0
-        version: 0.150.0(effect@4.0.0-rc.111)
 
   scratchpad:
     dependencies:
@@ -492,6 +641,24 @@ importers:
       '@efffrida/gplayapi':
         specifier: 0.0.30
         version: 0.0.30(@bufbuild/protobuf@2.14.0)(effect@4.0.0-rc.111)
+      '@efffrida/il2cpp-bridge':
+        specifier: 0.0.49
+        version: 0.0.49(effect@4.0.0-rc.111)
+      '@efffrida/platform':
+        specifier: 0.0.41
+        version: 0.0.41(effect@4.0.0-rc.111)
+      '@efffrida/polyfills':
+        specifier: 0.0.15
+        version: 0.0.15
+      '@efffrida/rpc':
+        specifier: 0.0.56
+        version: 0.0.56(effect@4.0.0-rc.111)
+      '@types/frida-gum':
+        specifier: 19.10.0
+        version: 19.10.0
+      '@types/node':
+        specifier: 26.3.0
+        version: 26.3.0
       effect:
         specifier: 4.0.0-rc.111
         version: 4.0.0-rc.111
@@ -1723,6 +1890,9 @@ packages:
   '@types/node@26.2.0':
     resolution: {integrity: sha512-5IviulTZeRNp2vAJ514cc/HUlY5nZ9fCbq9DMyC52BrhFZACo3nI0R7qBxhQmo/d27NFe96ur/b7Wwxklda+kg==}
 
+  '@types/node@26.3.0':
+    resolution: {integrity: sha512-L3fgrnchriRC2ExBflb8j4uZZURHZfQsmQeyVzhjcHW4kkwVyo8/0h1B2MVzMTrYUJYu6G7EWs14hW/L9putqw==}
+
   '@types/qs@6.15.1':
     resolution: {integrity: sha512-GZHUBZR9hckSUhrxmp1nG6NwdpM9fCunJwyThLW1X3AyHgd9IlHb6VANpQQqDr2o/qQp6McZ3y/IA2rVzKzSbw==}
 
@@ -2193,8 +2363,8 @@ packages:
     resolution: {integrity: sha512-yS+Q5i3hBf7GBkd4KG8a7eBNNWNGLTaEwwYWUijIYM7zrlYDM0BFXHjjPWlWZ1Rg7UaddZeIDmi9jF3HmqiQ2w==}
     engines: {node: '>=6.0.0'}
 
-  effect-oidc@0.0.14:
-    resolution: {integrity: sha512-VGmKsIWigbXY4fTWWy4dpESIvopNYq3ngxV39VTqu4uJTtu/60dfCh/oGL4jrsi5d3oHMMh+tYOcKHVkcqq/xw==}
+  effect-oidc@0.1.0:
+    resolution: {integrity: sha512-PWdgUPIK8+fGldqcmTU171MqHwI4djTRVbkqrLmM4L7E7SHbSPcHuIlLiKGfnxN6jqnARiMqQXtgk8r+2Eakyg==}
     engines: {node: '>=22.0.0'}
     peerDependencies:
       effect: 4.0.0-rc.111
@@ -4581,6 +4751,10 @@ snapshots:
     dependencies:
       undici-types: 8.3.0
 
+  '@types/node@26.3.0':
+    dependencies:
+      undici-types: 8.3.0
+
   '@types/qs@6.15.1':
     optional: true
 
@@ -4607,7 +4781,7 @@ snapshots:
 
   '@types/ws@8.18.1':
     dependencies:
-      '@types/node': 26.2.0
+      '@types/node': 26.3.0
 
   '@typescript-eslint/project-service@8.66.0(typescript@5.9.3)':
     dependencies:
@@ -5038,7 +5212,9 @@ snapshots:
     dependencies:
       esutils: 2.0.3
 
-  effect-oidc@0.0.14(effect@4.0.0-rc.111):
+  effect-oidc@0.1.0: {}
+
+  effect-oidc@0.1.0(effect@4.0.0-rc.111):
     dependencies:
       effect: 4.0.0-rc.111
 

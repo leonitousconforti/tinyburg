@@ -11,6 +11,8 @@ import { Model } from "effect/unstable/schema";
 
 import { PlayerIdSchema } from "@tinyburg/nimblebit-sdk/NimblebitConfig";
 
+import { GameId } from "./games.ts";
+
 /**
  * A player known to the study. Presence here is not consent: it only means the
  * id has been seen. {@link Consent} is what admits a player to the graph.
@@ -20,6 +22,7 @@ import { PlayerIdSchema } from "@tinyburg/nimblebit-sdk/NimblebitConfig";
  */
 export class Player extends Model.Class<Player>("Player")({
     id: Model.GeneratedByDb(Schema.String.check(Schema.isUUID())),
+    game: GameId,
     playerId: PlayerIdSchema,
     firstSeenAt: Model.DateTimeInsertFromDate,
 }) {}
@@ -35,6 +38,7 @@ export class Player extends Model.Class<Player>("Player")({
 export class Consent extends Model.Class<Consent>("Consent")({
     id: Schema.String.check(Schema.isUUID()).pipe(Model.FieldExcept(["insert"])),
     tinyburgUserId: Schema.String.check(Schema.isUUID()),
+    game: GameId,
     playerId: PlayerIdSchema,
     grantedAt: Model.DateTimeInsertFromDate,
     revokedAt: Schema.OptionFromNullishOr(Schema.DateTimeUtcFromDate, { onNoneEncoding: null }),
@@ -64,6 +68,7 @@ export class TowerGrant extends Model.Class<TowerGrant>("TowerGrant")({
  * @category Model
  */
 export class CrawlState extends Model.Class<CrawlState>("CrawlState")({
+    game: GameId,
     playerId: PlayerIdSchema,
     lastCrawledAt: Schema.OptionFromNullishOr(Schema.DateTimeUtcFromDate, { onNoneEncoding: null }),
     lastSuccessAt: Schema.OptionFromNullishOr(Schema.DateTimeUtcFromDate, { onNoneEncoding: null }),
@@ -83,6 +88,7 @@ export class CrawlState extends Model.Class<CrawlState>("CrawlState")({
  */
 export class FriendCount extends Model.Class<FriendCount>("FriendCount")({
     id: Schema.String.check(Schema.isUUID()).pipe(Model.FieldExcept(["insert"])),
+    game: GameId,
     playerId: PlayerIdSchema,
     observedAt: Model.DateTimeInsertFromDate,
     totalFriends: Schema.Finite,
@@ -98,6 +104,7 @@ export class FriendCount extends Model.Class<FriendCount>("FriendCount")({
  */
 export class PurgeReceipt extends Model.Class<PurgeReceipt>("PurgeReceipt")({
     id: Schema.String.check(Schema.isUUID()).pipe(Model.FieldExcept(["insert"])),
+    game: GameId,
     playerId: PlayerIdSchema,
     tinyburgUserId: Schema.String.check(Schema.isUUID()),
     requestedAt: Schema.DateTimeUtcFromDate,
@@ -108,6 +115,9 @@ export class PurgeReceipt extends Model.Class<PurgeReceipt>("PurgeReceipt")({
 
 /**
  * A player id, re-exported so callers do not have to reach into the sdk.
+ *
+ * On its own this is only a friend code: it identifies a person just within one
+ * game, so almost everything here pairs it with a {@link GameId}.
  *
  * @since 1.0.0
  * @category Model

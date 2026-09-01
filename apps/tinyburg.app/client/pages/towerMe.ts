@@ -4,9 +4,11 @@ import type { LinkedTowers, SessionUser } from "../backend.ts";
 import type { SharedMessages, TowerMeMessages } from "../messages/types.ts";
 import type { Html, HtmlBuilder } from "foldkit/html";
 
-import { type Language, longDate } from "@tinyburg/ui/Internationalization";
+import { type Language, longDate } from "@tinyburg/shared-ui/Internationalization";
 import { AsyncData } from "foldkit";
 
+import { linkableGames } from "../linkableGames.ts";
+import { towerLinkRouter } from "../routes.ts";
 import { appBackLink } from "../ui/chrome.ts";
 
 const card = "bg-card-bg shadow-pixel-hover border-gold w-full rounded-2xl border-3 p-8";
@@ -160,14 +162,28 @@ export const towerMeView = <M>(
                                 [h.Class("mb-6 flex items-center justify-between gap-4")],
                                 [
                                     h.h2([h.Class("font-pixel text-lg text-gray-800")], [msgs.towersHeading]),
-                                    h.a(
+                                    h.div(
+                                        [h.Class("flex shrink-0 flex-col items-end gap-2")],
                                         [
-                                            h.Href("/towers/@link"),
-                                            h.Class(
-                                                "bg-gold shadow-pixel hover:shadow-pixel-hover font-pixel shrink-0 rounded-lg px-4 py-3 text-[0.7rem] text-gray-800 no-underline transition-all hover:-translate-x-0.5 hover:-translate-y-0.5"
+                                            h.span(
+                                                [h.Class("font-pixel text-[0.55rem] text-gray-500")],
+                                                [msgs.linkATower]
                                             ),
-                                        ],
-                                        [msgs.linkATower]
+                                            h.div(
+                                                [h.Class("flex flex-wrap justify-end gap-2")],
+                                                linkableGames.map((game) =>
+                                                    h.a(
+                                                        [
+                                                            h.Href(towerLinkRouter({ game: game.id })),
+                                                            h.Class(
+                                                                "bg-gold shadow-pixel hover:shadow-pixel-hover font-pixel rounded-lg px-4 py-3 text-[0.7rem] text-gray-800 no-underline transition-all hover:-translate-x-0.5 hover:-translate-y-0.5"
+                                                            ),
+                                                        ],
+                                                        [game.name]
+                                                    )
+                                                )
+                                            ),
+                                        ]
                                     ),
                                 ]
                             ),

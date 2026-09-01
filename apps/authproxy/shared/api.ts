@@ -1,7 +1,7 @@
 import { Context, Schema } from "effect";
 import { HttpApi, HttpApiEndpoint, HttpApiError, HttpApiGroup, HttpApiMiddleware } from "effect/unstable/httpapi";
 
-import { Account } from "../domain/model.ts";
+import { ApiKey } from "../domain/model.ts";
 import { Session } from "../domain/sessions.ts";
 
 /**
@@ -42,7 +42,67 @@ export class AdminSessionCookie extends HttpApiMiddleware.Service<AdminSessionCo
     { error: [HttpApiError.Unauthorized, HttpApiError.Forbidden, HttpApiError.InternalServerError] }
 ) {}
 
-const keyParam = { key: Schema.String.check(Schema.isUUID()) };
+/**
+ * One scope as the dashboard lists it: the name a key carries, the sentence
+ * shown beside it, and whether a visitor may grant it to themselves.
+ *
+ * @since 1.0.0
+ * @category Schemas
+ */
+export const ScopeCatalogNode = Schema.Struct({
+    name: Schema.String,
+    description: Schema.String,
+    selfServe: Schema.Boolean,
+});
+
+/**
+ * A `:read` or `:write` branch and the leaves it grants.
+ *
+ * @since 1.0.0
+ * @category Schemas
+ */
+export const ScopeCatalogBranch = Schema.Struct({
+    ...ScopeCatalogNode.fields,
+    children: Schema.Array(ScopeCatalogNode),
+});
+
+/**
+ * One area of the api, granting both of its branches.
+ *
+ * @since 1.0.0
+ * @category Schemas
+ */
+export const ScopeCatalogArea = Schema.Struct({
+    ...ScopeCatalogNode.fields,
+    read: ScopeCatalogBranch,
+    write: ScopeCatalogBranch,
+});
+
+/**
+ * A game: its own `:read` and `:write` branches, which span every area, and
+ * the areas beneath it.
+ *
+ * @since 1.0.0
+ * @category Schemas
+ */
+export const ScopeCatalogGame = Schema.Struct({
+    ...ScopeCatalogNode.fields,
+    read: ScopeCatalogNode,
+    write: ScopeCatalogNode,
+    areas: Schema.Array(ScopeCatalogArea),
+});
+
+/**
+ * The scope catalog, served rather than bundled. It is read off the TinyTower
+ * endpoint definitions on the server, which the browser has no reason to
+ * carry for the sake of a tree of strings. Public: it describes what the proxy
+ * can do, not who may do it.
+ */
+const ScopesGroup = HttpApiGroup.make("ScopesGroup").add(
+    HttpApiEndpoint.get("catalog", "/self/scopes", {
+        success: Schema.Array(ScopeCatalogGame),
+    })
+);
 
 const SelfServiceGroup = HttpApiGroup.make("SelfServiceGroup")
     .add(
@@ -52,7 +112,7 @@ const SelfServiceGroup = HttpApiGroup.make("SelfServiceGroup")
     )
     .add(
         HttpApiEndpoint.get("listKeys", "/self/keys", {
-            success: Schema.Array(Account.json),
+            success: Schema.Array(ApiKey.json),
         })
     )
     .add(
@@ -62,33 +122,33 @@ const SelfServiceGroup = HttpApiGroup.make("SelfServiceGroup")
                 description: Schema.OptionFromNullishOr(Schema.String, { onNoneEncoding: null }),
             }),
             error: HttpApiError.BadRequest,
-            success: Account.json,
+            success: ApiKey.json,
         })
     )
     .add(
         HttpApiEndpoint.post("rotateKey", "/self/keys/:key/rotate", {
-            params: keyParam,
+            params: { key: Schema.String.check(Schema.isUUID()) },
             error: HttpApiError.NotFound,
-            success: Account.json,
+            success: ApiKey.json,
         })
     )
     .add(
         HttpApiEndpoint.put("revokeKey", "/self/keys/:key/revoke", {
-            params: keyParam,
+            params: { key: Schema.String.check(Schema.isUUID()) },
             error: HttpApiError.NotFound,
-            success: Account.json,
+            success: ApiKey.json,
         })
     )
     .add(
         HttpApiEndpoint.put("enableKey", "/self/keys/:key/enable", {
-            params: keyParam,
+            params: { key: Schema.String.check(Schema.isUUID()) },
             error: HttpApiError.NotFound,
-            success: Account.json,
+            success: ApiKey.json,
         })
     )
     .add(
         HttpApiEndpoint.delete("deleteKey", "/self/keys/:key", {
-            params: keyParam,
+            params: { key: Schema.String.check(Schema.isUUID()) },
             error: HttpApiError.NotFound,
             success: Schema.Void,
         })
@@ -98,42 +158,42 @@ const SelfServiceGroup = HttpApiGroup.make("SelfServiceGroup")
 const AdminGroup = HttpApiGroup.make("AdminGroup")
     .add(
         HttpApiEndpoint.get("listKeys", "/self/admin/keys", {
-            success: Schema.Array(Account.json),
+            success: Schema.Array(ApiKey.json),
         })
     )
     .add(
         HttpApiEndpoint.patch("scopes", "/self/admin/keys/:key/scopes", {
-            params: keyParam,
+            params: { key: Schema.String.check(Schema.isUUID()) },
             payload: Schema.Struct({ scopes: Schema.Array(Schema.String) }),
             error: HttpApiError.NotFound,
-            success: Account.json,
+            success: ApiKey.json,
         })
     )
     .add(
         HttpApiEndpoint.patch("rateLimit", "/self/admin/keys/:key/ratelimit", {
-            params: keyParam,
+            params: { key: Schema.String.check(Schema.isUUID()) },
             payload: Schema.Struct({ limit: Schema.Int, window: Schema.DurationFromMillis }),
             error: HttpApiError.NotFound,
-            success: Account.json,
+            success: ApiKey.json,
         })
     )
     .add(
         HttpApiEndpoint.put("revoke", "/self/admin/keys/:key/revoke", {
-            params: keyParam,
+            params: { key: Schema.String.check(Schema.isUUID()) },
             error: HttpApiError.NotFound,
-            success: Account.json,
+            success: ApiKey.json,
         })
     )
     .add(
         HttpApiEndpoint.put("enable", "/self/admin/keys/:key/enable", {
-            params: keyParam,
+            params: { key: Schema.String.check(Schema.isUUID()) },
             error: HttpApiError.NotFound,
-            success: Account.json,
+            success: ApiKey.json,
         })
     )
     .add(
         HttpApiEndpoint.delete("deleteKey", "/self/admin/keys/:key", {
-            params: keyParam,
+            params: { key: Schema.String.check(Schema.isUUID()) },
             error: HttpApiError.NotFound,
             success: Schema.Void,
         })
@@ -147,4 +207,4 @@ const AdminGroup = HttpApiGroup.make("AdminGroup")
  * @since 1.0.0
  * @category Api
  */
-export const SelfServiceApi = HttpApi.make("SelfServiceApi").add(SelfServiceGroup).add(AdminGroup);
+export const SelfServiceApi = HttpApi.make("SelfServiceApi").add(ScopesGroup).add(SelfServiceGroup).add(AdminGroup);

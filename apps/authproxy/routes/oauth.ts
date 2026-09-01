@@ -1,46 +1,93 @@
-import { Config, DateTime, Duration, Effect, Layer, Option, Redacted, Schema } from "effect";
-import {
-    HttpClient,
-    HttpClientRequest,
-    HttpClientResponse,
-    HttpRouter,
-    HttpServerRequest,
-    HttpServerResponse,
-} from "effect/unstable/http";
+import { Array, Config, DateTime, Duration, Effect, Layer, Option, Redacted, Result, Schedule, Schema } from "effect";
+import { HttpClient, HttpClientRequest, HttpRouter, HttpServerRequest, HttpServerResponse } from "effect/unstable/http";
+import { HttpApiClient } from "effect/unstable/httpapi";
 import { RateLimiter } from "effect/unstable/persistence";
 
 import * as crypto from "node:crypto";
 
-import { RelyingParty } from "effect-oidc";
+import { NimblebitConfig } from "@tinyburg/nimblebit-sdk";
+import { Sdk } from "@tinyburg/trading-sdk";
+import { TinyTower as TinyTowerScopes } from "@tinyburg/trading-sdk/Scopes";
+import { DynamicClientRegistration, RelyingParty } from "effect-oidc";
 
 import { CookiePolicy, SESSION_COOKIE_NAME, maybeCurrentSession } from "../cookies.ts";
 import { randomSecret, sha256 } from "../crypto.ts";
 import { SessionsRepository } from "../domain/sessions.ts";
-// "Sign in with Tinyburg": the authproxy is an OIDC relying party of
-// tinyburg.app's provider. Authorization code + PKCE; the client may be
-// public (no secret registered) since PKCE carries the proof.
-import { tinyburgConfig } from "../tinyburg.ts";
 
-/** Signing in asks for identity only. */
+const tinyburgConfig = Config.all({
+    adminPassword: Config.redacted("ADMIN_PASSWORD"),
+    adminPlayerIds: Config.schema(Config.Array(NimblebitConfig.PlayerIdSchema), "ADMIN_PLAYER_IDS"),
+    registrationToken: Config.option(Config.redacted("TINYBURG_OAUTH_REGISTRATION_TOKEN")),
+    redirectUri: Config.string("TINYBURG_OAUTH_REDIRECT_URI"),
+    issuer: Config.string("TINYBURG_OAUTH_ISSUER").pipe(
+        Config.withDefault("https://tinyburg.app"),
+        Config.map((issuer) => issuer.replace(/\/$/, ""))
+    ),
+    development: Config.string("NODE_ENV").pipe(
+        Config.withDefault("production"),
+        Config.map((env) => env === "development")
+    ),
+});
+
 const LOGIN_SCOPES = ["openid", "profile"];
-
-/**
- * Elevation re-authorizes with `towers:read` on top, so the callback can ask
- * the trading api - as the visitor, with their fresh consent - which towers
- * they have linked right now. The token lives 15 minutes and is used once;
- * nothing is stored.
- */
-const ELEVATE_SCOPES = ["openid", "towers:read"];
-
-/** Where a fresh sign-in lands when nothing better was asked for. */
+// Elevation only needs to know which towers the visitor has linked, and the
+// scope tree is fine enough to ask for exactly that.
+const ELEVATE_SCOPES = ["openid", TinyTowerScopes.read.list_accounts.name];
 const HOME_AFTER_LOGIN = "/keys";
 
 /**
- * Why the browser was sent to the provider: to sign in, or to prove tower
- * ownership for admin elevation. It rides the relying party's payload cookie
- * through the round trip, and the callback reads it to know what to do with
- * the tokens it gets back.
+ * The credentials the proxy presents at the provider, obtained by registering
+ * itself at boot (RFC 7591) and held for the life of the process. Registering
+ * is idempotent - the provider keys it on the software id below - so this is
+ * the same client every time and there is nothing to keep between runs.
+ * Public: PKCE carries the proof, and the scope is everything either flow
+ * below asks for.
+ *
+ * Outside development the registration token is required, and is read again
+ * here as such so a deployment without one fails naming the setting, rather
+ * than being refused by the provider a minute of retries later.
  */
+const SOFTWARE_ID = "tinyburg-authproxy";
+
+/**
+ * In the dev stack registration runs at boot, and the provider next door may
+ * still be coming up: an unreachable provider is retried for a little under a
+ * minute. A refusal is not retried - it would only be refused again - and a
+ * provider that offers no registration is not either.
+ */
+const registrationBackoff = Schedule.exponential("500 millis").pipe(
+    Schedule.jittered,
+    Schedule.upTo({ duration: "1 minute" })
+);
+
+const registerAtProvider = (config: Config.Success<typeof tinyburgConfig>) =>
+    Effect.gen(function* () {
+        const initialAccessToken = config.development
+            ? Option.getOrUndefined(config.registrationToken)
+            : yield* Config.redacted("TINYBURG_OAUTH_REGISTRATION_TOKEN");
+
+        const registration = yield* DynamicClientRegistration.register({
+            issuer: config.issuer,
+            initialAccessToken,
+            metadata: {
+                softwareId: SOFTWARE_ID,
+                clientName: "Authproxy Self Service",
+                redirectUris: [config.redirectUri],
+                tokenEndpointAuthMethod: "none",
+                scopes: Array.union(LOGIN_SCOPES, ELEVATE_SCOPES),
+                grantTypes: ["authorization_code", "refresh_token"],
+            },
+        }).pipe(
+            Effect.retry({ while: (error) => error.reason === "Unreachable", schedule: registrationBackoff }),
+            Effect.tap(({ clientId }) => Effect.logInfo(`registered at ${config.issuer} as client ${clientId}`))
+        );
+
+        return {
+            clientId: registration.clientId,
+            clientSecret: Option.map(registration.clientSecret, Redacted.value).pipe(Option.getOrUndefined),
+        };
+    });
+
 const OAuthIntent = Schema.fromJsonString(
     Schema.Struct({
         mode: Schema.Literals(["login", "elevate"]),
@@ -69,18 +116,6 @@ const returnToParam = HttpServerRequest.schemaSearchParams(
     Effect.map(Option.flatten)
 );
 
-/** The linked-towers list, as the trading api serves it to its owner. */
-const LinkedTowers = Schema.Array(
-    Schema.Struct({
-        playerId: Schema.String,
-        createdAt: Schema.String,
-    })
-);
-
-/**
- * The callback failure reasons, mapped onto the error strings the login page
- * already knows how to explain.
- */
 const loginErrorMessage: Record<RelyingParty.CallbackError["reason"], string> = {
     InvalidCallback: "invalid_oauth_callback",
     AccessDenied: "oauth_denied",
@@ -90,112 +125,94 @@ const loginErrorMessage: Record<RelyingParty.CallbackError["reason"], string> = 
     InvalidIdToken: "invalid_oauth_claims",
 };
 
-interface TinyburgRealized {
-    /** Sends the browser to the provider asking for identity only. */
-    readonly loginParty: RelyingParty.RelyingParty;
-    /** Sends the browser to the provider asking for `towers:read` on top. */
-    readonly elevateParty: RelyingParty.RelyingParty;
-    readonly adminPassword: Redacted.Redacted;
-    readonly adminPlayerIds: ReadonlySet<string>;
-    readonly linkedPlayerIds: (accessToken: string) => Effect.Effect<ReadonlySet<string>, unknown, never>;
-    readonly elevationRateLimiter: RateLimiter.RateLimiter;
-}
+const login = Effect.fnUntraced(function* (
+    _config: Config.Success<typeof tinyburgConfig>,
+    relyingParty: RelyingParty.RelyingParty
+) {
+    const returnTo = yield* returnToParam;
 
-const login = (tinyburg: TinyburgRealized) =>
+    const tryCurrentSession = yield* maybeCurrentSession.pipe(Effect.option);
+    if (Option.isNone(tryCurrentSession)) {
+        return HttpServerResponse.redirect("/login?error=oauth_failed");
+    }
+
+    if (Option.isSome(tryCurrentSession.value)) {
+        return HttpServerResponse.redirect(Option.getOrElse(returnTo, () => HOME_AFTER_LOGIN));
+    }
+
+    const intent = yield* Schema.encodeEffect(OAuthIntent)({
+        returnTo: Option.getOrUndefined(returnTo),
+        mode: "login",
+    }).pipe(Effect.orDie);
+
+    return yield* relyingParty
+        .beginAuthorization({ payload: intent })
+        .pipe(Effect.orElseSucceed(() => HttpServerResponse.redirect("/login?error=start_failed")));
+}, Effect.satisfiesErrorType<never>());
+
+const elevate = Effect.fnUntraced(function* (
+    config: Config.Success<typeof tinyburgConfig>,
+    relyingParty: RelyingParty.RelyingParty,
+    rateLimiter: RateLimiter.RateLimiter
+) {
+    const refused = HttpServerResponse.redirect("/admin?error=elevation_failed");
+    const tryCurrentSession = yield* maybeCurrentSession.pipe(Effect.option);
+
+    if (Option.isNone(tryCurrentSession)) {
+        return refused;
+    }
+
+    if (Option.isNone(tryCurrentSession.value)) {
+        return HttpServerResponse.redirect(`/login?returnTo=${encodeURIComponent("/admin")}`);
+    }
+
+    const session = tryCurrentSession.value.value;
+    const maybeBody = yield* HttpServerRequest.schemaBodyUrlParams(
+        Schema.Struct({
+            password: Schema.String,
+        })
+    ).pipe(Effect.option);
+
+    if (Option.isNone(maybeBody)) {
+        return refused;
+    }
+
+    // The password check is an oracle, so attempts are strictly limited.
+    const allowed = yield* rateLimiter
+        .consume({
+            onExceeded: "fail",
+            algorithm: "fixed-window",
+            key: `elevate:${session.id}`,
+            limit: 5,
+            window: Duration.minutes(5),
+        })
+        .pipe(Effect.isSuccess);
+    if (!allowed) {
+        return refused;
+    }
+
+    const presented = yield* sha256(maybeBody.value.password);
+    const expected = yield* sha256(Redacted.value(config.adminPassword));
+    const passwordOk = crypto.timingSafeEqual(Buffer.from(presented), Buffer.from(expected));
+
+    const begun = yield* SessionsRepository.use((repo) =>
+        repo.beginElevation({
+            sessionId: session.id,
+            passwordOk,
+        })
+    ).pipe(Effect.option, Effect.map(Option.flatten));
+
+    if (Option.isNone(begun)) {
+        return refused;
+    }
+
+    const intent = yield* Schema.encodeEffect(OAuthIntent)({ mode: "elevate" }).pipe(Effect.orDie);
+    return yield* relyingParty.beginAuthorization({ payload: intent }).pipe(Effect.orElseSucceed(() => refused));
+}, Effect.satisfiesErrorType<never>());
+
+const callback = (config: Config.Success<typeof tinyburgConfig>, relyingParty: RelyingParty.RelyingParty) =>
     Effect.gen(function* () {
-        const returnTo = yield* returnToParam;
-
-        const tryCurrentSession = yield* maybeCurrentSession.pipe(Effect.option);
-        if (Option.isNone(tryCurrentSession)) {
-            return HttpServerResponse.redirect("/login?error=oauth_failed");
-        }
-
-        // Already signed in: nothing to ask the provider for.
-        if (Option.isSome(tryCurrentSession.value)) {
-            return HttpServerResponse.redirect(Option.getOrElse(returnTo, () => HOME_AFTER_LOGIN));
-        }
-
-        const intent = yield* Schema.encodeEffect(OAuthIntent)({
-            mode: "login",
-            returnTo: Option.getOrUndefined(returnTo),
-        }).pipe(Effect.orDie);
-
-        return yield* tinyburg.loginParty
-            .beginAuthorization({ payload: intent })
-            .pipe(Effect.catch(() => Effect.succeed(HttpServerResponse.redirect("/login?error=start_failed"))));
-    }).pipe(Effect.satisfiesErrorType<never>());
-
-/**
- * The step-up: takes the admin password, records whether it matched - the
- * verdict lives server-side on the session, where the browser cannot forge
- * it - and sends the visitor to re-authorize with `towers:read` either way,
- * so the response never says whether the password was right.
- */
-const elevate = (tinyburg: TinyburgRealized) =>
-    Effect.gen(function* () {
-        const refused = HttpServerResponse.redirect("/admin?error=elevation_failed");
-
-        const tryCurrentSession = yield* maybeCurrentSession.pipe(Effect.option);
-        if (Option.isNone(tryCurrentSession)) {
-            return refused;
-        }
-        if (Option.isNone(tryCurrentSession.value)) {
-            return HttpServerResponse.redirect("/login?returnTo=%2Fadmin");
-        }
-
-        const session = tryCurrentSession.value.value;
-
-        const maybeBody = yield* HttpServerRequest.schemaBodyUrlParams(Schema.Struct({ password: Schema.String })).pipe(
-            Effect.option
-        );
-        if (Option.isNone(maybeBody)) {
-            return refused;
-        }
-
-        // The password check is an oracle, so attempts are strictly limited.
-        const allowed = yield* tinyburg.elevationRateLimiter
-            .consume({
-                onExceeded: "fail",
-                algorithm: "fixed-window",
-                key: `elevate:${session.id}`,
-                limit: 5,
-                window: Duration.minutes(5),
-            })
-            .pipe(Effect.isSuccess);
-        if (!allowed) {
-            return refused;
-        }
-
-        // Hash both sides before comparing: equal lengths for the timing-safe
-        // comparison, and no length leak.
-        const presented = yield* sha256(maybeBody.value.password);
-        const expected = yield* sha256(Redacted.value(tinyburg.adminPassword));
-        const passwordOk = crypto.timingSafeEqual(Buffer.from(presented), Buffer.from(expected));
-
-        const begun = yield* SessionsRepository.use((repo) =>
-            repo.beginElevation({ sessionId: session.id, passwordOk })
-        ).pipe(Effect.option, Effect.map(Option.flatten));
-        if (Option.isNone(begun)) {
-            return refused;
-        }
-
-        const intent = yield* Schema.encodeEffect(OAuthIntent)({ mode: "elevate" }).pipe(Effect.orDie);
-
-        return yield* tinyburg.elevateParty
-            .beginAuthorization({ payload: intent })
-            .pipe(Effect.catch(() => Effect.succeed(refused)));
-    }).pipe(Effect.satisfiesErrorType<never>());
-
-const callback = (tinyburg: TinyburgRealized) =>
-    Effect.gen(function* () {
-        // Both parties share one cookie prefix, so either can complete the
-        // round trip; scopes only matter on the way out.
-        const party = tinyburg.loginParty;
-
-        // The intent decides where failures land: sign-in problems go to the
-        // login page with a reason, elevation problems go to the admin page
-        // with one uniform code that never says which factor failed.
-        const maybeIntent = yield* party.payload.pipe(
+        const maybeIntent = yield* relyingParty.payload.pipe(
             Effect.flatMap(
                 Option.match({
                     onNone: () => Effect.succeed(Option.none<typeof OAuthIntent.Type>()),
@@ -203,9 +220,10 @@ const callback = (tinyburg: TinyburgRealized) =>
                 })
             )
         );
+
         if (Option.isNone(maybeIntent)) {
             return yield* HttpServerResponse.redirect("/login?error=invalid_oauth_intent").pipe(
-                party.expireTransactionCookies,
+                relyingParty.expireTransactionCookies,
                 Effect.orDie
             );
         }
@@ -216,15 +234,12 @@ const callback = (tinyburg: TinyburgRealized) =>
                 intent.mode === "elevate"
                     ? "/admin?error=elevation_failed"
                     : `/login?error=${encodeURIComponent(errorMessage)}`
-            ).pipe(party.expireTransactionCookies, Effect.orDie);
+            ).pipe(relyingParty.expireTransactionCookies, Effect.orDie);
 
-        const outcome = yield* Effect.result(party.completeAuthorization);
-        if (outcome._tag === "Failure") {
-            return yield* failed(loginErrorMessage[outcome.failure.reason]);
-        }
+        const outcome = yield* Effect.result(relyingParty.completeAuthorization);
+        if (Result.isFailure(outcome)) return yield* failed(loginErrorMessage[outcome.failure.reason]);
 
         const { claims, tokens } = outcome.success;
-
         if (intent.mode === "elevate") {
             const tryCurrentSession = yield* maybeCurrentSession.pipe(Effect.option, Effect.map(Option.flatten));
             if (Option.isNone(tryCurrentSession)) {
@@ -233,50 +248,50 @@ const callback = (tinyburg: TinyburgRealized) =>
 
             const session = tryCurrentSession.value;
             const clearPending = SessionsRepository.use((repo) => repo.clearElevation(session.id)).pipe(Effect.ignore);
-
-            // The account that just re-authorized must be the account this
-            // session belongs to; proving ownership of some other tower-holding
-            // account elevates nothing.
             if (claims.sub !== session.sub) {
                 yield* clearPending;
                 return yield* failed("elevation_failed");
             }
 
-            // Which towers does this account hold, right now, by their own
-            // freshly consented token. A lookup failure reads as not eligible,
-            // never as a pass.
-            const linked = yield* tinyburg.linkedPlayerIds(tokens.access_token).pipe(
-                Effect.map(Option.some),
-                Effect.catch(() => Effect.succeed(Option.none<ReadonlySet<string>>()))
-            );
-            const eligible = Option.match(linked, {
-                onNone: () => false,
-                onSome: (playerIds) =>
-                    tinyburg.adminPlayerIds.size > 0 &&
-                    Array.from(tinyburg.adminPlayerIds).some((playerId) => playerIds.has(playerId)),
+            const addBearer = HttpClient.mapRequest(HttpClientRequest.bearerToken(tokens.access_token));
+            const httpClient = yield* HttpClient.HttpClient.pipe(Effect.map(addBearer));
+
+            const pullLinkedTowers = yield* HttpApiClient.endpoint(Sdk.Api, {
+                baseUrl: config.issuer,
+                group: "TinyTowerAccountsGroup",
+                endpoint: "ListAccounts",
+                httpClient,
             });
+
+            const linkedTowers = yield* pullLinkedTowers().pipe(
+                Effect.orElseSucceed(() => []),
+                Effect.map(Array.map((tower) => tower.playerId)),
+                Effect.map((ids) => new Set(ids))
+            );
+
+            const eligible = config.adminPlayerIds.some((admin) => linkedTowers.has(admin));
             if (!eligible) {
                 yield* clearPending;
                 return yield* failed("elevation_failed");
             }
 
-            // Grants the hour only if the password matched when the round trip
-            // left and it came back inside its window; the check and the grant
-            // are one statement, so there is no moment between them.
             const completed = yield* SessionsRepository.use((repo) => repo.completeElevation(session.id)).pipe(
                 Effect.option,
                 Effect.map(Option.flatten)
             );
+
             if (Option.isNone(completed)) {
                 return yield* failed("elevation_failed");
             }
 
-            return yield* HttpServerResponse.redirect("/admin").pipe(party.expireTransactionCookies, Effect.orDie);
+            return yield* HttpServerResponse.redirect("/admin").pipe(
+                relyingParty.expireTransactionCookies,
+                Effect.orDie
+            );
         }
 
         const sessionToken = randomSecret();
         const tokenHash = yield* sha256(sessionToken);
-
         const maybeSession = yield* SessionsRepository.use((repo) =>
             repo.createSession({
                 sub: claims.sub,
@@ -285,6 +300,7 @@ const callback = (tinyburg: TinyburgRealized) =>
                 tokenHash,
             })
         ).pipe(Effect.option);
+
         if (Option.isNone(maybeSession)) {
             return yield* failed("invalid_oauth_session");
         }
@@ -303,7 +319,7 @@ const callback = (tinyburg: TinyburgRealized) =>
                 secure: cookiePolicy.secure,
                 sameSite: "lax",
             }),
-            Effect.flatMap(party.expireTransactionCookies),
+            Effect.flatMap(relyingParty.expireTransactionCookies),
             Effect.catch(() => failed("invalid_oauth_response"))
         );
     }).pipe(Effect.satisfiesErrorType<never>());
@@ -329,22 +345,9 @@ const logout = Effect.gen(function* () {
 export const OAuthRoutesLive = Effect.gen(function* () {
     const config = yield* tinyburgConfig;
     const cookiePolicy = yield* CookiePolicy;
-    const httpClient = yield* HttpClient.HttpClient;
     const elevationRateLimiter = yield* RateLimiter.make;
 
-    const adminPassword = yield* Config.redacted("ADMIN_PASSWORD");
-    const adminPlayerIds = yield* Config.string("ADMIN_PLAYER_IDS").pipe(
-        Config.withDefault(""),
-        Config.map(
-            (raw) =>
-                new Set(
-                    raw
-                        .split(",")
-                        .map((playerId) => playerId.trim())
-                        .filter((playerId) => playerId !== "")
-                )
-        )
-    );
+    const credentials = yield* registerAtProvider(config);
 
     // One registration at the provider, two scope sets: signing in asks for
     // identity only, elevation re-authorizes with towers:read on top. Both
@@ -356,8 +359,8 @@ export const OAuthRoutesLive = Effect.gen(function* () {
             authorizationEndpoint: `${config.issuer}/oauth/authorize`,
             tokenEndpoint: `${config.issuer}/oauth/token`,
             jwksUri: `${config.issuer}/.well-known/jwks.json`,
-            clientId: config.clientId,
-            clientSecret: Option.getOrUndefined(config.clientSecret),
+            clientId: credentials.clientId,
+            clientSecret: credentials.clientSecret,
             redirectUri: config.redirectUri,
             scopes,
             cookies: {
@@ -366,31 +369,14 @@ export const OAuthRoutesLive = Effect.gen(function* () {
                 secure: cookiePolicy.secure,
             },
         });
+
     const loginParty = yield* relyingParty(LOGIN_SCOPES);
     const elevateParty = yield* relyingParty(ELEVATE_SCOPES);
 
-    const linkedPlayerIds = (accessToken: string): Effect.Effect<ReadonlySet<string>, unknown, never> =>
-        HttpClientRequest.get(`${config.issuer}/v1/tinytower/linkedAccounts/list`).pipe(
-            HttpClientRequest.setHeader("authorization", `Bearer ${accessToken}`),
-            HttpClient.execute,
-            Effect.flatMap(HttpClientResponse.schemaBodyJson(LinkedTowers)),
-            Effect.map((towers) => new Set(towers.map((tower) => tower.playerId))),
-            Effect.provideService(HttpClient.HttpClient, httpClient)
-        );
-
-    const tinyburg: TinyburgRealized = {
-        loginParty,
-        elevateParty,
-        adminPassword,
-        adminPlayerIds,
-        linkedPlayerIds,
-        elevationRateLimiter,
-    };
-
     return Layer.mergeAll(
-        HttpRouter.add("GET", "/auth/login", login(tinyburg)),
-        HttpRouter.add("POST", "/auth/elevate", elevate(tinyburg)),
-        HttpRouter.add("GET", "/auth/callback", callback(tinyburg)),
+        HttpRouter.add("GET", "/auth/login", login(config, loginParty)),
+        HttpRouter.add("POST", "/auth/elevate", elevate(config, elevateParty, elevationRateLimiter)),
+        HttpRouter.add("GET", "/auth/callback", callback(config, elevateParty)),
         HttpRouter.add("POST", "/logout", logout)
     );
 }).pipe(Layer.unwrap);

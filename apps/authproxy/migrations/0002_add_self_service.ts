@@ -6,8 +6,8 @@ export default Effect.flatMap(
     (sql) => sql`
         -- Which Tinyburg account (the OIDC subject) provisioned a key through
         -- the self-service dashboard. NULL for keys handed out by the admin.
-        ALTER TABLE accounts ADD COLUMN IF NOT EXISTS owner_sub UUID;
-        CREATE INDEX IF NOT EXISTS idx_accounts_owner_sub ON accounts(owner_sub) WHERE owner_sub IS NOT NULL;
+        ALTER TABLE api_keys ADD COLUMN IF NOT EXISTS owner_sub UUID;
+        CREATE INDEX IF NOT EXISTS idx_api_keys_owner_sub ON api_keys(owner_sub) WHERE owner_sub IS NOT NULL;
 
         -- Self-service dashboard sessions, created by "sign in with Tinyburg".
         -- Only a hash of the cookie value is stored.

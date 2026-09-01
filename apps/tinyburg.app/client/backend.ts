@@ -3,7 +3,7 @@ import { HttpApiClient } from "effect/unstable/httpapi";
 
 import { Api as TradingApi } from "@tinyburg/trading-sdk/Sdk";
 import { AsyncData, Command, Http } from "foldkit";
-import { m } from "foldkit/message";
+import { defineMessageUnion } from "foldkit/message";
 import { ts } from "foldkit/schema";
 
 import { User } from "../domain/models.ts";
@@ -57,40 +57,48 @@ const LinkedTower = S.Struct({ playerId: S.String, createdAt: S.DateTimeUtc });
 export const LinkedTowers = AsyncData.Schema(S.Array(LinkedTower), S.Literals(["loadFailed"]));
 export type LinkedTowers = typeof LinkedTowers.schema.Type;
 
-export const GotSession = m("GotSession", { session: SessionState });
+/**
+ * What the backend tells the application.
+ *
+ * One union rather than a constructor per message: `defineMessageUnion`
+ * declares the whole set at once and hangs the constructors off the result, so
+ * the union and its members cannot drift apart.
+ */
+export const BackendMessage = defineMessageUnion({
+    GotSession: { session: SessionState },
 
-/** The outcome of a towers fetch; update folds it into the current state with
- *  `AsyncData.settle`, which keeps held data as Stale on failure. */
-export const SettledLinkedTowers = m("SettledLinkedTowers", {
-    result: S.Result(S.Array(LinkedTower), S.Literals(["loadFailed"])),
+    /** The outcome of a towers fetch; update folds it into the current state with
+     *  `AsyncData.settle`, which keeps held data as Stale on failure. */
+    SettledLinkedTowers: { result: S.Result(S.Array(LinkedTower), S.Literals(["loadFailed"])) },
 });
+export type BackendMessage = typeof BackendMessage.Type;
 
 /** Asks the server who this browser is. */
 export const FetchSession = Command.define("FetchSession", {
-    messages: [GotSession],
+    messages: [BackendMessage.GotSession],
     execute: Effect.gen(function* () {
         const auth = yield* Auth;
         const user = yield* auth.AuthGroup.session();
-        return GotSession({ session: SignedIn({ user }) });
+        return BackendMessage.GotSession({ session: SignedIn({ user }) });
     }).pipe(
         // Unauthorized is a plain signed-out answer. Anything else gets the
         // same treatment, because a gated page cannot render on a maybe.
-        Effect.catch(() => Effect.succeed(GotSession({ session: SignedOut() })))
+        Effect.catch(() => Effect.succeed(BackendMessage.GotSession({ session: SignedOut() })))
     ),
 });
 
 export const FetchLinkedTowers = Command.define("FetchLinkedTowers", {
-    messages: [SettledLinkedTowers, GotSession],
+    messages: [BackendMessage.SettledLinkedTowers, BackendMessage.GotSession],
     execute: Effect.gen(function* () {
         const api = yield* Api;
-        const towers = yield* api.LinkedTinyTowerAccountsGroup.TinyburgLinkedTinyTowerAccountsList();
-        return SettledLinkedTowers({
+        const towers = yield* api.TinyTowerAccountsGroup.ListAccounts();
+        return BackendMessage.SettledLinkedTowers({
             result: Result.succeed(towers.map((tower) => ({ playerId: tower.playerId, createdAt: tower.createdAt }))),
         });
     }).pipe(
         // The session expired or was signed out elsewhere; re-running the
         // gating sends the visitor back to login.
-        Effect.catchTag("Unauthorized", () => Effect.succeed(GotSession({ session: SignedOut() }))),
-        Effect.catch(() => Effect.succeed(SettledLinkedTowers({ result: Result.fail("loadFailed") })))
+        Effect.catchTag("Unauthorized", () => Effect.succeed(BackendMessage.GotSession({ session: SignedOut() }))),
+        Effect.catch(() => Effect.succeed(BackendMessage.SettledLinkedTowers({ result: Result.fail("loadFailed") })))
     ),
 });

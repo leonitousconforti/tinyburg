@@ -84,6 +84,18 @@ export const es: Messages = {
         joining: "Uniéndote...",
         takePart: "Participar",
 
+        graphHeading: "Tu círculo, dibujado",
+        graphBody:
+            "Todas las personas participantes que son amigas mutuas de alguna de tus torres, y las conexiones entre ellas. Cada juego forma su propio grupo, porque una amistad nunca cruza de un juego a otro.",
+        graphEmpty:
+            "Todavía no hay nada que dibujar. En cuanto una torre participe y alguien de su lista de amigos también se una, tu círculo aparecerá aquí.",
+        graphYou: "tú",
+        graphAlt: (people, connections) =>
+            `${people} ${people === 1 ? "persona" : "personas"} y ${connections} ${connections === 1 ? "conexión" : "conexiones"}.`,
+
+        dormantGames: (names) =>
+            `Aún no legibles: ${names}. El estudio conoce estos juegos pero no puede descifrar sus partidas, así que sus listas de amigos quedan fuera de alcance por ahora.`,
+
         yourCircle: "Tu círculo",
         hide: "Ocultar",
         emptyCircle:

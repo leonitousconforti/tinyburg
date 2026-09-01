@@ -3,8 +3,8 @@ import { Option } from "effect";
 import type { LoginMessages, SharedMessages } from "../messages/types.ts";
 import type { Html, HtmlBuilder } from "foldkit/html";
 
-import { appBackLink, card } from "@tinyburg/ui/Chrome";
-import { towerIcon } from "@tinyburg/ui/Icons";
+import { appBackLink, card } from "@tinyburg/shared-ui/Chrome";
+import { towerIcon } from "@tinyburg/shared-ui/Icons";
 
 import { startLoginHref } from "../routes.ts";
 

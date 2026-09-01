@@ -3,7 +3,7 @@ import "./styles/global.css";
 import { Runtime } from "foldkit";
 
 import { BackendLive } from "./backend.ts";
-import { ChangedUrl, ClickedLink, Model, init, initialLanguage, update, view, viewTransition } from "./main.ts";
+import { Model, NavigationMessage, init, initialLanguage, update, view, viewTransition } from "./main.ts";
 
 const application = Runtime.makeApplication({
     Model,
@@ -14,8 +14,8 @@ const application = Runtime.makeApplication({
     container: document.getElementById("root"),
     resources: BackendLive,
     routing: {
-        onUrlRequest: (request) => ClickedLink({ request }),
-        onUrlChange: (url) => ChangedUrl({ url }),
+        onUrlRequest: (request) => NavigationMessage.ClickedLink({ request }),
+        onUrlChange: (url) => NavigationMessage.ChangedUrl({ url }),
     },
 });
 

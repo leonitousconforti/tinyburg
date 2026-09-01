@@ -1,6 +1,6 @@
 import type { SqlConnection, SqlError, Statement } from "effect/unstable/sql";
 
-import { Context, DateTime, Duration, Effect, Layer, Option, Schedule, Schema, SchemaGetter } from "effect";
+import { Context, DateTime, Duration, Effect, Layer, Option, Schema, SchemaGetter } from "effect";
 import { SqlClient, SqlModel, SqlSchema } from "effect/unstable/sql";
 
 import { Session, User } from "./models.ts";
@@ -178,13 +178,6 @@ export class SessionsRepository extends Context.Service<SessionsRepository>()(
                 );
 
             const storeAccessToken = sessions.updateVoid;
-
-            yield* sql`DELETE FROM sessions WHERE expires_at < NOW()`.pipe(
-                Effect.catchCause((cause) => Effect.logWarning(`failed to purge expired sessions`, cause)),
-                Effect.schedule(Schedule.cron("17 * * * *")),
-                Effect.forkScoped,
-                Effect.asVoid
-            );
 
             return {
                 createSession,

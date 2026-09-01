@@ -81,6 +81,18 @@ export const en: Messages = {
         joining: "Joining...",
         takePart: "Take part",
 
+        graphHeading: "Your circle, drawn",
+        graphBody:
+            "Everyone taking part who is mutually friends with one of your towers, and the connections between them. Each game forms its own cluster, because a friendship never crosses games.",
+        graphEmpty:
+            "Nothing to draw yet. Once a tower is taking part and someone in its friends list has joined too, your circle appears here.",
+        graphYou: "you",
+        graphAlt: (people, connections) =>
+            `${people} ${people === 1 ? "person" : "people"} and ${connections} ${connections === 1 ? "connection" : "connections"}.`,
+
+        dormantGames: (names) =>
+            `Not yet readable: ${names}. The study can list these games but cannot decode their saves, so their friends lists are out of reach for now.`,
+
         yourCircle: "Your circle",
         hide: "Hide",
         emptyCircle:

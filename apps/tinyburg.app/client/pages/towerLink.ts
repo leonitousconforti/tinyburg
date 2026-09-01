@@ -6,15 +6,19 @@ import type { Html, HtmlBuilder } from "foldkit/html";
 
 import { PlayerEmailSchema, PlayerIdSchema } from "@tinyburg/nimblebit-sdk/NimblebitConfig";
 import { Command, Dom } from "foldkit";
-import { m } from "foldkit/message";
+import { defineMessageUnion } from "foldkit/message";
 import { evo } from "foldkit/struct";
 
 import { Api } from "../backend.ts";
+import { LinkableGame, linkableGameInfo } from "../linkableGames.ts";
 import { appBackLink } from "../ui/chrome.ts";
 
 // MODEL
 
 export const WizardModel = S.Struct({
+    // Which game this save is being linked from; picks the trading api group
+    // the requests go to and names the game the page is for.
+    game: LinkableGame,
     step: S.Literals(["link", "verify"]),
     // How the current step was entered, driving the slide animation.
     entered: S.Literals(["initial", "forward", "backward"]),
@@ -34,7 +38,8 @@ export const WizardModel = S.Struct({
 });
 export type WizardModel = typeof WizardModel.Type;
 
-export const initialWizard: WizardModel = {
+export const initialWizardFor = (game: LinkableGame): WizardModel => ({
+    game,
     step: "link",
     entered: "initial",
     friendCode: "",
@@ -47,43 +52,34 @@ export const initialWizard: WizardModel = {
     linkError: Option.none(),
     verifyError: Option.none(),
     resend: "idle",
-};
+});
 
 // MESSAGE
 
-export const ChangedFriendCode = m("ChangedFriendCode", { value: S.String });
-export const ChangedEmail = m("ChangedEmail", { value: S.String });
-export const ChangedVerificationCode = m("ChangedVerificationCode", { value: S.String });
-export const SubmittedLinkForm = m("SubmittedLinkForm");
-export const SucceededRequestCode = m("SucceededRequestCode", { friendCode: S.String, email: S.String });
-export const FailedRequestCode = m("FailedRequestCode");
-export const SubmittedVerifyForm = m("SubmittedVerifyForm");
-export const SucceededVerify = m("SucceededVerify");
-export const FailedVerify = m("FailedVerify");
-export const ClickedBack = m("ClickedBack");
-export const ClickedResend = m("ClickedResend");
-export const SucceededResend = m("SucceededResend");
-export const FailedResend = m("FailedResend");
-export const CompletedResendCooldown = m("CompletedResendCooldown");
-export const CompletedStepFocus = m("CompletedStepFocus");
-
-export const WizardMessage = S.Union([
-    ChangedFriendCode,
-    ChangedEmail,
-    ChangedVerificationCode,
-    SubmittedLinkForm,
-    SucceededRequestCode,
-    FailedRequestCode,
-    SubmittedVerifyForm,
-    SucceededVerify,
-    FailedVerify,
-    ClickedBack,
-    ClickedResend,
-    SucceededResend,
-    FailedResend,
-    CompletedResendCooldown,
-    CompletedStepFocus,
-]);
+/**
+ * Everything this page can say.
+ *
+ * `defineMessageUnion` declares the union and its constructors together, so a
+ * variant cannot be added without joining the union or removed while something
+ * still matches on it.
+ */
+export const WizardMessage = defineMessageUnion({
+    ChangedFriendCode: { value: S.String },
+    ChangedEmail: { value: S.String },
+    ChangedVerificationCode: { value: S.String },
+    SubmittedLinkForm: {},
+    SucceededRequestCode: { friendCode: S.String, email: S.String },
+    FailedRequestCode: {},
+    SubmittedVerifyForm: {},
+    SucceededVerify: {},
+    FailedVerify: {},
+    ClickedBack: {},
+    ClickedResend: {},
+    SucceededResend: {},
+    FailedResend: {},
+    CompletedResendCooldown: {},
+    CompletedStepFocus: {},
+});
 export type WizardMessage = typeof WizardMessage.Type;
 
 // COMMAND
@@ -92,70 +88,68 @@ export type WizardMessage = typeof WizardMessage.Type;
 // them email a verification code to the address its cloud save lives under.
 // The friend code and email are branded schemas, so mistyped input fails
 // here, before a request is made.
-const requestVerificationCode = (friendCode: string, email: string) =>
+// The trading api gives each game its own accounts group with the same
+// shape; the wizard's game picks which one the link and verify calls go to.
+const requestVerificationCode = (game: LinkableGame, friendCode: string, email: string) =>
     Effect.gen(function* () {
         const api = yield* Api;
+        const accounts = game === "tinytower" ? api.TinyTowerAccountsGroup : api.TinyTowerClassicAccountsGroup;
         const playerId = yield* S.decodeEffect(PlayerIdSchema)(friendCode);
         const playerEmail = yield* S.decodeEffect(PlayerEmailSchema)(email);
-        yield* api.LinkedTinyTowerAccountsGroup.TinyburgLinkedTinyTowerAccountsLink({
-            params: { friendCode: playerId, email: playerEmail },
-            payload: { friendCode: playerId, email: playerEmail },
-        });
+        yield* accounts.LinkAccount({ payload: { playerId, email: playerEmail } });
     });
 
 // Step two: presenting the emailed code proves the tower is theirs and links it.
-const verifyAndLink = (friendCode: string, verificationCode: string) =>
+const verifyAndLink = (game: LinkableGame, friendCode: string, verificationCode: string) =>
     Effect.gen(function* () {
         const api = yield* Api;
+        const accounts = game === "tinytower" ? api.TinyTowerAccountsGroup : api.TinyTowerClassicAccountsGroup;
         const playerId = yield* S.decodeEffect(PlayerIdSchema)(friendCode);
-        yield* api.LinkedTinyTowerAccountsGroup.TinyburgLinkedTinyTowerAccountsVerify({
-            params: { friendCode: playerId, verificationCode },
-            payload: { friendCode: playerId, verificationCode },
-        });
+        yield* accounts.VerifyAccount({ params: { playerId }, payload: { verificationCode } });
     });
 
 const RequestCode = Command.define("RequestCode", {
-    args: { friendCode: S.String, email: S.String },
-    messages: [SucceededRequestCode, FailedRequestCode],
-    execute: ({ email, friendCode }) =>
-        requestVerificationCode(friendCode, email).pipe(
-            Effect.as(SucceededRequestCode({ friendCode, email })),
-            Effect.catch(() => Effect.succeed(FailedRequestCode()))
+    args: { game: LinkableGame, friendCode: S.String, email: S.String },
+    messages: [WizardMessage.SucceededRequestCode, WizardMessage.FailedRequestCode],
+    execute: ({ email, friendCode, game }) =>
+        requestVerificationCode(game, friendCode, email).pipe(
+            Effect.as(WizardMessage.SucceededRequestCode({ friendCode, email })),
+            Effect.catch(() => Effect.succeed(WizardMessage.FailedRequestCode()))
         ),
 });
 
 const VerifyAndLink = Command.define("VerifyAndLink", {
-    args: { friendCode: S.String, verificationCode: S.String },
-    messages: [SucceededVerify, FailedVerify],
-    execute: ({ friendCode, verificationCode }) =>
-        verifyAndLink(friendCode, verificationCode).pipe(
-            Effect.as(SucceededVerify()),
-            Effect.catch(() => Effect.succeed(FailedVerify()))
+    args: { game: LinkableGame, friendCode: S.String, verificationCode: S.String },
+    messages: [WizardMessage.SucceededVerify, WizardMessage.FailedVerify],
+    execute: ({ friendCode, game, verificationCode }) =>
+        verifyAndLink(game, friendCode, verificationCode).pipe(
+            Effect.as(WizardMessage.SucceededVerify()),
+            Effect.catch(() => Effect.succeed(WizardMessage.FailedVerify()))
         ),
 });
 
 const ResendCode = Command.define("ResendCode", {
-    args: { friendCode: S.String, email: S.String },
-    messages: [SucceededResend, FailedResend],
-    execute: ({ email, friendCode }) =>
-        requestVerificationCode(friendCode, email).pipe(
-            Effect.as(SucceededResend()),
-            Effect.catch(() => Effect.succeed(FailedResend()))
+    args: { game: LinkableGame, friendCode: S.String, email: S.String },
+    messages: [WizardMessage.SucceededResend, WizardMessage.FailedResend],
+    execute: ({ email, friendCode, game }) =>
+        requestVerificationCode(game, friendCode, email).pipe(
+            Effect.as(WizardMessage.SucceededResend()),
+            Effect.catch(() => Effect.succeed(WizardMessage.FailedResend()))
         ),
 });
 
 const ResendCooldown = Command.define("ResendCooldown", {
-    messages: [CompletedResendCooldown],
-    execute: Effect.sleep("2 seconds").pipe(Effect.as(CompletedResendCooldown())),
+    messages: [WizardMessage.CompletedResendCooldown],
+    execute: Effect.sleep("2 seconds").pipe(Effect.as(WizardMessage.CompletedResendCooldown())),
 });
 
 const FocusInput = Command.define("FocusInput", {
     args: { selector: S.String },
-    messages: [CompletedStepFocus],
+    messages: [WizardMessage.CompletedStepFocus],
     execute: ({ selector }) =>
         Dom.focus(selector).pipe(
-            Effect.as(CompletedStepFocus()),
-            Effect.catch(() => Effect.succeed(CompletedStepFocus()))
+            Effect.as(WizardMessage.CompletedStepFocus()),
+            Effect.catch(() => Effect.succeed(WizardMessage.CompletedStepFocus()))
         ),
 });
 
@@ -175,7 +169,7 @@ export const updateWizard = (wizard: WizardModel, message: WizardMessage): Wizar
             ChangedVerificationCode: ({ value }) => [evo(wizard, { verificationCode: () => value }), []],
             SubmittedLinkForm: () => [
                 evo(wizard, { submitting: () => true, linkError: Option.none }),
-                [RequestCode({ friendCode: wizard.friendCode.trim(), email: wizard.email.trim() })],
+                [RequestCode({ game: wizard.game, friendCode: wizard.friendCode.trim(), email: wizard.email.trim() })],
             ],
             SucceededRequestCode: ({ email, friendCode }) => [
                 evo(wizard, {
@@ -201,6 +195,7 @@ export const updateWizard = (wizard: WizardModel, message: WizardMessage): Wizar
                 evo(wizard, { submitting: () => true, verifyError: Option.none }),
                 [
                     VerifyAndLink({
+                        game: wizard.game,
                         friendCode: wizard.pendingFriendCode,
                         verificationCode: wizard.verificationCode.trim(),
                     }),
@@ -220,7 +215,7 @@ export const updateWizard = (wizard: WizardModel, message: WizardMessage): Wizar
             ],
             ClickedResend: () => [
                 evo(wizard, { resend: () => "sending" as const }),
-                [ResendCode({ friendCode: wizard.pendingFriendCode, email: wizard.pendingEmail })],
+                [ResendCode({ game: wizard.game, friendCode: wizard.pendingFriendCode, email: wizard.pendingEmail })],
             ],
             SucceededResend: () => [evo(wizard, { resend: () => "sent" as const }), [ResendCooldown()]],
             FailedResend: () => [
@@ -265,7 +260,7 @@ const linkStep = (wizard: WizardModel, msgs: TowerLinkMessages, h: HtmlBuilder<A
         [h.Class(stepClass(wizard))],
         [
             h.form(
-                [h.Class("flex flex-col gap-6"), h.OnSubmit(SubmittedLinkForm())],
+                [h.Class("flex flex-col gap-6"), h.OnSubmit(WizardMessage.SubmittedLinkForm())],
                 [
                     h.label(
                         [h.Class("flex flex-col gap-2")],
@@ -284,7 +279,7 @@ const linkStep = (wizard: WizardModel, msgs: TowerLinkMessages, h: HtmlBuilder<A
                                 h.Autocapitalize("characters"),
                                 h.Spellcheck(false),
                                 h.Value(wizard.friendCode),
-                                h.OnInput((value) => ChangedFriendCode({ value })),
+                                h.OnInput((value) => WizardMessage.ChangedFriendCode({ value })),
                                 h.Class(
                                     "font-mono rounded-lg border-2 border-gray-300 bg-white p-3 text-center text-3xl tracking-[0.4em] text-gray-800 uppercase focus:border-sky-blue focus:outline-none"
                                 ),
@@ -304,7 +299,7 @@ const linkStep = (wizard: WizardModel, msgs: TowerLinkMessages, h: HtmlBuilder<A
                                 h.Placeholder("you@example.com"),
                                 h.Autocomplete("email"),
                                 h.Value(wizard.email),
-                                h.OnInput((value) => ChangedEmail({ value })),
+                                h.OnInput((value) => WizardMessage.ChangedEmail({ value })),
                                 h.Class(
                                     "font-mono rounded-lg border-2 border-gray-300 bg-white p-3 text-xl text-gray-800 focus:border-sky-blue focus:outline-none"
                                 ),
@@ -344,7 +339,7 @@ const verifyStep = (wizard: WizardModel, msgs: TowerLinkMessages, h: HtmlBuilder
                 ]
             ),
             h.form(
-                [h.Class("flex flex-col gap-6"), h.OnSubmit(SubmittedVerifyForm())],
+                [h.Class("flex flex-col gap-6"), h.OnSubmit(WizardMessage.SubmittedVerifyForm())],
                 [
                     h.label(
                         [h.Class("flex flex-col gap-2")],
@@ -361,7 +356,7 @@ const verifyStep = (wizard: WizardModel, msgs: TowerLinkMessages, h: HtmlBuilder
                                 h.Autocomplete("one-time-code"),
                                 h.Spellcheck(false),
                                 h.Value(wizard.verificationCode),
-                                h.OnInput((value) => ChangedVerificationCode({ value })),
+                                h.OnInput((value) => WizardMessage.ChangedVerificationCode({ value })),
                                 h.Class(
                                     "font-mono rounded-lg border-2 border-gray-300 bg-white p-3 text-center text-3xl tracking-[0.4em] text-gray-800 focus:border-sky-blue focus:outline-none"
                                 ),
@@ -389,7 +384,7 @@ const verifyStep = (wizard: WizardModel, msgs: TowerLinkMessages, h: HtmlBuilder
                     h.button(
                         [
                             h.Type("button"),
-                            h.OnClick(ClickedBack()),
+                            h.OnClick(WizardMessage.ClickedBack()),
                             h.Class("font-mono text-sky-dark cursor-pointer text-lg hover:underline"),
                         ],
                         [msgs.goBack]
@@ -397,7 +392,7 @@ const verifyStep = (wizard: WizardModel, msgs: TowerLinkMessages, h: HtmlBuilder
                     h.button(
                         [
                             h.Type("button"),
-                            h.OnClick(ClickedResend()),
+                            h.OnClick(WizardMessage.ClickedResend()),
                             h.Disabled(wizard.resend !== "idle"),
                             h.Class(
                                 "font-mono text-sky-dark cursor-pointer text-lg hover:underline disabled:cursor-not-allowed"
@@ -423,6 +418,10 @@ export const towerLinkView = (h: HtmlBuilder<AppMessage>, msgs: TowerLinkMessage
                         [
                             h.h1([h.Class("font-pixel mb-2 text-lg text-gray-800")], [msgs.heading]),
                             h.p([h.Class("font-mono text-xl text-gray-600")], [msgs.subheading]),
+                            h.p(
+                                [h.Class("font-pixel mt-3 text-[0.6rem] tracking-wider text-gray-400 uppercase")],
+                                [linkableGameInfo[wizard.game].name]
+                            ),
                         ]
                     ),
                     h.div(

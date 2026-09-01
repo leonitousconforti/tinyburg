@@ -9,7 +9,7 @@ import { PgClient, PgMigrator } from "@effect/sql-pg";
 import { DevelopersRepository } from "../domain/developers.ts";
 import { OidcRepository } from "../domain/oidc.ts";
 import { SessionsRepository } from "../domain/sessions.ts";
-import { TinyTowerAccountsRepository } from "../domain/tinytower.ts";
+import { TinyTowerAccountsRepository, TinyTowerClassicAccountsRepository } from "../domain/tinytower.ts";
 import { UsersRepository } from "../domain/users.ts";
 import { CookiePolicy } from "./cookies.ts";
 import { OidcKeys } from "./keys.ts";
@@ -17,6 +17,8 @@ import { ApiLive } from "./routes/api.ts";
 import { AuthRoutesLive } from "./routes/auth.ts";
 import { OAuthRoutesLive } from "./routes/oauth.ts";
 import { OidcProviderLive } from "./routes/oidc.ts";
+import { DynamicRegistrationLive } from "./routes/registration.ts";
+import { StandaloneStylesheetLive } from "./routes/standalone.ts";
 import { StaticRoutesLive } from "./routes/static.ts";
 
 /**
@@ -38,11 +40,15 @@ const SecurityHeadersLive = HttpRouter.middleware(
     { global: true }
 );
 
+const DotEnvLive = Effect.map(ConfigProvider.fromDotEnv(), ConfigProvider.nested("TINYBURGAPP"));
+
 const AllRoutes = Layer.mergeAll(
     ApiLive,
     AuthRoutesLive,
     OAuthRoutesLive,
     OidcProviderLive,
+    DynamicRegistrationLive,
+    StandaloneStylesheetLive,
     StaticRoutesLive,
     SecurityHeadersLive
 );
@@ -65,7 +71,8 @@ const Repositories = Layer.mergeAll(
     UsersRepository.Default,
     OidcRepository.Default,
     SessionsRepository.Default,
-    TinyTowerAccountsRepository.Default
+    TinyTowerAccountsRepository.Default,
+    TinyTowerClassicAccountsRepository.Default
 );
 
 HttpRouter.serve(AllRoutes).pipe(
@@ -78,7 +85,15 @@ HttpRouter.serve(AllRoutes).pipe(
             host: Config.string("HOST").pipe(Config.withDefault("0.0.0.0")),
         })
     ),
-    Layer.provideMerge(ConfigProvider.layerAdd(ConfigProvider.fromDotEnv())),
+    /*
+      The environment is read as it comes, because a process has one of its own
+      and nothing to collide with. `.env` is nested under the service name
+      instead, because that one file holds the whole stack's settings and two
+      services would otherwise fight over `DATABASE_URL`. Added rather than
+      installed, so the environment still wins: the dev stack's wiring cannot
+      be overridden by a stale `.env`.
+    */
+    Layer.provideMerge(ConfigProvider.layerAdd(DotEnvLive)),
     Layer.provideMerge(NodeHttpServer.layerHttpServices),
     Layer.launch,
     NodeRuntime.runMain

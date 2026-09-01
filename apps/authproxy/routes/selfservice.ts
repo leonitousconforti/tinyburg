@@ -4,10 +4,11 @@ import { HttpApiBuilder, HttpApiError } from "effect/unstable/httpapi";
 import { Model } from "effect/unstable/schema";
 
 import { CookiePolicy, maybeCurrentSession } from "../cookies.ts";
-import { Account, Repository } from "../domain/model.ts";
+import { ApiKey, Repository } from "../domain/model.ts";
+import { SCOPE_CATALOG, SELF_SERVE_SCOPE_NAMES } from "../domain/scopes.ts";
 import { SessionsRepository } from "../domain/sessions.ts";
 import { AdminSessionCookie, CurrentSession, SelfServiceApi, SessionCookie } from "../shared/api.ts";
-import { DEFAULT_RATE_LIMIT, MAX_KEYS_PER_USER, SELF_SERVE_SCOPE_PATHS } from "../shared/scopes.ts";
+import { DEFAULT_RATE_LIMIT, MAX_KEYS_PER_USER } from "../shared/policy.ts";
 
 const SessionCookieLive = Layer.effect(
     SessionCookie,
@@ -72,6 +73,10 @@ const AdminSessionCookieLive = Layer.effect(
     })
 );
 
+const ScopesGroupLive = HttpApiBuilder.group(SelfServiceApi, "ScopesGroup", (handlers) =>
+    handlers.handle("catalog", () => Effect.succeed(SCOPE_CATALOG))
+);
+
 const SelfServiceGroupLive = HttpApiBuilder.group(
     SelfServiceApi,
     "SelfServiceGroup",
@@ -90,11 +95,11 @@ const SelfServiceGroupLive = HttpApiBuilder.group(
                 Effect.gen(function* () {
                     const { session } = yield* CurrentSession;
 
-                    // Only catalogued read-only scopes are self-serve, and an
+                    // Only the self-serve scopes may be self-served, and an
                     // empty key would be useless.
                     const scopes = new Set(payload.scopes);
                     const allowed =
-                        scopes.size > 0 && payload.scopes.every((scope) => SELF_SERVE_SCOPE_PATHS.has(scope));
+                        scopes.size > 0 && payload.scopes.every((scope) => SELF_SERVE_SCOPE_NAMES.has(scope));
                     if (!allowed) {
                         return yield* new HttpApiError.BadRequest();
                     }
@@ -104,7 +109,7 @@ const SelfServiceGroupLive = HttpApiBuilder.group(
                         return yield* new HttpApiError.BadRequest();
                     }
 
-                    const newAccount = yield* Account.insert
+                    const newApiKey = yield* ApiKey.insert
                         .makeEffect({
                             scopes,
                             description: payload.description,
@@ -114,7 +119,7 @@ const SelfServiceGroupLive = HttpApiBuilder.group(
                         })
                         .pipe(Effect.orDie);
 
-                    return yield* repo.insert(newAccount).pipe(Effect.orDie);
+                    return yield* repo.insert(newApiKey).pipe(Effect.orDie);
                 })
             )
             .handle("rotateKey", ({ params }) =>
@@ -179,7 +184,7 @@ const AdminGroupLive = HttpApiBuilder.group(
     Effect.fnUntraced(function* (handlers) {
         const repo = yield* Repository;
 
-        const findAccount = (key: string) =>
+        const findApiKey = (key: string) =>
             repo.findById(key).pipe(
                 Effect.catchNoSuchElement,
                 Effect.orDie,
@@ -192,7 +197,7 @@ const AdminGroupLive = HttpApiBuilder.group(
             );
 
         const applyUpdate = (
-            account: Account,
+            apiKey: ApiKey,
             changes: Partial<{
                 readonly scopes: ReadonlySet<string>;
                 readonly revoked: boolean;
@@ -200,40 +205,40 @@ const AdminGroupLive = HttpApiBuilder.group(
                 readonly rateLimitWindow: Duration.Duration;
             }>
         ) =>
-            Account.update
+            ApiKey.update
                 .makeEffect({
-                    key: account.key,
-                    description: account.description,
-                    ownerSub: account.ownerSub,
-                    lastUsedAt: Model.Override(account.lastUsedAt),
-                    scopes: changes.scopes ?? account.scopes,
-                    revoked: changes.revoked ?? account.revoked,
-                    rateLimitLimit: changes.rateLimitLimit ?? account.rateLimitLimit,
-                    rateLimitWindow: changes.rateLimitWindow ?? account.rateLimitWindow,
+                    key: apiKey.key,
+                    description: apiKey.description,
+                    ownerSub: apiKey.ownerSub,
+                    lastUsedAt: Model.Override(apiKey.lastUsedAt),
+                    scopes: changes.scopes ?? apiKey.scopes,
+                    revoked: changes.revoked ?? apiKey.revoked,
+                    rateLimitLimit: changes.rateLimitLimit ?? apiKey.rateLimitLimit,
+                    rateLimitWindow: changes.rateLimitWindow ?? apiKey.rateLimitWindow,
                 })
                 .pipe(Effect.flatMap(repo.update), Effect.orDie);
 
         return handlers
             .handle("listKeys", () => repo.listAll().pipe(Effect.orDie))
             .handle("scopes", ({ params, payload }) =>
-                Effect.flatMap(findAccount(params.key), (account) =>
-                    applyUpdate(account, { scopes: new Set(payload.scopes) })
+                Effect.flatMap(findApiKey(params.key), (apiKey) =>
+                    applyUpdate(apiKey, { scopes: new Set(payload.scopes) })
                 )
             )
             .handle("rateLimit", ({ params, payload }) =>
-                Effect.flatMap(findAccount(params.key), (account) =>
-                    applyUpdate(account, { rateLimitLimit: payload.limit, rateLimitWindow: payload.window })
+                Effect.flatMap(findApiKey(params.key), (apiKey) =>
+                    applyUpdate(apiKey, { rateLimitLimit: payload.limit, rateLimitWindow: payload.window })
                 )
             )
             .handle("revoke", ({ params }) =>
-                Effect.flatMap(findAccount(params.key), (account) => applyUpdate(account, { revoked: true }))
+                Effect.flatMap(findApiKey(params.key), (apiKey) => applyUpdate(apiKey, { revoked: true }))
             )
             .handle("enable", ({ params }) =>
-                Effect.flatMap(findAccount(params.key), (account) => applyUpdate(account, { revoked: false }))
+                Effect.flatMap(findApiKey(params.key), (apiKey) => applyUpdate(apiKey, { revoked: false }))
             )
             .handle("deleteKey", ({ params }) =>
-                Effect.flatMap(findAccount(params.key), (account) =>
-                    repo.delete(account.key).pipe(Effect.orDie, Effect.asVoid)
+                Effect.flatMap(findApiKey(params.key), (apiKey) =>
+                    repo.delete(apiKey.key).pipe(Effect.orDie, Effect.asVoid)
                 )
             );
     })
@@ -244,6 +249,7 @@ const AdminGroupLive = HttpApiBuilder.group(
  * @category Api
  */
 export const SelfServiceApiLive = HttpApiBuilder.layer(SelfServiceApi).pipe(
+    Layer.provide(ScopesGroupLive),
     Layer.provide(SelfServiceGroupLive),
     Layer.provide(AdminGroupLive),
     Layer.provide(SessionCookieLive),

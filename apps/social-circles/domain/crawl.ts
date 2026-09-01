@@ -15,6 +15,8 @@ import type { PlayerId } from "./model.ts";
 
 import { PlayerIdSchema } from "@tinyburg/nimblebit-sdk/NimblebitConfig";
 
+import { GameId } from "./games.ts";
+
 /** Backoff ceiling. A player who keeps failing is retried daily, not abandoned. */
 const MAX_BACKOFF_MINUTES = 24 * 60;
 
@@ -25,10 +27,10 @@ export class CrawlStateRepository extends Context.Service<CrawlStateRepository>(
             const sql = yield* SqlClient.SqlClient;
 
             /** Puts a newly consented player into the rotation, due immediately. */
-            const enroll = (playerId: PlayerId): Effect.Effect<void, SqlError.SqlError, never> =>
+            const enroll = (game: GameId, playerId: PlayerId): Effect.Effect<void, SqlError.SqlError, never> =>
                 sql`
-                    INSERT INTO crawl_state (player_id) VALUES (${playerId})
-                    ON CONFLICT (player_id) DO NOTHING
+                    INSERT INTO crawl_state (game, player_id) VALUES (${game}, ${playerId})
+                    ON CONFLICT (game, player_id) DO NOTHING
                 `.pipe(Effect.asVoid);
 
             /**
@@ -40,16 +42,17 @@ export class CrawlStateRepository extends Context.Service<CrawlStateRepository>(
              */
             const due = SqlSchema.findAll({
                 Request: Schema.Finite,
-                Result: PlayerIdSchema,
+                Result: Schema.Struct({ game: GameId, playerId: PlayerIdSchema }),
                 execute: (limit) =>
                     sql`
-                        SELECT cs.player_id
+                        SELECT cs.game, cs.player_id
                         FROM crawl_state cs
-                        JOIN consents c ON c.player_id = cs.player_id AND c.revoked_at IS NULL
+                        JOIN consents c
+                            ON c.game = cs.game AND c.player_id = cs.player_id AND c.revoked_at IS NULL
                         WHERE cs.next_attempt_at <= NOW()
                         ORDER BY cs.next_attempt_at ASC
                         LIMIT ${limit}
-                    `.pipe(Effect.map((rows) => rows.map(({ playerId }) => playerId))),
+                    `.pipe(Effect.map((rows) => rows.map(({ game, playerId }) => ({ game, playerId })))),
             });
 
             /**
@@ -59,6 +62,7 @@ export class CrawlStateRepository extends Context.Service<CrawlStateRepository>(
              * a bad patch return to the normal cadence immediately.
              */
             const recordSuccess = (options: {
+                readonly game: GameId;
                 readonly playerId: PlayerId;
                 readonly saveVersion: string;
                 readonly intervalMinutes: number;
@@ -71,7 +75,7 @@ export class CrawlStateRepository extends Context.Service<CrawlStateRepository>(
                         consecutive_failures = 0,
                         last_error = NULL,
                         next_attempt_at = NOW() + (${options.intervalMinutes} * INTERVAL '1 minute')
-                    WHERE player_id = ${options.playerId}
+                    WHERE game = ${options.game} AND player_id = ${options.playerId}
                 `.pipe(Effect.asVoid);
 
             /**
@@ -82,6 +86,7 @@ export class CrawlStateRepository extends Context.Service<CrawlStateRepository>(
              * failure is long gone.
              */
             const recordFailure = (options: {
+                readonly game: GameId;
                 readonly playerId: PlayerId;
                 readonly error: string;
             }): Effect.Effect<void, SqlError.SqlError, never> =>
@@ -96,16 +101,22 @@ export class CrawlStateRepository extends Context.Service<CrawlStateRepository>(
                                 POWER(2, LEAST(consecutive_failures + 1, 10)) * 5
                             ) * INTERVAL '1 minute'
                         )
-                    WHERE player_id = ${options.playerId}
+                    WHERE game = ${options.game} AND player_id = ${options.playerId}
                 `.pipe(Effect.asVoid);
 
             /**
              * The save fingerprint from the last successful crawl, used to skip
              * the diff when a player's tower has not changed.
              */
-            const lastSaveVersion = (playerId: PlayerId): Effect.Effect<string | null, SqlError.SqlError, never> =>
+            const lastSaveVersion = (
+                game: GameId,
+                playerId: PlayerId
+            ): Effect.Effect<string | null, SqlError.SqlError, never> =>
                 Effect.map(
-                    sql`SELECT last_save_version FROM crawl_state WHERE player_id = ${playerId}`,
+                    sql`
+                        SELECT last_save_version FROM crawl_state
+                        WHERE game = ${game} AND player_id = ${playerId}
+                    `,
                     // Bridges an untyped runtime boundary; the shape is guaranteed by construction, not by the compiler.
                     // oxlint-disable-next-line typescript/no-unsafe-type-assertion
                     (rows) => (rows[0]?.["lastSaveVersion"] as string | undefined) ?? null

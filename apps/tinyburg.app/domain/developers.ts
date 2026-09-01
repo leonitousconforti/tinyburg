@@ -39,11 +39,52 @@ export class DevelopersRepository extends Context.Service<DevelopersRepository>(
                 `,
             });
 
+            /**
+             * A client registering itself (RFC 7591), keyed by the software it
+             * is an installation of.
+             *
+             * An upsert rather than an insert, which is what makes registering
+             * idempotent: a service that registers on every boot is handed the
+             * same client back, with whatever it now says about itself, and so
+             * has nothing of its own to remember between runs. A confidential
+             * client's secret is replaced each time, because only its hash was
+             * ever kept here and the client is told the new one in the same
+             * response.
+             */
+            const registerOAuthClient = SqlSchema.findOne({
+                Request: Schema.Struct({
+                    softwareId: Schema.String,
+                    name: Schema.String,
+                    secretHash: Schema.NullOr(Schema.String),
+                    scope: Schema.String,
+                    redirectUris: Schema.NonEmptyArray(Schema.String),
+                }),
+                Result: OAuthClient,
+                execute: (client) => sql`
+                    INSERT INTO oauth_clients (software_id, owner_user_id, name, secret_hash, scope, redirect_uris)
+                    VALUES (
+                        ${client.softwareId},
+                        NULL,
+                        ${client.name},
+                        ${client.secretHash},
+                        ${client.scope},
+                        ${client.redirectUris}
+                    )
+                    ON CONFLICT (software_id) WHERE software_id IS NOT NULL DO UPDATE SET
+                        name = EXCLUDED.name,
+                        secret_hash = EXCLUDED.secret_hash,
+                        scope = EXCLUDED.scope,
+                        redirect_uris = EXCLUDED.redirect_uris
+                    RETURNING *
+                `,
+            });
+
             return {
                 createOAuthClient,
                 findOAuthClient,
                 deleteOAuthClient,
                 listOAuthClients,
+                registerOAuthClient,
             };
         }),
     }

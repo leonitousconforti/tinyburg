@@ -13,6 +13,7 @@ import { SqlClient, SqlSchema } from "effect/unstable/sql";
 
 import { PlayerIdSchema } from "@tinyburg/nimblebit-sdk/NimblebitConfig";
 
+import { GameId } from "./games.ts";
 import { Consent, type PlayerId } from "./model.ts";
 
 export class ConsentRepository extends Context.Service<ConsentRepository>()(
@@ -33,19 +34,25 @@ export class ConsentRepository extends Context.Service<ConsentRepository>()(
              */
             const consentedPlayers = SqlSchema.findAll({
                 Request: Schema.Void,
-                Result: PlayerIdSchema,
+                Result: Schema.Struct({ game: GameId, playerId: PlayerIdSchema }),
                 execute: () =>
                     sql`
-                        SELECT player_id
+                        SELECT game, player_id
                         FROM consents
                         WHERE revoked_at IS NULL
-                    `.pipe(Effect.map((rows) => rows.map(({ playerId }) => playerId))),
+                    `.pipe(Effect.map((rows) => rows.map(({ game, playerId }) => ({ game, playerId })))),
             });
 
             /** Whether a player may appear in the graph at all, in either role. */
-            const hasLiveConsent = (playerId: PlayerId): Effect.Effect<boolean, SqlError.SqlError, never> =>
+            const hasLiveConsent = (
+                game: GameId,
+                playerId: PlayerId
+            ): Effect.Effect<boolean, SqlError.SqlError, never> =>
                 Effect.map(
-                    sql`SELECT 1 FROM consents WHERE player_id = ${playerId} AND revoked_at IS NULL`,
+                    sql`
+                        SELECT 1 FROM consents
+                        WHERE game = ${game} AND player_id = ${playerId} AND revoked_at IS NULL
+                    `,
                     (rows) => rows.length > 0
                 );
 
@@ -68,15 +75,16 @@ export class ConsentRepository extends Context.Service<ConsentRepository>()(
              */
             const grant = (options: {
                 readonly tinyburgUserId: string;
+                readonly game: GameId;
                 readonly playerId: PlayerId;
             }): Effect.Effect<void, SqlError.SqlError, never> =>
                 sql`
                     WITH ensured_player AS (
-                        INSERT INTO players (player_id) VALUES (${options.playerId})
-                        ON CONFLICT (player_id) DO NOTHING
+                        INSERT INTO players (game, player_id) VALUES (${options.game}, ${options.playerId})
+                        ON CONFLICT (game, player_id) DO NOTHING
                     )
-                    INSERT INTO consents (tinyburg_user_id, player_id)
-                    VALUES (${options.tinyburgUserId}, ${options.playerId})
+                    INSERT INTO consents (tinyburg_user_id, game, player_id)
+                    VALUES (${options.tinyburgUserId}, ${options.game}, ${options.playerId})
                     ON CONFLICT DO NOTHING
                 `.pipe(Effect.asVoid);
 
@@ -93,13 +101,15 @@ export class ConsentRepository extends Context.Service<ConsentRepository>()(
              */
             const revoke = (options: {
                 readonly tinyburgUserId: string;
+                readonly game: GameId;
                 readonly playerId: PlayerId;
             }): Effect.Effect<boolean, SqlError.SqlError, never> =>
                 Effect.map(
                     sql`
                         UPDATE consents
                         SET revoked_at = NOW()
-                        WHERE player_id = ${options.playerId}
+                        WHERE game = ${options.game}
+                          AND player_id = ${options.playerId}
                           AND tinyburg_user_id = ${options.tinyburgUserId}
                           AND revoked_at IS NULL
                         RETURNING id

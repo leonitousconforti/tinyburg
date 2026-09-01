@@ -4,6 +4,7 @@ import { HttpApi, HttpApiEndpoint, HttpApiError, HttpApiGroup, HttpApiMiddleware
 import { PlayerIdSchema } from "@tinyburg/nimblebit-sdk/NimblebitConfig";
 
 import { Session } from "../domain/sessions.ts";
+import { GameCatalogEntry, GameId } from "./games.ts";
 
 /**
  * The session in context, provided by the {@link SessionCookie} middleware.
@@ -47,6 +48,7 @@ export class SessionCookie extends HttpApiMiddleware.Service<SessionCookie, { pr
  * @category Models
  */
 export const TowerStatus = Schema.Struct({
+    game: GameId,
     playerId: PlayerIdSchema,
     enrolled: Schema.Boolean,
     /** How many of this player's friends are also in the study. */
@@ -68,13 +70,64 @@ export type TowerStatus = typeof TowerStatus.Type;
  * @category Models
  */
 export const Circle = Schema.Struct({
+    game: GameId,
     playerId: PlayerIdSchema,
     friends: Schema.Array(PlayerIdSchema),
     totalFriends: Schema.Finite,
 });
 export type Circle = typeof Circle.Type;
 
-const playerParam = { playerId: PlayerIdSchema };
+/**
+ * One person in the graph the dashboard draws.
+ *
+ * `mine` separates the visitor's own towers from the people they are friends
+ * with, which is the difference between the anchors of the picture and the rest
+ * of it.
+ *
+ * @since 1.0.0
+ * @category Models
+ */
+export const GraphNode = Schema.Struct({
+    game: GameId,
+    playerId: PlayerIdSchema,
+    mine: Schema.Boolean,
+});
+export type GraphNode = typeof GraphNode.Type;
+
+/**
+ * A mutual friendship between two people in the graph.
+ *
+ * Undirected: `a` and `b` are interchangeable, and the pair appears once. Both
+ * endpoints are always nodes of the same graph, and both consented.
+ *
+ * @since 1.0.0
+ * @category Models
+ */
+export const GraphEdge = Schema.Struct({
+    game: GameId,
+    a: PlayerIdSchema,
+    b: PlayerIdSchema,
+});
+export type GraphEdge = typeof GraphEdge.Type;
+
+/**
+ * The visitor's circles across every game, as one graph.
+ *
+ * Contains the visitor's own towers, the people mutually friended with them,
+ * and the mutual friendships among that set. Nobody outside the visitor's own
+ * circles appears, so the picture never grows past people they are already
+ * shown.
+ *
+ * @since 1.0.0
+ * @category Models
+ */
+export const CircleGraph = Schema.Struct({
+    nodes: Schema.Array(GraphNode),
+    edges: Schema.Array(GraphEdge),
+});
+export type CircleGraph = typeof CircleGraph.Type;
+
+const towerParams = { game: GameId, playerId: PlayerIdSchema };
 
 const SelfServiceGroup = HttpApiGroup.make("SelfServiceGroup")
     .add(
@@ -92,8 +145,19 @@ const SelfServiceGroup = HttpApiGroup.make("SelfServiceGroup")
         })
     )
     .add(
-        HttpApiEndpoint.post("enroll", "/self/towers/:playerId/enroll", {
-            params: playerParam,
+        HttpApiEndpoint.get("games", "/self/games", {
+            success: Schema.Array(GameCatalogEntry),
+        })
+    )
+    .add(
+        HttpApiEndpoint.get("graph", "/self/graph", {
+            error: HttpApiError.ServiceUnavailable,
+            success: CircleGraph,
+        })
+    )
+    .add(
+        HttpApiEndpoint.post("enroll", "/self/towers/:game/:playerId/enroll", {
+            params: towerParams,
             // Forbidden means the player is not linked to this account, which
             // is the ownership gate refusing.
             error: [HttpApiError.Forbidden, HttpApiError.ServiceUnavailable],
@@ -101,8 +165,8 @@ const SelfServiceGroup = HttpApiGroup.make("SelfServiceGroup")
         })
     )
     .add(
-        HttpApiEndpoint.delete("withdraw", "/self/towers/:playerId", {
-            params: playerParam,
+        HttpApiEndpoint.delete("withdraw", "/self/towers/:game/:playerId", {
+            params: towerParams,
             error: HttpApiError.NotFound,
             success: Schema.Struct({
                 edgesRemoved: Schema.Finite,
@@ -111,8 +175,8 @@ const SelfServiceGroup = HttpApiGroup.make("SelfServiceGroup")
         })
     )
     .add(
-        HttpApiEndpoint.get("circle", "/self/towers/:playerId/circle", {
-            params: playerParam,
+        HttpApiEndpoint.get("circle", "/self/towers/:game/:playerId/circle", {
+            params: towerParams,
             error: [HttpApiError.Forbidden, HttpApiError.NotFound],
             success: Circle,
         })

@@ -3,12 +3,22 @@ import { Effect, Match, Option, Schema as S } from "effect";
 import type { TitleMessages } from "./messages/types.ts";
 import type { Document, Html, HtmlBuilder } from "foldkit/html";
 
-import { Language, fromNavigator } from "@tinyburg/ui/Internationalization";
+import { Language, fromNavigator } from "@tinyburg/shared-ui/Internationalization";
 import { AsyncData, Command, Navigation, Render, type Runtime, Url } from "foldkit";
-import { m } from "foldkit/message";
+import { defineMessageUnion } from "foldkit/message";
 import { evo } from "foldkit/struct";
 
-import { type Backend, CheckingSession, FetchSession, GotSession, SessionState, SignedOut } from "./backend.ts";
+import {
+    type Backend,
+    BackendMessage,
+    type CatalogGame,
+    CheckingSession,
+    FetchScopes,
+    FetchSession,
+    ScopeCatalog,
+    SessionState,
+    SignedOut,
+} from "./backend.ts";
 import { messagesFor } from "./messages/index.ts";
 import {
     AdminMessage,
@@ -31,6 +41,9 @@ export const Model = S.Struct({
     route: AppRoute,
     language: Language,
     session: SessionState,
+    // The scopes the proxy hands out, as the server lists them. Fetched once
+    // at boot: both gated pages read it, and it changes only with a deploy.
+    scopes: ScopeCatalog.schema,
     keys: KeysModel,
     admin: AdminModel,
 });
@@ -47,11 +60,21 @@ export const initialLanguage = fromNavigator(
 
 // MESSAGE
 
-export const ClickedLink = m("ClickedLink", { request: Navigation.UrlRequest });
-export const ChangedUrl = m("ChangedUrl", { url: Url.Url });
-export const CompletedNavigation = m("CompletedNavigation");
+/** The application's own messages: everything about where the browser is. */
+export const NavigationMessage = defineMessageUnion({
+    ClickedLink: { request: Navigation.UrlRequest },
+    ChangedUrl: { url: Url.Url },
+    CompletedNavigation: {},
+});
+export type NavigationMessage = typeof NavigationMessage.Type;
 
-export const Message = S.Union([ClickedLink, ChangedUrl, CompletedNavigation, GotSession, KeysMessage, AdminMessage]);
+/**
+ * Everything the runtime may dispatch, which is the application's own messages
+ * plus one union per module that owns some. Each of those is a
+ * `defineMessageUnion` in its own file, so this stays a list of unions rather
+ * than a list of individual constructors.
+ */
+export const Message = S.Union([NavigationMessage, BackendMessage, KeysMessage, AdminMessage]);
 export type Message = typeof Message.Type;
 
 type Step = readonly [Model, ReadonlyArray<Command.Command<Message, never, Backend>>];
@@ -60,20 +83,20 @@ type Step = readonly [Model, ReadonlyArray<Command.Command<Message, never, Backe
 
 const Navigate = Command.define("Navigate", {
     args: { url: S.String, replace: S.Boolean },
-    messages: [CompletedNavigation],
+    messages: [NavigationMessage.CompletedNavigation],
     execute: ({ replace, url }) =>
         Effect.gen(function* () {
             yield* replace ? Navigation.replaceUrl(url) : Navigation.pushUrl(url);
             yield* Render.afterCommit;
             yield* Effect.sync(() => window.scrollTo({ top: 0, behavior: "instant" }));
-            return CompletedNavigation();
+            return NavigationMessage.CompletedNavigation();
         }),
 });
 
 const LoadExternal = Command.define("LoadExternal", {
     args: { href: S.String },
-    messages: [CompletedNavigation],
-    execute: ({ href }) => Navigation.load(href).pipe(Effect.as(CompletedNavigation())),
+    messages: [NavigationMessage.CompletedNavigation],
+    execute: ({ href }) => Navigation.load(href).pipe(Effect.as(NavigationMessage.CompletedNavigation())),
 });
 
 // Paths the server owns: the sign-in round trip and sign out. Clicking one
@@ -134,9 +157,13 @@ const enterRoute = (model: Model): Step => {
 const isKeysMessage = S.is(KeysMessage);
 const isAdminMessage = S.is(AdminMessage);
 
+/** The scope tree as far as it has arrived; the pages treat "not yet" as empty. */
+const catalogOf = (model: Model): ReadonlyArray<CatalogGame> =>
+    Option.getOrElse(AsyncData.getData(model.scopes), (): ReadonlyArray<CatalogGame> => []);
+
 export const update = (model: Model, message: Message): Step => {
     if (isAdminMessage(message)) {
-        const [admin, adminCommands] = updateAdmin(model.admin, message);
+        const [admin, adminCommands] = updateAdmin(model.admin, message, catalogOf(model));
         const commands: Array<Command.Command<Message, never, Backend>> = [...adminCommands];
 
         // The session ended elsewhere; the server owns the way back.
@@ -151,7 +178,7 @@ export const update = (model: Model, message: Message): Step => {
     }
 
     if (isKeysMessage(message)) {
-        const [keys, keysCommands] = updateKeys(model.keys, message);
+        const [keys, keysCommands] = updateKeys(model.keys, message, catalogOf(model));
         const commands: Array<Command.Command<Message, never, Backend>> = [...keysCommands];
 
         // The session ended elsewhere; the server owns the way back.
@@ -181,6 +208,7 @@ export const update = (model: Model, message: Message): Step => {
                 ),
             ChangedUrl: ({ url }) => enterRoute(resetPageState(model, urlToAppRoute(url))),
             GotSession: ({ session }) => enterRoute(evo(model, { session: () => session })),
+            SettledScopes: ({ result }) => [evo(model, { scopes: AsyncData.settle(result) }), []],
             CompletedNavigation: () => [model, []],
         })
     );
@@ -199,13 +227,14 @@ export const init: Runtime.RoutingApplicationInit<Model, Message, void, Backend>
                 route,
                 language: initialLanguage,
                 session: CheckingSession(),
+                scopes: ScopeCatalog.Loading(),
                 keys: initialKeys,
                 admin: initialAdmin,
             },
             route
         )
     );
-    return [model, [FetchSession(), ...commands]];
+    return [model, [FetchSession(), FetchScopes(), ...commands]];
 };
 
 // VIEW
@@ -234,10 +263,20 @@ const pageView = (model: Model, h: HtmlBuilder<Message>): Html => {
             // enterRoute has already sent a signed out visitor to login.
             Keys: () =>
                 model.session._tag === "SignedIn"
-                    ? keysView(h, msgs.keys, msgs.shared, model.language, model.keys, model.session.session)
+                    ? keysView(
+                          h,
+                          msgs.keys,
+                          msgs.shared,
+                          model.language,
+                          model.keys,
+                          model.session.session,
+                          model.scopes
+                      )
                     : h.empty,
             Admin: () =>
-                model.session._tag === "SignedIn" ? adminView(h, msgs.admin, msgs.shared, model.admin) : h.empty,
+                model.session._tag === "SignedIn"
+                    ? adminView(h, msgs.admin, msgs.shared, model.admin, model.scopes)
+                    : h.empty,
             NotFound: () => notFoundView(h, msgs.notFound, msgs.shared),
         })
     );

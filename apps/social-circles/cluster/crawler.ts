@@ -17,11 +17,12 @@ import { Cron, DateTime, Duration, Effect, Layer, Schema } from "effect";
 import { ClusterCron, ClusterSchema, Entity } from "effect/unstable/cluster";
 import { Rpc } from "effect/unstable/rpc";
 
-import type { PlayerId } from "../domain/model.ts";
+import type { GamePlayerRef } from "../domain/graph.ts";
 
 import { PlayerIdSchema } from "@tinyburg/nimblebit-sdk/NimblebitConfig";
 
 import { CrawlStateRepository } from "../domain/crawl.ts";
+import { GameId, gamePlayerKey } from "../domain/games.ts";
 import { GraphRepository } from "../domain/graph.ts";
 import { CrawlService } from "../services/crawl.ts";
 
@@ -32,11 +33,19 @@ import { CrawlService } from "../services/crawl.ts";
  * mailbox is memory only and a deploy would silently drop scheduled work.
  */
 export const CrawlEntity = Entity.make("SocialCirclesCrawl", [
-    // The player id is both the entity id (which is what shards and serialises
-    // the work) and part of the payload. Carrying it explicitly keeps the
-    // handler off `Entity.CurrentAddress`, which would otherwise leak into the
-    // layer's requirements.
-    Rpc.make("crawl", { payload: Schema.Struct({ playerId: PlayerIdSchema }) }).annotate(ClusterSchema.Persisted, true),
+    // The tower is both the entity id (which is what shards and serialises the
+    // work) and part of the payload. Carrying it explicitly keeps the handler
+    // off `Entity.CurrentAddress`, which would otherwise leak into the layer's
+    // requirements.
+    //
+    // The id is `game:playerId` rather than the friend code alone. Two games can
+    // hand out the same code to different people, and keying on the code alone
+    // would serialise two unrelated towers behind one mailbox while letting each
+    // one's crawl race the other's diff.
+    Rpc.make("crawl", { payload: Schema.Struct({ game: GameId, playerId: PlayerIdSchema }) }).annotate(
+        ClusterSchema.Persisted,
+        true
+    ),
 ]);
 
 /**
@@ -49,7 +58,7 @@ export const CrawlEntityLive = CrawlEntity.toLayer(
 
         return {
             crawl: Effect.fnUntraced(function* (request) {
-                const { playerId } = request.payload;
+                const { game, playerId } = request.payload;
 
                 /**
                  * The scheduled variant swallows failure into recorded backoff.
@@ -57,8 +66,8 @@ export const CrawlEntityLive = CrawlEntity.toLayer(
                  * message, which is the wrong shape of retry: backoff belongs in
                  * the database where it survives the process.
                  */
-                const outcome = yield* crawl.crawlPlayerScheduled(playerId);
-                yield* Effect.logDebug(`crawled ${playerId}: ${outcome._tag}`);
+                const outcome = yield* crawl.crawlPlayerScheduled({ game, playerId });
+                yield* Effect.logDebug(`crawled ${game}:${playerId}: ${outcome._tag}`);
             }, Effect.orDie),
         };
     })
@@ -84,11 +93,13 @@ const dispatchDue = Effect.gen(function* () {
 
     yield* Effect.forEach(
         due,
-        (playerId: PlayerId) =>
-            makeClient(playerId)
-                .crawl({ playerId }, { discard: true })
+        (tower: GamePlayerRef) =>
+            makeClient(gamePlayerKey(tower))
+                .crawl(tower, { discard: true })
                 .pipe(
-                    Effect.catchCause((cause) => Effect.logWarning(`could not enqueue crawl for ${playerId}`, cause))
+                    Effect.catchCause((cause) =>
+                        Effect.logWarning(`could not enqueue crawl for ${gamePlayerKey(tower)}`, cause)
+                    )
                 ),
         { discard: true }
     );

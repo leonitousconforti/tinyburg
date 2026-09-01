@@ -30,7 +30,7 @@ export const AuthProxyApiDecodeHashLive = Layer.effect(
 
         return Effect.fnUntraced(function* (httpEffect, _options) {
             const request = yield* HttpServerRequest.HttpServerRequest;
-            if (request.url.startsWith("/verify_device/tt/")) return yield* httpEffect;
+            if (request.url.startsWith("/verify_device/")) return yield* httpEffect;
 
             const lastSlashIndex = String.lastIndexOf("/")(request.url);
             if (Option.isNone(lastSlashIndex)) return yield* new HttpApiError.BadRequest();

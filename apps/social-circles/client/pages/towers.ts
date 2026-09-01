@@ -1,21 +1,27 @@
-import { Effect, Match, Option, Result, Schema as S } from "effect";
+import { Array as Arr, Effect, Match, Option, Result, Schema as S } from "effect";
 
 import type { Message as AppMessage } from "../main.ts";
 import type { TowersMessages } from "../messages/types.ts";
 import type { Html, HtmlBuilder } from "foldkit/html";
 
 import { PlayerIdSchema } from "@tinyburg/nimblebit-sdk/NimblebitConfig";
-import { type Language, longDate } from "@tinyburg/ui/Internationalization";
+import { type Language, longDate } from "@tinyburg/shared-ui/Internationalization";
 import { AsyncData, Command } from "foldkit";
 import { defineMessageUnion } from "foldkit/message";
 import { evo } from "foldkit/struct";
 
-import { Circle, TowerStatus } from "../../shared/api.ts";
+import { Circle, CircleGraph, TowerStatus } from "../../shared/api.ts";
+import { GameCatalogEntry, type GameId, GameIds, gamePlayerKey } from "../../shared/games.ts";
 import { Self, type SessionInfo } from "../backend.ts";
 import { initialLanguage, messagesFor } from "../messages/index.ts";
 import { banner, card, dangerButton, primaryButton, quietButton } from "../ui/chrome.ts";
+import { GraphLayout, forceGraphLegend, forceGraphView, layout } from "../ui/forceGraph.ts";
 
 type Tower = typeof TowerStatus.Type;
+
+/** Which tower a message is about. A friend code alone would be ambiguous. */
+const TowerRef = S.Struct({ game: S.Literals(GameIds), playerId: PlayerIdSchema });
+type TowerRef = typeof TowerRef.Type;
 
 // MODEL
 
@@ -24,14 +30,27 @@ export const Towers = AsyncData.Schema(S.Array(TowerStatus), S.String);
 export const TowersModel = S.Struct({
     towers: Towers.schema,
 
-    // The row currently mid-request, so only its own button says so.
-    busy: S.Option(PlayerIdSchema),
+    /**
+     * The game catalog, served rather than bundled. Names come from here, as
+     * does whether a game can be joined at all.
+     */
+    games: S.Array(GameCatalogEntry),
+
+    /**
+     * The laid-out graph. Held rather than derived in the view because the
+     * layout is a few hundred iterations of a force simulation, and a render
+     * must not pay for that.
+     */
+    graph: S.Option(GraphLayout),
+
+    // The row currently mid-request, by tower key, so only its own button says so.
+    busy: S.Option(S.String),
     notice: S.Option(S.String),
     problem: S.Option(S.String),
 
     // Withdrawing takes two clicks: the first arms the button, the second acts.
     // Erasure is not undoable, so it should not be one stray tap away.
-    armedWithdraw: S.Option(PlayerIdSchema),
+    armedWithdraw: S.Option(S.String),
 
     // The circle currently expanded, if any.
     circle: S.Option(Circle),
@@ -40,6 +59,8 @@ export type TowersModel = typeof TowersModel.Type;
 
 export const initialTowers: TowersModel = {
     towers: Towers.Idle(),
+    games: [],
+    graph: Option.none(),
     busy: Option.none(),
     notice: Option.none(),
     problem: Option.none(),
@@ -67,14 +88,16 @@ export const enterTowers = (previous: TowersModel): TowersModel =>
  */
 export const TowersMessage = defineMessageUnion({
     SettledTowers: { result: S.Result(S.Array(TowerStatus), S.String) },
+    SettledGames: { games: S.Array(GameCatalogEntry) },
+    SettledGraph: { graph: CircleGraph },
 
-    ClickedEnroll: { playerId: PlayerIdSchema },
+    ClickedEnroll: { tower: TowerRef },
     CompletedEnroll: { crawled: S.Boolean },
 
-    ClickedWithdraw: { playerId: PlayerIdSchema },
+    ClickedWithdraw: { tower: TowerRef },
     CompletedWithdraw: { eventsRemoved: S.Finite },
 
-    ClickedCircle: { playerId: PlayerIdSchema },
+    ClickedCircle: { tower: TowerRef },
     SettledCircle: { circle: Circle },
     ClickedHideCircle: {},
 
@@ -106,13 +129,34 @@ export const FetchTowers = Command.define("FetchTowers", {
     ),
 });
 
+/**
+ * The catalog. Failure is deliberately quiet: without it the page falls back to
+ * raw game ids, which is worse but still usable, and a banner about it would
+ * push aside problems the visitor can actually act on.
+ */
+export const FetchGames = Command.define("FetchGames", {
+    messages: [TowersMessage.SettledGames],
+    execute: Effect.gen(function* () {
+        const self = yield* Self;
+        return TowersMessage.SettledGames({ games: yield* self.SelfServiceGroup.games() });
+    }).pipe(Effect.catch(() => Effect.succeed(TowersMessage.SettledGames({ games: [] })))),
+});
+
+export const FetchGraph = Command.define("FetchGraph", {
+    messages: [TowersMessage.SettledGraph],
+    execute: Effect.gen(function* () {
+        const self = yield* Self;
+        return TowersMessage.SettledGraph({ graph: yield* self.SelfServiceGroup.graph() });
+    }).pipe(Effect.catch(() => Effect.succeed(TowersMessage.SettledGraph({ graph: { nodes: [], edges: [] } })))),
+});
+
 const Enroll = Command.define("Enroll", {
-    args: { playerId: PlayerIdSchema },
+    args: { tower: TowerRef },
     messages: [TowersMessage.CompletedEnroll, TowersMessage.FailedAction, TowersMessage.SignedOutElsewhere],
-    execute: ({ playerId }) =>
+    execute: ({ tower }) =>
         Effect.gen(function* () {
             const self = yield* Self;
-            const result = yield* self.SelfServiceGroup.enroll({ params: { playerId } });
+            const result = yield* self.SelfServiceGroup.enroll({ params: tower });
             return TowersMessage.CompletedEnroll({ crawled: result.crawled });
         }).pipe(
             Effect.catchTag("Unauthorized", () => Effect.succeed(TowersMessage.SignedOutElsewhere())),
@@ -124,12 +168,12 @@ const Enroll = Command.define("Enroll", {
 });
 
 const Withdraw = Command.define("Withdraw", {
-    args: { playerId: PlayerIdSchema },
+    args: { tower: TowerRef },
     messages: [TowersMessage.CompletedWithdraw, TowersMessage.FailedAction, TowersMessage.SignedOutElsewhere],
-    execute: ({ playerId }) =>
+    execute: ({ tower }) =>
         Effect.gen(function* () {
             const self = yield* Self;
-            const receipt = yield* self.SelfServiceGroup.withdraw({ params: { playerId } });
+            const receipt = yield* self.SelfServiceGroup.withdraw({ params: tower });
             return TowersMessage.CompletedWithdraw({ eventsRemoved: receipt.eventsRemoved });
         }).pipe(
             Effect.catchTag("Unauthorized", () => Effect.succeed(TowersMessage.SignedOutElsewhere())),
@@ -141,12 +185,12 @@ const Withdraw = Command.define("Withdraw", {
 });
 
 const FetchCircle = Command.define("FetchCircle", {
-    args: { playerId: PlayerIdSchema },
+    args: { tower: TowerRef },
     messages: [TowersMessage.SettledCircle, TowersMessage.FailedAction, TowersMessage.SignedOutElsewhere],
-    execute: ({ playerId }) =>
+    execute: ({ tower }) =>
         Effect.gen(function* () {
             const self = yield* Self;
-            const circle = yield* self.SelfServiceGroup.circle({ params: { playerId } });
+            const circle = yield* self.SelfServiceGroup.circle({ params: tower });
             return TowersMessage.SettledCircle({ circle });
         }).pipe(
             Effect.catchTag("Unauthorized", () => Effect.succeed(TowersMessage.SignedOutElsewhere())),
@@ -159,9 +203,9 @@ const FetchCircle = Command.define("FetchCircle", {
 type TowersStep = readonly [TowersModel, ReadonlyArray<Command.Command<TowersMessage, never, Self>>];
 
 /** Starting an action clears whatever the last one had to say about itself. */
-const starting = (model: TowersModel, busy: typeof PlayerIdSchema.Type): TowersModel =>
+const starting = (model: TowersModel, busy: TowerRef): TowersModel =>
     evo(model, {
-        busy: () => Option.some(busy),
+        busy: () => Option.some(gamePlayerKey(busy)),
         notice: Option.none,
         problem: Option.none,
         armedWithdraw: Option.none,
@@ -176,22 +220,41 @@ export const updateTowers = (model: TowersModel, message: TowersMessage): Towers
         Match.tagsExhaustive({
             SettledTowers: ({ result }) => [evo(model, { towers: AsyncData.settle(result), busy: Option.none }), []],
 
-            ClickedEnroll: ({ playerId }) => [starting(model, playerId), [Enroll({ playerId })]],
+            SettledGames: ({ games }) => [evo(model, { games: () => games }), []],
+
+            // The layout runs here, once per answer, rather than in the view.
+            SettledGraph: ({ graph }) => [
+                evo(model, {
+                    graph: () =>
+                        graph.nodes.length === 0
+                            ? Option.none()
+                            : Option.some(layout(graph.nodes, graph.edges, GameIds)),
+                }),
+                [],
+            ],
+
+            ClickedEnroll: ({ tower }) => [starting(model, tower), [Enroll({ tower })]],
 
             CompletedEnroll: ({ crawled }) => [
                 evo(refetch(model), {
                     busy: Option.none,
                     notice: () => Option.some(crawled ? towersMsgs().enrolledCrawled : towersMsgs().enrolledPending),
                 }),
-                [FetchTowers()],
+                [FetchTowers(), FetchGraph()],
             ],
 
             // First click arms, second acts. The armed state is per row, so
             // arming one and clicking another does not delete the wrong tower.
-            ClickedWithdraw: ({ playerId }) =>
-                Option.contains(model.armedWithdraw, playerId)
-                    ? [starting(model, playerId), [Withdraw({ playerId })]]
-                    : [evo(model, { armedWithdraw: () => Option.some(playerId), problem: Option.none }), []],
+            ClickedWithdraw: ({ tower }) =>
+                Option.contains(model.armedWithdraw, gamePlayerKey(tower))
+                    ? [starting(model, tower), [Withdraw({ tower })]]
+                    : [
+                          evo(model, {
+                              armedWithdraw: () => Option.some(gamePlayerKey(tower)),
+                              problem: Option.none,
+                          }),
+                          [],
+                      ],
 
             CompletedWithdraw: ({ eventsRemoved }) => [
                 evo(refetch(model), {
@@ -199,10 +262,10 @@ export const updateTowers = (model: TowersModel, message: TowersMessage): Towers
                     circle: Option.none,
                     notice: () => Option.some(towersMsgs().withdrawn(eventsRemoved)),
                 }),
-                [FetchTowers()],
+                [FetchTowers(), FetchGraph()],
             ],
 
-            ClickedCircle: ({ playerId }) => [starting(model, playerId), [FetchCircle({ playerId })]],
+            ClickedCircle: ({ tower }) => [starting(model, tower), [FetchCircle({ tower })]],
             SettledCircle: ({ circle }) => [evo(model, { circle: () => Option.some(circle), busy: Option.none }), []],
             ClickedHideCircle: () => [evo(model, { circle: Option.none }), []],
 
@@ -214,6 +277,10 @@ export const updateTowers = (model: TowersModel, message: TowersMessage): Towers
     );
 
 // VIEW
+
+/** What to call a game. Falls back to the raw id if the catalog did not load. */
+const nameOf = (model: TowersModel, game: GameId): string =>
+    model.games.find((entry) => entry.id === game)?.name ?? game;
 
 const formatLastCrawled = (msgs: TowersMessages, language: Language, tower: Tower): string =>
     Option.match(tower.lastCrawledAt, {
@@ -277,11 +344,12 @@ const towerRow = (
     tower: Tower,
     model: TowersModel
 ): Html => {
-    const busy = Option.contains(model.busy, tower.playerId);
-    const armed = Option.contains(model.armedWithdraw, tower.playerId);
+    const key = gamePlayerKey(tower);
+    const busy = Option.contains(model.busy, key);
+    const armed = Option.contains(model.armedWithdraw, key);
     const showingCircle = Option.match(model.circle, {
         onNone: () => false,
-        onSome: (circle) => circle.playerId === tower.playerId,
+        onSome: (circle) => circle.game === tower.game && circle.playerId === tower.playerId,
     });
 
     return h.div(
@@ -324,7 +392,7 @@ const towerRow = (
                                   h.Type("button"),
                                   h.Class(primaryButton),
                                   h.Disabled(busy),
-                                  h.OnClick(TowersMessage.ClickedCircle({ playerId: tower.playerId })),
+                                  h.OnClick(TowersMessage.ClickedCircle({ tower })),
                               ],
                               [busy ? "..." : msgs.seeMyCircle]
                           ),
@@ -334,7 +402,7 @@ const towerRow = (
                                   h.Class(dangerButton),
                                   h.Disabled(busy),
                                   h.Title(msgs.withdrawTitle),
-                                  h.OnClick(TowersMessage.ClickedWithdraw({ playerId: tower.playerId })),
+                                  h.OnClick(TowersMessage.ClickedWithdraw({ tower })),
                               ],
                               [busy ? "..." : armed ? msgs.reallyLeave : msgs.leaveAndDelete]
                           ),
@@ -345,7 +413,7 @@ const towerRow = (
                                   h.Type("button"),
                                   h.Class(primaryButton),
                                   h.Disabled(busy),
-                                  h.OnClick(TowersMessage.ClickedEnroll({ playerId: tower.playerId })),
+                                  h.OnClick(TowersMessage.ClickedEnroll({ tower })),
                               ],
                               [busy ? msgs.joining : msgs.takePart]
                           ),
@@ -362,12 +430,72 @@ const towerRow = (
     );
 };
 
+/**
+ * The graph.
+ *
+ * Drawn from every game at once rather than one picture per game, because the
+ * point of it is the shape of somebody's whole circle. Games separate into their
+ * own labelled clusters within the one canvas, since a friendship cannot cross
+ * between them.
+ */
+const graphSection = (h: HtmlBuilder<AppMessage>, msgs: TowersMessages, model: TowersModel): Html => {
+    const drawn = Option.match(model.graph, {
+        onNone: (): ReadonlyArray<Html> => [h.p([h.Class("font-mono text-lg text-gray-600")], [msgs.graphEmpty])],
+        onSome: (graph): ReadonlyArray<Html> => {
+            const games = Arr.dedupe(graph.nodes.map((node) => node.game));
+            const people = graph.nodes.length;
+            const connections = graph.edges.length;
+
+            return [
+                ...(games.length > 1 ? [forceGraphLegend(h, games, (game) => nameOf(model, game))] : []),
+                h.figure(
+                    [h.Class("m-0")],
+                    [
+                        forceGraphView(h, graph, {
+                            nameOf: (game) => nameOf(model, game),
+                            description: msgs.graphAlt(people, connections),
+                            you: msgs.graphYou,
+                        }),
+                        h.figcaption(
+                            [h.Class("font-mono mt-2 text-center text-base text-gray-500")],
+                            [msgs.graphAlt(people, connections)]
+                        ),
+                    ]
+                ),
+            ];
+        },
+    });
+
+    return h.section(
+        [h.Class(card)],
+        [
+            h.h2([h.Class("font-pixel mb-2 text-lg text-gray-800")], [msgs.graphHeading]),
+            h.p([h.Class("font-mono mb-6 text-lg text-gray-500")], [msgs.graphBody]),
+            ...drawn,
+        ]
+    );
+};
+
 const towersSection = (
     h: HtmlBuilder<AppMessage>,
     msgs: TowersMessages,
     language: Language,
     model: TowersModel
 ): Html => {
+    /** One block per game, in catalog order, each headed by the game's name. */
+    const byGame = (towers: ReadonlyArray<Tower>): ReadonlyArray<Html> =>
+        GameIds.filter((game) => towers.some((tower) => tower.game === game)).map((game) =>
+            h.div(
+                [h.Class("flex flex-col gap-3")],
+                [
+                    h.h3([h.Class("font-pixel text-[0.75rem] text-gray-700")], [nameOf(model, game)]),
+                    ...towers
+                        .filter((tower) => tower.game === game)
+                        .map((tower) => towerRow(h, msgs, language, tower, model)),
+                ]
+            )
+        );
+
     const list = (towers: ReadonlyArray<Tower>): Html =>
         towers.length === 0
             ? h.div(
@@ -387,10 +515,7 @@ const towersSection = (
                       ),
                   ]
               )
-            : h.div(
-                  [h.Class("flex flex-col gap-4")],
-                  towers.map((tower) => towerRow(h, msgs, language, tower, model))
-              );
+            : h.div([h.Class("flex flex-col gap-6")], byGame(towers));
 
     return h.section(
         [h.Class(card)],
@@ -407,6 +532,25 @@ const towersSection = (
             }),
         ]
     );
+};
+
+/**
+ * The games the study lists but cannot read yet.
+ *
+ * Worth saying out loud rather than omitting: somebody who plays Pocket Planes
+ * should learn that the study knows the game exists and cannot read it, instead
+ * of wondering why their account never appears.
+ */
+const dormantNote = (h: HtmlBuilder<AppMessage>, msgs: TowersMessages, model: TowersModel): ReadonlyArray<Html> => {
+    const dormant = model.games.filter((game) => !game.readable);
+    if (dormant.length === 0) return [];
+
+    return [
+        h.p(
+            [h.Class("font-mono text-center text-base text-white/70")],
+            [msgs.dormantGames(dormant.map((game) => game.name).join(", "))]
+        ),
+    ];
 };
 
 export const towersView = (
@@ -448,7 +592,9 @@ export const towersView = (
                         onSome: (text) => [banner(h, "problem", text)],
                         onNone: () => [],
                     }),
+                    graphSection(h, msgs, model),
                     towersSection(h, msgs, language, model),
+                    ...dormantNote(h, msgs, model),
                     h.p(
                         [h.Class("font-mono text-center text-lg text-white/80")],
                         [

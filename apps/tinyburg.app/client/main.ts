@@ -2,21 +2,20 @@ import { Effect, Match, Option, Schema as S } from "effect";
 
 import type { Document, Html, HtmlBuilder } from "foldkit/html";
 
-import { Language, fromNavigator } from "@tinyburg/ui/Internationalization";
+import { Language, fromNavigator } from "@tinyburg/shared-ui/Internationalization";
 import { AsyncData, Command, Dom, Navigation, Render, type Runtime, Url } from "foldkit";
 import { createLazy } from "foldkit/html";
-import { m } from "foldkit/message";
+import { defineMessageUnion } from "foldkit/message";
 import { evo } from "foldkit/struct";
 
 import {
     type Backend,
+    BackendMessage,
     CheckingSession,
     FetchLinkedTowers,
     FetchSession,
-    GotSession,
     LinkedTowers,
     SessionState,
-    SettledLinkedTowers,
     SignedOut,
 } from "./backend.ts";
 import { type Messages, type TitleMessages, messagesFor } from "./messages/index.ts";
@@ -39,7 +38,7 @@ import { notFoundView } from "./pages/notFound.ts";
 import { privacyView } from "./pages/privacy.ts";
 import { sponsorsView } from "./pages/sponsors.ts";
 import { termsView } from "./pages/terms.ts";
-import { WizardMessage, WizardModel, initialWizard, towerLinkView, updateWizard } from "./pages/towerLink.ts";
+import { WizardMessage, WizardModel, initialWizardFor, towerLinkView, updateWizard } from "./pages/towerLink.ts";
 import { towerMeView } from "./pages/towerMe.ts";
 import { AppRoute, loginHref, urlToAppRoute } from "./routes.ts";
 import { clouds } from "./ui/chrome.ts";
@@ -68,21 +67,22 @@ export const initialLanguage = fromNavigator(
 
 // MESSAGE
 
-export const ClickedLink = m("ClickedLink", { request: Navigation.UrlRequest });
-export const ChangedUrl = m("ChangedUrl", { url: Url.Url });
-export const ClickedSignIn = m("ClickedSignIn");
-export const CompletedNavigation = m("CompletedNavigation");
+/** The application's own messages: everything about where the browser is. */
+export const NavigationMessage = defineMessageUnion({
+    ClickedLink: { request: Navigation.UrlRequest },
+    ChangedUrl: { url: Url.Url },
+    ClickedSignIn: {},
+    CompletedNavigation: {},
+});
+export type NavigationMessage = typeof NavigationMessage.Type;
 
-export const Message = S.Union([
-    ClickedLink,
-    ChangedUrl,
-    ClickedSignIn,
-    CompletedNavigation,
-    GotSession,
-    SettledLinkedTowers,
-    WizardMessage,
-    AccountMessage,
-]);
+/**
+ * Everything the runtime may dispatch, which is the application's own messages
+ * plus one union per module that owns some. Each of those is a
+ * `defineMessageUnion` in its own file, so this stays a list of unions rather
+ * than a list of individual constructors.
+ */
+export const Message = S.Union([NavigationMessage, BackendMessage, WizardMessage, AccountMessage]);
 export type Message = typeof Message.Type;
 
 type Step = readonly [Model, ReadonlyArray<Command.Command<Message, never, Backend>>];
@@ -91,7 +91,7 @@ type Step = readonly [Model, ReadonlyArray<Command.Command<Message, never, Backe
 
 const Navigate = Command.define("Navigate", {
     args: { url: S.String, replace: S.Boolean },
-    messages: [CompletedNavigation],
+    messages: [NavigationMessage.CompletedNavigation],
     execute: ({ replace, url }) =>
         Effect.gen(function* () {
             yield* replace ? Navigation.replaceUrl(url) : Navigation.pushUrl(url);
@@ -108,14 +108,14 @@ const Navigate = Command.define("Navigate", {
             yield* hash === ""
                 ? Effect.sync(() => window.scrollTo({ top: 0, behavior: "instant" }))
                 : Dom.scrollIntoView(hash).pipe(Effect.catch(() => Effect.void));
-            return CompletedNavigation();
+            return NavigationMessage.CompletedNavigation();
         }),
 });
 
 const LoadExternal = Command.define("LoadExternal", {
     args: { href: S.String },
-    messages: [CompletedNavigation],
-    execute: ({ href }) => Navigation.load(href).pipe(Effect.as(CompletedNavigation())),
+    messages: [NavigationMessage.CompletedNavigation],
+    execute: ({ href }) => Navigation.load(href).pipe(Effect.as(NavigationMessage.CompletedNavigation())),
 });
 
 // Paths the server owns: the OIDC provider, the federated login round trip,
@@ -141,7 +141,7 @@ const requiresSession = (route: AppRoute): boolean =>
 const resetPageState = (model: Model, route: AppRoute): Model =>
     evo(model, {
         route: () => route,
-        wizard: (wizard) => (route._tag === "TowerLink" ? initialWizard : wizard),
+        wizard: (wizard) => (route._tag === "TowerLink" ? initialWizardFor(route.game) : wizard),
         account: (account) => (route._tag === "Account" ? enterAccount(route.link, route.error, account) : account),
     });
 
@@ -262,7 +262,7 @@ export const init: Runtime.RoutingApplicationInit<Model, Message, void, Backend>
                 route,
                 session: CheckingSession(),
                 linkedTowers: LinkedTowers.Idle(),
-                wizard: initialWizard,
+                wizard: initialWizardFor("tinytower"),
                 account: initialAccount,
                 language: initialLanguage,
             },

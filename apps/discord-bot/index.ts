@@ -1,6 +1,7 @@
 import { Config, ConfigProvider, Effect, Layer, Path, String } from "effect";
 import { FetchHttpClient, HttpRouter } from "effect/unstable/http";
 
+// @effect-diagnostics-next-line nodeBuiltinImport:off
 import { createServer } from "node:http";
 
 import { NodeHttpServer, NodeRuntime, NodeServices, NodeSocket } from "@effect/platform-node";
@@ -24,7 +25,7 @@ import { TinyburgClient } from "./tinyburg.ts";
  * HTTP server; `/link` is the seam between them.
  */
 
-const DotEnvLive = Effect.map(ConfigProvider.fromDotEnv(), ConfigProvider.nested("DISCORDBOT"));
+const ConfigProviderLive = ConfigProvider.fromEnv().pipe(ConfigProvider.nested("DISCORDBOT"), ConfigProvider.layer);
 
 const SqlLive = PgClient.layerConfig({
     url: Config.redacted("DATABASE_URL"),
@@ -75,7 +76,7 @@ Layer.mergeAll(InteractionsLive, HttpLive).pipe(
     Layer.provide(SqlLive),
     // The environment as it comes, `.env` nested under the service name; see
     // `tinyburg.app`'s server entrypoint for why they differ.
-    Layer.provideMerge(ConfigProvider.layerAdd(DotEnvLive)),
+    Layer.provideMerge(ConfigProviderLive),
     // The migrator and the `.env` reader both go to disk, so they need the
     // node services the http server used to bring along implicitly.
     Layer.provide(NodeServices.layer),

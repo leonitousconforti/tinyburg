@@ -121,6 +121,6 @@ Re-exports all named exports from the "./NimblebitScopes.ts" module as `Nimblebi
 export * as NimblebitScopes from "./NimblebitScopes.ts"
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/index.ts#L76)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/index.ts#L53)
 
 Since v1.0.0

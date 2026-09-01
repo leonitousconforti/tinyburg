@@ -1,7 +1,9 @@
 import { Option, Schema as S, pipe } from "effect";
 
 import { Route } from "foldkit";
-import { literal, r, slash } from "foldkit/route";
+import { literal, r, schemaSegment, slash } from "foldkit/route";
+
+import { LinkableGame } from "./linkableGames.ts";
 
 export const HomeRoute = r("Home");
 export const AboutRoute = r("About");
@@ -12,7 +14,7 @@ export const SponsorsRoute = r("Sponsors");
 export const DevelopersRoute = r("Developers");
 export const DeveloperAppsRoute = r("DeveloperApps");
 export const TowerMeRoute = r("TowerMe");
-export const TowerLinkRoute = r("TowerLink");
+export const TowerLinkRoute = r("TowerLink", { game: LinkableGame });
 export const AccountRoute = r("Account", { link: S.Option(S.String), error: S.Option(S.String) });
 export const NotFoundRoute = r("NotFound", { path: S.String });
 
@@ -47,7 +49,12 @@ export const sponsorsRouter = pipe(literal("sponsors"), Route.mapTo(SponsorsRout
 export const developersRouter = pipe(literal("developers"), Route.mapTo(DevelopersRoute));
 export const developerAppsRouter = pipe(literal("developers"), slash(literal("apps")), Route.mapTo(DeveloperAppsRoute));
 export const towerMeRouter = pipe(literal("towers"), slash(literal("@me")), Route.mapTo(TowerMeRoute));
-export const towerLinkRouter = pipe(literal("towers"), slash(literal("@link")), Route.mapTo(TowerLinkRoute));
+export const towerLinkRouter = pipe(
+    literal("towers"),
+    slash(literal("@link")),
+    slash(schemaSegment("game", LinkableGame)),
+    Route.mapTo(TowerLinkRoute)
+);
 // The oauth callback reports how connecting another provider went: `link` when
 // it worked, `error` when it did not. The page opens saying so either way.
 export const accountRouter = pipe(

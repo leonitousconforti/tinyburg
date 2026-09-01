@@ -1,9 +1,9 @@
 import type { HttpClientError } from "effect/unstable/http";
 
-import { Context, Effect, Function, Layer, type Schema } from "effect";
+import { Config, Context, Effect, Function, Layer, type Schema } from "effect";
 import { HttpApiBuilder, HttpApiClient, HttpApiError } from "effect/unstable/httpapi";
 
-import { NimblebitAuth } from "@tinyburg/nimblebit-sdk";
+import { NimblebitAuth, NimblebitConfig } from "@tinyburg/nimblebit-sdk";
 import { Endpoints as TinyTowerEndpoints } from "@tinyburg/tinytower-sdk";
 
 import { Authorization, AuthorizationLive } from "../middleware/10_authorization.ts";
@@ -127,6 +127,10 @@ export const SocialGroupLive = HttpApiBuilder.group(
 export const TinyTowerApiLive = HttpApiBuilder.layer(Api).pipe(
     Layer.provide([RaffleLive, DeviceManagementLive, SyncManagementLive, SocialGroupLive]),
     Layer.provide([AuthorizationLive, AuthProxyApiDecodeHashLive]),
-    Layer.provide(NimblebitAuth.layerDirectConfig()),
+    Layer.provide(
+        NimblebitAuth.layerDirectConfig(
+            Config.schema(NimblebitConfig.NimblebitAuthKeySchema, "TINYTOWERVEGAS_NIMBLEBIT_AUTH_KEY")
+        )
+    ),
     Layer.provide(Client.Default)
 );

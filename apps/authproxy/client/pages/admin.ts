@@ -4,16 +4,16 @@ import type { Message as AppMessage } from "../main.ts";
 import type { AdminMessages, SharedMessages } from "../messages/types.ts";
 import type { Html, HtmlBuilder } from "foldkit/html";
 
-import { banner, card, dangerButton, primaryButton, quietButton, smallButton } from "@tinyburg/ui/Chrome";
+import { banner, card, dangerButton, primaryButton, quietButton, smallButton } from "@tinyburg/shared-ui/Chrome";
 import { AsyncData, Command } from "foldkit";
-import { m } from "foldkit/message";
+import { defineMessageUnion } from "foldkit/message";
 import { evo } from "foldkit/struct";
 
-import { Account } from "../../domain/model.ts";
-import { ELEVATED_SCOPES, SELF_SERVE_SCOPES } from "../../shared/scopes.ts";
-import { Self } from "../backend.ts";
+import { ApiKey } from "../../domain/model.ts";
+import { type CatalogGame, type ScopeCatalogData, Self } from "../backend.ts";
+import { descriptionsOf, scopePicker, toggleScope } from "../scopePicker.ts";
 
-type Key = typeof Account.json.Type;
+type Key = typeof ApiKey.json.Type;
 
 // MODEL
 
@@ -23,9 +23,9 @@ const AdminNotice = S.Literals(["saved", "keyDeleted"]);
 const AdminProblem = S.Literals(["elevationFailed", "actionFailed", "rateLimitInvalid"]);
 const LoadFailed = S.Literals(["loadFailed"]);
 
-export const AdminKeys = AsyncData.Schema(S.Array(Account.json), LoadFailed);
+export const AdminKeys = AsyncData.Schema(S.Array(ApiKey.json), LoadFailed);
 
-const ScopesEditor = S.Struct({ key: S.String, scopes: S.Array(S.String) });
+const ScopesEditor = S.Struct({ key: S.String, scopes: S.Array(S.String), scopeTab: S.String });
 const RateLimitEditor = S.Struct({ key: S.String, limit: S.String, windowSeconds: S.String });
 
 export const AdminModel = S.Struct({
@@ -73,80 +73,86 @@ export const enterAdmin = (error: Option.Option<string>, previous: AdminModel): 
 
 // MESSAGE
 
-export const SettledAdminKeys = m("SettledAdminKeys", { result: S.Result(S.Array(Account.json), LoadFailed) });
+/**
+ * Everything this page can say.
+ *
+ * `defineMessageUnion` declares the union and its constructors together, so a
+ * variant cannot be added without joining the union or removed while something
+ * still matches on it.
+ */
+export const AdminMessage = defineMessageUnion({
+    SettledAdminKeys: { result: S.Result(S.Array(ApiKey.json), LoadFailed) },
+    /** The admin surface refused a plain session; show the step-up form. */
+    AdminRequiresElevation: {},
 
-/** The admin surface refused a plain session; show the step-up form. */
-export const AdminRequiresElevation = m("AdminRequiresElevation");
+    ClickedEditScopes: { key: S.String },
+    ToggledAdminScope: { scope: S.String },
+    SelectedAdminScopeTab: { game: S.String },
+    ClickedEditRateLimit: { key: S.String },
+    ChangedAdminLimit: { value: S.String },
+    ChangedAdminWindow: { value: S.String },
+    ClickedCancelAdminEdit: {},
+    SubmittedAdminEdit: {},
 
-export const ClickedEditScopes = m("ClickedEditScopes", { key: S.String });
-export const ToggledAdminScope = m("ToggledAdminScope", { path: S.String });
-export const ClickedEditRateLimit = m("ClickedEditRateLimit", { key: S.String });
-export const ChangedAdminLimit = m("ChangedAdminLimit", { value: S.String });
-export const ChangedAdminWindow = m("ChangedAdminWindow", { value: S.String });
-export const ClickedCancelAdminEdit = m("ClickedCancelAdminEdit");
-export const SubmittedAdminEdit = m("SubmittedAdminEdit");
-
-export const ClickedAdminSetRevoked = m("ClickedAdminSetRevoked", { key: S.String, revoked: S.Boolean });
-export const ClickedAdminDelete = m("ClickedAdminDelete", { key: S.String });
-export const CompletedAdminRowUpdate = m("CompletedAdminRowUpdate");
-export const CompletedAdminDelete = m("CompletedAdminDelete");
-export const FailedAdminAction = m("FailedAdminAction", { problem: AdminProblem });
-
-/** The session ended somewhere else while this page was open. */
-export const AdminSignedOutElsewhere = m("AdminSignedOutElsewhere");
-
-export const AdminMessage = S.Union([
-    SettledAdminKeys,
-    AdminRequiresElevation,
-    ClickedEditScopes,
-    ToggledAdminScope,
-    ClickedEditRateLimit,
-    ChangedAdminLimit,
-    ChangedAdminWindow,
-    ClickedCancelAdminEdit,
-    SubmittedAdminEdit,
-    ClickedAdminSetRevoked,
-    ClickedAdminDelete,
-    CompletedAdminRowUpdate,
-    CompletedAdminDelete,
-    FailedAdminAction,
-    AdminSignedOutElsewhere,
-]);
+    ClickedAdminSetRevoked: { key: S.String, revoked: S.Boolean },
+    ClickedAdminDelete: { key: S.String },
+    CompletedAdminRowUpdate: {},
+    CompletedAdminDelete: {},
+    FailedAdminAction: { problem: AdminProblem },
+    /** The session ended somewhere else while this page was open. */
+    AdminSignedOutElsewhere: {},
+});
 export type AdminMessage = typeof AdminMessage.Type;
 
 // COMMAND
 
 export const FetchAdminKeys = Command.define("FetchAdminKeys", {
-    messages: [SettledAdminKeys, AdminRequiresElevation, AdminSignedOutElsewhere],
+    messages: [
+        AdminMessage.SettledAdminKeys,
+        AdminMessage.AdminRequiresElevation,
+        AdminMessage.AdminSignedOutElsewhere,
+    ],
     execute: Effect.gen(function* () {
         const self = yield* Self;
         const keys = yield* self.AdminGroup.listKeys();
-        return SettledAdminKeys({ result: Result.succeed(keys) });
+        return AdminMessage.SettledAdminKeys({ result: Result.succeed(keys) });
     }).pipe(
-        Effect.catchTag("Unauthorized", () => Effect.succeed(AdminSignedOutElsewhere())),
-        Effect.catchTag("Forbidden", () => Effect.succeed(AdminRequiresElevation())),
-        Effect.catch(() => Effect.succeed(SettledAdminKeys({ result: Result.fail("loadFailed" as const) })))
+        Effect.catchTag("Unauthorized", () => Effect.succeed(AdminMessage.AdminSignedOutElsewhere())),
+        Effect.catchTag("Forbidden", () => Effect.succeed(AdminMessage.AdminRequiresElevation())),
+        Effect.catch(() =>
+            Effect.succeed(AdminMessage.SettledAdminKeys({ result: Result.fail("loadFailed" as const) }))
+        )
     ),
 });
 
 const SaveScopes = Command.define("SaveScopes", {
     args: { key: S.String, scopes: S.Array(S.String) },
-    messages: [CompletedAdminRowUpdate, FailedAdminAction, AdminRequiresElevation, AdminSignedOutElsewhere],
+    messages: [
+        AdminMessage.CompletedAdminRowUpdate,
+        AdminMessage.FailedAdminAction,
+        AdminMessage.AdminRequiresElevation,
+        AdminMessage.AdminSignedOutElsewhere,
+    ],
     execute: ({ key, scopes }) =>
         Effect.gen(function* () {
             const self = yield* Self;
             yield* self.AdminGroup.scopes({ params: { key }, payload: { scopes } });
-            return CompletedAdminRowUpdate();
+            return AdminMessage.CompletedAdminRowUpdate();
         }).pipe(
-            Effect.catchTag("Unauthorized", () => Effect.succeed(AdminSignedOutElsewhere())),
-            Effect.catchTag("Forbidden", () => Effect.succeed(AdminRequiresElevation())),
-            Effect.catch(() => Effect.succeed(FailedAdminAction({ problem: "actionFailed" })))
+            Effect.catchTag("Unauthorized", () => Effect.succeed(AdminMessage.AdminSignedOutElsewhere())),
+            Effect.catchTag("Forbidden", () => Effect.succeed(AdminMessage.AdminRequiresElevation())),
+            Effect.catch(() => Effect.succeed(AdminMessage.FailedAdminAction({ problem: "actionFailed" })))
         ),
 });
 
 const SaveRateLimit = Command.define("SaveRateLimit", {
     args: { key: S.String, limit: S.Int, windowSeconds: S.Int },
-    messages: [CompletedAdminRowUpdate, FailedAdminAction, AdminRequiresElevation, AdminSignedOutElsewhere],
+    messages: [
+        AdminMessage.CompletedAdminRowUpdate,
+        AdminMessage.FailedAdminAction,
+        AdminMessage.AdminRequiresElevation,
+        AdminMessage.AdminSignedOutElsewhere,
+    ],
     execute: ({ key, limit, windowSeconds }) =>
         Effect.gen(function* () {
             const self = yield* Self;
@@ -154,41 +160,51 @@ const SaveRateLimit = Command.define("SaveRateLimit", {
                 params: { key },
                 payload: { limit, window: Duration.seconds(windowSeconds) },
             });
-            return CompletedAdminRowUpdate();
+            return AdminMessage.CompletedAdminRowUpdate();
         }).pipe(
-            Effect.catchTag("Unauthorized", () => Effect.succeed(AdminSignedOutElsewhere())),
-            Effect.catchTag("Forbidden", () => Effect.succeed(AdminRequiresElevation())),
-            Effect.catch(() => Effect.succeed(FailedAdminAction({ problem: "actionFailed" })))
+            Effect.catchTag("Unauthorized", () => Effect.succeed(AdminMessage.AdminSignedOutElsewhere())),
+            Effect.catchTag("Forbidden", () => Effect.succeed(AdminMessage.AdminRequiresElevation())),
+            Effect.catch(() => Effect.succeed(AdminMessage.FailedAdminAction({ problem: "actionFailed" })))
         ),
 });
 
 const SetRevokedAdmin = Command.define("SetRevokedAdmin", {
     args: { key: S.String, revoked: S.Boolean },
-    messages: [CompletedAdminRowUpdate, FailedAdminAction, AdminRequiresElevation, AdminSignedOutElsewhere],
+    messages: [
+        AdminMessage.CompletedAdminRowUpdate,
+        AdminMessage.FailedAdminAction,
+        AdminMessage.AdminRequiresElevation,
+        AdminMessage.AdminSignedOutElsewhere,
+    ],
     execute: ({ key, revoked }) =>
         Effect.gen(function* () {
             const self = yield* Self;
             yield* revoked ? self.AdminGroup.revoke({ params: { key } }) : self.AdminGroup.enable({ params: { key } });
-            return CompletedAdminRowUpdate();
+            return AdminMessage.CompletedAdminRowUpdate();
         }).pipe(
-            Effect.catchTag("Unauthorized", () => Effect.succeed(AdminSignedOutElsewhere())),
-            Effect.catchTag("Forbidden", () => Effect.succeed(AdminRequiresElevation())),
-            Effect.catch(() => Effect.succeed(FailedAdminAction({ problem: "actionFailed" })))
+            Effect.catchTag("Unauthorized", () => Effect.succeed(AdminMessage.AdminSignedOutElsewhere())),
+            Effect.catchTag("Forbidden", () => Effect.succeed(AdminMessage.AdminRequiresElevation())),
+            Effect.catch(() => Effect.succeed(AdminMessage.FailedAdminAction({ problem: "actionFailed" })))
         ),
 });
 
 const DeleteKeyAdmin = Command.define("DeleteKeyAdmin", {
     args: { key: S.String },
-    messages: [CompletedAdminDelete, FailedAdminAction, AdminRequiresElevation, AdminSignedOutElsewhere],
+    messages: [
+        AdminMessage.CompletedAdminDelete,
+        AdminMessage.FailedAdminAction,
+        AdminMessage.AdminRequiresElevation,
+        AdminMessage.AdminSignedOutElsewhere,
+    ],
     execute: ({ key }) =>
         Effect.gen(function* () {
             const self = yield* Self;
             yield* self.AdminGroup.deleteKey({ params: { key } });
-            return CompletedAdminDelete();
+            return AdminMessage.CompletedAdminDelete();
         }).pipe(
-            Effect.catchTag("Unauthorized", () => Effect.succeed(AdminSignedOutElsewhere())),
-            Effect.catchTag("Forbidden", () => Effect.succeed(AdminRequiresElevation())),
-            Effect.catch(() => Effect.succeed(FailedAdminAction({ problem: "actionFailed" })))
+            Effect.catchTag("Unauthorized", () => Effect.succeed(AdminMessage.AdminSignedOutElsewhere())),
+            Effect.catchTag("Forbidden", () => Effect.succeed(AdminMessage.AdminRequiresElevation())),
+            Effect.catch(() => Effect.succeed(AdminMessage.FailedAdminAction({ problem: "actionFailed" })))
         ),
 });
 
@@ -207,7 +223,7 @@ const starting = (model: AdminModel, busy: string): AdminModel =>
 const refetching = (model: AdminModel): AdminModel =>
     evo(model, { keys: (keys) => Option.getOrElse(AsyncData.revalidate(keys), () => keys) });
 
-export const updateAdmin = (model: AdminModel, message: AdminMessage): AdminStep =>
+export const updateAdmin = (model: AdminModel, message: AdminMessage, catalog: ReadonlyArray<CatalogGame>): AdminStep =>
     Match.value(message).pipe(
         Match.withReturnType<AdminStep>(),
         Match.tagsExhaustive({
@@ -222,37 +238,39 @@ export const updateAdmin = (model: AdminModel, message: AdminMessage): AdminStep
             ],
 
             ClickedEditScopes: ({ key }) => {
-                const account = AsyncData.getData(model.keys).pipe(
+                const apiKey = AsyncData.getData(model.keys).pipe(
                     Option.flatMap((keys) => Option.fromNullishOr(keys.find((found) => found.key === key)))
                 );
                 return [
                     evo(model, {
                         rateLimitEditor: Option.none,
-                        scopesEditor: () => Option.map(account, (found) => ({ key, scopes: Array.from(found.scopes) })),
+                        scopesEditor: () =>
+                            Option.map(apiKey, (found) => ({ key, scopes: Array.from(found.scopes), scopeTab: "" })),
                     }),
                     [],
                 ];
             },
-            ToggledAdminScope: ({ path }) => [
+            ToggledAdminScope: ({ scope }) => [
                 evo(model, {
                     scopesEditor: Option.map((editor) =>
-                        evo(editor, {
-                            scopes: (scopes) =>
-                                scopes.includes(path) ? scopes.filter((scope) => scope !== path) : [...scopes, path],
-                        })
+                        evo(editor, { scopes: (scopes) => toggleScope(scopes, scope, catalog) })
                     ),
                 }),
                 [],
             ],
+            SelectedAdminScopeTab: ({ game }) => [
+                evo(model, { scopesEditor: Option.map((editor) => evo(editor, { scopeTab: () => game })) }),
+                [],
+            ],
             ClickedEditRateLimit: ({ key }) => {
-                const account = AsyncData.getData(model.keys).pipe(
+                const apiKey = AsyncData.getData(model.keys).pipe(
                     Option.flatMap((keys) => Option.fromNullishOr(keys.find((found) => found.key === key)))
                 );
                 return [
                     evo(model, {
                         scopesEditor: Option.none,
                         rateLimitEditor: () =>
-                            Option.map(account, (found) => ({
+                            Option.map(apiKey, (found) => ({
                                 key,
                                 limit: `${found.rateLimitLimit}`,
                                 windowSeconds: `${Math.round(Duration.toSeconds(found.rateLimitWindow))}`,
@@ -332,13 +350,17 @@ export const updateAdmin = (model: AdminModel, message: AdminMessage): AdminStep
 
 // VIEW
 
-const ALL_SCOPES = [...SELF_SERVE_SCOPES, ...ELEVATED_SCOPES];
-const scopeLabels: ReadonlyMap<string, string> = new Map(ALL_SCOPES.map((scope) => [scope.path, scope.label]));
-
-const scopeChip = (h: HtmlBuilder<AppMessage>, path: string): Html =>
+/**
+ * A scope a key holds, by name, with what it means on hover. A key may hold a
+ * scope the catalog no longer lists, and that still shows, as itself.
+ */
+const scopeChip = (h: HtmlBuilder<AppMessage>, descriptions: ReadonlyMap<string, string>, name: string): Html =>
     h.span(
-        [h.Class("font-mono bg-sky-light/40 text-sky-dark rounded px-2 py-0.5 text-base"), h.Title(path)],
-        [scopeLabels.get(path) ?? path]
+        [
+            h.Class("font-mono bg-sky-light/40 text-sky-dark rounded px-2 py-0.5 text-base"),
+            h.Title(descriptions.get(name) ?? name),
+        ],
+        [name]
     );
 
 /**
@@ -376,27 +398,24 @@ const scopesEditorView = (
     msgs: AdminMessages,
     shared: SharedMessages,
     model: AdminModel,
-    selected: ReadonlyArray<string>
+    selected: ReadonlyArray<string>,
+    catalog: ReadonlyArray<CatalogGame>
 ): Html =>
     h.div(
         [h.Class("flex flex-col gap-3 rounded-lg border-2 border-gray-200 bg-gray-50 p-3")],
         [
-            h.div(
-                [h.Class("grid gap-1.5 sm:grid-cols-2")],
-                ALL_SCOPES.map((scope) =>
-                    h.label(
-                        [h.Class("flex cursor-pointer items-center gap-2")],
-                        [
-                            h.input([
-                                h.Type("checkbox"),
-                                h.Checked(selected.includes(scope.path)),
-                                h.OnClick(ToggledAdminScope({ path: scope.path })),
-                            ]),
-                            h.span([h.Class("font-mono text-lg text-gray-700"), h.Title(scope.path)], [scope.label]),
-                        ]
-                    )
-                )
-            ),
+            // Everything is on offer here: the admin is who grants the writes.
+            scopePicker(h, {
+                catalog,
+                selected,
+                onToggle: (scope) => AdminMessage.ToggledAdminScope({ scope }),
+                selectable: () => true,
+                activeGame: Option.getOrElse(
+                    Option.map(model.scopesEditor, (editor) => editor.scopeTab),
+                    () => ""
+                ),
+                onSelectGame: (game) => AdminMessage.SelectedAdminScopeTab({ game }),
+            }),
             h.div(
                 [h.Class("flex gap-2")],
                 [
@@ -405,12 +424,12 @@ const scopesEditorView = (
                             h.Type("button"),
                             h.Class(primaryButton),
                             h.Disabled(selected.length === 0 || Option.isSome(model.busy)),
-                            h.OnClick(SubmittedAdminEdit()),
+                            h.OnClick(AdminMessage.SubmittedAdminEdit()),
                         ],
                         [msgs.saveScopes]
                     ),
                     h.button(
-                        [h.Type("button"), h.Class(quietButton), h.OnClick(ClickedCancelAdminEdit())],
+                        [h.Type("button"), h.Class(quietButton), h.OnClick(AdminMessage.ClickedCancelAdminEdit())],
                         [shared.cancel]
                     ),
                 ]
@@ -445,18 +464,21 @@ const rateLimitEditorView = (
     return h.div(
         [h.Class("flex flex-wrap items-center gap-3 rounded-lg border-2 border-gray-200 bg-gray-50 p-3")],
         [
-            field(msgs.requestsLabel, editor.limit, (value) => ChangedAdminLimit({ value })),
-            field(msgs.perSecondsLabel, editor.windowSeconds, (value) => ChangedAdminWindow({ value })),
+            field(msgs.requestsLabel, editor.limit, (value) => AdminMessage.ChangedAdminLimit({ value })),
+            field(msgs.perSecondsLabel, editor.windowSeconds, (value) => AdminMessage.ChangedAdminWindow({ value })),
             h.button(
                 [
                     h.Type("button"),
                     h.Class(primaryButton),
                     h.Disabled(Option.isSome(model.busy)),
-                    h.OnClick(SubmittedAdminEdit()),
+                    h.OnClick(AdminMessage.SubmittedAdminEdit()),
                 ],
                 [msgs.saveLimit]
             ),
-            h.button([h.Type("button"), h.Class(quietButton), h.OnClick(ClickedCancelAdminEdit())], [shared.cancel]),
+            h.button(
+                [h.Type("button"), h.Class(quietButton), h.OnClick(AdminMessage.ClickedCancelAdminEdit())],
+                [shared.cancel]
+            ),
         ]
     );
 };
@@ -466,7 +488,9 @@ const adminKeyRow = (
     msgs: AdminMessages,
     shared: SharedMessages,
     key: Key,
-    model: AdminModel
+    model: AdminModel,
+    catalog: ReadonlyArray<CatalogGame>,
+    descriptions: ReadonlyMap<string, string>
 ): Html => {
     const busy = Option.contains(model.busy, key.key);
     const armed = Option.contains(model.armedDelete, key.key);
@@ -514,10 +538,10 @@ const adminKeyRow = (
             ),
             h.div(
                 [h.Class("flex flex-wrap gap-1.5")],
-                Array.from(key.scopes, (scope) => scopeChip(h, scope))
+                Array.from(key.scopes, (scope) => scopeChip(h, descriptions, scope))
             ),
             ...Option.match(editingScopes, {
-                onSome: (selected) => [scopesEditorView(h, msgs, shared, model, selected)],
+                onSome: (selected) => [scopesEditorView(h, msgs, shared, model, selected, catalog)],
                 onNone: () => [],
             }),
             ...Option.match(editingRateLimit, {
@@ -532,7 +556,7 @@ const adminKeyRow = (
                             h.Type("button"),
                             h.Class(smallButton),
                             h.Disabled(busy),
-                            h.OnClick(ClickedEditScopes({ key: key.key })),
+                            h.OnClick(AdminMessage.ClickedEditScopes({ key: key.key })),
                         ],
                         [msgs.scopesButton]
                     ),
@@ -541,7 +565,7 @@ const adminKeyRow = (
                             h.Type("button"),
                             h.Class(smallButton),
                             h.Disabled(busy),
-                            h.OnClick(ClickedEditRateLimit({ key: key.key })),
+                            h.OnClick(AdminMessage.ClickedEditRateLimit({ key: key.key })),
                         ],
                         [msgs.rateLimitButton]
                     ),
@@ -550,7 +574,7 @@ const adminKeyRow = (
                             h.Type("button"),
                             h.Class(smallButton),
                             h.Disabled(busy),
-                            h.OnClick(ClickedAdminSetRevoked({ key: key.key, revoked: !key.revoked })),
+                            h.OnClick(AdminMessage.ClickedAdminSetRevoked({ key: key.key, revoked: !key.revoked })),
                         ],
                         [busy ? "..." : key.revoked ? shared.reEnable : shared.revoke]
                     ),
@@ -559,7 +583,7 @@ const adminKeyRow = (
                             h.Type("button"),
                             h.Class(dangerButton),
                             h.Disabled(busy),
-                            h.OnClick(ClickedAdminDelete({ key: key.key })),
+                            h.OnClick(AdminMessage.ClickedAdminDelete({ key: key.key })),
                         ],
                         [busy ? "..." : armed ? shared.reallyDelete : shared.delete]
                     ),
@@ -573,14 +597,16 @@ const keysTable = (
     h: HtmlBuilder<AppMessage>,
     msgs: AdminMessages,
     shared: SharedMessages,
-    model: AdminModel
+    model: AdminModel,
+    catalog: ReadonlyArray<CatalogGame>
 ): Html => {
+    const descriptions = descriptionsOf(catalog);
     const list = (keys: ReadonlyArray<Key>): Html =>
         h.div(
             [h.Class("flex flex-col gap-4")],
             keys.length === 0
                 ? [h.p([h.Class("font-mono text-xl text-gray-600")], [msgs.emptyState])]
-                : keys.map((key) => adminKeyRow(h, msgs, shared, key, model))
+                : keys.map((key) => adminKeyRow(h, msgs, shared, key, model, catalog, descriptions))
         );
 
     return h.section(
@@ -604,9 +630,12 @@ export const adminView = (
     h: HtmlBuilder<AppMessage>,
     msgs: AdminMessages,
     shared: SharedMessages,
-    model: AdminModel
-): Html =>
-    h.div(
+    model: AdminModel,
+    scopes: ScopeCatalogData
+): Html => {
+    const catalog = Option.getOrElse(AsyncData.getData(scopes), (): ReadonlyArray<CatalogGame> => []);
+
+    return h.div(
         [h.Class("relative z-10 flex min-h-screen flex-col items-center p-8 pt-24")],
         [
             h.div(
@@ -627,8 +656,9 @@ export const adminView = (
                         onSome: (problem) => [banner(h, "problem", msgs.problems[problem])],
                         onNone: () => [],
                     }),
-                    model.needsElevation ? elevationForm(h, msgs) : keysTable(h, msgs, shared, model),
+                    model.needsElevation ? elevationForm(h, msgs) : keysTable(h, msgs, shared, model, catalog),
                 ]
             ),
         ]
     );
+};

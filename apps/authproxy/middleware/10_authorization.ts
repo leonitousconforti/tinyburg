@@ -1,17 +1,19 @@
-import { Array, DateTime, Duration, Effect, Layer, Option, Redacted, Schema } from "effect";
+import { Context, DateTime, Duration, Effect, Layer, Option, Redacted, Schema } from "effect";
 import { Headers, HttpServerRequest, HttpServerResponse } from "effect/unstable/http";
 import { HttpApiError, HttpApiMiddleware, HttpApiSecurity } from "effect/unstable/httpapi";
 import { RateLimiter } from "effect/unstable/persistence";
 import { SqlError } from "effect/unstable/sql";
 
-import { Account, type CurrentAccount, Repository } from "../domain/model.ts";
+import { ResourceServer } from "effect-oidc";
+
+import { ApiKey, type CurrentApiKey, Repository } from "../domain/model.ts";
 
 export class Authorization extends HttpApiMiddleware.Service<
     Authorization,
     {
         // Written out to mirror the neighboring signatures.
         // oxlint-disable-next-line typescript/no-redundant-type-constituents
-        provides: CurrentAccount & never;
+        provides: CurrentApiKey & never;
     }
 >()("Authorization", {
     error: [HttpApiError.Unauthorized, HttpApiError.Forbidden, HttpApiError.InternalServerError],
@@ -29,14 +31,14 @@ export const AuthorizationLive = Layer.effect(
         const unauthenticatedLimit = 3;
         const unauthenticatedWindow = Duration.minutes(1);
 
-        const seededNoneAccountKeyEffect = repo.seededNoneAccount.pipe(
-            Effect.map((account) => account.key),
+        const seededNoneApiKeyEffect = repo.seededNoneApiKey.pipe(
+            Effect.map((apiKey) => apiKey.key),
             Effect.catchNoSuchElement,
             Effect.map(Option.getOrUndefined)
         );
 
-        const seededReadonlyAccountKeyEffect = repo.seededReadonlyAccount.pipe(
-            Effect.map((account) => account.key),
+        const seededReadonlyApiKeyEffect = repo.seededReadonlyApiKey.pipe(
+            Effect.map((apiKey) => apiKey.key),
             Effect.catchNoSuchElement,
             Effect.map(Option.getOrUndefined)
         );
@@ -73,64 +75,71 @@ export const AuthorizationLive = Layer.effect(
                 function* (next, { credential, endpoint }) {
                     const bearerToken = Redacted.value(credential);
                     const request = yield* HttpServerRequest.HttpServerRequest;
-                    const maybeAccount = yield* repo.findById(bearerToken).pipe(Effect.catchNoSuchElement);
+                    const maybeApiKey = yield* repo.findById(bearerToken).pipe(Effect.catchNoSuchElement);
 
                     const headers = request.headers;
                     const doConnectingIp = Headers.get(headers, "do-connecting-ip");
 
-                    const seededNoneAccountKey = yield* seededNoneAccountKeyEffect;
-                    const seededReadonlyAccountKey = yield* seededReadonlyAccountKeyEffect;
+                    const seededNoneApiKey = yield* seededNoneApiKeyEffect;
+                    const seededReadonlyApiKey = yield* seededReadonlyApiKeyEffect;
 
                     yield* rateLimiter.consume({
                         onExceeded: "fail",
                         algorithm: "fixed-window",
-                        key: maybeAccount.pipe(
-                            Option.map((account) => account.key),
-                            Option.filter((key) => key !== seededNoneAccountKey),
-                            Option.filter((key) => key !== seededReadonlyAccountKey),
+                        key: maybeApiKey.pipe(
+                            Option.map((apiKey) => apiKey.key),
+                            Option.filter((key) => key !== seededNoneApiKey),
+                            Option.filter((key) => key !== seededReadonlyApiKey),
                             Option.orElse(() => doConnectingIp),
                             Option.getOrElse(() => "unknown")
                         ),
-                        limit: maybeAccount.pipe(
-                            Option.map((account) => account.rateLimitLimit),
+                        limit: maybeApiKey.pipe(
+                            Option.map((apiKey) => apiKey.rateLimitLimit),
                             Option.getOrElse(() => unauthenticatedLimit)
                         ),
-                        window: maybeAccount.pipe(
-                            Option.map((account) => account.rateLimitWindow),
+                        window: maybeApiKey.pipe(
+                            Option.map((apiKey) => apiKey.rateLimitWindow),
                             Option.getOrElse(() => unauthenticatedWindow)
                         ),
                     });
 
-                    const isAuthenticated = Option.isSome(maybeAccount);
+                    // The scopes that unlock this endpoint are read off the
+                    // endpoint itself: the `OIDCScopes` annotation stamped on
+                    // it in `@tinyburg/tinytower-sdk`. A key needs one of them,
+                    // by name, exactly. An endpoint carrying none is one no key
+                    // may call through the proxy, whatever it holds.
+                    const accepted = Context.getOption(endpoint.annotations, ResourceServer.OIDCScopes).pipe(
+                        Option.map((scopes) => scopes.map(ResourceServer.scopeName)),
+                        Option.getOrElse((): ReadonlyArray<string> => [])
+                    );
+                    const isAuthenticated = Option.isSome(maybeApiKey);
                     const isAuthorized =
                         isAuthenticated &&
-                        Array.some(Array.fromIterable(maybeAccount.value.scopes), (scope) =>
-                            endpoint.path.startsWith(scope)
-                        ) &&
-                        !maybeAccount.value.revoked;
+                        accepted.some((scope) => maybeApiKey.value.scopes.has(scope)) &&
+                        !maybeApiKey.value.revoked;
 
                     if (!isAuthenticated) return yield* new HttpApiError.Unauthorized();
                     else if (!isAuthorized) return yield* new HttpApiError.Forbidden();
 
                     const now = yield* DateTime.now;
-                    const accountLastUsedAt = maybeAccount.value.lastUsedAt;
+                    const apiKeyLastUsedAt = maybeApiKey.value.lastUsedAt;
 
                     if (
-                        Duration.isGreaterThanOrEqualTo(DateTime.distance(accountLastUsedAt, now), Duration.minutes(1))
+                        Duration.isGreaterThanOrEqualTo(DateTime.distance(apiKeyLastUsedAt, now), Duration.minutes(1))
                     ) {
-                        const updatedAccount = yield* Account.update
+                        const updatedApiKey = yield* ApiKey.update
                             .makeEffect({
-                                key: maybeAccount.value.key,
-                                scopes: maybeAccount.value.scopes,
-                                revoked: maybeAccount.value.revoked,
-                                description: maybeAccount.value.description,
-                                ownerSub: maybeAccount.value.ownerSub,
-                                rateLimitLimit: maybeAccount.value.rateLimitLimit,
-                                rateLimitWindow: maybeAccount.value.rateLimitWindow,
+                                key: maybeApiKey.value.key,
+                                scopes: maybeApiKey.value.scopes,
+                                revoked: maybeApiKey.value.revoked,
+                                description: maybeApiKey.value.description,
+                                ownerSub: maybeApiKey.value.ownerSub,
+                                rateLimitLimit: maybeApiKey.value.rateLimitLimit,
+                                rateLimitWindow: maybeApiKey.value.rateLimitWindow,
                             })
                             .pipe(Effect.mapError((issue) => new Schema.SchemaError(issue)));
 
-                        yield* repo.updateVoid(updatedAccount);
+                        yield* repo.updateVoid(updatedApiKey);
                     }
 
                     return yield* next;

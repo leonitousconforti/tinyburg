@@ -16,6 +16,7 @@ import { Activity, Workflow } from "effect/unstable/workflow";
 import { PlayerIdSchema } from "@tinyburg/nimblebit-sdk/NimblebitConfig";
 
 import { ConsentRepository } from "../domain/consent.ts";
+import { GameId } from "../domain/games.ts";
 import { GraphRepository } from "../domain/graph.ts";
 import { PurgeRepository } from "../domain/purge.ts";
 import { TinyburgTowers } from "../services/towers.ts";
@@ -28,6 +29,7 @@ import { TinyburgTowers } from "../services/towers.ts";
  */
 export class PurgeFailed extends Schema.Error<PurgeFailed>("@tinyburg/social-circles/PurgeFailed")({
     _tag: Schema.tag("PurgeFailed"),
+    game: GameId,
     playerId: PlayerIdSchema,
     reason: Schema.String,
 }) {}
@@ -39,6 +41,7 @@ export class PurgeFailed extends Schema.Error<PurgeFailed>("@tinyburg/social-cir
 export const PurgeWorkflow = Workflow.make("SocialCirclesPurge", {
     payload: {
         tinyburgUserId: Schema.String.check(Schema.isUUID()),
+        game: GameId,
         playerId: PlayerIdSchema,
         requestedAt: Schema.DateTimeUtcFromDate,
     },
@@ -48,10 +51,12 @@ export const PurgeWorkflow = Workflow.make("SocialCirclesPurge", {
     }),
     error: PurgeFailed,
     /**
-     * Two requests for the same player collapse into one execution. A user
+     * Two requests for the same tower collapse into one execution. A user
      * hammering the delete button gets one purge, not five racing ones.
+     * Withdrawing one game's tower leaves the same person's other games alone,
+     * so the key names the game too.
      */
-    idempotencyKey: ({ playerId }) => playerId,
+    idempotencyKey: ({ game, playerId }) => `${game}:${playerId}`,
 });
 
 /**
@@ -75,7 +80,7 @@ export const PurgeWorkflowLive = PurgeWorkflow.toLayer(
         yield* Activity.make({
             name: "revokeConsent",
             execute: consents
-                .revoke({ tinyburgUserId: payload.tinyburgUserId, playerId: payload.playerId })
+                .revoke({ tinyburgUserId: payload.tinyburgUserId, game: payload.game, playerId: payload.playerId })
                 .pipe(Effect.asVoid, Effect.orDie),
         });
 
@@ -83,12 +88,12 @@ export const PurgeWorkflowLive = PurgeWorkflow.toLayer(
         const footprint = yield* Activity.make({
             name: "countFootprint",
             success: Schema.Struct({ events: Schema.Finite, edges: Schema.Finite }),
-            execute: Effect.orDie(purge.countFootprint(payload.playerId)),
+            execute: Effect.orDie(purge.countFootprint(payload.game, payload.playerId)),
         });
 
         yield* Activity.make({
             name: "erasePlayer",
-            execute: Effect.orDie(purge.erasePlayer(payload.playerId)),
+            execute: Effect.orDie(purge.erasePlayer(payload.game, payload.playerId)),
         });
 
         yield* Activity.make({
@@ -126,6 +131,7 @@ export const PurgeWorkflowLive = PurgeWorkflow.toLayer(
             name: "writeReceipt",
             execute: Effect.orDie(
                 purge.writeReceipt({
+                    game: payload.game,
                     playerId: payload.playerId,
                     tinyburgUserId: payload.tinyburgUserId,
                     requestedAt: DateTime.toDateUtc(payload.requestedAt),
