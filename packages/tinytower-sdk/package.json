@@ -61,7 +61,7 @@
         "@tinyburg/insight": "workspace:*",
         "effect": "4.0.0-rc.111",
         "redis": "6.2.1",
-        "vite": "8.2.1",
+        "vite": "8.2.2",
         "vitest": "4.1.11"
     },
     "peerDependencies": {
