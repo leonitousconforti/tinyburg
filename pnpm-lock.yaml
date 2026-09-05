@@ -40,8 +40,8 @@ importers:
         specifier: 0.36.5
         version: 0.36.5
       '@types/node':
-        specifier: 26.2.0
-        version: 26.2.0
+        specifier: 26.4.1
+        version: 26.4.1
       '@vitest/coverage-v8':
         specifier: 4.1.11
         version: 4.1.11(vitest@4.1.11)
@@ -80,10 +80,10 @@ importers:
         version: 7.0.2
       vite:
         specifier: 8.2.1
-        version: 8.2.1(@types/node@26.2.0)(tsx@4.23.12)
+        version: 8.2.1(@types/node@26.4.1)(tsx@4.23.12)
       vitest:
         specifier: 4.1.11
-        version: 4.1.11(@types/node@26.2.0)(@vitest/coverage-v8@4.1.11)(vite@8.2.1(@types/node@26.2.0)(tsx@4.23.12))
+        version: 4.1.11(@types/node@26.4.1)(@vitest/coverage-v8@4.1.11)(vite@8.2.1(@types/node@26.4.1)(tsx@4.23.12))
 
   apps/archivist:
     dependencies:
@@ -396,7 +396,7 @@ importers:
         version: link:../nimblebit-sdk
       effect-oidc:
         specifier: 0.1.0
-        version: 0.1.0
+        version: 0.1.0(effect@4.0.0-rc.111)
       pako:
         specifier: 3.0.1
         version: 3.0.1
@@ -414,7 +414,7 @@ importers:
         version: link:../nimblebit-sdk
       effect-oidc:
         specifier: 0.1.0
-        version: 0.1.0
+        version: 0.1.0(effect@4.0.0-rc.111)
       pako:
         specifier: 3.0.1
         version: 3.0.1
@@ -469,7 +469,7 @@ importers:
         version: link:../nimblebit-sdk
       effect-oidc:
         specifier: 0.1.0
-        version: 0.1.0
+        version: 0.1.0(effect@4.0.0-rc.111)
       pako:
         specifier: 3.0.1
         version: 3.0.1
@@ -495,7 +495,7 @@ importers:
         version: link:../nimblebit-sdk
       effect-oidc:
         specifier: 0.1.0
-        version: 0.1.0
+        version: 0.1.0(effect@4.0.0-rc.111)
       pako:
         specifier: 3.0.1
         version: 3.0.1
@@ -511,7 +511,7 @@ importers:
         version: link:../nimblebit-sdk
       effect-oidc:
         specifier: 0.1.0
-        version: 0.1.0
+        version: 0.1.0(effect@4.0.0-rc.111)
       pako:
         specifier: 3.0.1
         version: 3.0.1
@@ -589,7 +589,7 @@ importers:
         version: link:../nimblebit-sdk
       effect-oidc:
         specifier: 0.1.0
-        version: 0.1.0
+        version: 0.1.0(effect@4.0.0-rc.111)
       pako:
         specifier: 3.0.1
         version: 3.0.1
@@ -657,8 +657,8 @@ importers:
         specifier: 19.10.0
         version: 19.10.0
       '@types/node':
-        specifier: 26.3.0
-        version: 26.3.0
+        specifier: 26.4.1
+        version: 26.4.1
       effect:
         specifier: 4.0.0-rc.111
         version: 4.0.0-rc.111
@@ -1887,11 +1887,8 @@ packages:
   '@types/mime@1.3.5':
     resolution: {integrity: sha512-/pyBZWSLD2n0dcHE3hq8s8ZvcETHtEuF+3E7XVt0Ig2nvsVQXdghHVcEkIWjy9A0wKfTn97a/PSDYohKIlnP/w==}
 
-  '@types/node@26.2.0':
-    resolution: {integrity: sha512-5IviulTZeRNp2vAJ514cc/HUlY5nZ9fCbq9DMyC52BrhFZACo3nI0R7qBxhQmo/d27NFe96ur/b7Wwxklda+kg==}
-
-  '@types/node@26.3.0':
-    resolution: {integrity: sha512-L3fgrnchriRC2ExBflb8j4uZZURHZfQsmQeyVzhjcHW4kkwVyo8/0h1B2MVzMTrYUJYu6G7EWs14hW/L9putqw==}
+  '@types/node@26.4.1':
+    resolution: {integrity: sha512-k97ENvZWtvA6yqz5/FS6a7duDgOPEeOQOc2iKS/nY6mX6qJUKtLnWzQS+Xj6tXweyj6ZcTAK2Qecetnvi9nCLA==}
 
   '@types/qs@6.15.1':
     resolution: {integrity: sha512-GZHUBZR9hckSUhrxmp1nG6NwdpM9fCunJwyThLW1X3AyHgd9IlHb6VANpQQqDr2o/qQp6McZ3y/IA2rVzKzSbw==}
@@ -4702,7 +4699,7 @@ snapshots:
   '@types/body-parser@1.19.6':
     dependencies:
       '@types/connect': 3.4.38
-      '@types/node': 26.2.0
+      '@types/node': 26.4.1
     optional: true
 
   '@types/chai@5.2.3':
@@ -4712,7 +4709,7 @@ snapshots:
 
   '@types/connect@3.4.38':
     dependencies:
-      '@types/node': 26.2.0
+      '@types/node': 26.4.1
     optional: true
 
   '@types/deep-eql@4.0.2': {}
@@ -4721,7 +4718,7 @@ snapshots:
 
   '@types/express-serve-static-core@4.19.9':
     dependencies:
-      '@types/node': 26.2.0
+      '@types/node': 26.4.1
       '@types/qs': 6.15.1
       '@types/range-parser': 1.2.7
       '@types/send': 1.2.1
@@ -4747,11 +4744,7 @@ snapshots:
   '@types/mime@1.3.5':
     optional: true
 
-  '@types/node@26.2.0':
-    dependencies:
-      undici-types: 8.3.0
-
-  '@types/node@26.3.0':
+  '@types/node@26.4.1':
     dependencies:
       undici-types: 8.3.0
 
@@ -4764,24 +4757,24 @@ snapshots:
   '@types/send@0.17.6':
     dependencies:
       '@types/mime': 1.3.5
-      '@types/node': 26.2.0
+      '@types/node': 26.4.1
     optional: true
 
   '@types/send@1.2.1':
     dependencies:
-      '@types/node': 26.2.0
+      '@types/node': 26.4.1
     optional: true
 
   '@types/serve-static@1.15.10':
     dependencies:
       '@types/http-errors': 2.0.5
-      '@types/node': 26.2.0
+      '@types/node': 26.4.1
       '@types/send': 0.17.6
     optional: true
 
   '@types/ws@8.18.1':
     dependencies:
-      '@types/node': 26.3.0
+      '@types/node': 26.4.1
 
   '@typescript-eslint/project-service@8.66.0(typescript@5.9.3)':
     dependencies:
@@ -4890,7 +4883,7 @@ snapshots:
       obug: 2.1.4
       std-env: 4.2.0
       tinyrainbow: 3.1.1
-      vitest: 4.1.11(@types/node@26.2.0)(@vitest/coverage-v8@4.1.11)(vite@8.2.1(@types/node@26.2.0)(tsx@4.23.12))
+      vitest: 4.1.11(@types/node@26.4.1)(@vitest/coverage-v8@4.1.11)(vite@8.2.1(@types/node@26.4.1)(tsx@4.23.12))
 
   '@vitest/expect@4.1.11':
     dependencies:
@@ -4901,13 +4894,13 @@ snapshots:
       chai: 6.2.2
       tinyrainbow: 3.1.1
 
-  '@vitest/mocker@4.1.11(vite@8.2.1(@types/node@26.2.0)(tsx@4.23.12))':
+  '@vitest/mocker@4.1.11(vite@8.2.1(@types/node@26.4.1)(tsx@4.23.12))':
     dependencies:
       '@vitest/spy': 4.1.11
       estree-walker: 3.0.3
       magic-string: 0.30.21
     optionalDependencies:
-      vite: 8.2.1(@types/node@26.2.0)(tsx@4.23.12)
+      vite: 8.2.1(@types/node@26.4.1)(tsx@4.23.12)
 
   '@vitest/mocker@4.1.11(vite@8.2.1)':
     dependencies:
@@ -5211,8 +5204,6 @@ snapshots:
   doctrine@3.0.0:
     dependencies:
       esutils: 2.0.3
-
-  effect-oidc@0.1.0: {}
 
   effect-oidc@0.1.0(effect@4.0.0-rc.111):
     dependencies:
@@ -6332,7 +6323,7 @@ snapshots:
     optionalDependencies:
       fsevents: 2.3.3
 
-  vite@8.2.1(@types/node@26.2.0)(tsx@4.23.12):
+  vite@8.2.1(@types/node@26.4.1)(tsx@4.23.12):
     dependencies:
       lightningcss: 1.33.0
       picomatch: 4.0.5
@@ -6340,14 +6331,14 @@ snapshots:
       rolldown: 1.2.3
       tinyglobby: 0.2.17
     optionalDependencies:
-      '@types/node': 26.2.0
+      '@types/node': 26.4.1
       fsevents: 2.3.3
       tsx: 4.23.12
 
-  vitest@4.1.11(@types/node@26.2.0)(@vitest/coverage-v8@4.1.11)(vite@8.2.1(@types/node@26.2.0)(tsx@4.23.12)):
+  vitest@4.1.11(@types/node@26.4.1)(@vitest/coverage-v8@4.1.11)(vite@8.2.1(@types/node@26.4.1)(tsx@4.23.12)):
     dependencies:
       '@vitest/expect': 4.1.11
-      '@vitest/mocker': 4.1.11(vite@8.2.1(@types/node@26.2.0)(tsx@4.23.12))
+      '@vitest/mocker': 4.1.11(vite@8.2.1(@types/node@26.4.1)(tsx@4.23.12))
       '@vitest/pretty-format': 4.1.11
       '@vitest/runner': 4.1.11
       '@vitest/snapshot': 4.1.11
@@ -6364,10 +6355,10 @@ snapshots:
       tinyexec: 1.3.0
       tinyglobby: 0.2.17
       tinyrainbow: 3.1.1
-      vite: 8.2.1(@types/node@26.2.0)(tsx@4.23.12)
+      vite: 8.2.1(@types/node@26.4.1)(tsx@4.23.12)
       why-is-node-running: 2.3.0
     optionalDependencies:
-      '@types/node': 26.2.0
+      '@types/node': 26.4.1
       '@vitest/coverage-v8': 4.1.11(vitest@4.1.11)
     transitivePeerDependencies:
       - msw
