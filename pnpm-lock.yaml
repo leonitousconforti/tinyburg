@@ -396,7 +396,7 @@ importers:
         version: link:../nimblebit-sdk
       effect-oidc:
         specifier: 0.1.0
-        version: 0.1.0
+        version: 0.1.0(effect@4.0.0-rc.111)
       pako:
         specifier: 3.0.1
         version: 3.0.1
@@ -414,7 +414,7 @@ importers:
         version: link:../nimblebit-sdk
       effect-oidc:
         specifier: 0.1.0
-        version: 0.1.0
+        version: 0.1.0(effect@4.0.0-rc.111)
       pako:
         specifier: 3.0.1
         version: 3.0.1
@@ -452,8 +452,8 @@ importers:
         specifier: 17.17.0
         version: 17.17.0
       frida-il2cpp-bridge:
-        specifier: 0.13.1
-        version: 0.13.1
+        specifier: 0.14.0
+        version: 0.14.0
     devDependencies:
       '@types/frida-gum':
         specifier: 19.10.0
@@ -469,7 +469,7 @@ importers:
         version: link:../nimblebit-sdk
       effect-oidc:
         specifier: 0.1.0
-        version: 0.1.0
+        version: 0.1.0(effect@4.0.0-rc.111)
       pako:
         specifier: 3.0.1
         version: 3.0.1
@@ -495,7 +495,7 @@ importers:
         version: link:../nimblebit-sdk
       effect-oidc:
         specifier: 0.1.0
-        version: 0.1.0
+        version: 0.1.0(effect@4.0.0-rc.111)
       pako:
         specifier: 3.0.1
         version: 3.0.1
@@ -511,7 +511,7 @@ importers:
         version: link:../nimblebit-sdk
       effect-oidc:
         specifier: 0.1.0
-        version: 0.1.0
+        version: 0.1.0(effect@4.0.0-rc.111)
       pako:
         specifier: 3.0.1
         version: 3.0.1
@@ -589,7 +589,7 @@ importers:
         version: link:../nimblebit-sdk
       effect-oidc:
         specifier: 0.1.0
-        version: 0.1.0
+        version: 0.1.0(effect@4.0.0-rc.111)
       pako:
         specifier: 3.0.1
         version: 3.0.1
@@ -2509,12 +2509,12 @@ packages:
     resolution: {integrity: sha512-7EwmXrOjyL+ChxMhmG5lnW9MPt1aIeZEwKhQzoBUdTV0N3zuwWDZYVJatDvZ2OyzPUvdIAZDsCetk3coyMfcnQ==}
     engines: {node: '>=0.10.0'}
 
-  frida-il2cpp-bridge@0.13.1:
-    resolution: {integrity: sha512-qXjdcdI+KM5wnjCwqZTe/Tas/2pClXpDhcVWjiaQFxzSun+1vaoHEWlnMe4F09Vdz/vGkkjFOPKfvDem2A8UOQ==}
-    hasBin: true
-
   frida-il2cpp-bridge@0.13.2:
     resolution: {integrity: sha512-tLQrGEADcMUCwSgw8LfQiNxRWYEPQAHUp2Dr4wbRYXrwLegP5ccTotGnDCiWzKByNkWo/ON82ReBaWcx20IEEA==}
+    hasBin: true
+
+  frida-il2cpp-bridge@0.14.0:
+    resolution: {integrity: sha512-rtqHgsE3x1j05QV7hfowEsRynf276xHhEJPgoh87Dv7PEa9Zz13VLxRtt19DNVCtIzyCfH1vdMANUCtMYU29Kw==}
     hasBin: true
 
   frida@17.17.0:
@@ -5212,8 +5212,6 @@ snapshots:
     dependencies:
       esutils: 2.0.3
 
-  effect-oidc@0.1.0: {}
-
   effect-oidc@0.1.0(effect@4.0.0-rc.111):
     dependencies:
       effect: 4.0.0-rc.111
@@ -5367,9 +5365,9 @@ snapshots:
 
   for-in@1.0.2: {}
 
-  frida-il2cpp-bridge@0.13.1: {}
-
   frida-il2cpp-bridge@0.13.2: {}
+
+  frida-il2cpp-bridge@0.14.0: {}
 
   frida@17.17.0:
     dependencies:
