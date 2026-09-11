@@ -73,6 +73,16 @@ export interface TowersMessages {
     readonly joining: string;
     readonly takePart: string;
 
+    // The graph of the visitor's whole circle, across every game.
+    readonly graphHeading: string;
+    readonly graphBody: string;
+    readonly graphEmpty: string;
+    readonly graphYou: string;
+    readonly graphAlt: (people: number, connections: number) => string;
+
+    // The games the study lists but cannot read yet.
+    readonly dormantGames: (names: string) => string;
+
     // The expanded circle.
     readonly yourCircle: string;
     readonly hide: string;

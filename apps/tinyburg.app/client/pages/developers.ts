@@ -1,6 +1,8 @@
 import type { DevelopersMessages, SharedMessages } from "../messages/types.ts";
 import type { Html, HtmlBuilder } from "foldkit/html";
 
+import { all as gameScopes } from "@tinyburg/trading-sdk/Scopes";
+
 import { articleBackLink, articleHeading } from "../ui/chrome.ts";
 
 // Endpoint urls always advertise the public site, matching the old
@@ -34,9 +36,13 @@ export const developersView = <M>(h: HtmlBuilder<M>, msgs: DevelopersMessages, s
         { name: msgs.endpointNames.userinfo, url: endpointUrls.userinfo },
     ];
 
+    // The OIDC scopes in the visitor's language; the game scopes as the api
+    // that enforces them describes them, which is the same tree the consent
+    // screen reads, so a developer sees exactly the words a player will.
     const scopes = [
         { name: "openid", description: msgs.scopeDescriptions.openid },
         { name: "profile", description: msgs.scopeDescriptions.profile },
+        ...gameScopes(),
     ];
 
     const steps = [msgs.steps.logIn, msgs.steps.register, msgs.steps.point, msgs.steps.signIn];

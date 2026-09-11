@@ -281,7 +281,7 @@ export const device_verifyDevice = Effect.fn("device_verifyDevice")(function* ({
         httpClient: HttpClient.mapRequest(httpClient, maybeAddBearerToken),
     });
 
-    const playerId = yield* Effect.map(nimblebitAuth.burnbot, ({ playerId }) => playerId);
+    const playerId = yield* Effect.map(nimblebitAuth.burnbot("tinytower"), ({ playerId }) => playerId);
     const response = yield* endpoint({ params: { playerId, verificationCode } });
 
     if ("error" in response) {
@@ -322,7 +322,7 @@ export const device_registerEmail = Effect.fn("device_registerEmail")(function* 
     });
 
     const salt = yield* nimblebitAuth.salt;
-    const burnbot = yield* nimblebitAuth.burnbot;
+    const burnbot = yield* nimblebitAuth.burnbot("tinytower");
 
     const hash = yield* nimblebitAuth.sign(
         `tt/${burnbot.playerId}/${salt}${Redacted.value(playerEmail)}${Redacted.value(burnbot.playerAuthKey)}`

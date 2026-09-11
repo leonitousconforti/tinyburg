@@ -1,6 +1,6 @@
-import { Config, Context, Effect, Layer, Option } from "effect";
+import { Config, Context, Effect, Layer, Option, Schedule } from "effect";
 
-import { ClientRegistration } from "@tinyburg/trading-sdk";
+import { DynamicClientRegistration } from "effect-oidc";
 
 /**
  * The bot's registration at the tinyburg.app OIDC provider.
@@ -17,9 +17,10 @@ import { ClientRegistration } from "@tinyburg/trading-sdk";
  * `TINYBURG_CLIENT_ID` names that registration and is required, with one
  * exception: when it is unset and the bot is either in development or holds
  * a `TINYBURG_REGISTRATION_TOKEN`, the bot registers itself at the provider
- * at boot (RFC 7591) under the redirect uri it is configured with and keeps
- * what it was issued in its own database. Unset anywhere else is the same
- * failure any missing required setting is.
+ * at boot (RFC 7591) under the redirect uri it is configured with. The
+ * provider keys the registration on the software id, so the same client
+ * comes back every boot and there is nothing to keep. Unset anywhere else is
+ * the same failure any missing required setting is.
  */
 const tinyburgConfig = Config.all({
     issuer: Config.string("TINYBURG_ISSUER").pipe(
@@ -45,6 +46,16 @@ const tinyburgConfig = Config.all({
 export const LINK_SCOPES = ["openid", "profile"];
 
 /**
+ * In the dev stack registration runs at boot, and the provider next door may
+ * still be coming up: an unreachable provider is retried for a little under a
+ * minute. A refusal is not retried - it would only be refused again.
+ */
+const registrationBackoff = Schedule.exponential("500 millis").pipe(
+    Schedule.jittered,
+    Schedule.upTo({ duration: "1 minute" })
+);
+
+/**
  * The bot as a client of the provider: the issuer, the redirect uri, and the
  * credentials it presents, whichever way they were obtained. Resolved once at
  * boot, so the registration round trip happens before the first `/link`
@@ -67,7 +78,7 @@ export class TinyburgClient extends Context.Service<TinyburgClient>()("@tinyburg
             return { issuer, redirectUri, clientId, clientSecret: config.clientSecret } as const;
         }
 
-        const registration = yield* ClientRegistration.register({
+        const registration = yield* DynamicClientRegistration.register({
             issuer,
             initialAccessToken: Option.getOrUndefined(config.registrationToken),
             metadata: {
@@ -75,9 +86,13 @@ export class TinyburgClient extends Context.Service<TinyburgClient>()("@tinyburg
                 clientName: "Tinyburg Discord Bot",
                 redirectUris: [redirectUri],
                 tokenEndpointAuthMethod: "client_secret_basic",
-                scope: LINK_SCOPES.join(" "),
+                scopes: LINK_SCOPES,
+                grantTypes: ["authorization_code", "refresh_token"],
             },
-        });
+        }).pipe(
+            Effect.retry({ while: (error) => error.reason === "Unreachable", schedule: registrationBackoff }),
+            Effect.tap(({ clientId }) => Effect.logInfo(`registered at ${issuer} as client ${clientId}`))
+        );
 
         return {
             issuer,

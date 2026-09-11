@@ -1,7 +1,9 @@
 import { Option, Schema as S, pipe } from "effect";
 
 import { Route } from "foldkit";
-import { literal, r, slash } from "foldkit/route";
+import { literal, r, schemaSegment, slash } from "foldkit/route";
+
+import { LinkableGame } from "./linkableGames.ts";
 
 export const HomeRoute = r("Home");
 export const AboutRoute = r("About");
@@ -12,8 +14,10 @@ export const SponsorsRoute = r("Sponsors");
 export const DevelopersRoute = r("Developers");
 export const DeveloperAppsRoute = r("DeveloperApps");
 export const TowerMeRoute = r("TowerMe");
-export const TowerLinkRoute = r("TowerLink");
+export const TowerLinkRoute = r("TowerLink", { game: LinkableGame });
 export const AccountRoute = r("Account", { link: S.Option(S.String), error: S.Option(S.String) });
+export const TradesRoute = r("Trades", { connected: S.Option(S.String), error: S.Option(S.String) });
+export const TradeDetailRoute = r("TradeDetail", { tradeId: S.String });
 export const NotFoundRoute = r("NotFound", { path: S.String });
 
 export const AppRoute = S.Union([
@@ -28,6 +32,8 @@ export const AppRoute = S.Union([
     TowerMeRoute,
     TowerLinkRoute,
     AccountRoute,
+    TradesRoute,
+    TradeDetailRoute,
     NotFoundRoute,
 ]);
 export type AppRoute = typeof AppRoute.Type;
@@ -47,13 +53,31 @@ export const sponsorsRouter = pipe(literal("sponsors"), Route.mapTo(SponsorsRout
 export const developersRouter = pipe(literal("developers"), Route.mapTo(DevelopersRoute));
 export const developerAppsRouter = pipe(literal("developers"), slash(literal("apps")), Route.mapTo(DeveloperAppsRoute));
 export const towerMeRouter = pipe(literal("towers"), slash(literal("@me")), Route.mapTo(TowerMeRoute));
-export const towerLinkRouter = pipe(literal("towers"), slash(literal("@link")), Route.mapTo(TowerLinkRoute));
+export const towerLinkRouter = pipe(
+    literal("towers"),
+    slash(literal("@link")),
+    slash(schemaSegment("game", LinkableGame)),
+    Route.mapTo(TowerLinkRoute)
+);
 // The oauth callback reports how connecting another provider went: `link` when
 // it worked, `error` when it did not. The page opens saying so either way.
 export const accountRouter = pipe(
     literal("account"),
     Route.query(S.Struct({ link: S.OptionFromOptional(S.String), error: S.OptionFromOptional(S.String) })),
     Route.mapTo(AccountRoute)
+);
+
+// The connect flow lands back on /trades with its outcome in the query; the
+// page opens saying how it went.
+export const tradesRouter = pipe(
+    literal("trades"),
+    Route.query(S.Struct({ connected: S.OptionFromOptional(S.String), error: S.OptionFromOptional(S.String) })),
+    Route.mapTo(TradesRoute)
+);
+export const tradeDetailRouter = pipe(
+    literal("trades"),
+    slash(schemaSegment("tradeId", S.String)),
+    Route.mapTo(TradeDetailRoute)
 );
 
 const routeParser = Route.oneOf(
@@ -67,7 +91,10 @@ const routeParser = Route.oneOf(
     developersRouter,
     towerMeRouter,
     towerLinkRouter,
-    accountRouter
+    accountRouter,
+    // Detail before list: /trades/<id> must not fall through to /trades.
+    tradeDetailRouter,
+    tradesRouter
 );
 
 export const urlToAppRoute = Route.parseUrlWithFallback(routeParser, NotFoundRoute);

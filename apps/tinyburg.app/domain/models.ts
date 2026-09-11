@@ -69,6 +69,14 @@ export class OAuthClient extends Model.Class<OAuthClient>("OAuthClient")({
     secretHash: Schema.OptionFromNullishOr(Schema.String.check(Schema.isBase64Url()), { onNoneEncoding: null }),
     redirectUris: Schema.NonEmptyArray(Schema.String),
     scope: Schema.String,
+    /**
+     * The software this client is an installation of (RFC 7591), for clients
+     * that registered themselves. Registering again under the same value
+     * updates this row rather than making another, which is what lets such a
+     * client keep no record of its own registration. None for a client
+     * created by hand or by migration.
+     */
+    softwareId: Schema.OptionFromNullishOr(Schema.String, { onNoneEncoding: null }),
     createdAt: Model.DateTimeInsertFromDate,
 }) {}
 

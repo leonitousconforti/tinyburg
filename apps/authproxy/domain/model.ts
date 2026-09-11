@@ -3,46 +3,46 @@ import { Model } from "effect/unstable/schema";
 import { SqlClient, SqlModel, SqlSchema } from "effect/unstable/sql";
 
 /**
- * The current account in context, provided by middleware.
+ * The current API key in context, provided by middleware.
  *
  * @since 1.0.0
  * @category Tags
  */
-export class CurrentAccount extends Context.Service<CurrentAccount, Account>()(
-    "@tinyburg/authproxy/model/CurrentAccount"
+export class CurrentApiKey extends Context.Service<CurrentApiKey, ApiKey>()(
+    "@tinyburg/authproxy/model/CurrentApiKey"
 ) {}
 
 /**
- * The key of the seeded account that permits no scopes at all.
+ * The key of the seeded API key that permits no scopes at all.
  *
  * @since 1.0.0
  * @category Constants
  */
-export const NONE_ACCOUNT_KEY = "00000000-0000-0000-0000-000000000001";
+export const NONE_API_KEY = "00000000-0000-0000-0000-000000000001";
 
 /**
- * The key of the seeded public account that carries the read-only scopes.
+ * The key of the seeded public API key that carries the read-only scopes.
  *
  * @since 1.0.0
  * @category Constants
  */
-export const READONLY_ACCOUNT_KEY = "00000000-0000-0000-0000-000000000002";
+export const READONLY_API_KEY = "00000000-0000-0000-0000-000000000002";
 
 /**
- * An account in the authproxy system.
+ * An API key in the authproxy system.
  *
  * @since 1.0.0
  * @category Models
  */
-export class Account extends Model.Class<Account>("Account")({
+export class ApiKey extends Model.Class<ApiKey>("ApiKey")({
     id: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)).pipe(Model.GeneratedByDb),
     revoked: Schema.Boolean.pipe(Model.FieldExcept(["insert"])),
     lastUsedAt: Model.DateTimeUpdateFromDate,
     createdAt: Model.DateTimeInsertFromDate,
     key: Schema.Union([
         Schema.String.check(Schema.isUUID()),
-        Schema.Literal(NONE_ACCOUNT_KEY),
-        Schema.Literal(READONLY_ACCOUNT_KEY),
+        Schema.Literal(NONE_API_KEY),
+        Schema.Literal(READONLY_API_KEY),
     ]).pipe(Model.FieldExcept(["insert"])),
     scopes: Schema.UniqueArray(Schema.String).pipe(
         Schema.decodeTo(Schema.ReadonlySet(Schema.String), {
@@ -61,7 +61,7 @@ export class Account extends Model.Class<Account>("Account")({
 }) {}
 
 /**
- * The repository for accounts.
+ * The repository for API keys.
  *
  * @since 1.0.0
  * @category Services
@@ -70,23 +70,23 @@ export class Repository extends Context.Service<Repository>()("@tinyburg/authpro
     make: Effect.gen(function* () {
         const sql = yield* SqlClient.SqlClient;
 
-        const repoByKey = yield* SqlModel.makeRepository(Account, {
+        const repoByKey = yield* SqlModel.makeRepository(ApiKey, {
             spanPrefix: "@tinyburg/authproxy/model/Repository/ByKey",
-            tableName: "accounts",
+            tableName: "api_keys",
             idColumn: "key",
         });
 
         const listAll = SqlSchema.findAll({
             Request: Schema.Void,
-            Result: Account.select,
-            execute: () => sql`SELECT * FROM accounts`,
+            Result: ApiKey.select,
+            execute: () => sql`SELECT * FROM api_keys`,
         });
 
         const listForOwner = SqlSchema.findAll({
             Request: Schema.String.check(Schema.isUUID()),
-            Result: Account.select,
+            Result: ApiKey.select,
             execute: (ownerSub) => sql`
-                SELECT * FROM accounts
+                SELECT * FROM api_keys
                 WHERE owner_sub = ${ownerSub}
                 ORDER BY created_at DESC
             `,
@@ -96,7 +96,7 @@ export class Repository extends Context.Service<Repository>()("@tinyburg/authpro
             Request: Schema.String.check(Schema.isUUID()),
             Result: Schema.Struct({ count: Schema.Int }),
             execute: (ownerSub) => sql`
-                SELECT COUNT(*)::int AS count FROM accounts
+                SELECT COUNT(*)::int AS count FROM api_keys
                 WHERE owner_sub = ${ownerSub}
             `,
         });
@@ -106,9 +106,9 @@ export class Repository extends Context.Service<Repository>()("@tinyburg/authpro
                 key: Schema.String.check(Schema.isUUID()),
                 ownerSub: Schema.String,
             }),
-            Result: Account.select,
+            Result: ApiKey.select,
             execute: ({ key, ownerSub }) => sql`
-                UPDATE accounts SET key = gen_random_uuid()
+                UPDATE api_keys SET key = gen_random_uuid()
                 WHERE key = ${key} AND owner_sub = ${ownerSub}
                 RETURNING *
             `,
@@ -120,9 +120,9 @@ export class Repository extends Context.Service<Repository>()("@tinyburg/authpro
                 ownerSub: Schema.String,
                 revoked: Schema.Boolean,
             }),
-            Result: Account.select,
+            Result: ApiKey.select,
             execute: ({ key, ownerSub, revoked }) => sql`
-                UPDATE accounts SET revoked = ${revoked}
+                UPDATE api_keys SET revoked = ${revoked}
                 WHERE key = ${key} AND owner_sub = ${ownerSub}
                 RETURNING *
             `,
@@ -132,14 +132,14 @@ export class Repository extends Context.Service<Repository>()("@tinyburg/authpro
             Request: Schema.Struct({ key: Schema.String.check(Schema.isUUID()), ownerSub: Schema.String }),
             Result: Schema.Struct({ key: Schema.String }),
             execute: ({ key, ownerSub }) => sql`
-                DELETE FROM accounts
+                DELETE FROM api_keys
                 WHERE key = ${key} AND owner_sub = ${ownerSub}
                 RETURNING key::text
             `,
         });
 
-        const seededNoneAccount = repoByKey.findById(NONE_ACCOUNT_KEY);
-        const seededReadonlyAccount = repoByKey.findById(READONLY_ACCOUNT_KEY);
+        const seededNoneApiKey = repoByKey.findById(NONE_API_KEY);
+        const seededReadonlyApiKey = repoByKey.findById(READONLY_API_KEY);
 
         return {
             ...repoByKey,
@@ -150,11 +150,11 @@ export class Repository extends Context.Service<Repository>()("@tinyburg/authpro
             setRevokedForOwner,
             deleteForOwner,
 
-            /** The none account will permit no scopes. */
-            seededNoneAccount,
+            /** The none API key will permit no scopes. */
+            seededNoneApiKey,
 
-            /** The default account will permit all the read-only scopes. */
-            seededReadonlyAccount,
+            /** The default API key will permit all the read-only scopes. */
+            seededReadonlyApiKey,
         };
     }),
 }) {

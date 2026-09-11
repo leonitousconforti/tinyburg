@@ -3,7 +3,7 @@ import { Effect, Match, Option, Schema as S } from "effect";
 import type { TitleMessages } from "./messages/types.ts";
 import type { Document, Html, HtmlBuilder } from "foldkit/html";
 
-import { Language } from "@tinyburg/ui/Internationalization";
+import { Language } from "@tinyburg/shared-ui/Internationalization";
 import { AsyncData, Command, Navigation, Render, type Runtime, Url } from "foldkit";
 import { defineMessageUnion } from "foldkit/message";
 import { evo } from "foldkit/struct";
@@ -15,6 +15,8 @@ import { loginView } from "./pages/login.ts";
 import { notFoundView } from "./pages/notFound.ts";
 import { privacyView } from "./pages/privacy.ts";
 import {
+    FetchGames,
+    FetchGraph,
     FetchTowers,
     TowersMessage,
     TowersModel,
@@ -107,11 +109,16 @@ const enterRoute = (model: Model): Step => {
     }
 
     if (route._tag === "Towers" && session._tag === "SignedIn") {
+        // The graph and the catalog are refetched on every entry rather than
+        // cached: a crawl may have landed since the last visit, and both are
+        // cheap reads the visitor should not have to reload the page to see.
+        const alongside = [FetchGraph(), ...(model.towers.games.length === 0 ? [FetchGames()] : [])];
+
         return Option.match(AsyncData.revalidateOrLoad(model.towers.towers), {
-            onNone: (): Step => [model, []],
+            onNone: (): Step => [model, alongside],
             onSome: (towers): Step => [
                 evo(model, { towers: (towersModel) => evo(towersModel, { towers: () => towers }) }),
-                [FetchTowers()],
+                [FetchTowers(), ...alongside],
             ],
         });
     }

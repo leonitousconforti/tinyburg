@@ -4,22 +4,23 @@ import type { Message as AppMessage } from "../main.ts";
 import type { KeysMessages, SharedMessages } from "../messages/types.ts";
 import type { Html, HtmlBuilder } from "foldkit/html";
 
-import { banner, card, dangerButton, primaryButton, quietButton, smallButton } from "@tinyburg/ui/Chrome";
-import { type Language, longDate } from "@tinyburg/ui/Internationalization";
+import { banner, card, dangerButton, primaryButton, quietButton, smallButton } from "@tinyburg/shared-ui/Chrome";
+import { type Language, longDate } from "@tinyburg/shared-ui/Internationalization";
 import { AsyncData, Command } from "foldkit";
-import { m } from "foldkit/message";
+import { defineMessageUnion } from "foldkit/message";
 import { evo } from "foldkit/struct";
 
-import { Account } from "../../domain/model.ts";
-import { ELEVATED_SCOPES, MAX_KEYS_PER_USER, SELF_SERVE_SCOPES } from "../../shared/scopes.ts";
-import { Self, type SessionInfo } from "../backend.ts";
+import { ApiKey } from "../../domain/model.ts";
+import { MAX_KEYS_PER_USER } from "../../shared/policy.ts";
+import { type CatalogGame, type ScopeCatalogData, Self, type SessionInfo } from "../backend.ts";
+import { descriptionsOf, scopePicker, toggleScope } from "../scopePicker.ts";
 
 /**
- * One key as /self/keys lists it: the same account model the proxy's
+ * One key as /self/keys lists it: the same API key model the proxy's
  * authorization middleware reads, minus nothing, because the key belongs to
  * the person looking at it.
  */
-type Key = typeof Account.json.Type;
+type Key = typeof ApiKey.json.Type;
 
 // MODEL
 
@@ -31,7 +32,7 @@ const KeysProblem = S.Literals(["actionFailed", "createRefused", "clipboardFaile
 type KeysProblem = typeof KeysProblem.Type;
 const LoadFailed = S.Literals(["loadFailed"]);
 
-export const Keys = AsyncData.Schema(S.Array(Account.json), LoadFailed);
+export const Keys = AsyncData.Schema(S.Array(ApiKey.json), LoadFailed);
 
 export const KeysModel = S.Struct({
     keys: Keys.schema,
@@ -53,11 +54,13 @@ export const KeysModel = S.Struct({
         open: S.Boolean,
         scopes: S.Array(S.String),
         description: S.String,
+        // The game tab the scope picker is showing. Empty means the first.
+        scopeTab: S.String,
     }),
 });
 export type KeysModel = typeof KeysModel.Type;
 
-const closedForm = { open: false, scopes: [] as ReadonlyArray<string>, description: "" };
+const closedForm = { open: false, scopes: [] as ReadonlyArray<string>, description: "", scopeTab: "" };
 
 export const initialKeys: KeysModel = {
     keys: Keys.Idle(),
@@ -85,70 +88,59 @@ export const enterKeys = (previous: KeysModel): KeysModel =>
 
 // MESSAGE
 
-export const SettledKeys = m("SettledKeys", { result: S.Result(S.Array(Account.json), LoadFailed) });
+/**
+ * Everything this page can say.
+ *
+ * `defineMessageUnion` declares the union and its constructors together, so a
+ * variant cannot be added without joining the union or removed while something
+ * still matches on it.
+ */
+export const KeysMessage = defineMessageUnion({
+    SettledKeys: { result: S.Result(S.Array(ApiKey.json), LoadFailed) },
 
-export const ClickedOpenCreate = m("ClickedOpenCreate");
-export const ClickedCancelCreate = m("ClickedCancelCreate");
-export const ToggledScope = m("ToggledScope", { path: S.String });
-export const ChangedDescription = m("ChangedDescription", { value: S.String });
-export const SubmittedCreate = m("SubmittedCreate");
-export const CompletedCreate = m("CompletedCreate", { key: Account.json });
+    ClickedOpenCreate: {},
+    ClickedCancelCreate: {},
+    ToggledScope: { scope: S.String },
+    SelectedScopeTab: { game: S.String },
+    ChangedDescription: { value: S.String },
+    SubmittedCreate: {},
+    CompletedCreate: { key: ApiKey.json },
 
-export const ClickedRotate = m("ClickedRotate", { key: S.String });
-export const CompletedRotate = m("CompletedRotate", { key: Account.json });
+    ClickedRotate: { key: S.String },
+    CompletedRotate: { key: ApiKey.json },
 
-export const ClickedSetRevoked = m("ClickedSetRevoked", { key: S.String, revoked: S.Boolean });
-export const CompletedSetRevoked = m("CompletedSetRevoked", { key: Account.json });
+    ClickedSetRevoked: { key: S.String, revoked: S.Boolean },
+    CompletedSetRevoked: { key: ApiKey.json },
 
-export const ClickedDelete = m("ClickedDelete", { key: S.String });
-export const CompletedDelete = m("CompletedDelete");
+    ClickedDelete: { key: S.String },
+    CompletedDelete: {},
 
-export const ClickedCopy = m("ClickedCopy", { key: S.String });
-export const CopiedKey = m("CopiedKey");
+    ClickedCopy: { key: S.String },
+    CopiedKey: {},
 
-export const FailedAction = m("FailedAction", { problem: KeysProblem });
-
-/** The session ended somewhere else while this page was open. */
-export const SignedOutElsewhere = m("SignedOutElsewhere");
-
-export const KeysMessage = S.Union([
-    SettledKeys,
-    ClickedOpenCreate,
-    ClickedCancelCreate,
-    ToggledScope,
-    ChangedDescription,
-    SubmittedCreate,
-    CompletedCreate,
-    ClickedRotate,
-    CompletedRotate,
-    ClickedSetRevoked,
-    CompletedSetRevoked,
-    ClickedDelete,
-    CompletedDelete,
-    ClickedCopy,
-    CopiedKey,
-    FailedAction,
-    SignedOutElsewhere,
-]);
+    FailedAction: { problem: KeysProblem },
+    /** The session ended somewhere else while this page was open. */
+    SignedOutElsewhere: {},
+});
 export type KeysMessage = typeof KeysMessage.Type;
 
 // COMMAND
 
 export const FetchKeys = Command.define("FetchKeys", {
-    messages: [SettledKeys, SignedOutElsewhere],
+    messages: [KeysMessage.SettledKeys, KeysMessage.SignedOutElsewhere],
     execute: Effect.gen(function* () {
         const self = yield* Self;
         const keys = yield* self.SelfServiceGroup.listKeys();
-        return SettledKeys({ result: Result.succeed(keys) });
+        return KeysMessage.SettledKeys({ result: Result.succeed(keys) });
     }).pipe(
-        Effect.catchTag("Unauthorized", () => Effect.succeed(SignedOutElsewhere())),
-        Effect.catch(() => Effect.succeed(SettledKeys({ result: Result.fail("loadFailed" as const) })))
+        Effect.catchTag("Unauthorized", () => Effect.succeed(KeysMessage.SignedOutElsewhere())),
+        Effect.catch(() => Effect.succeed(KeysMessage.SettledKeys({ result: Result.fail("loadFailed" as const) })))
     ),
 });
 
 const CreateKey = Command.define("CreateKey", {
     args: { scopes: S.Array(S.String), description: S.String },
-    messages: [CompletedCreate, FailedAction, SignedOutElsewhere],
+    messages: [KeysMessage.CompletedCreate, KeysMessage.FailedAction, KeysMessage.SignedOutElsewhere],
     execute: ({ description, scopes }) =>
         Effect.gen(function* () {
             const self = yield* Self;
@@ -159,65 +151,65 @@ const CreateKey = Command.define("CreateKey", {
                     description: trimmed === "" ? Option.none() : Option.some(trimmed),
                 },
             });
-            return CompletedCreate({ key });
+            return KeysMessage.CompletedCreate({ key });
         }).pipe(
-            Effect.catchTag("Unauthorized", () => Effect.succeed(SignedOutElsewhere())),
-            Effect.catchTag("BadRequest", () => Effect.succeed(FailedAction({ problem: "createRefused" }))),
-            Effect.catch(() => Effect.succeed(FailedAction({ problem: "actionFailed" })))
+            Effect.catchTag("Unauthorized", () => Effect.succeed(KeysMessage.SignedOutElsewhere())),
+            Effect.catchTag("BadRequest", () => Effect.succeed(KeysMessage.FailedAction({ problem: "createRefused" }))),
+            Effect.catch(() => Effect.succeed(KeysMessage.FailedAction({ problem: "actionFailed" })))
         ),
 });
 
 const RotateKey = Command.define("RotateKey", {
     args: { key: S.String },
-    messages: [CompletedRotate, FailedAction, SignedOutElsewhere],
+    messages: [KeysMessage.CompletedRotate, KeysMessage.FailedAction, KeysMessage.SignedOutElsewhere],
     execute: ({ key }) =>
         Effect.gen(function* () {
             const self = yield* Self;
             const rotated = yield* self.SelfServiceGroup.rotateKey({ params: { key } });
-            return CompletedRotate({ key: rotated });
+            return KeysMessage.CompletedRotate({ key: rotated });
         }).pipe(
-            Effect.catchTag("Unauthorized", () => Effect.succeed(SignedOutElsewhere())),
-            Effect.catch(() => Effect.succeed(FailedAction({ problem: "actionFailed" })))
+            Effect.catchTag("Unauthorized", () => Effect.succeed(KeysMessage.SignedOutElsewhere())),
+            Effect.catch(() => Effect.succeed(KeysMessage.FailedAction({ problem: "actionFailed" })))
         ),
 });
 
 const SetRevoked = Command.define("SetRevoked", {
     args: { key: S.String, revoked: S.Boolean },
-    messages: [CompletedSetRevoked, FailedAction, SignedOutElsewhere],
+    messages: [KeysMessage.CompletedSetRevoked, KeysMessage.FailedAction, KeysMessage.SignedOutElsewhere],
     execute: ({ key, revoked }) =>
         Effect.gen(function* () {
             const self = yield* Self;
             const updated = yield* revoked
                 ? self.SelfServiceGroup.revokeKey({ params: { key } })
                 : self.SelfServiceGroup.enableKey({ params: { key } });
-            return CompletedSetRevoked({ key: updated });
+            return KeysMessage.CompletedSetRevoked({ key: updated });
         }).pipe(
-            Effect.catchTag("Unauthorized", () => Effect.succeed(SignedOutElsewhere())),
-            Effect.catch(() => Effect.succeed(FailedAction({ problem: "actionFailed" })))
+            Effect.catchTag("Unauthorized", () => Effect.succeed(KeysMessage.SignedOutElsewhere())),
+            Effect.catch(() => Effect.succeed(KeysMessage.FailedAction({ problem: "actionFailed" })))
         ),
 });
 
 const DeleteKey = Command.define("DeleteKey", {
     args: { key: S.String },
-    messages: [CompletedDelete, FailedAction, SignedOutElsewhere],
+    messages: [KeysMessage.CompletedDelete, KeysMessage.FailedAction, KeysMessage.SignedOutElsewhere],
     execute: ({ key }) =>
         Effect.gen(function* () {
             const self = yield* Self;
             yield* self.SelfServiceGroup.deleteKey({ params: { key } });
-            return CompletedDelete();
+            return KeysMessage.CompletedDelete();
         }).pipe(
-            Effect.catchTag("Unauthorized", () => Effect.succeed(SignedOutElsewhere())),
-            Effect.catch(() => Effect.succeed(FailedAction({ problem: "actionFailed" })))
+            Effect.catchTag("Unauthorized", () => Effect.succeed(KeysMessage.SignedOutElsewhere())),
+            Effect.catch(() => Effect.succeed(KeysMessage.FailedAction({ problem: "actionFailed" })))
         ),
 });
 
 const CopyKey = Command.define("CopyKey", {
     args: { key: S.String },
-    messages: [CopiedKey, FailedAction],
+    messages: [KeysMessage.CopiedKey, KeysMessage.FailedAction],
     execute: ({ key }) =>
         Effect.tryPromise(() => navigator.clipboard.writeText(key)).pipe(
-            Effect.as(CopiedKey()),
-            Effect.catch(() => Effect.succeed(FailedAction({ problem: "clipboardFailed" })))
+            Effect.as(KeysMessage.CopiedKey()),
+            Effect.catch(() => Effect.succeed(KeysMessage.FailedAction({ problem: "clipboardFailed" })))
         ),
 });
 
@@ -237,7 +229,7 @@ const starting = (model: KeysModel, busy: string): KeysModel =>
 const refetch = (model: KeysModel): KeysModel =>
     evo(model, { keys: (keys) => Option.getOrElse(AsyncData.revalidate(keys), () => keys) });
 
-export const updateKeys = (model: KeysModel, message: KeysMessage): KeysStep =>
+export const updateKeys = (model: KeysModel, message: KeysMessage, catalog: ReadonlyArray<CatalogGame>): KeysStep =>
     Match.value(message).pipe(
         Match.withReturnType<KeysStep>(),
         Match.tagsExhaustive({
@@ -253,16 +245,11 @@ export const updateKeys = (model: KeysModel, message: KeysMessage): KeysStep =>
                 [],
             ],
             ClickedCancelCreate: () => [evo(model, { form: () => closedForm }), []],
-            ToggledScope: ({ path }) => [
-                evo(model, {
-                    form: (form) =>
-                        evo(form, {
-                            scopes: (scopes) =>
-                                scopes.includes(path) ? scopes.filter((scope) => scope !== path) : [...scopes, path],
-                        }),
-                }),
+            ToggledScope: ({ scope }) => [
+                evo(model, { form: (form) => evo(form, { scopes: (scopes) => toggleScope(scopes, scope, catalog) }) }),
                 [],
             ],
+            SelectedScopeTab: ({ game }) => [evo(model, { form: (form) => evo(form, { scopeTab: () => game }) }), []],
             ChangedDescription: ({ value }) => [
                 evo(model, { form: (form) => evo(form, { description: () => value }) }),
                 [],
@@ -327,19 +314,23 @@ export const updateKeys = (model: KeysModel, message: KeysMessage): KeysStep =>
 
 // VIEW
 
-const scopeLabels: ReadonlyMap<string, string> = new Map(
-    [...SELF_SERVE_SCOPES, ...ELEVATED_SCOPES].map((scope) => [scope.path, scope.label])
-);
-
 const maskKey = (key: string): string => `${key.slice(0, 8)}-····-····-····-············`;
 
 const problemText = (msgs: KeysMessages, problem: KeysProblem): string =>
     problem === "createRefused" ? msgs.problems.createRefused(MAX_KEYS_PER_USER) : msgs.problems[problem];
 
-const scopeChip = (h: HtmlBuilder<AppMessage>, path: string): Html =>
+/**
+ * A scope a key holds, by name, with what it means on hover. A key may hold a
+ * scope the catalog no longer lists - granted by hand, or renamed since - and
+ * that still shows, as itself.
+ */
+const scopeChip = (h: HtmlBuilder<AppMessage>, descriptions: ReadonlyMap<string, string>, name: string): Html =>
     h.span(
-        [h.Class("font-mono bg-sky-light/40 text-sky-dark rounded px-2 py-0.5 text-base"), h.Title(path)],
-        [scopeLabels.get(path) ?? path]
+        [
+            h.Class("font-mono bg-sky-light/40 text-sky-dark rounded px-2 py-0.5 text-base"),
+            h.Title(descriptions.get(name) ?? name),
+        ],
+        [name]
     );
 
 const keyRow = (
@@ -348,7 +339,8 @@ const keyRow = (
     shared: SharedMessages,
     language: Language,
     key: Key,
-    model: KeysModel
+    model: KeysModel,
+    descriptions: ReadonlyMap<string, string>
 ): Html => {
     const busy = Option.contains(model.busy, key.key);
     const minted = model.justMinted.includes(key.key);
@@ -385,7 +377,7 @@ const keyRow = (
             }),
             h.div(
                 [h.Class("flex flex-wrap gap-1.5")],
-                Array.from(key.scopes, (scope) => scopeChip(h, scope))
+                Array.from(key.scopes, (scope) => scopeChip(h, descriptions, scope))
             ),
             h.p(
                 [h.Class("font-mono text-base text-gray-500")],
@@ -398,7 +390,7 @@ const keyRow = (
                 [h.Class("flex flex-wrap gap-2")],
                 [
                     h.button(
-                        [h.Type("button"), h.Class(smallButton), h.OnClick(ClickedCopy({ key: key.key }))],
+                        [h.Type("button"), h.Class(smallButton), h.OnClick(KeysMessage.ClickedCopy({ key: key.key }))],
                         [msgs.copy]
                     ),
                     h.button(
@@ -407,7 +399,7 @@ const keyRow = (
                             h.Class(smallButton),
                             h.Disabled(busy),
                             h.Title(msgs.rotateTitle),
-                            h.OnClick(ClickedRotate({ key: key.key })),
+                            h.OnClick(KeysMessage.ClickedRotate({ key: key.key })),
                         ],
                         [busy ? "..." : msgs.rotate]
                     ),
@@ -416,7 +408,7 @@ const keyRow = (
                             h.Type("button"),
                             h.Class(smallButton),
                             h.Disabled(busy),
-                            h.OnClick(ClickedSetRevoked({ key: key.key, revoked: !key.revoked })),
+                            h.OnClick(KeysMessage.ClickedSetRevoked({ key: key.key, revoked: !key.revoked })),
                         ],
                         [busy ? "..." : key.revoked ? shared.reEnable : shared.revoke]
                     ),
@@ -425,7 +417,7 @@ const keyRow = (
                             h.Type("button"),
                             h.Class(dangerButton),
                             h.Disabled(busy),
-                            h.OnClick(ClickedDelete({ key: key.key })),
+                            h.OnClick(KeysMessage.ClickedDelete({ key: key.key })),
                         ],
                         [busy ? "..." : armed ? shared.reallyDelete : shared.delete]
                     ),
@@ -435,55 +427,13 @@ const keyRow = (
     );
 };
 
-const scopeCheckbox = (
+const createForm = (
     h: HtmlBuilder<AppMessage>,
+    msgs: KeysMessages,
+    shared: SharedMessages,
     model: KeysModel,
-    path: string,
-    label: string,
-    description: string
-): Html =>
-    h.label(
-        [
-            h.Class(
-                "hover:border-sky-blue flex cursor-pointer items-start gap-3 rounded-lg border-2 border-gray-300 bg-white px-3 py-2"
-            ),
-        ],
-        [
-            h.input([
-                h.Type("checkbox"),
-                h.Class("mt-1.5"),
-                h.Checked(model.form.scopes.includes(path)),
-                h.OnClick(ToggledScope({ path })),
-            ]),
-            h.span(
-                [h.Class("min-w-0")],
-                [
-                    h.span([h.Class("font-mono block text-xl text-gray-800")], [label]),
-                    h.span([h.Class("font-mono block text-base text-gray-500")], [description]),
-                ]
-            ),
-        ]
-    );
-
-const elevatedRow = (h: HtmlBuilder<AppMessage>, label: string, description: string): Html =>
-    h.div(
-        [
-            h.Class(
-                "flex items-start gap-3 rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 px-3 py-2 opacity-70"
-            ),
-        ],
-        [
-            h.span(
-                [h.Class("min-w-0")],
-                [
-                    h.span([h.Class("font-mono block text-xl text-gray-600")], [label]),
-                    h.span([h.Class("font-mono block text-base text-gray-500")], [description]),
-                ]
-            ),
-        ]
-    );
-
-const createForm = (h: HtmlBuilder<AppMessage>, msgs: KeysMessages, shared: SharedMessages, model: KeysModel): Html => {
+    catalog: ReadonlyArray<CatalogGame>
+): Html => {
     const creating = Option.contains(model.busy, "create");
 
     return h.div(
@@ -500,20 +450,23 @@ const createForm = (h: HtmlBuilder<AppMessage>, msgs: KeysMessages, shared: Shar
                         ),
                         h.Placeholder(msgs.descriptionPlaceholder),
                         h.Value(model.form.description),
-                        h.OnInput((value) => ChangedDescription({ value })),
+                        h.OnInput((value) => KeysMessage.ChangedDescription({ value })),
                     ]),
                 ]
             ),
             h.p([h.Class("font-pixel text-[0.55rem] text-gray-600")], [msgs.readOnlyScopesLabel]),
-            h.div(
-                [h.Class("grid gap-2 sm:grid-cols-2")],
-                SELF_SERVE_SCOPES.map((scope) => scopeCheckbox(h, model, scope.path, scope.label, scope.description))
-            ),
+            // The whole tree, with only the reads on offer: the writes are
+            // listed dimmed so a visitor can see what they would have to ask
+            // for, and the note below says where.
+            scopePicker(h, {
+                catalog,
+                selected: model.form.scopes,
+                onToggle: (scope) => KeysMessage.ToggledScope({ scope }),
+                selectable: (node) => node.selfServe,
+                activeGame: model.form.scopeTab,
+                onSelectGame: (game) => KeysMessage.SelectedScopeTab({ game }),
+            }),
             h.p([h.Class("font-pixel text-[0.55rem] text-gray-600")], [msgs.writeScopesNote]),
-            h.div(
-                [h.Class("grid gap-2 sm:grid-cols-2")],
-                ELEVATED_SCOPES.map((scope) => elevatedRow(h, scope.label, scope.description))
-            ),
             h.div(
                 [h.Class("flex flex-wrap gap-3")],
                 [
@@ -522,7 +475,7 @@ const createForm = (h: HtmlBuilder<AppMessage>, msgs: KeysMessages, shared: Shar
                             h.Type("button"),
                             h.Class(primaryButton),
                             h.Disabled(model.form.scopes.length === 0 || creating),
-                            h.OnClick(SubmittedCreate()),
+                            h.OnClick(KeysMessage.SubmittedCreate()),
                         ],
                         [creating ? "..." : msgs.createKey]
                     ),
@@ -531,7 +484,7 @@ const createForm = (h: HtmlBuilder<AppMessage>, msgs: KeysMessages, shared: Shar
                             h.Type("button"),
                             h.Class(quietButton),
                             h.Disabled(creating),
-                            h.OnClick(ClickedCancelCreate()),
+                            h.OnClick(KeysMessage.ClickedCancelCreate()),
                         ],
                         [shared.cancel]
                     ),
@@ -546,17 +499,19 @@ const keysSection = (
     msgs: KeysMessages,
     shared: SharedMessages,
     language: Language,
-    model: KeysModel
+    model: KeysModel,
+    catalog: ReadonlyArray<CatalogGame>
 ): Html => {
+    const descriptions = descriptionsOf(catalog);
     const list = (keys: ReadonlyArray<Key>): Html =>
         h.div(
             [h.Class("flex flex-col gap-4")],
             [
                 ...(keys.length === 0
                     ? [h.p([h.Class("font-mono text-xl text-gray-600")], [msgs.emptyState])]
-                    : keys.map((key) => keyRow(h, msgs, shared, language, key, model))),
+                    : keys.map((key) => keyRow(h, msgs, shared, language, key, model, descriptions))),
                 model.form.open
-                    ? createForm(h, msgs, shared, model)
+                    ? createForm(h, msgs, shared, model, catalog)
                     : h.div(
                           [],
                           [
@@ -570,7 +525,7 @@ const keysSection = (
                                               ? msgs.maxKeysTitle(MAX_KEYS_PER_USER)
                                               : msgs.provisionTitle
                                       ),
-                                      h.OnClick(ClickedOpenCreate()),
+                                      h.OnClick(KeysMessage.ClickedOpenCreate()),
                                   ],
                                   [msgs.newKey]
                               ),
@@ -602,9 +557,14 @@ export const keysView = (
     shared: SharedMessages,
     language: Language,
     model: KeysModel,
-    session: SessionInfo
-): Html =>
-    h.div(
+    session: SessionInfo,
+    scopes: ScopeCatalogData
+): Html => {
+    // Until the catalog lands - or if it never does - chips show bare names
+    // and the create form offers nothing to tick, which is the honest state.
+    const catalog = Option.getOrElse(AsyncData.getData(scopes), (): ReadonlyArray<CatalogGame> => []);
+
+    return h.div(
         [h.Class("relative z-10 flex min-h-screen flex-col items-center p-8 pt-24")],
         [
             h.div(
@@ -636,8 +596,9 @@ export const keysView = (
                         onSome: (problem) => [banner(h, "problem", problemText(msgs, problem))],
                         onNone: () => [],
                     }),
-                    keysSection(h, msgs, shared, language, model),
+                    keysSection(h, msgs, shared, language, model, catalog),
                 ]
             ),
         ]
     );
+};

@@ -113,7 +113,7 @@ export const DeviceLive: Layer.Layer<
     | Crypto.Crypto
 > = Layer.tap(
     FridaDevice.layerAndroidEmulatorDeviceConfig("Small_Phone", {
-        fridaExecutable: "/data/local/tmp/frida-server-17.11.0-android-arm64",
+        fridaExecutable: "/data/local/tmp/frida-server-17.17.0-android-arm64",
         extraEmulatorArgs: ["-gpu", "swiftshader_indirect"],
     }),
     Effect.fnUntraced(

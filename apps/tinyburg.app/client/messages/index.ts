@@ -1,5 +1,5 @@
 import type { Messages } from "./types.ts";
-import type { Language } from "@tinyburg/ui/Internationalization";
+import type { Language } from "@tinyburg/shared-ui/Internationalization";
 
 import { de } from "./de.ts";
 import { en } from "./en.ts";

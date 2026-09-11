@@ -11,6 +11,8 @@ import type { SqlError } from "effect/unstable/sql";
 import { Context, Effect, Layer, Schema } from "effect";
 import { SqlClient, SqlSchema } from "effect/unstable/sql";
 
+import type { GameId } from "./games.ts";
+
 import { type PlayerId, PurgeReceipt } from "./model.ts";
 
 export class PurgeRepository extends Context.Service<PurgeRepository>()(
@@ -24,6 +26,7 @@ export class PurgeRepository extends Context.Service<PurgeRepository>()(
              * anything is removed so the receipt can report real numbers.
              */
             const countFootprint = (
+                game: GameId,
                 playerId: PlayerId
             ): Effect.Effect<{ readonly events: number; readonly edges: number }, SqlError.SqlError, never> =>
                 Effect.map(
@@ -31,9 +34,10 @@ export class PurgeRepository extends Context.Service<PurgeRepository>()(
                         SELECT
                             (SELECT COUNT(*) FROM friendship_events fe
                              JOIN players p ON p.id IN (fe.from_player_id, fe.to_player_id)
-                             WHERE p.player_id = ${playerId}) AS events,
+                             WHERE fe.game = ${game} AND p.player_id = ${playerId}) AS events,
                             (SELECT COUNT(*) FROM current_friendships cf
-                             WHERE cf.from_player = ${playerId} OR cf.to_player = ${playerId}) AS edges
+                             WHERE cf.game = ${game}
+                               AND (cf.from_player = ${playerId} OR cf.to_player = ${playerId})) AS edges
                     `,
                     (rows) => {
                         // Bridges an untyped runtime boundary; the shape is guaranteed by construction, not by the compiler.
@@ -54,8 +58,8 @@ export class PurgeRepository extends Context.Service<PurgeRepository>()(
              * enough and cannot leave one table behind if the process dies
              * partway. Deleting an already-deleted player is a no-op.
              */
-            const erasePlayer = (playerId: PlayerId): Effect.Effect<void, SqlError.SqlError, never> =>
-                sql`DELETE FROM players WHERE player_id = ${playerId}`.pipe(Effect.asVoid);
+            const erasePlayer = (game: GameId, playerId: PlayerId): Effect.Effect<void, SqlError.SqlError, never> =>
+                sql`DELETE FROM players WHERE game = ${game} AND player_id = ${playerId}`.pipe(Effect.asVoid);
 
             /**
              * Drops the stored `towers` grant so no background job can act for
@@ -71,6 +75,7 @@ export class PurgeRepository extends Context.Service<PurgeRepository>()(
              * above it already happened.
              */
             const writeReceipt = (options: {
+                readonly game: GameId;
                 readonly playerId: PlayerId;
                 readonly tinyburgUserId: string;
                 readonly requestedAt: Date;
@@ -79,8 +84,9 @@ export class PurgeRepository extends Context.Service<PurgeRepository>()(
             }): Effect.Effect<void, SqlError.SqlError, never> =>
                 sql`
                     INSERT INTO purge_receipts
-                        (player_id, tinyburg_user_id, requested_at, edges_removed, events_removed)
+                        (game, player_id, tinyburg_user_id, requested_at, edges_removed, events_removed)
                     VALUES (
+                        ${options.game},
                         ${options.playerId},
                         ${options.tinyburgUserId},
                         ${options.requestedAt},
@@ -90,11 +96,11 @@ export class PurgeRepository extends Context.Service<PurgeRepository>()(
                 `.pipe(Effect.asVoid);
 
             const receiptsFor = SqlSchema.findAll({
-                Request: Schema.String,
+                Request: Schema.Struct({ game: Schema.String, playerId: Schema.String }),
                 Result: PurgeReceipt,
-                execute: (playerId) => sql`
+                execute: ({ game, playerId }) => sql`
                     SELECT * FROM purge_receipts
-                    WHERE player_id = ${playerId}
+                    WHERE game = ${game} AND player_id = ${playerId}
                     ORDER BY completed_at DESC
                 `,
             });

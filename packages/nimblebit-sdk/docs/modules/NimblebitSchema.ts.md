@@ -119,11 +119,11 @@ declare const UnityColor: Schema.decodeTo<
   Schema.Struct<{ readonly r: Schema.Int; readonly g: Schema.Int; readonly b: Schema.Int }>,
   Schema.TemplateLiteralParser<
     readonly [
-      Schema.compose<Schema.Finite, Schema.NumberFromString>,
+      Schema.compose<Schema.Finite, Schema.FiniteFromString>,
       ":",
-      Schema.compose<Schema.Finite, Schema.NumberFromString>,
+      Schema.compose<Schema.Finite, Schema.FiniteFromString>,
       ":",
-      Schema.compose<Schema.Finite, Schema.NumberFromString>
+      Schema.compose<Schema.Finite, Schema.FiniteFromString>
     ]
   >,
   never,
@@ -142,9 +142,9 @@ Since v1.0.0
 ```ts
 declare const split: (options?: {
   readonly separator?: string | undefined
-}) => (from: Schema.String) => Schema.decodeTo<Schema.$Array<Schema.String>, Schema.String, never>
+}) => (from: Schema.String) => Schema.decodeTo<Schema.$Array<Schema.String>, Schema.String, never, never>
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/NimblebitSchema.ts#L132)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/NimblebitSchema.ts#L131)
 
 Since v1.0.0

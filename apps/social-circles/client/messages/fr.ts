@@ -85,6 +85,18 @@ export const fr: Messages = {
         joining: "Inscription...",
         takePart: "Participer",
 
+        graphHeading: "Ton cercle, dessiné",
+        graphBody:
+            "Toutes les personnes participantes qui sont amies réciproques d'une de tes tours, et les liens entre elles. Chaque jeu forme son propre groupe, car une amitié ne franchit jamais la frontière d'un jeu.",
+        graphEmpty:
+            "Rien à dessiner pour l'instant. Dès qu'une tour participe et que quelqu'un de sa liste d'amis nous rejoint aussi, ton cercle apparaît ici.",
+        graphYou: "toi",
+        graphAlt: (people, connections) =>
+            `${people} ${people === 1 ? "personne" : "personnes"} et ${connections} ${connections === 1 ? "lien" : "liens"}.`,
+
+        dormantGames: (names) =>
+            `Pas encore lisibles : ${names}. L'étude connaît ces jeux mais ne sait pas décoder leurs sauvegardes, donc leurs listes d'amis restent hors de portée pour le moment.`,
+
         yourCircle: "Ton cercle",
         hide: "Masquer",
         emptyCircle:

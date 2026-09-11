@@ -25,6 +25,7 @@ import { Oidc } from "effect-oidc";
 
 import { CookiePolicy, SESSION_COOKIE_NAME, maybeCurrentSession } from "../cookies.ts";
 import { randomSecret, seal, sha256 } from "../crypto.ts";
+import { REQUIRED_SCOPES } from "../domain/games.ts";
 import { GrantsRepository } from "../domain/grants.ts";
 import { SessionsRepository } from "../domain/sessions.ts";
 
@@ -45,14 +46,20 @@ const CODE_VERIFIER_COOKIE_NAME = "social_circles_oauth_code_verifier";
 const RETURN_TO_COOKIE_NAME = "social_circles_oauth_return_to";
 
 /**
- * `towers:read` lets the study read a friends list; `offline_access` lets it
- * keep doing so on a schedule.
+ * What the study asks a participant to grant, derived from the game catalog
+ * rather than written out here.
  *
- * Read-only is the whole point of asking for `towers:read` rather than the
- * older `towers`: a research project has no business being able to overwrite
- * somebody's tower, and the consent screen now says so in as many words.
+ * Per readable game, `list_accounts` and `pull_save` let the study see which
+ * towers a participant has linked and read their saves; `offline_access` lets
+ * it keep doing so on a schedule. Two leaves per game rather than a whole
+ * `:read` branch: a research project has no business with anyone's snapshots,
+ * gifts or visits, let alone overwriting a tower, and the consent screen says
+ * exactly what is asked for in as many words.
+ *
+ * Reading it off the catalog is what stops the sign-in asking for one game
+ * while the crawler reads another.
  */
-const SCOPES = ["openid", "profile", "towers:read", "offline_access"];
+const SCOPES = REQUIRED_SCOPES;
 
 /** Where a fresh sign-in lands when nothing better was asked for. */
 const HOME_AFTER_LOGIN = "/towers";

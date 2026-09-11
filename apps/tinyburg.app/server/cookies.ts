@@ -1,12 +1,13 @@
 import type { SqlError } from "effect/unstable/sql";
 
-import { Config, Context, Effect, Layer, Option, type Schema } from "effect";
+import { Context, Effect, Layer, Option, type Schema } from "effect";
 import { HttpServerRequest } from "effect/unstable/http";
 
 import type { Session, User } from "../domain/models.ts";
 
 import { SessionsRepository } from "../domain/sessions.ts";
 import { sha256 } from "./crypto.ts";
+import { isDevelopment } from "./environment.ts";
 
 /** The name of the cookie used to store the provider session. */
 export const PROVIDER_SESSION_COOKIE_NAME = "tinyburg_provider_session";
@@ -23,8 +24,8 @@ export const PROVIDER_SESSION_COOKIE_NAME = "tinyburg_provider_session";
  * cookies. Plain names in development, where http would refuse the prefix.
  */
 export class CookiePolicy extends Context.Service<CookiePolicy>()("@tinyburg/tinyburg.app/server/CookiePolicy", {
-    make: Effect.map(Config.string("NODE_ENV").pipe(Config.withDefault("production")), (env) => {
-        const secure = env !== "development";
+    make: Effect.map(isDevelopment, (development) => {
+        const secure = !development;
         const name = (base: string): string => (secure ? `__Host-${base}` : base);
         return { secure, name } as const;
     }),

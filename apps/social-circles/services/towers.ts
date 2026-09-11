@@ -20,31 +20,48 @@
  * which is why {@link GrantsRepository.upsert} overwrites in place rather than
  * accumulating rows.
  *
- * The remaining narrowing worth doing is upstream: `towers:read` still returns a
- * whole save when the study only ever wants the friends list.
+ * The remaining narrowing worth doing is upstream: `tinytower:pull_save` still
+ * returns a whole save when the study only ever wants the friends list.
  */
 
 import { Config, Context, Effect, Layer, Option, Redacted, Schema } from "effect";
 import { HttpClient, HttpClientRequest } from "effect/unstable/http";
 import { HttpApiClient } from "effect/unstable/httpapi";
 
+import type { GamePlayerRef } from "../domain/graph.ts";
 import type { PlayerId } from "../domain/model.ts";
 
 import { PlayerIdSchema } from "@tinyburg/nimblebit-sdk/NimblebitConfig";
 import { Api } from "@tinyburg/trading-sdk/Sdk";
 
 import { seal, unseal } from "../crypto.ts";
+import { type GameId, READABLE_GAMES, gameInfo } from "../domain/games.ts";
 import { GrantsRepository } from "../domain/grants.ts";
 
 /**
- * The scope the study asks for.
+ * The scope the study asks for, re-exported from the game catalog so callers do
+ * not have to know it is derived from the list of readable games.
  *
- * `towers:read` is as narrow as the provider currently goes. It still returns a
- * whole save when the study only wants the friends list, so there is room for a
- * narrower `towers:friends` later; the study has no business reading anyone's
- * bitizens or coin balance.
+ * Two leaves per game rather than a whole `:read` branch, because the study has
+ * no business with snapshots, gifts or visits. A save is still more than the
+ * friends list it wants, so there is room for something narrower later.
  */
-export const REQUIRED_SCOPE = "openid towers:read offline_access";
+export { REQUIRED_SCOPE } from "../domain/games.ts";
+
+/**
+ * The study asked for a game the trading api does not serve.
+ *
+ * Distinct from a tower being unavailable: nothing is wrong upstream and
+ * retrying will not help, the api simply has no group for this game yet.
+ *
+ * @since 1.0.0
+ * @category Errors
+ */
+export class GameNotServed extends Schema.Error<GameNotServed>("@tinyburg/social-circles/GameNotServed")({
+    _tag: Schema.tag("GameNotServed"),
+    game: Schema.String,
+    reason: Schema.String,
+}) {}
 
 /**
  * The stored grant cannot currently be turned into an access token.
@@ -233,12 +250,53 @@ export class TinyburgTowers extends Context.Service<TinyburgTowers>()(
                 });
 
             /**
-             * The TinyTower accounts a user has proven they own, read with a
-             * token the caller already holds.
+             * The trading api's groups for one game.
+             *
+             * The api exposes a pair of groups per game and both have the same
+             * shape, but they are separate properties on the derived client, so
+             * something has to turn a game id into the right pair. This is that
+             * something, and it is the one place that knows which games the api
+             * actually serves today.
+             *
+             * The six games beyond TinyTower and Classic have their groups
+             * defined in `@tinyburg/trading-sdk` but not yet added to `Api`, so
+             * there is nothing here to return for them.
+             */
+            const groupsFor = (client: Effect.Success<ReturnType<typeof clientFor>>, game: GameId) => {
+                switch (game) {
+                    case "tinytower": {
+                        return Option.some({
+                            accounts: client.TinyTowerAccountsGroup,
+                            tower: client.TinyTowerGroup,
+                        });
+                    }
+                    case "tinytowerclassic": {
+                        return Option.some({
+                            accounts: client.TinyTowerClassicAccountsGroup,
+                            tower: client.TinyTowerClassicGroup,
+                        });
+                    }
+                    default: {
+                        return Option.none<{
+                            accounts: typeof client.TinyTowerAccountsGroup;
+                            tower: typeof client.TinyTowerGroup;
+                        }>();
+                    }
+                }
+            };
+
+            /**
+             * Every account a user has proven they own, in every game the study
+             * can read, using a token the caller already holds.
              *
              * This is the ownership check the old Google Form could not make. A
-             * consent request for a player that is not in this list is somebody
+             * consent request for a tower that is not in this list is somebody
              * trying to enroll an account that is not theirs.
+             *
+             * One request per readable game. A game whose accounts group the api
+             * does not serve is skipped rather than failing the lot: the visitor
+             * should still see the towers that *can* be listed, and a game the
+             * study cannot read has nothing to contribute anyway.
              *
              * Taking the token as an argument is what lets the dashboard work
              * today: a signed-in visitor's session carries a live access token,
@@ -251,19 +309,30 @@ export class TinyburgTowers extends Context.Service<TinyburgTowers>()(
                 readonly accessToken: string;
             }) {
                 const client = yield* clientFor(options.accessToken);
-                const linked = yield* client.LinkedTinyTowerAccountsGroup.TinyburgLinkedTinyTowerAccountsList().pipe(
-                    Effect.mapError(
-                        (cause) =>
-                            new TowerGrantUnusable({
-                                tinyburgUserId: options.tinyburgUserId,
-                                // Frida's runtime handles are not plain strings; interpolating them here is intentional.
-                                // oxlint-disable-next-line typescript/restrict-template-expressions
-                                reason: `could not list linked accounts: ${cause}`,
-                                permanent: false,
-                            })
-                    )
+
+                const perGame = yield* Effect.forEach(READABLE_GAMES, (game) =>
+                    Option.match(groupsFor(client, game.id), {
+                        onNone: () => Effect.succeed<ReadonlyArray<GamePlayerRef>>([]),
+                        onSome: (groups) =>
+                            groups.accounts.ListAccounts().pipe(
+                                Effect.map((linked) =>
+                                    linked.map(({ playerId }): GamePlayerRef => ({ game: game.id, playerId }))
+                                ),
+                                Effect.mapError(
+                                    (cause) =>
+                                        new TowerGrantUnusable({
+                                            tinyburgUserId: options.tinyburgUserId,
+                                            // Frida's runtime handles are not plain strings; interpolating them here is intentional.
+                                            // oxlint-disable-next-line typescript/restrict-template-expressions
+                                            reason: `could not list linked ${game.name} accounts: ${cause}`,
+                                            permanent: false,
+                                        })
+                                )
+                            ),
+                    })
                 );
-                return linked.map(({ playerId }) => playerId);
+
+                return perGame.flat();
             });
 
             /** {@link linkedPlayersWith}, sourcing the token from the stored grant. */
@@ -273,20 +342,30 @@ export class TinyburgTowers extends Context.Service<TinyburgTowers>()(
             });
 
             /**
-             * Pulls a player's save through the provider.
+             * Pulls a tower's save through the provider.
              *
              * Returns the raw save string; decoding into a friends list is the
-             * caller's job so this stays a thin transport seam.
+             * game catalog's job so this stays a thin transport seam.
              */
             const pullSave = Effect.fnUntraced(function* (options: {
                 readonly tinyburgUserId: string;
+                readonly game: GameId;
                 readonly playerId: PlayerId;
             }) {
                 const accessToken = yield* accessTokenFor(options.tinyburgUserId);
                 const client = yield* clientFor(accessToken);
-                return yield* client.TinyTowerGroup.TinyTowerSyncPullSave({
-                    params: { friendCode: options.playerId },
-                }).pipe(
+
+                const groups = yield* Option.match(groupsFor(client, options.game), {
+                    onNone: () =>
+                        new GameNotServed({
+                            game: options.game,
+                            reason: `the trading api has no group for ${gameInfo[options.game].name}`,
+                        }),
+                    onSome: Effect.succeed,
+                });
+
+                return yield* groups.tower.PullSave({ params: { playerId: options.playerId } }).pipe(
+                    Effect.map((save) => save.data),
                     Effect.mapError(
                         (cause) =>
                             new TowerUnavailable({

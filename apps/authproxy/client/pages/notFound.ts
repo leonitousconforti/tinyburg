@@ -1,7 +1,7 @@
 import type { NotFoundMessages, SharedMessages } from "../messages/types.ts";
 import type { Html, HtmlBuilder } from "foldkit/html";
 
-import { appBackLink, card } from "@tinyburg/ui/Chrome";
+import { appBackLink, card } from "@tinyburg/shared-ui/Chrome";
 
 export const notFoundView = <M>(h: HtmlBuilder<M>, msgs: NotFoundMessages, shared: SharedMessages): Html =>
     h.div(

@@ -16,9 +16,23 @@ import { OAuthRoutesLive } from "./routes/oauth.ts";
 import { SelfServiceApiLive } from "./routes/selfservice.ts";
 import { StaticRoutesLive } from "./routes/static.ts";
 import { TinyTowerApiLive } from "./routes/tinytower.ts";
+import { TinyTowerClassicApiLive } from "./routes/tinytowerClassic.ts";
+import { PocketPlanesApiLive } from "./routes/pocketPlanes.ts";
+import { PocketTrainsApiLive } from "./routes/pocketTrains.ts";
+import { LegoTowerApiLive } from "./routes/legoTower.ts";
+import { DiscoZooApiLive } from "./routes/discoZoo.ts";
+import { BitCityApiLive } from "./routes/bitCity.ts";
+import { TinyTowerVegasApiLive } from "./routes/tinytowerVegas.ts";
 
 const AllRoutes = Layer.mergeAll(
     TinyTowerApiLive,
+    TinyTowerClassicApiLive,
+    PocketPlanesApiLive,
+    PocketTrainsApiLive,
+    LegoTowerApiLive,
+    DiscoZooApiLive,
+    BitCityApiLive,
+    TinyTowerVegasApiLive,
     SelfServiceApiLive,
     OAuthRoutesLive,
     HealthCheckRoutesLive,

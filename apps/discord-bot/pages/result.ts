@@ -14,9 +14,9 @@
 import type { Effect } from "effect";
 import type { HttpServerResponse } from "effect/unstable/http";
 
-import type { Language } from "@tinyburg/ui/Internationalization";
+import type { Language } from "@tinyburg/shared-ui/Internationalization";
 
-import * as StandalonePage from "@tinyburg/ui/StandalonePage";
+import * as StandalonePage from "@tinyburg/shared-ui/StandalonePage";
 
 /**
  * @since 1.0.0

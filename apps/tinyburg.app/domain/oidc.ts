@@ -1,6 +1,6 @@
 import type { SqlError } from "effect/unstable/sql";
 
-import { Context, Effect, Layer, Schedule, Schema } from "effect";
+import { Context, Effect, Layer, Schema } from "effect";
 import { SqlClient, SqlModel, SqlSchema } from "effect/unstable/sql";
 
 import { OAuthAuthorizationRequest, RefreshToken } from "./models.ts";
@@ -145,30 +145,6 @@ export class OidcRepository extends Context.Service<OidcRepository>()("@tinyburg
                 `,
                 (rows) => rows.length
             );
-
-        yield* sql`DELETE FROM revoked_tokens WHERE expires_at < NOW()`.pipe(
-            Effect.catchCause((cause) => Effect.logWarning(`failed to purge expired revoked tokens`, cause)),
-            Effect.schedule(Schedule.cron("23 * * * *")),
-            Effect.forkScoped,
-            Effect.asVoid
-        );
-
-        // Kept a while past expiry: a replayed token is only recognisable as
-        // reuse while its row still exists, so deleting on the stroke of expiry
-        // would turn a detectable attack into a silent "unknown token".
-        yield* sql`DELETE FROM refresh_tokens WHERE expires_at < NOW() - INTERVAL '30 days'`.pipe(
-            Effect.catchCause((cause) => Effect.logWarning(`failed to purge expired refresh tokens`, cause)),
-            Effect.schedule(Schedule.cron("47 3 * * *")),
-            Effect.forkScoped,
-            Effect.asVoid
-        );
-
-        yield* sql`DELETE FROM oauth_authorization_requests WHERE expires_at < NOW()`.pipe(
-            Effect.catchCause((cause) => Effect.logWarning(`failed to purge expired authorization requests`, cause)),
-            Effect.schedule(Schedule.cron("*/15 * * * *")),
-            Effect.forkScoped,
-            Effect.asVoid
-        );
 
         return {
             createAuthorizationRequest,

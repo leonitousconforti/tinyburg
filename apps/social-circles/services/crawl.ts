@@ -10,13 +10,12 @@
 
 import { Config, Context, Effect, Layer, Option, Schema } from "effect";
 
-import type { PlayerId } from "../domain/model.ts";
-import type { TowerGrantUnusable } from "./towers.ts";
-
-import { TinyTower } from "@tinyburg/tinytower-sdk";
+import type { GamePlayerRef } from "../domain/graph.ts";
+import type { GameNotServed, TowerGrantUnusable } from "./towers.ts";
 
 import { sha256 } from "../crypto.ts";
 import { CrawlStateRepository } from "../domain/crawl.ts";
+import { gameInfo } from "../domain/games.ts";
 import { GrantsRepository } from "../domain/grants.ts";
 import { GraphRepository } from "../domain/graph.ts";
 import { NimblebitPacer } from "./ratelimit.ts";
@@ -38,7 +37,10 @@ export const CrawlOutcome = Schema.Union([
     }),
     /** The tower had not changed since the last successful crawl. */
     Schema.Struct({ _tag: Schema.tag("Unchanged") }),
-    /** Consent was withdrawn between scheduling and running. */
+    /**
+     * Nothing to do: consent was withdrawn between scheduling and running, or
+     * the game has no save decoder yet. Neither is a failure to back off from.
+     */
     Schema.Struct({ _tag: Schema.tag("Skipped"), reason: Schema.String }),
 ]);
 
@@ -62,19 +64,29 @@ export class CrawlService extends Context.Service<CrawlService>()("@tinyburg/soc
          * is fatal (the consent workflow's first crawl) or just another backoff
          * tick (the scheduled entity).
          */
-        const crawlPlayer = Effect.fnUntraced(function* (playerId: PlayerId) {
+        const crawlPlayer = Effect.fnUntraced(function* ({ game, playerId }: GamePlayerRef) {
+            /**
+             * A game with no save decoder has nothing this crawl can do. Caught
+             * here rather than at scheduling time as well, because a game can go
+             * dormant between the two and a scheduled message must not fail.
+             */
+            const reader = gameInfo[game].reader;
+            if (reader._tag === "Dormant") {
+                return { _tag: "Skipped", reason: reader.reason } as const;
+            }
+
             /**
              * Whoever consented is who we act as. If nobody does, the player is
              * either revoked or their grant died, and either way there is
              * nothing to do and nothing to back off from.
              */
-            const maybeUser = yield* grants.findUserForPlayer(playerId).pipe(Effect.orDie);
+            const maybeUser = yield* grants.findUserForPlayer({ game, playerId }).pipe(Effect.orDie);
             if (Option.isNone(maybeUser)) {
                 return { _tag: "Skipped", reason: "no live consent or usable grant" } as const;
             }
             const tinyburgUserId = maybeUser.value;
 
-            const save = yield* pacer.paced(towers.pullSave({ tinyburgUserId, playerId }));
+            const save = yield* pacer.paced(towers.pullSave({ tinyburgUserId, game, playerId }));
 
             /**
              * Fingerprint the raw save. Nimblebit has no etag, and a fingerprint
@@ -82,33 +94,26 @@ export class CrawlService extends Context.Service<CrawlService>()("@tinyburg/soc
              * has not moved, which is most players most of the time.
              */
             const saveVersion = yield* sha256(save);
-            const previous = yield* crawlState.lastSaveVersion(playerId).pipe(Effect.orDie);
+            const previous = yield* crawlState.lastSaveVersion(game, playerId).pipe(Effect.orDie);
             if (previous === saveVersion) {
-                yield* crawlState.recordSuccess({ playerId, saveVersion, intervalMinutes }).pipe(Effect.orDie);
+                yield* crawlState.recordSuccess({ game, playerId, saveVersion, intervalMinutes }).pipe(Effect.orDie);
                 return { _tag: "Unchanged" } as const;
             }
 
-            const decoded = yield* Schema.decodeEffect(TinyTower.SaveData)(save).pipe(
+            /**
+             * The game catalog owns the save format. Passing the raw list on is
+             * deliberate: `syncFriends` does the consent filtering itself so it
+             * can count what it dropped.
+             */
+            const observed = yield* reader.friendsOf(save).pipe(
                 // Frida's runtime handles are not plain strings; interpolating them here is intentional.
                 // oxlint-disable-next-line typescript/restrict-template-expressions
                 Effect.mapError((cause) => new TowerUnavailable({ playerId, reason: `save did not decode: ${cause}` }))
             );
 
-            /**
-             * An empty friends list encodes as `""`, not as an empty array.
-             * Passing the raw list on is deliberate: `syncFriends` does the
-             * consent filtering itself so it can count what it dropped.
-             */
-            const observed = decoded.friends === undefined || decoded.friends === "" ? [] : decoded.friends;
+            const result = yield* graph.syncFriends(game, playerId, observed).pipe(Effect.orDie);
 
-            const result = yield* graph
-                .syncFriends(
-                    playerId,
-                    observed.map(({ friendId }) => friendId)
-                )
-                .pipe(Effect.orDie);
-
-            yield* crawlState.recordSuccess({ playerId, saveVersion, intervalMinutes }).pipe(Effect.orDie);
+            yield* crawlState.recordSuccess({ game, playerId, saveVersion, intervalMinutes }).pipe(Effect.orDie);
 
             return { _tag: "Synced", ...result } as const;
         });
@@ -119,14 +124,15 @@ export class CrawlService extends Context.Service<CrawlService>()("@tinyburg/soc
          * This is the entry point for scheduled work, where one unreachable
          * tower must never take down the round.
          */
-        const crawlPlayerScheduled = Effect.fnUntraced(function* (playerId: PlayerId) {
-            const outcome = yield* Effect.result(crawlPlayer(playerId));
+        const crawlPlayerScheduled = Effect.fnUntraced(function* (tower: GamePlayerRef) {
+            const { game, playerId } = tower;
+            const outcome = yield* Effect.result(crawlPlayer(tower));
             if (outcome._tag === "Success") {
                 return outcome.success;
             }
 
             const failure = outcome.failure;
-            yield* crawlState.recordFailure({ playerId, error: describe(failure) }).pipe(Effect.orDie);
+            yield* crawlState.recordFailure({ game, playerId, error: describe(failure) }).pipe(Effect.orDie);
 
             /**
              * A dead grant is a decision the user made upstream, not an outage.
@@ -148,7 +154,16 @@ export class CrawlService extends Context.Service<CrawlService>()("@tinyburg/soc
     static readonly Default = Layer.effect(CrawlService, CrawlService.make);
 }
 
-const describe = (failure: TowerGrantUnusable | TowerUnavailable): string =>
-    failure._tag === "TowerGrantUnusable"
-        ? `grant unusable: ${failure.reason}`
-        : `tower unavailable: ${failure.reason}`;
+const describe = (failure: GameNotServed | TowerGrantUnusable | TowerUnavailable): string => {
+    switch (failure._tag) {
+        case "TowerGrantUnusable": {
+            return `grant unusable: ${failure.reason}`;
+        }
+        case "GameNotServed": {
+            return `game not served: ${failure.reason}`;
+        }
+        default: {
+            return `tower unavailable: ${failure.reason}`;
+        }
+    }
+};

@@ -11,9 +11,11 @@ import * as HttpApiError from "effect/unstable/httpapi/HttpApiError";
 import * as HttpApiGroup from "effect/unstable/httpapi/HttpApiGroup";
 
 import * as NimblebitConfig from "@tinyburg/nimblebit-sdk/NimblebitConfig";
+import * as ResourceServer from "effect-oidc/ResourceServer";
 
 import * as Bitizen from "./Bitizens.ts";
 import * as Gift from "./Gift.ts";
+import * as Scopes from "./Scopes.ts";
 import * as SyncItemType from "./SyncItemType.ts";
 
 /** @internal */
@@ -110,7 +112,12 @@ export const PlayerMetaData = Schema.Struct({
     })
 );
 
-/** @internal */
+/**
+ * Deliberately carries no scope: registering a new player is not something a
+ * proxy should do on a key holder's behalf, so no key can be granted it.
+ *
+ * @internal
+ */
 export const DeviceNewPlayerEndpoint = HttpApiEndpoint.get("DeviceNewPlayer", "/register/tt/:salt1/:salt2/:hash", {
     params: { salt1: U32, salt2: U32, hash: Schema.String },
     error: ApiErrors,
@@ -152,7 +159,7 @@ export const DevicePlayerDetailsEndpoint = HttpApiEndpoint.get(
             }),
         ],
     }
-);
+).annotate(ResourceServer.OIDCScopes, Scopes.Device.read.player_details.grants);
 
 /** @internal */
 export const DeviceVerifyDeviceEndpoint = HttpApiEndpoint.get(
@@ -181,7 +188,7 @@ export const DeviceVerifyDeviceEndpoint = HttpApiEndpoint.get(
             ),
         ],
     }
-);
+).annotate(ResourceServer.OIDCScopes, Scopes.Device.write.verify_device.grants);
 
 /** @internal */
 export const DeviceRegisterEmailEndpoint = HttpApiEndpoint.post(
@@ -197,7 +204,7 @@ export const DeviceRegisterEmailEndpoint = HttpApiEndpoint.post(
             Schema.Struct({ success: Schema.Literal("NewDevice") }),
         ],
     }
-);
+).annotate(ResourceServer.OIDCScopes, Scopes.Device.write.register_email.grants);
 
 /** @internal */
 export const SyncPullSaveEndpoint = HttpApiEndpoint.get("SyncPullSave", "/sync/pull/tt/:playerId/:salt/:hash", {
@@ -218,7 +225,7 @@ export const SyncPullSaveEndpoint = HttpApiEndpoint.get("SyncPullSave", "/sync/p
             })
         ),
     ],
-});
+}).annotate(ResourceServer.OIDCScopes, Scopes.Sync.read.pull_save.grants);
 
 /** @internal */
 export const SyncPushSaveEndpoint = HttpApiEndpoint.post("SyncPushSave", "/sync/push/tt/:playerId/:salt/:hash", {
@@ -241,7 +248,7 @@ export const SyncPushSaveEndpoint = HttpApiEndpoint.post("SyncPushSave", "/sync/
     ),
     error: ApiErrors,
     success: [ErrorResponse, SavedResponse, NotSavedResponse],
-});
+}).annotate(ResourceServer.OIDCScopes, Scopes.Sync.write.push_save.grants);
 
 /** @internal */
 export const SyncCheckForNewerSaveEndpoint = HttpApiEndpoint.get(
@@ -265,7 +272,7 @@ export const SyncCheckForNewerSaveEndpoint = HttpApiEndpoint.get(
             ),
         ],
     }
-);
+).annotate(ResourceServer.OIDCScopes, Scopes.Sync.read.check_version.grants);
 
 /** @internal */
 export const SyncPullSnapshotEndpoint = HttpApiEndpoint.get(
@@ -290,7 +297,7 @@ export const SyncPullSnapshotEndpoint = HttpApiEndpoint.get(
             ),
         ],
     }
-);
+).annotate(ResourceServer.OIDCScopes, Scopes.Sync.read.pull_snapshot.grants);
 
 /** @internal */
 export const SyncPushSnapshotEndpoint = HttpApiEndpoint.post(
@@ -317,7 +324,7 @@ export const SyncPushSnapshotEndpoint = HttpApiEndpoint.post(
         error: ApiErrors,
         success: [ErrorResponse, SavedResponse, NotSavedResponse],
     }
-);
+).annotate(ResourceServer.OIDCScopes, Scopes.Sync.write.push_snapshot.grants);
 
 /** @internal */
 export const SyncRetrieveSnapshotListEndpoint = HttpApiEndpoint.get(
@@ -341,14 +348,14 @@ export const SyncRetrieveSnapshotListEndpoint = HttpApiEndpoint.get(
             }),
         ],
     }
-);
+).annotate(ResourceServer.OIDCScopes, Scopes.Sync.read.list_snapshots.grants);
 
 /** @internal */
 export const RaffleEnterEndpoint = HttpApiEndpoint.get("RaffleEnter", "/raffle/enter/tt/:playerId/:salt/:hash", {
     params: { playerId: NimblebitConfig.PlayerIdSchema, salt: U32, hash: Schema.String },
     error: ApiErrors,
     success: [ErrorResponse, EnteredResponse, NotEnteredResponse],
-});
+}).annotate(ResourceServer.OIDCScopes, Scopes.Raffle.write.enter.grants);
 
 /** @internal */
 export const RaffleEnterMultiEndpoint = HttpApiEndpoint.get(
@@ -359,7 +366,7 @@ export const RaffleEnterMultiEndpoint = HttpApiEndpoint.get(
         error: ApiErrors,
         success: [ErrorResponse, EnteredResponse, NotEnteredResponse],
     }
-);
+).annotate(ResourceServer.OIDCScopes, Scopes.Raffle.write.enter_multi.grants);
 
 /** @internal */
 export const RaffleCheckEnteredCurrentEndpoint = HttpApiEndpoint.get(
@@ -370,7 +377,7 @@ export const RaffleCheckEnteredCurrentEndpoint = HttpApiEndpoint.get(
         error: ApiErrors,
         success: [ErrorResponse, EnteredResponse, NotEnteredResponse],
     }
-);
+).annotate(ResourceServer.OIDCScopes, Scopes.Raffle.read.check_entered.grants);
 
 /** @internal */
 export const SocialSendItemEndpoint = HttpApiEndpoint.post(
@@ -388,7 +395,7 @@ export const SocialSendItemEndpoint = HttpApiEndpoint.post(
         error: ApiErrors,
         success: [ErrorResponse, SentResponse, NotSentResponse],
     }
-);
+).annotate(ResourceServer.OIDCScopes, Scopes.Social.write.send_item.grants);
 
 /** @internal */
 export const SocialGetGiftsEndpoint = HttpApiEndpoint.get("SocialGetGifts", "/get_gifts/tt/:playerId/:salt/:hash", {
@@ -403,7 +410,7 @@ export const SocialGetGiftsEndpoint = HttpApiEndpoint.get("SocialGetGifts", "/ge
             total: Schema.Int,
         }),
     ],
-});
+}).annotate(ResourceServer.OIDCScopes, Scopes.Social.read.get_gifts.grants);
 
 /** @internal */
 export const SocialReceiveGiftEndpoint = HttpApiEndpoint.get(
@@ -414,7 +421,7 @@ export const SocialReceiveGiftEndpoint = HttpApiEndpoint.get(
         error: ApiErrors,
         success: [ErrorResponse, ReceivedResponse, NotReceivedResponse],
     }
-);
+).annotate(ResourceServer.OIDCScopes, Scopes.Social.write.receive_gift.grants);
 
 /** @internal */
 export const SocialPullFriendMetaEndpoint = HttpApiEndpoint.post(
@@ -433,7 +440,7 @@ export const SocialPullFriendMetaEndpoint = HttpApiEndpoint.post(
             }),
         ],
     }
-);
+).annotate(ResourceServer.OIDCScopes, Scopes.Social.read.pull_friend_meta.grants);
 
 /** @internal */
 export const SocialPullFriendTowerEndpoint = HttpApiEndpoint.get(
@@ -465,7 +472,7 @@ export const SocialPullFriendTowerEndpoint = HttpApiEndpoint.get(
             ),
         ],
     }
-);
+).annotate(ResourceServer.OIDCScopes, Scopes.Social.read.pull_friend_tower.grants);
 
 /** @internal */
 export const SocialRetrieveFriendsSnapshotListEndpoint = HttpApiEndpoint.get(
@@ -512,7 +519,7 @@ export const SocialRetrieveFriendsSnapshotListEndpoint = HttpApiEndpoint.get(
             }),
         ],
     }
-);
+).annotate(ResourceServer.OIDCScopes, Scopes.Social.read.list_friend_snapshots.grants);
 
 /** @internal */
 export const SocialGetVisitsEndpoint = HttpApiEndpoint.get("SocialGetVisits", "/get_visits/tt/:playerId/:salt/:hash", {
@@ -527,7 +534,7 @@ export const SocialGetVisitsEndpoint = HttpApiEndpoint.get("SocialGetVisits", "/
             total: Schema.Int,
         }),
     ],
-});
+}).annotate(ResourceServer.OIDCScopes, Scopes.Social.read.get_visits.grants);
 
 /** @internal */
 export const DeviceManagementGroup = HttpApiGroup.make("DeviceManagementGroup")

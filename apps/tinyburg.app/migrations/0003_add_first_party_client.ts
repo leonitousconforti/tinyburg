@@ -25,7 +25,7 @@ export default Effect.flatMap(
             NULL,
             'Tinyburg',
             NULL,
-            'openid profile towers',
+            'openid profile tinytower tinytowerclassic',
             ARRAY['https://tinyburg.app/']
         )
         ON CONFLICT (id) DO NOTHING

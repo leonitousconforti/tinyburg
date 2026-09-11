@@ -1,7 +1,7 @@
 import { Effect, Layer, Option, Result } from "effect";
 import { Url } from "effect/unstable/http";
 
-import { fromDiscordLocale } from "@tinyburg/ui/Internationalization";
+import { fromDiscordLocale } from "@tinyburg/shared-ui/Internationalization";
 import { Discord, Ix, UI } from "dfx";
 import { InteractionsRegistry } from "dfx/gateway";
 import { Oidc } from "effect-oidc";

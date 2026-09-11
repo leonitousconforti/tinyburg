@@ -46,8 +46,9 @@
     },
     "dependencies": {
         "@tinyburg/nimblebit-sdk": "workspace:^",
+        "@tinyburg/tinytower-classic-sdk": "workspace:^",
         "@tinyburg/tinytower-sdk": "workspace:^",
-        "effect-oidc": "0.0.14"
+        "effect-oidc": "0.1.0"
     },
     "devDependencies": {
         "effect": "4.0.0-rc.111"

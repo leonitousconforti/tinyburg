@@ -2,8 +2,9 @@ import { Context, Effect, Layer, Result, Schema as S } from "effect";
 import { HttpApiClient } from "effect/unstable/httpapi";
 
 import { Api as TradingApi } from "@tinyburg/trading-sdk/Sdk";
+import { Api as TreasuryApi, TreasuryStats } from "@tinyburg/treasury-sdk/Sdk";
 import { AsyncData, Command, Http } from "foldkit";
-import { m } from "foldkit/message";
+import { defineMessageUnion } from "foldkit/message";
 import { ts } from "foldkit/schema";
 
 import { User } from "../domain/models.ts";
@@ -30,9 +31,20 @@ export class Auth extends Context.Service<Auth>()("@tinyburg/tinyburg.app/client
     static readonly Default = Layer.effect(this, Auth.make).pipe(Layer.provide(Http.layer));
 }
 
+/**
+ * The derived treasury client. Requests go to this same origin; the server's
+ * `/v1/treasury/*` proxy attaches the session bearer and forwards them to
+ * the treasury service.
+ */
+export class Treasury extends Context.Service<Treasury>()("@tinyburg/tinyburg.app/client/Treasury", {
+    make: HttpApiClient.make(TreasuryApi),
+}) {
+    static readonly Default = Layer.effect(this, Treasury.make).pipe(Layer.provide(Http.layer));
+}
+
 /** Everything a command may reach for, provided to the runtime at boot. */
-export type Backend = Api | Auth;
-export const BackendLive: Layer.Layer<Backend> = Layer.mergeAll(Api.Default, Auth.Default);
+export type Backend = Api | Auth | Treasury;
+export const BackendLive: Layer.Layer<Backend> = Layer.mergeAll(Api.Default, Auth.Default, Treasury.Default);
 
 /**
  * The signed-in user, modelled with the same schema the session endpoint
@@ -57,40 +69,68 @@ const LinkedTower = S.Struct({ playerId: S.String, createdAt: S.DateTimeUtc });
 export const LinkedTowers = AsyncData.Schema(S.Array(LinkedTower), S.Literals(["loadFailed"]));
 export type LinkedTowers = typeof LinkedTowers.schema.Type;
 
-export const GotSession = m("GotSession", { session: SessionState });
+/** The treasury's public counters, for the home page's stat tiles. */
+export const Stats = AsyncData.Schema(TreasuryStats, S.Literals(["loadFailed"]));
+export type Stats = typeof Stats.schema.Type;
 
-/** The outcome of a towers fetch; update folds it into the current state with
- *  `AsyncData.settle`, which keeps held data as Stale on failure. */
-export const SettledLinkedTowers = m("SettledLinkedTowers", {
-    result: S.Result(S.Array(LinkedTower), S.Literals(["loadFailed"])),
+/**
+ * What the backend tells the application.
+ *
+ * One union rather than a constructor per message: `defineMessageUnion`
+ * declares the whole set at once and hangs the constructors off the result, so
+ * the union and its members cannot drift apart.
+ */
+export const BackendMessage = defineMessageUnion({
+    GotSession: { session: SessionState },
+
+    /** The outcome of a towers fetch; update folds it into the current state with
+     *  `AsyncData.settle`, which keeps held data as Stale on failure. */
+    SettledLinkedTowers: { result: S.Result(S.Array(LinkedTower), S.Literals(["loadFailed"])) },
+
+    SettledStats: { result: S.Result(TreasuryStats, S.Literals(["loadFailed"])) },
 });
+export type BackendMessage = typeof BackendMessage.Type;
 
 /** Asks the server who this browser is. */
 export const FetchSession = Command.define("FetchSession", {
-    messages: [GotSession],
+    messages: [BackendMessage.GotSession],
     execute: Effect.gen(function* () {
         const auth = yield* Auth;
         const user = yield* auth.AuthGroup.session();
-        return GotSession({ session: SignedIn({ user }) });
+        return BackendMessage.GotSession({ session: SignedIn({ user }) });
     }).pipe(
         // Unauthorized is a plain signed-out answer. Anything else gets the
         // same treatment, because a gated page cannot render on a maybe.
-        Effect.catch(() => Effect.succeed(GotSession({ session: SignedOut() })))
+        Effect.catch(() => Effect.succeed(BackendMessage.GotSession({ session: SignedOut() })))
     ),
 });
 
+/**
+ * The public counters for the front page. No session involved: the endpoint
+ * is the treasury's one unauthenticated group, and the proxy forwards it
+ * with or without a visitor signed in.
+ */
+export const FetchStats = Command.define("FetchStats", {
+    messages: [BackendMessage.SettledStats],
+    execute: Effect.gen(function* () {
+        const treasury = yield* Treasury;
+        const stats = yield* treasury.TreasuryPublicGroup.Stats();
+        return BackendMessage.SettledStats({ result: Result.succeed(stats) });
+    }).pipe(Effect.catch(() => Effect.succeed(BackendMessage.SettledStats({ result: Result.fail("loadFailed") })))),
+});
+
 export const FetchLinkedTowers = Command.define("FetchLinkedTowers", {
-    messages: [SettledLinkedTowers, GotSession],
+    messages: [BackendMessage.SettledLinkedTowers, BackendMessage.GotSession],
     execute: Effect.gen(function* () {
         const api = yield* Api;
-        const towers = yield* api.LinkedTinyTowerAccountsGroup.TinyburgLinkedTinyTowerAccountsList();
-        return SettledLinkedTowers({
+        const towers = yield* api.TinyTowerAccountsGroup.ListAccounts();
+        return BackendMessage.SettledLinkedTowers({
             result: Result.succeed(towers.map((tower) => ({ playerId: tower.playerId, createdAt: tower.createdAt }))),
         });
     }).pipe(
         // The session expired or was signed out elsewhere; re-running the
         // gating sends the visitor back to login.
-        Effect.catchTag("Unauthorized", () => Effect.succeed(GotSession({ session: SignedOut() }))),
-        Effect.catch(() => Effect.succeed(SettledLinkedTowers({ result: Result.fail("loadFailed") })))
+        Effect.catchTag("Unauthorized", () => Effect.succeed(BackendMessage.GotSession({ session: SignedOut() }))),
+        Effect.catch(() => Effect.succeed(BackendMessage.SettledLinkedTowers({ result: Result.fail("loadFailed") })))
     ),
 });

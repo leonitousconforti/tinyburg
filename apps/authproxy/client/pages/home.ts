@@ -4,8 +4,8 @@ import type { SessionState } from "../backend.ts";
 import type { HomeMessages } from "../messages/types.ts";
 import type { Html, HtmlBuilder } from "foldkit/html";
 
-import { card, primaryButton } from "@tinyburg/ui/Chrome";
-import { codeBlock } from "@tinyburg/ui/Code";
+import { card, primaryButton } from "@tinyburg/shared-ui/Chrome";
+import { codeBlock } from "@tinyburg/shared-ui/Code";
 
 import { loginHref } from "../routes.ts";
 

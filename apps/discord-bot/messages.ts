@@ -1,4 +1,4 @@
-import type { Language } from "@tinyburg/ui/Internationalization";
+import type { Language } from "@tinyburg/shared-ui/Internationalization";
 
 /**
  * Every user-facing string the bot produces, per language.

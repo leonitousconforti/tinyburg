@@ -1,12 +1,12 @@
-import { Context, Effect, Layer, Schema as S } from "effect";
+import { Context, Effect, Layer, Result, Schema as S } from "effect";
 import { HttpApiClient } from "effect/unstable/httpapi";
 
-import { Command, Http } from "foldkit";
-import { m } from "foldkit/message";
+import { AsyncData, Command, Http } from "foldkit";
+import { defineMessageUnion } from "foldkit/message";
 import { ts } from "foldkit/schema";
 
 import { Session } from "../domain/sessions.ts";
-import { SelfServiceApi } from "../shared/api.ts";
+import { type ScopeCatalogArea, ScopeCatalogGame, type ScopeCatalogNode, SelfServiceApi } from "../shared/api.ts";
 
 /**
  * The derived client for the cookie-session self-service api. Requests are
@@ -37,18 +37,55 @@ export const SignedIn = ts("SignedIn", { session: Session.json });
 export const SessionState = S.Union([SignedOut, CheckingSession, SignedIn]);
 export type SessionState = typeof SessionState.Type;
 
-export const GotSession = m("GotSession", { session: SessionState });
+/**
+ * The scopes as the proxy offers them, straight from the catalog endpoint:
+ * one area per part of the api, each with a `:read` and a `:write` branch and
+ * the leaves under those. The dashboard holds no list of its own: what it
+ * shows is what the server read off the TinyTower endpoints, so a scope
+ * cannot be offered here that is not enforced there.
+ */
+export type CatalogGame = typeof ScopeCatalogGame.Type;
+export type CatalogArea = typeof ScopeCatalogArea.Type;
+export type CatalogNode = typeof ScopeCatalogNode.Type;
+
+const LoadFailed = S.Literals(["loadFailed"]);
+
+export const ScopeCatalog = AsyncData.Schema(S.Array(ScopeCatalogGame), LoadFailed);
+export type ScopeCatalogData = typeof ScopeCatalog.schema.Type;
+
+/**
+ * What the backend tells the application.
+ *
+ * One union rather than a constructor per message: `defineMessageUnion`
+ * declares the whole set at once and hangs the constructors off the result, so
+ * the union and its members cannot drift apart.
+ */
+export const BackendMessage = defineMessageUnion({
+    GotSession: { session: SessionState },
+    SettledScopes: { result: S.Result(S.Array(ScopeCatalogGame), LoadFailed) },
+});
+export type BackendMessage = typeof BackendMessage.Type;
 
 /** Asks the server who this browser is. */
 export const FetchSession = Command.define("FetchSession", {
-    messages: [GotSession],
+    messages: [BackendMessage.GotSession],
     execute: Effect.gen(function* () {
         const self = yield* Self;
         const session = yield* self.SelfServiceGroup.session();
-        return GotSession({ session: SignedIn({ session }) });
+        return BackendMessage.GotSession({ session: SignedIn({ session }) });
     }).pipe(
         // Unauthorized is a plain signed-out answer. Anything else gets the
         // same treatment, because a gated page cannot render on a maybe.
-        Effect.catch(() => Effect.succeed(GotSession({ session: SignedOut() })))
+        Effect.orElseSucceed(() => BackendMessage.GotSession({ session: SignedOut() }))
     ),
+});
+
+/** Asks the server which scopes it hands out, and what each one means. */
+export const FetchScopes = Command.define("FetchScopes", {
+    messages: [BackendMessage.SettledScopes],
+    execute: Effect.gen(function* () {
+        const self = yield* Self;
+        const catalog = yield* self.ScopesGroup.catalog();
+        return BackendMessage.SettledScopes({ result: Result.succeed(catalog) });
+    }).pipe(Effect.orElseSucceed(() => BackendMessage.SettledScopes({ result: Result.fail("loadFailed" as const) }))),
 });

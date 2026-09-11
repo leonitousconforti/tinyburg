@@ -13,7 +13,7 @@
 import { Effect } from "effect";
 import { HttpRouter, HttpServerResponse } from "effect/unstable/http";
 
-import { STYLESHEET_HREF, stylesheetFile } from "@tinyburg/ui/StandalonePage";
+import { STYLESHEET_HREF, stylesheetFile } from "@tinyburg/shared-ui/StandalonePage";
 
 /**
  * @since 1.0.0

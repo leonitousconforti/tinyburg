@@ -3,7 +3,7 @@ import { HttpClient, HttpRouter, HttpServerRequest } from "effect/unstable/http"
 
 import type { Jwt } from "effect-oidc";
 
-import { type Language, fromAcceptLanguage } from "@tinyburg/ui/Internationalization";
+import { type Language, fromAcceptLanguage } from "@tinyburg/shared-ui/Internationalization";
 import { DiscordREST } from "dfx";
 import { Oidc } from "effect-oidc";
 

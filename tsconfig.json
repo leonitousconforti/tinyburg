@@ -3,19 +3,28 @@
     "extends": "./tsconfig.base.jsonc",
     "include": [],
     "references": [
+        { "path": "packages/bitcity-sdk" },
         { "path": "packages/bitprints" },
+        { "path": "packages/disco-zoo-sdk" },
         { "path": "packages/doorman" },
         { "path": "packages/insight" },
+        { "path": "packages/lego-tower-sdk" },
         { "path": "packages/nimblebit-sdk" },
+        { "path": "packages/pocket-planes-sdk" },
+        { "path": "packages/pocket-trains-sdk" },
+        { "path": "packages/tinytower-classic-sdk" },
         { "path": "packages/tinytower-sdk" },
+        { "path": "packages/tinytower-vegas-sdk" },
         { "path": "packages/trading-sdk" },
-        { "path": "packages/ui" },
+        { "path": "packages/treasury-sdk" },
+        { "path": "apps/shared-ui" },
         { "path": "apps/archivist" },
         { "path": "apps/authproxy" },
         { "path": "apps/auto-gold-bits" },
         { "path": "apps/discord-bot" },
         { "path": "apps/doorman-clone" },
         { "path": "apps/social-circles" },
-        { "path": "apps/tinyburg.app" }
+        { "path": "apps/tinyburg.app" },
+        { "path": "apps/treasury" }
     ]
 }

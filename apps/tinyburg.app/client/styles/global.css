@@ -2,11 +2,11 @@
 
 /* Fonts, shared tokens (sky/gold/card colors, pixel shadows, provider
    colors), and the base body styles come from the component library. */
-@import "@tinyburg/ui/theme.css";
+@import "@tinyburg/shared-ui/theme.css";
 
 /* Component classes live in the shared library's TypeScript; tailwind only
    generates utilities for files it scans. */
-@source "../../node_modules/@tinyburg/ui/src";
+@source "../../node_modules/@tinyburg/shared-ui/src";
 
 @theme {
     /* Floor type colors, this app's own */

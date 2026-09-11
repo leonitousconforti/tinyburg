@@ -1,0 +1,20 @@
+{
+    "name": "@tinyburg/treasury",
+    "version": "0.0.0",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "start": "node index.ts"
+    },
+    "dependencies": {
+        "@effect/platform-node": "4.0.0-rc.111",
+        "@effect/sql-pg": "4.0.0-rc.111",
+        "@tinyburg/nimblebit-sdk": "workspace:*",
+        "@tinyburg/tinytower-sdk": "workspace:*",
+        "@tinyburg/trading-sdk": "workspace:*",
+        "@tinyburg/treasury-sdk": "workspace:*",
+        "effect": "4.0.0-rc.111",
+        "effect-oidc": "0.1.0",
+        "typescript": "7.0.2"
+    }
+}

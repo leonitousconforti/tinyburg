@@ -16,6 +16,7 @@ import { PlayerIdSchema } from "@tinyburg/nimblebit-sdk/NimblebitConfig";
 
 import { ConsentRepository } from "../domain/consent.ts";
 import { CrawlStateRepository } from "../domain/crawl.ts";
+import { GameId, gameInfo } from "../domain/games.ts";
 import { CrawlService } from "../services/crawl.ts";
 import { TinyburgTowers } from "../services/towers.ts";
 
@@ -27,6 +28,7 @@ import { TinyburgTowers } from "../services/towers.ts";
  */
 export class ConsentRejected extends Schema.Error<ConsentRejected>("@tinyburg/social-circles/ConsentRejected")({
     _tag: Schema.tag("ConsentRejected"),
+    game: GameId,
     playerId: PlayerIdSchema,
     reason: Schema.String,
 }) {}
@@ -41,6 +43,7 @@ const FIRST_CRAWL_ATTEMPTS = 3;
 export const ConsentWorkflow = Workflow.make("SocialCirclesConsent", {
     payload: {
         tinyburgUserId: Schema.String.check(Schema.isUUID()),
+        game: GameId,
         playerId: PlayerIdSchema,
     },
     success: Schema.Struct({
@@ -49,10 +52,12 @@ export const ConsentWorkflow = Workflow.make("SocialCirclesConsent", {
     }),
     error: ConsentRejected,
     /**
-     * One enrollment per player. A double-submitted consent form joins the
-     * existing execution instead of racing a second one.
+     * One enrollment per tower. A double-submitted consent form joins the
+     * existing execution instead of racing a second one. Keyed by game as well
+     * as player, because the same friend code in two games is two towers and
+     * enrolling one says nothing about the other.
      */
-    idempotencyKey: ({ playerId }) => playerId,
+    idempotencyKey: ({ game, playerId }) => `${game}:${playerId}`,
 });
 
 /**
@@ -77,12 +82,13 @@ export const ConsentWorkflowLive = ConsentWorkflow.toLayer(
          */
         const linked = yield* Activity.make({
             name: "verifyOwnership",
-            success: Schema.Array(PlayerIdSchema),
+            success: Schema.Array(Schema.Struct({ game: GameId, playerId: PlayerIdSchema })),
             error: ConsentRejected,
             execute: towers.linkedPlayers(payload.tinyburgUserId).pipe(
                 Effect.mapError(
                     (cause) =>
                         new ConsentRejected({
+                            game: payload.game,
                             playerId: payload.playerId,
                             reason: `could not confirm linked accounts: ${cause.reason}`,
                         })
@@ -90,10 +96,12 @@ export const ConsentWorkflowLive = ConsentWorkflow.toLayer(
             ),
         });
 
-        if (!linked.includes(payload.playerId)) {
+        const owned = linked.some((tower) => tower.game === payload.game && tower.playerId === payload.playerId);
+        if (!owned) {
             return yield* new ConsentRejected({
+                game: payload.game,
                 playerId: payload.playerId,
-                reason: "this player is not linked to the requesting Tinyburg account",
+                reason: `this ${gameInfo[payload.game].name} account is not linked to the requesting Tinyburg account`,
             });
         }
 
@@ -105,17 +113,27 @@ export const ConsentWorkflowLive = ConsentWorkflow.toLayer(
         yield* Activity.make({
             name: "recordConsent",
             execute: Effect.orDie(
-                consents.grant({ tinyburgUserId: payload.tinyburgUserId, playerId: payload.playerId })
+                consents.grant({
+                    tinyburgUserId: payload.tinyburgUserId,
+                    game: payload.game,
+                    playerId: payload.playerId,
+                })
             ),
         }).pipe(
             ConsentWorkflow.withCompensation(() =>
-                Effect.ignore(consents.revoke({ tinyburgUserId: payload.tinyburgUserId, playerId: payload.playerId }))
+                Effect.ignore(
+                    consents.revoke({
+                        tinyburgUserId: payload.tinyburgUserId,
+                        game: payload.game,
+                        playerId: payload.playerId,
+                    })
+                )
             )
         );
 
         yield* Activity.make({
             name: "enrollCrawl",
-            execute: Effect.orDie(crawlState.enroll(payload.playerId)),
+            execute: Effect.orDie(crawlState.enroll(payload.game, payload.playerId)),
         });
 
         /**
@@ -132,7 +150,7 @@ export const ConsentWorkflowLive = ConsentWorkflow.toLayer(
             const outcome = yield* Activity.make({
                 name: `firstCrawl-${attempt}`,
                 success: Schema.Boolean,
-                execute: crawl.crawlPlayer(payload.playerId).pipe(
+                execute: crawl.crawlPlayer({ game: payload.game, playerId: payload.playerId }).pipe(
                     Effect.map((result) => result._tag !== "Skipped"),
                     Effect.catchCause((cause) =>
                         Effect.as(Effect.logWarning("first crawl attempt failed", cause), false)

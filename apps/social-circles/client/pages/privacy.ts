@@ -35,12 +35,23 @@ export const privacyView = <M>(h: HtmlBuilder<M>): Html =>
                                 [
                                     section(h, "What we read", [
                                         "Only your friends list, and only for a tower you explicitly joined with. We read it through tinyburg.app, which already holds your linked account, so this study never sees your Nimblebit credentials.",
+                                        "This works for TinyTower and TinyTower Classic today. The study lists Nimblebit's other games too, but cannot yet decode their saves, so there is nothing it can read from them.",
                                         "Your tower's contents are not part of the study. Bitizens, floors, coins, and bux are none of our business.",
                                     ]),
 
                                     section(h, "What we store", [
                                         "A connection between two players, and only when both of them have joined. If someone in your friends list has not joined, they are not recorded, not even anonymously.",
                                         "We also store a count: how many friends you had in total, against how many were taking part. That count is what lets an analysis say how much of the real network it is looking at. It names nobody.",
+                                    ]),
+
+                                    section(h, "What you are shown", [
+                                        "Your dashboard draws your circle as a graph: your towers, the people mutually friended with them, and the connections among that group. Everyone in it is taking part, and nobody outside your own circle appears.",
+                                        "That last part is worth being exact about, because it goes one step past a list of your friends: if two people in your circle are friends with each other, the graph shows that. Both of them joined the study, and both are already shown to you individually, but neither was asked specifically about this. If you would rather not be drawn in someone else's picture, withdrawing is what stops it.",
+                                    ]),
+
+                                    section(h, "One game at a time", [
+                                        "Nimblebit gives each game its own player numbering, so the same friend code can belong to two different people in two different games. The study treats a tower as a game and a code together, and never connects one game's player to another's.",
+                                        "Taking part with one tower says nothing about your others. Each is joined, read, and withdrawn on its own.",
                                     ]),
 
                                     section(h, "What this dataset actually is", [

@@ -15,6 +15,7 @@ import { HttpApiBuilder, HttpApiError } from "effect/unstable/httpapi";
 import { CookiePolicy, maybeCurrentSession } from "../cookies.ts";
 import { unseal } from "../crypto.ts";
 import { ConsentRepository } from "../domain/consent.ts";
+import { catalogForClient } from "../domain/games.ts";
 import { GraphRepository } from "../domain/graph.ts";
 import { SessionsRepository } from "../domain/sessions.ts";
 import { TinyburgTowers } from "../services/towers.ts";
@@ -86,94 +87,132 @@ const SelfServiceGroupLive = HttpApiBuilder.group(
             return { sub: session.sub, accessToken: Redacted.value(token) };
         });
 
-        return handlers
-            .handle("session", () => Effect.map(CurrentSession, ({ session }) => session))
+        return (
+            handlers
+                .handle("session", () => Effect.map(CurrentSession, ({ session }) => session))
 
-            .handle("towers", () =>
-                Effect.gen(function* () {
-                    const { accessToken, sub } = yield* liveAccessToken();
+                // The catalog is a fact about what this server can decode, which the
+                // browser has no way to work out for itself. Served rather than
+                // bundled so the page carries names, not sdks.
+                .handle("games", () => Effect.succeed(catalogForClient()))
 
-                    const linked = yield* towers
-                        .linkedPlayersWith({ tinyburgUserId: sub, accessToken })
-                        .pipe(Effect.mapError(() => new HttpApiError.ServiceUnavailable()));
+                .handle("towers", () =>
+                    Effect.gen(function* () {
+                        const { accessToken, sub } = yield* liveAccessToken();
 
-                    const statuses = yield* graph.statusFor(linked).pipe(Effect.orDie);
+                        const linked = yield* towers
+                            .linkedPlayersWith({ tinyburgUserId: sub, accessToken })
+                            .pipe(Effect.mapError(() => new HttpApiError.ServiceUnavailable()));
 
-                    return statuses.map((status) => ({
-                        playerId: status.playerId,
-                        enrolled: status.enrolled,
-                        circleSize: status.consentedFriends,
-                        totalFriends: status.totalFriends,
-                        lastCrawledAt: Option.fromNullishOr(status.lastSuccessAt).pipe(
-                            Option.map(DateTime.fromDateUnsafe)
-                        ),
-                    }));
-                })
-            )
+                        const statuses = yield* graph.statusFor(linked).pipe(Effect.orDie);
 
-            .handle("enroll", ({ params }) =>
-                Effect.gen(function* () {
-                    const { session } = yield* CurrentSession;
-                    return yield* ConsentWorkflow.execute({
-                        tinyburgUserId: session.sub,
-                        playerId: params.playerId,
-                    }).pipe(
-                        // The workflow rejects a player the visitor cannot prove
-                        // they own. That is the ownership gate, and Forbidden is
-                        // what it looks like from outside.
-                        Effect.mapError(() => new HttpApiError.Forbidden())
-                    );
-                })
-            )
+                        return statuses.map((status) => ({
+                            game: status.game,
+                            playerId: status.playerId,
+                            enrolled: status.enrolled,
+                            circleSize: status.consentedFriends,
+                            totalFriends: status.totalFriends,
+                            lastCrawledAt: Option.fromNullishOr(status.lastSuccessAt).pipe(
+                                Option.map(DateTime.fromDateUnsafe)
+                            ),
+                        }));
+                    })
+                )
 
-            .handle("withdraw", ({ params }) =>
-                Effect.gen(function* () {
-                    const { session } = yield* CurrentSession;
+                /**
+                 * The visitor's whole circle, across every game they took part in,
+                 * as one graph.
+                 *
+                 * Built from the towers they have live consent for rather than from
+                 * everything tinyburg.app says they linked: a tower they have not
+                 * enrolled contributes no edges and should contribute no nodes.
+                 */
+                .handle("graph", () =>
+                    Effect.gen(function* () {
+                        const { session } = yield* CurrentSession;
 
-                    // Only the account that granted consent may withdraw it. The
-                    // purge workflow scopes its revoke the same way, so a
-                    // mismatch removes nothing; checking here just turns that
-                    // into an honest 404 instead of a receipt for no work.
-                    const held = yield* consents.findForUser(session.sub).pipe(Effect.orDie);
-                    const owns = held.some(
-                        (consent) => consent.playerId === params.playerId && Option.isNone(consent.revokedAt)
-                    );
-                    if (!owns) {
-                        return yield* new HttpApiError.NotFound();
-                    }
+                        const held = yield* consents.findForUser(session.sub).pipe(Effect.orDie);
+                        const enrolled = held
+                            .filter((consent) => Option.isNone(consent.revokedAt))
+                            .map((consent) => ({ game: consent.game, playerId: consent.playerId }));
 
-                    const requestedAt = yield* DateTime.now;
-                    return yield* PurgeWorkflow.execute({
-                        tinyburgUserId: session.sub,
-                        playerId: params.playerId,
-                        requestedAt,
-                    }).pipe(Effect.mapError(() => new HttpApiError.NotFound()));
-                })
-            )
+                        return yield* graph.circleGraphFor(enrolled).pipe(Effect.orDie);
+                    })
+                )
 
-            .handle("circle", ({ params }) =>
-                Effect.gen(function* () {
-                    const { session } = yield* CurrentSession;
+                .handle("enroll", ({ params }) =>
+                    Effect.gen(function* () {
+                        const { session } = yield* CurrentSession;
+                        return yield* ConsentWorkflow.execute({
+                            tinyburgUserId: session.sub,
+                            game: params.game,
+                            playerId: params.playerId,
+                        }).pipe(
+                            // The workflow rejects a player the visitor cannot prove
+                            // they own. That is the ownership gate, and Forbidden is
+                            // what it looks like from outside.
+                            Effect.mapError(() => new HttpApiError.Forbidden())
+                        );
+                    })
+                )
 
-                    // A circle is only ever shown to the player it belongs to.
-                    const held = yield* consents.findForUser(session.sub).pipe(Effect.orDie);
-                    const owns = held.some(
-                        (consent) => consent.playerId === params.playerId && Option.isNone(consent.revokedAt)
-                    );
-                    if (!owns) {
-                        return yield* new HttpApiError.Forbidden();
-                    }
+                .handle("withdraw", ({ params }) =>
+                    Effect.gen(function* () {
+                        const { session } = yield* CurrentSession;
 
-                    const friends = yield* graph.mutualFriendsOf(params.playerId).pipe(Effect.orDie);
-                    const [status] = yield* graph.statusFor([params.playerId]).pipe(Effect.orDie);
+                        // Only the account that granted consent may withdraw it. The
+                        // purge workflow scopes its revoke the same way, so a
+                        // mismatch removes nothing; checking here just turns that
+                        // into an honest 404 instead of a receipt for no work.
+                        const held = yield* consents.findForUser(session.sub).pipe(Effect.orDie);
+                        const owns = held.some(
+                            (consent) =>
+                                consent.game === params.game &&
+                                consent.playerId === params.playerId &&
+                                Option.isNone(consent.revokedAt)
+                        );
+                        if (!owns) {
+                            return yield* new HttpApiError.NotFound();
+                        }
 
-                    return {
-                        playerId: params.playerId,
-                        friends,
-                        totalFriends: status?.totalFriends ?? 0,
-                    };
-                })
-            );
+                        const requestedAt = yield* DateTime.now;
+                        return yield* PurgeWorkflow.execute({
+                            tinyburgUserId: session.sub,
+                            game: params.game,
+                            playerId: params.playerId,
+                            requestedAt,
+                        }).pipe(Effect.mapError(() => new HttpApiError.NotFound()));
+                    })
+                )
+
+                .handle("circle", ({ params }) =>
+                    Effect.gen(function* () {
+                        const { session } = yield* CurrentSession;
+
+                        // A circle is only ever shown to the player it belongs to.
+                        const held = yield* consents.findForUser(session.sub).pipe(Effect.orDie);
+                        const owns = held.some(
+                            (consent) =>
+                                consent.game === params.game &&
+                                consent.playerId === params.playerId &&
+                                Option.isNone(consent.revokedAt)
+                        );
+                        if (!owns) {
+                            return yield* new HttpApiError.Forbidden();
+                        }
+
+                        const friends = yield* graph.mutualFriendsOf(params.game, params.playerId).pipe(Effect.orDie);
+                        const [status] = yield* graph.statusFor([params]).pipe(Effect.orDie);
+
+                        return {
+                            game: params.game,
+                            playerId: params.playerId,
+                            friends,
+                            totalFriends: status?.totalFriends ?? 0,
+                        };
+                    })
+                )
+        );
     })
 );
 

@@ -1,0 +1,46 @@
+{
+    "name": "@tinyburg/shared-ui",
+    "version": "0.0.0",
+    "private": true,
+    "description": "Shared foldkit components and theme for tinyburg apps",
+    "homepage": "https://github.com/leonitousconforti/tinyburg",
+    "license": "GPL-3.0-only",
+    "author": "Leo Conforti <leo@leoconforti.us> (https://leoconforti.us)",
+    "type": "module",
+    "sideEffects": [
+        "*.css"
+    ],
+    "exports": {
+        "./package.json": "./package.json",
+        ".": "./src/index.ts",
+        "./theme.css": "./src/theme.css",
+        "./*": "./src/*.ts"
+    },
+    "scripts": {
+        "build": "tsc -b tsconfig.build.json",
+        "check": "tsc -b tsconfig.json"
+    },
+    "dependencies": {
+        "@fontsource/ibm-plex-mono": "5.3.0",
+        "@fontsource/press-start-2p": "5.3.0",
+        "@fontsource/vt323": "5.3.0"
+    },
+    "devDependencies": {
+        "@effect/platform-browser": "4.0.0-rc.111",
+        "effect": "4.0.0-rc.111",
+        "foldkit": "0.150.0"
+    },
+    "peerDependencies": {
+        "@effect/platform-browser": "4.0.0-rc.111",
+        "effect": "4.0.0-rc.111",
+        "foldkit": "0.150.0"
+    },
+    "peerDependenciesMeta": {
+        "@effect/platform-browser": {
+            "optional": true
+        },
+        "foldkit": {
+            "optional": true
+        }
+    }
+}

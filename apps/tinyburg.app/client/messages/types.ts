@@ -36,6 +36,8 @@ export interface TitleMessages {
     readonly towerMe: string;
     readonly towerLink: string;
     readonly account: string;
+    readonly trades: string;
+    readonly tradeDetail: string;
     readonly notFound: string;
 }
 
@@ -281,8 +283,112 @@ export interface TowerMeMessages {
     readonly loadingTowers: string;
     readonly towersLoadFailed: string;
     readonly linkedOn: (date: string) => string;
+    readonly tradesRow: { readonly title: string; readonly detail: string };
     readonly accountRow: { readonly title: string; readonly detail: string };
     readonly developerRow: { readonly title: string; readonly detail: string };
+}
+
+export interface TradesMessages {
+    readonly backToHome: string;
+    readonly backToTrades: string;
+    readonly heading: string;
+    readonly tagline: string;
+    /** The honest caveat: an api-sent gift is not debited from the sender's save. */
+    readonly duplicationNote: string;
+    readonly connectHeading: string;
+    readonly connectBody: string;
+    readonly connectButton: string;
+    readonly loading: string;
+    readonly loadFailed: string;
+    readonly notices: {
+        readonly connected: string;
+        readonly proposed: string;
+        readonly accepted: string;
+        readonly cancelled: string;
+        readonly confirmed: string;
+    };
+    readonly problems: {
+        readonly connectFailed: string;
+        readonly badOffer: string;
+        readonly notAllowed: string;
+        readonly actionFailed: string;
+        readonly conflict: string;
+    };
+    readonly proposeHeading: string;
+    readonly proposeToggle: string;
+    readonly proposeCancel: string;
+    readonly mechanismLabel: string;
+    readonly mechanismGift: string;
+    readonly mechanismSplice: string;
+    readonly yourTowerLabel: string;
+    readonly pickTower: string;
+    readonly orTypeCode: string;
+    readonly counterpartyLabel: string;
+    readonly counterpartyHint: string;
+    readonly youGiveLabel: string;
+    readonly youWantLabel: string;
+    readonly available: (count: number) => string;
+    readonly balance: (amount: string) => string;
+    readonly inventoryLoadFailed: string;
+    readonly wantHint: string;
+    readonly itemHint: string;
+    readonly amountHint: string;
+    readonly kinds: {
+        readonly bitizen: string;
+        readonly costume: string;
+        readonly pet: string;
+        readonly coins: string;
+        readonly bux: string;
+    };
+    readonly ttlLabel: string;
+    readonly submitPropose: string;
+    readonly proposing: string;
+    readonly tradesHeading: string;
+    readonly emptyTrades: string;
+    readonly openOffer: string;
+    readonly viewTrade: string;
+    readonly gives: (what: string) => string;
+    readonly wants: (what: string) => string;
+    readonly expires: (date: string) => string;
+    readonly mechanisms: {
+        readonly gift: string;
+        readonly splice: string;
+    };
+    readonly states: {
+        readonly proposed: string;
+        readonly accepted: string;
+        readonly awaiting_confirmation: string;
+        readonly escrowing: string;
+        readonly escrowed: string;
+        readonly releasing: string;
+        readonly executing: string;
+        readonly settled: string;
+        readonly cancelled: string;
+        readonly refunding: string;
+        readonly refunded: string;
+        readonly expired: string;
+        readonly failed: string;
+    };
+    readonly legStates: {
+        readonly pending: string;
+        readonly sent: string;
+        readonly verified: string;
+        readonly released: string;
+        readonly settled: string;
+        readonly refund_sent: string;
+        readonly refunded: string;
+        readonly lost: string;
+    };
+    readonly legsHeading: string;
+    readonly historyHeading: string;
+    readonly acceptPlayerLabel: string;
+    readonly acceptButton: string;
+    readonly accepting: string;
+    readonly cancelButton: string;
+    readonly confirmWarning: string;
+    readonly confirmButton: string;
+    readonly awaitingOther: string;
+    readonly failureReason: (reason: string) => string;
 }
 
 export interface NotFoundMessages {
@@ -304,5 +410,6 @@ export interface Messages {
     readonly sponsors: SponsorsMessages;
     readonly towerLink: TowerLinkMessages;
     readonly towerMe: TowerMeMessages;
+    readonly trades: TradesMessages;
     readonly notFound: NotFoundMessages;
 }

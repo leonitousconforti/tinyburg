@@ -1,0 +1,105 @@
+/*
+    The stylesheet for pages served outside the single page applications.
+
+    Written by hand rather than composed from Tailwind like the rest of this
+    package, because a standalone page cannot reach the SPA's stylesheet: it is
+    emitted by Vite under a content-hashed name, into a different app, on a
+    different origin. Inlining this is what keeps a consent screen from
+    downloading a whole application's CSS to show six lines of text.
+*/
+
+:root {
+    color-scheme: light;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: ui-monospace, SFMono-Regular, monospace;
+    color: #2c3e50;
+    background: linear-gradient(180deg, #87ceeb 0%, #4fa4d4 50%, #2d7bb3 100%);
+    padding: 2rem;
+}
+
+.card {
+    background: rgba(255, 255, 255, 0.95);
+    border: 3px solid #ffd700;
+    border-radius: 1rem;
+    box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.25);
+    padding: 2rem;
+    max-width: 28rem;
+    width: 100%;
+}
+
+/* For a card that is only a heading and a sentence. */
+.card.centered {
+    text-align: center;
+}
+
+h1 {
+    font-size: 1.25rem;
+    margin: 0 0 0.75rem;
+    text-align: center;
+}
+
+p {
+    margin: 0;
+    color: #4a5568;
+    line-height: 1.6;
+}
+
+/* The lead line under a heading, when the card carries more below it. */
+p.lead {
+    text-align: center;
+    margin: 0 0 1.5rem;
+}
+
+/* A footnote under everything else, such as where a form will send you. */
+p.footnote {
+    text-align: center;
+    font-size: 0.85rem;
+    margin-top: 1.5rem;
+}
+
+/* The list of things a page is asking the visitor to agree to. */
+ul.permissions {
+    list-style: none;
+    padding: 1rem;
+    margin: 0 0 1.5rem;
+    border: 2px solid rgba(79, 164, 212, 0.2);
+    background: rgba(79, 164, 212, 0.1);
+    border-radius: 0.5rem;
+}
+
+ul.permissions li {
+    padding: 0.25rem 0;
+}
+
+/* Stacked rather than side by side: the two answers carry equal weight, and a
+   row would make the wider label look like the default. */
+.actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.actions button {
+    font: inherit;
+    cursor: pointer;
+    border-radius: 0.5rem;
+    padding: 0.9rem 1.5rem;
+    box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.2);
+    border: 2px solid transparent;
+}
+
+.actions button.primary {
+    background: #ffd700;
+}
+
+.actions button.secondary {
+    background: #fff;
+    border-color: #cbd5e0;
+}

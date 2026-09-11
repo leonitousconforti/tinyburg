@@ -49,6 +49,7 @@
     },
     "dependencies": {
         "@tinyburg/nimblebit-sdk": "workspace:*",
+        "effect-oidc": "0.1.0",
         "pako": "3.0.1"
     },
     "devDependencies": {

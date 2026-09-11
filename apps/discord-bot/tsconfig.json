@@ -2,7 +2,7 @@
     "extends": "../../tsconfig.base.jsonc",
     "references": [
         { "path": "../../packages/trading-sdk/tsconfig.src.json" },
-        { "path": "../../packages/ui/tsconfig.src.json" }
+        { "path": "../shared-ui/tsconfig.src.json" }
     ],
     "include": ["domain", "pages", "migrations", "routes", "crypto.ts", "index.ts", "interactions.ts", "tinyburg.ts"],
     "compilerOptions": {

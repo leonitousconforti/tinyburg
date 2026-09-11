@@ -1,29 +1,6 @@
 /**
  * The scope tree every Nimblebit game's api is guarded by.
  *
- * A game sits at the top and splits into a `:read` and a `:write` branch that
- * span the whole game. Beneath it, each area of the api (`sync`, `social`,
- * ...) splits into a `:read` and a `:write` branch of its own, with a leaf
- * per endpoint under those. A scope grants everything beneath it, so
- * `<game>:read` grants every read in the game, `<game>:sync:read` every
- * read in one area, and `<game>:sync:pull_save` one endpoint. That reaches
- * enforcement without any prefix matching: a leaf carries the list an
- * endpoint accepts - itself, its area's branch, its area, the game's branch,
- * the game - and a key holding any one of them matches by plain equality.
- *
- * A leaf exists only as part of an area, and an area only as part of a game,
- * both made by {@link defineGame} from the spec that names them, so nothing
- * can be outside the tree and no name can disagree with its place in it.
- * `Sync.read.pull_save` is the leaf named `<game>:sync:pull_save`, and
- * `Sync.read.pull_save.grants` is what goes on the endpoint. {@link defineArea}
- * makes a standalone area for an api whose scopes need no game above them.
- *
- * This lives here rather than in one game's sdk because every game builds the
- * same shape: a sdk that only needs to declare its scopes should not have to
- * depend on TinyTower to do it.
- *
- * `import type` keeps this module free of runtime imports.
- *
  * @since 1.0.0
  * @category Scopes
  */
@@ -31,13 +8,6 @@
 import type * as ResourceServer from "effect-oidc/ResourceServer";
 
 /**
- * A scope on one endpoint, and the scopes that grant it. `grants` is the
- * endpoint's `OIDCScopes` annotation.
- *
- * Exported, along with {@link Branch}, {@link Area} and {@link Game}, because a
- * package that builds its own tree has to be able to name the type of what it
- * exports.
- *
  * @since 1.0.0
  * @category Models
  */
@@ -138,12 +108,12 @@ const makeArea = <R extends string, W extends string>(
             name: `${area.name}:${kind}`,
             description: branchSpec.description,
         };
+
         const leaves = Object.entries<string>(branchSpec.leaves).map(([key, description]): readonly [string, Leaf] => {
             const leaf: ResourceServer.ScopeDescription = { name: `${area.name}:${key}`, description };
             return [key, { ...leaf, grants: [leaf, scope, area, ...grantsAbove] }];
         });
-        // `fromEntries` gives an index signature; the keys are exactly K by
-        // construction, which is what the return type says.
+
         // oxlint-disable-next-line typescript/no-unsafe-type-assertion
         const keyed = Object.fromEntries(leaves) as Keyed<K>;
         return { ...keyed, ...scope, children: leaves.map(([, leaf]) => leaf) };

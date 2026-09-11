@@ -4,9 +4,9 @@ import type { Message as AppMessage } from "../main.ts";
 import type { AccountMessages } from "../messages/types.ts";
 import type { Html, HtmlBuilder } from "foldkit/html";
 
-import { type Language, longDate, relativeTime } from "@tinyburg/ui/Internationalization";
+import { type Language, longDate, relativeTime } from "@tinyburg/shared-ui/Internationalization";
 import { AsyncData, Command } from "foldkit";
-import { m } from "foldkit/message";
+import { defineMessageUnion } from "foldkit/message";
 import { evo } from "foldkit/struct";
 
 import { OAuthAccount, Session } from "../../domain/models.ts";
@@ -125,118 +125,109 @@ export const enterAccount = (
 
 // Fetches settle into a Result; update folds it into the current state with
 // `AsyncData.settle`, which keeps held data as Stale on failure.
-export const SettledSessions = m("SettledSessions", {
-    result: S.Result(S.Array(SessionSummary), LoadFailed),
-    asOf: S.DateTimeUtc,
+/**
+ * Everything this page can say.
+ *
+ * `defineMessageUnion` declares the union and its constructors together, so a
+ * variant cannot be added without joining the union or removed while something
+ * still matches on it.
+ */
+export const AccountMessage = defineMessageUnion({
+    SettledSessions: { result: S.Result(S.Array(SessionSummary), LoadFailed), asOf: S.DateTimeUtc },
+    SettledLinkedAccounts: { result: S.Result(S.Array(OAuthAccount.json), LoadFailed) },
+    ClickedRevokeSession: { sessionId: S.String },
+    ClickedRevokeOthers: {},
+    ClickedRevokeAll: {},
+    ClickedUnlink: { provider: OAuthAccount.fields.provider, providerAccountId: S.String },
+    CompletedRevoke: { revoked: S.Number, signedOut: S.Boolean },
+    CompletedUnlink: {},
+    FailedAction: { problem: AccountProblem },
+    /** The session ended somewhere else while this page was open. */
+    SignedOutElsewhere: {},
 });
-export const SettledLinkedAccounts = m("SettledLinkedAccounts", {
-    result: S.Result(S.Array(OAuthAccount.json), LoadFailed),
-});
-export const ClickedRevokeSession = m("ClickedRevokeSession", { sessionId: S.String });
-export const ClickedRevokeOthers = m("ClickedRevokeOthers");
-export const ClickedRevokeAll = m("ClickedRevokeAll");
-export const ClickedUnlink = m("ClickedUnlink", {
-    provider: OAuthAccount.fields.provider,
-    providerAccountId: S.String,
-});
-export const CompletedRevoke = m("CompletedRevoke", { revoked: S.Number, signedOut: S.Boolean });
-export const CompletedUnlink = m("CompletedUnlink");
-export const FailedAction = m("FailedAction", { problem: AccountProblem });
-
-/** The session ended somewhere else while this page was open. */
-export const SignedOutElsewhere = m("SignedOutElsewhere");
-
-export const AccountMessage = S.Union([
-    SettledSessions,
-    SettledLinkedAccounts,
-    ClickedRevokeSession,
-    ClickedRevokeOthers,
-    ClickedRevokeAll,
-    ClickedUnlink,
-    CompletedRevoke,
-    CompletedUnlink,
-    FailedAction,
-    SignedOutElsewhere,
-]);
 export type AccountMessage = typeof AccountMessage.Type;
 
 // COMMAND
 
 export const FetchSessions = Command.define("FetchSessions", {
-    messages: [SettledSessions, SignedOutElsewhere],
+    messages: [AccountMessage.SettledSessions, AccountMessage.SignedOutElsewhere],
     execute: Effect.gen(function* () {
         const auth = yield* Auth;
         const sessions = yield* auth.AuthGroup.sessions();
-        return SettledSessions({ result: Result.succeed(sessions), asOf: yield* DateTime.now });
+        return AccountMessage.SettledSessions({ result: Result.succeed(sessions), asOf: yield* DateTime.now });
     }).pipe(
-        Effect.catchTag("Unauthorized", () => Effect.succeed(SignedOutElsewhere())),
+        Effect.catchTag("Unauthorized", () => Effect.succeed(AccountMessage.SignedOutElsewhere())),
         Effect.catch(() =>
-            Effect.map(DateTime.now, (asOf) => SettledSessions({ result: Result.fail("loadFailed"), asOf }))
+            Effect.map(DateTime.now, (asOf) =>
+                AccountMessage.SettledSessions({ result: Result.fail("loadFailed"), asOf })
+            )
         )
     ),
 });
 
 export const FetchLinkedAccounts = Command.define("FetchLinkedAccounts", {
-    messages: [SettledLinkedAccounts, SignedOutElsewhere],
+    messages: [AccountMessage.SettledLinkedAccounts, AccountMessage.SignedOutElsewhere],
     execute: Effect.gen(function* () {
         const auth = yield* Auth;
         const accounts = yield* auth.AuthGroup.accounts();
-        return SettledLinkedAccounts({ result: Result.succeed(accounts) });
+        return AccountMessage.SettledLinkedAccounts({ result: Result.succeed(accounts) });
     }).pipe(
-        Effect.catchTag("Unauthorized", () => Effect.succeed(SignedOutElsewhere())),
-        Effect.catch(() => Effect.succeed(SettledLinkedAccounts({ result: Result.fail("loadFailed") })))
+        Effect.catchTag("Unauthorized", () => Effect.succeed(AccountMessage.SignedOutElsewhere())),
+        Effect.catch(() => Effect.succeed(AccountMessage.SettledLinkedAccounts({ result: Result.fail("loadFailed") })))
     ),
 });
 
 export const RevokeSession = Command.define("RevokeSession", {
     args: { sessionId: S.String },
-    messages: [CompletedRevoke, FailedAction, SignedOutElsewhere],
+    messages: [AccountMessage.CompletedRevoke, AccountMessage.FailedAction, AccountMessage.SignedOutElsewhere],
     execute: ({ sessionId }) =>
         Effect.gen(function* () {
             const auth = yield* Auth;
-            return CompletedRevoke(yield* auth.AuthGroup.revokeSession({ params: { sessionId } }));
+            return AccountMessage.CompletedRevoke(yield* auth.AuthGroup.revokeSession({ params: { sessionId } }));
         }).pipe(
-            Effect.catchTag("Unauthorized", () => Effect.succeed(SignedOutElsewhere())),
-            Effect.catch(() => Effect.succeed(FailedAction({ problem: "actionFailed" })))
+            Effect.catchTag("Unauthorized", () => Effect.succeed(AccountMessage.SignedOutElsewhere())),
+            Effect.catch(() => Effect.succeed(AccountMessage.FailedAction({ problem: "actionFailed" })))
         ),
 });
 
 export const RevokeOthers = Command.define("RevokeOthers", {
-    messages: [CompletedRevoke, FailedAction, SignedOutElsewhere],
+    messages: [AccountMessage.CompletedRevoke, AccountMessage.FailedAction, AccountMessage.SignedOutElsewhere],
     execute: Effect.gen(function* () {
         const auth = yield* Auth;
-        return CompletedRevoke(yield* auth.AuthGroup.revokeSessions({ query: { scope: "others" } }));
+        return AccountMessage.CompletedRevoke(yield* auth.AuthGroup.revokeSessions({ query: { scope: "others" } }));
     }).pipe(
-        Effect.catchTag("Unauthorized", () => Effect.succeed(SignedOutElsewhere())),
-        Effect.catch(() => Effect.succeed(FailedAction({ problem: "actionFailed" })))
+        Effect.catchTag("Unauthorized", () => Effect.succeed(AccountMessage.SignedOutElsewhere())),
+        Effect.catch(() => Effect.succeed(AccountMessage.FailedAction({ problem: "actionFailed" })))
     ),
 });
 
 export const RevokeAll = Command.define("RevokeAll", {
-    messages: [CompletedRevoke, FailedAction, SignedOutElsewhere],
+    messages: [AccountMessage.CompletedRevoke, AccountMessage.FailedAction, AccountMessage.SignedOutElsewhere],
     execute: Effect.gen(function* () {
         const auth = yield* Auth;
-        return CompletedRevoke(yield* auth.AuthGroup.revokeSessions({ query: { scope: "all" } }));
+        return AccountMessage.CompletedRevoke(yield* auth.AuthGroup.revokeSessions({ query: { scope: "all" } }));
     }).pipe(
-        Effect.catchTag("Unauthorized", () => Effect.succeed(SignedOutElsewhere())),
-        Effect.catch(() => Effect.succeed(FailedAction({ problem: "actionFailed" })))
+        Effect.catchTag("Unauthorized", () => Effect.succeed(AccountMessage.SignedOutElsewhere())),
+        Effect.catch(() => Effect.succeed(AccountMessage.FailedAction({ problem: "actionFailed" })))
     ),
 });
 
 export const Unlink = Command.define("Unlink", {
     args: { provider: OAuthAccount.fields.provider, providerAccountId: S.String },
-    messages: [CompletedUnlink, FailedAction, SignedOutElsewhere],
+    messages: [AccountMessage.CompletedUnlink, AccountMessage.FailedAction, AccountMessage.SignedOutElsewhere],
     execute: ({ provider, providerAccountId }) =>
         Effect.gen(function* () {
             const auth = yield* Auth;
             yield* auth.AuthGroup.unlinkAccount({ params: { provider, providerAccountId } });
-            return CompletedUnlink();
+            return AccountMessage.CompletedUnlink();
         }).pipe(
-            Effect.catchTag("Unauthorized", () => Effect.succeed(SignedOutElsewhere())),
+            Effect.catchTag("Unauthorized", () => Effect.succeed(AccountMessage.SignedOutElsewhere())),
             // The server refuses to remove the last way in; the button is
             // disabled for it, but a stale page can still ask.
-            Effect.catchTag("Conflict", () => Effect.succeed(FailedAction({ problem: "lastSignInMethod" }))),
-            Effect.catch(() => Effect.succeed(FailedAction({ problem: "actionFailed" })))
+            Effect.catchTag("Conflict", () =>
+                Effect.succeed(AccountMessage.FailedAction({ problem: "lastSignInMethod" }))
+            ),
+            Effect.catch(() => Effect.succeed(AccountMessage.FailedAction({ problem: "actionFailed" })))
         ),
 });
 
@@ -416,7 +407,7 @@ const sessionRow = (
                     h.Class(dangerButton),
                     h.Disabled(busy),
                     h.Title(session.current ? msgs.signOutThisBrowser : msgs.signOutOf(name)),
-                    h.OnClick(ClickedRevokeSession({ sessionId: session.id })),
+                    h.OnClick(AccountMessage.ClickedRevokeSession({ sessionId: session.id })),
                 ],
                 [busy ? "..." : msgs.signOut]
             ),
@@ -445,7 +436,7 @@ const sessionsSection = (
                                 h.Type("button"),
                                 h.Class(quietButton),
                                 h.Disabled(others === 0 || Option.isSome(model.busy)),
-                                h.OnClick(ClickedRevokeOthers()),
+                                h.OnClick(AccountMessage.ClickedRevokeOthers()),
                             ],
                             [others === 0 ? msgs.noOtherSessions : msgs.signOutOthers(others)]
                         ),
@@ -454,7 +445,7 @@ const sessionsSection = (
                                 h.Type("button"),
                                 h.Class(quietButton),
                                 h.Disabled(Option.isSome(model.busy)),
-                                h.OnClick(ClickedRevokeAll()),
+                                h.OnClick(AccountMessage.ClickedRevokeAll()),
                             ],
                             [msgs.signOutEverywhere]
                         ),
@@ -525,7 +516,7 @@ const linkedRow = (
                     h.Disabled(busy || last),
                     h.Title(last ? msgs.lastMethodTitle : msgs.disconnectProvider(providerLabel(account.provider))),
                     h.OnClick(
-                        ClickedUnlink({
+                        AccountMessage.ClickedUnlink({
                             provider: account.provider,
                             providerAccountId: account.providerAccountId,
                         })

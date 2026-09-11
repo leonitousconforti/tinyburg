@@ -84,6 +84,18 @@ export const de: Messages = {
         joining: "Beitritt läuft...",
         takePart: "Teilnehmen",
 
+        graphHeading: "Ihr Kreis, gezeichnet",
+        graphBody:
+            "Alle Teilnehmenden, die mit einem Ihrer Türme beidseitig befreundet sind, und die Verbindungen zwischen ihnen. Jedes Spiel bildet eine eigene Gruppe, denn eine Freundschaft reicht nie über ein Spiel hinaus.",
+        graphEmpty:
+            "Noch nichts zu zeichnen. Sobald ein Turm teilnimmt und jemand aus seiner Freundesliste ebenfalls beigetreten ist, erscheint Ihr Kreis hier.",
+        graphYou: "Sie",
+        graphAlt: (people, connections) =>
+            `${people} ${people === 1 ? "Person" : "Personen"} und ${connections} ${connections === 1 ? "Verbindung" : "Verbindungen"}.`,
+
+        dormantGames: (names) =>
+            `Noch nicht lesbar: ${names}. Die Studie kennt diese Spiele, kann ihre Spielstände aber nicht entschlüsseln, sodass ihre Freundeslisten vorerst unerreichbar bleiben.`,
+
         yourCircle: "Ihr Kreis",
         hide: "Ausblenden",
         emptyCircle:
