@@ -32,21 +32,12 @@ export const highestArchivedVersion = Effect.fnUntraced(function* (bundleIdentif
     const parsedNames = yield* Effect.all(
         Array.map(prefixes, (prefix) =>
             Schema.decodeUnknownEffect(
-                Schema.TemplateLiteralParser([
-                    prefixFor(bundleIdentifier),
-                    "/",
-                    Schema.BigIntFromString,
-                    "/",
-                    Schema.String,
-                ])
+                Schema.TemplateLiteralParser([prefixFor(bundleIdentifier), Schema.BigIntFromString, "/"])
             )(prefix)
         )
     );
 
-    const versionCodes = Array.map(
-        parsedNames,
-        ([_bundleIdentifier, _slash, versionCode, _slash2, _name]) => versionCode
-    );
+    const versionCodes = Array.map(parsedNames, ([_prefix, versionCode]) => versionCode);
 
     return Array.isReadonlyArrayNonEmpty(versionCodes)
         ? Option.some(Array.max(versionCodes, Order.BigInt))
