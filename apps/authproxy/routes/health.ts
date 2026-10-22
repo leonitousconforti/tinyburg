@@ -6,8 +6,6 @@ import { TinyTower } from "@tinyburg/tinytower-sdk";
 
 export const HealthCheckRoutesLive = Layer.unwrap(
     Effect.gen(function* () {
-        yield* Effect.log("here");
-
         const auth = yield* NimblebitAuth.NimblebitAuth;
         const httpClient = yield* HttpClient.HttpClient;
 
@@ -29,7 +27,7 @@ export const HealthCheckRoutesLive = Layer.unwrap(
     Layer.provide([
         HttpRouter.disableLogger,
         NimblebitAuth.layerDirectConfig(
-            Config.schema(NimblebitConfig.NimblebitAuthKeySchema, "TINYTOWERVEGAS_NIMBLEBIT_AUTH_KEY")
+            Config.schema(NimblebitConfig.NimblebitAuthKeySchema, "TINYTOWER_NIMBLEBIT_AUTH_KEY")
         ),
     ])
 );
