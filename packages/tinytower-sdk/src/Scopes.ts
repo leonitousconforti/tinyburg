@@ -20,18 +20,38 @@ import type * as ResourceServer from "effect-oidc/ResourceServer";
 import { type Game, defineGame } from "@tinyburg/nimblebit-sdk/NimblebitScopes";
 
 export {
+    /**
+     * @since 1.0.0
+     * @category Models
+     */
     type Area,
+    /**
+     * @since 1.0.0
+     * @category Models
+     */
     type Branch,
+    /**
+     * @since 1.0.0
+     * @category Models
+     */
     type Game,
+    /**
+     * @since 1.0.0
+     * @category Models
+     */
     type Leaf,
+    /**
+     * @since 1.0.0
+     * @category Constructors
+     */
     defineArea,
+    /**
+     * @since 1.0.0
+     * @category Constructors
+     */
     defineGame,
 } from "@tinyburg/nimblebit-sdk/NimblebitScopes";
 
-/**
- * @since 1.0.0
- * @category Games
- */
 /**
  * The areas of the TinyTower api, as {@link defineGame} takes them. Exported
  * on their own because TinyTower Classic is the same api under another game
@@ -114,6 +134,10 @@ export const TinyTowerAreas = {
     },
 } as const;
 
+/**
+ * @since 1.0.0
+ * @category Games
+ */
 export const TinyTower = defineGame({
     name: "tinytower",
     description: "TinyTower",

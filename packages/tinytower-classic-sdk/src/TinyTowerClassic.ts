@@ -29,13 +29,15 @@ import * as Pako from "pako";
 import * as Endpoints from "./Endpoints.ts";
 import { GAME_CODE } from "./Game.ts";
 
-/**
- * A Classic save is a TinyTower save.
- *
- * @since 1.0.0
- * @category Schemas
- */
-export { SaveData };
+export {
+    /**
+     * A Classic save is a TinyTower save.
+     *
+     * @since 1.0.0
+     * @category Schemas
+     */
+    SaveData,
+};
 
 /**
  * Requests a new player from the Nimblebit servers.

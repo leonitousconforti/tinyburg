@@ -13,34 +13,30 @@
  * @since 1.0.0
  * @category Endpoints
  */
-export * as Endpoints from "./Endpoints.ts";
+export * as Endpoints from "./Endpoints.ts"
 
 /**
  * What tells Nimblebit this is TinyTower Classic rather than TinyTower: the
- * game code in every path and every signed string.
- *
- * PLACEHOLDER. `ttc` is a guess pending confirmation against Nimblebit's
- * servers; nothing has been observed on the wire yet. Every path in
- * `Endpoints` and every hash in `TinyTowerClassic` derives from this one
- * constant, so correcting it is a one-line change.
+ * game code in every path and every signed string. Every path in `Endpoints`
+ * and every hash in `TinyTowerClassic` derives from this one constant.
  *
  * @since 1.0.0
  * @category Game
  */
-export * as Game from "./Game.ts";
+export * as Game from "./Game.ts"
 
 /**
  * The scopes the TinyTower Classic api is guarded by: the same areas as
  * TinyTower, under the `tinytowerclassic` game, so `tinytowerclassic:read`
  * grants every read in Classic and `tinytowerclassic:sync:pull_save` one
- * endpoint. The tree is built by `@tinyburg/tinytower-sdk`'s `defineGame`
+ * endpoint. The tree is built by `@tinyburg/nimblebit-sdk`'s `defineGame`
  * from TinyTower's own area spec, so the two games cannot drift apart in
  * shape, only in name.
  *
  * @since 1.0.0
  * @category Scopes
  */
-export * as Scopes from "./Scopes.ts";
+export * as Scopes from "./Scopes.ts"
 
 /**
  * TinyTower Classic SDK for interacting with Nimblebit's cloud services.
@@ -54,4 +50,4 @@ export * as Scopes from "./Scopes.ts";
  * @since 1.0.0
  * @category SDK
  */
-export * as TinyTowerClassic from "./TinyTowerClassic.ts";
+export * as TinyTowerClassic from "./TinyTowerClassic.ts"
