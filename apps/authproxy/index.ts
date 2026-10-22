@@ -11,17 +11,17 @@ import { PgClient, PgMigrator } from "@effect/sql-pg";
 import { CookiePolicy } from "./cookies.ts";
 import { Repository } from "./domain/model.ts";
 import { SessionsRepository } from "./domain/sessions.ts";
+import { BitCityApiLive } from "./routes/bitCity.ts";
+import { DiscoZooApiLive } from "./routes/discoZoo.ts";
 import { HealthCheckRoutesLive } from "./routes/health.ts";
+import { LegoTowerApiLive } from "./routes/legoTower.ts";
 import { OAuthRoutesLive } from "./routes/oauth.ts";
+import { PocketPlanesApiLive } from "./routes/pocketPlanes.ts";
+import { PocketTrainsApiLive } from "./routes/pocketTrains.ts";
 import { SelfServiceApiLive } from "./routes/selfservice.ts";
 import { StaticRoutesLive } from "./routes/static.ts";
 import { TinyTowerApiLive } from "./routes/tinytower.ts";
 import { TinyTowerClassicApiLive } from "./routes/tinytowerClassic.ts";
-import { PocketPlanesApiLive } from "./routes/pocketPlanes.ts";
-import { PocketTrainsApiLive } from "./routes/pocketTrains.ts";
-import { LegoTowerApiLive } from "./routes/legoTower.ts";
-import { DiscoZooApiLive } from "./routes/discoZoo.ts";
-import { BitCityApiLive } from "./routes/bitCity.ts";
 import { TinyTowerVegasApiLive } from "./routes/tinytowerVegas.ts";
 
 const AllRoutes = Layer.mergeAll(

@@ -21,8 +21,8 @@ import type { OAuthAuthorizationRequest, OAuthClient } from "../../domain/models
 import type { Language } from "@tinyburg/shared-ui/Internationalization";
 import type { HtmlBuilder } from "foldkit/html";
 
-import { Api } from "@tinyburg/trading-sdk/Sdk";
 import * as StandalonePage from "@tinyburg/shared-ui/StandalonePage";
+import { Api } from "@tinyburg/trading-sdk/Sdk";
 import { ResourceServer } from "effect-oidc";
 
 import { consentMessagesFor } from "./consentMessages.ts";

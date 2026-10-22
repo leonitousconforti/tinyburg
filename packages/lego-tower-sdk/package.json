@@ -3,8 +3,8 @@
     "version": "0.0.0",
     "description": "api for the mobile game LEGO Tower by Nimblebit",
     "keywords": [
-        "nimblebit",
-        "lego-tower-sdk"
+        "lego-tower-sdk",
+        "nimblebit"
     ],
     "homepage": "https://github.com/leonitousconforti/tinyburg",
     "license": "GPL-3.0-only",

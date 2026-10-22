@@ -3,8 +3,8 @@ import type { HttpClientError } from "effect/unstable/http";
 import { Config, Context, Effect, Function, Layer, type Schema } from "effect";
 import { HttpApiBuilder, HttpApiClient, HttpApiError } from "effect/unstable/httpapi";
 
-import { NimblebitAuth, NimblebitConfig } from "@tinyburg/nimblebit-sdk";
 import { Endpoints } from "@tinyburg/lego-tower-sdk";
+import { NimblebitAuth, NimblebitConfig } from "@tinyburg/nimblebit-sdk";
 
 import { AuthProxyApiDecodeHash, AuthProxyApiDecodeHashLive } from "../middleware/20_tinytowerDecode.ts";
 
@@ -16,9 +16,7 @@ class Client extends Context.Service<Client>()("LegoTowerClient", {
 }
 
 /** @internal */
-const catch500s = <A, E, R>(
-    effect: Effect.Effect<A, E | Schema.SchemaError | HttpClientError.HttpClientError, R>
-) =>
+const catch500s = <A, E, R>(effect: Effect.Effect<A, E | Schema.SchemaError | HttpClientError.HttpClientError, R>) =>
     effect.pipe(
         Effect.catchTag("SchemaError", () => new HttpApiError.InternalServerError()),
         Effect.catchTag("HttpClientError", () => new HttpApiError.InternalServerError())
@@ -76,8 +74,7 @@ export const LegoTowerTradeLive = HttpApiBuilder.group(
     "TradeGroup",
     Effect.fnUntraced(function* (handlers) {
         const client = yield* Effect.map(Client, (client) => client.TradeGroup);
-        return handlers
-            .handle("TradeGetTrades", Function.compose(client.TradeGetTrades, catch500s));
+        return handlers.handle("TradeGetTrades", Function.compose(client.TradeGetTrades, catch500s));
     })
 );
 
@@ -104,7 +101,12 @@ export const LegoTowerSocialLive = HttpApiBuilder.group(
  * @category LEGO Tower Routes
  */
 export const LegoTowerApiLive = HttpApiBuilder.layer(Api).pipe(
-    Layer.provide([LegoTowerDeviceManagementLive, LegoTowerSyncManagementLive, LegoTowerTradeLive, LegoTowerSocialLive]),
+    Layer.provide([
+        LegoTowerDeviceManagementLive,
+        LegoTowerSyncManagementLive,
+        LegoTowerTradeLive,
+        LegoTowerSocialLive,
+    ]),
     Layer.provide(AuthProxyApiDecodeHashLive),
     Layer.provide(
         NimblebitAuth.layerDirectConfig(
