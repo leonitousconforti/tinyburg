@@ -3,8 +3,8 @@
     "version": "0.0.0",
     "description": "api for the mobile game Disco Zoo by Nimblebit",
     "keywords": [
-        "nimblebit",
-        "disco-zoo-sdk"
+        "disco-zoo-sdk",
+        "nimblebit"
     ],
     "homepage": "https://github.com/leonitousconforti/tinyburg",
     "license": "GPL-3.0-only",

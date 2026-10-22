@@ -211,9 +211,10 @@ export class TinyTowerClassicAccountsRepository extends Context.Service<
  * @since 1.0.0
  * @category Services
  */
-export class PocketPlanesAccountsRepository extends Context.Service<PocketPlanesAccountsRepository, GameAccountsRepository>()(
-    "@tinyburg/tinyburg.app/domain/PocketPlanesAccountsRepository"
-) {
+export class PocketPlanesAccountsRepository extends Context.Service<
+    PocketPlanesAccountsRepository,
+    GameAccountsRepository
+>()("@tinyburg/tinyburg.app/domain/PocketPlanesAccountsRepository") {
     static readonly Default = Layer.effect(
         this,
         makeAccountsRepository({
@@ -228,9 +229,10 @@ export class PocketPlanesAccountsRepository extends Context.Service<PocketPlanes
  * @since 1.0.0
  * @category Services
  */
-export class PocketTrainsAccountsRepository extends Context.Service<PocketTrainsAccountsRepository, GameAccountsRepository>()(
-    "@tinyburg/tinyburg.app/domain/PocketTrainsAccountsRepository"
-) {
+export class PocketTrainsAccountsRepository extends Context.Service<
+    PocketTrainsAccountsRepository,
+    GameAccountsRepository
+>()("@tinyburg/tinyburg.app/domain/PocketTrainsAccountsRepository") {
     static readonly Default = Layer.effect(
         this,
         makeAccountsRepository({
@@ -296,9 +298,10 @@ export class BitCityAccountsRepository extends Context.Service<BitCityAccountsRe
  * @since 1.0.0
  * @category Services
  */
-export class TinyTowerVegasAccountsRepository extends Context.Service<TinyTowerVegasAccountsRepository, GameAccountsRepository>()(
-    "@tinyburg/tinyburg.app/domain/TinyTowerVegasAccountsRepository"
-) {
+export class TinyTowerVegasAccountsRepository extends Context.Service<
+    TinyTowerVegasAccountsRepository,
+    GameAccountsRepository
+>()("@tinyburg/tinyburg.app/domain/TinyTowerVegasAccountsRepository") {
     static readonly Default = Layer.effect(
         this,
         makeAccountsRepository({

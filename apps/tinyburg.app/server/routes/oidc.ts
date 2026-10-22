@@ -7,8 +7,8 @@ import * as crypto from "node:crypto";
 
 import type { OAuthAuthorizationRequest, OAuthClient } from "../../domain/models.ts";
 
-import { all as gameScopes } from "@tinyburg/trading-sdk/Scopes";
 import { type Language, fromAcceptLanguage } from "@tinyburg/shared-ui/Internationalization";
+import { all as gameScopes } from "@tinyburg/trading-sdk/Scopes";
 import { Jwt, Oidc } from "effect-oidc";
 
 import { DevelopersRepository } from "../../domain/developers.ts";

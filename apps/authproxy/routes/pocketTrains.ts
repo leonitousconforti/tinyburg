@@ -16,9 +16,7 @@ class Client extends Context.Service<Client>()("PocketTrainsClient", {
 }
 
 /** @internal */
-const catch500s = <A, E, R>(
-    effect: Effect.Effect<A, E | Schema.SchemaError | HttpClientError.HttpClientError, R>
-) =>
+const catch500s = <A, E, R>(effect: Effect.Effect<A, E | Schema.SchemaError | HttpClientError.HttpClientError, R>) =>
     effect.pipe(
         Effect.catchTag("SchemaError", () => new HttpApiError.InternalServerError()),
         Effect.catchTag("HttpClientError", () => new HttpApiError.InternalServerError())

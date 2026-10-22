@@ -3,8 +3,8 @@ import type { HttpClientError } from "effect/unstable/http";
 import { Config, Context, Effect, Function, Layer, type Schema } from "effect";
 import { HttpApiBuilder, HttpApiClient, HttpApiError } from "effect/unstable/httpapi";
 
-import { NimblebitAuth, NimblebitConfig } from "@tinyburg/nimblebit-sdk";
 import { Endpoints } from "@tinyburg/disco-zoo-sdk";
+import { NimblebitAuth, NimblebitConfig } from "@tinyburg/nimblebit-sdk";
 
 import { AuthProxyApiDecodeHash, AuthProxyApiDecodeHashLive } from "../middleware/20_tinytowerDecode.ts";
 
@@ -16,9 +16,7 @@ class Client extends Context.Service<Client>()("DiscoZooClient", {
 }
 
 /** @internal */
-const catch500s = <A, E, R>(
-    effect: Effect.Effect<A, E | Schema.SchemaError | HttpClientError.HttpClientError, R>
-) =>
+const catch500s = <A, E, R>(effect: Effect.Effect<A, E | Schema.SchemaError | HttpClientError.HttpClientError, R>) =>
     effect.pipe(
         Effect.catchTag("SchemaError", () => new HttpApiError.InternalServerError()),
         Effect.catchTag("HttpClientError", () => new HttpApiError.InternalServerError())

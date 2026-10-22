@@ -44,6 +44,9 @@
         "check": "tsc -b tsconfig.json",
         "codegen": "build-utils prepare-v4"
     },
+    "dependencies": {
+        "effect-oidc": "0.1.0"
+    },
     "devDependencies": {
         "effect": "4.0.0-rc.111"
     },
@@ -54,8 +57,5 @@
         "nimblebit",
         "tinytower",
         "tinytowers"
-    ],
-    "dependencies": {
-        "effect-oidc": "0.1.0"
-    }
+    ]
 }

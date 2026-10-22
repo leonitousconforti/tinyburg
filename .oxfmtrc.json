@@ -11,6 +11,7 @@
         "packages/bitprints/src/index.ts",
         "packages/doorman/src/index.ts",
         "packages/nimblebit-sdk/src/index.ts",
+        "packages/tinytower-classic-sdk/src/index.ts",
         "packages/tinytower-sdk/src/index.ts",
         "packages/trading-sdk/src/index.ts"
     ],
