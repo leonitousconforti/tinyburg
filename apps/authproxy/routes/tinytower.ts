@@ -129,7 +129,7 @@ export const TinyTowerApiLive = HttpApiBuilder.layer(Api).pipe(
     Layer.provide([AuthorizationLive, AuthProxyApiDecodeHashLive]),
     Layer.provide(
         NimblebitAuth.layerDirectConfig(
-            Config.schema(NimblebitConfig.NimblebitAuthKeySchema, "TINYTOWERVEGAS_NIMBLEBIT_AUTH_KEY")
+            Config.schema(NimblebitConfig.NimblebitAuthKeySchema, "TINYTOWER_NIMBLEBIT_AUTH_KEY")
         )
     ),
     Layer.provide(Client.Default)
