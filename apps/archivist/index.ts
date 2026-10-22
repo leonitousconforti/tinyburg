@@ -10,25 +10,25 @@ import { Live } from "./layers.ts";
 Effect.gen(function* () {
     for (const bundleIdentifier of bundleIdentifiers) {
         const details = yield* GooglePlayApi.details(bundleIdentifier);
-        const offerType = details.item?.offer[0].offerType ?? 1;
+        const offerType = details.item?.offer.at(0)?.offerType ?? 1;
 
         const mostRecentPublishedVersionCode = details.item?.details?.appDetails?.versionCode ?? 0n;
-        const highestArchivedVersionCode = yield* highestArchivedVersion(bundleIdentifier).pipe(
-            Effect.map(Option.getOrElse(() => 0n))
+        const firstUnarchivedVersionCode = yield* highestArchivedVersion(bundleIdentifier).pipe(
+            Effect.map(Option.match({ onNone: () => 0n, onSome: (highest) => highest + 1n }))
         );
 
-        if (highestArchivedVersionCode >= mostRecentPublishedVersionCode) {
+        if (firstUnarchivedVersionCode > mostRecentPublishedVersionCode) {
             yield* Effect.logInfo(`${bundleIdentifier} is up to date at version ${mostRecentPublishedVersionCode}`);
             continue;
         }
 
         yield* Effect.logInfo(
-            `Archiving ${bundleIdentifier} versions ${highestArchivedVersionCode} through ${mostRecentPublishedVersionCode + 1n}`
+            `Archiving ${bundleIdentifier} versions ${firstUnarchivedVersionCode} through ${mostRecentPublishedVersionCode}`
         );
 
         for (
-            let versionCode = highestArchivedVersionCode;
-            versionCode < mostRecentPublishedVersionCode;
+            let versionCode = firstUnarchivedVersionCode;
+            versionCode <= mostRecentPublishedVersionCode;
             versionCode++
         ) {
             yield* archiveToS3({
