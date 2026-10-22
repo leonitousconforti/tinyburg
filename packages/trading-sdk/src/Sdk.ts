@@ -442,7 +442,6 @@ export const TinyTowerClassicAccountsGroup = tinyTowerClassic.accounts;
  */
 export const TinyTowerClassicGroup = tinyTowerClassic.tower;
 
-
 /**
  * The PocketPlanes accounts a player has linked, and linking more. (The act-on-behalf
  * tower api is not exposed for this game yet.)

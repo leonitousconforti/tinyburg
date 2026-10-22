@@ -6,7 +6,7 @@ import { Model } from "effect/unstable/schema";
 import type { Session, User } from "../../domain/models.ts";
 import type { GameAccountsRepository } from "../../domain/tinytower.ts";
 import type { PlayerAuthKeySchema, PlayerEmailSchema, PlayerIdSchema } from "@tinyburg/nimblebit-sdk/NimblebitConfig";
-import type { NimblebitGame as NimblebitGame } from "@tinyburg/nimblebit-sdk/NimblebitGame";
+import type { NimblebitGame } from "@tinyburg/nimblebit-sdk/NimblebitGame";
 import type { ItemToSend, SaveUpload } from "@tinyburg/trading-sdk/Sdk";
 
 import { NimblebitAuth, NimblebitError } from "@tinyburg/nimblebit-sdk";
