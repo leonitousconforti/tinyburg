@@ -5,14 +5,12 @@
  * @category Auth
  */
 
-import type * as Array from "effect/Array";
 import type * as PlatformError from "effect/PlatformError";
 
 import * as Config from "effect/Config";
 import * as Context from "effect/Context";
 import * as Crypto from "effect/Crypto";
 import * as Effect from "effect/Effect";
-import * as Function from "effect/Function";
 import * as Layer from "effect/Layer";
 import * as Random from "effect/Random";
 import * as Redacted from "effect/Redacted";
@@ -49,96 +47,56 @@ export class NimblebitAuth extends Context.Service<
         ) => Effect.Effect<Schema.Schema.Type<typeof NimblebitConfig.AuthenticatedPlayerSchema>, never, never>;
     }
 >()("NimblebitAuth") {
-    private static readonly bitcityBurnBots: Array.NonEmptyReadonlyArray<
-        Schema.Schema.Type<typeof NimblebitConfig.AuthenticatedPlayerSchema>
-    > = [] as const;
-
-    private static readonly discozooBurnBots: Array.NonEmptyReadonlyArray<
-        Schema.Schema.Type<typeof NimblebitConfig.AuthenticatedPlayerSchema>
-    > = [] as const;
-
-    private static readonly legotowerBurnBots: Array.NonEmptyReadonlyArray<
-        Schema.Schema.Type<typeof NimblebitConfig.AuthenticatedPlayerSchema>
-    > = [] as const;
-
-    private static readonly pocketplanesBurnBots: Array.NonEmptyReadonlyArray<
-        Schema.Schema.Type<typeof NimblebitConfig.AuthenticatedPlayerSchema>
-    > = [] as const;
-
-    private static readonly pockettrainsBurnBots: Array.NonEmptyReadonlyArray<
-        Schema.Schema.Type<typeof NimblebitConfig.AuthenticatedPlayerSchema>
-    > = [] as const;
-
-    private static readonly tinytowerClassicBurnBots: Array.NonEmptyReadonlyArray<
-        Schema.Schema.Type<typeof NimblebitConfig.AuthenticatedPlayerSchema>
-    > = [] as const;
-
-    private static readonly tinytowerBurnBots: Array.NonEmptyReadonlyArray<
-        Schema.Schema.Type<typeof NimblebitConfig.AuthenticatedPlayerSchema>
-    > = [
-        {
-            playerId: NimblebitConfig.PlayerIdSchema.make("BPQSY"),
-            playerAuthKey: NimblebitConfig.PlayerAuthKeySchema.make(
-                Redacted.make("8dad81ae-2626-41b9-8225-325f4809057f")
-            ),
-        },
-        {
-            playerId: NimblebitConfig.PlayerIdSchema.make("9GV59"),
-            playerAuthKey: NimblebitConfig.PlayerAuthKeySchema.make(
-                Redacted.make("be61b26e-330b-41e0-ad2f-48eb79dc3bd6")
-            ),
-        },
-        {
-            playerId: NimblebitConfig.PlayerIdSchema.make("9GV2Y"),
-            playerAuthKey: NimblebitConfig.PlayerAuthKeySchema.make(
-                Redacted.make("efe5f6a3-8cd5-4956-897c-ec1db6c26485")
-            ),
-        },
-        {
-            playerId: NimblebitConfig.PlayerIdSchema.make("9GTYN"),
-            playerAuthKey: NimblebitConfig.PlayerAuthKeySchema.make(
-                Redacted.make("89f9b90b-4e1e-4b48-af56-df39da7b17a7")
-            ),
-        },
-    ] as const;
-
-    private static readonly tinytowerVegasBurnBots: Array.NonEmptyReadonlyArray<
-        Schema.Schema.Type<typeof NimblebitConfig.AuthenticatedPlayerSchema>
-    > = [] as const;
+    /**
+     * Throwaway players per game, for requests that need a player but not
+     * any particular one. Games without any yet have an empty pool, and
+     * asking for one of those dies rather than handing back `undefined`.
+     */
+    private static readonly burnBots: Record<
+        NimblebitGame,
+        ReadonlyArray<Schema.Schema.Type<typeof NimblebitConfig.AuthenticatedPlayerSchema>>
+    > = {
+        bitcity: [],
+        discozoo: [],
+        legotower: [],
+        pocketplanes: [],
+        pockettrains: [],
+        tinytower: [
+            {
+                playerId: NimblebitConfig.PlayerIdSchema.make("BPQSY"),
+                playerAuthKey: NimblebitConfig.PlayerAuthKeySchema.make(
+                    Redacted.make("8dad81ae-2626-41b9-8225-325f4809057f")
+                ),
+            },
+            {
+                playerId: NimblebitConfig.PlayerIdSchema.make("9GV59"),
+                playerAuthKey: NimblebitConfig.PlayerAuthKeySchema.make(
+                    Redacted.make("be61b26e-330b-41e0-ad2f-48eb79dc3bd6")
+                ),
+            },
+            {
+                playerId: NimblebitConfig.PlayerIdSchema.make("9GV2Y"),
+                playerAuthKey: NimblebitConfig.PlayerAuthKeySchema.make(
+                    Redacted.make("efe5f6a3-8cd5-4956-897c-ec1db6c26485")
+                ),
+            },
+            {
+                playerId: NimblebitConfig.PlayerIdSchema.make("9GTYN"),
+                playerAuthKey: NimblebitConfig.PlayerAuthKeySchema.make(
+                    Redacted.make("89f9b90b-4e1e-4b48-af56-df39da7b17a7")
+                ),
+            },
+        ],
+        tinytowerclassic: [],
+        tinytowervegas: [],
+    };
 
     private static readonly burnbot: (
         game: NimblebitGame
-    ) => Effect.Effect<Schema.Schema.Type<typeof NimblebitConfig.AuthenticatedPlayerSchema>, never, never> = (game) => {
-        switch (game) {
-            case "bitcity": {
-                return Random.shuffle(NimblebitAuth.bitcityBurnBots).pipe(Effect.map((bots) => bots[0]));
-            }
-            case "discozoo": {
-                return Random.shuffle(NimblebitAuth.discozooBurnBots).pipe(Effect.map((bots) => bots[0]));
-            }
-            case "legotower": {
-                return Random.shuffle(NimblebitAuth.legotowerBurnBots).pipe(Effect.map((bots) => bots[0]));
-            }
-            case "pocketplanes": {
-                return Random.shuffle(NimblebitAuth.pocketplanesBurnBots).pipe(Effect.map((bots) => bots[0]));
-            }
-            case "pockettrains": {
-                return Random.shuffle(NimblebitAuth.pockettrainsBurnBots).pipe(Effect.map((bots) => bots[0]));
-            }
-            case "tinytowerclassic": {
-                return Random.shuffle(NimblebitAuth.tinytowerClassicBurnBots).pipe(Effect.map((bots) => bots[0]));
-            }
-            case "tinytower": {
-                return Random.shuffle(NimblebitAuth.tinytowerBurnBots).pipe(Effect.map((bots) => bots[0]));
-            }
-            case "tinytowervegas": {
-                return Random.shuffle(NimblebitAuth.tinytowerVegasBurnBots).pipe(Effect.map((bots) => bots[0]));
-            }
-            default: {
-                return Function.absurd(game);
-            }
-        }
-    };
+    ) => Effect.Effect<Schema.Schema.Type<typeof NimblebitConfig.AuthenticatedPlayerSchema>, never, never> = (game) =>
+        Random.choice(NimblebitAuth.burnBots[game]).pipe(
+            Effect.catch(() => Effect.die(new Error(`No burnbots are configured for ${game}`)))
+        );
 
     private static readonly Salt: Effect.Effect<number, PlatformError.PlatformError, Crypto.Crypto> = Effect.map(
         Crypto.Crypto.use((crypto) => crypto.randomBytes(4)),
