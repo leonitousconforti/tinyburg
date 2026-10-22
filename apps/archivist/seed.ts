@@ -13,7 +13,7 @@ Effect.gen(function* () {
         const maxVersionCode = item?.details?.appDetails?.versionCode ?? 0n;
         for (let versionCode = BigInt(0); versionCode <= maxVersionCode; versionCode++) {
             yield* Effect.logInfo(`Archiving ${bundleIdentifier} version ${versionCode}`);
-            yield* archiveToS3({ bundleIdentifier, offerType: item?.offer[0].offerType ?? 1, versionCode });
+            yield* archiveToS3({ bundleIdentifier, offerType: item?.offer.at(0)?.offerType ?? 1, versionCode });
         }
     }
 }).pipe(Effect.provide(Live), NodeRuntime.runMain);
