@@ -463,7 +463,7 @@ const FloorIdSchema = Schema.suspend(() => {
         Schema.decodeTo(validIndicesSchema),
         Schema.decodeTo(
             Schema.Union(validFloorsSchema),
-            SchemaTransformation.transformOrFail({
+            SchemaTransformation.transformEffect({
                 encode: (input: ValidFloor) =>
                     Option.match(tryFindFloor(input), {
                         // Bridges an untyped runtime boundary; the shape is guaranteed by construction, not by the compiler.
@@ -530,14 +530,14 @@ export const Floor = Schema.Struct({
     ),
     stocks: Schema.String.pipe(
         NimblebitSchema.split(),
-        Schema.decodeTo(Schema.Array(Schema.BigIntFromString).pipe(Schema.check(Schema.isLengthBetween(3, 3)))),
+        Schema.decodeTo(Schema.Array(Schema.BigIntFromString).pipe(Schema.check(Schema.isBetweenLength(3, 3)))),
         Schema.annotateKey({ nimblebitSaveDataKey: "Fstk" })
     ),
     lastSaleTicks: Schema.String.pipe(
         NimblebitSchema.split(),
         Schema.decodeTo(
             Schema.Array(Schema.BigIntFromString.pipe(Schema.decodeTo(NimblebitSchema.CSharpDate))).pipe(
-                Schema.check(Schema.isLengthBetween(3, 3))
+                Schema.check(Schema.isBetweenLength(3, 3))
             )
         ),
         Schema.annotateKey({ nimblebitSaveDataKey: "Flst" })

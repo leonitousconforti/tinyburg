@@ -8,7 +8,7 @@ import { PlayerIdSchema } from "@tinyburg/nimblebit-sdk/NimblebitConfig";
 import { type Language, longDate } from "@tinyburg/shared-ui/Internationalization";
 import { AsyncData, Command } from "foldkit";
 import { defineMessageUnion } from "foldkit/message";
-import { evo } from "foldkit/struct";
+import { modifyFields } from "foldkit/struct";
 
 import { Circle, CircleGraph, TowerStatus } from "../../shared/api.ts";
 import { GameCatalogEntry, type GameId, GameIds, gamePlayerKey } from "../../shared/games.ts";
@@ -70,7 +70,7 @@ export const initialTowers: TowersModel = {
 
 /** The page as entered: held data stays, transient row state clears. */
 export const enterTowers = (previous: TowersModel): TowersModel =>
-    evo(previous, {
+    modifyFields(previous, {
         busy: Option.none,
         notice: Option.none,
         problem: Option.none,
@@ -204,7 +204,7 @@ type TowersStep = readonly [TowersModel, ReadonlyArray<Command.Command<TowersMes
 
 /** Starting an action clears whatever the last one had to say about itself. */
 const starting = (model: TowersModel, busy: TowerRef): TowersModel =>
-    evo(model, {
+    modifyFields(model, {
         busy: () => Option.some(gamePlayerKey(busy)),
         notice: Option.none,
         problem: Option.none,
@@ -212,19 +212,22 @@ const starting = (model: TowersModel, busy: TowerRef): TowersModel =>
     });
 
 const refetch = (model: TowersModel): TowersModel =>
-    evo(model, { towers: (towers) => Option.getOrElse(AsyncData.revalidate(towers), () => towers) });
+    modifyFields(model, { towers: (towers) => Option.getOrElse(AsyncData.revalidate(towers), () => towers) });
 
 export const updateTowers = (model: TowersModel, message: TowersMessage): TowersStep =>
     Match.value(message).pipe(
         Match.withReturnType<TowersStep>(),
         Match.tagsExhaustive({
-            SettledTowers: ({ result }) => [evo(model, { towers: AsyncData.settle(result), busy: Option.none }), []],
+            SettledTowers: ({ result }) => [
+                modifyFields(model, { towers: AsyncData.settle(result), busy: Option.none }),
+                [],
+            ],
 
-            SettledGames: ({ games }) => [evo(model, { games: () => games }), []],
+            SettledGames: ({ games }) => [modifyFields(model, { games: () => games }), []],
 
             // The layout runs here, once per answer, rather than in the view.
             SettledGraph: ({ graph }) => [
-                evo(model, {
+                modifyFields(model, {
                     graph: () =>
                         graph.nodes.length === 0
                             ? Option.none()
@@ -236,7 +239,7 @@ export const updateTowers = (model: TowersModel, message: TowersMessage): Towers
             ClickedEnroll: ({ tower }) => [starting(model, tower), [Enroll({ tower })]],
 
             CompletedEnroll: ({ crawled }) => [
-                evo(refetch(model), {
+                modifyFields(refetch(model), {
                     busy: Option.none,
                     notice: () => Option.some(crawled ? towersMsgs().enrolledCrawled : towersMsgs().enrolledPending),
                 }),
@@ -249,7 +252,7 @@ export const updateTowers = (model: TowersModel, message: TowersMessage): Towers
                 Option.contains(model.armedWithdraw, gamePlayerKey(tower))
                     ? [starting(model, tower), [Withdraw({ tower })]]
                     : [
-                          evo(model, {
+                          modifyFields(model, {
                               armedWithdraw: () => Option.some(gamePlayerKey(tower)),
                               problem: Option.none,
                           }),
@@ -257,7 +260,7 @@ export const updateTowers = (model: TowersModel, message: TowersMessage): Towers
                       ],
 
             CompletedWithdraw: ({ eventsRemoved }) => [
-                evo(refetch(model), {
+                modifyFields(refetch(model), {
                     busy: Option.none,
                     circle: Option.none,
                     notice: () => Option.some(towersMsgs().withdrawn(eventsRemoved)),
@@ -266,13 +269,19 @@ export const updateTowers = (model: TowersModel, message: TowersMessage): Towers
             ],
 
             ClickedCircle: ({ tower }) => [starting(model, tower), [FetchCircle({ tower })]],
-            SettledCircle: ({ circle }) => [evo(model, { circle: () => Option.some(circle), busy: Option.none }), []],
-            ClickedHideCircle: () => [evo(model, { circle: Option.none }), []],
+            SettledCircle: ({ circle }) => [
+                modifyFields(model, { circle: () => Option.some(circle), busy: Option.none }),
+                [],
+            ],
+            ClickedHideCircle: () => [modifyFields(model, { circle: Option.none }), []],
 
-            FailedAction: ({ message }) => [evo(model, { busy: Option.none, problem: () => Option.some(message) }), []],
+            FailedAction: ({ message }) => [
+                modifyFields(model, { busy: Option.none, problem: () => Option.some(message) }),
+                [],
+            ],
 
             // Handled by main.ts, which owns navigation.
-            SignedOutElsewhere: () => [evo(model, { busy: Option.none }), []],
+            SignedOutElsewhere: () => [modifyFields(model, { busy: Option.none }), []],
         })
     );
 

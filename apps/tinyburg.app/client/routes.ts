@@ -1,66 +1,57 @@
 import { Option, Schema as S, pipe } from "effect";
 
 import { Route } from "foldkit";
-import { literal, r, schemaSegment, slash } from "foldkit/route";
+import { defineRouteUnion, literal, schemaSegment, slash } from "foldkit/route";
 
 import { LinkableGame } from "./linkableGames.ts";
 
-export const HomeRoute = r("Home");
-export const AboutRoute = r("About");
-export const LoginRoute = r("Login", { returnTo: S.Option(S.String), error: S.Option(S.String) });
-export const PrivacyRoute = r("Privacy");
-export const TermsRoute = r("Terms");
-export const SponsorsRoute = r("Sponsors");
-export const DevelopersRoute = r("Developers");
-export const DeveloperAppsRoute = r("DeveloperApps");
-export const TowerMeRoute = r("TowerMe");
-export const TowerLinkRoute = r("TowerLink", { game: LinkableGame });
-export const AccountRoute = r("Account", { link: S.Option(S.String), error: S.Option(S.String) });
-export const NotFoundRoute = r("NotFound", { path: S.String });
-
-export const AppRoute = S.Union([
-    HomeRoute,
-    AboutRoute,
-    LoginRoute,
-    PrivacyRoute,
-    TermsRoute,
-    SponsorsRoute,
-    DevelopersRoute,
-    DeveloperAppsRoute,
-    TowerMeRoute,
-    TowerLinkRoute,
-    AccountRoute,
-    NotFoundRoute,
-]);
+export const AppRoute = defineRouteUnion({
+    Home: {},
+    About: {},
+    Login: { returnTo: S.Option(S.String), error: S.Option(S.String) },
+    Privacy: {},
+    Terms: {},
+    Sponsors: {},
+    Developers: {},
+    DeveloperApps: {},
+    TowerMe: {},
+    TowerLink: { game: LinkableGame },
+    Account: { link: S.Option(S.String), error: S.Option(S.String) },
+    NotFound: { path: S.String },
+});
 export type AppRoute = typeof AppRoute.Type;
 
-export const homeRouter = pipe(Route.root, Route.mapTo(HomeRoute));
-export const aboutRouter = pipe(literal("about"), Route.mapTo(AboutRoute));
+export const homeRouter = pipe(Route.root, Route.mapTo(AppRoute.Home));
+export const aboutRouter = pipe(literal("about"), Route.mapTo(AppRoute.About));
 // The oauth callback reports a failed sign in through the `error` query
 // parameter; the page opens saying so rather than pretending nothing happened.
 export const loginRouter = pipe(
     literal("login"),
     Route.query(S.Struct({ returnTo: S.OptionFromOptional(S.String), error: S.OptionFromOptional(S.String) })),
-    Route.mapTo(LoginRoute)
+    Route.mapTo(AppRoute.Login)
 );
-export const privacyRouter = pipe(literal("privacy"), Route.mapTo(PrivacyRoute));
-export const termsRouter = pipe(literal("terms"), Route.mapTo(TermsRoute));
-export const sponsorsRouter = pipe(literal("sponsors"), Route.mapTo(SponsorsRoute));
-export const developersRouter = pipe(literal("developers"), Route.mapTo(DevelopersRoute));
-export const developerAppsRouter = pipe(literal("developers"), slash(literal("apps")), Route.mapTo(DeveloperAppsRoute));
-export const towerMeRouter = pipe(literal("towers"), slash(literal("@me")), Route.mapTo(TowerMeRoute));
+export const privacyRouter = pipe(literal("privacy"), Route.mapTo(AppRoute.Privacy));
+export const termsRouter = pipe(literal("terms"), Route.mapTo(AppRoute.Terms));
+export const sponsorsRouter = pipe(literal("sponsors"), Route.mapTo(AppRoute.Sponsors));
+export const developersRouter = pipe(literal("developers"), Route.mapTo(AppRoute.Developers));
+export const developerAppsRouter = pipe(
+    literal("developers"),
+    slash(literal("apps")),
+    Route.mapTo(AppRoute.DeveloperApps)
+);
+export const towerMeRouter = pipe(literal("towers"), slash(literal("@me")), Route.mapTo(AppRoute.TowerMe));
 export const towerLinkRouter = pipe(
     literal("towers"),
     slash(literal("@link")),
     slash(schemaSegment("game", LinkableGame)),
-    Route.mapTo(TowerLinkRoute)
+    Route.mapTo(AppRoute.TowerLink)
 );
 // The oauth callback reports how connecting another provider went: `link` when
 // it worked, `error` when it did not. The page opens saying so either way.
 export const accountRouter = pipe(
     literal("account"),
     Route.query(S.Struct({ link: S.OptionFromOptional(S.String), error: S.OptionFromOptional(S.String) })),
-    Route.mapTo(AccountRoute)
+    Route.mapTo(AppRoute.Account)
 );
 
 const routeParser = Route.oneOf(
@@ -77,7 +68,7 @@ const routeParser = Route.oneOf(
     accountRouter
 );
 
-export const urlToAppRoute = Route.parseUrlWithFallback(routeParser, NotFoundRoute);
+export const urlToAppRoute = Route.parseUrlWithFallback(routeParser, AppRoute.NotFound);
 
 /** /login, carrying the page to return to after signing in. */
 export const loginHref = (returnTo: Option.Option<string>): string => loginRouter({ returnTo, error: Option.none() });

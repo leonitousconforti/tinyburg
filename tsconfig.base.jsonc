@@ -31,6 +31,31 @@
                 "transform": "@effect/language-service/transform",
                 "namespaceImportPackages": ["effect", "@effect/*"],
                 "ignoreEffectWarningsInTscExitCode": true,
+                // Effect 4.1 marks its platform modules `@stability unstable`. These are the ones the
+                // apps and SDKs are built on, opted into by name so a new unstable module still gets
+                // flagged. Effect is pinned to an exact version, so their breaking changes surface as
+                // type errors on upgrade.
+                "allowedUnstableApis": [
+                    "effect/ConfigProvider#fromDotEnv",
+                    "effect/FileSystem",
+                    "effect/Graph",
+                    "effect/Path",
+                    "effect/PlatformError",
+                    "effect/cluster",
+                    "effect/crypto",
+                    "effect/http",
+                    "effect/http-api",
+                    "effect/persistence",
+                    "effect/process",
+                    "effect/rpc",
+                    "effect/schema",
+                    "effect/sql",
+                    "effect/workflow",
+                    "@effect/platform-node",
+                    "@effect/platform-node-shared",
+                    "@effect/sql-pg",
+                    "@effect/vitest",
+                ],
                 "diagnosticSeverity": {
                     "abortControllerInEffect": "warning",
                     "asyncFunction": "warning",

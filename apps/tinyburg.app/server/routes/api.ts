@@ -1,4 +1,5 @@
-import { DateTime, Duration, Effect, Encoding, Layer, Option, Redacted, Schema } from "effect";
+import { DateTime, Duration, Effect, Layer, Option, Redacted, Schema } from "effect";
+import { Base64Url } from "effect/encoding";
 import { Headers, HttpClient, HttpRouter, HttpServerRequest } from "effect/http";
 import { HttpApiBuilder, HttpApiError } from "effect/http-api";
 import { Model } from "effect/schema";
@@ -54,7 +55,7 @@ const accessTokenFor = Effect.fnUntraced(function* ({ session, user }: { session
         ttlSeconds: ACCESS_TOKEN_TTL_SECONDS,
     });
 
-    const claims = yield* Effect.fromResult(Encoding.decodeBase64UrlString(accessToken.split(".")[1])).pipe(
+    const claims = yield* Effect.fromResult(Base64Url.decodeString(accessToken.split(".")[1])).pipe(
         Effect.flatMap(Schema.decodeEffect(Schema.fromJsonString(Jwt.StandardClaimsSchema)))
     );
 

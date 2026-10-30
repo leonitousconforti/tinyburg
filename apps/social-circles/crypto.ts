@@ -1,4 +1,5 @@
-import { Config, Effect, Encoding, Redacted, Schema } from "effect";
+import { Config, Effect, Redacted, Schema } from "effect";
+import { Base64Url } from "effect/encoding";
 
 import * as crypto from "node:crypto";
 
@@ -9,7 +10,7 @@ import * as crypto from "node:crypto";
 export const sha256 = (value: string): Effect.Effect<string> =>
     Effect.map(
         Effect.promise(() => crypto.subtle.digest("SHA-256", new TextEncoder().encode(value))),
-        (digest) => Encoding.encodeBase64Url(new Uint8Array(digest))
+        (digest) => Base64Url.encode(new Uint8Array(digest))
     );
 
 /**
@@ -83,6 +84,8 @@ export const unseal = (sealed: string): Effect.Effect<Redacted.Redacted, Config.
  * was altered. Deliberately carries no detail: the caller's only correct
  * response is to treat the grant as lost and ask the user to reconnect.
  */
-export class SealError extends Schema.Error<SealError>("@tinyburg/social-circles/SealError")({
+export class SealError extends Schema.Error<SealError, { readonly brand: unique symbol }>(
+    "@tinyburg/social-circles/SealError"
+)({
     _tag: Schema.tag("SealError"),
 }) {}

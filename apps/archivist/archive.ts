@@ -63,8 +63,7 @@ export const archiveToS3 = Effect.fnUntraced(
             const checksumAlgorithm = Match.value(integrity).pipe(
                 Match.when({ "SHA-1": Match.string }, () => "SHA1" as const),
                 Match.when({ "SHA-256": Match.string }, () => "SHA256" as const),
-                Match.when({ "SHA-512": Match.string }, () => "SHA512" as const),
-                Match.orElse(() => undefined)
+                Match.exhaustive
             );
 
             const integrityBase64 = Match.value(integrity).pipe(
@@ -74,15 +73,8 @@ export const archiveToS3 = Effect.fnUntraced(
                 Match.when({ "SHA-256": Match.string }, ({ "SHA-256": sha256Hash }) =>
                     Buffer.from(sha256Hash, "hex").toString("base64")
                 ),
-                Match.when({ "SHA-512": Match.string }, ({ "SHA-512": sha512Hash }) =>
-                    Buffer.from(sha512Hash, "hex").toString("base64")
-                ),
-                Match.orElse(() => undefined)
+                Match.exhaustive
             );
-
-            if ("SHA-384" in integrity) {
-                return yield* Effect.die("SHA-384 is not supported and thus could not be checked by S3");
-            }
 
             const maybeExistingUpload = yield* Effect.flatMap(S3, (s3) =>
                 s3.getObject({
@@ -99,8 +91,7 @@ export const archiveToS3 = Effect.fnUntraced(
                 const existingUploadIntegrity = Match.value(integrity).pipe(
                     Match.when({ "SHA-1": Match.string }, () => maybeExistingUpload.value.ChecksumSHA1),
                     Match.when({ "SHA-256": Match.string }, () => maybeExistingUpload.value.ChecksumSHA256),
-                    Match.when({ "SHA-512": Match.string }, () => maybeExistingUpload.value.ChecksumSHA512),
-                    Match.orElse(() => undefined)
+                    Match.exhaustive
                 );
 
                 if (existingUploadIntegrity !== integrityBase64) {
@@ -125,7 +116,6 @@ export const archiveToS3 = Effect.fnUntraced(
                     Key: keyFor({ ...options, name }),
                     ...("SHA-1" in integrity ? { ChecksumSHA1: integrityBase64 } : {}),
                     ...("SHA-256" in integrity ? { ChecksumSHA256: integrityBase64 } : {}),
-                    ...("SHA-512" in integrity ? { ChecksumSHA512: integrityBase64 } : {}),
                 })
             );
 

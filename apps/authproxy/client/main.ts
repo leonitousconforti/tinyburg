@@ -4,9 +4,9 @@ import type { TitleMessages } from "./messages/types.ts";
 import type { Document, Html, HtmlBuilder } from "foldkit/html";
 
 import { Language, fromNavigator } from "@tinyburg/shared-ui/Internationalization";
-import { AsyncData, Command, Navigation, Render, type Runtime, Url } from "foldkit";
+import { AsyncData, Command, Navigation, Render, type Runtime, type Update, Url } from "foldkit";
 import { defineMessageUnion } from "foldkit/message";
-import { evo } from "foldkit/struct";
+import { modifyFields } from "foldkit/struct";
 
 import {
     type Backend,
@@ -77,7 +77,7 @@ export type NavigationMessage = typeof NavigationMessage.Type;
 export const Message = S.Union([NavigationMessage, BackendMessage, KeysMessage, AdminMessage]);
 export type Message = typeof Message.Type;
 
-type Step = readonly [Model, ReadonlyArray<Command.Command<Message, never, Backend>>];
+type Step = Update.Return<Model, Message, Backend>;
 
 // COMMAND
 
@@ -107,7 +107,7 @@ const requiresSession = (route: AppRoute): boolean => route._tag === "Keys" || r
 
 /** Page-scoped state resets when its route is entered. */
 const resetPageState = (model: Model, route: AppRoute): Model =>
-    evo(model, {
+    modifyFields(model, {
         route: () => route,
         keys: (keys) => (route._tag === "Keys" ? enterKeys(keys) : keys),
         admin: (admin) => (route._tag === "Admin" ? enterAdmin(route.error, admin) : admin),
@@ -126,16 +126,16 @@ const enterRoute = (model: Model): Step => {
 
     if (requiresSession(route) && session._tag === "SignedOut") {
         const returnTo = window.location.pathname + window.location.search;
-        return [model, [Navigate({ url: loginHref(Option.some(returnTo)), replace: true })]];
+        return { model, commands: [Navigate({ url: loginHref(Option.some(returnTo)), replace: true })] };
     }
 
     if (route._tag === "Keys" && session._tag === "SignedIn") {
         return Option.match(AsyncData.revalidateOrLoad(model.keys.keys), {
-            onNone: (): Step => [model, []],
-            onSome: (keys): Step => [
-                evo(model, { keys: (keysModel) => evo(keysModel, { keys: () => keys }) }),
-                [FetchKeys()],
-            ],
+            onNone: (): Step => ({ model }),
+            onSome: (keys): Step => ({
+                model: modifyFields(model, { keys: (keysModel) => modifyFields(keysModel, { keys: () => keys }) }),
+                commands: [FetchKeys()],
+            }),
         });
     }
 
@@ -143,15 +143,15 @@ const enterRoute = (model: Model): Step => {
     // page as "show the step-up form".
     if (route._tag === "Admin" && session._tag === "SignedIn") {
         return Option.match(AsyncData.revalidateOrLoad(model.admin.keys), {
-            onNone: (): Step => [model, []],
-            onSome: (keys): Step => [
-                evo(model, { admin: (adminModel) => evo(adminModel, { keys: () => keys }) }),
-                [FetchAdminKeys()],
-            ],
+            onNone: (): Step => ({ model }),
+            onSome: (keys): Step => ({
+                model: modifyFields(model, { admin: (adminModel) => modifyFields(adminModel, { keys: () => keys }) }),
+                commands: [FetchAdminKeys()],
+            }),
         });
     }
 
-    return [model, []];
+    return { model };
 };
 
 const isKeysMessage = S.is(KeysMessage);
@@ -168,13 +168,13 @@ export const update = (model: Model, message: Message): Step => {
 
         // The session ended elsewhere; the server owns the way back.
         if (message._tag === "AdminSignedOutElsewhere") {
-            return [
-                evo(model, { admin: () => admin, session: () => SignedOut() }),
-                [Navigate({ url: loginHref(Option.some("/admin")), replace: true })],
-            ];
+            return {
+                model: modifyFields(model, { admin: () => admin, session: () => SignedOut() }),
+                commands: [Navigate({ url: loginHref(Option.some("/admin")), replace: true })],
+            };
         }
 
-        return [evo(model, { admin: () => admin }), commands];
+        return { model: modifyFields(model, { admin: () => admin }), commands };
     }
 
     if (isKeysMessage(message)) {
@@ -183,13 +183,13 @@ export const update = (model: Model, message: Message): Step => {
 
         // The session ended elsewhere; the server owns the way back.
         if (message._tag === "SignedOutElsewhere") {
-            return [
-                evo(model, { keys: () => keys, session: () => SignedOut() }),
-                [Navigate({ url: loginHref(Option.some("/keys")), replace: true })],
-            ];
+            return {
+                model: modifyFields(model, { keys: () => keys, session: () => SignedOut() }),
+                commands: [Navigate({ url: loginHref(Option.some("/keys")), replace: true })],
+            };
         }
 
-        return [evo(model, { keys: () => keys }), commands];
+        return { model: modifyFields(model, { keys: () => keys }), commands };
     }
 
     return Match.value(message).pipe(
@@ -201,15 +201,15 @@ export const update = (model: Model, message: Message): Step => {
                     Match.tagsExhaustive({
                         Internal: ({ url }) =>
                             isServerPath(url.pathname)
-                                ? [model, [LoadExternal({ href: Url.toString(url) })]]
-                                : [model, [Navigate({ url: Url.toString(url), replace: false })]],
-                        External: ({ href }) => [model, [LoadExternal({ href })]],
+                                ? { model, commands: [LoadExternal({ href: Url.toString(url) })] }
+                                : { model, commands: [Navigate({ url: Url.toString(url), replace: false })] },
+                        External: ({ href }) => ({ model, commands: [LoadExternal({ href })] }),
                     })
                 ),
             ChangedUrl: ({ url }) => enterRoute(resetPageState(model, urlToAppRoute(url))),
-            GotSession: ({ session }) => enterRoute(evo(model, { session: () => session })),
-            SettledScopes: ({ result }) => [evo(model, { scopes: AsyncData.settle(result) }), []],
-            CompletedNavigation: () => [model, []],
+            GotSession: ({ session }) => enterRoute(modifyFields(model, { session: () => session })),
+            SettledScopes: ({ result }) => ({ model: modifyFields(model, { scopes: AsyncData.settle(result) }) }),
+            CompletedNavigation: () => ({ model }),
         })
     );
 };
@@ -221,7 +221,7 @@ export const init: Runtime.RoutingApplicationInit<Model, Message, void, Backend>
 
     // The session answer decides the gated route, so it is the first thing
     // asked for; until it lands the app is neither signed in nor out.
-    const [model, commands] = enterRoute(
+    const { model, commands = [] } = enterRoute(
         resetPageState(
             {
                 route,
@@ -234,7 +234,7 @@ export const init: Runtime.RoutingApplicationInit<Model, Message, void, Backend>
             route
         )
     );
-    return [model, [FetchSession(), FetchScopes(), ...commands]];
+    return { model, commands: [FetchSession(), FetchScopes(), ...commands] };
 };
 
 // VIEW

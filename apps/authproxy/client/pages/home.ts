@@ -87,7 +87,7 @@ export const homeView = <M>(h: HtmlBuilder<M>, msgs: HomeMessages, session: Sess
                                         h,
                                         "ts",
                                         [
-                                            `import { NodeServices } from "@effect/platform-node";`,
+                                            `import { NodeCrypto } from "@effect/platform-node";`,
                                             `import { NimblebitAuth, NimblebitConfig } from "@tinyburg/nimblebit-sdk";`,
                                             `import { TinyTower } from "@tinyburg/tinytower-sdk";`,
                                             `import { Config, Effect, Layer } from "effect";`,
@@ -98,7 +98,7 @@ export const homeView = <M>(h: HtmlBuilder<M>, msgs: HomeMessages, session: Sess
                                             `    NimblebitAuth.layerTinyburgAuthProxyConfig({`,
                                             `        authKey: Config.Redacted("AUTH_KEY"),`,
                                             `    })`,
-                                            `).pipe(Layer.provide(NodeServices.layer));`,
+                                            `).pipe(Layer.provide(NodeCrypto.layerSecureRandom));`,
                                             ``,
                                             `const program = Effect.gen(function* () {`,
                                             `    const me = yield* NimblebitConfig.AuthenticatedPlayerConfig;`,

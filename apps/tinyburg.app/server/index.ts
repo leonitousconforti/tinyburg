@@ -3,7 +3,7 @@ import { FetchHttpClient, HttpRouter, HttpServerResponse } from "effect/http";
 
 import { createServer } from "node:http";
 
-import { NodeHttpServer, NodeRuntime } from "@effect/platform-node";
+import { NodeCrypto, NodeHttpServer, NodeRuntime } from "@effect/platform-node";
 import { PgClient, PgMigrator } from "@effect/sql-pg";
 
 import { DevelopersRepository } from "../domain/developers.ts";
@@ -76,7 +76,13 @@ const Repositories = Layer.mergeAll(
 );
 
 HttpRouter.serve(AllRoutes).pipe(
-    Layer.provide([Repositories, CookiePolicy.Default, OidcKeys.Default, FetchHttpClient.layer]),
+    Layer.provide([
+        Repositories,
+        CookiePolicy.Default,
+        OidcKeys.Default,
+        FetchHttpClient.layer,
+        NodeCrypto.layerSecureRandom,
+    ]),
     Layer.provide(MigratorLive),
     Layer.provide(SqlLive),
     Layer.provide(

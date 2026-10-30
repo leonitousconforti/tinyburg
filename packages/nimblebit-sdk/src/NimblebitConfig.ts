@@ -116,7 +116,7 @@ export const AuthenticatedPlayerConfig: Config.Config<Schema.Schema.Type<typeof 
  */
 export const PlayerConfig: Config.Config<
     Schema.Schema.Type<typeof UnauthenticatedPlayerSchema> | Schema.Schema.Type<typeof AuthenticatedPlayerSchema>
-> = Config.mapOrFail(
+> = Config.mapEffect(
     Config.all({
         playerId: PlayerIdConfig,
         playerEmail: PlayerEmailConfig.pipe(Config.option),

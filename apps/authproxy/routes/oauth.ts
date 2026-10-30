@@ -16,7 +16,7 @@ import { SessionsRepository } from "../domain/sessions.ts";
 
 const tinyburgConfig = Config.all({
     adminPassword: Config.Redacted("ADMIN_PASSWORD"),
-    adminPlayerIds: Config.schema(Config.Array(NimblebitConfig.PlayerIdSchema), "ADMIN_PLAYER_IDS"),
+    adminPlayerIds: Config.Array(NimblebitConfig.PlayerIdSchema, "ADMIN_PLAYER_IDS"),
     registrationToken: Config.option(Config.Redacted("TINYBURG_OAUTH_REGISTRATION_TOKEN")),
     redirectUri: Config.String("TINYBURG_OAUTH_REDIRECT_URI"),
     issuer: Config.String("TINYBURG_OAUTH_ISSUER").pipe(

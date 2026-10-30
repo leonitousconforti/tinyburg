@@ -27,7 +27,9 @@ import { TinyburgTowers } from "../services/towers.ts";
  * @since 1.0.0
  * @category Errors
  */
-export class PurgeFailed extends Schema.Error<PurgeFailed>("@tinyburg/social-circles/PurgeFailed")({
+export class PurgeFailed extends Schema.Error<PurgeFailed, { readonly brand: unique symbol }>(
+    "@tinyburg/social-circles/PurgeFailed"
+)({
     _tag: Schema.tag("PurgeFailed"),
     game: GameId,
     playerId: PlayerIdSchema,

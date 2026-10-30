@@ -1,10 +1,10 @@
+import type { EncodingError } from "effect/encoding";
 import type { HttpClient, HttpClientError } from "effect/http";
 
 import {
     type Cause,
     Config,
     Context,
-    type Crypto,
     Duration,
     Effect,
     type Exit,
@@ -17,7 +17,7 @@ import {
     String,
     Tuple,
 } from "effect";
-import { ChildProcess, ChildProcessSpawner } from "effect/unstable/process";
+import { ChildProcess, ChildProcessSpawner } from "effect/process";
 import { type RpcClient, RpcSerialization } from "effect/rpc";
 
 import {
@@ -98,6 +98,7 @@ export const AgentWatched = <A, E, R>(
 export const DeviceLive: Layer.Layer<
     FridaDevice.FridaDevice,
     | Config.ConfigError
+    | EncodingError.EncodingError
     | FridaDeviceAcquisitionError.FridaDeviceAcquisitionError
     | HttpClientError.HttpClientError
     | Schema.SchemaError
@@ -110,7 +111,6 @@ export const DeviceLive: Layer.Layer<
     | HttpClient.HttpClient
     | AndroidDevice.AndroidDeviceService
     | PlayAccount.PlayAccount
-    | Crypto.Crypto
 > = Layer.tap(
     FridaDevice.layerAndroidEmulatorDeviceConfig("Small_Phone", {
         fridaExecutable: "/data/local/tmp/frida-server-17.17.0-android-arm64",

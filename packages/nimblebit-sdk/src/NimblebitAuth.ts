@@ -9,7 +9,7 @@ import type * as PlatformError from "effect/PlatformError";
 
 import * as Config from "effect/Config";
 import * as Context from "effect/Context";
-import * as Crypto from "effect/Crypto";
+import { SecureRandom } from "effect/crypto";
 import * as Effect from "effect/Effect";
 import * as Layer from "effect/Layer";
 import * as Random from "effect/Random";
@@ -98,9 +98,9 @@ export class NimblebitAuth extends Context.Service<
             Effect.catch(() => Effect.die(new Error(`No burnbots are configured for ${game}`)))
         );
 
-    private static readonly Salt: Effect.Effect<number, PlatformError.PlatformError, Crypto.Crypto> = Effect.map(
-        Crypto.Crypto.use((crypto) => crypto.randomBytes(4)),
-        (bytes) => new DataView(bytes.buffer).getUint32(0, false)
+    private static readonly Salt: Effect.Effect<number, never, SecureRandom.SecureRandom> = Effect.map(
+        SecureRandom.SecureRandom.use((random) => random.randomBytes(4)),
+        (bytes) => new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength).getUint32(0, false)
     );
 
     private static readonly MD5 = (data: string): Effect.Effect<string, never, never> =>
@@ -111,10 +111,10 @@ export class NimblebitAuth extends Context.Service<
 
     public static readonly Direct = (
         authKey: Schema.Schema.Type<typeof NimblebitConfig.NimblebitAuthKeySchema>
-    ): Layer.Layer<NimblebitAuth, never, Crypto.Crypto> =>
-        Effect.map(Crypto.Crypto, (crypto) => ({
+    ): Layer.Layer<NimblebitAuth, never, SecureRandom.SecureRandom> =>
+        Effect.map(SecureRandom.SecureRandom, (random) => ({
             sign: (data: string) => NimblebitAuth.MD5(data + Redacted.value(authKey)),
-            salt: NimblebitAuth.Salt.pipe(Effect.provideService(Crypto.Crypto, crypto)),
+            salt: NimblebitAuth.Salt.pipe(Effect.provideService(SecureRandom.SecureRandom, random)),
             burnbot: NimblebitAuth.burnbot,
             host: "https://sync.nimblebit.com",
             authKey,
@@ -124,7 +124,7 @@ export class NimblebitAuth extends Context.Service<
         config: Config.Config<
             Schema.Schema.Type<typeof NimblebitConfig.NimblebitAuthKeySchema>
         > = NimblebitConfig.NimblebitAuthKeyConfig
-    ): Layer.Layer<NimblebitAuth, Config.ConfigError, Crypto.Crypto> =>
+    ): Layer.Layer<NimblebitAuth, Config.ConfigError, SecureRandom.SecureRandom> =>
         Effect.map(config, (authKey) => NimblebitAuth.Direct(authKey)).pipe(Layer.unwrap);
 
     public static readonly CustomHost = ({
@@ -133,9 +133,9 @@ export class NimblebitAuth extends Context.Service<
     }: {
         host: string;
         authKey: Redacted.Redacted;
-    }): Layer.Layer<NimblebitAuth, never, Crypto.Crypto> =>
-        Effect.map(Crypto.Crypto, (crypto) => ({
-            salt: NimblebitAuth.Salt.pipe(Effect.provideService(Crypto.Crypto, crypto)),
+    }): Layer.Layer<NimblebitAuth, never, SecureRandom.SecureRandom> =>
+        Effect.map(SecureRandom.SecureRandom, (random) => ({
+            salt: NimblebitAuth.Salt.pipe(Effect.provideService(SecureRandom.SecureRandom, random)),
             sign: Schema.encodeEffect(Schema.StringFromBase64Url),
             burnbot: NimblebitAuth.burnbot,
             authKey,
@@ -147,21 +147,21 @@ export class NimblebitAuth extends Context.Service<
             host: string;
             authKey: Redacted.Redacted;
         }>
-    ): Layer.Layer<NimblebitAuth, Config.ConfigError, Crypto.Crypto> =>
+    ): Layer.Layer<NimblebitAuth, Config.ConfigError, SecureRandom.SecureRandom> =>
         Layer.unwrap(Effect.map(Config.unwrap(options), NimblebitAuth.CustomHost));
 
     public static readonly TinyburgAuthProxy = ({
         authKey,
     }: {
         authKey: Redacted.Redacted;
-    }): Layer.Layer<NimblebitAuth, never, Crypto.Crypto> =>
+    }): Layer.Layer<NimblebitAuth, never, SecureRandom.SecureRandom> =>
         NimblebitAuth.CustomHost({ host: "https://authproxy.tinyburg.app", authKey });
 
     public static readonly TinyburgAuthProxyConfig = (
         options: Config.Wrap<{
             authKey: Redacted.Redacted;
         }>
-    ): Layer.Layer<NimblebitAuth, Config.ConfigError, Crypto.Crypto> =>
+    ): Layer.Layer<NimblebitAuth, Config.ConfigError, SecureRandom.SecureRandom> =>
         Layer.unwrap(Effect.map(Config.unwrap(options), NimblebitAuth.TinyburgAuthProxy));
 }
 
@@ -171,7 +171,7 @@ export class NimblebitAuth extends Context.Service<
  */
 export const layerDirect: (
     authKey: Schema.Schema.Type<typeof NimblebitConfig.NimblebitAuthKeySchema>
-) => Layer.Layer<NimblebitAuth, never, Crypto.Crypto> = NimblebitAuth.Direct;
+) => Layer.Layer<NimblebitAuth, never, SecureRandom.SecureRandom> = NimblebitAuth.Direct;
 
 /**
  * @since 1.0.0
@@ -179,7 +179,7 @@ export const layerDirect: (
  */
 export const layerDirectConfig: (
     config?: Config.Config<Schema.Schema.Type<typeof NimblebitConfig.NimblebitAuthKeySchema>>
-) => Layer.Layer<NimblebitAuth, Config.ConfigError, Crypto.Crypto> = NimblebitAuth.DirectConfig;
+) => Layer.Layer<NimblebitAuth, Config.ConfigError, SecureRandom.SecureRandom> = NimblebitAuth.DirectConfig;
 
 /**
  * @since 1.0.0
@@ -188,7 +188,7 @@ export const layerDirectConfig: (
 export const layerCustomHost: (options: {
     host: string;
     authKey: Redacted.Redacted;
-}) => Layer.Layer<NimblebitAuth, never, Crypto.Crypto> = NimblebitAuth.CustomHost;
+}) => Layer.Layer<NimblebitAuth, never, SecureRandom.SecureRandom> = NimblebitAuth.CustomHost;
 
 /**
  * @since 1.0.0
@@ -199,7 +199,7 @@ export const layerCustomHostConfig: (
         host: string;
         authKey: Redacted.Redacted;
     }>
-) => Layer.Layer<NimblebitAuth, Config.ConfigError, Crypto.Crypto> = NimblebitAuth.CustomHostConfig;
+) => Layer.Layer<NimblebitAuth, Config.ConfigError, SecureRandom.SecureRandom> = NimblebitAuth.CustomHostConfig;
 
 /**
  * @since 1.0.0
@@ -207,7 +207,7 @@ export const layerCustomHostConfig: (
  */
 export const layerTinyburgAuthProxy: (options: {
     authKey: Redacted.Redacted;
-}) => Layer.Layer<NimblebitAuth, never, Crypto.Crypto> = NimblebitAuth.TinyburgAuthProxy;
+}) => Layer.Layer<NimblebitAuth, never, SecureRandom.SecureRandom> = NimblebitAuth.TinyburgAuthProxy;
 
 /**
  * @since 1.0.0
@@ -217,4 +217,4 @@ export const layerTinyburgAuthProxyConfig: (
     options: Config.Wrap<{
         authKey: Redacted.Redacted;
     }>
-) => Layer.Layer<NimblebitAuth, Config.ConfigError, Crypto.Crypto> = NimblebitAuth.TinyburgAuthProxyConfig;
+) => Layer.Layer<NimblebitAuth, Config.ConfigError, SecureRandom.SecureRandom> = NimblebitAuth.TinyburgAuthProxyConfig;

@@ -1,7 +1,7 @@
 import { ConfigProvider, Effect, Layer, ManagedRuntime, Path, Schema } from "effect";
 import { FetchHttpClient } from "effect/http";
 
-import { NodeServices } from "@effect/platform-node";
+import { NodeCrypto, NodeServices } from "@effect/platform-node";
 import { describe, it } from "@effect/vitest";
 import { NimblebitAuth, NimblebitConfig } from "@tinyburg/nimblebit-sdk";
 import { TinyTower } from "@tinyburg/tinytower-sdk";
@@ -17,7 +17,7 @@ const ConfigLayerLive = DotEnvLayer.pipe(Layer.provideMerge(NodeServices.layer))
 const Live = Layer.mergeAll(
     FetchHttpClient.layer,
     NimblebitAuth.layerDirectConfig(NimblebitConfig.NimblebitAuthKeyConfig)
-).pipe(Layer.provideMerge(ConfigLayerLive));
+).pipe(Layer.provide(NodeCrypto.layerSecureRandom), Layer.provideMerge(ConfigLayerLive));
 
 const runtime = ManagedRuntime.make(Live);
 

@@ -183,10 +183,7 @@ export const render = <Model>(options: {
     readonly view: (model: Model, h: HtmlBuilder<never>) => Document;
     readonly favicon?: boolean | undefined;
 }): Effect.Effect<string> =>
-    Server.renderToString(
-        { init: () => [options.model, []] as const, view: options.view },
-        { isHydratable: false }
-    ).pipe(
+    Server.renderToString({ init: () => ({ model: options.model }), view: options.view }, { isHydratable: false }).pipe(
         Effect.map((rendered) => Server.injectIntoTemplate(template({ favicon: options.favicon ?? false }), rendered)),
         Effect.orDie
     );

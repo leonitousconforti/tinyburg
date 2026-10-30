@@ -3,10 +3,10 @@ import { Effect, Match, Option, Schema as S } from "effect";
 import type { Document, Html, HtmlBuilder } from "foldkit/html";
 
 import { Language, fromNavigator } from "@tinyburg/shared-ui/Internationalization";
-import { AsyncData, Command, Dom, Navigation, Render, type Runtime, Url } from "foldkit";
+import { AsyncData, Command, Dom, Navigation, Render, type Runtime, type Update, Url } from "foldkit";
 import { createLazy } from "foldkit/html";
 import { defineMessageUnion } from "foldkit/message";
-import { evo } from "foldkit/struct";
+import { modifyFields } from "foldkit/struct";
 
 import {
     type Backend,
@@ -85,7 +85,7 @@ export type NavigationMessage = typeof NavigationMessage.Type;
 export const Message = S.Union([NavigationMessage, BackendMessage, WizardMessage, AccountMessage]);
 export type Message = typeof Message.Type;
 
-type Step = readonly [Model, ReadonlyArray<Command.Command<Message, never, Backend>>];
+type Step = Update.Return<Model, Message, Backend>;
 
 // COMMAND
 
@@ -139,7 +139,7 @@ const requiresSession = (route: AppRoute): boolean =>
  * them immediately while enterRoute revalidates behind them.
  */
 const resetPageState = (model: Model, route: AppRoute): Model =>
-    evo(model, {
+    modifyFields(model, {
         route: () => route,
         wizard: (wizard) => (route._tag === "TowerLink" ? initialWizardFor(route.game) : wizard),
         account: (account) => (route._tag === "Account" ? enterAccount(route.link, route.error, account) : account),
@@ -158,7 +158,7 @@ const enterRoute = (model: Model): Step => {
 
     if (requiresSession(route) && session._tag === "SignedOut") {
         const returnTo = window.location.pathname + window.location.search;
-        return [model, [LoadExternal({ href: loginHref(Option.some(returnTo)) })]];
+        return { model, commands: [LoadExternal({ href: loginHref(Option.some(returnTo)) })] };
     }
 
     // Entering a data-backed page revalidates what it already holds and loads
@@ -167,30 +167,33 @@ const enterRoute = (model: Model): Step => {
     // as Refreshing while the fetch runs behind it.
     if (route._tag === "TowerMe" && session._tag === "SignedIn") {
         return Option.match(AsyncData.revalidateOrLoad(model.linkedTowers), {
-            onNone: (): Step => [model, []],
-            onSome: (linkedTowers): Step => [evo(model, { linkedTowers: () => linkedTowers }), [FetchLinkedTowers()]],
+            onNone: (): Step => ({ model }),
+            onSome: (linkedTowers): Step => ({
+                model: modifyFields(model, { linkedTowers: () => linkedTowers }),
+                commands: [FetchLinkedTowers()],
+            }),
         });
     }
 
     if (route._tag === "Account" && session._tag === "SignedIn") {
         const sessions = AsyncData.revalidateOrLoad(model.account.sessions);
         const accounts = AsyncData.revalidateOrLoad(model.account.accounts);
-        return [
-            evo(model, {
+        return {
+            model: modifyFields(model, {
                 account: (account) =>
-                    evo(account, {
+                    modifyFields(account, {
                         sessions: (current) => Option.getOrElse(sessions, () => current),
                         accounts: (current) => Option.getOrElse(accounts, () => current),
                     }),
             }),
-            [
+            commands: [
                 ...(Option.isSome(sessions) ? [FetchSessions()] : []),
                 ...(Option.isSome(accounts) ? [FetchLinkedAccounts()] : []),
             ],
-        ];
+        };
     }
 
-    return [model, []];
+    return { model };
 };
 
 const isWizardMessage = S.is(WizardMessage);
@@ -201,7 +204,7 @@ export const update = (model: Model, message: Message): Step => {
         const [wizard, wizardCommands] = updateWizard(model.wizard, message);
         const commands: Array<Command.Command<Message, never, Backend>> = [...wizardCommands];
         if (message._tag === "SucceededVerify") commands.push(Navigate({ url: "/towers/@me", replace: false }));
-        return [evo(model, { wizard: () => wizard }), commands];
+        return { model: modifyFields(model, { wizard: () => wizard }), commands };
     }
 
     if (isAccountMessage(message)) {
@@ -215,10 +218,13 @@ export const update = (model: Model, message: Message): Step => {
         const signedOut =
             message._tag === "SignedOutElsewhere" || (message._tag === "CompletedRevoke" && message.signedOut);
         if (signedOut) {
-            return [evo(model, { account: () => account, session: () => SignedOut() }), [LoadExternal({ href: "/" })]];
+            return {
+                model: modifyFields(model, { account: () => account, session: () => SignedOut() }),
+                commands: [LoadExternal({ href: "/" })],
+            };
         }
 
-        return [evo(model, { account: () => account }), commands];
+        return { model: modifyFields(model, { account: () => account }), commands };
     }
 
     return Match.value(message).pipe(
@@ -230,19 +236,21 @@ export const update = (model: Model, message: Message): Step => {
                     Match.tagsExhaustive({
                         Internal: ({ url }) =>
                             isServerPath(url.pathname)
-                                ? [model, [LoadExternal({ href: Url.toString(url) })]]
-                                : [model, [Navigate({ url: Url.toString(url), replace: false })]],
-                        External: ({ href }) => [model, [LoadExternal({ href })]],
+                                ? { model, commands: [LoadExternal({ href: Url.toString(url) })] }
+                                : { model, commands: [Navigate({ url: Url.toString(url), replace: false })] },
+                        External: ({ href }) => ({ model, commands: [LoadExternal({ href })] }),
                     })
                 ),
             ChangedUrl: ({ url }) => enterRoute(resetPageState(model, urlToAppRoute(url))),
-            ClickedSignIn: () => [model, [LoadExternal({ href: loginHref(Option.some("/towers/@me")) })]],
-            GotSession: ({ session }) => enterRoute(evo(model, { session: () => session })),
+            ClickedSignIn: () => ({ model, commands: [LoadExternal({ href: loginHref(Option.some("/towers/@me")) })] }),
+            GotSession: ({ session }) => enterRoute(modifyFields(model, { session: () => session })),
             // Folds the fetch outcome into whatever state is current: success
             // replaces it, and failure keeps any held data as Stale rather
             // than blanking the page.
-            SettledLinkedTowers: ({ result }) => [evo(model, { linkedTowers: AsyncData.settle(result) }), []],
-            CompletedNavigation: () => [model, []],
+            SettledLinkedTowers: ({ result }) => ({
+                model: modifyFields(model, { linkedTowers: AsyncData.settle(result) }),
+            }),
+            CompletedNavigation: () => ({ model }),
         })
     );
 };
@@ -256,7 +264,7 @@ export const init: Runtime.RoutingApplicationInit<Model, Message, void, Backend>
     // asked for; until it lands the app is neither signed in nor out. Landing
     // runs through the same page-state reset as navigating, so anything the
     // url carries (like a link outcome) is seen on a fresh load too.
-    const [model, commands] = enterRoute(
+    const { model, commands = [] } = enterRoute(
         resetPageState(
             {
                 route,
@@ -269,7 +277,7 @@ export const init: Runtime.RoutingApplicationInit<Model, Message, void, Backend>
             route
         )
     );
-    return [model, [FetchSession(), ...commands]];
+    return { model, commands: [FetchSession(), ...commands] };
 };
 
 // VIEW

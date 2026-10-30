@@ -3,7 +3,7 @@ import { HttpApiClient } from "effect/http-api";
 
 import { AsyncData, Command, Http } from "foldkit";
 import { defineMessageUnion } from "foldkit/message";
-import { ts } from "foldkit/schema";
+import { taggedStruct } from "foldkit/schema";
 
 import { Session } from "../domain/sessions.ts";
 import { type ScopeCatalogArea, ScopeCatalogGame, type ScopeCatalogNode, SelfServiceApi } from "../shared/api.ts";
@@ -31,9 +31,9 @@ export type SessionInfo = typeof Session.json.Type;
 
 // Who is signed in. The app holds nothing: the cookie is the whole of its
 // authentication, and it cannot read it.
-export const SignedOut = ts("SignedOut");
-export const CheckingSession = ts("CheckingSession");
-export const SignedIn = ts("SignedIn", { session: Session.json });
+export const SignedOut = taggedStruct("SignedOut");
+export const CheckingSession = taggedStruct("CheckingSession");
+export const SignedIn = taggedStruct("SignedIn", { session: Session.json });
 export const SessionState = S.Union([SignedOut, CheckingSession, SignedIn]);
 export type SessionState = typeof SessionState.Type;
 

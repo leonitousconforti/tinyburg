@@ -49,7 +49,7 @@ const ConfigProviderLive = ConfigProvider.fromEnv().pipe(ConfigProvider.nested("
 
 export const Live = Layer.mergeAll(
     ObjectStorageLive,
-    AndroidDevice.EmbeddedPixel7aLive,
+    AndroidDevice.layerEmbeddedPixel7a,
     PlayAccount.layerAuroraDispenser(),
     Layer.succeed(References.MinimumLogLevel, "Debug")
 ).pipe(

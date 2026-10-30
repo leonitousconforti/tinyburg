@@ -184,7 +184,7 @@ const generateData = Effect.gen(function* () {
 }).pipe(Effect.scoped, Effect.provide(Layer.provideMerge(AgentLive, DeviceLive)));
 
 const Live = pipe(
-    Layer.mergeAll(AndroidDevice.EmbeddedPixel7aLive, PlayAccount.layerConfig()),
+    Layer.mergeAll(AndroidDevice.layerEmbeddedPixel7a, PlayAccount.layerConfig()),
     Layer.provideMerge(FetchHttpClient.layer),
     Layer.provideMerge(NodeServices.layer)
 );

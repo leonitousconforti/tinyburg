@@ -10,12 +10,9 @@
  * @category Endpoints
  */
 
+import { HttpApi, HttpApiEndpoint, HttpApiError, HttpApiGroup } from "effect/http-api";
 import * as Schema from "effect/Schema";
 import * as SchemaTransformation from "effect/SchemaTransformation";
-import { HttpApi } from "effect/http-api";
-import { HttpApiEndpoint } from "effect/http-api";
-import { HttpApiError } from "effect/http-api";
-import { HttpApiGroup } from "effect/http-api";
 
 import * as NimblebitConfig from "@tinyburg/nimblebit-sdk/NimblebitConfig";
 import * as Bitizen from "@tinyburg/tinytower-sdk/Bitizens";

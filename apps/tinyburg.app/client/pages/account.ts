@@ -7,7 +7,7 @@ import type { Html, HtmlBuilder } from "foldkit/html";
 import { type Language, longDate, relativeTime } from "@tinyburg/shared-ui/Internationalization";
 import { AsyncData, Command } from "foldkit";
 import { defineMessageUnion } from "foldkit/message";
-import { evo } from "foldkit/struct";
+import { modifyFields } from "foldkit/struct";
 
 import { OAuthAccount, Session } from "../../domain/models.ts";
 import { Auth, type SessionUser } from "../backend.ts";
@@ -92,16 +92,20 @@ export const enterAccount = (
     error: Option.Option<string>,
     previous: AccountModel
 ): AccountModel => {
-    const entered: AccountModel = evo(previous, { busy: Option.none, notice: Option.none, problem: Option.none });
+    const entered: AccountModel = modifyFields(previous, {
+        busy: Option.none,
+        notice: Option.none,
+        problem: Option.none,
+    });
 
     // The callback sets `error` when connecting fell over and `link` when it
     // got far enough to have an outcome, never both.
     if (Option.isSome(error)) {
         return Match.value(classifyOAuthError(error.value)).pipe(
             Match.withReturnType<AccountModel>(),
-            Match.when("denied", () => evo(entered, { notice: () => Option.some("linkCancelled" as const) })),
-            Match.when("expired", () => evo(entered, { problem: () => Option.some("linkExpired" as const) })),
-            Match.when("failed", () => evo(entered, { problem: () => Option.some("linkFailed" as const) })),
+            Match.when("denied", () => modifyFields(entered, { notice: () => Option.some("linkCancelled" as const) })),
+            Match.when("expired", () => modifyFields(entered, { problem: () => Option.some("linkExpired" as const) })),
+            Match.when("failed", () => modifyFields(entered, { problem: () => Option.some("linkFailed" as const) })),
             Match.exhaustive
         );
     }
@@ -111,11 +115,13 @@ export const enterAccount = (
         onSome: (outcome) =>
             Match.value(outcome).pipe(
                 Match.withReturnType<AccountModel>(),
-                Match.when("linked", () => evo(entered, { notice: () => Option.some("connected" as const) })),
+                Match.when("linked", () => modifyFields(entered, { notice: () => Option.some("connected" as const) })),
                 Match.when("alreadyLinked", () =>
-                    evo(entered, { notice: () => Option.some("alreadyConnected" as const) })
+                    modifyFields(entered, { notice: () => Option.some("alreadyConnected" as const) })
                 ),
-                Match.when("taken", () => evo(entered, { problem: () => Option.some("accountTaken" as const) })),
+                Match.when("taken", () =>
+                    modifyFields(entered, { problem: () => Option.some("accountTaken" as const) })
+                ),
                 Match.orElse(() => entered)
             ),
     });
@@ -237,17 +243,17 @@ type AccountStep = readonly [AccountModel, ReadonlyArray<Command.Command<Account
 
 /** Starting an action clears whatever the last one had to say about itself. */
 const starting = (model: AccountModel, busy: string): AccountModel =>
-    evo(model, { busy: () => Option.some(busy), notice: Option.none, problem: Option.none });
+    modifyFields(model, { busy: () => Option.some(busy), notice: Option.none, problem: Option.none });
 
 export const updateAccount = (model: AccountModel, message: AccountMessage): AccountStep =>
     Match.value(message).pipe(
         Match.withReturnType<AccountStep>(),
         Match.tagsExhaustive({
             SettledSessions: ({ asOf, result }) => [
-                evo(model, { sessions: AsyncData.settle(result), asOf: () => asOf }),
+                modifyFields(model, { sessions: AsyncData.settle(result), asOf: () => asOf }),
                 [],
             ],
-            SettledLinkedAccounts: ({ result }) => [evo(model, { accounts: AsyncData.settle(result) }), []],
+            SettledLinkedAccounts: ({ result }) => [modifyFields(model, { accounts: AsyncData.settle(result) }), []],
 
             ClickedRevokeSession: ({ sessionId }) => [starting(model, sessionId), [RevokeSession({ sessionId })]],
             ClickedRevokeOthers: () => [starting(model, "others"), [RevokeOthers()]],
@@ -263,9 +269,9 @@ export const updateAccount = (model: AccountModel, message: AccountMessage): Acc
             // refetches, with the held list marked Refreshing while it runs.
             CompletedRevoke: ({ revoked, signedOut }) =>
                 signedOut
-                    ? [evo(model, { busy: Option.none }), []]
+                    ? [modifyFields(model, { busy: Option.none }), []]
                     : [
-                          evo(model, {
+                          modifyFields(model, {
                               busy: Option.none,
                               notice: () => Option.some({ revoked }),
                               sessions: (sessions) => Option.getOrElse(AsyncData.revalidate(sessions), () => sessions),
@@ -274,7 +280,7 @@ export const updateAccount = (model: AccountModel, message: AccountMessage): Acc
                       ],
 
             CompletedUnlink: () => [
-                evo(model, {
+                modifyFields(model, {
                     busy: Option.none,
                     notice: () => Option.some("disconnected" as const),
                     accounts: (accounts) => Option.getOrElse(AsyncData.revalidate(accounts), () => accounts),
@@ -282,9 +288,12 @@ export const updateAccount = (model: AccountModel, message: AccountMessage): Acc
                 [FetchLinkedAccounts()],
             ],
 
-            FailedAction: ({ problem }) => [evo(model, { busy: Option.none, problem: () => Option.some(problem) }), []],
+            FailedAction: ({ problem }) => [
+                modifyFields(model, { busy: Option.none, problem: () => Option.some(problem) }),
+                [],
+            ],
 
-            SignedOutElsewhere: () => [evo(model, { busy: Option.none }), []],
+            SignedOutElsewhere: () => [modifyFields(model, { busy: Option.none }), []],
         })
     );
 

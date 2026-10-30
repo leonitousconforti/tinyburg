@@ -75,7 +75,7 @@ export const parseNimblebitOrderedList = <
     const to = Schema.Struct({ $unknown: Schema.Array(Schema.String), ...fieldEntries });
     const from = Schema.String;
 
-    const transformation = SchemaTransformation.transformOrFail({
+    const transformation = SchemaTransformation.transformEffect({
         // { a: "123", b: "456" } -> "123,456"
         encode: (properties: (typeof to)["Encoded"]): Effect.Effect<string, SchemaIssue.Issue, never> => {
             const allEntries = Object.entries(properties);

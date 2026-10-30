@@ -7,7 +7,7 @@ import type { Html, HtmlBuilder } from "foldkit/html";
 import { banner, card, dangerButton, primaryButton, quietButton, smallButton } from "@tinyburg/shared-ui/Chrome";
 import { AsyncData, Command } from "foldkit";
 import { defineMessageUnion } from "foldkit/message";
-import { evo } from "foldkit/struct";
+import { modifyFields } from "foldkit/struct";
 
 import { ApiKey } from "../../domain/model.ts";
 import { type CatalogGame, type ScopeCatalogData, Self } from "../backend.ts";
@@ -62,7 +62,7 @@ export const initialAdmin: AdminModel = {
  * page opens saying how it went.
  */
 export const enterAdmin = (error: Option.Option<string>, previous: AdminModel): AdminModel =>
-    evo(previous, {
+    modifyFields(previous, {
         busy: Option.none,
         notice: Option.none,
         problem: () => Option.map(error, () => "elevationFailed" as const),
@@ -213,7 +213,7 @@ const DeleteKeyAdmin = Command.define("DeleteKeyAdmin", {
 type AdminStep = readonly [AdminModel, ReadonlyArray<Command.Command<AdminMessage, never, Self>>];
 
 const starting = (model: AdminModel, busy: string): AdminModel =>
-    evo(model, {
+    modifyFields(model, {
         busy: () => Option.some(busy),
         notice: Option.none,
         problem: Option.none,
@@ -221,19 +221,19 @@ const starting = (model: AdminModel, busy: string): AdminModel =>
     });
 
 const refetching = (model: AdminModel): AdminModel =>
-    evo(model, { keys: (keys) => Option.getOrElse(AsyncData.revalidate(keys), () => keys) });
+    modifyFields(model, { keys: (keys) => Option.getOrElse(AsyncData.revalidate(keys), () => keys) });
 
 export const updateAdmin = (model: AdminModel, message: AdminMessage, catalog: ReadonlyArray<CatalogGame>): AdminStep =>
     Match.value(message).pipe(
         Match.withReturnType<AdminStep>(),
         Match.tagsExhaustive({
             SettledAdminKeys: ({ result }) => [
-                evo(model, { keys: AsyncData.settle(result), needsElevation: () => false }),
+                modifyFields(model, { keys: AsyncData.settle(result), needsElevation: () => false }),
                 [],
             ],
 
             AdminRequiresElevation: () => [
-                evo(model, { needsElevation: () => true, busy: Option.none, keys: () => AdminKeys.Idle() }),
+                modifyFields(model, { needsElevation: () => true, busy: Option.none, keys: () => AdminKeys.Idle() }),
                 [],
             ],
 
@@ -242,7 +242,7 @@ export const updateAdmin = (model: AdminModel, message: AdminMessage, catalog: R
                     Option.flatMap((keys) => Option.fromNullishOr(keys.find((found) => found.key === key)))
                 );
                 return [
-                    evo(model, {
+                    modifyFields(model, {
                         rateLimitEditor: Option.none,
                         scopesEditor: () =>
                             Option.map(apiKey, (found) => ({ key, scopes: Array.from(found.scopes), scopeTab: "" })),
@@ -251,15 +251,17 @@ export const updateAdmin = (model: AdminModel, message: AdminMessage, catalog: R
                 ];
             },
             ToggledAdminScope: ({ scope }) => [
-                evo(model, {
+                modifyFields(model, {
                     scopesEditor: Option.map((editor) =>
-                        evo(editor, { scopes: (scopes) => toggleScope(scopes, scope, catalog) })
+                        modifyFields(editor, { scopes: (scopes) => toggleScope(scopes, scope, catalog) })
                     ),
                 }),
                 [],
             ],
             SelectedAdminScopeTab: ({ game }) => [
-                evo(model, { scopesEditor: Option.map((editor) => evo(editor, { scopeTab: () => game })) }),
+                modifyFields(model, {
+                    scopesEditor: Option.map((editor) => modifyFields(editor, { scopeTab: () => game })),
+                }),
                 [],
             ],
             ClickedEditRateLimit: ({ key }) => {
@@ -267,7 +269,7 @@ export const updateAdmin = (model: AdminModel, message: AdminMessage, catalog: R
                     Option.flatMap((keys) => Option.fromNullishOr(keys.find((found) => found.key === key)))
                 );
                 return [
-                    evo(model, {
+                    modifyFields(model, {
                         scopesEditor: Option.none,
                         rateLimitEditor: () =>
                             Option.map(apiKey, (found) => ({
@@ -280,14 +282,21 @@ export const updateAdmin = (model: AdminModel, message: AdminMessage, catalog: R
                 ];
             },
             ChangedAdminLimit: ({ value }) => [
-                evo(model, { rateLimitEditor: Option.map((editor) => evo(editor, { limit: () => value })) }),
+                modifyFields(model, {
+                    rateLimitEditor: Option.map((editor) => modifyFields(editor, { limit: () => value })),
+                }),
                 [],
             ],
             ChangedAdminWindow: ({ value }) => [
-                evo(model, { rateLimitEditor: Option.map((editor) => evo(editor, { windowSeconds: () => value })) }),
+                modifyFields(model, {
+                    rateLimitEditor: Option.map((editor) => modifyFields(editor, { windowSeconds: () => value })),
+                }),
                 [],
             ],
-            ClickedCancelAdminEdit: () => [evo(model, { scopesEditor: Option.none, rateLimitEditor: Option.none }), []],
+            ClickedCancelAdminEdit: () => [
+                modifyFields(model, { scopesEditor: Option.none, rateLimitEditor: Option.none }),
+                [],
+            ],
             SubmittedAdminEdit: () => {
                 if (Option.isSome(model.scopesEditor)) {
                     const { key, scopes } = model.scopesEditor.value;
@@ -305,7 +314,7 @@ export const updateAdmin = (model: AdminModel, message: AdminMessage, catalog: R
                         parsedWindow <= 0
                     ) {
                         return [
-                            evo(model, {
+                            modifyFields(model, {
                                 problem: () => Option.some("rateLimitInvalid" as const),
                             }),
                             [],
@@ -324,10 +333,10 @@ export const updateAdmin = (model: AdminModel, message: AdminMessage, catalog: R
             ClickedAdminDelete: ({ key }) =>
                 Option.contains(model.armedDelete, key)
                     ? [starting(model, key), [DeleteKeyAdmin({ key })]]
-                    : [evo(model, { armedDelete: () => Option.some(key), problem: Option.none }), []],
+                    : [modifyFields(model, { armedDelete: () => Option.some(key), problem: Option.none }), []],
 
             CompletedAdminRowUpdate: () => [
-                evo(refetching(model), {
+                modifyFields(refetching(model), {
                     busy: Option.none,
                     notice: () => Option.some("saved" as const),
                     scopesEditor: Option.none,
@@ -336,15 +345,18 @@ export const updateAdmin = (model: AdminModel, message: AdminMessage, catalog: R
                 [FetchAdminKeys()],
             ],
             CompletedAdminDelete: () => [
-                evo(refetching(model), { busy: Option.none, notice: () => Option.some("keyDeleted" as const) }),
+                modifyFields(refetching(model), {
+                    busy: Option.none,
+                    notice: () => Option.some("keyDeleted" as const),
+                }),
                 [FetchAdminKeys()],
             ],
 
             FailedAdminAction: ({ problem }) => [
-                evo(model, { busy: Option.none, problem: () => Option.some(problem) }),
+                modifyFields(model, { busy: Option.none, problem: () => Option.some(problem) }),
                 [],
             ],
-            AdminSignedOutElsewhere: () => [evo(model, { busy: Option.none }), []],
+            AdminSignedOutElsewhere: () => [modifyFields(model, { busy: Option.none }), []],
         })
     );
 

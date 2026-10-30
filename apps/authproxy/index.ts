@@ -5,7 +5,7 @@ import { RateLimiter } from "effect/persistence";
 // @effect-diagnostics-next-line nodeBuiltinImport:off
 import { createServer } from "node:http";
 
-import { NodeHttpServer, NodeRuntime } from "@effect/platform-node";
+import { NodeCrypto, NodeHttpServer, NodeRuntime } from "@effect/platform-node";
 import { PgClient, PgMigrator } from "@effect/sql-pg";
 
 import { CookiePolicy } from "./cookies.ts";
@@ -61,6 +61,7 @@ HttpRouter.serve(AllRoutes, { routerConfig: { maxParamLength: 500 } }).pipe(
         SessionsRepository.Default,
         CookiePolicy.Default,
         FetchHttpClient.layer,
+        NodeCrypto.layerSecureRandom,
     ]),
     Layer.provide(MigratorLive),
     Layer.provide(SqlLive),

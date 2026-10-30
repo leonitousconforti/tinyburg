@@ -6,14 +6,13 @@
  */
 
 import * as Effect from "effect/Effect";
-import * as Encoding from "effect/Encoding";
+import { Base64 } from "effect/encoding";
 import * as Function from "effect/Function";
+import { HttpClient, HttpClientRequest } from "effect/http";
+import { HttpApiClient } from "effect/http-api";
 import * as Redacted from "effect/Redacted";
 import * as Schema from "effect/Schema";
 import * as SchemaTransformation from "effect/SchemaTransformation";
-import { HttpClient } from "effect/http";
-import { HttpClientRequest } from "effect/http";
-import { HttpApiClient } from "effect/http-api";
 
 import { NimblebitAuth, NimblebitConfig, NimblebitError, NimblebitSchema } from "@tinyburg/nimblebit-sdk";
 import * as Pako from "pako";
@@ -389,7 +388,7 @@ export const sync_pullSave = Effect.fn("sync_pullSave")(function* ({
         });
     }
 
-    const dataAsBase64 = Encoding.encodeBase64(response.data);
+    const dataAsBase64 = Base64.encode(response.data);
     const checksum = yield* nimblebitAuth.sign(
         playerId + salt + response.saveId + dataAsBase64 + Redacted.value(playerAuthKey)
     );
@@ -438,7 +437,7 @@ export const sync_pushSave = Effect.fn("sync_pushSave")(function* ({
 
     const salt = yield* nimblebitAuth.salt;
     const dataAsUint8Array = Pako.deflate(yield* Schema.encodeEffect(SaveData)(data));
-    const dataAsBase64 = Encoding.encodeBase64(dataAsUint8Array);
+    const dataAsBase64 = Base64.encode(dataAsUint8Array);
     const hash = yield* nimblebitAuth.sign(`tt/${playerId}/${salt}${dataAsBase64}${Redacted.value(playerAuthKey)}`);
     const saveVersion = yield* sync_checkForNewerSave({ playerAuthKey, playerId });
 
@@ -582,7 +581,7 @@ export const sync_pullSnapshot = Effect.fn("sync_pullSnapshot")(function* ({
         });
     }
 
-    const dataAsBase64 = Encoding.encodeBase64(response.data);
+    const dataAsBase64 = Base64.encode(response.data);
     const checksum = yield* nimblebitAuth.sign(
         playerId + salt + response.snapshotId + dataAsBase64 + Redacted.value(playerAuthKey)
     );
@@ -631,7 +630,7 @@ export const sync_pushSnapshot = Effect.fn("sync_pushSnapshot")(function* ({
 
     const salt = yield* nimblebitAuth.salt;
     const dataAsUint8Array = Pako.deflate(yield* Schema.encodeEffect(SaveData)(data));
-    const dataAsBase64 = Encoding.encodeBase64(dataAsUint8Array);
+    const dataAsBase64 = Base64.encode(dataAsUint8Array);
     const hash = yield* nimblebitAuth.sign(`tt/${playerId}/${salt}${dataAsBase64}${Redacted.value(playerAuthKey)}`);
     const saveVersion = yield* sync_checkForNewerSave({ playerAuthKey, playerId });
 
@@ -1113,7 +1112,7 @@ export const social_pullFriendTower = Effect.fn("social_pullFriendTower")(functi
         });
     }
 
-    const dataAsBase64 = Encoding.encodeBase64(response.data);
+    const dataAsBase64 = Base64.encode(response.data);
     const checksum = yield* nimblebitAuth.sign(
         playerId + friendId + salt + response.saveId + dataAsBase64 + Redacted.value(playerAuthKey)
     );

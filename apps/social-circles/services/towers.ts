@@ -57,7 +57,9 @@ export { REQUIRED_SCOPE } from "../domain/games.ts";
  * @since 1.0.0
  * @category Errors
  */
-export class GameNotServed extends Schema.Error<GameNotServed>("@tinyburg/social-circles/GameNotServed")({
+export class GameNotServed extends Schema.Error<GameNotServed, { readonly brand: unique symbol }>(
+    "@tinyburg/social-circles/GameNotServed"
+)({
     _tag: Schema.tag("GameNotServed"),
     game: Schema.String,
     reason: Schema.String,
@@ -69,15 +71,15 @@ export class GameNotServed extends Schema.Error<GameNotServed>("@tinyburg/social
  * @since 1.0.0
  * @category Errors
  */
-export class TowerGrantUnusable extends Schema.Error<TowerGrantUnusable>("@tinyburg/social-circles/TowerGrantUnusable")(
-    {
-        _tag: Schema.tag("TowerGrantUnusable"),
-        tinyburgUserId: Schema.String,
-        reason: Schema.String,
-        /** Whether the grant is dead for good, as opposed to a transient outage. */
-        permanent: Schema.Boolean,
-    }
-) {}
+export class TowerGrantUnusable extends Schema.Error<TowerGrantUnusable, { readonly brand: unique symbol }>(
+    "@tinyburg/social-circles/TowerGrantUnusable"
+)({
+    _tag: Schema.tag("TowerGrantUnusable"),
+    tinyburgUserId: Schema.String,
+    reason: Schema.String,
+    /** Whether the grant is dead for good, as opposed to a transient outage. */
+    permanent: Schema.Boolean,
+}) {}
 
 /**
  * A player's tower could not be read.
@@ -85,7 +87,9 @@ export class TowerGrantUnusable extends Schema.Error<TowerGrantUnusable>("@tinyb
  * @since 1.0.0
  * @category Errors
  */
-export class TowerUnavailable extends Schema.Error<TowerUnavailable>("@tinyburg/social-circles/TowerUnavailable")({
+export class TowerUnavailable extends Schema.Error<TowerUnavailable, { readonly brand: unique symbol }>(
+    "@tinyburg/social-circles/TowerUnavailable"
+)({
     _tag: Schema.tag("TowerUnavailable"),
     playerId: PlayerIdSchema,
     reason: Schema.String,

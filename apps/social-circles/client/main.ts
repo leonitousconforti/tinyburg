@@ -4,9 +4,9 @@ import type { TitleMessages } from "./messages/types.ts";
 import type { Document, Html, HtmlBuilder } from "foldkit/html";
 
 import { Language } from "@tinyburg/shared-ui/Internationalization";
-import { AsyncData, Command, Navigation, Render, type Runtime, Url } from "foldkit";
+import { AsyncData, Command, Navigation, Render, type Runtime, type Update, Url } from "foldkit";
 import { defineMessageUnion } from "foldkit/message";
-import { evo } from "foldkit/struct";
+import { modifyFields } from "foldkit/struct";
 
 import { type Backend, BackendMessage, CheckingSession, FetchSession, SessionState, SignedOut } from "./backend.ts";
 import { initialLanguage, messagesFor } from "./messages/index.ts";
@@ -58,7 +58,7 @@ export type NavigationMessage = typeof NavigationMessage.Type;
 export const Message = S.Union([NavigationMessage, BackendMessage, TowersMessage]);
 export type Message = typeof Message.Type;
 
-type Step = readonly [Model, ReadonlyArray<Command.Command<Message, never, Backend>>];
+type Step = Update.Return<Model, Message, Backend>;
 
 // COMMAND
 
@@ -88,7 +88,7 @@ const requiresSession = (route: AppRoute): boolean => route._tag === "Towers";
 
 /** Page-scoped state resets when its route is entered. */
 const resetPageState = (model: Model, route: AppRoute): Model =>
-    evo(model, {
+    modifyFields(model, {
         route: () => route,
         towers: (towers) => (route._tag === "Towers" ? enterTowers(towers) : towers),
     });
@@ -105,7 +105,7 @@ const enterRoute = (model: Model): Step => {
 
     if (requiresSession(route) && session._tag === "SignedOut") {
         const returnTo = window.location.pathname + window.location.search;
-        return [model, [Navigate({ url: loginHref(Option.some(returnTo)), replace: true })]];
+        return { model, commands: [Navigate({ url: loginHref(Option.some(returnTo)), replace: true })] };
     }
 
     if (route._tag === "Towers" && session._tag === "SignedIn") {
@@ -115,15 +115,17 @@ const enterRoute = (model: Model): Step => {
         const alongside = [FetchGraph(), ...(model.towers.games.length === 0 ? [FetchGames()] : [])];
 
         return Option.match(AsyncData.revalidateOrLoad(model.towers.towers), {
-            onNone: (): Step => [model, alongside],
-            onSome: (towers): Step => [
-                evo(model, { towers: (towersModel) => evo(towersModel, { towers: () => towers }) }),
-                [FetchTowers(), ...alongside],
-            ],
+            onNone: (): Step => ({ model, commands: alongside }),
+            onSome: (towers): Step => ({
+                model: modifyFields(model, {
+                    towers: (towersModel) => modifyFields(towersModel, { towers: () => towers }),
+                }),
+                commands: [FetchTowers(), ...alongside],
+            }),
         });
     }
 
-    return [model, []];
+    return { model };
 };
 
 const isTowersMessage = S.is(TowersMessage);
@@ -135,13 +137,13 @@ export const update = (model: Model, message: Message): Step => {
 
         // The session ended elsewhere; the server owns the way back.
         if (message._tag === "SignedOutElsewhere") {
-            return [
-                evo(model, { towers: () => towers, session: () => SignedOut() }),
-                [Navigate({ url: loginHref(Option.some("/towers")), replace: true })],
-            ];
+            return {
+                model: modifyFields(model, { towers: () => towers, session: () => SignedOut() }),
+                commands: [Navigate({ url: loginHref(Option.some("/towers")), replace: true })],
+            };
         }
 
-        return [evo(model, { towers: () => towers }), commands];
+        return { model: modifyFields(model, { towers: () => towers }), commands };
     }
 
     return Match.value(message).pipe(
@@ -153,14 +155,14 @@ export const update = (model: Model, message: Message): Step => {
                     Match.tagsExhaustive({
                         Internal: ({ url }) =>
                             isServerPath(url.pathname)
-                                ? [model, [LoadExternal({ href: Url.toString(url) })]]
-                                : [model, [Navigate({ url: Url.toString(url), replace: false })]],
-                        External: ({ href }) => [model, [LoadExternal({ href })]],
+                                ? { model, commands: [LoadExternal({ href: Url.toString(url) })] }
+                                : { model, commands: [Navigate({ url: Url.toString(url), replace: false })] },
+                        External: ({ href }) => ({ model, commands: [LoadExternal({ href })] }),
                     })
                 ),
             ChangedUrl: ({ url }) => enterRoute(resetPageState(model, urlToAppRoute(url))),
-            GotSession: ({ session }) => enterRoute(evo(model, { session: () => session })),
-            CompletedNavigation: () => [model, []],
+            GotSession: ({ session }) => enterRoute(modifyFields(model, { session: () => session })),
+            CompletedNavigation: () => ({ model }),
         })
     );
 };
@@ -172,7 +174,7 @@ export const init: Runtime.RoutingApplicationInit<Model, Message, void, Backend>
 
     // The session answer decides the gated route, so it is the first thing
     // asked for; until it lands the app is neither signed in nor out.
-    const [model, commands] = enterRoute(
+    const { model, commands = [] } = enterRoute(
         resetPageState(
             {
                 route,
@@ -183,7 +185,7 @@ export const init: Runtime.RoutingApplicationInit<Model, Message, void, Backend>
             route
         )
     );
-    return [model, [FetchSession(), ...commands]];
+    return { model, commands: [FetchSession(), ...commands] };
 };
 
 // VIEW

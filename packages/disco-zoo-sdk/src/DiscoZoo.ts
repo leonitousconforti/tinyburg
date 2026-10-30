@@ -19,10 +19,9 @@ import type * as Schema from "effect/Schema";
 
 import * as Effect from "effect/Effect";
 import * as Function from "effect/Function";
-import * as Redacted from "effect/Redacted";
-import { HttpClient } from "effect/http";
-import { HttpClientRequest } from "effect/http";
+import { HttpClient, HttpClientRequest } from "effect/http";
 import { HttpApiClient } from "effect/http-api";
+import * as Redacted from "effect/Redacted";
 
 import type { NimblebitConfig } from "@tinyburg/nimblebit-sdk";
 

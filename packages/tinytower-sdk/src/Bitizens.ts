@@ -1341,7 +1341,7 @@ export const BitizenAttributes = Schema.suspend(() => {
     return from.pipe(
         Schema.decodeTo(
             to,
-            SchemaTransformation.transformOrFail({
+            SchemaTransformation.transformEffect({
                 encode: (customI: (typeof to)["Encoded"]) => {
                     const isMale = customI.gender === "male";
                     const [firstName, lastName] = customI.name.split(" ");

@@ -1,4 +1,5 @@
-import { Effect, Encoding } from "effect";
+import { Effect } from "effect";
+import { Base64Url } from "effect/encoding";
 
 import * as crypto from "node:crypto";
 
@@ -10,7 +11,7 @@ import * as crypto from "node:crypto";
 export const sha256 = (value: string): Effect.Effect<string> =>
     Effect.map(
         Effect.promise(() => crypto.subtle.digest("SHA-256", new TextEncoder().encode(value))),
-        (digest) => Encoding.encodeBase64Url(new Uint8Array(digest))
+        (digest) => Base64Url.encode(new Uint8Array(digest))
     );
 
 /**

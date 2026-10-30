@@ -7,7 +7,7 @@ import type { Html, HtmlBuilder } from "foldkit/html";
 import { PlayerEmailSchema, PlayerIdSchema } from "@tinyburg/nimblebit-sdk/NimblebitConfig";
 import { Command, Dom } from "foldkit";
 import { defineMessageUnion } from "foldkit/message";
-import { evo } from "foldkit/struct";
+import { modifyFields } from "foldkit/struct";
 
 import { Api } from "../backend.ts";
 import { LinkableGame, linkableGameInfo } from "../linkableGames.ts";
@@ -162,17 +162,17 @@ export const updateWizard = (wizard: WizardModel, message: WizardMessage): Wizar
         Match.withReturnType<WizardStep>(),
         Match.tagsExhaustive({
             ChangedFriendCode: ({ value }) => [
-                evo(wizard, { friendCode: () => value.toUpperCase().replaceAll(/[^0-9A-Z]/g, "") }),
+                modifyFields(wizard, { friendCode: () => value.toUpperCase().replaceAll(/[^0-9A-Z]/g, "") }),
                 [],
             ],
-            ChangedEmail: ({ value }) => [evo(wizard, { email: () => value }), []],
-            ChangedVerificationCode: ({ value }) => [evo(wizard, { verificationCode: () => value }), []],
+            ChangedEmail: ({ value }) => [modifyFields(wizard, { email: () => value }), []],
+            ChangedVerificationCode: ({ value }) => [modifyFields(wizard, { verificationCode: () => value }), []],
             SubmittedLinkForm: () => [
-                evo(wizard, { submitting: () => true, linkError: Option.none }),
+                modifyFields(wizard, { submitting: () => true, linkError: Option.none }),
                 [RequestCode({ game: wizard.game, friendCode: wizard.friendCode.trim(), email: wizard.email.trim() })],
             ],
             SucceededRequestCode: ({ email, friendCode }) => [
-                evo(wizard, {
+                modifyFields(wizard, {
                     submitting: () => false,
                     step: () => "verify" as const,
                     entered: () => "forward" as const,
@@ -185,14 +185,14 @@ export const updateWizard = (wizard: WizardModel, message: WizardMessage): Wizar
                 [FocusInput({ selector: "#verification-code-input" })],
             ],
             FailedRequestCode: () => [
-                evo(wizard, {
+                modifyFields(wizard, {
                     submitting: () => false,
                     linkError: () => Option.some("requestFailed" as const),
                 }),
                 [],
             ],
             SubmittedVerifyForm: () => [
-                evo(wizard, { submitting: () => true, verifyError: Option.none }),
+                modifyFields(wizard, { submitting: () => true, verifyError: Option.none }),
                 [
                     VerifyAndLink({
                         game: wizard.game,
@@ -201,31 +201,31 @@ export const updateWizard = (wizard: WizardModel, message: WizardMessage): Wizar
                     }),
                 ],
             ],
-            SucceededVerify: () => [evo(wizard, { verified: () => true }), []],
+            SucceededVerify: () => [modifyFields(wizard, { verified: () => true }), []],
             FailedVerify: () => [
-                evo(wizard, {
+                modifyFields(wizard, {
                     submitting: () => false,
                     verifyError: () => Option.some("verifyFailed" as const),
                 }),
                 [],
             ],
             ClickedBack: () => [
-                evo(wizard, { step: () => "link" as const, entered: () => "backward" as const }),
+                modifyFields(wizard, { step: () => "link" as const, entered: () => "backward" as const }),
                 [FocusInput({ selector: "#friend-code-input" })],
             ],
             ClickedResend: () => [
-                evo(wizard, { resend: () => "sending" as const }),
+                modifyFields(wizard, { resend: () => "sending" as const }),
                 [ResendCode({ game: wizard.game, friendCode: wizard.pendingFriendCode, email: wizard.pendingEmail })],
             ],
-            SucceededResend: () => [evo(wizard, { resend: () => "sent" as const }), [ResendCooldown()]],
+            SucceededResend: () => [modifyFields(wizard, { resend: () => "sent" as const }), [ResendCooldown()]],
             FailedResend: () => [
-                evo(wizard, {
+                modifyFields(wizard, {
                     resend: () => "cooldown" as const,
                     verifyError: () => Option.some("resendFailed" as const),
                 }),
                 [ResendCooldown()],
             ],
-            CompletedResendCooldown: () => [evo(wizard, { resend: () => "idle" as const }), []],
+            CompletedResendCooldown: () => [modifyFields(wizard, { resend: () => "idle" as const }), []],
             CompletedStepFocus: () => [wizard, []],
         })
     );

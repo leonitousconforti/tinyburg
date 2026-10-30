@@ -14,7 +14,7 @@
  */
 
 import { Cron, DateTime, Duration, Effect, Layer, Schema } from "effect";
-import { ClusterCron, ClusterSchema, Entity } from "effect/unstable/cluster";
+import { ClusterCron, ClusterSchema, Entity } from "effect/cluster";
 import { Rpc } from "effect/rpc";
 
 import type { GamePlayerRef } from "../domain/graph.ts";

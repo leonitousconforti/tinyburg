@@ -452,8 +452,8 @@ importers:
         specifier: 0.0.64
         version: 0.0.64(effect@4.1.0)
       frida:
-        specifier: 17.17.0
-        version: 17.17.0
+        specifier: 17.24.3
+        version: 17.24.3
       frida-il2cpp-bridge:
         specifier: 0.13.1
         version: 0.13.1
@@ -2502,10 +2502,6 @@ packages:
   frida-il2cpp-bridge@0.14.0:
     resolution: {integrity: sha512-rtqHgsE3x1j05QV7hfowEsRynf276xHhEJPgoh87Dv7PEa9Zz13VLxRtt19DNVCtIzyCfH1vdMANUCtMYU29Kw==}
     hasBin: true
-
-  frida@17.17.0:
-    resolution: {integrity: sha512-6R20Qx9nxdx9jPo55K2q3uNO/8MU/FWUvZfPnv466JMRuANPsiR5GogpFuHWhOd5X8XcQLdVWoPgZHnDCcxApQ==}
-    engines: {node: '>=16'}
 
   frida@17.24.3:
     resolution: {integrity: sha512-W9CmbxHTcjzgZU3kzrufvqnM0uz1SYoRVeeQ6FJrycHH9JcJuydrZuG+Q7x65bRJH9uqt6jyBJxavkni62ILaQ==}
@@ -5228,12 +5224,6 @@ snapshots:
   frida-il2cpp-bridge@0.13.1: {}
 
   frida-il2cpp-bridge@0.14.0: {}
-
-  frida@17.17.0:
-    dependencies:
-      bindings: 1.5.0
-      minimatch: 10.2.6
-      prebuild-install: 7.1.3
 
   frida@17.24.3:
     dependencies:

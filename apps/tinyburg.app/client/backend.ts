@@ -4,7 +4,7 @@ import { HttpApiClient } from "effect/http-api";
 import { Api as TradingApi } from "@tinyburg/trading-sdk/Sdk";
 import { AsyncData, Command, Http } from "foldkit";
 import { defineMessageUnion } from "foldkit/message";
-import { ts } from "foldkit/schema";
+import { taggedStruct } from "foldkit/schema";
 
 import { User } from "../domain/models.ts";
 import { AuthApi } from "../shared/auth.ts";
@@ -44,9 +44,9 @@ export type SessionUser = typeof User.json.Type;
 
 // Who is signed in. The app holds nothing: the cookie is the whole of its
 // authentication, and it cannot read it.
-export const SignedOut = ts("SignedOut");
-export const CheckingSession = ts("CheckingSession");
-export const SignedIn = ts("SignedIn", { user: User.json });
+export const SignedOut = taggedStruct("SignedOut");
+export const CheckingSession = taggedStruct("CheckingSession");
+export const SignedIn = taggedStruct("SignedIn", { user: User.json });
 export const SessionState = S.Union([SignedOut, CheckingSession, SignedIn]);
 export type SessionState = typeof SessionState.Type;
 

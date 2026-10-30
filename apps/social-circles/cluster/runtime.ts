@@ -13,7 +13,7 @@
  */
 
 import { Config, Layer, String } from "effect";
-import { ClusterWorkflowEngine, SingleRunner } from "effect/unstable/cluster";
+import { ClusterWorkflowEngine, SingleRunner } from "effect/cluster";
 
 import { NodeCrypto } from "@effect/platform-node";
 import { PgClient } from "@effect/sql-pg";
@@ -35,7 +35,7 @@ export const SqlLive = PgClient.layerConfig({
  * survive a restart. A crawl that was mid-flight when the process died is
  * resumed rather than silently dropped.
  */
-export const ClusterLive = SingleRunner.layer({ runnerStorage: "sql" }).pipe(Layer.provide(NodeCrypto.layer));
+export const ClusterLive = SingleRunner.layer({ runnerStorage: "sql" }).pipe(Layer.provide(NodeCrypto.layerDigest));
 
 /**
  * Durable execution on top of the cluster. This is what makes the consent and

@@ -8,7 +8,7 @@ import { banner, card, dangerButton, primaryButton, quietButton, smallButton } f
 import { type Language, longDate } from "@tinyburg/shared-ui/Internationalization";
 import { AsyncData, Command } from "foldkit";
 import { defineMessageUnion } from "foldkit/message";
-import { evo } from "foldkit/struct";
+import { modifyFields } from "foldkit/struct";
 
 import { ApiKey } from "../../domain/model.ts";
 import { MAX_KEYS_PER_USER } from "../../shared/policy.ts";
@@ -77,7 +77,7 @@ export const initialKeys: KeysModel = {
  * Leaving and coming back counts as a later look, so nothing stays unmasked.
  */
 export const enterKeys = (previous: KeysModel): KeysModel =>
-    evo(previous, {
+    modifyFields(previous, {
         busy: Option.none,
         notice: Option.none,
         problem: Option.none,
@@ -219,7 +219,7 @@ type KeysStep = readonly [KeysModel, ReadonlyArray<Command.Command<KeysMessage, 
 
 /** Starting an action clears whatever the last one had to say about itself. */
 const starting = (model: KeysModel, busy: string): KeysModel =>
-    evo(model, {
+    modifyFields(model, {
         busy: () => Option.some(busy),
         notice: Option.none,
         problem: Option.none,
@@ -227,16 +227,16 @@ const starting = (model: KeysModel, busy: string): KeysModel =>
     });
 
 const refetch = (model: KeysModel): KeysModel =>
-    evo(model, { keys: (keys) => Option.getOrElse(AsyncData.revalidate(keys), () => keys) });
+    modifyFields(model, { keys: (keys) => Option.getOrElse(AsyncData.revalidate(keys), () => keys) });
 
 export const updateKeys = (model: KeysModel, message: KeysMessage, catalog: ReadonlyArray<CatalogGame>): KeysStep =>
     Match.value(message).pipe(
         Match.withReturnType<KeysStep>(),
         Match.tagsExhaustive({
-            SettledKeys: ({ result }) => [evo(model, { keys: AsyncData.settle(result) }), []],
+            SettledKeys: ({ result }) => [modifyFields(model, { keys: AsyncData.settle(result) }), []],
 
             ClickedOpenCreate: () => [
-                evo(model, {
+                modifyFields(model, {
                     form: () => ({ ...closedForm, open: true }),
                     notice: Option.none,
                     problem: Option.none,
@@ -244,14 +244,19 @@ export const updateKeys = (model: KeysModel, message: KeysMessage, catalog: Read
                 }),
                 [],
             ],
-            ClickedCancelCreate: () => [evo(model, { form: () => closedForm }), []],
+            ClickedCancelCreate: () => [modifyFields(model, { form: () => closedForm }), []],
             ToggledScope: ({ scope }) => [
-                evo(model, { form: (form) => evo(form, { scopes: (scopes) => toggleScope(scopes, scope, catalog) }) }),
+                modifyFields(model, {
+                    form: (form) => modifyFields(form, { scopes: (scopes) => toggleScope(scopes, scope, catalog) }),
+                }),
                 [],
             ],
-            SelectedScopeTab: ({ game }) => [evo(model, { form: (form) => evo(form, { scopeTab: () => game }) }), []],
+            SelectedScopeTab: ({ game }) => [
+                modifyFields(model, { form: (form) => modifyFields(form, { scopeTab: () => game }) }),
+                [],
+            ],
             ChangedDescription: ({ value }) => [
-                evo(model, { form: (form) => evo(form, { description: () => value }) }),
+                modifyFields(model, { form: (form) => modifyFields(form, { description: () => value }) }),
                 [],
             ],
             SubmittedCreate: () => [
@@ -267,15 +272,15 @@ export const updateKeys = (model: KeysModel, message: KeysMessage, catalog: Read
             ClickedDelete: ({ key }) =>
                 Option.contains(model.armedDelete, key)
                     ? [starting(model, key), [DeleteKey({ key })]]
-                    : [evo(model, { armedDelete: () => Option.some(key), problem: Option.none }), []],
+                    : [modifyFields(model, { armedDelete: () => Option.some(key), problem: Option.none }), []],
 
             ClickedCopy: ({ key }) => [model, [CopyKey({ key })]],
-            CopiedKey: () => [evo(model, { notice: () => Option.some("copied" as const) }), []],
+            CopiedKey: () => [modifyFields(model, { notice: () => Option.some("copied" as const) }), []],
 
             // A fresh credential is the one moment the full key matters, so it
             // arrives unmasked. Every later look at the row is masked.
             CompletedCreate: ({ key }) => [
-                evo(refetch(model), {
+                modifyFields(refetch(model), {
                     busy: Option.none,
                     form: () => closedForm,
                     notice: () => Option.some("created" as const),
@@ -284,7 +289,7 @@ export const updateKeys = (model: KeysModel, message: KeysMessage, catalog: Read
                 [FetchKeys()],
             ],
             CompletedRotate: ({ key }) => [
-                evo(refetch(model), {
+                modifyFields(refetch(model), {
                     busy: Option.none,
                     notice: () => Option.some("rotated" as const),
                     justMinted: (minted) => [...minted, key.key],
@@ -292,23 +297,26 @@ export const updateKeys = (model: KeysModel, message: KeysMessage, catalog: Read
                 [FetchKeys()],
             ],
             CompletedSetRevoked: ({ key }) => [
-                evo(refetch(model), {
+                modifyFields(refetch(model), {
                     busy: Option.none,
                     notice: () => Option.some(key.revoked ? ("revoked" as const) : ("reEnabled" as const)),
                 }),
                 [FetchKeys()],
             ],
             CompletedDelete: () => [
-                evo(refetch(model), {
+                modifyFields(refetch(model), {
                     busy: Option.none,
                     notice: () => Option.some("deleted" as const),
                 }),
                 [FetchKeys()],
             ],
 
-            FailedAction: ({ problem }) => [evo(model, { busy: Option.none, problem: () => Option.some(problem) }), []],
+            FailedAction: ({ problem }) => [
+                modifyFields(model, { busy: Option.none, problem: () => Option.some(problem) }),
+                [],
+            ],
 
-            SignedOutElsewhere: () => [evo(model, { busy: Option.none }), []],
+            SignedOutElsewhere: () => [modifyFields(model, { busy: Option.none }), []],
         })
     );
 
