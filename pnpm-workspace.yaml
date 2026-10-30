@@ -34,7 +34,13 @@ overrides:
 peerDependencyRules:
   allowedVersions:
     typescript: "7.0.2"
-    "@babel/core": "8.0.1"
+    "@babel/core": "8.0.10"
+    "@efffrida/frida-tools>effect": "4.1.1"
+    "@efffrida/gplayapi>effect": "4.1.1"
+    "@efffrida/il2cpp-bridge>effect": "4.1.1"
+    "@efffrida/platform>effect": "4.1.1"
+    "@efffrida/polyfills>effect": "4.1.1"
+    "@efffrida/rpc>effect": "4.1.1"
 
 minimumReleaseAgeExclude:
   - "@yielded/*"
@@ -43,6 +49,7 @@ minimumReleaseAgeExclude:
   - "effect"
   - "@foldkit/*"
   - "foldkit"
+  - frida@17.25.0
 
 patchedDependencies:
   "@yielded/jose@0.1.0-beta.47": patches/@yielded__jose@0.1.0-beta.47.patch

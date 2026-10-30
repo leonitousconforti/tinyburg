@@ -45,14 +45,14 @@
     },
     "dependencies": {
         "@tinyburg/nimblebit-sdk": "workspace:*",
-        "pako": "3.0.1"
+        "pako": "3.0.3"
     },
     "devDependencies": {
         "@yielded/auth": "0.1.0-beta.47",
-        "effect": "4.1.0"
+        "effect": "4.1.1"
     },
     "peerDependencies": {
         "@yielded/auth": "0.1.0-beta.47",
-        "effect": "4.1.0"
+        "effect": "4.1.1"
     }
 }

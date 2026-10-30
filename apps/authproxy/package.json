@@ -8,9 +8,9 @@
         "start": "node index.ts"
     },
     "dependencies": {
-        "@effect/platform-browser": "4.1.0",
-        "@effect/platform-node": "4.1.0",
-        "@effect/sql-pg": "4.1.0",
+        "@effect/platform-browser": "4.1.1",
+        "@effect/platform-node": "4.1.1",
+        "@effect/sql-pg": "4.1.1",
         "@foldkit/vite-plugin": "0.29.0",
         "@tailwindcss/vite": "4.3.3",
         "@tinyburg/bitcity-sdk": "workspace:*",
@@ -26,11 +26,11 @@
         "@tinyburg/trading-sdk": "workspace:*",
         "@yielded/auth": "0.1.0-beta.47",
         "@yielded/oauth": "0.1.0-beta.47",
-        "effect": "4.1.0",
+        "effect": "4.1.1",
         "foldkit": "0.170.0",
-        "redis": "6.2.1",
+        "redis": "6.3.1",
         "tailwindcss": "4.3.3",
         "typescript": "7.0.2",
-        "vite": "8.2.1"
+        "vite": "8.3.5"
     }
 }
