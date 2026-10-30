@@ -4,10 +4,10 @@
     "private": true,
     "type": "module",
     "dependencies": {
-        "@effect/platform-node": "4.0.0-rc.111",
+        "@effect/platform-node": "4.1.0",
         "@tinyburg/nimblebit-sdk": "workspace:*",
         "@tinyburg/tinytower-sdk": "workspace:*",
-        "effect": "4.0.0-rc.111",
+        "effect": "4.1.0",
         "redis": "6.2.1"
     }
 }

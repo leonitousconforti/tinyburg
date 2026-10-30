@@ -45,13 +45,13 @@
         "codegen": "build-utils prepare-v4"
     },
     "dependencies": {
-        "effect-oidc": "0.1.0"
+        "@yielded/auth": "0.1.0-beta.47"
     },
     "devDependencies": {
-        "effect": "4.0.0-rc.111"
+        "effect": "4.1.0"
     },
     "peerDependencies": {
-        "effect": "4.0.0-rc.111"
+        "effect": "4.1.0"
     },
     "tags": [
         "nimblebit",

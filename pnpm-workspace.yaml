@@ -37,7 +37,7 @@ peerDependencyRules:
     "@babel/core": "8.0.1"
 
 minimumReleaseAgeExclude:
-  - "effect-oidc"
+  - "@yielded/*"
   - "@efffrida/*"
   - "@effect/*"
   - "effect"
