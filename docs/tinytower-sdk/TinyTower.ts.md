@@ -1,6 +1,6 @@
 ---
 title: TinyTower.ts
-nav_order: 2
+nav_order: 3
 parent: "@tinyburg/tinytower-sdk"
 ---
 
@@ -67,7 +67,7 @@ declare const device_newPlayer: Effect.Effect<
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L186)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L185)
 
 Since v1.0.0
 
@@ -100,7 +100,7 @@ declare const device_playerDetails: (args_0: {
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L224)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L223)
 
 Since v1.0.0
 
@@ -127,7 +127,7 @@ declare const device_registerEmail: (args_0: {
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L304)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L303)
 
 Since v1.0.0
 
@@ -154,7 +154,7 @@ declare const device_verifyDevice: (args_0: {
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L264)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L263)
 
 Since v1.0.0
 
@@ -182,7 +182,7 @@ declare const raffle_checkEnteredCurrent: (args_0: {
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L822)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L821)
 
 Since v1.0.0
 
@@ -210,7 +210,7 @@ declare const raffle_enterMultiRaffle: (args_0: {
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L774)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L773)
 
 Since v1.0.0
 
@@ -238,7 +238,7 @@ declare const raffle_enterRaffle: (args_0: {
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L726)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L725)
 
 Since v1.0.0
 
@@ -277,7 +277,7 @@ declare const social_getGifts: (args_0: {
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L923)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L922)
 
 Since v1.0.0
 
@@ -316,7 +316,7 @@ declare const social_getVisits: (args_0: {
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L1192)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L1191)
 
 Since v1.0.0
 
@@ -531,7 +531,7 @@ declare const social_pullFriendMeta: (
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L1023)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L1022)
 
 Since v1.0.0
 
@@ -561,7 +561,7 @@ declare const social_pullFriendTower: (
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L1074)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L1073)
 
 Since v1.0.0
 
@@ -591,7 +591,7 @@ declare const social_receiveGift: (
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L974)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L973)
 
 Since v1.0.0
 
@@ -621,7 +621,7 @@ declare const social_retrieveFriendsSnapshotList: (
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L1141)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L1140)
 
 Since v1.0.0
 
@@ -655,7 +655,7 @@ declare const social_sendItem: (
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L862)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L861)
 
 Since v1.0.0
 
@@ -685,7 +685,7 @@ declare const social_visit: (
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L1243)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L1242)
 
 Since v1.0.0
 
@@ -713,7 +713,7 @@ declare const sync_checkForNewerSave: (args_0: {
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L485)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L484)
 
 Since v1.0.0
 
@@ -741,7 +741,7 @@ declare const sync_pullSave: (args_0: {
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L353)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L352)
 
 Since v1.0.0
 
@@ -771,7 +771,7 @@ declare const sync_pullSnapshot: (
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L545)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L544)
 
 Since v1.0.0
 
@@ -801,7 +801,7 @@ declare const sync_pushSave: (
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L417)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L416)
 
 Since v1.0.0
 
@@ -831,7 +831,7 @@ declare const sync_pushSnapshot: (
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L610)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L609)
 
 Since v1.0.0
 
@@ -1048,7 +1048,7 @@ declare const sync_retrieveSnapshotList: (args_0: {
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L678)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L677)
 
 Since v1.0.0
 
@@ -1639,11 +1639,11 @@ declare const SaveData: Schema.suspend<
                             Schema.Struct<{ readonly r: Schema.Int; readonly g: Schema.Int; readonly b: Schema.Int }>,
                             Schema.TemplateLiteralParser<
                               readonly [
-                                Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                                Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                                 ":",
-                                Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                                Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                                 ":",
-                                Schema.compose<Schema.Finite, Schema.NumberFromString>
+                                Schema.compose<Schema.Finite, Schema.FiniteFromString>
                               ]
                             >,
                             never,
@@ -1655,11 +1655,11 @@ declare const SaveData: Schema.suspend<
                             Schema.Struct<{ readonly r: Schema.Int; readonly g: Schema.Int; readonly b: Schema.Int }>,
                             Schema.TemplateLiteralParser<
                               readonly [
-                                Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                                Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                                 ":",
-                                Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                                Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                                 ":",
-                                Schema.compose<Schema.Finite, Schema.NumberFromString>
+                                Schema.compose<Schema.Finite, Schema.FiniteFromString>
                               ]
                             >,
                             never,
@@ -1679,11 +1679,11 @@ declare const SaveData: Schema.suspend<
                               Schema.Struct<{ readonly r: Schema.Int; readonly g: Schema.Int; readonly b: Schema.Int }>,
                               Schema.TemplateLiteralParser<
                                 readonly [
-                                  Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                                  Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                                   ":",
-                                  Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                                  Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                                   ":",
-                                  Schema.compose<Schema.Finite, Schema.NumberFromString>
+                                  Schema.compose<Schema.Finite, Schema.FiniteFromString>
                                 ]
                               >,
                               never,
@@ -1695,11 +1695,11 @@ declare const SaveData: Schema.suspend<
                               Schema.Struct<{ readonly r: Schema.Int; readonly g: Schema.Int; readonly b: Schema.Int }>,
                               Schema.TemplateLiteralParser<
                                 readonly [
-                                  Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                                  Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                                   ":",
-                                  Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                                  Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                                   ":",
-                                  Schema.compose<Schema.Finite, Schema.NumberFromString>
+                                  Schema.compose<Schema.Finite, Schema.FiniteFromString>
                                 ]
                               >,
                               never,
@@ -1713,11 +1713,11 @@ declare const SaveData: Schema.suspend<
                               Schema.Struct<{ readonly r: Schema.Int; readonly g: Schema.Int; readonly b: Schema.Int }>,
                               Schema.TemplateLiteralParser<
                                 readonly [
-                                  Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                                  Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                                   ":",
-                                  Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                                  Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                                   ":",
-                                  Schema.compose<Schema.Finite, Schema.NumberFromString>
+                                  Schema.compose<Schema.Finite, Schema.FiniteFromString>
                                 ]
                               >,
                               never,
@@ -1729,11 +1729,11 @@ declare const SaveData: Schema.suspend<
                               Schema.Struct<{ readonly r: Schema.Int; readonly g: Schema.Int; readonly b: Schema.Int }>,
                               Schema.TemplateLiteralParser<
                                 readonly [
-                                  Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                                  Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                                   ":",
-                                  Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                                  Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                                   ":",
-                                  Schema.compose<Schema.Finite, Schema.NumberFromString>
+                                  Schema.compose<Schema.Finite, Schema.FiniteFromString>
                                 ]
                               >,
                               never,
@@ -1754,11 +1754,11 @@ declare const SaveData: Schema.suspend<
                                 }>,
                                 Schema.TemplateLiteralParser<
                                   readonly [
-                                    Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                                    Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                                     ":",
-                                    Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                                    Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                                     ":",
-                                    Schema.compose<Schema.Finite, Schema.NumberFromString>
+                                    Schema.compose<Schema.Finite, Schema.FiniteFromString>
                                   ]
                                 >,
                                 never,
@@ -1777,11 +1777,11 @@ declare const SaveData: Schema.suspend<
                                 }>,
                                 Schema.TemplateLiteralParser<
                                   readonly [
-                                    Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                                    Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                                     ":",
-                                    Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                                    Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                                     ":",
-                                    Schema.compose<Schema.Finite, Schema.NumberFromString>
+                                    Schema.compose<Schema.Finite, Schema.FiniteFromString>
                                   ]
                                 >,
                                 never,
@@ -1822,11 +1822,11 @@ declare const SaveData: Schema.suspend<
                             Schema.Struct<{ readonly r: Schema.Int; readonly g: Schema.Int; readonly b: Schema.Int }>,
                             Schema.TemplateLiteralParser<
                               readonly [
-                                Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                                Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                                 ":",
-                                Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                                Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                                 ":",
-                                Schema.compose<Schema.Finite, Schema.NumberFromString>
+                                Schema.compose<Schema.Finite, Schema.FiniteFromString>
                               ]
                             >,
                             never,
@@ -1836,11 +1836,11 @@ declare const SaveData: Schema.suspend<
                             Schema.Struct<{ readonly r: Schema.Int; readonly g: Schema.Int; readonly b: Schema.Int }>,
                             Schema.TemplateLiteralParser<
                               readonly [
-                                Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                                Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                                 ":",
-                                Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                                Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                                 ":",
-                                Schema.compose<Schema.Finite, Schema.NumberFromString>
+                                Schema.compose<Schema.Finite, Schema.FiniteFromString>
                               ]
                             >,
                             never,
@@ -1869,11 +1869,11 @@ declare const SaveData: Schema.suspend<
                             Schema.Struct<{ readonly r: Schema.Int; readonly g: Schema.Int; readonly b: Schema.Int }>,
                             Schema.TemplateLiteralParser<
                               readonly [
-                                Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                                Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                                 ":",
-                                Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                                Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                                 ":",
-                                Schema.compose<Schema.Finite, Schema.NumberFromString>
+                                Schema.compose<Schema.Finite, Schema.FiniteFromString>
                               ]
                             >,
                             never,
@@ -1921,11 +1921,11 @@ declare const SaveData: Schema.suspend<
                             Schema.Struct<{ readonly r: Schema.Int; readonly g: Schema.Int; readonly b: Schema.Int }>,
                             Schema.TemplateLiteralParser<
                               readonly [
-                                Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                                Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                                 ":",
-                                Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                                Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                                 ":",
-                                Schema.compose<Schema.Finite, Schema.NumberFromString>
+                                Schema.compose<Schema.Finite, Schema.FiniteFromString>
                               ]
                             >,
                             never,
@@ -1944,11 +1944,11 @@ declare const SaveData: Schema.suspend<
                             Schema.Struct<{ readonly r: Schema.Int; readonly g: Schema.Int; readonly b: Schema.Int }>,
                             Schema.TemplateLiteralParser<
                               readonly [
-                                Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                                Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                                 ":",
-                                Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                                Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                                 ":",
-                                Schema.compose<Schema.Finite, Schema.NumberFromString>
+                                Schema.compose<Schema.Finite, Schema.FiniteFromString>
                               ]
                             >,
                             never,
@@ -2483,11 +2483,11 @@ declare const SaveData: Schema.suspend<
                                 }>,
                                 Schema.TemplateLiteralParser<
                                   readonly [
-                                    Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                                    Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                                     ":",
-                                    Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                                    Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                                     ":",
-                                    Schema.compose<Schema.Finite, Schema.NumberFromString>
+                                    Schema.compose<Schema.Finite, Schema.FiniteFromString>
                                   ]
                                 >,
                                 never,
@@ -2503,11 +2503,11 @@ declare const SaveData: Schema.suspend<
                                 }>,
                                 Schema.TemplateLiteralParser<
                                   readonly [
-                                    Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                                    Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                                     ":",
-                                    Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                                    Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                                     ":",
-                                    Schema.compose<Schema.Finite, Schema.NumberFromString>
+                                    Schema.compose<Schema.Finite, Schema.FiniteFromString>
                                   ]
                                 >,
                                 never,
@@ -2531,11 +2531,11 @@ declare const SaveData: Schema.suspend<
                                   }>,
                                   Schema.TemplateLiteralParser<
                                     readonly [
-                                      Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                                      Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                                       ":",
-                                      Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                                      Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                                       ":",
-                                      Schema.compose<Schema.Finite, Schema.NumberFromString>
+                                      Schema.compose<Schema.Finite, Schema.FiniteFromString>
                                     ]
                                   >,
                                   never,
@@ -2551,11 +2551,11 @@ declare const SaveData: Schema.suspend<
                                   }>,
                                   Schema.TemplateLiteralParser<
                                     readonly [
-                                      Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                                      Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                                       ":",
-                                      Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                                      Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                                       ":",
-                                      Schema.compose<Schema.Finite, Schema.NumberFromString>
+                                      Schema.compose<Schema.Finite, Schema.FiniteFromString>
                                     ]
                                   >,
                                   never,
@@ -2573,11 +2573,11 @@ declare const SaveData: Schema.suspend<
                                   }>,
                                   Schema.TemplateLiteralParser<
                                     readonly [
-                                      Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                                      Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                                       ":",
-                                      Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                                      Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                                       ":",
-                                      Schema.compose<Schema.Finite, Schema.NumberFromString>
+                                      Schema.compose<Schema.Finite, Schema.FiniteFromString>
                                     ]
                                   >,
                                   never,
@@ -2593,11 +2593,11 @@ declare const SaveData: Schema.suspend<
                                   }>,
                                   Schema.TemplateLiteralParser<
                                     readonly [
-                                      Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                                      Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                                       ":",
-                                      Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                                      Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                                       ":",
-                                      Schema.compose<Schema.Finite, Schema.NumberFromString>
+                                      Schema.compose<Schema.Finite, Schema.FiniteFromString>
                                     ]
                                   >,
                                   never,
@@ -2618,11 +2618,11 @@ declare const SaveData: Schema.suspend<
                                     }>,
                                     Schema.TemplateLiteralParser<
                                       readonly [
-                                        Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                                        Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                                         ":",
-                                        Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                                        Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                                         ":",
-                                        Schema.compose<Schema.Finite, Schema.NumberFromString>
+                                        Schema.compose<Schema.Finite, Schema.FiniteFromString>
                                       ]
                                     >,
                                     never,
@@ -2641,11 +2641,11 @@ declare const SaveData: Schema.suspend<
                                     }>,
                                     Schema.TemplateLiteralParser<
                                       readonly [
-                                        Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                                        Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                                         ":",
-                                        Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                                        Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                                         ":",
-                                        Schema.compose<Schema.Finite, Schema.NumberFromString>
+                                        Schema.compose<Schema.Finite, Schema.FiniteFromString>
                                       ]
                                     >,
                                     never,
@@ -2690,11 +2690,11 @@ declare const SaveData: Schema.suspend<
                                 }>,
                                 Schema.TemplateLiteralParser<
                                   readonly [
-                                    Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                                    Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                                     ":",
-                                    Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                                    Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                                     ":",
-                                    Schema.compose<Schema.Finite, Schema.NumberFromString>
+                                    Schema.compose<Schema.Finite, Schema.FiniteFromString>
                                   ]
                                 >,
                                 never,
@@ -2708,11 +2708,11 @@ declare const SaveData: Schema.suspend<
                                 }>,
                                 Schema.TemplateLiteralParser<
                                   readonly [
-                                    Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                                    Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                                     ":",
-                                    Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                                    Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                                     ":",
-                                    Schema.compose<Schema.Finite, Schema.NumberFromString>
+                                    Schema.compose<Schema.Finite, Schema.FiniteFromString>
                                   ]
                                 >,
                                 never,
@@ -2745,11 +2745,11 @@ declare const SaveData: Schema.suspend<
                                 }>,
                                 Schema.TemplateLiteralParser<
                                   readonly [
-                                    Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                                    Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                                     ":",
-                                    Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                                    Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                                     ":",
-                                    Schema.compose<Schema.Finite, Schema.NumberFromString>
+                                    Schema.compose<Schema.Finite, Schema.FiniteFromString>
                                   ]
                                 >,
                                 never,
@@ -2801,11 +2801,11 @@ declare const SaveData: Schema.suspend<
                                 }>,
                                 Schema.TemplateLiteralParser<
                                   readonly [
-                                    Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                                    Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                                     ":",
-                                    Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                                    Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                                     ":",
-                                    Schema.compose<Schema.Finite, Schema.NumberFromString>
+                                    Schema.compose<Schema.Finite, Schema.FiniteFromString>
                                   ]
                                 >,
                                 never,
@@ -2828,11 +2828,11 @@ declare const SaveData: Schema.suspend<
                                 }>,
                                 Schema.TemplateLiteralParser<
                                   readonly [
-                                    Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                                    Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                                     ":",
-                                    Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                                    Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                                     ":",
-                                    Schema.compose<Schema.Finite, Schema.NumberFromString>
+                                    Schema.compose<Schema.Finite, Schema.FiniteFromString>
                                   ]
                                 >,
                                 never,
@@ -3541,11 +3541,11 @@ declare const SaveData: Schema.suspend<
                                       }>,
                                       Schema.TemplateLiteralParser<
                                         readonly [
-                                          Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                                          Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                                           ":",
-                                          Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                                          Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                                           ":",
-                                          Schema.compose<Schema.Finite, Schema.NumberFromString>
+                                          Schema.compose<Schema.Finite, Schema.FiniteFromString>
                                         ]
                                       >,
                                       never,
@@ -3561,11 +3561,11 @@ declare const SaveData: Schema.suspend<
                                       }>,
                                       Schema.TemplateLiteralParser<
                                         readonly [
-                                          Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                                          Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                                           ":",
-                                          Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                                          Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                                           ":",
-                                          Schema.compose<Schema.Finite, Schema.NumberFromString>
+                                          Schema.compose<Schema.Finite, Schema.FiniteFromString>
                                         ]
                                       >,
                                       never,
@@ -3589,11 +3589,11 @@ declare const SaveData: Schema.suspend<
                                         }>,
                                         Schema.TemplateLiteralParser<
                                           readonly [
-                                            Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                                            Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                                             ":",
-                                            Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                                            Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                                             ":",
-                                            Schema.compose<Schema.Finite, Schema.NumberFromString>
+                                            Schema.compose<Schema.Finite, Schema.FiniteFromString>
                                           ]
                                         >,
                                         never,
@@ -3609,11 +3609,11 @@ declare const SaveData: Schema.suspend<
                                         }>,
                                         Schema.TemplateLiteralParser<
                                           readonly [
-                                            Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                                            Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                                             ":",
-                                            Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                                            Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                                             ":",
-                                            Schema.compose<Schema.Finite, Schema.NumberFromString>
+                                            Schema.compose<Schema.Finite, Schema.FiniteFromString>
                                           ]
                                         >,
                                         never,
@@ -3631,11 +3631,11 @@ declare const SaveData: Schema.suspend<
                                         }>,
                                         Schema.TemplateLiteralParser<
                                           readonly [
-                                            Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                                            Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                                             ":",
-                                            Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                                            Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                                             ":",
-                                            Schema.compose<Schema.Finite, Schema.NumberFromString>
+                                            Schema.compose<Schema.Finite, Schema.FiniteFromString>
                                           ]
                                         >,
                                         never,
@@ -3651,11 +3651,11 @@ declare const SaveData: Schema.suspend<
                                         }>,
                                         Schema.TemplateLiteralParser<
                                           readonly [
-                                            Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                                            Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                                             ":",
-                                            Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                                            Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                                             ":",
-                                            Schema.compose<Schema.Finite, Schema.NumberFromString>
+                                            Schema.compose<Schema.Finite, Schema.FiniteFromString>
                                           ]
                                         >,
                                         never,
@@ -3676,11 +3676,11 @@ declare const SaveData: Schema.suspend<
                                           }>,
                                           Schema.TemplateLiteralParser<
                                             readonly [
-                                              Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                                              Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                                               ":",
-                                              Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                                              Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                                               ":",
-                                              Schema.compose<Schema.Finite, Schema.NumberFromString>
+                                              Schema.compose<Schema.Finite, Schema.FiniteFromString>
                                             ]
                                           >,
                                           never,
@@ -3699,11 +3699,11 @@ declare const SaveData: Schema.suspend<
                                           }>,
                                           Schema.TemplateLiteralParser<
                                             readonly [
-                                              Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                                              Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                                               ":",
-                                              Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                                              Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                                               ":",
-                                              Schema.compose<Schema.Finite, Schema.NumberFromString>
+                                              Schema.compose<Schema.Finite, Schema.FiniteFromString>
                                             ]
                                           >,
                                           never,
@@ -3748,11 +3748,11 @@ declare const SaveData: Schema.suspend<
                                       }>,
                                       Schema.TemplateLiteralParser<
                                         readonly [
-                                          Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                                          Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                                           ":",
-                                          Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                                          Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                                           ":",
-                                          Schema.compose<Schema.Finite, Schema.NumberFromString>
+                                          Schema.compose<Schema.Finite, Schema.FiniteFromString>
                                         ]
                                       >,
                                       never,
@@ -3766,11 +3766,11 @@ declare const SaveData: Schema.suspend<
                                       }>,
                                       Schema.TemplateLiteralParser<
                                         readonly [
-                                          Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                                          Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                                           ":",
-                                          Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                                          Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                                           ":",
-                                          Schema.compose<Schema.Finite, Schema.NumberFromString>
+                                          Schema.compose<Schema.Finite, Schema.FiniteFromString>
                                         ]
                                       >,
                                       never,
@@ -3803,11 +3803,11 @@ declare const SaveData: Schema.suspend<
                                       }>,
                                       Schema.TemplateLiteralParser<
                                         readonly [
-                                          Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                                          Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                                           ":",
-                                          Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                                          Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                                           ":",
-                                          Schema.compose<Schema.Finite, Schema.NumberFromString>
+                                          Schema.compose<Schema.Finite, Schema.FiniteFromString>
                                         ]
                                       >,
                                       never,
@@ -3859,11 +3859,11 @@ declare const SaveData: Schema.suspend<
                                       }>,
                                       Schema.TemplateLiteralParser<
                                         readonly [
-                                          Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                                          Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                                           ":",
-                                          Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                                          Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                                           ":",
-                                          Schema.compose<Schema.Finite, Schema.NumberFromString>
+                                          Schema.compose<Schema.Finite, Schema.FiniteFromString>
                                         ]
                                       >,
                                       never,
@@ -3886,11 +3886,11 @@ declare const SaveData: Schema.suspend<
                                       }>,
                                       Schema.TemplateLiteralParser<
                                         readonly [
-                                          Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                                          Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                                           ":",
-                                          Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                                          Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                                           ":",
-                                          Schema.compose<Schema.Finite, Schema.NumberFromString>
+                                          Schema.compose<Schema.Finite, Schema.FiniteFromString>
                                         ]
                                       >,
                                       never,
@@ -3987,6 +3987,6 @@ declare const SaveData: Schema.suspend<
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L34)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L33)
 
 Since v1.0.0

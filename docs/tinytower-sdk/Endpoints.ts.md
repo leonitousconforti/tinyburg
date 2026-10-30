@@ -516,11 +516,11 @@ declare const PlayerMetaData: Schema.encodeKeys<
                       Schema.Struct<{ readonly r: Schema.Int; readonly g: Schema.Int; readonly b: Schema.Int }>,
                       Schema.TemplateLiteralParser<
                         readonly [
-                          Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                          Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                           ":",
-                          Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                          Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                           ":",
-                          Schema.compose<Schema.Finite, Schema.NumberFromString>
+                          Schema.compose<Schema.Finite, Schema.FiniteFromString>
                         ]
                       >,
                       never,
@@ -532,11 +532,11 @@ declare const PlayerMetaData: Schema.encodeKeys<
                       Schema.Struct<{ readonly r: Schema.Int; readonly g: Schema.Int; readonly b: Schema.Int }>,
                       Schema.TemplateLiteralParser<
                         readonly [
-                          Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                          Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                           ":",
-                          Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                          Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                           ":",
-                          Schema.compose<Schema.Finite, Schema.NumberFromString>
+                          Schema.compose<Schema.Finite, Schema.FiniteFromString>
                         ]
                       >,
                       never,
@@ -556,11 +556,11 @@ declare const PlayerMetaData: Schema.encodeKeys<
                         Schema.Struct<{ readonly r: Schema.Int; readonly g: Schema.Int; readonly b: Schema.Int }>,
                         Schema.TemplateLiteralParser<
                           readonly [
-                            Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                            Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                             ":",
-                            Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                            Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                             ":",
-                            Schema.compose<Schema.Finite, Schema.NumberFromString>
+                            Schema.compose<Schema.Finite, Schema.FiniteFromString>
                           ]
                         >,
                         never,
@@ -572,11 +572,11 @@ declare const PlayerMetaData: Schema.encodeKeys<
                         Schema.Struct<{ readonly r: Schema.Int; readonly g: Schema.Int; readonly b: Schema.Int }>,
                         Schema.TemplateLiteralParser<
                           readonly [
-                            Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                            Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                             ":",
-                            Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                            Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                             ":",
-                            Schema.compose<Schema.Finite, Schema.NumberFromString>
+                            Schema.compose<Schema.Finite, Schema.FiniteFromString>
                           ]
                         >,
                         never,
@@ -590,11 +590,11 @@ declare const PlayerMetaData: Schema.encodeKeys<
                         Schema.Struct<{ readonly r: Schema.Int; readonly g: Schema.Int; readonly b: Schema.Int }>,
                         Schema.TemplateLiteralParser<
                           readonly [
-                            Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                            Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                             ":",
-                            Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                            Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                             ":",
-                            Schema.compose<Schema.Finite, Schema.NumberFromString>
+                            Schema.compose<Schema.Finite, Schema.FiniteFromString>
                           ]
                         >,
                         never,
@@ -606,11 +606,11 @@ declare const PlayerMetaData: Schema.encodeKeys<
                         Schema.Struct<{ readonly r: Schema.Int; readonly g: Schema.Int; readonly b: Schema.Int }>,
                         Schema.TemplateLiteralParser<
                           readonly [
-                            Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                            Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                             ":",
-                            Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                            Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                             ":",
-                            Schema.compose<Schema.Finite, Schema.NumberFromString>
+                            Schema.compose<Schema.Finite, Schema.FiniteFromString>
                           ]
                         >,
                         never,
@@ -627,11 +627,11 @@ declare const PlayerMetaData: Schema.encodeKeys<
                           Schema.Struct<{ readonly r: Schema.Int; readonly g: Schema.Int; readonly b: Schema.Int }>,
                           Schema.TemplateLiteralParser<
                             readonly [
-                              Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                              Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                               ":",
-                              Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                              Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                               ":",
-                              Schema.compose<Schema.Finite, Schema.NumberFromString>
+                              Schema.compose<Schema.Finite, Schema.FiniteFromString>
                             ]
                           >,
                           never,
@@ -646,11 +646,11 @@ declare const PlayerMetaData: Schema.encodeKeys<
                           Schema.Struct<{ readonly r: Schema.Int; readonly g: Schema.Int; readonly b: Schema.Int }>,
                           Schema.TemplateLiteralParser<
                             readonly [
-                              Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                              Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                               ":",
-                              Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                              Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                               ":",
-                              Schema.compose<Schema.Finite, Schema.NumberFromString>
+                              Schema.compose<Schema.Finite, Schema.FiniteFromString>
                             ]
                           >,
                           never,
@@ -691,11 +691,11 @@ declare const PlayerMetaData: Schema.encodeKeys<
                       Schema.Struct<{ readonly r: Schema.Int; readonly g: Schema.Int; readonly b: Schema.Int }>,
                       Schema.TemplateLiteralParser<
                         readonly [
-                          Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                          Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                           ":",
-                          Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                          Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                           ":",
-                          Schema.compose<Schema.Finite, Schema.NumberFromString>
+                          Schema.compose<Schema.Finite, Schema.FiniteFromString>
                         ]
                       >,
                       never,
@@ -705,11 +705,11 @@ declare const PlayerMetaData: Schema.encodeKeys<
                       Schema.Struct<{ readonly r: Schema.Int; readonly g: Schema.Int; readonly b: Schema.Int }>,
                       Schema.TemplateLiteralParser<
                         readonly [
-                          Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                          Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                           ":",
-                          Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                          Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                           ":",
-                          Schema.compose<Schema.Finite, Schema.NumberFromString>
+                          Schema.compose<Schema.Finite, Schema.FiniteFromString>
                         ]
                       >,
                       never,
@@ -738,11 +738,11 @@ declare const PlayerMetaData: Schema.encodeKeys<
                       Schema.Struct<{ readonly r: Schema.Int; readonly g: Schema.Int; readonly b: Schema.Int }>,
                       Schema.TemplateLiteralParser<
                         readonly [
-                          Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                          Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                           ":",
-                          Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                          Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                           ":",
-                          Schema.compose<Schema.Finite, Schema.NumberFromString>
+                          Schema.compose<Schema.Finite, Schema.FiniteFromString>
                         ]
                       >,
                       never,
@@ -790,11 +790,11 @@ declare const PlayerMetaData: Schema.encodeKeys<
                       Schema.Struct<{ readonly r: Schema.Int; readonly g: Schema.Int; readonly b: Schema.Int }>,
                       Schema.TemplateLiteralParser<
                         readonly [
-                          Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                          Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                           ":",
-                          Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                          Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                           ":",
-                          Schema.compose<Schema.Finite, Schema.NumberFromString>
+                          Schema.compose<Schema.Finite, Schema.FiniteFromString>
                         ]
                       >,
                       never,
@@ -813,11 +813,11 @@ declare const PlayerMetaData: Schema.encodeKeys<
                       Schema.Struct<{ readonly r: Schema.Int; readonly g: Schema.Int; readonly b: Schema.Int }>,
                       Schema.TemplateLiteralParser<
                         readonly [
-                          Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                          Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                           ":",
-                          Schema.compose<Schema.Finite, Schema.NumberFromString>,
+                          Schema.compose<Schema.Finite, Schema.FiniteFromString>,
                           ":",
-                          Schema.compose<Schema.Finite, Schema.NumberFromString>
+                          Schema.compose<Schema.Finite, Schema.FiniteFromString>
                         ]
                       >,
                       never,
@@ -876,6 +876,6 @@ declare const PlayerMetaData: Schema.encodeKeys<
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/Endpoints.ts#L73)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/Endpoints.ts#L72)
 
 Since v1.0.0
