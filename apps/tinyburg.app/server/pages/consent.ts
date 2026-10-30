@@ -15,15 +15,14 @@
  */
 
 import type { Effect } from "effect";
-import type { HttpServerResponse } from "effect/http";
 
-import type { OAuthAuthorizationRequest, OAuthClient } from "../../domain/models.ts";
 import type { Language } from "@tinyburg/shared-ui/Internationalization";
+import type * as OAuthServer from "@yielded/auth/OAuthServer";
 import type { HtmlBuilder } from "foldkit/html";
 
 import * as StandalonePage from "@tinyburg/shared-ui/StandalonePage";
 import { Api } from "@tinyburg/trading-sdk/Sdk";
-import { ResourceServer } from "effect-oidc";
+import * as OAuthScope from "@yielded/auth/OAuthScope";
 
 import { consentMessagesFor } from "./consentMessages.ts";
 
@@ -33,7 +32,7 @@ import { consentMessagesFor } from "./consentMessages.ts";
  * unlocks are one declaration, so they cannot disagree.
  */
 const gameScopeDescriptions: ReadonlyMap<string, string> = new Map(
-    ResourceServer.scopeCatalog(Api).map((scope) => [scope.name, scope.description])
+    OAuthScope.catalog(Api).map((scope) => [scope.name, scope.description])
 );
 
 /**
@@ -44,9 +43,14 @@ const gameScopeDescriptions: ReadonlyMap<string, string> = new Map(
  */
 export interface ConsentModel {
     readonly clientName: string;
-    readonly requestId: string;
     readonly scopes: ReadonlyArray<string>;
     readonly redirectHost: string;
+    /** Where the decision is posted: the OAuth server's authorize endpoint. */
+    readonly action: string;
+    /** The OAuth server's token binding this form to this visitor and request. */
+    readonly csrf: string;
+    /** Where "use another account" leads: signing out, then back in. */
+    readonly loginPath: string;
     readonly language: Language;
 }
 
@@ -81,8 +85,8 @@ export const view = (model: ConsentModel, h: HtmlBuilder<never>) => {
             StandalonePage.lead(h, messages.wantsAccess),
             StandalonePage.permissions(h, scopeDescriptions(model)),
             StandalonePage.actions(h, {
-                action: "/oauth/consent",
-                hidden: { request_id: model.requestId },
+                action: model.action,
+                hidden: { csrf: model.csrf },
                 name: "decision",
                 buttons: [
                     { value: "approve", label: messages.authorize, variant: "primary" },
@@ -90,6 +94,7 @@ export const view = (model: ConsentModel, h: HtmlBuilder<never>) => {
                 ],
             }),
             StandalonePage.footnote(h, messages.destination(model.redirectHost)),
+            h.p([h.Class("footnote")], [h.a([h.Href(model.loginPath)], [messages.switchAccount])]),
         ]),
     };
 };
@@ -104,29 +109,17 @@ export const render = (model: ConsentModel): Effect.Effect<string> =>
     StandalonePage.render({ model, view, favicon: true });
 
 /**
- * Answers with the consent screen.
- *
- * @since 1.0.0
- * @category Rendering
- */
-export const respond = (model: ConsentModel): Effect.Effect<HttpServerResponse.HttpServerResponse> =>
-    StandalonePage.respond({ model, view, favicon: true });
-
-/**
- * Builds the page's model from the provider's own types.
+ * Builds the page's model from what the OAuth server asks consent for.
  *
  * @since 1.0.0
  * @category Constructors
  */
-export const modelFor = (options: {
-    readonly client: OAuthClient;
-    readonly request: OAuthAuthorizationRequest;
-    readonly scopes: ReadonlyArray<string>;
-    readonly language: Language;
-}): ConsentModel => ({
-    clientName: options.client.name,
-    requestId: options.request.id,
-    scopes: options.scopes,
-    redirectHost: new URL(options.request.redirectUri).host,
-    language: options.language,
+export const modelFor = (consent: OAuthServer.Consent, language: Language): ConsentModel => ({
+    clientName: consent.clientName,
+    scopes: consent.scopes,
+    redirectHost: new URL(consent.redirectUri).host,
+    action: consent.action,
+    csrf: consent.csrf,
+    loginPath: consent.loginPath,
+    language,
 });

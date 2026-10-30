@@ -3,16 +3,17 @@ import { FetchHttpClient, HttpRouter, HttpServerResponse } from "effect/http";
 
 import { createServer } from "node:http";
 
-import { NodeCrypto, NodeHttpServer, NodeRuntime } from "@effect/platform-node";
+import { NodeHttpServer, NodeRuntime } from "@effect/platform-node";
 import { PgClient, PgMigrator } from "@effect/sql-pg";
+import * as WebCrypto from "@yielded/auth/WebCrypto";
 
 import { DevelopersRepository } from "../domain/developers.ts";
-import { OidcRepository } from "../domain/oidc.ts";
 import { SessionsRepository } from "../domain/sessions.ts";
 import { TinyTowerAccountsRepository, TinyTowerClassicAccountsRepository } from "../domain/tinytower.ts";
 import { UsersRepository } from "../domain/users.ts";
 import { CookiePolicy } from "./cookies.ts";
 import { OidcKeys } from "./keys.ts";
+import { OAuthServerLive } from "./oauthLive.ts";
 import { ApiLive } from "./routes/api.ts";
 import { AuthRoutesLive } from "./routes/auth.ts";
 import { OAuthRoutesLive } from "./routes/oauth.ts";
@@ -25,17 +26,25 @@ import { StaticRoutesLive } from "./routes/static.ts";
  * Baseline security headers on every response. Nothing this site serves is
  * meant to be embedded, least of all the OAuth consent screen, so framing is
  * denied outright; HSTS rides along whenever cookies demand https.
+ *
+ * A response that sets its own content security policy keeps it: the consent
+ * screen's is stricter than this one, and already denies framing.
  */
 const SecurityHeadersLive = HttpRouter.middleware(
     Effect.map(CookiePolicy, ({ secure }) => {
         const headers = {
             "x-content-type-options": "nosniff",
             "x-frame-options": "DENY",
-            "content-security-policy": "frame-ancestors 'none'",
             ...(secure ? { "strict-transport-security": "max-age=31536000; includeSubDomains" } : {}),
         };
 
-        return (httpEffect) => Effect.map(httpEffect, HttpServerResponse.setHeaders(headers));
+        return (httpEffect) =>
+            Effect.map(httpEffect, (response) =>
+                HttpServerResponse.setHeaders(response, {
+                    ...headers,
+                    "content-security-policy": response.headers["content-security-policy"] ?? "frame-ancestors 'none'",
+                })
+            );
     }),
     { global: true }
 );
@@ -69,20 +78,14 @@ const MigratorLive = Effect.gen(function* () {
 const Repositories = Layer.mergeAll(
     DevelopersRepository.Default,
     UsersRepository.Default,
-    OidcRepository.Default,
     SessionsRepository.Default,
     TinyTowerAccountsRepository.Default,
     TinyTowerClassicAccountsRepository.Default
 );
 
 HttpRouter.serve(AllRoutes).pipe(
-    Layer.provide([
-        Repositories,
-        CookiePolicy.Default,
-        OidcKeys.Default,
-        FetchHttpClient.layer,
-        NodeCrypto.layerSecureRandom,
-    ]),
+    Layer.provide(OAuthServerLive),
+    Layer.provide([Repositories, CookiePolicy.Default, OidcKeys.Default, FetchHttpClient.layer, WebCrypto.layer]),
     Layer.provide(MigratorLive),
     Layer.provide(SqlLive),
     Layer.provide(

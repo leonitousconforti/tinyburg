@@ -1,11 +1,13 @@
 /**
  * The refusal page for the browser half of the OIDC flow.
  *
- * Only a handful of failures reach a visitor as a page. Everything else in the
- * code flow answers to the client's registered redirect uri as an `error`
- * parameter, per RFC 6749 - but a request whose client is unknown, or whose
- * redirect uri is not the one registered, has no trustworthy place to be sent,
- * so it stops here instead.
+ * Only a handful of failures reach a visitor as a page. A request whose client
+ * is unknown, or whose redirect uri is not the one registered, has no
+ * trustworthy place to be sent, so it stops here; so does one asking for a
+ * scope its client is not registered for, because every Tinyburg client
+ * registered itself and the OAuth server sends nobody back to such a client's
+ * redirect uri with an error unasked. The rest of the code flow is the OAuth
+ * server's to answer (`../routes/oidc.ts`).
  *
  * These used to be `text/plain` 400s, which is a raw sentence on a white page
  * in the middle of an otherwise styled sign-in, and English regardless of who

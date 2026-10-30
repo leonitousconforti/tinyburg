@@ -235,12 +235,12 @@ export const fr: Messages = {
             standardOidc: {
                 title: "OIDC standard",
                 description:
-                    "Flux authorization code avec PKCE et jetons d'identité signés en ES256. Toute bibliothèque cliente OpenID Connect fonctionne directement.",
+                    "Flux authorization code avec PKCE et jetons d'identité signés en RS256. Toute bibliothèque cliente OpenID Connect fonctionne directement.",
             },
             minimalScopes: {
                 title: "Scopes minimaux",
                 description:
-                    "Les applis ne voient que l'identité, le nom affiché et l'avatar du joueur. Rien d'autre ne quitte Tinyburg.",
+                    "Les applis ne voient que l'identité et le nom affiché du joueur. Rien d'autre ne quitte Tinyburg.",
             },
             playerConsent: {
                 title: "Consentement du joueur",
@@ -283,7 +283,7 @@ export const fr: Messages = {
         scopesHeading: "Scopes",
         scopeDescriptions: {
             openid: "Confirmer ton identité Tinyburg",
-            profile: "Voir ton nom affiché et ton avatar",
+            profile: "Voir ton nom affiché",
         },
         readyHeading: "Prêt à construire ?",
         readyBefore:

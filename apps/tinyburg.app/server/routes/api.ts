@@ -1,133 +1,106 @@
-import { DateTime, Duration, Effect, Layer, Option, Redacted, Schema } from "effect";
-import { Base64Url } from "effect/encoding";
-import { Headers, HttpClient, HttpRouter, HttpServerRequest } from "effect/http";
+import { Context, DateTime, Effect, Layer, Option, Redacted, Schema } from "effect";
+import { Headers, HttpClient, HttpEffect, HttpServerRequest, HttpServerResponse } from "effect/http";
 import { HttpApiBuilder, HttpApiError } from "effect/http-api";
-import { Model } from "effect/schema";
 
-import type { Session, User } from "../../domain/models.ts";
 import type { GameAccountsRepository } from "../../domain/tinytower.ts";
 import type { PlayerAuthKeySchema, PlayerEmailSchema, PlayerIdSchema } from "@tinyburg/nimblebit-sdk/NimblebitConfig";
 import type { NimblebitGame } from "@tinyburg/nimblebit-sdk/NimblebitGame";
 import type { ItemToSend, SaveUpload } from "@tinyburg/trading-sdk/Sdk";
 
 import { NimblebitAuth, NimblebitError } from "@tinyburg/nimblebit-sdk";
+import * as NimblebitScopes from "@tinyburg/nimblebit-sdk/NimblebitScopes";
 import { TinyTowerClassic } from "@tinyburg/tinytower-classic-sdk";
 import { Bitizens, type Endpoints, TinyTower } from "@tinyburg/tinytower-sdk";
-import { Jwt, Oidc, ResourceServer } from "effect-oidc";
+import * as OAuthScope from "@yielded/auth/OAuthScope";
 
 import { DevelopersRepository } from "../../domain/developers.ts";
-import { OidcRepository } from "../../domain/oidc.ts";
 import { SessionsRepository } from "../../domain/sessions.ts";
 import { TinyTowerAccountsRepository, TinyTowerClassicAccountsRepository } from "../../domain/tinytower.ts";
 import { Api } from "../../shared/api.ts";
 import { CookiePolicy, maybeCurrentUser } from "../cookies.ts";
-import { OidcKeys } from "../keys.ts";
+import { CurrentCaller, FIRST_PARTY_SCOPES, TinyburgOAuth, requireCaller } from "../oauthServer.ts";
 
-const accessTokenFor = Effect.fnUntraced(function* ({ session, user }: { session: Session; user: User }) {
-    const keys = yield* OidcKeys;
-    const now = yield* DateTime.now;
-
-    /** A token this close to expiring is replaced rather than reused. */
-    const REFRESH_SKEW = Duration.minutes(1);
-
-    /** Everything the first-party app is allowed to do on the visitor's behalf. */
-    const SESSION_SCOPE = "openid profile tinytower tinytowerclassic";
-
-    /** The time-to-live for the access token, in seconds. */
-    const ACCESS_TOKEN_TTL_SECONDS = 900;
-
-    const cutoff = DateTime.addDuration(now, REFRESH_SKEW);
-    const cached = Option.zipWith(session.accessToken, session.accessTokenExpiresAt, (token, expiresAt) =>
-        DateTime.isGreaterThan(expiresAt, cutoff) ? Option.some(token) : Option.none<string>()
-    ).pipe(Option.flatten);
-
-    if (Option.isSome(cached)) {
-        return cached.value;
-    }
-
-    const accessToken = yield* Oidc.issueAccessToken({
-        privateJwk: keys.privateJwk,
-        issuer: keys.issuer,
-        subject: user.id,
-        audience: keys.issuer,
-        clientId: DevelopersRepository.FIRST_PARTY_CLIENT_ID,
-        scope: SESSION_SCOPE,
-        ttlSeconds: ACCESS_TOKEN_TTL_SECONDS,
-    });
-
-    const claims = yield* Effect.fromResult(Base64Url.decodeString(accessToken.split(".")[1])).pipe(
-        Effect.flatMap(Schema.decodeEffect(Schema.fromJsonString(Jwt.StandardClaimsSchema)))
-    );
-
-    yield* SessionsRepository.use((repo) =>
-        repo.storeAccessToken({
-            // The payload is serialized before it leaves this call, so the class prototype is irrelevant.
-            // oxlint-disable-next-line typescript/no-misused-spread
-            ...session,
-            accessToken: Option.some(accessToken),
-            accessTokenJti: Option.fromNullishOr(claims.jti),
-            accessTokenExpiresAt: Option.some(DateTime.addDuration(now, Duration.seconds(ACCESS_TOKEN_TTL_SECONDS))),
-            lastSeenAt: now.pipe(Model.Override),
-        })
-    );
-
-    return accessToken;
-});
-
-const SessionBearer = HttpRouter.middleware(
+/**
+ * Who may call `/v1`, and as whom.
+ *
+ * An application calls with the opaque access token the OAuth server issued
+ * it, and the OAuth server's own `RequireAccess` (`securityLayer`) checks it
+ * against the grant behind it and the endpoint's scope requirement.
+ *
+ * The first-party app holds no token: it is the site itself, calling with
+ * the visitor's session cookie, and is held to the scopes tinyburg.app grants
+ * itself (`FIRST_PARTY_SCOPES`). Only a request with no Authorization header
+ * at all is read that way, so a token that fails never falls back to the
+ * cookie riding alongside it. A request with neither goes to the OAuth
+ * server, which refuses it with the challenge that says where to get a
+ * token. Lax session cookies still ride along on requests from sibling
+ * subdomains, so anything but a GET or HEAD on the cookie path must come from
+ * the site itself (`Sec-Fetch-Site: same-origin`).
+ *
+ * Either way the handler finds the caller in `CurrentCaller`.
+ */
+const RequireAccessLive = Layer.effect(
+    OAuthScope.RequireAccess,
     Effect.gen(function* () {
+        const tokenAccess = Context.get(yield* Layer.build(TinyburgOAuth.securityLayer(Api)), OAuthScope.RequireAccess);
         const sessions = yield* SessionsRepository;
         const cookiePolicy = yield* CookiePolicy;
-        const keys = yield* OidcKeys;
 
-        return Effect.fnUntraced(
-            function* (httpEffect) {
+        return OAuthScope.RequireAccess.of({
+            bearer: Effect.fnUntraced(function* (httpEffect, options) {
                 const request = yield* HttpServerRequest.HttpServerRequest;
-                if (Headers.has(request.headers, "authorization")) {
-                    return yield* httpEffect;
+
+                if (!Headers.has(request.headers, "authorization")) {
+                    const current = yield* maybeCurrentUser.pipe(
+                        Effect.provideService(SessionsRepository, sessions),
+                        Effect.provideService(CookiePolicy, cookiePolicy),
+                        Effect.mapError(() => new HttpApiError.ServiceUnavailable())
+                    );
+
+                    if (Option.isSome(current)) {
+                        const safe = request.method === "GET" || request.method === "HEAD";
+                        if (!safe && request.headers["sec-fetch-site"] !== "same-origin") {
+                            return yield* new HttpApiError.Forbidden();
+                        }
+
+                        const requirement =
+                            Context.getOrUndefined(options.endpoint.annotations, OAuthScope.Required) ??
+                            Context.getOrUndefined(options.group.annotations, OAuthScope.Required);
+
+                        if (
+                            requirement === undefined ||
+                            !NimblebitScopes.isSatisfied(requirement, FIRST_PARTY_SCOPES)
+                        ) {
+                            return yield* new HttpApiError.Forbidden();
+                        }
+
+                        yield* HttpEffect.appendPreResponseHandler((_request, response) =>
+                            Effect.succeed(HttpServerResponse.setHeader(response, "cache-control", "no-store"))
+                        );
+
+                        return yield* Effect.provideService(httpEffect, CurrentCaller, {
+                            userId: current.value.user.id,
+                            clientId: DevelopersRepository.FIRST_PARTY_CLIENT_ID,
+                        });
+                    }
                 }
 
-                const currentUser = yield* maybeCurrentUser;
-                if (Option.isNone(currentUser)) return yield* httpEffect;
-
-                const accessToken = yield* accessTokenFor(currentUser.value).pipe(Effect.option);
-                if (Option.isNone(accessToken)) return yield* httpEffect;
-
-                return yield* Effect.provideService(
-                    httpEffect,
-                    HttpServerRequest.HttpServerRequest,
-                    request.modify({
-                        headers: Headers.set(request.headers, "authorization", `Bearer ${accessToken.value}`),
-                    })
+                return yield* tokenAccess.bearer(
+                    Effect.gen(function* () {
+                        const access = yield* TinyburgOAuth.CurrentAccess;
+                        if (access === undefined) {
+                            return yield* Effect.die(new Error("the OAuth server granted access without providing it"));
+                        }
+                        return yield* Effect.provideService(httpEffect, CurrentCaller, {
+                            userId: access.subjectId,
+                            clientId: access.clientId,
+                        });
+                    }),
+                    options
                 );
-            },
-            Effect.provideService(SessionsRepository, sessions),
-            Effect.provideService(CookiePolicy, cookiePolicy),
-            Effect.provideService(OidcKeys, keys)
-        );
+            }),
+        });
     })
-);
-
-const AuthorizationLive = Layer.unwrap(
-    Effect.map(OidcKeys, (keys) =>
-        ResourceServer.layer({
-            issuer: keys.issuer,
-            audience: keys.issuer,
-            // The provider lives in this very process, so its keys are already
-            // at hand; verifying locally removes the boot-order dependency on
-            // the server fetching its own JWKS endpoint over http.
-            jwks: keys.jwks,
-            algorithms: ["ES256"],
-            revoked: (claims) =>
-                OidcRepository.use((repo) => {
-                    if (claims.jti === undefined) {
-                        return Effect.succeed(false);
-                    } else {
-                        return repo.isTokenRevoked(claims.jti);
-                    }
-                }),
-        })
-    )
 );
 
 // ---------------------------------------------------------------------------
@@ -195,8 +168,8 @@ const helpersFor = Effect.fnUntraced(function* (game: Game) {
      */
     const actingAs = (playerId: PlayerId) =>
         Effect.gen(function* () {
-            const user = yield* ResourceServer.CurrentUser;
-            const account = yield* game.towers.findForUser({ userId: user.sub, playerId }).pipe(Effect.orDie);
+            const { userId } = yield* requireCaller;
+            const account = yield* game.towers.findForUser({ userId, playerId }).pipe(Effect.orDie);
             if (Option.isNone(account)) return yield* new HttpApiError.NotFound();
             return { playerId: account.value.playerId, playerAuthKey: account.value.playerAuthKey };
         });
@@ -276,8 +249,8 @@ const gift = <
 const accountsHandlers = ({ asBurnBot, key, nimblebit, sdk, towers, upstreamOrRefused }: Helpers) => ({
     ListAccounts: () =>
         Effect.gen(function* () {
-            const user = yield* ResourceServer.CurrentUser;
-            const accounts = yield* towers.listForUser(user.sub);
+            const { userId } = yield* requireCaller;
+            const accounts = yield* towers.listForUser(userId);
             return accounts.map((account) => ({ playerId: account.playerId, createdAt: account.createdAt }));
         }).pipe(Effect.orDie),
 
@@ -285,7 +258,7 @@ const accountsHandlers = ({ asBurnBot, key, nimblebit, sdk, towers, upstreamOrRe
         // The early exits return never-typed values; the normal path runs to the end.
         // oxlint-disable-next-line typescript/consistent-return
         Effect.gen(function* () {
-            const user = yield* ResourceServer.CurrentUser;
+            const { userId } = yield* requireCaller;
 
             // One link per tower. Whoever holds it, a second link would
             // let two accounts act as the same player.
@@ -299,7 +272,7 @@ const accountsHandlers = ({ asBurnBot, key, nimblebit, sdk, towers, upstreamOrRe
 
             yield* towers
                 .createPending({
-                    userId: user.sub,
+                    userId,
                     playerId: payload.playerId,
                     playerEmail: payload.email,
                     burnBotPlayerId: bot.playerId,
@@ -318,11 +291,9 @@ const accountsHandlers = ({ asBurnBot, key, nimblebit, sdk, towers, upstreamOrRe
         // The early exits return never-typed values; the normal path runs to the end.
         // oxlint-disable-next-line typescript/consistent-return
         Effect.gen(function* () {
-            const user = yield* ResourceServer.CurrentUser;
+            const { userId } = yield* requireCaller;
 
-            const waiting = yield* towers
-                .findPending({ userId: user.sub, playerId: params.playerId })
-                .pipe(Effect.orDie);
+            const waiting = yield* towers.findPending({ userId, playerId: params.playerId }).pipe(Effect.orDie);
             if (Option.isNone(waiting)) return yield* new HttpApiError.BadRequest();
             const request = waiting.value;
 
@@ -343,7 +314,7 @@ const accountsHandlers = ({ asBurnBot, key, nimblebit, sdk, towers, upstreamOrRe
 
             yield* towers
                 .link({
-                    userId: user.sub,
+                    userId,
                     playerId: verified.playerId,
                     playerAuthKey: verified.playerAuthKey,
                     playerEmail: verified.playerEmail,
@@ -356,8 +327,8 @@ const accountsHandlers = ({ asBurnBot, key, nimblebit, sdk, towers, upstreamOrRe
         // The early exits return never-typed values; the normal path runs to the end.
         // oxlint-disable-next-line typescript/consistent-return
         Effect.gen(function* () {
-            const user = yield* ResourceServer.CurrentUser;
-            const removed = yield* towers.unlink({ userId: user.sub, playerId: params.playerId }).pipe(Effect.orDie);
+            const { userId } = yield* requireCaller;
+            const removed = yield* towers.unlink({ userId, playerId: params.playerId }).pipe(Effect.orDie);
             if (!removed) return yield* new HttpApiError.NotFound();
         }),
 });
@@ -624,8 +595,7 @@ export const ApiLive = HttpApiBuilder.layer(Api).pipe(
     Layer.provide(TinyTowerGroupLive),
     Layer.provide(TinyTowerClassicAccountsGroupLive),
     Layer.provide(TinyTowerClassicGroupLive),
-    Layer.provide(AuthorizationLive),
-    Layer.provide(SessionBearer.layer),
+    Layer.provide(RequireAccessLive),
     // This server talks to Nimblebit directly, as the game does, with the
     // linked account's own key: the authproxy is for callers who hold a key
     // of their own, and this is what serves callers who do not. One set of

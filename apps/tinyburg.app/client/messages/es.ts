@@ -233,12 +233,12 @@ export const es: Messages = {
             standardOidc: {
                 title: "OIDC estándar",
                 description:
-                    "Flujo de código de autorización con PKCE y tokens de identidad firmados con ES256. Cualquier biblioteca cliente de OpenID Connect funciona sin más.",
+                    "Flujo de código de autorización con PKCE y tokens de identidad firmados con RS256. Cualquier biblioteca cliente de OpenID Connect funciona sin más.",
             },
             minimalScopes: {
                 title: "Scopes mínimos",
                 description:
-                    "Las apps solo ven la identidad, el nombre visible y el avatar del jugador. Nada más sale de Tinyburg.",
+                    "Las apps solo ven la identidad y el nombre visible del jugador. Nada más sale de Tinyburg.",
             },
             playerConsent: {
                 title: "Consentimiento del jugador",
@@ -281,7 +281,7 @@ export const es: Messages = {
         scopesHeading: "Scopes",
         scopeDescriptions: {
             openid: "Confirmar tu identidad de Tinyburg",
-            profile: "Ver tu nombre visible y tu avatar",
+            profile: "Ver tu nombre visible",
         },
         readyHeading: "¿Listo para construir?",
         readyBefore:

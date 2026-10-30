@@ -10,11 +10,11 @@ import { articleBackLink, articleHeading } from "../ui/chrome.ts";
 const site = "https://tinyburg.app";
 
 const endpointUrls = {
-    jwks: `${site}/.well-known/jwks.json`,
+    jwks: `${site}/oauth/tinyburg/jwks`,
     discovery: `${site}/.well-known/openid-configuration`,
-    authorization: `${site}/oauth/authorize`,
-    token: `${site}/oauth/token`,
-    userinfo: `${site}/oauth/userinfo`,
+    authorization: `${site}/oauth/tinyburg/authorize`,
+    token: `${site}/oauth/tinyburg/token`,
+    userinfo: `${site}/oauth/tinyburg/userinfo`,
 };
 
 const featureCard = <M>(h: HtmlBuilder<M>, icon: string, title: string, description: string): Html =>
@@ -247,8 +247,7 @@ export const developersView = <M>(h: HtmlBuilder<M>, msgs: DevelopersMessages, s
                                             ),
                                             h.a(
                                                 [
-                                                    // Kept pointing at the first listed endpoint, as before.
-                                                    h.Href(endpointUrls.jwks),
+                                                    h.Href(endpointUrls.discovery),
                                                     h.Class(
                                                         "font-pixel bg-dark-blue/95 shadow-pixel hover:shadow-pixel-hover flex items-center justify-center gap-2 rounded-lg px-5 py-4 text-[0.7rem] text-white transition-all hover:-translate-x-0.5 hover:-translate-y-0.5"
                                                     ),

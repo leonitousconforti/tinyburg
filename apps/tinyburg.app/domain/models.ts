@@ -31,15 +31,6 @@ export class Session extends Model.Class<Session>("Session")({
     lastSeenAt: Model.DateTimeUpdateFromDate,
     userAgent: Schema.OptionFromNullishOr(Schema.String, { onNoneEncoding: null }),
     ip: Schema.OptionFromNullishOr(Schema.String, { onNoneEncoding: null }),
-    accessToken: Schema.OptionFromNullishOr(Schema.String, { onNoneEncoding: null }).pipe(
-        Model.FieldOnly(["select", "update"])
-    ),
-    accessTokenExpiresAt: Schema.OptionFromNullishOr(Schema.DateTimeUtcFromDate, { onNoneEncoding: null }).pipe(
-        Model.FieldOnly(["select", "update"])
-    ),
-    accessTokenJti: Schema.OptionFromNullishOr(Schema.String, { onNoneEncoding: null }).pipe(
-        Model.FieldOnly(["select", "update"])
-    ),
 }) {}
 
 export class TinyTowerAccount extends Model.Class<TinyTowerAccount>("TinyTowerAccount")({
@@ -78,39 +69,4 @@ export class OAuthClient extends Model.Class<OAuthClient>("OAuthClient")({
      */
     softwareId: Schema.OptionFromNullishOr(Schema.String, { onNoneEncoding: null }),
     createdAt: Model.DateTimeInsertFromDate,
-}) {}
-
-export class OAuthAuthorizationRequest extends Model.Class<OAuthAuthorizationRequest>("OAuthAuthorizationRequest")({
-    id: Schema.String.check(Schema.isUUID()).pipe(Model.FieldExcept(["insert"])),
-    clientId: Schema.String.check(Schema.isUUID()),
-    userId: Schema.String.check(Schema.isUUID()),
-    redirectUri: Schema.String,
-    scope: Schema.String,
-    state: Schema.String,
-    nonce: Schema.OptionFromNullishOr(Schema.String, { onNoneEncoding: null }),
-    codeChallenge: Schema.String,
-    codeHash: Schema.OptionFromNullishOr(Schema.String.check(Schema.isBase64Url()), { onNoneEncoding: null }),
-    createdAt: Model.DateTimeInsertFromDate,
-    expiresAt: Schema.DateTimeUtcFromDate.pipe(Model.GeneratedByDb),
-}) {}
-
-/**
- * A refresh token, stored as a hash.
- *
- * `familyId` links every token descended from one authorization. Presenting a
- * token that was already consumed revokes the whole family, which is how a
- * stolen token gets caught: the thief and the legitimate client cannot both
- * spend the same one.
- */
-export class RefreshToken extends Model.Class<RefreshToken>("RefreshToken")({
-    id: Schema.String.check(Schema.isUUID()).pipe(Model.FieldExcept(["insert"])),
-    tokenHash: Model.Sensitive(Schema.String),
-    clientId: Schema.String.check(Schema.isUUID()),
-    userId: Schema.String.check(Schema.isUUID()),
-    scope: Schema.String,
-    familyId: Schema.String.check(Schema.isUUID()),
-    issuedAt: Model.DateTimeInsertFromDate,
-    expiresAt: Schema.DateTimeUtcFromDate,
-    consumedAt: Schema.OptionFromNullishOr(Schema.DateTimeUtcFromDate, { onNoneEncoding: null }),
-    revokedAt: Schema.OptionFromNullishOr(Schema.DateTimeUtcFromDate, { onNoneEncoding: null }),
 }) {}

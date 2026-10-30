@@ -238,12 +238,12 @@ export const de: Messages = {
             standardOidc: {
                 title: "Standard-OIDC",
                 description:
-                    "Authorization-Code-Flow mit PKCE und ES256-signierten ID-Tokens. Jede OpenID-Connect-Client-Bibliothek funktioniert auf Anhieb.",
+                    "Authorization-Code-Flow mit PKCE und RS256-signierten ID-Tokens. Jede OpenID-Connect-Client-Bibliothek funktioniert auf Anhieb.",
             },
             minimalScopes: {
                 title: "Minimale Scopes",
                 description:
-                    "Apps sehen nur Identität, Anzeigenamen und Avatar eines Spielers. Nichts anderes verlässt Tinyburg.",
+                    "Apps sehen nur Identität und Anzeigenamen eines Spielers. Nichts anderes verlässt Tinyburg.",
             },
             playerConsent: {
                 title: "Zustimmung der Spieler",
@@ -286,7 +286,7 @@ export const de: Messages = {
         scopesHeading: "Scopes",
         scopeDescriptions: {
             openid: "Ihre Tinyburg-Identität bestätigen",
-            profile: "Ihren Anzeigenamen und Avatar sehen",
+            profile: "Ihren Anzeigenamen sehen",
         },
         readyHeading: "Bereit loszulegen?",
         readyBefore:

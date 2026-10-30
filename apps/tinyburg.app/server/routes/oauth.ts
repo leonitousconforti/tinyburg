@@ -1,121 +1,92 @@
-import { Config, DateTime, Effect, Layer, Option, type Redacted, Schema } from "effect";
-import {
-    HttpClient,
-    HttpClientRequest,
-    HttpClientResponse,
-    HttpRouter,
-    HttpServerRequest,
-    HttpServerResponse,
-} from "effect/http";
+import type { Digest, Mac, SecureRandom, Signature } from "effect/crypto";
 
-import { RelyingParty } from "effect-oidc";
+import { Config, DateTime, Duration, Effect, Exit, Layer, Option, Redacted, Result, Schema, type Scope } from "effect";
+import { type HttpClient, HttpRouter, HttpServerRequest, HttpServerResponse } from "effect/http";
+
+import type * as OpenIdConnect from "@yielded/auth/OpenIdConnect";
+
+import * as Discord from "@yielded/auth/Discord";
+import * as Google from "@yielded/auth/Google";
+import * as OAuth from "@yielded/auth/OAuth";
+import * as Operations from "@yielded/auth/Operations";
 
 import { SessionsRepository } from "../../domain/sessions.ts";
 import { UsersRepository } from "../../domain/users.ts";
 import { CookiePolicy, PROVIDER_SESSION_COOKIE_NAME, maybeCurrentUser } from "../cookies.ts";
 import { randomSecret, sha256 } from "../crypto.ts";
 
-interface OAuthProvider {
+/**
+ * A provider the app signs visitors in with, configured: `protocol` discovers
+ * the provider on first use and keeps the result, so an outage at boot costs
+ * the sign ins attempted during it rather than the whole server.
+ */
+interface SignInProvider {
     readonly name: "google" | "discord";
-    readonly authUrl: string;
-    readonly tokenUrl: string;
-    readonly issuer: string;
-    readonly scopes: ReadonlyArray<string>;
-    readonly cookiePrefix: string;
-    readonly config: Config.Config<{
-        readonly clientId: string;
-        readonly clientSecret: Redacted.Redacted;
-        readonly redirectUri: string;
-        readonly jwksUri: string;
-    }>;
-}
-
-interface OAuthProviderRealized {
-    readonly name: OAuthProvider["name"];
-    /** The relying-party half of the code flow, realized for this provider. */
-    readonly party: RelyingParty.RelyingParty;
-    /**
-     * Providers that do not carry a `name` claim in their ID token fetch the
-     * display name from their user endpoint instead. Returning `Option.none`
-     * falls back to the ID token claim, so a provider outage costs a nice
-     * name rather than the whole sign in.
-     */
-    readonly fetchDisplayName: (accessToken: string) => Effect.Effect<Option.Option<string>>;
+    readonly key: OAuth.OAuthProviderKey;
+    /** The cookie the round trip rides on, from the redirect to the callback. */
+    readonly cookie: string;
+    readonly protocol: Effect.Effect<
+        OAuth.OAuthProtocol["Service"],
+        OpenIdConnect.OpenIdConnectConfigurationError | OAuth.OAuthUnavailable
+    >;
 }
 
 const google = {
     name: "google",
-    authUrl: "https://accounts.google.com/o/oauth2/v2/auth",
-    tokenUrl: "https://oauth2.googleapis.com/token",
-    issuer: "https://accounts.google.com",
-    scopes: ["openid", "email", "profile"],
-    cookiePrefix: "google_oauth",
     config: Config.all({
         clientId: Config.String("GOOGLE_CLIENT_ID"),
         clientSecret: Config.Redacted("GOOGLE_CLIENT_SECRET"),
         redirectUri: Config.String("GOOGLE_REDIRECT_URI"),
-        jwksUri: Config.String("GOOGLE_JWKS_URI"),
     }),
-} satisfies OAuthProvider;
+    // Google puts `name` in the ID token, so `profile` is all it takes
+    define: ({ clientId, clientSecret }: { readonly clientId: string; readonly clientSecret: Redacted.Redacted }) =>
+        Google.provider({ clientId, clientSecret, scopes: ["openid", "profile"] }),
+} as const;
 
 const discord = {
     name: "discord",
-    authUrl: "https://discord.com/oauth2/authorize",
-    tokenUrl: "https://discord.com/api/oauth2/token",
-    issuer: "https://discord.com",
-    scopes: ["identify", "email", "openid"],
-    cookiePrefix: "discord_oauth",
     config: Config.all({
         clientId: Config.String("DISCORD_CLIENT_ID"),
         clientSecret: Config.Redacted("DISCORD_CLIENT_SECRET"),
         redirectUri: Config.String("DISCORD_REDIRECT_URI"),
-        jwksUri: Config.String("DISCORD_JWKS_URI"),
     }),
-} satisfies OAuthProvider;
-
-/**
- * The slice of Discord's user object we care about. Discord's ID token
- * carries no `name` claim, so the display name has to come from here.
- *
- * @see https://docs.discord.com/developers/resources/user
- */
-const DiscordUser = Schema.Struct({
-    /** "the user's display name, if it is set" - null for accounts that never set one. */
-    global_name: Schema.optionalKey(Schema.NullOr(Schema.String)),
-    /** "the user's username, not unique across the platform". */
-    username: Schema.String,
-});
-
-/**
- * Reads the display name from Discord's user endpoint, which the `identify`
- * scope grants us. Any failure resolves to `Option.none` rather than
- * failing the callback.
- */
-const discordDisplayName =
-    (httpClient: HttpClient.HttpClient) =>
-    (accessToken: string): Effect.Effect<Option.Option<string>> =>
-        HttpClientRequest.get("https://discord.com/api/users/@me").pipe(
-            HttpClientRequest.setHeader("authorization", `Bearer ${accessToken}`),
-            HttpClient.execute,
-            Effect.flatMap(HttpClientResponse.schemaBodyJson(DiscordUser)),
-            Effect.provideService(HttpClient.HttpClient, httpClient),
-            Effect.map((user) => Option.fromNullishOr(user.global_name ?? user.username)),
-            Effect.option,
-            Effect.map(Option.flatten)
-        );
+    // Discord's ID token carries no `name`; `identify` lets the provider read
+    // the display name from its user endpoint instead
+    define: ({ clientId, clientSecret }: { readonly clientId: string; readonly clientSecret: Redacted.Redacted }) =>
+        Discord.provider({ clientId, clientSecret, scopes: ["openid", "identify"] }),
+} as const;
 
 /**
  * Why the browser was sent to the provider: to sign in, or to connect the
- * account to an already signed-in user. It rides the relying party's payload
- * cookie through the round trip, and the callback reads it to know what to
+ * account to an already signed-in user. The callback reads it to know what to
  * do with the account it gets back.
  */
-const OAuthIntent = Schema.fromJsonString(
+const OAuthIntent = Schema.Struct({
+    mode: Schema.Literals(["login", "link"]),
+    returnTo: Schema.optional(Schema.String),
+});
+
+/**
+ * Everything the callback needs from the redirect that started the round
+ * trip: the configuration it was prepared under, the state, PKCE verifier and
+ * nonce it has to prove, and the intent. One cookie, httpOnly and bound to
+ * this site, so nobody but this browser can finish the flow it started.
+ */
+const SignInFlow = Schema.fromJsonString(
     Schema.Struct({
-        mode: Schema.Literals(["login", "link"]),
-        returnTo: Schema.optional(Schema.String),
+        configuration: OAuth.OAuthProtocolConfiguration,
+        secrets: OAuth.OAuthTransactionSecrets,
+        intent: OAuthIntent,
     })
 );
+
+/** What a provider sends back. Anything else it appends is ignored. */
+const CallbackQuery = Schema.Struct({
+    state: Schema.optional(Schema.String),
+    code: Schema.optional(Schema.String),
+    error: Schema.optional(Schema.String),
+    iss: Schema.optional(Schema.String),
+});
 
 const isLocalPath = (value: string): boolean => {
     const NOWHERE = "https://tinyburg.invalid";
@@ -141,21 +112,9 @@ const returnToParam = HttpServerRequest.schemaSearchParams(
 const bounceToLogin = (returnTo: string) =>
     HttpServerResponse.redirect(`/login?returnTo=${encodeURIComponent(returnTo)}`);
 
-/**
- * The callback failure reasons, mapped onto the error strings the login and
- * account pages already know how to explain.
- */
-const callbackErrorMessage: Record<RelyingParty.CallbackError["reason"], string> = {
-    InvalidCallback: "invalid_oauth_callback",
-    AccessDenied: "oauth_denied",
-    ProviderError: "invalid_oauth_provider",
-    StateMismatch: "invalid_oauth_cookies",
-    ExchangeFailed: "invalid_oauth_token",
-    InvalidIdToken: "invalid_oauth_claims",
-};
-
-const start = (provider: OAuthProviderRealized, mode: "link" | "login") =>
+const start = (provider: SignInProvider, mode: "link" | "login") =>
     Effect.gen(function* () {
+        const cookiePolicy = yield* CookiePolicy;
         const returnTo = mode === "link" ? Option.none<string>() : yield* returnToParam;
 
         const tryMaybeCurrentUser = yield* maybeCurrentUser.pipe(Effect.option);
@@ -172,52 +131,69 @@ const start = (provider: OAuthProviderRealized, mode: "link" | "login") =>
             return HttpServerResponse.redirect(Option.getOrElse(returnTo, () => "/towers/@me"));
         }
 
-        // Remember why we are sending them
-        const intent = yield* Schema.encodeEffect(OAuthIntent)({
-            returnTo: Option.getOrUndefined(returnTo),
-            mode,
+        const startFailed = HttpServerResponse.redirect(
+            mode === "link" ? "/account?error=start_failed" : "/login?error=start_failed"
+        );
+
+        const prepared = yield* Effect.gen(function* () {
+            const protocol = yield* provider.protocol;
+            const flowId = yield* Schema.decodeEffect(Operations.RequestBindingFlowId)(randomSecret());
+            return yield* protocol.prepareAuthorization({ provider: provider.key, flowId });
+        }).pipe(Effect.option);
+        if (Option.isNone(prepared)) return startFailed;
+
+        // Remember why we are sending them, and what they have to come back with
+        const flow = yield* Schema.encodeEffect(SignInFlow)({
+            configuration: prepared.value.configuration,
+            secrets: prepared.value.secrets,
+            intent: { mode, returnTo: Option.getOrUndefined(returnTo) },
         }).pipe(Effect.orDie);
 
-        return yield* provider.party.beginAuthorization({ payload: intent }).pipe(
-            Effect.catch(() => {
-                if (mode === "link") {
-                    return Effect.succeed(HttpServerResponse.redirect("/account?error=start_failed"));
-                } else {
-                    return Effect.succeed(HttpServerResponse.redirect("/login?error=start_failed"));
-                }
-            })
+        return yield* HttpServerResponse.redirect(Redacted.value(prepared.value.authorizationUrl)).pipe(
+            HttpServerResponse.setCookie(cookiePolicy.name(provider.cookie), flow, {
+                httpOnly: true,
+                path: "/",
+                secure: cookiePolicy.secure,
+                sameSite: "lax",
+                maxAge: Duration.minutes(10),
+            }),
+            Effect.orElseSucceed(() => startFailed)
         );
     }).pipe(Effect.satisfiesErrorType<never>());
 
-const callback = (provider: OAuthProviderRealized) =>
+const callback = (provider: SignInProvider) =>
     Effect.gen(function* () {
         const cookiesPolicy = yield* CookiePolicy;
+        const request = yield* HttpServerRequest.HttpServerRequest;
+        const flowCookie = cookiesPolicy.name(provider.cookie);
+
+        // However it ends, the round trip is over
+        const done = (response: HttpServerResponse.HttpServerResponse) =>
+            HttpServerResponse.expireCookieUnsafe(response, flowCookie, {
+                httpOnly: true,
+                path: "/",
+                secure: cookiesPolicy.secure,
+                sameSite: "lax",
+            });
 
         // What to do on failure
-        const failed = (to: string, errorMessage: string = "oauth") => {
-            const encodedErrorMessage = encodeURIComponent(errorMessage);
-            const toWithError = `${to}?error=${encodedErrorMessage}`;
-            return HttpServerResponse.redirect(toWithError).pipe(provider.party.expireTransactionCookies, Effect.orDie);
-        };
+        const failed = (to: string, errorMessage: string = "oauth") =>
+            done(HttpServerResponse.redirect(`${to}?error=${encodeURIComponent(errorMessage)}`));
 
-        // We start by parsing the intent payload so that we know where to
+        // We start by reading the flow cookie so that we know where to
         // redirect on errors, either login or account.
-        const maybeIntent = yield* provider.party.payload.pipe(
-            Effect.flatMap(
-                Option.match({
-                    onNone: () => Effect.succeed(Option.none<typeof OAuthIntent.Type>()),
-                    onSome: (raw) => Schema.decodeEffect(OAuthIntent)(raw).pipe(Effect.option),
-                })
-            )
-        );
+        const maybeFlow = yield* Option.match(Option.fromNullishOr(request.cookies[flowCookie]), {
+            onNone: () => Effect.succeedNone,
+            onSome: (raw) => Schema.decodeEffect(SignInFlow)(raw).pipe(Effect.option),
+        });
 
         // Uh oh
-        if (Option.isNone(maybeIntent)) {
-            return yield* failed("/login", "invalid_oauth_intent");
+        if (Option.isNone(maybeFlow)) {
+            return failed("/login", "invalid_oauth_cookies");
         }
 
         // Make a new failed based on the intent
-        const intent = maybeIntent.value;
+        const { configuration, intent, secrets } = maybeFlow.value;
         const failedRedirectByIntent = (errorMessage: string = "oauth") => {
             if (intent.mode === "link") {
                 return failed("/account", errorMessage);
@@ -233,29 +209,53 @@ const callback = (provider: OAuthProviderRealized) =>
             })
         ).pipe(Effect.option);
         if (Option.isNone(maybeHeaders)) {
-            return yield* failedRedirectByIntent("invalid_oauth_headers");
+            return failedRedirectByIntent("invalid_oauth_headers");
         }
 
-        // Validate the provider's redirect, exchange the code, verify the
-        // ID token
-        const outcome = yield* Effect.result(provider.party.completeAuthorization);
-        if (outcome._tag === "Failure") {
-            return yield* failedRedirectByIntent(callbackErrorMessage[outcome.failure.reason]);
+        // Read the provider's answer: an error, or a code to exchange
+        const maybeQuery = yield* HttpServerRequest.schemaSearchParams(CallbackQuery).pipe(Effect.option);
+        if (Option.isNone(maybeQuery)) {
+            return failedRedirectByIntent("invalid_oauth_callback");
         }
 
-        // Providers that leave `name` out of the ID token get a second look
-        // at their own user endpoint before we settle for the placeholder
-        const { claims, tokens } = outcome.success;
-        const fetchedName = yield* provider.fetchDisplayName(tokens.access_token);
+        const query = maybeQuery.value;
+        if (query.error !== undefined) {
+            return failedRedirectByIntent(query.error === "access_denied" ? "oauth_denied" : "invalid_oauth_provider");
+        }
+
+        const maybeResponse = yield* Schema.decodeUnknownEffect(OAuth.OAuthCodeResponse)({
+            _tag: "Code",
+            state: query.state,
+            code: query.code,
+            ...(query.iss === undefined ? {} : { issuer: query.iss }),
+        }).pipe(Effect.option);
+        if (Option.isNone(maybeResponse)) {
+            return failedRedirectByIntent("invalid_oauth_callback");
+        }
+
+        // Check the state, exchange the code, verify the ID token
+        const outcome = yield* Effect.gen(function* () {
+            const protocol = yield* provider.protocol;
+            return yield* protocol.exchangeVerifiedIdentity({
+                configuration,
+                response: maybeResponse.value,
+                secrets,
+                verificationStartedAt: yield* DateTime.now,
+            });
+        }).pipe(Effect.result);
+        if (Result.isFailure(outcome)) {
+            return failedRedirectByIntent(
+                outcome.failure._tag === "OAuthProtocolRejected" ? "invalid_oauth_claims" : "invalid_oauth_token"
+            );
+        }
 
         // What will get inserted into the database
+        const { identity, profile: display } = outcome.success;
+        const displayName = display?.displayName?.trim() ?? "";
         const profile = {
             provider: provider.name,
-            providerAccountId: claims.sub,
-            displayName: fetchedName.pipe(
-                Option.orElse(() => Option.fromNullishOr(claims.name)),
-                Option.getOrElse(() => "Tinyburg player")
-            ),
+            providerAccountId: identity.subject,
+            displayName: displayName.length > 0 ? displayName : "Tinyburg player",
             avatarUrl: Option.none<string>(),
             email: Option.none<string>(),
         };
@@ -266,12 +266,12 @@ const callback = (provider: OAuthProviderRealized) =>
         if (intent.mode === "link") {
             const tryCurrentUser = yield* maybeCurrentUser.pipe(Effect.option);
             if (Option.isNone(tryCurrentUser)) {
-                return yield* failedRedirectByIntent("invalid_oauth_current_user");
+                return failedRedirectByIntent("invalid_oauth_current_user");
             }
 
             const currentUser = tryCurrentUser.value;
             if (Option.isNone(currentUser)) {
-                return yield* bounceToLogin("/account").pipe(provider.party.expireTransactionCookies, Effect.orDie);
+                return done(bounceToLogin("/account"));
             }
 
             const maybeOutcome = yield* UsersRepository.use((repo) =>
@@ -281,15 +281,9 @@ const callback = (provider: OAuthProviderRealized) =>
                 })
             ).pipe(Effect.option);
             if (Option.isNone(maybeOutcome)) {
-                return yield* HttpServerResponse.redirect(`/account?error=invalid_oauth_link`).pipe(
-                    provider.party.expireTransactionCookies,
-                    Effect.orDie
-                );
+                return done(HttpServerResponse.redirect(`/account?error=invalid_oauth_link`));
             } else {
-                return yield* HttpServerResponse.redirect(`/account?link=${maybeOutcome.value}`).pipe(
-                    provider.party.expireTransactionCookies,
-                    Effect.orDie
-                );
+                return done(HttpServerResponse.redirect(`/account?link=${maybeOutcome.value}`));
             }
         }
 
@@ -297,7 +291,7 @@ const callback = (provider: OAuthProviderRealized) =>
         const tokenHash = yield* sha256(sessionToken);
         const maybeSignedIn = yield* UsersRepository.use((repo) => repo.signInWithOAuth(profile)).pipe(Effect.option);
         if (Option.isNone(maybeSignedIn)) {
-            return yield* failedRedirectByIntent("invalid_oauth_signin");
+            return failedRedirectByIntent("invalid_oauth_signin");
         }
 
         const userAgent = Option.fromNullishOr(maybeHeaders.value["user-agent"]).pipe(
@@ -313,7 +307,7 @@ const callback = (provider: OAuthProviderRealized) =>
             })
         ).pipe(Effect.option);
         if (Option.isNone(maybeSession)) {
-            return yield* failedRedirectByIntent("invalid_oauth_session");
+            return failedRedirectByIntent("invalid_oauth_session");
         }
 
         const returnTo = Option.fromNullishOr(intent.returnTo).pipe(
@@ -329,49 +323,44 @@ const callback = (provider: OAuthProviderRealized) =>
                 secure: cookiesPolicy.secure,
                 sameSite: "lax",
             }),
-            Effect.flatMap(provider.party.expireTransactionCookies),
-            Effect.catch(() => failedRedirectByIntent("invalid_oauth_response"))
+            Effect.map(done),
+            Effect.orElseSucceed(() => failedRedirectByIntent("invalid_oauth_response"))
         );
     }).pipe(Effect.satisfiesErrorType<never>());
 
 export const OAuthRoutesLive = Effect.gen(function* () {
     const googleConfig = yield* google.config;
     const discordConfig = yield* discord.config;
-    const cookiePolicy = yield* CookiePolicy;
-    const httpClient = yield* HttpClient.HttpClient;
 
-    const relyingParty = (
-        provider: OAuthProvider,
-        config: Config.Success<OAuthProvider["config"]>
-    ): Effect.Effect<RelyingParty.RelyingParty, never, HttpClient.HttpClient> =>
-        RelyingParty.make({
-            issuer: provider.issuer,
-            authorizationEndpoint: provider.authUrl,
-            tokenEndpoint: provider.tokenUrl,
-            jwksUri: config.jwksUri,
-            clientId: config.clientId,
-            clientSecret: config.clientSecret,
-            redirectUri: config.redirectUri,
-            scopes: provider.scopes,
-            cookies: {
-                prefix: provider.cookiePrefix,
-                name: cookiePolicy.name,
-                secure: cookiePolicy.secure,
-            },
+    // Configuring a provider is discovery plus the clients built from it,
+    // which live as long as these routes do
+    const services = yield* Effect.context<
+        HttpClient.HttpClient | SecureRandom.SecureRandom | Digest.Digest | Mac.Mac | Signature.Signature | Scope.Scope
+    >();
+
+    const signInWith = (
+        provider: typeof google | typeof discord,
+        config: Config.Success<(typeof google)["config"]>
+    ): Effect.Effect<SignInProvider, Schema.SchemaError> =>
+        Effect.gen(function* () {
+            const key = yield* Schema.decodeEffect(OAuth.OAuthProviderKey)(provider.name);
+            const callbackId = yield* Schema.decodeEffect(OAuth.OAuthCallbackId)(provider.name);
+            const redirectUri = yield* Schema.decodeEffect(OAuth.OAuthRedirectUri)(config.redirectUri);
+
+            // Kept once it works, tried again on the next sign in until it does
+            const protocol = yield* Effect.cachedWithTTL(
+                provider
+                    .define(config)
+                    .configure({ provider: key, callbacks: [{ callbackId, redirectUri }] })
+                    .pipe(Effect.provideContext(services)),
+                (exit) => (Exit.isSuccess(exit) ? Duration.infinity : Duration.zero)
+            );
+
+            return { name: provider.name, key, cookie: `${provider.name}_oauth_flow`, protocol };
         });
 
-    const googleRealized: OAuthProviderRealized = {
-        name: google.name,
-        party: yield* relyingParty(google, googleConfig),
-        // Google puts `name` in the ID token, so there is nothing to fetch
-        fetchDisplayName: () => Effect.succeed(Option.none()),
-    };
-
-    const discordRealized: OAuthProviderRealized = {
-        name: discord.name,
-        party: yield* relyingParty(discord, discordConfig),
-        fetchDisplayName: discordDisplayName(httpClient),
-    };
+    const googleRealized = yield* signInWith(google, googleConfig);
+    const discordRealized = yield* signInWith(discord, discordConfig);
 
     return Layer.mergeAll(
         HttpRouter.add("GET", "/auth/google/login", start(googleRealized, "login")),

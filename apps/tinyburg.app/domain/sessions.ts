@@ -56,9 +56,6 @@ export class SessionsRepository extends Context.Service<SessionsRepository>()(
                         sessionLastSeenAt: Session.fields.lastSeenAt,
                         sessionUserAgent: Session.fields.userAgent,
                         sessionIp: Session.fields.ip,
-                        sessionAccessToken: Session.fields.accessToken,
-                        sessionAccessTokenExpiresAt: Session.fields.accessTokenExpiresAt,
-                        sessionAccessTokenJti: Session.fields.accessTokenJti,
                     })
                 ).pipe(
                     Schema.decodeTo(
@@ -85,9 +82,6 @@ export class SessionsRepository extends Context.Service<SessionsRepository>()(
                                     lastSeenAt: output.sessionLastSeenAt,
                                     userAgent: output.sessionUserAgent,
                                     ip: output.sessionIp,
-                                    accessToken: output.sessionAccessToken,
-                                    accessTokenExpiresAt: output.sessionAccessTokenExpiresAt,
-                                    accessTokenJti: output.sessionAccessTokenJti,
                                 },
                             })),
                         }
@@ -108,10 +102,7 @@ export class SessionsRepository extends Context.Service<SessionsRepository>()(
                             sessions.expires_at as session_expires_at,
                             sessions.last_seen_at as session_last_seen_at,
                             sessions.user_agent as session_user_agent,
-                            sessions.ip as session_ip,
-                            sessions.access_token as session_access_token,
-                            sessions.access_token_expires_at as session_access_token_expires_at,
-                            sessions.access_token_jti as session_access_token_jti
+                            sessions.ip as session_ip
                         FROM sessions
                         INNER JOIN users ON sessions.user_id = users.id
                         WHERE sessions.token_hash = ${tokenHash} AND sessions.expires_at > NOW()
@@ -138,17 +129,8 @@ export class SessionsRepository extends Context.Service<SessionsRepository>()(
             const revokeWhere = (
                 where: Statement.Fragment
             ): Effect.Effect<ReadonlyArray<SqlConnection.Row>, SqlError.SqlError, never> => sql`
-                WITH deleted AS (
-                    DELETE FROM sessions WHERE ${where}
-                    RETURNING id, access_token_jti, access_token_expires_at
-                ),
-                revoked AS (
-                    INSERT INTO revoked_tokens (jti, expires_at)
-                    SELECT access_token_jti, access_token_expires_at FROM deleted
-                    WHERE access_token_jti IS NOT NULL AND access_token_expires_at > NOW()
-                    ON CONFLICT (jti) DO NOTHING
-                )
-                SELECT id FROM deleted
+                DELETE FROM sessions WHERE ${where}
+                RETURNING id
             `;
 
             const revokeSession = (options: {
@@ -177,8 +159,6 @@ export class SessionsRepository extends Context.Service<SessionsRepository>()(
                     (rows) => rows.length
                 );
 
-            const storeAccessToken = sessions.updateVoid;
-
             return {
                 createSession,
                 findSessionWithUser,
@@ -186,7 +166,6 @@ export class SessionsRepository extends Context.Service<SessionsRepository>()(
                 revokeSession,
                 revokeSessionByTokenHash,
                 revokeSessionsForUser,
-                storeAccessToken,
             };
         }),
     }

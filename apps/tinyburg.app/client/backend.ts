@@ -11,8 +11,8 @@ import { AuthApi } from "../shared/auth.ts";
 
 /**
  * The derived trading api client, built once at boot. Requests are same-origin
- * so the session cookie rides along on its own; the server trades it for the
- * bearer token the api actually requires.
+ * so the session cookie rides along on its own, and the server accepts it in
+ * place of a bearer token, for the scopes it grants the first party.
  */
 export class Api extends Context.Service<Api>()("@tinyburg/tinyburg.app/client/Api", {
     make: HttpApiClient.make(TradingApi),
