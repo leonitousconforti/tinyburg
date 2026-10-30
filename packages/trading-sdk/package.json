@@ -47,13 +47,14 @@
     "dependencies": {
         "@tinyburg/nimblebit-sdk": "workspace:^",
         "@tinyburg/tinytower-classic-sdk": "workspace:^",
-        "@tinyburg/tinytower-sdk": "workspace:^",
-        "@yielded/auth": "0.1.0-beta.47"
+        "@tinyburg/tinytower-sdk": "workspace:^"
     },
     "devDependencies": {
+        "@yielded/auth": "0.1.0-beta.47",
         "effect": "4.1.0"
     },
     "peerDependencies": {
+        "@yielded/auth": "0.1.0-beta.47",
         "effect": "4.1.0"
     },
     "tags": [

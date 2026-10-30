@@ -25,6 +25,7 @@
         "@tinyburg/tinytower-vegas-sdk": "workspace:*",
         "@tinyburg/trading-sdk": "workspace:*",
         "@yielded/auth": "0.1.0-beta.47",
+        "@yielded/oauth": "0.1.0-beta.47",
         "effect": "4.1.0",
         "foldkit": "0.170.0",
         "redis": "6.2.1",

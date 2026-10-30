@@ -1,0 +1,26 @@
+diff --git a/dist/internal/validation.mjs b/dist/internal/validation.mjs
+index ac9a4713a440059f4412ef663a92e57a0414ef6e..079b9b53fe3d1aa4fc3fb684b7bee2cafffe7aee 100644
+--- a/dist/internal/validation.mjs
++++ b/dist/internal/validation.mjs
+@@ -42,7 +42,7 @@ const validUrl = (value, loopback) => {
+ 		return false;
+ 	}
+ };
+-const Endpoint = text(2048).check(Schema.makeFilter((value) => validUrl(value, false)));
++const Endpoint = text(2048).check(Schema.makeFilter((value) => validUrl(value, true)));
+ const Issuer = Endpoint.check(Schema.makeFilter((value) => !value.includes("?") && !new URL(value).pathname.includes("/.well-known/")));
+ const Callback = text(2048).check(Schema.makeFilter((value) => validUrl(value, true) && new URL(value).href === value && !value.includes("?")));
+ const ScopeName = Schema.String.check(Schema.isPattern(/^[\x21\x23-\x5b\x5d-\x7e]{1,256}$/));
+diff --git a/src/internal/validation.ts b/src/internal/validation.ts
+index fa3d0e2f2ed2f4407692c2f1c1ebfec4a14727e9..ffdcf22559f62fa4af1c821c1ee925b5056393e2 100644
+--- a/src/internal/validation.ts
++++ b/src/internal/validation.ts
+@@ -59,7 +59,7 @@ const validUrl = (value: string, loopback: boolean) => {
+   }
+ };
+ 
+-export const Endpoint = text(2048).check(Schema.makeFilter((value) => validUrl(value, false)));
++export const Endpoint = text(2048).check(Schema.makeFilter((value) => validUrl(value, true)));
+ 
+ export const Issuer = Endpoint.check(
+   Schema.makeFilter(

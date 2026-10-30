@@ -201,8 +201,6 @@
                 SITE_URL = "http://localhost:${toString ports.tinyburgApp}";
                 GOOGLE_REDIRECT_URI = "http://localhost:${toString ports.tinyburgApp}/auth/google/callback";
                 DISCORD_REDIRECT_URI = "http://localhost:${toString ports.tinyburgApp}/auth/discord/callback";
-                GOOGLE_JWKS_URI = "https://www.googleapis.com/oauth2/v3/certs";
-                DISCORD_JWKS_URI = "https://discord.com/api/oauth2/keys";
               };
             };
 

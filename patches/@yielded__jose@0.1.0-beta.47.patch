@@ -1,0 +1,31 @@
+diff --git a/dist/Jwks.mjs b/dist/Jwks.mjs
+index 308a07e87af0c949bc9bbe5e7dea8c669a9df5c7..2d9dd2b0ccbb3c2552e1828801d2e9ed7feeba70 100644
+--- a/dist/Jwks.mjs
++++ b/dist/Jwks.mjs
+@@ -81,7 +81,7 @@ const bounded = (minimum, maximum) => Schema.Int.check(Schema.isBetween({
+ 	maximum
+ }));
+ const RemoteConfiguration = Schema.Struct({
+-	url: Schema.URLFromString.check(Schema.makeFilter((url) => url.protocol === "https:" && url.username === "" && url.password === "" && url.hash === "")),
++	url: Schema.URLFromString.check(Schema.makeFilter((url) => (url.protocol === "https:" || url.protocol === "http:" && ["localhost", "127.0.0.1", "[::1]"].includes(url.hostname)) && url.username === "" && url.password === "" && url.hash === "")),
+ 	cacheTimeMs: bounded(1, 864e5),
+ 	cooldownMs: bounded(0, 36e5),
+ 	timeoutMs: bounded(1, 6e4),
+diff --git a/src/Jwks.ts b/src/Jwks.ts
+index 453b64084e99419a424350cd6394afc461bf3293..32a1fb5707a18764d073bb96f91177d02559c1b7 100644
+--- a/src/Jwks.ts
++++ b/src/Jwks.ts
+@@ -165,7 +165,12 @@ const RemoteConfiguration = Schema.Struct({
+   url: Schema.URLFromString.check(
+     Schema.makeFilter(
+       (url) =>
+-        url.protocol === "https:" && url.username === "" && url.password === "" && url.hash === "",
++        (url.protocol === "https:" ||
++          (url.protocol === "http:" &&
++            ["localhost", "127.0.0.1", "[::1]"].includes(url.hostname))) &&
++        url.username === "" &&
++        url.password === "" &&
++        url.hash === "",
+     ),
+   ),
+   cacheTimeMs: bounded(1, 86400000),

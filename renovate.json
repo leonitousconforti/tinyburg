@@ -67,11 +67,11 @@
             "matchPackageNames": [
                 "effect",
                 "frida",
-                "effect-oidc",
                 "foldkit",
                 "/^@foldkit//",
                 "/^@efffrida//",
                 "/^@effect//",
+                "/^@yielded//",
                 "!@effect/build-utils",
                 "!@effect/tsgo"
             ],

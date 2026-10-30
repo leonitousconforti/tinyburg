@@ -43,3 +43,7 @@ minimumReleaseAgeExclude:
   - "effect"
   - "@foldkit/*"
   - "foldkit"
+
+patchedDependencies:
+  "@yielded/jose@0.1.0-beta.47": patches/@yielded__jose@0.1.0-beta.47.patch
+  "@yielded/oauth@0.1.0-beta.47": patches/@yielded__oauth@0.1.0-beta.47.patch

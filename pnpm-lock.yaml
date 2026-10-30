@@ -8,6 +8,10 @@ overrides:
   '@effect/docgen>typescript': 7.0.2
   madge>typescript: 7.0.2
 
+patchedDependencies:
+  '@yielded/jose@0.1.0-beta.47': 5d26c8e1069c9b4cf7d4edefd49c43a8a3de9f54c730aac17aff46a95f09d247
+  '@yielded/oauth@0.1.0-beta.47': db1de8c9952c6b3965c025f23956acfd8e1e5f8746b9aefd0e7ac4e823b89d5d
+
 importers:
 
   .:
@@ -159,6 +163,9 @@ importers:
       '@yielded/auth':
         specifier: 0.1.0-beta.47
         version: 0.1.0-beta.47(effect@4.1.0)
+      '@yielded/oauth':
+        specifier: 0.1.0-beta.47
+        version: 0.1.0-beta.47(patch_hash=db1de8c9952c6b3965c025f23956acfd8e1e5f8746b9aefd0e7ac4e823b89d5d)(effect@4.1.0)
       effect:
         specifier: 4.1.0
         version: 4.1.0
@@ -189,6 +196,9 @@ importers:
       '@tinyburg/tinytower-sdk':
         specifier: workspace:*
         version: link:../../packages/tinytower-sdk
+      '@yielded/auth':
+        specifier: 0.1.0-beta.47
+        version: 0.1.0-beta.47(effect@4.1.0)
       effect:
         specifier: 4.1.0
         version: 4.1.0
@@ -216,9 +226,12 @@ importers:
       '@yielded/auth':
         specifier: 0.1.0-beta.47
         version: 0.1.0-beta.47(effect@4.1.0)
+      '@yielded/oauth':
+        specifier: 0.1.0-beta.47
+        version: 0.1.0-beta.47(patch_hash=db1de8c9952c6b3965c025f23956acfd8e1e5f8746b9aefd0e7ac4e823b89d5d)(effect@4.1.0)
       dfx:
-        specifier: 1.0.15
-        version: 1.0.15(effect@4.1.0)
+        specifier: 1.1.1
+        version: 1.1.1(effect@4.1.0)
       effect:
         specifier: 4.1.0
         version: 4.1.0
@@ -246,6 +259,9 @@ importers:
       '@tinyburg/tinytower-sdk':
         specifier: workspace:*
         version: link:../../packages/tinytower-sdk
+      '@yielded/auth':
+        specifier: 0.1.0-beta.47
+        version: 0.1.0-beta.47(effect@4.1.0)
       effect:
         specifier: 4.1.0
         version: 4.1.0
@@ -313,6 +329,9 @@ importers:
       '@yielded/auth':
         specifier: 0.1.0-beta.47
         version: 0.1.0-beta.47(effect@4.1.0)
+      '@yielded/oauth':
+        specifier: 0.1.0-beta.47
+        version: 0.1.0-beta.47(patch_hash=db1de8c9952c6b3965c025f23956acfd8e1e5f8746b9aefd0e7ac4e823b89d5d)(effect@4.1.0)
       effect:
         specifier: 4.1.0
         version: 4.1.0
@@ -373,6 +392,9 @@ importers:
       '@yielded/auth':
         specifier: 0.1.0-beta.47
         version: 0.1.0-beta.47(effect@4.1.0)
+      '@yielded/auth-persistence':
+        specifier: 0.1.0-beta.47
+        version: 0.1.0-beta.47(effect@4.1.0)
       effect:
         specifier: 4.1.0
         version: 4.1.0
@@ -397,13 +419,13 @@ importers:
       '@tinyburg/nimblebit-sdk':
         specifier: workspace:*
         version: link:../nimblebit-sdk
-      '@yielded/auth':
-        specifier: 0.1.0-beta.47
-        version: 0.1.0-beta.47(effect@4.1.0)
       pako:
         specifier: 3.0.1
         version: 3.0.1
     devDependencies:
+      '@yielded/auth':
+        specifier: 0.1.0-beta.47
+        version: 0.1.0-beta.47(effect@4.1.0)
       effect:
         specifier: 4.1.0
         version: 4.1.0
@@ -415,13 +437,13 @@ importers:
       '@tinyburg/nimblebit-sdk':
         specifier: workspace:*
         version: link:../nimblebit-sdk
-      '@yielded/auth':
-        specifier: 0.1.0-beta.47
-        version: 0.1.0-beta.47(effect@4.1.0)
       pako:
         specifier: 3.0.1
         version: 3.0.1
     devDependencies:
+      '@yielded/auth':
+        specifier: 0.1.0-beta.47
+        version: 0.1.0-beta.47(effect@4.1.0)
       effect:
         specifier: 4.1.0
         version: 4.1.0
@@ -470,23 +492,22 @@ importers:
       '@tinyburg/nimblebit-sdk':
         specifier: workspace:*
         version: link:../nimblebit-sdk
-      '@yielded/auth':
-        specifier: 0.1.0-beta.47
-        version: 0.1.0-beta.47(effect@4.1.0)
       pako:
         specifier: 3.0.1
         version: 3.0.1
     devDependencies:
+      '@yielded/auth':
+        specifier: 0.1.0-beta.47
+        version: 0.1.0-beta.47(effect@4.1.0)
       effect:
         specifier: 4.1.0
         version: 4.1.0
 
   packages/nimblebit-sdk:
-    dependencies:
+    devDependencies:
       '@yielded/auth':
         specifier: 0.1.0-beta.47
         version: 0.1.0-beta.47(effect@4.1.0)
-    devDependencies:
       effect:
         specifier: 4.1.0
         version: 4.1.0
@@ -496,13 +517,13 @@ importers:
       '@tinyburg/nimblebit-sdk':
         specifier: workspace:*
         version: link:../nimblebit-sdk
-      '@yielded/auth':
-        specifier: 0.1.0-beta.47
-        version: 0.1.0-beta.47(effect@4.1.0)
       pako:
         specifier: 3.0.1
         version: 3.0.1
     devDependencies:
+      '@yielded/auth':
+        specifier: 0.1.0-beta.47
+        version: 0.1.0-beta.47(effect@4.1.0)
       effect:
         specifier: 4.1.0
         version: 4.1.0
@@ -512,13 +533,13 @@ importers:
       '@tinyburg/nimblebit-sdk':
         specifier: workspace:*
         version: link:../nimblebit-sdk
-      '@yielded/auth':
-        specifier: 0.1.0-beta.47
-        version: 0.1.0-beta.47(effect@4.1.0)
       pako:
         specifier: 3.0.1
         version: 3.0.1
     devDependencies:
+      '@yielded/auth':
+        specifier: 0.1.0-beta.47
+        version: 0.1.0-beta.47(effect@4.1.0)
       effect:
         specifier: 4.1.0
         version: 4.1.0
@@ -531,13 +552,13 @@ importers:
       '@tinyburg/tinytower-sdk':
         specifier: workspace:*
         version: link:../tinytower-sdk
-      '@yielded/auth':
-        specifier: 0.1.0-beta.47
-        version: 0.1.0-beta.47(effect@4.1.0)
       pako:
         specifier: 3.0.1
         version: 3.0.1
     devDependencies:
+      '@yielded/auth':
+        specifier: 0.1.0-beta.47
+        version: 0.1.0-beta.47(effect@4.1.0)
       effect:
         specifier: 4.1.0
         version: 4.1.0
@@ -547,9 +568,6 @@ importers:
       '@tinyburg/nimblebit-sdk':
         specifier: workspace:*
         version: link:../nimblebit-sdk
-      '@yielded/auth':
-        specifier: 0.1.0-beta.47
-        version: 0.1.0-beta.47(effect@4.1.0)
       pako:
         specifier: 3.0.1
         version: 3.0.1
@@ -572,6 +590,9 @@ importers:
       '@tinyburg/insight':
         specifier: workspace:*
         version: link:../insight
+      '@yielded/auth':
+        specifier: 0.1.0-beta.47
+        version: 0.1.0-beta.47(effect@4.1.0)
       effect:
         specifier: 4.1.0
         version: 4.1.0
@@ -590,13 +611,13 @@ importers:
       '@tinyburg/nimblebit-sdk':
         specifier: workspace:*
         version: link:../nimblebit-sdk
-      '@yielded/auth':
-        specifier: 0.1.0-beta.47
-        version: 0.1.0-beta.47(effect@4.1.0)
       pako:
         specifier: 3.0.1
         version: 3.0.1
     devDependencies:
+      '@yielded/auth':
+        specifier: 0.1.0-beta.47
+        version: 0.1.0-beta.47(effect@4.1.0)
       effect:
         specifier: 4.1.0
         version: 4.1.0
@@ -612,10 +633,10 @@ importers:
       '@tinyburg/tinytower-sdk':
         specifier: workspace:^
         version: link:../tinytower-sdk
+    devDependencies:
       '@yielded/auth':
         specifier: 0.1.0-beta.47
         version: 0.1.0-beta.47(effect@4.1.0)
-    devDependencies:
       effect:
         specifier: 4.1.0
         version: 4.1.0
@@ -631,6 +652,9 @@ importers:
       '@tinyburg/tinytower-sdk':
         specifier: workspace:*
         version: link:../packages/tinytower-sdk
+      '@yielded/auth':
+        specifier: 0.1.0-beta.47
+        version: 0.1.0-beta.47(effect@4.1.0)
     devDependencies:
       '@bufbuild/protobuf':
         specifier: 2.14.0
@@ -2090,6 +2114,11 @@ packages:
   '@vue/shared@3.5.41':
     resolution: {integrity: sha512-IOnwSCma8j+9xJT6b8H0dEYidC80NsYmNMlZxRsukYcSoGaDBohog5hDxzeUXdFeGWFA++vWvxqOmrr96VlqMA==}
 
+  '@yielded/auth-persistence@0.1.0-beta.47':
+    resolution: {integrity: sha512-q3YqMBtJnuPps1opk3xTIGSfiAFgNyZxpmVWiQabY1lzdtwHjUNGaxnM1P3jfIK+z1NM+0CWWMEGv1FkuB349g==}
+    peerDependencies:
+      effect: ^4.1.0
+
   '@yielded/auth@0.1.0-beta.47':
     resolution: {integrity: sha512-/EiCCzEJxPXzzfpiGdOWgqgYYmoy8HlSl2Rbtzsu1FjFFek/8f8HVHSY5EDd7qowYxrF1EzcjBq2vQBUDzz2UA==}
     peerDependencies:
@@ -2338,17 +2367,17 @@ packages:
     peerDependencies:
       typescript: ^5.4.4 || ^6.0.2
 
-  dfx@1.0.15:
-    resolution: {integrity: sha512-LqHeOZLcOJB5D0+BUiy6XkthunolbJoSAAIOjXEiux5P6CzXPbJl0EkaWSDXTbkj/F/pdW9lk1zCC4XAl8yG+w==}
+  dfx@1.1.1:
+    resolution: {integrity: sha512-g22vKD6+WtOX6a6PoUjZoryJGp3Ut//ve6jjvEFQ8ONB0zNRkDGdf4IVitNmzZcW8G9Ewsr1FR47A98UWWbmIA==}
     peerDependencies:
-      effect: '>=4.0.0-beta.101 <5.0.0'
+      effect: ^4.0.0
 
   diacritics-map@0.1.0:
     resolution: {integrity: sha512-3omnDTYrGigU0i4cJjvaKwD52B8aoqyX/NEIkukFFkogBemsIbhSa1O414fpTp5nuszJG6lvQ5vBvDVNCbSsaQ==}
     engines: {node: '>=0.8.0'}
 
-  discord-api-types@0.38.53:
-    resolution: {integrity: sha512-HL1zz/UuZ+bbJjA/X8Kbxx9gk8v9rJAbTeWRNYKmIdjwJ7EovjlHgoJTxcLpATfNJ+AonOtMdy3Y5MVIJAAd/A==}
+  discord-api-types@0.38.57:
+    resolution: {integrity: sha512-R1CTSSt4RshqCq23j2Xq2ZscvzB4LzG9OB1CYQdKUGdw8Ti/oF/72EEtK2mNpagG/Vj9NcBT7dw9lKLf+Dacfg==}
 
   discord-verify@1.2.0:
     resolution: {integrity: sha512-8qlrMROW8DhpzWWzgNq9kpeLDxKanWa4EDVoj/ASVv2nr+dSr4JPmu2tFSydf3hAGI/OIJTnZyD0JulMYIxx4w==}
@@ -4825,19 +4854,24 @@ snapshots:
 
   '@vue/shared@3.5.41': {}
 
+  '@yielded/auth-persistence@0.1.0-beta.47(effect@4.1.0)':
+    dependencies:
+      '@yielded/auth': 0.1.0-beta.47(effect@4.1.0)
+      effect: 4.1.0
+
   '@yielded/auth@0.1.0-beta.47(effect@4.1.0)':
     dependencies:
-      '@yielded/jose': 0.1.0-beta.47(effect@4.1.0)
-      '@yielded/oauth': 0.1.0-beta.47(effect@4.1.0)
+      '@yielded/jose': 0.1.0-beta.47(patch_hash=5d26c8e1069c9b4cf7d4edefd49c43a8a3de9f54c730aac17aff46a95f09d247)(effect@4.1.0)
+      '@yielded/oauth': 0.1.0-beta.47(patch_hash=db1de8c9952c6b3965c025f23956acfd8e1e5f8746b9aefd0e7ac4e823b89d5d)(effect@4.1.0)
       effect: 4.1.0
 
-  '@yielded/jose@0.1.0-beta.47(effect@4.1.0)':
+  '@yielded/jose@0.1.0-beta.47(patch_hash=5d26c8e1069c9b4cf7d4edefd49c43a8a3de9f54c730aac17aff46a95f09d247)(effect@4.1.0)':
     dependencies:
       effect: 4.1.0
 
-  '@yielded/oauth@0.1.0-beta.47(effect@4.1.0)':
+  '@yielded/oauth@0.1.0-beta.47(patch_hash=db1de8c9952c6b3965c025f23956acfd8e1e5f8746b9aefd0e7ac4e823b89d5d)(effect@4.1.0)':
     dependencies:
-      '@yielded/jose': 0.1.0-beta.47(effect@4.1.0)
+      '@yielded/jose': 0.1.0-beta.47(patch_hash=5d26c8e1069c9b4cf7d4edefd49c43a8a3de9f54c730aac17aff46a95f09d247)(effect@4.1.0)
       effect: 4.1.0
 
   abort-controller@3.0.0:
@@ -5059,16 +5093,16 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  dfx@1.0.15(effect@4.1.0):
+  dfx@1.1.1(effect@4.1.0):
     dependencies:
-      discord-api-types: 0.38.53
+      discord-api-types: 0.38.57
       effect: 4.1.0
     optionalDependencies:
       discord-verify: 1.2.0
 
   diacritics-map@0.1.0: {}
 
-  discord-api-types@0.38.53: {}
+  discord-api-types@0.38.57: {}
 
   discord-verify@1.2.0:
     dependencies:
