@@ -37,6 +37,7 @@ One process runs everything, on a single-node Effect cluster backed by the same 
 | `cluster/crawler.ts`      | One entity per player (serializes and isolates crawls) plus the crons that feed it |
 | `services/crawl.ts`       | Pull, diff, write. A short idempotent task, deliberately _not_ a workflow          |
 | `services/ratelimit.ts`   | The single global pacer for everything that reaches Nimblebit                      |
+| `services/tinyburg.ts`    | The study's client at tinyburg.app, on `@yielded/oauth`                            |
 | `services/towers.ts`      | The OAuth client against tinyburg.app's `towers` API                               |
 | `routes/oauth.ts`         | The sign-in round trip, and where the two tokens get stored                        |
 | `routes/selfservice.ts`   | The dashboard's cookie-session api                                                 |
@@ -101,6 +102,8 @@ offline_access
 Two leaves per game rather than the whole `<game>:read` branch, so a research project can see which towers a participant linked and read their saves, and nothing else.
 
 Refresh tokens are **rotated** at the provider, with reuse detection: each one is good for exactly one exchange, and presenting a spent token revokes the whole family. `services/towers.ts` therefore stores the replacement on every refresh, and marks the grant invalid if it cannot, since a lost replacement is an unrecoverable grant.
+
+Rotation does not extend a grant. tinyburg.app honours one for at most 30 days from the sign in that started it, and no longer than the participant's tinyburg.app session at the time. After that the crawl sees the grant refused, and it resumes once the participant signs in again.
 
 What is still worth narrowing is upstream: `<game>:pull_save` returns a whole save when the study only ever wants the friends list. A `<game>:friends` leaf would be the honest grant to ask for.
 

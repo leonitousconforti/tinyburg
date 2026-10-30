@@ -6,6 +6,7 @@ import { createServer } from "node:http";
 
 import { NodeHttpServer, NodeRuntime, NodeServices, NodeSocket } from "@effect/platform-node";
 import { PgClient, PgMigrator } from "@effect/sql-pg";
+import * as WebCrypto from "@yielded/auth/WebCrypto";
 import { DiscordConfig } from "dfx";
 import { DiscordIxLive } from "dfx/gateway";
 
@@ -66,11 +67,13 @@ Layer.mergeAll(InteractionsLive, HttpLive).pipe(
     Layer.provide(DiscordLive),
     // The client registration, if the bot makes one, needs the provider over
     // http and its own database, and it has to come after the migrator so the
-    // table it keeps the registration in exists.
+    // table it keeps the registration in exists. The callback verifies the
+    // provider's id tokens, which takes the crypto.
     Layer.provide([
         LinksRepository.Default,
         TinyburgClient.Default.pipe(Layer.provide(FetchHttpClient.layer)),
         FetchHttpClient.layer,
+        WebCrypto.layer,
     ]),
     Layer.provide(MigratorLive),
     Layer.provide(SqlLive),

@@ -1,10 +1,8 @@
-import { Effect, Layer, Option, Result } from "effect";
-import { Url } from "effect/http";
+import { Effect, Layer, Option, Redacted } from "effect";
 
 import { fromDiscordLocale } from "@tinyburg/shared-ui/Internationalization";
 import { Discord, Ix, UI } from "dfx";
 import { InteractionsRegistry } from "dfx/gateway";
-import { Oidc } from "effect-oidc";
 
 import { randomSecret, sha256 } from "./crypto.ts";
 import { LinksRepository } from "./domain/links.ts";
@@ -133,21 +131,16 @@ export const InteractionsLive = Layer.effectDiscard(
 
                 const state = randomSecret();
                 const codeVerifier = randomSecret();
+                const nonce = randomSecret();
 
-                const authorizationRequest = Oidc.authorizationRequest({
-                    authorizationEndpoint: `${tinyburg.issuer}/oauth/authorize`,
-                    clientId: tinyburg.clientId,
+                const { client } = yield* tinyburg.connected;
+                const authorizationUrl = yield* client.authorizationUrl({
                     redirectUri: tinyburg.redirectUri,
                     scopes: LINK_SCOPES,
-                    state,
+                    state: Redacted.make(state),
+                    nonce: Redacted.make(nonce),
                     codeChallenge: yield* sha256(codeVerifier),
                 });
-
-                const authorizationUrl = Url.make(
-                    authorizationRequest.url,
-                    authorizationRequest.urlParams,
-                    authorizationRequest.hash.valueOrUndefined
-                ).pipe(Result.getOrThrow);
 
                 const stateHash = yield* sha256(state);
 
@@ -158,6 +151,7 @@ export const InteractionsLive = Layer.effectDiscard(
                 yield* links.beginLink({
                     stateHash,
                     codeVerifier,
+                    nonce,
                     discordUserId: discordUserId.value,
                     interactionToken: yield* Effect.map(Ix.Interaction, (interaction) => interaction.token),
                 });
@@ -165,7 +159,7 @@ export const InteractionsLive = Layer.effectDiscard(
                 return ephemeralWithLink({
                     content: messages.linkPrompt,
                     label: messages.linkButtonLabel,
-                    url: authorizationUrl.href,
+                    url: Redacted.value(authorizationUrl),
                 });
             })
         );

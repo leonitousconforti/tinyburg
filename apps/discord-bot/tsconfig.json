@@ -4,7 +4,17 @@
         { "path": "../../packages/trading-sdk/tsconfig.src.json" },
         { "path": "../shared-ui/tsconfig.src.json" }
     ],
-    "include": ["domain", "pages", "migrations", "routes", "crypto.ts", "index.ts", "interactions.ts", "tinyburg.ts"],
+    "include": [
+        "domain",
+        "pages",
+        "migrations",
+        "routes",
+        "crypto.ts",
+        "index.ts",
+        "interactions.ts",
+        "registration.ts",
+        "tinyburg.ts"
+    ],
     "compilerOptions": {
         "noEmit": true,
         "declaration": false,

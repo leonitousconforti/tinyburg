@@ -32,6 +32,7 @@ export class PendingLink extends Model.Class<PendingLink>("PendingLink")({
     id: Schema.String.check(Schema.isUUID()).pipe(Model.FieldExcept(["insert"])),
     stateHash: Model.Sensitive(Schema.String.check(Schema.isBase64Url())),
     codeVerifier: Model.Sensitive(Schema.String),
+    nonce: Model.Sensitive(Schema.String),
     discordUserId: Schema.String,
     interactionToken: Model.Sensitive(Schema.String),
     createdAt: Model.DateTimeInsertFromDate,
@@ -58,14 +59,16 @@ export class LinksRepository extends Context.Service<LinksRepository>()(
             const beginLink = (options: {
                 readonly stateHash: string;
                 readonly codeVerifier: string;
+                readonly nonce: string;
                 readonly discordUserId: string;
                 readonly interactionToken: string;
             }): Effect.Effect<void, SqlError.SqlError, never> =>
                 Effect.asVoid(sql`
-                INSERT INTO discord_pending_links (state_hash, code_verifier, discord_user_id, interaction_token)
+                INSERT INTO discord_pending_links (state_hash, code_verifier, nonce, discord_user_id, interaction_token)
                 VALUES (
                     ${options.stateHash},
                     ${options.codeVerifier},
+                    ${options.nonce},
                     ${options.discordUserId},
                     ${options.interactionToken}
                 )

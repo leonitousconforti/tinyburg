@@ -20,11 +20,16 @@
  * which is why {@link GrantsRepository.upsert} overwrites in place rather than
  * accumulating rows.
  *
+ * Rotation does not extend the grant. tinyburg.app honours a family for at
+ * most 30 days from the sign in that started it, and no longer than that
+ * participant's tinyburg.app session lasted. After that the refresh is refused
+ * like any dead grant, and the crawl stops asking until they sign in again.
+ *
  * The remaining narrowing worth doing is upstream: `tinytower:pull_save` still
  * returns a whole save when the study only ever wants the friends list.
  */
 
-import { Config, Context, Effect, Layer, Option, Redacted, Schema } from "effect";
+import { Context, Effect, Layer, Option, Redacted, Schema } from "effect";
 import { HttpClient, HttpClientRequest } from "effect/http";
 import { HttpApiClient } from "effect/http-api";
 
@@ -33,10 +38,12 @@ import type { PlayerId } from "../domain/model.ts";
 
 import { PlayerIdSchema } from "@tinyburg/nimblebit-sdk/NimblebitConfig";
 import { Api } from "@tinyburg/trading-sdk/Sdk";
+import * as OAuth from "@yielded/oauth/OAuth";
 
 import { seal, unseal } from "../crypto.ts";
 import { type GameId, READABLE_GAMES, gameInfo } from "../domain/games.ts";
 import { GrantsRepository } from "../domain/grants.ts";
+import { TinyburgClient } from "./tinyburg.ts";
 
 /**
  * The scope the study asks for, re-exported from the game catalog so callers do
@@ -95,37 +102,22 @@ export class TowerUnavailable extends Schema.Error<TowerUnavailable, { readonly 
     reason: Schema.String,
 }) {}
 
-const tinyburgConfig = Config.all({
-    issuer: Config.String("TINYBURG_ISSUER").pipe(
-        Config.withDefault("https://tinyburg.app"),
-        Config.map((issuer) => issuer.replace(/\/$/, ""))
-    ),
-    clientId: Config.String("TINYBURG_CLIENT_ID").pipe(Config.withDefault("unconfigured")),
-    clientSecret: Config.option(Config.Redacted("TINYBURG_CLIENT_SECRET")),
-});
-
-const TokenResponse = Schema.Struct({
-    access_token: Schema.String,
-    expires_in: Schema.optional(Schema.Finite),
-    scope: Schema.optional(Schema.String),
-    refresh_token: Schema.optional(Schema.String),
-});
-
 export class TinyburgTowers extends Context.Service<TinyburgTowers>()(
     "@tinyburg/social-circles/services/TinyburgTowers",
     {
         make: Effect.gen(function* () {
-            const config = yield* tinyburgConfig;
+            const tinyburg = yield* TinyburgClient;
             const grants = yield* GrantsRepository;
             const httpClient = yield* HttpClient.HttpClient;
 
             /**
              * Trades a stored refresh token for a short-lived access token.
              *
-             * A 400 from the token endpoint means the grant is dead (revoked
-             * upstream, or the provider still does not implement the grant
-             * type); anything else is treated as transient so a provider blip
-             * does not evict every participant from the study.
+             * Only the provider refusing the grant itself (`invalid_grant`:
+             * revoked, expired, or a spent token presented again) means the
+             * grant is dead. Anything else, this client's own configuration
+             * included, is treated as transient, so a provider blip or a bad
+             * deploy does not evict every participant from the study.
              */
             const accessTokenFor = Effect.fnUntraced(function* (tinyburgUserId: string) {
                 const grant = yield* grants
@@ -151,59 +143,25 @@ export class TinyburgTowers extends Context.Service<TinyburgTowers>()(
                     )
                 );
 
-                const body = new URLSearchParams({
-                    grant_type: "refresh_token",
-                    refresh_token: Redacted.value(refreshToken),
-                    client_id: config.clientId,
-                });
-                if (Option.isSome(config.clientSecret)) {
-                    body.set("client_secret", Redacted.value(config.clientSecret.value));
-                }
-
-                const response = yield* httpClient
-                    .execute(
-                        HttpClientRequest.post(`${config.issuer}/oauth/token`).pipe(
-                            HttpClientRequest.bodyUrlParams(body)
-                        )
-                    )
-                    .pipe(
-                        Effect.mapError(
-                            (cause) =>
-                                new TowerGrantUnusable({
-                                    tinyburgUserId,
-                                    // Frida's runtime handles are not plain strings; interpolating them here is intentional.
-                                    // oxlint-disable-next-line typescript/restrict-template-expressions
-                                    reason: `token endpoint unreachable: ${cause}`,
-                                    permanent: false,
-                                })
-                        )
-                    );
-
-                if (response.status >= 400) {
-                    // 4xx is the provider telling us this grant will never work
-                    // again. Retrying it on a schedule would be pure noise.
-                    const permanent = response.status < 500;
-                    if (permanent) {
-                        yield* Effect.ignore(grants.invalidate(tinyburgUserId));
-                    }
-                    return yield* new TowerGrantUnusable({
-                        tinyburgUserId,
-                        reason: `token endpoint returned ${response.status}`,
-                        permanent,
-                    });
-                }
-
-                const token = yield* response.json.pipe(
-                    Effect.flatMap(Schema.decodeUnknownEffect(TokenResponse)),
-                    Effect.mapError(
-                        (cause) =>
-                            new TowerGrantUnusable({
+                const token = yield* tinyburg.connected.pipe(
+                    Effect.flatMap(({ client }) => client.refreshGrant({ refreshToken })),
+                    Effect.flatMap(OAuth.tokens),
+                    Effect.catch((error) =>
+                        Effect.gen(function* () {
+                            // The provider telling us this grant will never work
+                            // again. Retrying it on a schedule would be pure noise.
+                            const permanent = error._tag === "OAuthRejected";
+                            if (permanent) {
+                                yield* Effect.ignore(grants.invalidate(tinyburgUserId));
+                            }
+                            return yield* new TowerGrantUnusable({
                                 tinyburgUserId,
-                                // Frida's runtime handles are not plain strings; interpolating them here is intentional.
-                                // oxlint-disable-next-line typescript/restrict-template-expressions
-                                reason: `unreadable token response: ${cause}`,
-                                permanent: false,
-                            })
+                                reason: permanent
+                                    ? "the provider refused the grant"
+                                    : `token endpoint unavailable: ${error._tag}`,
+                                permanent,
+                            });
+                        })
                     )
                 );
 
@@ -219,8 +177,8 @@ export class TinyburgTowers extends Context.Service<TinyburgTowers>()(
                  * marked invalid rather than left to fail confusingly later. The
                  * user reconnects and gets a fresh family.
                  */
-                if (token.refresh_token !== undefined) {
-                    yield* seal(token.refresh_token).pipe(
+                if (token.refreshToken !== undefined) {
+                    yield* seal(Redacted.value(token.refreshToken)).pipe(
                         Effect.flatMap((ciphertext) =>
                             grants.upsert({
                                 tinyburgUserId,
@@ -237,7 +195,7 @@ export class TinyburgTowers extends Context.Service<TinyburgTowers>()(
                     );
                 }
 
-                return token.access_token;
+                return Redacted.value(token.accessToken);
             });
 
             /**
@@ -249,7 +207,7 @@ export class TinyburgTowers extends Context.Service<TinyburgTowers>()(
              */
             const clientFor = (accessToken: string) =>
                 HttpApiClient.makeWith(Api, {
-                    baseUrl: config.issuer,
+                    baseUrl: tinyburg.issuer,
                     httpClient: HttpClient.mapRequest(httpClient, HttpClientRequest.bearerToken(accessToken)),
                 });
 
@@ -390,13 +348,8 @@ export class TinyburgTowers extends Context.Service<TinyburgTowers>()(
                 const grant = yield* grants.findLive(tinyburgUserId);
                 if (Option.isNone(grant)) return;
                 const refreshToken = yield* unseal(grant.value.refreshTokenCiphertext);
-                const body = new URLSearchParams({
-                    token: Redacted.value(refreshToken),
-                    client_id: config.clientId,
-                });
-                yield* httpClient.execute(
-                    HttpClientRequest.post(`${config.issuer}/oauth/revoke`).pipe(HttpClientRequest.bodyUrlParams(body))
-                );
+                const { client } = yield* tinyburg.connected;
+                yield* client.revoke({ token: refreshToken, tokenTypeHint: "refresh_token" });
             });
 
             return {

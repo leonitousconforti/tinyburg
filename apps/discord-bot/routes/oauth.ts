@@ -1,11 +1,9 @@
-import { Config, Effect, Layer, Option, Redacted, Ref, Schema } from "effect";
-import { HttpClient, HttpRouter, HttpServerRequest } from "effect/http";
-
-import type { Jwt } from "effect-oidc";
+import { Config, DateTime, Effect, Layer, Option, Redacted, Schema } from "effect";
+import { HttpRouter, HttpServerRequest } from "effect/http";
 
 import { type Language, fromAcceptLanguage } from "@tinyburg/shared-ui/Internationalization";
+import * as OAuth from "@yielded/oauth/OAuth";
 import { DiscordREST } from "dfx";
-import { Oidc } from "effect-oidc";
 
 import { sha256 } from "../crypto.ts";
 import { LinksRepository } from "../domain/links.ts";
@@ -26,6 +24,14 @@ import { TinyburgClient } from "../tinyburg.ts";
  * an account from a chat client, and it is why `/link` replies ephemerally,
  * so the URL is never posted where someone else can take it.
  */
+
+/**
+ * The claims the bot reads beyond the subject. `profile` shares a display
+ * name and nothing else; tinyburg.app has no picture to give.
+ */
+const ProfileClaims = Schema.Struct({
+    name: Schema.optional(Schema.String),
+});
 
 /**
  * One outcome, as a response.
@@ -78,53 +84,38 @@ const cancelled = (language: Language) =>
 
 export const CallbackRoutesLive = Effect.gen(function* () {
     const tinyburg = yield* TinyburgClient;
-    const httpClient = yield* HttpClient.HttpClient;
 
     // Reporting back into Discord goes through dfx's REST client, so the
     // follow-up edit inherits its rate limiting rather than racing it.
     const rest = yield* DiscordREST;
     const applicationId = yield* Config.String("APPLICATION_ID");
 
-    // The provider's signing keys, cached with a last-good fallback so a
-    // hiccup fetching them does not read as a failed link.
-    const cachedJwks = yield* Effect.flatMap(
-        Ref.make(Option.none<Schema.Schema.Type<typeof Jwt.JwksSchema>>()),
-        (lastGood) =>
-            Oidc.fetchJwks(`${tinyburg.issuer}/.well-known/jwks.json`).pipe(
-                Effect.provideService(HttpClient.HttpClient, httpClient),
-                Effect.tap((jwks) => Ref.set(lastGood, Option.some(jwks))),
-                Effect.catch((error) =>
-                    Ref.get(lastGood).pipe(
-                        Effect.flatMap(
-                            Option.match({
-                                onNone: () => Effect.fail(error),
-                                onSome: Effect.succeed,
-                            })
-                        )
-                    )
-                ),
-                Effect.cachedInvalidateWithTTL("10 minutes"),
-                Effect.map(([cached, invalidate]) => Effect.tapError(cached, () => invalidate))
-            )
-    );
-
     const handleCallback = (language: Language) =>
         Effect.gen(function* () {
+            // Taken before anything else, so the id token is judged against
+            // when the response arrived rather than how long the exchange took.
+            const verificationStartedAt = yield* DateTime.now;
             const messages = botMessagesFor[language];
             const refuse = (reason: string) =>
                 Effect.andThen(Effect.logInfo(`link callback refused: ${reason}`), failed(language));
 
             const maybeUrlParams = yield* HttpServerRequest.schemaSearchParams(
                 Schema.Union([
-                    Schema.Struct({ error: Schema.String }),
-                    Schema.Struct({ code: Schema.String, state: Schema.String }),
+                    Schema.Struct({ error: Schema.String, iss: Schema.optional(Schema.String) }),
+                    Schema.Struct({ code: Schema.String, state: Schema.String, iss: Schema.optional(Schema.String) }),
                 ])
             ).pipe(Effect.option);
             if (Option.isNone(maybeUrlParams)) {
                 return yield* refuse("malformed callback");
             }
 
+            // RFC 9207: the provider names itself on the way back, so a
+            // response some other issuer minted for this callback is refused
             const urlParams = maybeUrlParams.value;
+            if (urlParams.iss !== tinyburg.issuer) {
+                return yield* refuse(`callback from another issuer: ${urlParams.iss}`);
+            }
+
             if ("error" in urlParams) {
                 return urlParams.error === "access_denied"
                     ? yield* cancelled(language)
@@ -143,15 +134,17 @@ export const CallbackRoutesLive = Effect.gen(function* () {
             }
             const pending = maybePending.value;
 
-            const maybeToken = yield* Oidc.exchangeAuthorizationCode({
-                tokenEndpoint: `${tinyburg.issuer}/oauth/token`,
-                clientId: tinyburg.clientId,
-                clientSecret: Option.map(tinyburg.clientSecret, Redacted.value).pipe(Option.getOrUndefined),
-                redirectUri: tinyburg.redirectUri,
-                code: urlParams.code,
-                codeVerifier: pending.codeVerifier,
+            const code = Redacted.make(urlParams.code);
+            const maybeExchange = yield* Effect.gen(function* () {
+                const { client, verifier } = yield* tinyburg.connected;
+                const receipt = yield* client.codeGrant({
+                    code,
+                    redirectUri: tinyburg.redirectUri,
+                    pkceVerifier: Redacted.make(pending.codeVerifier),
+                });
+                return { tokens: yield* OAuth.tokens(receipt), verifier };
             }).pipe(Effect.option);
-            if (Option.isNone(maybeToken)) {
+            if (Option.isNone(maybeExchange)) {
                 return yield* refuse("token exchange failed");
             }
 
@@ -159,28 +152,38 @@ export const CallbackRoutesLive = Effect.gen(function* () {
             // token is deliberately dropped on the floor: this slice reads
             // nothing from the trading api, so keeping it would be holding a
             // capability with no use for it.
-            const maybeClaims = yield* cachedJwks.pipe(
-                Effect.flatMap((jwks) =>
-                    Oidc.verifyIdToken({
-                        jwks,
-                        clientId: tinyburg.clientId,
-                        issuer: tinyburg.issuer,
-                        idToken: maybeToken.value.id_token ?? "",
-                    })
-                ),
-                Effect.option
-            );
-            if (Option.isNone(maybeClaims)) {
+            const { tokens, verifier } = maybeExchange.value;
+            if (tokens.idToken === undefined) {
+                return yield* refuse("no id token");
+            }
+
+            const maybeIdentity = yield* verifier
+                .verify(tokens.idToken, {
+                    verificationStartedAt,
+                    nonce: Redacted.make(pending.nonce),
+                    accessToken: tokens.accessToken,
+                    code,
+                })
+                .pipe(
+                    Effect.flatMap((verified) =>
+                        Effect.map(Schema.decodeEffect(ProfileClaims)(Redacted.value(verified.claims)), (profile) => ({
+                            sub: verified.subject,
+                            name: profile.name,
+                        }))
+                    ),
+                    Effect.option
+                );
+            if (Option.isNone(maybeIdentity)) {
                 return yield* refuse("id token did not verify");
             }
-            const claims = maybeClaims.value;
+            const identity = maybeIdentity.value;
 
             const maybeLink = yield* LinksRepository.use((repo) =>
                 repo.upsertLink({
                     discordUserId: pending.discordUserId,
-                    sub: claims.sub,
-                    displayName: claims.name ?? null,
-                    avatarUrl: claims.picture ?? null,
+                    sub: identity.sub,
+                    displayName: identity.name ?? null,
+                    avatarUrl: null,
                 })
             ).pipe(Effect.option);
             if (Option.isNone(maybeLink)) {

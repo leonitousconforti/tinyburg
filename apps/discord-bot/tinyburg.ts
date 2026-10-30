@@ -1,6 +1,10 @@
-import { Config, Context, Effect, Layer, Option, Schedule } from "effect";
+import { Config, Context, Duration, Effect, Exit, Layer, Option, Schedule, Scope } from "effect";
+import { HttpClient } from "effect/http";
 
-import { DynamicClientRegistration } from "effect-oidc";
+import * as OAuth from "@yielded/oauth/OAuth";
+import * as Oidc from "@yielded/oauth/Oidc";
+
+import { register } from "./registration.ts";
 
 /**
  * The bot's registration at the tinyburg.app OIDC provider.
@@ -55,51 +59,88 @@ const registrationBackoff = Schedule.exponential("500 millis").pipe(
     Schedule.upTo({ duration: "1 minute" })
 );
 
+/** How long any one call to the provider may take before it counts as unavailable. */
+const PROVIDER_TIMEOUT_MILLIS = 10_000;
+
 /**
  * The bot as a client of the provider: the issuer, the redirect uri, and the
  * credentials it presents, whichever way they were obtained. Resolved once at
  * boot, so the registration round trip happens before the first `/link`
  * rather than during it.
+ *
+ * The protocol itself is `@yielded/oauth`'s, behind `connected`. Reading the
+ * provider's metadata for it waits for the first `/link` instead of holding up
+ * boot, and a failed attempt is not remembered, so a provider that was down
+ * is simply asked again next time.
  */
 export class TinyburgClient extends Context.Service<TinyburgClient>()("@tinyburg/discord-bot/TinyburgClient", {
     make: Effect.gen(function* () {
         const config = yield* tinyburgConfig;
         const { issuer, redirectUri } = config;
 
-        if (Option.isSome(config.clientId)) {
-            return { issuer, redirectUri, clientId: config.clientId.value, clientSecret: config.clientSecret } as const;
-        }
+        const { clientId, clientSecret } = yield* Effect.gen(function* () {
+            if (Option.isSome(config.clientId)) {
+                return { clientId: config.clientId.value, clientSecret: config.clientSecret };
+            }
 
-        if (!config.development && Option.isNone(config.registrationToken)) {
-            // No client id and no way to obtain one. Reading the setting
-            // again, now as required, fails the way every other missing
-            // setting does: naming it.
-            const clientId = yield* Config.String("TINYBURG_CLIENT_ID");
-            return { issuer, redirectUri, clientId, clientSecret: config.clientSecret } as const;
-        }
+            if (!config.development && Option.isNone(config.registrationToken)) {
+                // No client id and no way to obtain one. Reading the setting
+                // again, now as required, fails the way every other missing
+                // setting does: naming it.
+                const clientId = yield* Config.String("TINYBURG_CLIENT_ID");
+                return { clientId, clientSecret: config.clientSecret };
+            }
 
-        const registration = yield* DynamicClientRegistration.register({
-            issuer,
-            initialAccessToken: Option.getOrUndefined(config.registrationToken),
-            metadata: {
-                softwareId: "tinyburg-discord-bot",
-                clientName: "Tinyburg Discord Bot",
-                redirectUris: [redirectUri],
-                tokenEndpointAuthMethod: "client_secret_basic",
-                scopes: LINK_SCOPES,
-                grantTypes: ["authorization_code", "refresh_token"],
-            },
-        }).pipe(
-            Effect.retry({ while: (error) => error.reason === "Unreachable", schedule: registrationBackoff }),
-            Effect.tap(({ clientId }) => Effect.logInfo(`registered at ${issuer} as client ${clientId}`))
+            return yield* register(issuer, {
+                initialAccessToken: Option.getOrUndefined(config.registrationToken),
+                metadata: {
+                    software_id: "tinyburg-discord-bot",
+                    client_name: "Tinyburg Discord Bot",
+                    redirect_uris: [redirectUri],
+                    token_endpoint_auth_method: "client_secret_basic",
+                    grant_types: ["authorization_code"],
+                    scope: LINK_SCOPES.join(" "),
+                },
+            }).pipe(
+                Effect.retry({ while: (error) => error.reason === "Unreachable", schedule: registrationBackoff }),
+                Effect.tap(({ clientId }) => Effect.logInfo(`registered at ${issuer} as client ${clientId}`))
+            );
+        });
+
+        const httpClient = yield* HttpClient.HttpClient;
+        const scope = yield* Effect.scope;
+
+        // The secret goes the way the bot registered to present it: Basic.
+        const authentication: OAuth.Authentication = Option.match(clientSecret, {
+            onNone: () => ({ method: "none", publicClient: true }),
+            onSome: (secret) => ({ method: "client_secret_basic", secret }),
+        });
+
+        const connect = Effect.gen(function* () {
+            const metadata = yield* Oidc.discover(issuer, { timeoutMs: PROVIDER_TIMEOUT_MILLIS });
+
+            const verifier = yield* Oidc.makeVerifier({
+                metadata,
+                clientId,
+                timeoutMs: PROVIDER_TIMEOUT_MILLIS,
+                algorithms: ["RS256"],
+            });
+
+            const client = yield* OAuth.make({
+                metadata,
+                clientId,
+                timeoutMs: PROVIDER_TIMEOUT_MILLIS,
+                authentication,
+            });
+
+            return { client, verifier } as const;
+        }).pipe(Effect.provideService(HttpClient.HttpClient, httpClient), Scope.provide(scope));
+
+        const connected = yield* Effect.cachedWithTTL(connect, (exit) =>
+            Exit.isSuccess(exit) ? Duration.infinity : Duration.zero
         );
 
-        return {
-            issuer,
-            redirectUri,
-            clientId: registration.clientId,
-            clientSecret: registration.clientSecret,
-        } as const;
+        return { issuer, redirectUri, connected } as const;
     }),
 }) {
     static readonly Default = Layer.effect(this, TinyburgClient.make);

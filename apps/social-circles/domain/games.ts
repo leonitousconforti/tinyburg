@@ -200,7 +200,7 @@ export const REQUIRED_SCOPE: string = REQUIRED_SCOPES.join(" ");
 // visible at the point it goes wrong, so it is checked at boot.
 {
     const declared = new Set<string>(GameIds);
-    const served = new Set(Scopes.Areas.map((area) => area.name));
+    const served = new Set<string>(Scopes.Areas.map((area) => area.name));
     const missing = Array.from(served).filter((name) => !declared.has(name));
     const extra = Array.from(declared).filter((name) => !served.has(name));
     if (missing.length > 0 || extra.length > 0) {

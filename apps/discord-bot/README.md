@@ -33,6 +33,8 @@ between them:
 interactions.ts       Ix.global command definitions, registered with InteractionsRegistry
 routes/oauth.ts       the /discord/callback the browser returns to
 domain/links.ts       discord_links, and the in-flight discord_pending_links
+tinyburg.ts           the bot's client at tinyburg.app, on @yielded/oauth
+registration.ts       RFC 7591 self-registration, which @yielded/oauth leaves to the app
 index.ts              merges the gateway layer with the http server
 ```
 
