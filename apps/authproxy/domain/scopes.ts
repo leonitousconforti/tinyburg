@@ -25,6 +25,8 @@
  * @since 1.0.0
  */
 
+import type { NimblebitScopes } from "@tinyburg/nimblebit-sdk";
+
 import * as BitCity from "@tinyburg/bitcity-sdk";
 import * as DiscoZoo from "@tinyburg/disco-zoo-sdk";
 import * as LegoTower from "@tinyburg/lego-tower-sdk";
@@ -33,7 +35,7 @@ import * as PocketTrains from "@tinyburg/pocket-trains-sdk";
 import * as Classic from "@tinyburg/tinytower-classic-sdk";
 import { Endpoints, Scopes } from "@tinyburg/tinytower-sdk";
 import * as TinyTowerVegas from "@tinyburg/tinytower-vegas-sdk";
-import { ResourceServer } from "effect-oidc";
+import * as OAuthScope from "@yielded/auth/OAuthScope";
 
 /**
  * Every game this proxy serves, in the order the dashboard lists them, and
@@ -51,16 +53,16 @@ const GAMES = [
     { games: TinyTowerVegas.Scopes.Games, all: TinyTowerVegas.Scopes.all },
 ] as const;
 
-/** Every scope some endpoint of some game accepts. One call per api: `scopeCatalog` is generic over the api. */
-const enforcedScopes = (): ReadonlyArray<ResourceServer.ScopeDescription> => [
-    ...ResourceServer.scopeCatalog(Endpoints.Api),
-    ...ResourceServer.scopeCatalog(Classic.Endpoints.Api),
-    ...ResourceServer.scopeCatalog(PocketPlanes.Endpoints.Api),
-    ...ResourceServer.scopeCatalog(PocketTrains.Endpoints.Api),
-    ...ResourceServer.scopeCatalog(LegoTower.Endpoints.Api),
-    ...ResourceServer.scopeCatalog(DiscoZoo.Endpoints.Api),
-    ...ResourceServer.scopeCatalog(BitCity.Endpoints.Api),
-    ...ResourceServer.scopeCatalog(TinyTowerVegas.Endpoints.Api),
+/** Every scope some endpoint of some game accepts. One call per api: `OAuthScope.catalog` is generic over the api. */
+const enforcedScopes = (): ReadonlyArray<NimblebitScopes.ScopeDescription> => [
+    ...OAuthScope.catalog(Endpoints.Api),
+    ...OAuthScope.catalog(Classic.Endpoints.Api),
+    ...OAuthScope.catalog(PocketPlanes.Endpoints.Api),
+    ...OAuthScope.catalog(PocketTrains.Endpoints.Api),
+    ...OAuthScope.catalog(LegoTower.Endpoints.Api),
+    ...OAuthScope.catalog(DiscoZoo.Endpoints.Api),
+    ...OAuthScope.catalog(BitCity.Endpoints.Api),
+    ...OAuthScope.catalog(TinyTowerVegas.Endpoints.Api),
 ];
 
 /**
@@ -70,7 +72,7 @@ const enforcedScopes = (): ReadonlyArray<ResourceServer.ScopeDescription> => [
  * @since 1.0.0
  * @category Models
  */
-export interface CatalogNode extends ResourceServer.ScopeDescription {
+export interface CatalogNode extends NimblebitScopes.ScopeDescription {
     readonly selfServe: boolean;
 }
 
@@ -103,7 +105,7 @@ export interface CatalogGame extends CatalogNode {
     readonly areas: ReadonlyArray<CatalogArea>;
 }
 
-const node = (source: ResourceServer.ScopeDescription, selfServe: boolean): CatalogNode => ({
+const node = (source: NimblebitScopes.ScopeDescription, selfServe: boolean): CatalogNode => ({
     name: source.name,
     description: source.description,
     selfServe,

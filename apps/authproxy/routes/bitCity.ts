@@ -24,9 +24,9 @@ const catch500s = <A, E, R>(effect: Effect.Effect<A, E | Schema.SchemaError | Ht
 
 /**
  * NOTE: the `Authorization` (bearer + scope) middleware is intentionally not
- * applied yet - these endpoints carry no `OIDCScopes`, and `Authorization`
- * forbids any endpoint that carries none. Add `.middleware(Authorization)`
- * (and `AuthorizationLive` below) once the endpoints are annotated with scopes.
+ * applied yet - not every endpoint here carries an `OAuthScope.Required`, and
+ * `Authorization` forbids any endpoint that carries none. Add
+ * `.middleware(Authorization)` (and `AuthorizationLive` below) once they all do.
  *
  * @internal
  */

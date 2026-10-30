@@ -16,6 +16,7 @@
         "cookies.ts",
         "crypto.ts",
         "index.ts",
+        "registration.ts",
         "vite.config.ts"
     ],
     "compilerOptions": {

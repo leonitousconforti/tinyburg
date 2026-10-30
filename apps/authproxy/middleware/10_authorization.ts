@@ -4,7 +4,8 @@ import { HttpApiError, HttpApiMiddleware, HttpApiSecurity } from "effect/http-ap
 import { RateLimiter } from "effect/persistence";
 import { SqlError } from "effect/sql";
 
-import { ResourceServer } from "effect-oidc";
+import { NimblebitScopes } from "@tinyburg/nimblebit-sdk";
+import * as OAuthScope from "@yielded/auth/OAuthScope";
 
 import { ApiKey, type CurrentApiKey, Repository } from "../domain/model.ts";
 
@@ -104,18 +105,16 @@ export const AuthorizationLive = Layer.effect(
                     });
 
                     // The scopes that unlock this endpoint are read off the
-                    // endpoint itself: the `OIDCScopes` annotation stamped on
-                    // it in `@tinyburg/tinytower-sdk`. A key needs one of them,
+                    // endpoint itself: the `OAuthScope.Required` annotation
+                    // stamped on it in its game's sdk. A key needs one of them,
                     // by name, exactly. An endpoint carrying none is one no key
                     // may call through the proxy, whatever it holds.
-                    const accepted = Context.getOption(endpoint.annotations, ResourceServer.OIDCScopes).pipe(
-                        Option.map((scopes) => scopes.map(ResourceServer.scopeName)),
-                        Option.getOrElse((): ReadonlyArray<string> => [])
-                    );
+                    const requirement = Context.getOrUndefined(endpoint.annotations, OAuthScope.Required);
                     const isAuthenticated = Option.isSome(maybeApiKey);
                     const isAuthorized =
                         isAuthenticated &&
-                        accepted.some((scope) => maybeApiKey.value.scopes.has(scope)) &&
+                        requirement !== undefined &&
+                        NimblebitScopes.isSatisfied(requirement, maybeApiKey.value.scopes) &&
                         !maybeApiKey.value.revoked;
 
                     if (!isAuthenticated) return yield* new HttpApiError.Unauthorized();
