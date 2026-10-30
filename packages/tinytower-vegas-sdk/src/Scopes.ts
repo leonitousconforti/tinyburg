@@ -8,9 +8,7 @@
  * @category Scopes
  */
 
-import type * as ResourceServer from "effect-oidc/ResourceServer";
-
-import { type Game, defineGame } from "@tinyburg/nimblebit-sdk/NimblebitScopes";
+import { type Game, type ScopeDescription, defineGame } from "@tinyburg/nimblebit-sdk/NimblebitScopes";
 
 /**
  * @since 1.0.0
@@ -77,7 +75,7 @@ export const Games: ReadonlyArray<Game> = [TinyTowerVegas];
  * @since 1.0.0
  * @category Tree
  */
-export const all = (): ReadonlyArray<ResourceServer.ScopeDescription> =>
+export const all = (): ReadonlyArray<ScopeDescription> =>
     Games.flatMap((game) => [
         game,
         game.read,

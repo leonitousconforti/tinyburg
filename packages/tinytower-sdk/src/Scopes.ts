@@ -9,15 +9,13 @@
  *
  * What is TinyTower's own is below: the areas of its api, and the game built
  * from them. `Sync.read.pull_save` is the leaf named `tinytower:sync:pull_save`,
- * and `Sync.read.pull_save.grants` is what goes on the endpoint.
+ * and `Sync.read.pull_save.required` is what goes on the endpoint.
  *
  * @since 1.0.0
  * @category Scopes
  */
 
-import type * as ResourceServer from "effect-oidc/ResourceServer";
-
-import { type Game, defineGame } from "@tinyburg/nimblebit-sdk/NimblebitScopes";
+import { type Game, type ScopeDescription, defineGame } from "@tinyburg/nimblebit-sdk/NimblebitScopes";
 
 export {
     /**
@@ -148,7 +146,7 @@ export const TinyTower = defineGame({
 
 /**
  * The game's areas, by name, for annotating endpoints:
- * `Sync.read.pull_save.grants`.
+ * `Sync.read.pull_save.required`.
  *
  * @since 1.0.0
  * @category Areas
@@ -170,7 +168,7 @@ export const Games: ReadonlyArray<Game> = [TinyTower];
  * @since 1.0.0
  * @category Tree
  */
-export const all = (): ReadonlyArray<ResourceServer.ScopeDescription> =>
+export const all = (): ReadonlyArray<ScopeDescription> =>
     Games.flatMap((game) => [
         game,
         game.read,

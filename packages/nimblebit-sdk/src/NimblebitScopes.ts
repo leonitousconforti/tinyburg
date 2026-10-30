@@ -5,14 +5,30 @@
  * @category Scopes
  */
 
-import type * as ResourceServer from "effect-oidc/ResourceServer";
+import type * as Arr from "effect/Array";
+
+import * as OAuthScope from "@yielded/auth/OAuthScope";
 
 /**
+ * A scope by name, with the text a player reads for it on the consent
+ * screen.
+ *
  * @since 1.0.0
  * @category Models
  */
-export interface Leaf extends ResourceServer.ScopeDescription {
-    readonly grants: ReadonlyArray<ResourceServer.ScopeDescription>;
+export type ScopeDescription = OAuthScope.Described;
+
+/**
+ * One endpoint's scope. `grants` is the leaf and every scope above it,
+ * narrowest first, and `required` is the requirement an endpoint is
+ * annotated with: any one of `grants`.
+ *
+ * @since 1.0.0
+ * @category Models
+ */
+export interface Leaf extends ScopeDescription {
+    readonly grants: Arr.NonEmptyReadonlyArray<ScopeDescription>;
+    readonly required: OAuthScope.Requirement;
 }
 
 /**
@@ -21,7 +37,7 @@ export interface Leaf extends ResourceServer.ScopeDescription {
  * @since 1.0.0
  * @category Models
  */
-export interface Branch extends ResourceServer.ScopeDescription {
+export interface Branch extends ScopeDescription {
     readonly children: ReadonlyArray<Leaf>;
 }
 
@@ -31,7 +47,7 @@ export interface Branch extends ResourceServer.ScopeDescription {
  * @since 1.0.0
  * @category Models
  */
-export interface Area extends ResourceServer.ScopeDescription {
+export interface Area extends ScopeDescription {
     readonly read: Branch;
     readonly write: Branch;
 }
@@ -43,7 +59,7 @@ export interface Area extends ResourceServer.ScopeDescription {
  * @since 1.0.0
  * @category Models
  */
-export interface Game extends ResourceServer.ScopeDescription {
+export interface Game extends ScopeDescription {
     readonly read: Branch;
     readonly write: Branch;
     readonly areas: Readonly<Record<string, Area>>;
@@ -85,8 +101,8 @@ type NoReservedLeaves<R extends string, W extends string> = [(R | W) & Reserved]
 /** What sits above an area: the prefix its name carries, and what its leaves grant beyond it. */
 interface Above {
     readonly prefix: string;
-    readonly read: ReadonlyArray<ResourceServer.ScopeDescription>;
-    readonly write: ReadonlyArray<ResourceServer.ScopeDescription>;
+    readonly read: ReadonlyArray<ScopeDescription>;
+    readonly write: ReadonlyArray<ScopeDescription>;
 }
 
 const makeArea = <R extends string, W extends string>(
@@ -94,24 +110,25 @@ const makeArea = <R extends string, W extends string>(
     spec: AreaSpec<R, W>,
     above?: Above
 ): KeyedArea<R, W> => {
-    const area: ResourceServer.ScopeDescription = {
-        name: above === undefined ? name : `${above.prefix}:${name}`,
+    const area: ScopeDescription = {
+        name: OAuthScope.make(above === undefined ? name : `${above.prefix}:${name}`),
         description: spec.description,
     };
 
     const branch = <K extends string>(
         kind: "read" | "write",
         branchSpec: BranchSpec<K>,
-        grantsAbove: ReadonlyArray<ResourceServer.ScopeDescription>
+        grantsAbove: ReadonlyArray<ScopeDescription>
     ): Branch & Keyed<K> => {
-        const scope: ResourceServer.ScopeDescription = {
-            name: `${area.name}:${kind}`,
+        const scope: ScopeDescription = {
+            name: OAuthScope.make(`${area.name}:${kind}`),
             description: branchSpec.description,
         };
 
         const leaves = Object.entries<string>(branchSpec.leaves).map(([key, description]): readonly [string, Leaf] => {
-            const leaf: ResourceServer.ScopeDescription = { name: `${area.name}:${key}`, description };
-            return [key, { ...leaf, grants: [leaf, scope, area, ...grantsAbove] }];
+            const leaf: ScopeDescription = { name: OAuthScope.make(`${area.name}:${key}`), description };
+            const grants: Arr.NonEmptyReadonlyArray<ScopeDescription> = [leaf, scope, area, ...grantsAbove];
+            return [key, { ...leaf, grants, required: { anyOf: grants } }];
         });
 
         // oxlint-disable-next-line typescript/no-unsafe-type-assertion
@@ -165,9 +182,12 @@ export const defineGame = <const Areas extends Readonly<Record<string, AreaSpec<
         readonly [K in keyof Areas]: Areas[K] extends AreaSpec<infer R, infer W> ? KeyedArea<R, W> : never;
     };
 } => {
-    const game: ResourceServer.ScopeDescription = { name: spec.name, description: spec.description };
-    const read: ResourceServer.ScopeDescription = { name: `${spec.name}:read`, description: spec.read.description };
-    const write: ResourceServer.ScopeDescription = { name: `${spec.name}:write`, description: spec.write.description };
+    const game: ScopeDescription = { name: OAuthScope.make(spec.name), description: spec.description };
+    const read: ScopeDescription = { name: OAuthScope.make(`${spec.name}:read`), description: spec.read.description };
+    const write: ScopeDescription = {
+        name: OAuthScope.make(`${spec.name}:write`),
+        description: spec.write.description,
+    };
 
     const above: Above = { prefix: spec.name, read: [read, game], write: [write, game] };
     const entries = Object.entries<AreaSpec<string, string>>(spec.areas).map(
@@ -186,4 +206,44 @@ export const defineGame = <const Areas extends Readonly<Record<string, AreaSpec<
         write: { ...write, children: list.flatMap((area) => area.write.children) },
         areas,
     };
+};
+
+/**
+ * The requirement that accepts exactly one scope: what a group is annotated
+ * with when nothing narrower than the whole node will do.
+ *
+ * @since 1.0.0
+ * @category Requirements
+ */
+export const requiredBy = (node: ScopeDescription): OAuthScope.Requirement => ({
+    anyOf: [{ name: node.name, description: node.description }],
+});
+
+/**
+ * The scope name of a requirement entry, which is either a bare scope or a
+ * described one.
+ *
+ * @since 1.0.0
+ * @category Requirements
+ */
+export const entryName = (entry: OAuthScope.OAuthScope | OAuthScope.Described): string =>
+    typeof entry === "string" ? entry : entry.name;
+
+/**
+ * Whether holding `held` satisfies `requirement`, by name, exactly as the
+ * Tinyburg OAuth server checks a token: every `allOf` scope held and, when
+ * `anyOf` is present, at least one of those. A requirement with neither, or
+ * with an empty `anyOf`, is satisfied by nothing, because the server refuses
+ * it too; `{ allOf: [] }` is satisfied by anything.
+ *
+ * @since 1.0.0
+ * @category Requirements
+ */
+export const isSatisfied = (requirement: OAuthScope.Requirement, held: ReadonlySet<string>): boolean => {
+    const holds = (entry: OAuthScope.OAuthScope | OAuthScope.Described) => held.has(entryName(entry));
+    return (
+        (requirement.allOf !== undefined || requirement.anyOf !== undefined) &&
+        (requirement.allOf ?? []).every(holds) &&
+        (requirement.anyOf === undefined || requirement.anyOf.some(holds))
+    );
 };

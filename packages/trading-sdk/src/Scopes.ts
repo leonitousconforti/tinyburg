@@ -16,9 +16,7 @@
  * @category Scopes
  */
 
-import type * as ResourceServer from "effect-oidc/ResourceServer";
-
-import { defineArea } from "@tinyburg/nimblebit-sdk/NimblebitScopes";
+import { type ScopeDescription, defineArea } from "@tinyburg/nimblebit-sdk/NimblebitScopes";
 
 /**
  * The leaves every game's area carries: one per trading endpoint. The same
@@ -142,5 +140,5 @@ export const Areas: ReadonlyArray<GameArea> = [
  * @since 1.0.0
  * @category Tree
  */
-export const all = (): ReadonlyArray<ResourceServer.ScopeDescription> =>
+export const all = (): ReadonlyArray<ScopeDescription> =>
     Areas.flatMap((area) => [area, area.read, ...area.read.children, area.write, ...area.write.children]);

@@ -73,7 +73,7 @@ export * as Roofs from "./Roofs.ts"
  *
  * What is TinyTower's own is below: the areas of its api, and the game built
  * from them. `Sync.read.pull_save` is the leaf named `tinytower:sync:pull_save`,
- * and `Sync.read.pull_save.grants` is what goes on the endpoint.
+ * and `Sync.read.pull_save.required` is what goes on the endpoint.
  *
  * @since 1.0.0
  * @category Scopes

@@ -41,7 +41,7 @@ import { HttpApi, HttpApiEndpoint, HttpApiError, HttpApiGroup } from "effect/htt
 import * as Schema from "effect/Schema";
 
 import * as NimblebitConfig from "@tinyburg/nimblebit-sdk/NimblebitConfig";
-import * as ResourceServer from "effect-oidc/ResourceServer";
+import * as OAuthScope from "@yielded/auth/OAuthScope";
 
 import * as Scopes from "./Scopes.ts";
 
@@ -137,7 +137,7 @@ export const DevicePlayerDetailsEndpoint = HttpApiEndpoint.get(
             }),
         ],
     }
-).annotate(ResourceServer.OIDCScopes, Scopes.Device.read.player_details.grants);
+).annotate(OAuthScope.Required, Scopes.Device.read.player_details.required);
 
 /**
  * DERIVED from Tiny Tower; not yet confirmed for pp.
@@ -162,7 +162,7 @@ export const DeviceVerifyDeviceEndpoint = HttpApiEndpoint.get(
             ),
         ],
     }
-).annotate(ResourceServer.OIDCScopes, Scopes.Device.write.verify_device.grants);
+).annotate(OAuthScope.Required, Scopes.Device.write.verify_device.required);
 
 /**
  * DERIVED from Tiny Tower; not yet confirmed for pp.
@@ -182,7 +182,7 @@ export const DeviceRegisterEmailEndpoint = HttpApiEndpoint.post(
             Schema.Struct({ success: Schema.Literal("NewDevice") }),
         ],
     }
-).annotate(ResourceServer.OIDCScopes, Scopes.Device.write.register_email.grants);
+).annotate(OAuthScope.Required, Scopes.Device.write.register_email.required);
 
 /**
  * Pull the player's cloud save. `data` is base64 pako-deflated bytes (parse into
@@ -243,7 +243,7 @@ export const SocialGetVisitsEndpoint = HttpApiEndpoint.get("SocialGetVisits", "/
         NotFoundResponse,
         Schema.Struct({ success: Schema.Literal("Found"), gifts: Schema.Array(Gift), total: Schema.Int }),
     ],
-}).annotate(ResourceServer.OIDCScopes, Scopes.Social.read.get_visits.grants);
+}).annotate(OAuthScope.Required, Scopes.Social.read.get_visits.required);
 
 /**
  * VERIFIED: `/get_gifts/pp/:playerId/:salt/:hash` -> `{ success:"Found", gifts:[...], total }`.
@@ -258,7 +258,7 @@ export const SocialGetGiftsEndpoint = HttpApiEndpoint.get("SocialGetGifts", "/ge
         NotFoundResponse,
         Schema.Struct({ success: Schema.Literal("Found"), gifts: Schema.Array(Gift), total: Schema.Int }),
     ],
-}).annotate(ResourceServer.OIDCScopes, Scopes.Social.read.get_gifts.grants);
+}).annotate(OAuthScope.Required, Scopes.Social.read.get_gifts.required);
 
 /**
  * VERIFIED: `/request_items/pp/:playerId/:salt/:hash` -> `{ success:"Found", gifts:[...] }`
@@ -278,7 +278,7 @@ export const SocialRequestItemsEndpoint = HttpApiEndpoint.get(
             Schema.Struct({ success: Schema.Literal("Found"), gifts: Schema.Array(Gift) }),
         ],
     }
-).annotate(ResourceServer.OIDCScopes, Scopes.Social.read.request_items.grants);
+).annotate(OAuthScope.Required, Scopes.Social.read.request_items.required);
 
 /**
  * DERIVED from Tiny Tower. Sends an item to a friend (write path, not exercised).
@@ -300,7 +300,7 @@ export const SocialSendItemEndpoint = HttpApiEndpoint.post(
         error: ApiErrors,
         success: [ErrorResponse, SentResponse, NotSentResponse],
     }
-).annotate(ResourceServer.OIDCScopes, Scopes.Social.write.send_item.grants);
+).annotate(OAuthScope.Required, Scopes.Social.write.send_item.required);
 
 /**
  * Preimage `pp/<playerId>/<giftId>/<salt><playerAuthKey>` (path derived from Tiny
@@ -320,7 +320,7 @@ export const SocialReceiveItemEndpoint = HttpApiEndpoint.get(
             NotReceivedResponse,
         ],
     }
-).annotate(ResourceServer.OIDCScopes, Scopes.Social.write.receive_item.grants);
+).annotate(OAuthScope.Required, Scopes.Social.write.receive_item.required);
 
 /**
  * DERIVED from Tiny Tower; preimage `pp/<playerId>/<salt><friendId><playerAuthKey>`.
@@ -344,7 +344,7 @@ export const SocialPullFriendMetaEndpoint = HttpApiEndpoint.post(
             }),
         ],
     }
-).annotate(ResourceServer.OIDCScopes, Scopes.Social.read.pull_friend_meta.grants);
+).annotate(OAuthScope.Required, Scopes.Social.read.pull_friend_meta.required);
 
 /**
  * DERIVED from Tiny Tower; preimage `pp/<playerId>/<friendId>/<salt><playerAuthKey>`.
@@ -374,7 +374,7 @@ export const SocialPullFriendGameEndpoint = HttpApiEndpoint.get(
             }).pipe(Schema.encodeKeys({ checksum: "h", saveId: "id", playerId: "player_id" })),
         ],
     }
-).annotate(ResourceServer.OIDCScopes, Scopes.Social.read.pull_friend_game.grants);
+).annotate(OAuthScope.Required, Scopes.Social.read.pull_friend_game.required);
 
 /** @internal */
 export const DeviceManagementGroup = HttpApiGroup.make("DeviceManagementGroup")

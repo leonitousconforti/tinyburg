@@ -35,9 +35,11 @@ export * as Scopes from "./Scopes.ts"
  * accepts. The scopes are the tree in `Scopes`, and every endpoint here is
  * annotated with the leaf that guards it.
  *
- * Every endpoint is bearer authenticated: callers present an access token
- * minted by the Tinyburg OIDC provider, whether that is the first-party app,
- * a third-party application, or a long-lived api key.
+ * Every endpoint is bearer authenticated: an application presents the opaque
+ * access token the Tinyburg OAuth server issued it, and tinyburg.app checks it
+ * against the grant behind it on every call. The first-party app is the one
+ * caller without a token: it calls with the player's session cookie, and is
+ * held to the scopes tinyburg.app grants itself.
  *
  * Saves travel as the text Nimblebit stores, exactly as the TinyTower sdk's
  * `sync_pullSave` returns them; a client that wants structure decodes with

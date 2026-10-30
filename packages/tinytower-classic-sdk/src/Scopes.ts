@@ -10,9 +10,7 @@
  * @category Scopes
  */
 
-import type * as ResourceServer from "effect-oidc/ResourceServer";
-
-import { type Game, defineGame } from "@tinyburg/nimblebit-sdk/NimblebitScopes";
+import { type Game, type ScopeDescription, defineGame } from "@tinyburg/nimblebit-sdk/NimblebitScopes";
 import { TinyTowerAreas } from "@tinyburg/tinytower-sdk/Scopes";
 
 /**
@@ -29,7 +27,7 @@ export const TinyTowerClassic = defineGame({
 
 /**
  * The game's areas, by name, for annotating endpoints:
- * `Sync.read.pull_save.grants`.
+ * `Sync.read.pull_save.required`.
  *
  * @since 1.0.0
  * @category Areas
@@ -50,7 +48,7 @@ export const Games: ReadonlyArray<Game> = [TinyTowerClassic];
  * @since 1.0.0
  * @category Tree
  */
-export const all = (): ReadonlyArray<ResourceServer.ScopeDescription> =>
+export const all = (): ReadonlyArray<ScopeDescription> =>
     Games.flatMap((game) => [
         game,
         game.read,
