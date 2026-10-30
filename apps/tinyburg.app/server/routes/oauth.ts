@@ -6,7 +6,7 @@ import {
     HttpRouter,
     HttpServerRequest,
     HttpServerResponse,
-} from "effect/unstable/http";
+} from "effect/http";
 
 import { RelyingParty } from "effect-oidc";
 
@@ -51,10 +51,10 @@ const google = {
     scopes: ["openid", "email", "profile"],
     cookiePrefix: "google_oauth",
     config: Config.all({
-        clientId: Config.string("GOOGLE_CLIENT_ID"),
-        clientSecret: Config.redacted("GOOGLE_CLIENT_SECRET"),
-        redirectUri: Config.string("GOOGLE_REDIRECT_URI"),
-        jwksUri: Config.string("GOOGLE_JWKS_URI"),
+        clientId: Config.String("GOOGLE_CLIENT_ID"),
+        clientSecret: Config.Redacted("GOOGLE_CLIENT_SECRET"),
+        redirectUri: Config.String("GOOGLE_REDIRECT_URI"),
+        jwksUri: Config.String("GOOGLE_JWKS_URI"),
     }),
 } satisfies OAuthProvider;
 
@@ -66,10 +66,10 @@ const discord = {
     scopes: ["identify", "email", "openid"],
     cookiePrefix: "discord_oauth",
     config: Config.all({
-        clientId: Config.string("DISCORD_CLIENT_ID"),
-        clientSecret: Config.redacted("DISCORD_CLIENT_SECRET"),
-        redirectUri: Config.string("DISCORD_REDIRECT_URI"),
-        jwksUri: Config.string("DISCORD_JWKS_URI"),
+        clientId: Config.String("DISCORD_CLIENT_ID"),
+        clientSecret: Config.Redacted("DISCORD_CLIENT_SECRET"),
+        redirectUri: Config.String("DISCORD_REDIRECT_URI"),
+        jwksUri: Config.String("DISCORD_JWKS_URI"),
     }),
 } satisfies OAuthProvider;
 

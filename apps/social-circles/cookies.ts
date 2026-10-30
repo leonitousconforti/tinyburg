@@ -1,7 +1,7 @@
-import type { SqlError } from "effect/unstable/sql";
+import type { SqlError } from "effect/sql";
 
 import { Config, Context, Effect, Layer, Option, type Schema } from "effect";
-import { HttpServerRequest } from "effect/unstable/http";
+import { HttpServerRequest } from "effect/http";
 
 import type { Session } from "./domain/sessions.ts";
 
@@ -23,7 +23,7 @@ export const SESSION_COOKIE_NAME = "social_circles_session";
  * cookies. Plain names in development, where http would refuse the prefix.
  */
 export class CookiePolicy extends Context.Service<CookiePolicy>()("@tinyburg/social-circles/CookiePolicy", {
-    make: Effect.map(Config.string("NODE_ENV").pipe(Config.withDefault("production")), (env) => {
+    make: Effect.map(Config.String("NODE_ENV").pipe(Config.withDefault("production")), (env) => {
         const secure = env !== "development";
         const name = (base: string): string => (secure ? `__Host-${base}` : base);
         return { secure, name } as const;

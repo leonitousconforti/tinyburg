@@ -16,10 +16,10 @@
  *    the reads have to be scoped here.
  */
 
-import type { SqlError } from "effect/unstable/sql";
+import type { SqlError } from "effect/sql";
 
 import { Array, Context, Effect, Layer, Schema, pipe } from "effect";
-import { SqlClient, SqlSchema } from "effect/unstable/sql";
+import { SqlClient, SqlSchema } from "effect/sql";
 
 import type { GameId } from "./games.ts";
 import type { PlayerId } from "./model.ts";

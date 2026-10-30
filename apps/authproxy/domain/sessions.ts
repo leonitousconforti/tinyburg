@@ -1,8 +1,8 @@
-import type { SqlError } from "effect/unstable/sql";
+import type { SqlError } from "effect/sql";
 
 import { Context, DateTime, Duration, Effect, Layer, type Option, Schema } from "effect";
-import { Model } from "effect/unstable/schema";
-import { SqlClient, SqlModel, SqlSchema } from "effect/unstable/sql";
+import { Model } from "effect/schema";
+import { SqlClient, SqlModel, SqlSchema } from "effect/sql";
 
 /**
  * A signed-in browser. The subject is the Tinyburg user id carried by the

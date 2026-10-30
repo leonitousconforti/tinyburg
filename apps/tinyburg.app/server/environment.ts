@@ -8,7 +8,7 @@ import { Config, Option, type Redacted } from "effect";
  * (`cookies.ts`) and gated dynamic client registration
  * (`routes/registration.ts`). Only an explicit `development` relaxes either.
  */
-export const isDevelopment: Config.Config<boolean> = Config.string("NODE_ENV").pipe(
+export const isDevelopment: Config.Config<boolean> = Config.String("NODE_ENV").pipe(
     Config.withDefault("production"),
     Config.map((env) => env === "development")
 );
@@ -30,7 +30,7 @@ export interface RegistrationPolicy {
 
 export const registrationPolicy: Config.Config<RegistrationPolicy> = Config.all({
     development: isDevelopment,
-    token: Config.option(Config.redacted("REGISTRATION_TOKEN")),
+    token: Config.option(Config.Redacted("REGISTRATION_TOKEN")),
 }).pipe(
     Config.map(({ development, token }) => ({
         offered: development || Option.isSome(token),

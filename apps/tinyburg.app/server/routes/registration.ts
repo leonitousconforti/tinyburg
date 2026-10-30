@@ -1,5 +1,5 @@
 import { Effect, Layer, Option, Redacted, Result } from "effect";
-import { HttpRouter, HttpServerRequest, HttpServerResponse } from "effect/unstable/http";
+import { HttpRouter, HttpServerRequest, HttpServerResponse } from "effect/http";
 
 import type { RegistrationPolicy } from "../environment.ts";
 

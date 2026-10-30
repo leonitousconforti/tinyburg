@@ -25,8 +25,8 @@
  */
 
 import { Config, Context, Effect, Layer, Option, Redacted, Schema } from "effect";
-import { HttpClient, HttpClientRequest } from "effect/unstable/http";
-import { HttpApiClient } from "effect/unstable/httpapi";
+import { HttpClient, HttpClientRequest } from "effect/http";
+import { HttpApiClient } from "effect/http-api";
 
 import type { GamePlayerRef } from "../domain/graph.ts";
 import type { PlayerId } from "../domain/model.ts";
@@ -92,12 +92,12 @@ export class TowerUnavailable extends Schema.Error<TowerUnavailable>("@tinyburg/
 }) {}
 
 const tinyburgConfig = Config.all({
-    issuer: Config.string("TINYBURG_ISSUER").pipe(
+    issuer: Config.String("TINYBURG_ISSUER").pipe(
         Config.withDefault("https://tinyburg.app"),
         Config.map((issuer) => issuer.replace(/\/$/, ""))
     ),
-    clientId: Config.string("TINYBURG_CLIENT_ID").pipe(Config.withDefault("unconfigured")),
-    clientSecret: Config.option(Config.redacted("TINYBURG_CLIENT_SECRET")),
+    clientId: Config.String("TINYBURG_CLIENT_ID").pipe(Config.withDefault("unconfigured")),
+    clientSecret: Config.option(Config.Redacted("TINYBURG_CLIENT_SECRET")),
 });
 
 const TokenResponse = Schema.Struct({

@@ -6,10 +6,10 @@
  * writes has to be true the first time and every time after.
  */
 
-import type { SqlError } from "effect/unstable/sql";
+import type { SqlError } from "effect/sql";
 
 import { Context, Effect, Layer, Schema } from "effect";
-import { SqlClient, SqlSchema } from "effect/unstable/sql";
+import { SqlClient, SqlSchema } from "effect/sql";
 
 import type { GameId } from "./games.ts";
 

@@ -1,5 +1,5 @@
 import { Config, ConfigProvider, Effect, Layer, Schema } from "effect";
-import { FetchHttpClient } from "effect/unstable/http";
+import { FetchHttpClient } from "effect/http";
 
 import { NodeRuntime, NodeServices } from "@effect/platform-node";
 import { NimblebitAuth, NimblebitConfig } from "@tinyburg/nimblebit-sdk";
@@ -10,7 +10,7 @@ const ConfigProviderLive = ConfigProvider.fromEnv().pipe(ConfigProvider.nested("
 const Live = Layer.merge(
     FetchHttpClient.layer,
     NimblebitAuth.layerTinyburgAuthProxyConfig({
-        authKey: Config.redacted("AUTHPROXY_AUTH_KEY"),
+        authKey: Config.Redacted("AUTHPROXY_AUTH_KEY"),
     })
 ).pipe(Layer.provideMerge(ConfigProviderLive), Layer.provide(NodeServices.layer));
 

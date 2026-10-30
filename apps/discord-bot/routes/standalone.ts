@@ -11,7 +11,7 @@
  */
 
 import { Effect } from "effect";
-import { HttpRouter, HttpServerResponse } from "effect/unstable/http";
+import { HttpRouter, HttpServerResponse } from "effect/http";
 
 import { STYLESHEET_HREF, stylesheetFile } from "@tinyburg/shared-ui/StandalonePage";
 

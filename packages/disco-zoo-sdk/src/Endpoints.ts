@@ -24,10 +24,10 @@
  */
 
 import * as Schema from "effect/Schema";
-import * as HttpApi from "effect/unstable/httpapi/HttpApi";
-import * as HttpApiEndpoint from "effect/unstable/httpapi/HttpApiEndpoint";
-import * as HttpApiError from "effect/unstable/httpapi/HttpApiError";
-import * as HttpApiGroup from "effect/unstable/httpapi/HttpApiGroup";
+import { HttpApi } from "effect/http-api";
+import { HttpApiEndpoint } from "effect/http-api";
+import { HttpApiError } from "effect/http-api";
+import { HttpApiGroup } from "effect/http-api";
 
 import * as NimblebitConfig from "@tinyburg/nimblebit-sdk/NimblebitConfig";
 import * as ResourceServer from "effect-oidc/ResourceServer";

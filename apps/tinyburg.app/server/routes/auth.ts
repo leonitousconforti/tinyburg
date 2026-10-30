@@ -1,6 +1,6 @@
 import { Effect, Layer, Option } from "effect";
-import { HttpEffect, HttpRouter, HttpServerResponse } from "effect/unstable/http";
-import { HttpApiBuilder, HttpApiError } from "effect/unstable/httpapi";
+import { HttpEffect, HttpRouter, HttpServerResponse } from "effect/http";
+import { HttpApiBuilder, HttpApiError } from "effect/http-api";
 
 import { SessionsRepository } from "../../domain/sessions.ts";
 import { UsersRepository } from "../../domain/users.ts";

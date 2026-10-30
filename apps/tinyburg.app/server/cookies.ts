@@ -1,7 +1,7 @@
-import type { SqlError } from "effect/unstable/sql";
+import type { SqlError } from "effect/sql";
 
 import { Context, Effect, Layer, Option, type Schema } from "effect";
-import { HttpServerRequest } from "effect/unstable/http";
+import { HttpServerRequest } from "effect/http";
 
 import type { Session, User } from "../domain/models.ts";
 

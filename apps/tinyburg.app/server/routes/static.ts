@@ -1,5 +1,5 @@
 import { Effect, Layer, Path } from "effect";
-import { HttpStaticServer } from "effect/unstable/http";
+import { HttpStaticServer } from "effect/http";
 
 /**
  * Serves the built foldkit SPA. Real files under dist/client are served

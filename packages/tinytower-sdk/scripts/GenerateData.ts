@@ -1,6 +1,6 @@
 import { Array, Effect, FileSystem, Layer, Order, Path, Record, pipe } from "effect";
-import { FetchHttpClient } from "effect/unstable/http";
-import { RpcClient } from "effect/unstable/rpc";
+import { FetchHttpClient } from "effect/http";
+import { RpcClient } from "effect/rpc";
 
 import { NodeRuntime, NodeServices } from "@effect/platform-node";
 import { AndroidDevice, GooglePlayApi, PlayAccount } from "@efffrida/gplayapi";

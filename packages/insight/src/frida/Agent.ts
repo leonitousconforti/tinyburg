@@ -2,7 +2,7 @@ import "@efffrida/polyfills";
 import "frida-il2cpp-bridge";
 
 import { Array, Cause, Effect, Function, Layer, Option, Record, Result, Schedule, Schema, Tuple, pipe } from "effect";
-import { RpcSerialization, RpcServer } from "effect/unstable/rpc";
+import { RpcSerialization, RpcServer } from "effect/rpc";
 
 import { Assembly, Class, Extensions, FridaIl2cppBridge } from "@efffrida/il2cpp-bridge";
 import { FridaRuntime } from "@efffrida/platform";

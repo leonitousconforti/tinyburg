@@ -20,9 +20,9 @@ import type * as Schema from "effect/Schema";
 import * as Effect from "effect/Effect";
 import * as Function from "effect/Function";
 import * as Redacted from "effect/Redacted";
-import * as HttpClient from "effect/unstable/http/HttpClient";
-import * as HttpClientRequest from "effect/unstable/http/HttpClientRequest";
-import * as HttpApiClient from "effect/unstable/httpapi/HttpApiClient";
+import { HttpClient } from "effect/http";
+import { HttpClientRequest } from "effect/http";
+import { HttpApiClient } from "effect/http-api";
 
 import type { NimblebitConfig } from "@tinyburg/nimblebit-sdk";
 

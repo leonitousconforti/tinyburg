@@ -1,5 +1,5 @@
 import { Layer } from "effect";
-import { HttpRouter, HttpServerResponse } from "effect/unstable/http";
+import { HttpRouter, HttpServerResponse } from "effect/http";
 
 /**
  * Liveness only. The bot has no upstream it must be able to reach to be

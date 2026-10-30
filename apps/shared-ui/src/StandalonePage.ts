@@ -25,7 +25,7 @@
  */
 
 import { Effect, Option } from "effect";
-import { Headers, HttpServerResponse } from "effect/unstable/http";
+import { Headers, HttpServerResponse } from "effect/http";
 
 import type { Document, Html, HtmlBuilder } from "foldkit/html";
 

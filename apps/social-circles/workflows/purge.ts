@@ -11,7 +11,7 @@
  */
 
 import { DateTime, Effect, Schema } from "effect";
-import { Activity, Workflow } from "effect/unstable/workflow";
+import { Activity, Workflow } from "effect/workflow";
 
 import { PlayerIdSchema } from "@tinyburg/nimblebit-sdk/NimblebitConfig";
 

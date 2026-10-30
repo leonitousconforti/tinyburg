@@ -8,7 +8,7 @@
  */
 
 import { Config, ConfigProvider, Effect, Layer, Path, String } from "effect";
-import { FetchHttpClient, HttpRouter } from "effect/unstable/http";
+import { FetchHttpClient, HttpRouter } from "effect/http";
 
 import { createServer } from "node:http";
 
@@ -39,7 +39,7 @@ const AllRoutes = Layer.mergeAll(SelfServiceApiLive, OAuthRoutesLive, StaticRout
 const DotEnvLive = Effect.map(ConfigProvider.fromDotEnv(), ConfigProvider.nested("SOCIALCIRCLES"));
 
 const SqlLive = PgClient.layerConfig({
-    url: Config.redacted("DATABASE_URL"),
+    url: Config.Redacted("DATABASE_URL"),
     transformQueryNames: Config.succeed(String.camelToSnake),
     transformResultNames: Config.succeed(String.snakeToCamel),
 });
@@ -91,8 +91,8 @@ Layer.mergeAll(
     Layer.provide(DependenciesLive),
     Layer.provide(
         NodeHttpServer.layerConfig(createServer, {
-            port: Config.number("PORT").pipe(Config.withDefault(3002)),
-            host: Config.string("HOST").pipe(Config.withDefault("0.0.0.0")),
+            port: Config.Number("PORT").pipe(Config.withDefault(3002)),
+            host: Config.String("HOST").pipe(Config.withDefault("0.0.0.0")),
         })
     ),
     // The environment as it comes, `.env` nested under the service name; see

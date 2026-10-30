@@ -10,7 +10,7 @@
  */
 
 import { Effect, Schema } from "effect";
-import { Activity, DurableClock, Workflow } from "effect/unstable/workflow";
+import { Activity, DurableClock, Workflow } from "effect/workflow";
 
 import { PlayerIdSchema } from "@tinyburg/nimblebit-sdk/NimblebitConfig";
 

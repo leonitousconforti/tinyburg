@@ -1,8 +1,8 @@
 import { Context, DateTime, Duration, Effect, Layer, Option, Redacted, Schema } from "effect";
-import { Headers, HttpServerRequest, HttpServerResponse } from "effect/unstable/http";
-import { HttpApiError, HttpApiMiddleware, HttpApiSecurity } from "effect/unstable/httpapi";
-import { RateLimiter } from "effect/unstable/persistence";
-import { SqlError } from "effect/unstable/sql";
+import { Headers, HttpServerRequest, HttpServerResponse } from "effect/http";
+import { HttpApiError, HttpApiMiddleware, HttpApiSecurity } from "effect/http-api";
+import { RateLimiter } from "effect/persistence";
+import { SqlError } from "effect/sql";
 
 import { ResourceServer } from "effect-oidc";
 

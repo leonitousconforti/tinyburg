@@ -6,7 +6,7 @@ import { S3 } from "@effect-aws/client-s3";
 import { NodeStream } from "@effect/platform-node";
 import { GooglePlayApi } from "@efffrida/gplayapi";
 
-const bucketName = Config.string("SPACES_BUCKET");
+const bucketName = Config.String("SPACES_BUCKET");
 const prefixFor = (bundleIdentifier: BundleIdentifier): string => `archivist/${bundleIdentifier}/`;
 const keyFor = (options: {
     readonly bundleIdentifier: BundleIdentifier;

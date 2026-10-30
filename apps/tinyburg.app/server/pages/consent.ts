@@ -15,7 +15,7 @@
  */
 
 import type { Effect } from "effect";
-import type { HttpServerResponse } from "effect/unstable/http";
+import type { HttpServerResponse } from "effect/http";
 
 import type { OAuthAuthorizationRequest, OAuthClient } from "../../domain/models.ts";
 import type { Language } from "@tinyburg/shared-ui/Internationalization";

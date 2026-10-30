@@ -12,7 +12,7 @@
  */
 
 import type { Effect } from "effect";
-import type { HttpServerResponse } from "effect/unstable/http";
+import type { HttpServerResponse } from "effect/http";
 
 import type { Language } from "@tinyburg/shared-ui/Internationalization";
 

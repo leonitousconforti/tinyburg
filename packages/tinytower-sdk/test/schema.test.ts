@@ -1,5 +1,5 @@
 import { ConfigProvider, Effect, Layer, ManagedRuntime, Path, Schema } from "effect";
-import { FetchHttpClient } from "effect/unstable/http";
+import { FetchHttpClient } from "effect/http";
 
 import { NodeServices } from "@effect/platform-node";
 import { describe, it } from "@effect/vitest";

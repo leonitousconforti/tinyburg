@@ -1,6 +1,6 @@
 import { Effect, Layer, Option, Schema, String } from "effect";
-import { HttpRouter, HttpServerRequest } from "effect/unstable/http";
-import { HttpApiError, HttpApiMiddleware } from "effect/unstable/httpapi";
+import { HttpRouter, HttpServerRequest } from "effect/http";
+import { HttpApiError, HttpApiMiddleware } from "effect/http-api";
 
 import { NimblebitAuth } from "@tinyburg/nimblebit-sdk";
 

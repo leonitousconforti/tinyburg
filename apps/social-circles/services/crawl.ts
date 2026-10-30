@@ -55,7 +55,7 @@ export class CrawlService extends Context.Service<CrawlService>()("@tinyburg/soc
         const pacer = yield* NimblebitPacer;
 
         /** How long between routine crawls of the same player. */
-        const intervalMinutes = yield* Config.int("CRAWL_INTERVAL_MINUTES").pipe(Config.withDefault(6 * 60));
+        const intervalMinutes = yield* Config.Int("CRAWL_INTERVAL_MINUTES").pipe(Config.withDefault(6 * 60));
 
         /**
          * Crawls one player.

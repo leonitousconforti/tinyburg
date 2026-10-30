@@ -1,7 +1,7 @@
-import type { SqlError } from "effect/unstable/sql";
+import type { SqlError } from "effect/sql";
 
 import { Context, Effect, Function, Layer, Schema } from "effect";
-import { SqlClient, SqlModel, SqlSchema } from "effect/unstable/sql";
+import { SqlClient, SqlModel, SqlSchema } from "effect/sql";
 
 import { OAuthClient } from "./models.ts";
 

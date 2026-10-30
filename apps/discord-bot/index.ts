@@ -1,5 +1,5 @@
 import { Config, ConfigProvider, Effect, Layer, Path, String } from "effect";
-import { FetchHttpClient, HttpRouter } from "effect/unstable/http";
+import { FetchHttpClient, HttpRouter } from "effect/http";
 
 // @effect-diagnostics-next-line nodeBuiltinImport:off
 import { createServer } from "node:http";
@@ -28,7 +28,7 @@ import { TinyburgClient } from "./tinyburg.ts";
 const ConfigProviderLive = ConfigProvider.fromEnv().pipe(ConfigProvider.nested("DISCORDBOT"), ConfigProvider.layer);
 
 const SqlLive = PgClient.layerConfig({
-    url: Config.redacted("DATABASE_URL"),
+    url: Config.Redacted("DATABASE_URL"),
     transformQueryNames: Config.succeed(String.camelToSnake),
     transformResultNames: Config.succeed(String.snakeToCamel),
 });
@@ -44,7 +44,7 @@ const DiscordLive = DiscordIxLive.pipe(
     Layer.provide(NodeSocket.layerWebSocketConstructor),
     Layer.provide(
         DiscordConfig.layerConfig({
-            token: Config.redacted("TOKEN"),
+            token: Config.Redacted("TOKEN"),
         })
     )
 );
@@ -56,8 +56,8 @@ const HttpLive = HttpRouter.serve(
         NodeHttpServer.layerConfig(createServer, {
             // 3000/3001/3002 belong to tinyburg.app, authproxy, and
             // social-circles in the dev stack (`nix/dev.nix`).
-            port: Config.number("PORT").pipe(Config.withDefault(3003)),
-            host: Config.string("HOST").pipe(Config.withDefault("0.0.0.0")),
+            port: Config.Number("PORT").pipe(Config.withDefault(3003)),
+            host: Config.String("HOST").pipe(Config.withDefault("0.0.0.0")),
         })
     )
 );

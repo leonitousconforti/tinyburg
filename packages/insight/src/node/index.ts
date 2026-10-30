@@ -1,4 +1,4 @@
-import type { HttpClient, HttpClientError } from "effect/unstable/http";
+import type { HttpClient, HttpClientError } from "effect/http";
 
 import {
     type Cause,
@@ -18,7 +18,7 @@ import {
     Tuple,
 } from "effect";
 import { ChildProcess, ChildProcessSpawner } from "effect/unstable/process";
-import { type RpcClient, RpcSerialization } from "effect/unstable/rpc";
+import { type RpcClient, RpcSerialization } from "effect/rpc";
 
 import {
     FridaDevice,
@@ -133,7 +133,7 @@ export const DeviceLive: Layer.Layer<
             });
 
             // Take straight from @efffrida/frida-tools for how it resolves adb
-            const androidSdk = yield* Config.string("ANDROID_SDK").pipe(
+            const androidSdk = yield* Config.String("ANDROID_SDK").pipe(
                 Config.map((androidSdk) => ({
                     adbExecutable: path.join(androidSdk, "platform-tools", "adb"),
                     emulatorExecutable: path.join(androidSdk, "emulator", "emulator"),

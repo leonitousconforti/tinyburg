@@ -1,8 +1,8 @@
-import type { SqlError } from "effect/unstable/sql";
+import type { SqlError } from "effect/sql";
 
 import { Context, Effect, Layer, Schema } from "effect";
-import { Model } from "effect/unstable/schema";
-import { SqlClient, SqlSchema } from "effect/unstable/sql";
+import { Model } from "effect/schema";
+import { SqlClient, SqlSchema } from "effect/sql";
 
 /**
  * A Discord account bound to a Tinyburg account. The subject is the Tinyburg

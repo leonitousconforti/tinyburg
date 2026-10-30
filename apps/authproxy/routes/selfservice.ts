@@ -1,7 +1,7 @@
 import { DateTime, Duration, Effect, Layer, Option } from "effect";
-import { HttpEffect, HttpServerResponse } from "effect/unstable/http";
-import { HttpApiBuilder, HttpApiError } from "effect/unstable/httpapi";
-import { Model } from "effect/unstable/schema";
+import { HttpEffect, HttpServerResponse } from "effect/http";
+import { HttpApiBuilder, HttpApiError } from "effect/http-api";
+import { Model } from "effect/schema";
 
 import { CookiePolicy, maybeCurrentSession } from "../cookies.ts";
 import { ApiKey, Repository } from "../domain/model.ts";

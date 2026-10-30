@@ -1,6 +1,6 @@
 import { Config, ConfigProvider, Duration, Effect, Layer, Redacted, References } from "effect";
-import { FetchHttpClient, HttpClient } from "effect/unstable/http";
-import { RateLimiter } from "effect/unstable/persistence";
+import { FetchHttpClient, HttpClient } from "effect/http";
+import { RateLimiter } from "effect/persistence";
 
 import { S3 } from "@effect-aws/client-s3";
 import { NodeServices } from "@effect/platform-node";
@@ -8,11 +8,11 @@ import { AndroidDevice, PlayAccount } from "@efffrida/gplayapi";
 
 const ObjectStorageLive = Layer.unwrap(
     Effect.gen(function* () {
-        const accessKeyId = yield* Config.redacted("SPACES_KEY");
-        const secretAccessKey = yield* Config.redacted("SPACES_SECRET");
-        const endpoint = yield* Config.string("S3_ENDPOINT");
-        const region = yield* Config.string("S3_REGION").pipe(Config.withDefault("us-east-1"));
-        const forcePathStyle = yield* Config.boolean("S3_FORCE_PATH_STYLE").pipe(Config.withDefault(false));
+        const accessKeyId = yield* Config.Redacted("SPACES_KEY");
+        const secretAccessKey = yield* Config.Redacted("SPACES_SECRET");
+        const endpoint = yield* Config.String("S3_ENDPOINT");
+        const region = yield* Config.String("S3_REGION").pipe(Config.withDefault("us-east-1"));
+        const forcePathStyle = yield* Config.Boolean("S3_FORCE_PATH_STYLE").pipe(Config.withDefault(false));
 
         return S3.layer({
             forcePathStyle,

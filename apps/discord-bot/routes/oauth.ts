@@ -1,5 +1,5 @@
 import { Config, Effect, Layer, Option, Redacted, Ref, Schema } from "effect";
-import { HttpClient, HttpRouter, HttpServerRequest } from "effect/unstable/http";
+import { HttpClient, HttpRouter, HttpServerRequest } from "effect/http";
 
 import type { Jwt } from "effect-oidc";
 
@@ -83,7 +83,7 @@ export const CallbackRoutesLive = Effect.gen(function* () {
     // Reporting back into Discord goes through dfx's REST client, so the
     // follow-up edit inherits its rate limiting rather than racing it.
     const rest = yield* DiscordREST;
-    const applicationId = yield* Config.string("APPLICATION_ID");
+    const applicationId = yield* Config.String("APPLICATION_ID");
 
     // The provider's signing keys, cached with a last-good fallback so a
     // hiccup fetching them does not read as a failed link.

@@ -1,7 +1,7 @@
 import { Array, Config, DateTime, Duration, Effect, Layer, Option, Redacted, Result, Schedule, Schema } from "effect";
-import { HttpClient, HttpClientRequest, HttpRouter, HttpServerRequest, HttpServerResponse } from "effect/unstable/http";
-import { HttpApiClient } from "effect/unstable/httpapi";
-import { RateLimiter } from "effect/unstable/persistence";
+import { HttpClient, HttpClientRequest, HttpRouter, HttpServerRequest, HttpServerResponse } from "effect/http";
+import { HttpApiClient } from "effect/http-api";
+import { RateLimiter } from "effect/persistence";
 
 import * as crypto from "node:crypto";
 
@@ -15,15 +15,15 @@ import { randomSecret, sha256 } from "../crypto.ts";
 import { SessionsRepository } from "../domain/sessions.ts";
 
 const tinyburgConfig = Config.all({
-    adminPassword: Config.redacted("ADMIN_PASSWORD"),
+    adminPassword: Config.Redacted("ADMIN_PASSWORD"),
     adminPlayerIds: Config.schema(Config.Array(NimblebitConfig.PlayerIdSchema), "ADMIN_PLAYER_IDS"),
-    registrationToken: Config.option(Config.redacted("TINYBURG_OAUTH_REGISTRATION_TOKEN")),
-    redirectUri: Config.string("TINYBURG_OAUTH_REDIRECT_URI"),
-    issuer: Config.string("TINYBURG_OAUTH_ISSUER").pipe(
+    registrationToken: Config.option(Config.Redacted("TINYBURG_OAUTH_REGISTRATION_TOKEN")),
+    redirectUri: Config.String("TINYBURG_OAUTH_REDIRECT_URI"),
+    issuer: Config.String("TINYBURG_OAUTH_ISSUER").pipe(
         Config.withDefault("https://tinyburg.app"),
         Config.map((issuer) => issuer.replace(/\/$/, ""))
     ),
-    development: Config.string("NODE_ENV").pipe(
+    development: Config.String("NODE_ENV").pipe(
         Config.withDefault("production"),
         Config.map((env) => env === "development")
     ),
@@ -64,7 +64,7 @@ const registerAtProvider = (config: Config.Success<typeof tinyburgConfig>) =>
     Effect.gen(function* () {
         const initialAccessToken = config.development
             ? Option.getOrUndefined(config.registrationToken)
-            : yield* Config.redacted("TINYBURG_OAUTH_REGISTRATION_TOKEN");
+            : yield* Config.Redacted("TINYBURG_OAUTH_REGISTRATION_TOKEN");
 
         const registration = yield* DynamicClientRegistration.register({
             issuer: config.issuer,

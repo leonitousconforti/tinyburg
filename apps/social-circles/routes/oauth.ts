@@ -14,10 +14,10 @@
  *   `tower_grants` and is what the scheduled crawl uses hours later.
  */
 
-import type { HttpClientError } from "effect/unstable/http";
+import type { HttpClientError } from "effect/http";
 
 import { Config, DateTime, Effect, Layer, Option, Redacted, Ref, Result, Schema } from "effect";
-import { HttpClient, HttpRouter, HttpServerRequest, HttpServerResponse, Url } from "effect/unstable/http";
+import { HttpClient, HttpRouter, HttpServerRequest, HttpServerResponse, Url } from "effect/http";
 
 import type { Jwt } from "effect-oidc";
 
@@ -30,15 +30,15 @@ import { GrantsRepository } from "../domain/grants.ts";
 import { SessionsRepository } from "../domain/sessions.ts";
 
 const tinyburgConfig = Config.all({
-    issuer: Config.string("TINYBURG_ISSUER").pipe(
+    issuer: Config.String("TINYBURG_ISSUER").pipe(
         Config.withDefault("https://tinyburg.app"),
         Config.map((issuer) => issuer.replace(/\/$/, ""))
     ),
     // The default keeps the study booting before its client is registered at
     // the provider; sign in simply fails at tinyburg.app until it is set.
-    clientId: Config.string("TINYBURG_CLIENT_ID").pipe(Config.withDefault("unconfigured")),
-    clientSecret: Config.option(Config.redacted("TINYBURG_CLIENT_SECRET")),
-    redirectUri: Config.string("TINYBURG_REDIRECT_URI").pipe(Config.withDefault("http://localhost:3002/auth/callback")),
+    clientId: Config.String("TINYBURG_CLIENT_ID").pipe(Config.withDefault("unconfigured")),
+    clientSecret: Config.option(Config.Redacted("TINYBURG_CLIENT_SECRET")),
+    redirectUri: Config.String("TINYBURG_REDIRECT_URI").pipe(Config.withDefault("http://localhost:3002/auth/callback")),
 });
 
 const STATE_COOKIE_NAME = "social_circles_oauth_state";

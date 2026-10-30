@@ -7,11 +7,11 @@
  * short-lived by design and separate from the long-lived grant the crawl uses.
  */
 
-import type { SqlError } from "effect/unstable/sql";
+import type { SqlError } from "effect/sql";
 
 import { Context, DateTime, Duration, Effect, Layer, type Option, Schema } from "effect";
-import { Model } from "effect/unstable/schema";
-import { SqlClient, SqlModel, SqlSchema } from "effect/unstable/sql";
+import { Model } from "effect/schema";
+import { SqlClient, SqlModel, SqlSchema } from "effect/sql";
 
 /**
  * @since 1.0.0

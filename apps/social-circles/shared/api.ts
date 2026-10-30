@@ -1,5 +1,5 @@
 import { Context, Schema } from "effect";
-import { HttpApi, HttpApiEndpoint, HttpApiError, HttpApiGroup, HttpApiMiddleware } from "effect/unstable/httpapi";
+import { HttpApi, HttpApiEndpoint, HttpApiError, HttpApiGroup, HttpApiMiddleware } from "effect/http-api";
 
 import { PlayerIdSchema } from "@tinyburg/nimblebit-sdk/NimblebitConfig";
 

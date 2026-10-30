@@ -23,20 +23,20 @@ import { DynamicClientRegistration } from "effect-oidc";
  * the same failure any missing required setting is.
  */
 const tinyburgConfig = Config.all({
-    issuer: Config.string("TINYBURG_ISSUER").pipe(
+    issuer: Config.String("TINYBURG_ISSUER").pipe(
         Config.withDefault("https://tinyburg.app"),
         Config.map((issuer) => issuer.replace(/\/$/, ""))
     ),
-    clientId: Config.option(Config.string("TINYBURG_CLIENT_ID")),
-    clientSecret: Config.option(Config.redacted("TINYBURG_CLIENT_SECRET")),
+    clientId: Config.option(Config.String("TINYBURG_CLIENT_ID")),
+    clientSecret: Config.option(Config.Redacted("TINYBURG_CLIENT_SECRET")),
     // The provider's initial access token, which is what gates registration
     // outside development. Holding one is what lets a deployed bot register
     // itself on first boot instead of being registered by hand.
-    registrationToken: Config.option(Config.redacted("TINYBURG_REGISTRATION_TOKEN")),
-    redirectUri: Config.string("TINYBURG_REDIRECT_URI").pipe(
+    registrationToken: Config.option(Config.Redacted("TINYBURG_REGISTRATION_TOKEN")),
+    redirectUri: Config.String("TINYBURG_REDIRECT_URI").pipe(
         Config.withDefault("http://localhost:3003/discord/callback")
     ),
-    development: Config.string("NODE_ENV").pipe(
+    development: Config.String("NODE_ENV").pipe(
         Config.withDefault("production"),
         Config.map((env) => env === "development")
     ),
@@ -74,7 +74,7 @@ export class TinyburgClient extends Context.Service<TinyburgClient>()("@tinyburg
             // No client id and no way to obtain one. Reading the setting
             // again, now as required, fails the way every other missing
             // setting does: naming it.
-            const clientId = yield* Config.string("TINYBURG_CLIENT_ID");
+            const clientId = yield* Config.String("TINYBURG_CLIENT_ID");
             return { issuer, redirectUri, clientId, clientSecret: config.clientSecret } as const;
         }
 

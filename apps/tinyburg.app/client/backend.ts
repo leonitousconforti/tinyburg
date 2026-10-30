@@ -1,5 +1,5 @@
 import { Context, Effect, Layer, Result, Schema as S } from "effect";
-import { HttpApiClient } from "effect/unstable/httpapi";
+import { HttpApiClient } from "effect/http-api";
 
 import { Api as TradingApi } from "@tinyburg/trading-sdk/Sdk";
 import { AsyncData, Command, Http } from "foldkit";

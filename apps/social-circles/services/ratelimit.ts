@@ -22,7 +22,7 @@ export class NimblebitPacer extends Context.Service<NimblebitPacer>()(
              * is never in a hurry and a slow crawl is strictly better than
              * getting the whole project blocked.
              */
-            const spacing = yield* Config.int("NIMBLEBIT_MIN_INTERVAL_MILLIS").pipe(
+            const spacing = yield* Config.Int("NIMBLEBIT_MIN_INTERVAL_MILLIS").pipe(
                 Config.withDefault(2_000),
                 Config.map(Duration.millis)
             );

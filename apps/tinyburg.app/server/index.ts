@@ -1,5 +1,5 @@
 import { Config, ConfigProvider, Effect, Layer, Path, String } from "effect";
-import { FetchHttpClient, HttpRouter, HttpServerResponse } from "effect/unstable/http";
+import { FetchHttpClient, HttpRouter, HttpServerResponse } from "effect/http";
 
 import { createServer } from "node:http";
 
@@ -54,7 +54,7 @@ const AllRoutes = Layer.mergeAll(
 );
 
 const SqlLive = PgClient.layerConfig({
-    url: Config.redacted("DATABASE_URL"),
+    url: Config.Redacted("DATABASE_URL"),
     transformQueryNames: Config.succeed(String.camelToSnake),
     transformResultNames: Config.succeed(String.snakeToCamel),
 });
@@ -81,8 +81,8 @@ HttpRouter.serve(AllRoutes).pipe(
     Layer.provide(SqlLive),
     Layer.provide(
         NodeHttpServer.layerConfig(createServer, {
-            port: Config.number("PORT").pipe(Config.withDefault(3000)),
-            host: Config.string("HOST").pipe(Config.withDefault("0.0.0.0")),
+            port: Config.Number("PORT").pipe(Config.withDefault(3000)),
+            host: Config.String("HOST").pipe(Config.withDefault("0.0.0.0")),
         })
     ),
     /*

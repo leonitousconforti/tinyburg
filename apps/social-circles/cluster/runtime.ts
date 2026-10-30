@@ -23,7 +23,7 @@ import { PgClient } from "@effect/sql-pg";
  * keep snake_case in the database and camelCase in TypeScript.
  */
 export const SqlLive = PgClient.layerConfig({
-    url: Config.redacted("DATABASE_URL"),
+    url: Config.Redacted("DATABASE_URL"),
     transformQueryNames: Config.succeed(String.camelToSnake),
     transformResultNames: Config.succeed(String.snakeToCamel),
 });

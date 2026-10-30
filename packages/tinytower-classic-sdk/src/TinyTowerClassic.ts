@@ -16,9 +16,9 @@ import * as Encoding from "effect/Encoding";
 import * as Function from "effect/Function";
 import * as Redacted from "effect/Redacted";
 import * as Schema from "effect/Schema";
-import * as HttpClient from "effect/unstable/http/HttpClient";
-import * as HttpClientRequest from "effect/unstable/http/HttpClientRequest";
-import * as HttpApiClient from "effect/unstable/httpapi/HttpApiClient";
+import { HttpClient } from "effect/http";
+import { HttpClientRequest } from "effect/http";
+import { HttpApiClient } from "effect/http-api";
 
 import { NimblebitAuth, type NimblebitConfig, NimblebitError } from "@tinyburg/nimblebit-sdk";
 import * as Bitizen from "@tinyburg/tinytower-sdk/Bitizens";

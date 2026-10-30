@@ -9,8 +9,8 @@
  */
 
 import { DateTime, Effect, Layer, Option, Redacted } from "effect";
-import { HttpEffect, HttpServerResponse } from "effect/unstable/http";
-import { HttpApiBuilder, HttpApiError } from "effect/unstable/httpapi";
+import { HttpEffect, HttpServerResponse } from "effect/http";
+import { HttpApiBuilder, HttpApiError } from "effect/http-api";
 
 import { CookiePolicy, maybeCurrentSession } from "../cookies.ts";
 import { unseal } from "../crypto.ts";

@@ -26,7 +26,7 @@ export const randomSecret = (): string =>
  * are encrypted instead, so a leaked database dump is not by itself a set of
  * live credentials to other people's towers.
  */
-const sealingKey = Config.redacted("GRANT_SEALING_KEY").pipe(
+const sealingKey = Config.Redacted("GRANT_SEALING_KEY").pipe(
     Config.map((secret) => crypto.createHash("sha256").update(Redacted.value(secret)).digest())
 );
 

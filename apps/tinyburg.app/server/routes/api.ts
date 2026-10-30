@@ -1,7 +1,7 @@
 import { DateTime, Duration, Effect, Encoding, Layer, Option, Redacted, Schema } from "effect";
-import { Headers, HttpClient, HttpRouter, HttpServerRequest } from "effect/unstable/http";
-import { HttpApiBuilder, HttpApiError } from "effect/unstable/httpapi";
-import { Model } from "effect/unstable/schema";
+import { Headers, HttpClient, HttpRouter, HttpServerRequest } from "effect/http";
+import { HttpApiBuilder, HttpApiError } from "effect/http-api";
+import { Model } from "effect/schema";
 
 import type { Session, User } from "../../domain/models.ts";
 import type { GameAccountsRepository } from "../../domain/tinytower.ts";

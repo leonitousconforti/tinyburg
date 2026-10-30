@@ -6,10 +6,10 @@
  * here, and nowhere else.
  */
 
-import type { SqlError } from "effect/unstable/sql";
+import type { SqlError } from "effect/sql";
 
 import { Context, Effect, Layer, Schema } from "effect";
-import { SqlClient, SqlSchema } from "effect/unstable/sql";
+import { SqlClient, SqlSchema } from "effect/sql";
 
 import { PlayerIdSchema } from "@tinyburg/nimblebit-sdk/NimblebitConfig";
 

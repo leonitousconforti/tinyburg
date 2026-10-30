@@ -1,7 +1,7 @@
-import type { SqlConnection, SqlError, Statement } from "effect/unstable/sql";
+import type { SqlConnection, SqlError, Statement } from "effect/sql";
 
 import { Context, DateTime, Duration, Effect, Layer, Option, Schema, SchemaGetter } from "effect";
-import { SqlClient, SqlModel, SqlSchema } from "effect/unstable/sql";
+import { SqlClient, SqlModel, SqlSchema } from "effect/sql";
 
 import { Session, User } from "./models.ts";
 

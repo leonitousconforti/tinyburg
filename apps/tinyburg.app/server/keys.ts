@@ -9,12 +9,12 @@ import { Jwt } from "effect-oidc";
  */
 export class OidcKeys extends Context.Service<OidcKeys>()("@tinyburg/tinyburg.app/server/OidcKeys", {
     make: Effect.gen(function* () {
-        const issuer = yield* Config.string("SITE_URL").pipe(
+        const issuer = yield* Config.String("SITE_URL").pipe(
             Config.withDefault("https://tinyburg.app"),
             Config.map((url) => url.replace(/\/$/, ""))
         );
 
-        const privateJwk = yield* Effect.flatMap(Config.redacted("OIDC_PRIVATE_JWK"), (jwk) =>
+        const privateJwk = yield* Effect.flatMap(Config.Redacted("OIDC_PRIVATE_JWK"), (jwk) =>
             Schema.decodeEffect(Schema.fromJsonString(Jwt.PrivateJwkSchema))(Redacted.value(jwk))
         );
 

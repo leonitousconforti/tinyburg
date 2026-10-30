@@ -1,7 +1,7 @@
-import type { HttpClientError } from "effect/unstable/http";
+import type { HttpClientError } from "effect/http";
 
 import { Config, Context, Effect, Function, Layer, type Schema } from "effect";
-import { HttpApiBuilder, HttpApiClient, HttpApiError } from "effect/unstable/httpapi";
+import { HttpApiBuilder, HttpApiClient, HttpApiError } from "effect/http-api";
 
 import { Endpoints } from "@tinyburg/lego-tower-sdk";
 import { NimblebitAuth, NimblebitConfig } from "@tinyburg/nimblebit-sdk";

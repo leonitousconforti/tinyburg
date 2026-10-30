@@ -1,5 +1,5 @@
 import { Context, Effect, Layer, Schema as S } from "effect";
-import { HttpApiClient } from "effect/unstable/httpapi";
+import { HttpApiClient } from "effect/http-api";
 
 import { Command, Http } from "foldkit";
 import { defineMessageUnion } from "foldkit/message";

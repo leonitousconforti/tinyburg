@@ -1,5 +1,5 @@
 import { Effect } from "effect";
-import { SqlClient } from "effect/unstable/sql";
+import { SqlClient } from "effect/sql";
 
 /**
  * Keys the study by game as well as by player.

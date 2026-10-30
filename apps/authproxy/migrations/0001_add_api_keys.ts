@@ -1,5 +1,5 @@
 import { Effect } from "effect";
-import { SqlClient } from "effect/unstable/sql";
+import { SqlClient } from "effect/sql";
 
 import { NONE_API_KEY, READONLY_API_KEY } from "../domain/model.ts";
 import { READONLY_KEY_SCOPES } from "../domain/scopes.ts";

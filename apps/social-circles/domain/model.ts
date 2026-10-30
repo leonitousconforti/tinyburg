@@ -7,7 +7,7 @@
  */
 
 import { Schema } from "effect";
-import { Model } from "effect/unstable/schema";
+import { Model } from "effect/schema";
 
 import { PlayerIdSchema } from "@tinyburg/nimblebit-sdk/NimblebitConfig";
 

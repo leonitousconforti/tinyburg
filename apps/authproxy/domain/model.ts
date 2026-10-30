@@ -1,6 +1,6 @@
 import { Context, Effect, Layer, Schema, SchemaGetter } from "effect";
-import { Model } from "effect/unstable/schema";
-import { SqlClient, SqlModel, SqlSchema } from "effect/unstable/sql";
+import { Model } from "effect/schema";
+import { SqlClient, SqlModel, SqlSchema } from "effect/sql";
 
 /**
  * The current API key in context, provided by middleware.
