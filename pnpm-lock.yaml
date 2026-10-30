@@ -92,8 +92,8 @@ importers:
   apps/archivist:
     dependencies:
       '@bufbuild/protobuf':
-        specifier: 2.14.0
-        version: 2.14.0
+        specifier: 2.16.0
+        version: 2.16.0
       '@effect-aws/client-s3':
         specifier: 2.0.0-beta.6
         version: 2.0.0-beta.6(effect@4.1.0)
@@ -453,8 +453,8 @@ importers:
   packages/insight:
     dependencies:
       '@bufbuild/protobuf':
-        specifier: 2.14.0
-        version: 2.14.0
+        specifier: 2.16.0
+        version: 2.16.0
       '@efffrida/frida-tools':
         specifier: 0.0.61
         version: 0.0.61(effect@4.1.0)
@@ -573,8 +573,8 @@ importers:
         version: 3.0.1
     devDependencies:
       '@bufbuild/protobuf':
-        specifier: 2.14.0
-        version: 2.14.0
+        specifier: 2.16.0
+        version: 2.16.0
       '@effect/platform-node':
         specifier: 4.1.0
         version: 4.1.0(effect@4.1.0)(redis@6.2.1)
@@ -657,8 +657,8 @@ importers:
         version: 0.1.0-beta.47(effect@4.1.0)
     devDependencies:
       '@bufbuild/protobuf':
-        specifier: 2.14.0
-        version: 2.14.0
+        specifier: 2.16.0
+        version: 2.16.0
       '@effect/platform-node':
         specifier: 4.1.0
         version: 4.1.0(effect@4.1.0)(redis@6.2.1)
@@ -891,9 +891,6 @@ packages:
   '@bcoe/v8-coverage@1.0.2':
     resolution: {integrity: sha512-6zABk/ECA/QYSCQ1NGiVwwbQerUCZ+TQbp64Q3AgmfNvurHH0j8TtXa1qbShXA6qqkpAj4V5W8pP6mLe1mcMqA==}
     engines: {node: '>=18'}
-
-  '@bufbuild/protobuf@2.14.0':
-    resolution: {integrity: sha512-C3UGsiCwSprE2NKIIFA3hCDlpXTMCAXRZuEVp88L1GY36Y41+rYL5fryE+nOFhp4p4JPQvdV8PQ4DWgHgeTE+w==}
 
   '@bufbuild/protobuf@2.16.0':
     resolution: {integrity: sha512-FWa0sPlqYGJgpTs6OxBRcL/AW4JT0OIO+W1ajerluoTVh8CV0B7XM1qsNCRgnkSCkRCgOICKHRQlY17jrsm0+Q==}
@@ -3856,8 +3853,6 @@ snapshots:
       '@babel/helper-validator-identifier': 8.0.4
 
   '@bcoe/v8-coverage@1.0.2': {}
-
-  '@bufbuild/protobuf@2.14.0': {}
 
   '@bufbuild/protobuf@2.16.0': {}
 
