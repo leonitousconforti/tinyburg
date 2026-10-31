@@ -8,10 +8,11 @@
  * a settlement - into "one writer won, the other observed `false`".
  */
 
-import type { SqlError } from "effect/unstable/sql";
+import type { Option } from "effect";
+import type { SqlError } from "effect/sql";
 
-import { Context, Effect, Layer, Option, Schema } from "effect";
-import { SqlClient, SqlSchema } from "effect/unstable/sql";
+import { Context, Effect, Layer, Schema } from "effect";
+import { SqlClient, SqlSchema } from "effect/sql";
 
 import type { TradeState } from "@tinyburg/treasury-sdk/Sdk";
 
@@ -153,9 +154,7 @@ export class TradesRepository extends Context.Service<TradesRepository>()(
                         RETURNING *
                     `;
                 return Effect.flatMap(confirm, (rows) =>
-                    rows.length === 0
-                        ? Effect.succeedNone
-                        : Effect.map(Schema.decodeUnknownEffect(Trade)(rows[0]), Option.some)
+                    rows.length === 0 ? Effect.succeedNone : Effect.asSome(Schema.decodeUnknownEffect(Trade)(rows[0]))
                 );
             };
 

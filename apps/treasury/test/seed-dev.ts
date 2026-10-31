@@ -19,12 +19,12 @@
  */
 
 import { Config, Effect, Layer, Redacted, Result, Schema, String } from "effect";
-import { FetchHttpClient } from "effect/unstable/http";
-import { SqlClient } from "effect/unstable/sql";
+import { FetchHttpClient } from "effect/http";
+import { SqlClient } from "effect/sql";
 
 import * as fs from "node:fs";
 
-import { NodeRuntime, NodeServices } from "@effect/platform-node";
+import { NodeCrypto, NodeRuntime, NodeServices } from "@effect/platform-node";
 import { PgClient } from "@effect/sql-pg";
 import { NimblebitAuth, NimblebitConfig } from "@tinyburg/nimblebit-sdk";
 import { TinyTower } from "@tinyburg/tinytower-sdk";
@@ -109,8 +109,8 @@ const seedDatabase = Effect.gen(function* () {
 const seedSaves = Effect.gen(function* () {
     const data = yield* snapshotSave;
     for (const user of USERS) {
-        const playerId = yield* Schema.decodeUnknownEffect(NimblebitConfig.PlayerIdSchema)(user.playerId);
-        const playerAuthKey = yield* Schema.decodeUnknownEffect(NimblebitConfig.PlayerAuthKeySchema)(user.authKey);
+        const playerId = yield* Schema.decodeEffect(NimblebitConfig.PlayerIdSchema)(user.playerId);
+        const playerAuthKey = yield* Schema.decodeEffect(NimblebitConfig.PlayerAuthKeySchema)(user.authKey);
         yield* TinyTower.sync_pushSave({ playerId, playerAuthKey, data });
         yield* Effect.logInfo(`pushed a save to the fake for ${user.playerId}`);
     }
@@ -135,7 +135,7 @@ const program = Effect.gen(function* () {
 });
 
 const SqlLive = PgClient.layerConfig({
-    url: Config.redacted("TINYBURG_APP_DATABASE_URL").pipe(
+    url: Config.Redacted("TINYBURG_APP_DATABASE_URL").pipe(
         Config.withDefault(Redacted.make("postgres://postgres@127.0.0.1:54320/tinyburg_app"))
     ),
     transformQueryNames: Config.succeed(String.camelToSnake),
@@ -144,13 +144,15 @@ const SqlLive = PgClient.layerConfig({
 
 /** The fake does the signing server-side; the bearer key only has to exist. */
 const FakeNimblebitLive = NimblebitAuth.layerCustomHostConfig({
-    host: Config.string("FAKE_NIMBLEBIT_URL").pipe(Config.withDefault("http://localhost:3005")),
-    authKey: Config.redacted("FAKE_NIMBLEBIT_AUTH_KEY").pipe(Config.withDefault(Redacted.make("fake"))),
+    host: Config.String("FAKE_NIMBLEBIT_URL").pipe(Config.withDefault("http://localhost:3005")),
+    authKey: Config.Redacted("FAKE_NIMBLEBIT_AUTH_KEY").pipe(Config.withDefault(Redacted.make("fake"))),
 });
 
 program.pipe(
     Effect.provide(
-        Layer.mergeAll(SqlLive, FakeNimblebitLive, FetchHttpClient.layer).pipe(Layer.provideMerge(NodeServices.layer))
+        Layer.mergeAll(SqlLive, FakeNimblebitLive, FetchHttpClient.layer).pipe(
+            Layer.provideMerge(Layer.mergeAll(NodeServices.layer, NodeCrypto.layerSecureRandom))
+        )
     ),
     NodeRuntime.runMain
 );

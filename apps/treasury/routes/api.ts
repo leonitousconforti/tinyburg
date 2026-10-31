@@ -1,7 +1,9 @@
 /**
  * The treasury's api handlers.
  *
- * Every handler acts as the bearer token's subject and nobody else, and the
+ * Every handler acts as the bearer token's subject and nobody else (who that
+ * is, and whether the token may call the endpoint at all, is
+ * `routes/access.ts`'s business), and the
  * participant checks all answer `404` rather than `403` for someone else's
  * trade: the api never confirms a trade exists to a stranger. The deeper
  * invariants - who may accept, what a cancel may interrupt - are not
@@ -10,24 +12,24 @@
  */
 
 import { DateTime, Duration, Effect, Layer, Option, Schema } from "effect";
-import { HttpApiBuilder, HttpApiError } from "effect/unstable/httpapi";
+import { HttpApiBuilder, HttpApiError } from "effect/http-api";
 
 import type { Trade } from "../domain/model.ts";
 import type { PlayerIdSchema } from "@tinyburg/nimblebit-sdk/NimblebitConfig";
 
 import { Bitizens, TinyTower } from "@tinyburg/tinytower-sdk";
 import { Api, ItemSpec } from "@tinyburg/treasury-sdk/Sdk";
-import { ResourceServer } from "effect-oidc";
 
 import { GrantsRepository } from "../domain/grants.ts";
 import { LedgerRepository } from "../domain/ledger.ts";
 import { LegsRepository } from "../domain/legs.ts";
 import { TradesRepository } from "../domain/trades.ts";
-import { TinyburgOidc } from "../services/oidc.ts";
+import { TinyburgProvider } from "../services/provider.ts";
 import { TinyburgTrading } from "../services/tinyburg.ts";
 import { GiftEscrowWorkflow } from "../workflows/giftEscrow.ts";
 import { RefundWorkflow } from "../workflows/refund.ts";
 import { SpliceWorkflow } from "../workflows/splice.ts";
+import { RequireAccessLive, requireTrader } from "./access.ts";
 
 type PlayerId = typeof PlayerIdSchema.Type;
 
@@ -35,20 +37,6 @@ const decodeItemSpec = Schema.decodeEffect(Schema.fromJsonString(ItemSpec));
 const encodeItemSpec = Schema.encodeEffect(Schema.fromJsonString(ItemSpec));
 const decodeSave = Schema.decodeEffect(TinyTower.SaveData);
 const encodeBitizen = Schema.encodeEffect(Bitizens.Bitizen);
-
-/**
- * Verifying tokens is delegated to the provider's published keys: the
- * treasury holds none of its own, so a token minted anywhere but
- * tinyburg.app verifies nowhere here.
- */
-const AuthorizationLive = Layer.unwrap(
-    Effect.map(TinyburgOidc, (oidc) =>
-        ResourceServer.layer({
-            issuer: oidc.issuer,
-            audience: oidc.issuer,
-        })
-    )
-);
 
 const TreasuryGroupLive = HttpApiBuilder.group(
     Api,
@@ -59,9 +47,9 @@ const TreasuryGroupLive = HttpApiBuilder.group(
         const ledger = yield* LedgerRepository;
         const grants = yield* GrantsRepository;
         const tinyburg = yield* TinyburgTrading;
-        const oidc = yield* TinyburgOidc;
+        const provider = yield* TinyburgProvider;
 
-        const connectUrl = `${oidc.publicUrl}/auth/connect?returnTo=${encodeURIComponent(`${oidc.issuer}/trades`)}`;
+        const connectUrl = `${provider.publicUrl}/auth/connect?returnTo=${encodeURIComponent(`${provider.issuer}/trades`)}`;
 
         /**
          * The ownership gate: a player id not among the caller's linked
@@ -82,8 +70,8 @@ const TreasuryGroupLive = HttpApiBuilder.group(
 
         /** A trade as the api describes it, from one caller's point of view. */
         const encodeTrade = Effect.fnUntraced(function* (trade: Trade, userId: string) {
-            const gives = yield* Effect.orDie(decodeItemSpec(trade.gives));
-            const wants = yield* Effect.orDie(decodeItemSpec(trade.wants));
+            const gives = yield* decodeItemSpec(trade.gives);
+            const wants = yield* decodeItemSpec(trade.wants);
             const role =
                 trade.proposerUserId === userId
                     ? ("proposer" as const)
@@ -106,7 +94,7 @@ const TreasuryGroupLive = HttpApiBuilder.group(
                 expiresAt: trade.expiresAt,
                 failureReason: Option.getOrUndefined(trade.failureReason),
             };
-        });
+        }, Effect.orDie);
 
         const isParticipant = (trade: Trade, userId: string): boolean =>
             trade.proposerUserId === userId || Option.getOrUndefined(trade.counterpartyUserId) === userId;
@@ -123,8 +111,8 @@ const TreasuryGroupLive = HttpApiBuilder.group(
         return handlers
             .handle("GrantStatus", () =>
                 Effect.gen(function* () {
-                    const user = yield* ResourceServer.CurrentUser;
-                    const grant = yield* Effect.orDie(grants.findLive(user.sub));
+                    const user = yield* requireTrader;
+                    const grant = yield* Effect.orDie(grants.findLive(user.userId));
                     return {
                         connected: Option.isSome(grant),
                         scope: Option.map(grant, (live) => live.scope).pipe(Option.getOrUndefined),
@@ -135,20 +123,20 @@ const TreasuryGroupLive = HttpApiBuilder.group(
 
             .handle("ListTrades", () =>
                 Effect.gen(function* () {
-                    const user = yield* ResourceServer.CurrentUser;
-                    const mine = yield* Effect.orDie(trades.listForUser(user.sub));
-                    return yield* Effect.forEach(mine, (trade) => encodeTrade(trade, user.sub));
+                    const user = yield* requireTrader;
+                    const mine = yield* Effect.orDie(trades.listForUser(user.userId));
+                    return yield* Effect.forEach(mine, (trade) => encodeTrade(trade, user.userId));
                 })
             )
 
             .handle("GetTrade", ({ params }) =>
                 Effect.gen(function* () {
-                    const user = yield* ResourceServer.CurrentUser;
-                    const trade = yield* participantTrade(params.tradeId, user.sub);
+                    const user = yield* requireTrader;
+                    const trade = yield* participantTrade(params.tradeId, user.userId);
                     const tradeLegs = yield* Effect.orDie(legs.forTrade(trade.id));
                     const history = yield* Effect.orDie(ledger.forTrade(trade.id));
                     return {
-                        trade: yield* encodeTrade(trade, user.sub),
+                        trade: yield* encodeTrade(trade, user.userId),
                         legs: tradeLegs.map((leg) => ({
                             role: leg.role,
                             fromPlayerId: leg.fromPlayerId,
@@ -164,7 +152,7 @@ const TreasuryGroupLive = HttpApiBuilder.group(
 
             .handle("ProposeTrade", ({ payload }) =>
                 Effect.gen(function* () {
-                    const user = yield* ResourceServer.CurrentUser;
+                    const user = yield* requireTrader;
 
                     // The offer must match the mechanism: gift items ride the
                     // gift channel, splice lists ride the splice, never mixed.
@@ -173,7 +161,7 @@ const TreasuryGroupLive = HttpApiBuilder.group(
                         return yield* new HttpApiError.BadRequest();
                     }
 
-                    const owns = yield* ownsPlayer(user.sub, payload.proposerPlayerId);
+                    const owns = yield* ownsPlayer(user.userId, payload.proposerPlayerId);
                     if (!owns) return yield* new HttpApiError.Forbidden();
 
                     const now = yield* DateTime.now;
@@ -181,7 +169,7 @@ const TreasuryGroupLive = HttpApiBuilder.group(
                         .create({
                             mechanism: payload.mechanism,
                             game: payload.game,
-                            proposerUserId: user.sub,
+                            proposerUserId: user.userId,
                             proposerPlayerId: payload.proposerPlayerId,
                             counterpartyPlayerId: Option.fromUndefinedOr(payload.counterpartyPlayerId),
                             gives: yield* Effect.orDie(encodeItemSpec(payload.gives)),
@@ -190,21 +178,21 @@ const TreasuryGroupLive = HttpApiBuilder.group(
                         })
                         .pipe(Effect.orDie);
                     yield* Effect.ignore(ledger.append({ tradeId: trade.id, event: "proposed" }));
-                    return yield* encodeTrade(trade, user.sub);
+                    return yield* encodeTrade(trade, user.userId);
                 })
             )
 
             .handle("AcceptTrade", ({ params, payload }) =>
                 Effect.gen(function* () {
-                    const user = yield* ResourceServer.CurrentUser;
+                    const user = yield* requireTrader;
 
-                    const owns = yield* ownsPlayer(user.sub, payload.playerId);
+                    const owns = yield* ownsPlayer(user.userId, payload.playerId);
                     if (!owns) return yield* new HttpApiError.Forbidden();
 
                     const accepted = yield* trades
                         .accept({
                             tradeId: params.tradeId,
-                            counterpartyUserId: user.sub,
+                            counterpartyUserId: user.userId,
                             counterpartyPlayerId: payload.playerId,
                         })
                         .pipe(Effect.orDie);
@@ -224,14 +212,14 @@ const TreasuryGroupLive = HttpApiBuilder.group(
                         yield* GiftEscrowWorkflow.execute({ tradeId: params.tradeId }, { discard: true });
                     }
 
-                    return yield* encodeTrade(accepted.value, user.sub);
+                    return yield* encodeTrade(accepted.value, user.userId);
                 })
             )
 
             .handle("CancelTrade", ({ params }) =>
                 Effect.gen(function* () {
-                    const user = yield* ResourceServer.CurrentUser;
-                    const trade = yield* participantTrade(params.tradeId, user.sub);
+                    const user = yield* requireTrader;
+                    const trade = yield* participantTrade(params.tradeId, user.userId);
 
                     // Nothing has moved yet: the trade simply ends.
                     const cancelled = yield* trades
@@ -243,16 +231,16 @@ const TreasuryGroupLive = HttpApiBuilder.group(
                         .pipe(Effect.orDie);
                     if (cancelled) {
                         yield* Effect.ignore(ledger.append({ tradeId: trade.id, event: "cancelled" }));
-                        const fresh = yield* participantTrade(trade.id, user.sub);
-                        return yield* encodeTrade(fresh, user.sub);
+                        const fresh = yield* participantTrade(trade.id, user.userId);
+                        return yield* encodeTrade(fresh, user.userId);
                     }
 
                     // Deposits are in the vault: cancelling means unwinding.
                     if (trade.state === "escrowing" || trade.state === "escrowed") {
                         yield* Effect.ignore(ledger.append({ tradeId: trade.id, event: "cancel_requested" }));
                         yield* RefundWorkflow.execute({ tradeId: trade.id }, { discard: true });
-                        const fresh = yield* participantTrade(trade.id, user.sub);
-                        return yield* encodeTrade(fresh, user.sub);
+                        const fresh = yield* participantTrade(trade.id, user.userId);
+                        return yield* encodeTrade(fresh, user.userId);
                     }
 
                     return yield* new HttpApiError.Conflict();
@@ -261,11 +249,12 @@ const TreasuryGroupLive = HttpApiBuilder.group(
 
             .handle("ConfirmSplice", ({ params }) =>
                 Effect.gen(function* () {
-                    const user = yield* ResourceServer.CurrentUser;
-                    const trade = yield* participantTrade(params.tradeId, user.sub);
+                    const user = yield* requireTrader;
+                    const trade = yield* participantTrade(params.tradeId, user.userId);
                     if (trade.mechanism !== "splice") return yield* new HttpApiError.Conflict();
 
-                    const role = trade.proposerUserId === user.sub ? ("proposer" as const) : ("counterparty" as const);
+                    const role =
+                        trade.proposerUserId === user.userId ? ("proposer" as const) : ("counterparty" as const);
                     const alreadyConfirmed =
                         role === "proposer"
                             ? Option.isSome(trade.proposerConfirmedAt)
@@ -281,22 +270,22 @@ const TreasuryGroupLive = HttpApiBuilder.group(
 
                     yield* Effect.ignore(ledger.append({ tradeId: trade.id, event: `splice_confirmed_${role}` }));
 
-                    const fresh = yield* participantTrade(trade.id, user.sub);
+                    const fresh = yield* participantTrade(trade.id, user.userId);
                     if (Option.isSome(fresh.proposerConfirmedAt) && Option.isSome(fresh.counterpartyConfirmedAt)) {
                         yield* SpliceWorkflow.execute({ tradeId: trade.id }, { discard: true });
                     }
-                    return yield* encodeTrade(fresh, user.sub);
+                    return yield* encodeTrade(fresh, user.userId);
                 })
             )
 
             .handle("ListInventory", ({ params }) =>
                 Effect.gen(function* () {
-                    const user = yield* ResourceServer.CurrentUser;
-                    const owns = yield* ownsPlayer(user.sub, params.playerId);
+                    const user = yield* requireTrader;
+                    const owns = yield* ownsPlayer(user.userId, params.playerId);
                     if (!owns) return yield* new HttpApiError.NotFound();
 
                     const save = yield* tinyburg
-                        .pullSave({ tinyburgUserId: user.sub, playerId: params.playerId })
+                        .pullSave({ tinyburgUserId: user.userId, playerId: params.playerId })
                         .pipe(Effect.mapError(() => new HttpApiError.ServiceUnavailable()));
                     const decoded = yield* decodeSave(save.data).pipe(
                         Effect.mapError(() => new HttpApiError.ServiceUnavailable())
@@ -336,5 +325,5 @@ const TreasuryPublicGroupLive = HttpApiBuilder.group(
 export const ApiLive = HttpApiBuilder.layer(Api).pipe(
     Layer.provide(TreasuryGroupLive),
     Layer.provide(TreasuryPublicGroupLive),
-    Layer.provide(AuthorizationLive)
+    Layer.provide(RequireAccessLive)
 );

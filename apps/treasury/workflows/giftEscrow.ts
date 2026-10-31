@@ -14,7 +14,7 @@
  */
 
 import { Effect, Option, Schema } from "effect";
-import { Activity, DurableClock, Workflow } from "effect/unstable/workflow";
+import { Activity, DurableClock, Workflow } from "effect/workflow";
 
 import type { GiftItem } from "@tinyburg/treasury-sdk/Sdk";
 

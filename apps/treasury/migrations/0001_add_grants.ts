@@ -1,5 +1,5 @@
 import { Effect } from "effect";
-import { SqlClient } from "effect/unstable/sql";
+import { SqlClient } from "effect/sql";
 
 /**
  * Refresh tokens for the tinyburg.app grant a trader gives the treasury. The
@@ -7,9 +7,10 @@ import { SqlClient } from "effect/unstable/sql";
  * counterparty may accept hours later - so a user-present access token is
  * not enough. Tokens are stored encrypted; this table holds ciphertext only.
  */
-export default Effect.flatMap(
-    SqlClient.SqlClient,
-    (sql) => sql`
+export default Effect.flatMap(SqlClient.SqlClient, (sql) =>
+    Effect.all(
+        [
+            sql`
         CREATE TABLE IF NOT EXISTS grants (
             id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
             tinyburg_user_id UUID NOT NULL UNIQUE,
@@ -20,5 +21,8 @@ export default Effect.flatMap(
             -- retrying a grant the user revoked upstream.
             invalidated_at TIMESTAMPTZ
         );
-    `
+        `,
+        ],
+        { discard: true }
+    )
 );

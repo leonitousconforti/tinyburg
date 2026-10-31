@@ -1,22 +1,18 @@
-import { Config, Effect, Encoding, Redacted, Schema } from "effect";
+import { Config, Effect, Redacted, Schema } from "effect";
+import { Base64Url } from "effect/encoding";
 
 import * as crypto from "node:crypto";
 
 /**
- * SHA-256 as base64url, the shape OAuth uses for the PKCE S256 challenge and
- * for anything we keep a hash of rather than the secret itself.
+ * SHA-256 as unpadded base64url: the shape tinyburg.app keeps session cookies
+ * in (the dev seed writes sessions with it), and what the connect flow
+ * compares its state with in constant time.
  */
 export const sha256 = (value: string): Effect.Effect<string> =>
     Effect.map(
         Effect.promise(() => crypto.subtle.digest("SHA-256", new TextEncoder().encode(value))),
-        (digest) => Encoding.encodeBase64Url(new Uint8Array(digest))
+        (digest) => Base64Url.encode(new Uint8Array(digest))
     );
-
-/**
- * A 384-bit random string, for OAuth state and PKCE verifiers.
- */
-export const randomSecret = (): string =>
-    Array.from(crypto.getRandomValues(new Uint8Array(48)), (byte) => byte.toString(16).padStart(2, "0")).join("");
 
 /**
  * The key that protects stored refresh tokens.
@@ -26,7 +22,7 @@ export const randomSecret = (): string =>
  * days later. They are encrypted instead, so a leaked database dump is not by
  * itself a set of live credentials to other people's towers.
  */
-const sealingKey = Config.redacted("GRANT_SEALING_KEY").pipe(
+const sealingKey = Config.Redacted("GRANT_SEALING_KEY").pipe(
     Config.map((secret) => crypto.createHash("sha256").update(Redacted.value(secret)).digest())
 );
 
@@ -83,6 +79,8 @@ export const unseal = (sealed: string): Effect.Effect<Redacted.Redacted, Config.
  * was altered. Deliberately carries no detail: the caller's only correct
  * response is to treat the grant as lost and ask the user to reconnect.
  */
-export class SealError extends Schema.Error<SealError>("@tinyburg/treasury/SealError")({
+export class SealError extends Schema.Error<SealError, { readonly brand: unique symbol }>(
+    "@tinyburg/treasury/SealError"
+)({
     _tag: Schema.tag("SealError"),
 }) {}

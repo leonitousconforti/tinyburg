@@ -7,10 +7,10 @@
  * many verifiers and reconcilers are looking at it.
  */
 
-import type { SqlError } from "effect/unstable/sql";
+import type { SqlError } from "effect/sql";
 
 import { Context, Effect, Layer, Schema } from "effect";
-import { SqlClient, SqlSchema } from "effect/unstable/sql";
+import { SqlClient, SqlSchema } from "effect/sql";
 
 import type { SyncItemType } from "@tinyburg/tinytower-sdk/SyncItemType";
 import type { LegState } from "@tinyburg/treasury-sdk/Sdk";

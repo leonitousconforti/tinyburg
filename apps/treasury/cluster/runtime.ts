@@ -15,14 +15,18 @@
  */
 
 import { Layer } from "effect";
-import { ClusterWorkflowEngine, SingleRunner } from "effect/unstable/cluster";
+import { ClusterWorkflowEngine, SingleRunner } from "effect/cluster";
 
 import { NodeCrypto } from "@effect/platform-node";
 
-export const ClusterLive = SingleRunner.layer({ runnerStorage: "sql" }).pipe(Layer.provide(NodeCrypto.layer));
+export const ClusterLive = SingleRunner.layer({ runnerStorage: "sql" }).pipe(Layer.provide(NodeCrypto.layerDigest));
 
 /**
  * Durable execution on top of the cluster: what makes the escrow, refund and
  * splice workflows replayable across deploys.
+ *
+ * `provideMerge` rather than `provide` so that `Sharding` stays visible
+ * downstream: the crons need it too, and this keeps them on the same single
+ * cluster instance as the workflow engine.
  */
 export const DurableLive = ClusterWorkflowEngine.layer.pipe(Layer.provideMerge(ClusterLive));

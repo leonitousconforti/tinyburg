@@ -14,8 +14,8 @@
  * audit trail the trading api would otherwise have provided.
  */
 
-import { Config, Context, Effect, Layer, Schema } from "effect";
-import { HttpClient } from "effect/unstable/http";
+import { Config, Context, Effect, Layer, Option, Schema } from "effect";
+import { HttpClient } from "effect/http";
 
 import type { SyncItemType } from "@tinyburg/tinytower-sdk/SyncItemType";
 
@@ -34,7 +34,9 @@ type SyncItemTypeValue = (typeof SyncItemType)[keyof typeof SyncItemType];
  * @since 1.0.0
  * @category Errors
  */
-export class VaultUnavailable extends Schema.Error<VaultUnavailable>("@tinyburg/treasury/VaultUnavailable")({
+export class VaultUnavailable extends Schema.Error<VaultUnavailable, { readonly brand: unique symbol }>(
+    "@tinyburg/treasury/VaultUnavailable"
+)({
     _tag: Schema.tag("VaultUnavailable"),
     reason: Schema.String,
 }) {}
@@ -48,16 +50,21 @@ const vaultConfig = Config.all({
  * How the vault signs its calls. Talking to Nimblebit itself needs the
  * game's shared secret; anything else (the authproxy for its auditing, a
  * fake for the dev stack) is a custom host that does the real signing on its
- * side.
+ * side. A blank NIMBLEBIT_HOST, as `.env.example` leaves it, means Nimblebit.
  */
 export const VaultAuthLive = Layer.unwrap(
-    Effect.map(Config.string("NIMBLEBIT_HOST").pipe(Config.withDefault("https://sync.nimblebit.com")), (host) =>
-        host === "https://sync.nimblebit.com"
-            ? NimblebitAuth.layerDirectConfig()
-            : NimblebitAuth.layerCustomHostConfig({
-                  host: Config.succeed(host),
-                  authKey: Config.redacted("NIMBLEBIT_AUTH_KEY"),
-              })
+    Effect.map(
+        Config.option(Config.String("NIMBLEBIT_HOST")).pipe(
+            Config.map(Option.filter((host) => host.trim() !== "" && host !== "https://sync.nimblebit.com"))
+        ),
+        Option.match({
+            onNone: () => NimblebitAuth.layerDirectConfig(),
+            onSome: (host) =>
+                NimblebitAuth.layerCustomHostConfig({
+                    host: Config.succeed(host),
+                    authKey: Config.Redacted("NIMBLEBIT_AUTH_KEY"),
+                }),
+        })
     )
 );
 

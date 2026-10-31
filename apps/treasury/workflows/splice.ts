@@ -11,7 +11,7 @@
  */
 
 import { Effect, Option, Schema, type Types } from "effect";
-import { Activity, Workflow } from "effect/unstable/workflow";
+import { Activity, Workflow } from "effect/workflow";
 
 import type { SpliceItems } from "@tinyburg/treasury-sdk/Sdk";
 
@@ -35,7 +35,9 @@ type MutableSave = Types.DeepMutable<typeof TinyTower.SaveData.Type>;
  * giver's save, or a balance was short. Nothing has been pushed when this is
  * raised; it fails the trade with a reason the participants can read.
  */
-class SpliceRejected extends Schema.Error<SpliceRejected>("@tinyburg/treasury/SpliceRejected")({
+class SpliceRejected extends Schema.Error<SpliceRejected, { readonly brand: unique symbol }>(
+    "@tinyburg/treasury/SpliceRejected"
+)({
     _tag: Schema.tag("SpliceRejected"),
     reason: Schema.String,
 }) {}
@@ -280,10 +282,7 @@ export const SpliceWorkflowLive = SpliceWorkflow.toLayer(
                 });
                 yield* Effect.ignore(ledger.append({ tradeId: payload.tradeId, event: "splice_snapshot" }));
                 return true;
-            }).pipe(
-                Effect.catch(() => Effect.succeed(false)),
-                Effect.orDie
-            ),
+            }).pipe(Effect.orElseSucceed(() => false)),
         });
         if (!snapshotted) return yield* failTrade("could not snapshot both towers before splicing");
 
@@ -317,8 +316,7 @@ export const SpliceWorkflowLive = SpliceWorkflow.toLayer(
                 return { ok: true, reason: "" };
             }).pipe(
                 Effect.catchTag("SpliceRejected", (error) => Effect.succeed({ ok: false, reason: error.reason })),
-                Effect.catch(() => Effect.succeed({ ok: false, reason: "the saves would not splice" })),
-                Effect.orDie
+                Effect.orElseSucceed(() => ({ ok: false, reason: "the saves would not splice" }))
             ),
         });
         if (!computed.ok) return yield* failTrade(computed.reason);
@@ -350,10 +348,7 @@ export const SpliceWorkflowLive = SpliceWorkflow.toLayer(
                 });
                 yield* Effect.ignore(ledger.append({ tradeId: payload.tradeId, event: "splice_pushed_proposer" }));
                 return { pushed: true, reason: "" };
-            }).pipe(
-                Effect.catch(() => Effect.succeed({ pushed: false, reason: "could not push the proposer's save" })),
-                Effect.orDie
-            ),
+            }).pipe(Effect.orElseSucceed(() => ({ pushed: false, reason: "could not push the proposer's save" }))),
         });
         if (!proposerPushed.pushed) return yield* failTrade(proposerPushed.reason);
 
@@ -376,10 +371,7 @@ export const SpliceWorkflowLive = SpliceWorkflow.toLayer(
                 });
                 yield* Effect.ignore(ledger.append({ tradeId: payload.tradeId, event: "splice_pushed_counterparty" }));
                 return { pushed: true, reason: "" };
-            }).pipe(
-                Effect.catch(() => Effect.succeed({ pushed: false, reason: "could not push the counterparty's save" })),
-                Effect.orDie
-            ),
+            }).pipe(Effect.orElseSucceed(() => ({ pushed: false, reason: "could not push the counterparty's save" }))),
         });
 
         if (!counterpartyPushed.pushed) {

@@ -6,14 +6,17 @@
  * cluster, and the durable escrow, refund and splice workflows with the
  * crons that feed them. Single node is a deliberate choice rather than a
  * stepping stone; see `cluster/runtime.ts`.
+ *
+ * Boot registers the treasury at tinyburg.app (`services/provider.ts`), so
+ * the provider has to be reachable; it is retried for about a minute.
  */
 
 import { Config, ConfigProvider, Effect, Layer, Path, String } from "effect";
-import { FetchHttpClient, HttpRouter } from "effect/unstable/http";
+import { FetchHttpClient, HttpRouter } from "effect/http";
 
 import { createServer } from "node:http";
 
-import { NodeHttpServer, NodeRuntime, NodeServices } from "@effect/platform-node";
+import { NodeCrypto, NodeHttpServer, NodeRuntime, NodeServices } from "@effect/platform-node";
 import { PgClient, PgMigrator } from "@effect/sql-pg";
 
 import { ExpiryLive, ReconcilerLive } from "./cluster/crons.ts";
@@ -27,7 +30,7 @@ import { TradesRepository } from "./domain/trades.ts";
 import { ApiLive } from "./routes/api.ts";
 import { HealthRoutesLive } from "./routes/health.ts";
 import { OAuthRoutesLive } from "./routes/oauth.ts";
-import { TinyburgOidc } from "./services/oidc.ts";
+import { TinyburgProvider } from "./services/provider.ts";
 import { NimblebitPacer } from "./services/ratelimit.ts";
 import { TinyburgTrading } from "./services/tinyburg.ts";
 import { Vault, VaultAuthLive } from "./services/vault.ts";
@@ -40,7 +43,7 @@ const AllRoutes = Layer.mergeAll(ApiLive, OAuthRoutesLive, HealthRoutesLive);
 const DotEnvLive = Effect.map(ConfigProvider.fromDotEnv(), ConfigProvider.nested("TREASURY"));
 
 const SqlLive = PgClient.layerConfig({
-    url: Config.redacted("DATABASE_URL"),
+    url: Config.Redacted("DATABASE_URL"),
     transformQueryNames: Config.succeed(String.camelToSnake),
     transformResultNames: Config.succeed(String.snakeToCamel),
 });
@@ -67,7 +70,7 @@ const RepositoriesLive = Layer.mergeAll(
 const DependenciesLive = Layer.empty.pipe(
     Layer.provideMerge(Vault.Default),
     Layer.provideMerge(TinyburgTrading.Default),
-    Layer.provideMerge(TinyburgOidc.Default),
+    Layer.provideMerge(TinyburgProvider.Default),
     Layer.provideMerge(NimblebitPacer.Default),
     Layer.provideMerge(VaultAuthLive),
     Layer.provideMerge(DurableLive),
@@ -76,6 +79,17 @@ const DependenciesLive = Layer.empty.pipe(
     Layer.provideMerge(MigratorLive),
     Layer.provideMerge(SqlLive),
     Layer.provideMerge(FetchHttpClient.layer),
+    // Randomness for OAuth state and Nimblebit salts, digests for PKCE and
+    // the cluster, and what JOSE verification asks for (signatures, and MACs
+    // for the algorithms the treasury never accepts) for the provider's tokens.
+    Layer.provideMerge(
+        Layer.mergeAll(
+            NodeCrypto.layerSecureRandom,
+            NodeCrypto.layerDigest,
+            NodeCrypto.layerMac,
+            NodeCrypto.layerSignature
+        )
+    ),
     Layer.provideMerge(NodeServices.layer)
 );
 
@@ -95,8 +109,8 @@ Layer.mergeAll(
     Layer.provide(DependenciesLive),
     Layer.provide(
         NodeHttpServer.layerConfig(createServer, {
-            port: Config.number("PORT").pipe(Config.withDefault(3004)),
-            host: Config.string("HOST").pipe(Config.withDefault("0.0.0.0")),
+            port: Config.Number("PORT").pipe(Config.withDefault(3004)),
+            host: Config.String("HOST").pipe(Config.withDefault("0.0.0.0")),
         })
     ),
     // The environment as it comes, `.env` nested under the service name; see

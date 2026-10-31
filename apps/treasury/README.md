@@ -49,31 +49,52 @@ Splice trades are the non-duplicating path.
 
 ## Pieces
 
-| Where                   | What                                                                  |
-| ----------------------- | --------------------------------------------------------------------- |
-| `packages/treasury-sdk` | The api spec and the `treasury` scope area, shared with tinyburg.app  |
-| `routes/api.ts`         | Handlers; bearer-authed with tokens minted by tinyburg.app            |
-| `routes/oauth.ts`       | The connect flow (authorization code + PKCE + `offline_access`)       |
-| `services/tinyburg.ts`  | Acting on traders' towers through the trading api, grants + rotation  |
-| `services/vault.ts`     | The vault tower, reached with its own Nimblebit credentials           |
-| `workflows/`            | GiftEscrow, Refund, Splice - the durable sagas                        |
-| `cluster/crons.ts`      | Expiry (deposited trades → refund) and the reconciler (queue vs book) |
+| Where                   | What                                                                       |
+| ----------------------- | -------------------------------------------------------------------------- |
+| `packages/treasury-sdk` | The api spec and the `treasury` scope area, shared with tinyburg.app       |
+| `routes/access.ts`      | Bearer JWT verification and the per-endpoint scope check (`RequireAccess`) |
+| `routes/api.ts`         | Handlers, acting as the token's subject                                    |
+| `routes/oauth.ts`       | The connect flow (authorization code + PKCE + `offline_access`)            |
+| `services/provider.ts`  | Boot-time RFC 7591 registration at tinyburg.app, and the OAuth client      |
+| `services/tinyburg.ts`  | Acting on traders' towers through the trading api, grants + rotation       |
+| `services/vault.ts`     | The vault tower, reached with its own Nimblebit credentials                |
+| `workflows/`            | GiftEscrow, Refund, Splice - the durable sagas                             |
+| `cluster/crons.ts`      | Expiry (deposited trades → refund) and the reconciler (queue vs book)      |
 
-The browser never calls this service: tinyburg.app reverse-proxies
-`/v1/treasury/*` with the visitor's session bearer attached
-(`apps/tinyburg.app/server/routes/treasury.ts`).
+### Who calls it, with what
+
+The api lives at `<site>/v1/treasury/*`: tinyburg.app reverse-proxies that
+path here verbatim (`apps/tinyburg.app/server/routes/treasury.ts`), the
+caller's `Authorization: Bearer <JWT>` included. The token is one
+tinyburg.app issued for the Tinyburg api (`<site>/v1`): the first-party app
+gets it from tinyburg.app's `/auth/token`, any other application uses its
+own. The treasury verifies it locally against tinyburg.app's published keys
+and checks the endpoint's `treasury` scope; it keeps no sessions. A revoked
+grant's token keeps working here until it expires (ten minutes at most),
+which is accepted because everything the treasury then does to a tower goes
+through tinyburg.app's `/v1`, where revocation is immediate.
+
+The one thing the browser reaches directly is the connect flow at
+`PUBLIC_URL`, which sends the trader to tinyburg.app's consent screen and back.
 
 ## Configuration (`TREASURY_*`)
 
-| Variable                                                   | Meaning                                                                                                                     |
-| ---------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| `DATABASE_URL`, `PORT`, `HOST`                             | Set by the dev stack                                                                                                        |
-| `GRANT_SEALING_KEY`                                        | AES key for stored refresh tokens                                                                                           |
-| `VAULT_PLAYER_ID` / `VAULT_AUTH_KEY`                       | The vault tower's own credentials                                                                                           |
-| `NIMBLEBIT_HOST`                                           | Where the vault's calls go; default `https://sync.nimblebit.com`, point at the authproxy for its auditing or a fake for dev |
-| `NIMBLEBIT_AUTH_KEY`                                       | The shared secret (direct host) or bearer key (custom host)                                                                 |
-| `TINYBURG_ISSUER` / `TINYBURG_REDIRECT_URI` / `PUBLIC_URL` | The OAuth triangle                                                                                                          |
-| `TINYBURG_OAUTH_REGISTRATION_TOKEN`                        | Required outside development for RFC 7591 boot registration                                                                 |
+Read from the environment as given, and from `.env` under the `TREASURY_`
+prefix.
+
+| Variable                             | Meaning                                                                                                                     |
+| ------------------------------------ | --------------------------------------------------------------------------------------------------------------------------- |
+| `DATABASE_URL`, `PORT`, `HOST`       | Set by the dev stack                                                                                                        |
+| `NODE_ENV`                           | `development` relaxes cookies to plain http names and makes the registration token optional                                 |
+| `GRANT_SEALING_KEY`                  | AES key for stored refresh tokens                                                                                           |
+| `VAULT_PLAYER_ID` / `VAULT_AUTH_KEY` | The vault tower's own credentials                                                                                           |
+| `NIMBLEBIT_HOST`                     | Where the vault's calls go; default `https://sync.nimblebit.com`, point at the authproxy for its auditing or a fake for dev |
+| `NIMBLEBIT_AUTH_KEY`                 | The shared secret (direct host) or bearer key (custom host)                                                                 |
+| `NIMBLEBIT_MIN_INTERVAL_MILLIS`      | The pacer's minimum gap between Nimblebit-bound calls; default 2000                                                         |
+| `TINYBURG_ISSUER`                    | tinyburg.app's origin: the issuer, and `<issuer>/v1` is the resource incoming tokens must be for                            |
+| `TINYBURG_REDIRECT_URI`              | The connect flow's callback, as registered                                                                                  |
+| `PUBLIC_URL`                         | Where the browser reaches the connect flow                                                                                  |
+| `TINYBURG_OAUTH_REGISTRATION_TOKEN`  | Required outside development for RFC 7591 boot registration                                                                 |
 
 ## Ops
 
@@ -82,10 +103,10 @@ The browser never calls this service: tinyburg.app reverse-proxies
   player id and auth key in the environment. Keep it out of anyone's game
   client.
 - **Rotating the vault key:** drain first - `SELECT * FROM trade_legs WHERE
-state IN ('sent','verified','released','refund_sent')` must be empty - then
+  state IN ('sent','verified','released','refund_sent')` must be empty - then
   swap credentials and restart.
 - **Where is my item:** `SELECT * FROM escrow_ledger WHERE trade_id = ...
-ORDER BY id`. The ledger refuses updates and deletes at the table level.
+  ORDER BY id`. The ledger refuses updates and deletes at the table level.
 - **Orphans and losses:** the reconciler logs `orphan_gift` for vault gifts
   no trade accounts for and turns long-unseen deposits into `lost` legs; both
   are ops signals, not automatic actions.

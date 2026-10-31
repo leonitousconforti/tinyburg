@@ -1,5 +1,5 @@
 import { Effect } from "effect";
-import { SqlClient } from "effect/unstable/sql";
+import { SqlClient } from "effect/sql";
 
 /**
  * The trade book.
@@ -10,9 +10,10 @@ import { SqlClient } from "effect/unstable/sql";
  * reconcilers claiming one gift. Handlers and workflows only ever propose a
  * transition and observe whether it took.
  */
-export default Effect.flatMap(
-    SqlClient.SqlClient,
-    (sql) => sql`
+export default Effect.flatMap(SqlClient.SqlClient, (sql) =>
+    Effect.all(
+        [
+            sql`
         CREATE TABLE IF NOT EXISTS trades (
             id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
             mechanism TEXT NOT NULL CHECK (mechanism IN ('gift', 'splice')),
@@ -49,12 +50,18 @@ export default Effect.flatMap(
                 OR counterparty_user_id IS NOT NULL
             )
         );
-
+        `,
+            sql`
         CREATE INDEX IF NOT EXISTS idx_trades_proposer ON trades(proposer_user_id);
+        `,
+            sql`
         CREATE INDEX IF NOT EXISTS idx_trades_counterparty ON trades(counterparty_user_id);
+        `,
+            sql`
         CREATE INDEX IF NOT EXISTS idx_trades_expiry ON trades(expires_at) WHERE state IN (
             'proposed', 'accepted', 'awaiting_confirmation', 'escrowing', 'escrowed');
-
+        `,
+            sql`
         -- Gift mechanism only; a splice trade carries a plan instead.
         CREATE TABLE IF NOT EXISTS trade_legs (
             id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -80,10 +87,14 @@ export default Effect.flatMap(
 
             CONSTRAINT one_leg_per_side UNIQUE (trade_id, role)
         );
-
+        `,
+            sql`
         CREATE INDEX IF NOT EXISTS idx_trade_legs_trade ON trade_legs(trade_id);
+        `,
+            sql`
         CREATE INDEX IF NOT EXISTS idx_trade_legs_open ON trade_legs(state) WHERE state IN ('sent', 'verified');
-
+        `,
+            sql`
         CREATE TABLE IF NOT EXISTS splice_plans (
             trade_id UUID PRIMARY KEY REFERENCES trades(id),
             -- Captured at pull; checked against Nimblebit again immediately
@@ -98,5 +109,8 @@ export default Effect.flatMap(
             proposer_spliced TEXT,
             counterparty_spliced TEXT
         );
-    `
+        `,
+        ],
+        { discard: true }
+    )
 );

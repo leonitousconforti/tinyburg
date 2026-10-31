@@ -10,7 +10,7 @@ import { Config, Context, Effect, Layer } from "effect";
  * subdomain can never plant a copy of the OAuth round-trip cookies.
  */
 export class CookiePolicy extends Context.Service<CookiePolicy>()("@tinyburg/treasury/CookiePolicy", {
-    make: Effect.map(Config.string("NODE_ENV").pipe(Config.withDefault("production")), (env) => {
+    make: Effect.map(Config.String("NODE_ENV").pipe(Config.withDefault("production")), (env) => {
         const secure = env !== "development";
         const name = (base: string): string => (secure ? `__Host-${base}` : base);
         return { secure, name } as const;

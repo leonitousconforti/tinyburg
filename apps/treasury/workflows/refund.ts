@@ -10,7 +10,7 @@
  */
 
 import { Effect, Option, Schema } from "effect";
-import { Activity, Workflow } from "effect/unstable/workflow";
+import { Activity, Workflow } from "effect/workflow";
 
 import { LedgerRepository } from "../domain/ledger.ts";
 import { LegsRepository } from "../domain/legs.ts";

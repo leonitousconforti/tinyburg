@@ -8,15 +8,21 @@
  * they moved it.
  */
 
-import { Schema } from "effect";
-import { Model } from "effect/unstable/schema";
+import { Schema, SchemaTransformation } from "effect";
+import { Model } from "effect/schema";
 
 import { PlayerIdSchema } from "@tinyburg/nimblebit-sdk/NimblebitConfig";
 import { SyncItemType } from "@tinyburg/tinytower-sdk/SyncItemType";
 import { LegState, TradeGame, TradeMechanism, TradeRole, TradeState } from "@tinyburg/treasury-sdk/Sdk";
 
-/** A BIGINT column: the driver hands it over as a string, small values as a number. */
-const int8 = Schema.Union([Schema.Finite, Schema.FiniteFromString]);
+/**
+ * A BIGINT column, which the Postgres driver reads as a `bigint`. Every one
+ * here (a vault gift id, a ledger sequence number) is far inside the safe
+ * integer range, so the treasury handles them as plain numbers.
+ */
+const int8 = Schema.BigInt.pipe(
+    Schema.decodeTo(Schema.Int, SchemaTransformation.transform({ decode: Number, encode: BigInt }))
+);
 
 /**
  * A stored towers grant, letting the escrow sagas act for a trader who is no

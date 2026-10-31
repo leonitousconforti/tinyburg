@@ -9,9 +9,9 @@
  */
 
 import { Cron, Effect } from "effect";
-import { ClusterCron } from "effect/unstable/cluster";
+import { ClusterCron } from "effect/cluster";
 
-import { LedgerRepository } from "../domain/ledger.ts";
+import { LedgerRepository, orphanDetail } from "../domain/ledger.ts";
 import { LegsRepository } from "../domain/legs.ts";
 import { TradesRepository } from "../domain/trades.ts";
 import { Vault } from "../services/vault.ts";
@@ -108,9 +108,7 @@ export const ReconcilerLive = ClusterCron.make({
             if (expected) continue;
             const seen = yield* ledger.hasOrphan(gift.id).pipe(Effect.orDie);
             if (!seen) {
-                yield* Effect.ignore(
-                    ledger.append({ event: "orphan_gift", detail: JSON.stringify({ giftId: gift.id }) })
-                );
+                yield* Effect.ignore(ledger.append({ event: "orphan_gift", detail: orphanDetail(gift.id) }));
                 yield* Effect.logWarning(`the vault holds a gift no trade accounts for: ${gift.id} from ${gift.from}`);
             }
         }

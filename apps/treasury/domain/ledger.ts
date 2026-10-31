@@ -4,14 +4,23 @@
  * even if a bug asked it to.
  */
 
-import type { SqlError } from "effect/unstable/sql";
+import type { SqlError } from "effect/sql";
 
 import { Context, Effect, Layer, Schema } from "effect";
-import { SqlClient, SqlSchema } from "effect/unstable/sql";
+import { SqlClient, SqlSchema } from "effect/sql";
 
 import { LedgerEvent } from "./model.ts";
 
 const uuid = Schema.String.check(Schema.isUUID());
+
+const OrphanDetail = Schema.fromJsonString(Schema.Struct({ giftId: Schema.Finite }));
+
+/**
+ * The detail an `orphan_gift` entry carries, written and matched by this one
+ * function so the reconciler's "seen it already" check cannot drift from what
+ * it recorded.
+ */
+export const orphanDetail = (giftId: number): string => Schema.encodeSync(OrphanDetail)({ giftId });
 
 export class LedgerRepository extends Context.Service<LedgerRepository>()(
     "@tinyburg/treasury/domain/LedgerRepository",
@@ -46,7 +55,7 @@ export class LedgerRepository extends Context.Service<LedgerRepository>()(
                 Effect.map(
                     sql`
                     SELECT 1 FROM escrow_ledger
-                    WHERE event = 'orphan_gift' AND detail = ${JSON.stringify({ giftId })}
+                    WHERE event = 'orphan_gift' AND detail = ${orphanDetail(giftId)}
                     LIMIT 1
                 `,
                     (rows) => rows.length > 0

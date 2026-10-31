@@ -16,8 +16,8 @@
  */
 
 import { Config, ConfigProvider, Effect, Layer, Redacted, Schema } from "effect";
-import { HttpRouter } from "effect/unstable/http";
-import { HttpApiBuilder } from "effect/unstable/httpapi";
+import { HttpRouter } from "effect/http";
+import { HttpApiBuilder } from "effect/http-api";
 
 import * as crypto from "node:crypto";
 import { createServer } from "node:http";
@@ -83,13 +83,13 @@ const DeviceManagementLive = HttpApiBuilder.group(
         return handlers
             .handle("DeviceNewPlayer", () =>
                 Effect.gen(function* () {
-                    const playerId = yield* decodePlayerId(randomPlayerId()).pipe(Effect.orDie);
+                    const playerId = yield* decodePlayerId(randomPlayerId());
                     const tower = towerFor(playerId);
                     return {
                         playerId,
-                        playerSs: yield* decodeAuthKey(tower.authKey).pipe(Effect.orDie),
+                        playerSs: yield* decodeAuthKey(tower.authKey),
                     };
-                })
+                }).pipe(Effect.orDie)
             )
             .handle("DevicePlayerDetails", ({ params }) =>
                 Effect.gen(function* () {
@@ -123,16 +123,16 @@ const DeviceManagementLive = HttpApiBuilder.group(
                     // it, or a brand new one, exactly like linking a fresh
                     // save in the real flow.
                     const owned = [...towers.entries()].find(([, tower]) => tower.email === email);
-                    const playerId = yield* decodePlayerId(owned?.[0] ?? randomPlayerId()).pipe(Effect.orDie);
+                    const playerId = yield* decodePlayerId(owned?.[0] ?? randomPlayerId());
                     const tower = towerFor(playerId);
                     tower.email = email;
                     return {
                         success: "NewDevice" as const,
                         playerId,
-                        playerAuthKey: yield* decodeAuthKey(tower.authKey).pipe(Effect.orDie),
-                        playerEmail: yield* decodeEmail(email).pipe(Effect.orDie),
+                        playerAuthKey: yield* decodeAuthKey(tower.authKey),
+                        playerEmail: yield* decodeEmail(email),
                     };
-                })
+                }).pipe(Effect.orDie)
             );
     })
 );
@@ -293,8 +293,8 @@ const createRoomyServer: typeof createServer = (options?: object) =>
 HttpRouter.serve(ApiLive, { routerConfig: { maxParamLength: 16 * 1024 * 1024 } }).pipe(
     Layer.provide(
         NodeHttpServer.layerConfig(createRoomyServer, {
-            port: Config.number("PORT").pipe(Config.withDefault(3005)),
-            host: Config.string("HOST").pipe(Config.withDefault("127.0.0.1")),
+            port: Config.Number("PORT").pipe(Config.withDefault(3005)),
+            host: Config.String("HOST").pipe(Config.withDefault("127.0.0.1")),
         })
     ),
     Layer.provideMerge(ConfigProvider.layerAdd(DotEnvLive)),
