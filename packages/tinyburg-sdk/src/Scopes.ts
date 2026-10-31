@@ -19,8 +19,8 @@
 import { type ScopeDescription, defineArea } from "@tinyburg/nimblebit-sdk/NimblebitScopes";
 
 /**
- * The leaves every game's area carries: one per trading endpoint. The same
- * for every game because the trading api is the same for every game; only
+ * The leaves every game's area carries: one per endpoint. The same
+ * for every game because the tinyburg api is the same for every game; only
  * the name and the words differ.
  */
 const areaFor = (name: string, title: string) =>

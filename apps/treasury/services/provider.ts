@@ -22,14 +22,14 @@
 
 import { Config, Context, Effect, Layer, Option, Schedule } from "effect";
 
-import { TinyTower as TinyTowerScopes } from "@tinyburg/trading-sdk/Scopes";
+import { TinyTower as TinyTowerScopes } from "@tinyburg/tinyburg-sdk/Scopes";
 import * as OAuth from "@yielded/oauth/OAuth";
 import * as Oidc from "@yielded/oauth/Oidc";
 
 import { register } from "./registration.ts";
 
 /**
- * What the treasury asks a trader to grant, written out of the trading api's
+ * What the treasury asks a trader to grant, written out of the tinyburg api's
  * scope tree rather than as strings, so the connect flow cannot ask for one
  * thing while the sagas call another. `openid` is there for the ID token,
  * which is how the callback learns whose grant it is storing.

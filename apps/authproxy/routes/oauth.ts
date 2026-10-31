@@ -6,8 +6,8 @@ import { RateLimiter } from "effect/persistence";
 import * as crypto from "node:crypto";
 
 import { NimblebitConfig } from "@tinyburg/nimblebit-sdk";
-import { Sdk } from "@tinyburg/trading-sdk";
-import { TinyTower as TinyTowerScopes } from "@tinyburg/trading-sdk/Scopes";
+import { Sdk } from "@tinyburg/tinyburg-sdk";
+import { TinyTower as TinyTowerScopes } from "@tinyburg/tinyburg-sdk/Scopes";
 import { OAuth, Oidc, Pkce } from "@yielded/oauth";
 
 import { CookiePolicy, SESSION_COOKIE_NAME, maybeCurrentSession } from "../cookies.ts";

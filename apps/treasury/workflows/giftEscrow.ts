@@ -23,7 +23,7 @@ import { ItemSpec } from "@tinyburg/treasury-sdk/Sdk";
 import { LedgerRepository } from "../domain/ledger.ts";
 import { LegsRepository } from "../domain/legs.ts";
 import { TradesRepository } from "../domain/trades.ts";
-import { TinyburgTrading } from "../services/tinyburg.ts";
+import { TinyburgApi } from "../services/tinyburg.ts";
 import { Vault } from "../services/vault.ts";
 import { RefundWorkflow } from "./refund.ts";
 import { awaitDeposits, untilTheVaultAnswers } from "./vaultSteps.ts";
@@ -63,7 +63,7 @@ export const GiftEscrowWorkflowLive = GiftEscrowWorkflow.toLayer(
         const trades = yield* TradesRepository;
         const legs = yield* LegsRepository;
         const ledger = yield* LedgerRepository;
-        const tinyburg = yield* TinyburgTrading;
+        const tinyburg = yield* TinyburgApi;
         const vault = yield* Vault;
 
         const record = (event: string, legId?: string) =>

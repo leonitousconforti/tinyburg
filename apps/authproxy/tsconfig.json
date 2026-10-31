@@ -3,7 +3,7 @@
     "references": [
         { "path": "../../packages/nimblebit-sdk/tsconfig.src.json" },
         { "path": "../../packages/tinytower-sdk/tsconfig.src.json" },
-        { "path": "../../packages/trading-sdk/tsconfig.src.json" },
+        { "path": "../../packages/tinyburg-sdk/tsconfig.src.json" },
         { "path": "../shared-ui/tsconfig.src.json" }
     ],
     "include": [

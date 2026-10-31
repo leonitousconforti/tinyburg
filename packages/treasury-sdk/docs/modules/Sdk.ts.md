@@ -2029,7 +2029,7 @@ Since v1.0.0
 
 ## TradeGame
 
-The games the treasury trades in. TinyTower only, until the trading api
+The games the treasury trades in. TinyTower only, until the tinyburg api
 serves more.
 
 **Signature**

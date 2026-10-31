@@ -1,17 +1,17 @@
 import type { ScopeDescription } from "@tinyburg/nimblebit-sdk/NimblebitScopes";
 
-import * as TradingScopes from "@tinyburg/trading-sdk/Scopes";
+import * as TinyburgScopes from "@tinyburg/tinyburg-sdk/Scopes";
 import * as TreasuryScopes from "@tinyburg/treasury-sdk/Scopes";
 
-/** The games whose trading api this server serves, at `/v1/<game>`. */
-export const SERVED_GAMES: ReadonlyArray<TradingScopes.GameArea> = [
-    TradingScopes.TinyTower,
-    TradingScopes.TinyTowerClassic,
+/** The games whose tinyburg api this server serves, at `/v1/<game>`. */
+export const SERVED_GAMES: ReadonlyArray<TinyburgScopes.GameArea> = [
+    TinyburgScopes.TinyTower,
+    TinyburgScopes.TinyTowerClassic,
 ];
 
 /**
  * Every scope of the apis behind `/v1`: each served game's tree (the area,
- * then each branch followed by its leaves) from `@tinyburg/trading-sdk`, then
+ * then each branch followed by its leaves) from `@tinyburg/tinyburg-sdk`, then
  * the treasury's area from `@tinyburg/treasury-sdk`. Read off the sdks rather
  * than listed again, so the OAuth server declares, and the developers page
  * lists, exactly the scopes the endpoints accept.

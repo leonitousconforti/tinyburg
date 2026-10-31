@@ -27,8 +27,8 @@ The Tinyburg monorepo is organized into multiple packages and apps. Below is an 
 | `@tinyburg/nimblebit-sdk` | General purpose SDK for connecting to Nimblebit's cloud services | [README](https://github.com/leonitousconforti/tinyburg/tree/main/packages/nimblebit-sdk#readme) |
 | `@tinyburg/pocket-planes-sdk` | Api for the mobile game Pocket Planes by Nimblebit | [README](https://github.com/leonitousconforti/tinyburg/tree/main/packages/pocket-planes-sdk#readme) |
 | `@tinyburg/pocket-trains-sdk` | Api for the mobile game Pocket Trains by Nimblebit | [README](https://github.com/leonitousconforti/tinyburg/tree/main/packages/pocket-trains-sdk#readme) |
+| `@tinyburg/tinyburg-sdk` | Sdk for the tinyburg.app api | [README](https://github.com/leonitousconforti/tinyburg/tree/main/packages/tinyburg-sdk#readme) |
 | `@tinyburg/tinytower-classic-sdk` | Api for the mobile game TinyTower Classic by Nimblebit | [README](https://github.com/leonitousconforti/tinyburg/tree/main/packages/tinytower-classic-sdk#readme) |
 | `@tinyburg/tinytower-sdk` | Api for the mobile game TinyTower by Nimblebit | [README](https://github.com/leonitousconforti/tinyburg/tree/main/packages/tinytower-sdk#readme) |
 | `@tinyburg/tinytower-vegas-sdk` | Api for the mobile game Tiny Tower Vegas by Nimblebit | [README](https://github.com/leonitousconforti/tinyburg/tree/main/packages/tinytower-vegas-sdk#readme) |
-| `@tinyburg/trading-sdk` | Trading sdk for tinyburg.app | [README](https://github.com/leonitousconforti/tinyburg/tree/main/packages/trading-sdk#readme) |
 | `@tinyburg/treasury-sdk` | Treasury (trade escrow) sdk for tinyburg.app | [README](https://github.com/leonitousconforti/tinyburg/tree/main/packages/treasury-sdk#readme) |

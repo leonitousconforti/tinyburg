@@ -506,7 +506,7 @@ export const TinyTowerVegasAccountsGroup = tinyTowerVegas.accounts;
  * @since 1.0.0
  * @category Api
  */
-export const Api = HttpApi.make("TradingSdk")
+export const Api = HttpApi.make("TinyburgApi")
     .add(TinyTowerAccountsGroup)
     .add(TinyTowerGroup)
     .add(TinyTowerClassicAccountsGroup)

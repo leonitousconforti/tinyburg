@@ -5,7 +5,7 @@ import { HttpApiBuilder, HttpApiError } from "effect/http-api";
 import type { GameAccountsRepository } from "../../domain/tinytower.ts";
 import type { PlayerAuthKeySchema, PlayerEmailSchema, PlayerIdSchema } from "@tinyburg/nimblebit-sdk/NimblebitConfig";
 import type { NimblebitGame } from "@tinyburg/nimblebit-sdk/NimblebitGame";
-import type { ItemToSend, SaveUpload } from "@tinyburg/trading-sdk/Sdk";
+import type { ItemToSend, SaveUpload } from "@tinyburg/tinyburg-sdk/Sdk";
 
 import { NimblebitAuth, NimblebitError } from "@tinyburg/nimblebit-sdk";
 import * as NimblebitScopes from "@tinyburg/nimblebit-sdk/NimblebitScopes";

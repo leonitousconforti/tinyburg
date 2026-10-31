@@ -25,7 +25,7 @@ import { HttpApiClient } from "effect/http-api";
 import type { SyncItemType } from "@tinyburg/tinytower-sdk/SyncItemType";
 
 import { PlayerIdSchema } from "@tinyburg/nimblebit-sdk/NimblebitConfig";
-import { Api } from "@tinyburg/trading-sdk/Sdk";
+import { Api } from "@tinyburg/tinyburg-sdk/Sdk";
 import * as OAuth from "@yielded/oauth/OAuth";
 
 import { seal, unseal } from "../crypto.ts";
@@ -76,7 +76,7 @@ interface HeldToken {
     readonly expiresAtMillis: number;
 }
 
-export class TinyburgTrading extends Context.Service<TinyburgTrading>()("@tinyburg/treasury/services/TinyburgTrading", {
+export class TinyburgApi extends Context.Service<TinyburgApi>()("@tinyburg/treasury/services/TinyburgApi", {
     make: Effect.gen(function* () {
         const provider = yield* TinyburgProvider;
         const grants = yield* GrantsRepository;
@@ -349,5 +349,5 @@ export class TinyburgTrading extends Context.Service<TinyburgTrading>()("@tinybu
         return { accessTokenFor, listAccounts, sendItem, pullSave, checkVersion, pushSnapshot, pushSave };
     }),
 }) {
-    static readonly Default = Layer.effect(TinyburgTrading, TinyburgTrading.make);
+    static readonly Default = Layer.effect(TinyburgApi, TinyburgApi.make);
 }

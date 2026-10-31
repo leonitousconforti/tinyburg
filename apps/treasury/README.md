@@ -11,7 +11,7 @@ Nimblebit has no hold primitive, so the treasury makes one out of the gift
 channel: **an unreceived gift is a native escrow slot.** The treasury owns a
 vault tower, and a gift trade runs
 
-1. **Deposit** - each side's item is sent to the vault via the trading api,
+1. **Deposit** - each side's item is sent to the vault via the tinyburg api,
    using the OAuth grant the trader gave on the consent screen
    (`/auth/connect`). The item sits in the vault's gift queue, unclaimed.
    The leg is marked `sent` _before_ the send, and only while the trade is
@@ -76,7 +76,7 @@ Splice trades are the non-duplicating path.
 | `routes/api.ts`         | Handlers, acting as the token's subject                                    |
 | `routes/oauth.ts`       | The connect flow (authorization code + PKCE + `offline_access`)            |
 | `services/provider.ts`  | Boot-time RFC 7591 registration at tinyburg.app, and the OAuth client      |
-| `services/tinyburg.ts`  | Acting on traders' towers through the trading api, grants + rotation       |
+| `services/tinyburg.ts`  | Acting on traders' towers through the tinyburg api, grants + rotation      |
 | `services/vault.ts`     | The vault tower, reached with its own Nimblebit credentials                |
 | `workflows/`            | GiftEscrow, Refund, Splice - the durable sagas                             |
 | `cluster/crons.ts`      | Expiry (stalled escrows → refund), resume, and the reconciler              |

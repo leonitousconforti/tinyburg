@@ -56,7 +56,7 @@ const avatar = <M>(h: HtmlBuilder<M>, msgs: TowerMeMessages, user: SessionUser):
             ),
     });
 
-/** The linked towers section, driven by the trading api. */
+/** The linked towers section, driven by the tinyburg api. */
 const towerList = <M>(h: HtmlBuilder<M>, msgs: TowerMeMessages, language: Language, towers: LinkedTowers): Html => {
     const empty = (message: string, detail: string): Html =>
         h.div(

@@ -1,7 +1,7 @@
 ---
 title: index.ts
 nav_order: 1
-parent: Modules
+parent: "@tinyburg/tinyburg-sdk"
 ---
 
 ## index.ts overview
@@ -44,7 +44,7 @@ Re-exports all named exports from the "./Scopes.ts" module as `Scopes`.
 export * as Scopes from "./Scopes.ts"
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/trading-sdk/src/index.ts#L22)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinyburg-sdk/src/index.ts#L22)
 
 Since v1.0.0
 
@@ -60,6 +60,6 @@ Re-exports all named exports from the "./Sdk.ts" module as `Sdk`.
 export * as Sdk from "./Sdk.ts"
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/trading-sdk/src/index.ts#L51)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinyburg-sdk/src/index.ts#L51)
 
 Since v1.0.0

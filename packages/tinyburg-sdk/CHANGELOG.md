@@ -1,9 +1,10 @@
-# @tinyburg/trading-sdk
+# @tinyburg/tinyburg-sdk
 
 ## 0.2.0
 
 ### Minor Changes
 
+- Renamed from `@tinyburg/trading-sdk`: it is the client for tinyburg.app's game endpoints under `/v1/<game>`, not for trading (that is `@tinyburg/treasury-sdk`). BEHAVIOR CHANGE: import from `@tinyburg/tinyburg-sdk`; the `HttpApi` is now named `TinyburgApi`.
 - Move to Effect 4.1 and declare each endpoint's scopes with `@yielded/auth`'s `OAuthScope` annotations. BEHAVIOR CHANGE: `effect` 4.1.1 and `@yielded/auth` 0.1.0-beta.47 are now peer dependencies, and `NimblebitAuth` layers require `SecureRandom` from `effect/crypto` instead of `Crypto`.
 
 ### Patch Changes

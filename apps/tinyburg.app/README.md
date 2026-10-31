@@ -46,8 +46,8 @@ the ID token already carries the claims.
 | `tinytowerclassic`, `tinytowerclassic:read`, ... | The same tree for TinyTower Classic, at `/v1/tinytowerclassic/...`                             |
 | `treasury`, `treasury:read`, `treasury:write`    | The treasury's escrowed trades, at `/v1/treasury/...`, with a leaf per endpoint                |
 
-The game scopes are a tree declared once in `@tinyburg/trading-sdk`'s `Scopes`
-module, one area per game with a leaf per endpoint of the trading api, and the
+The game scopes are a tree declared once in `@tinyburg/tinyburg-sdk`'s `Scopes`
+module, one area per game with a leaf per endpoint of the tinyburg api, and the
 treasury's area is declared the same way in `@tinyburg/treasury-sdk`: each
 endpoint is annotated with `OAuthScope.Required`, accepting its leaf, its
 `:read`/`:write` branch, and the area, and the consent screen, the developers

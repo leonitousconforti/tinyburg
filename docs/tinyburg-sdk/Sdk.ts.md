@@ -1,7 +1,7 @@
 ---
 title: Sdk.ts
 nav_order: 3
-parent: Modules
+parent: "@tinyburg/tinyburg-sdk"
 ---
 
 ## Sdk.ts overview
@@ -80,7 +80,7 @@ once that game-aware `burnbot(game)` refactor lands. `.add(...)` them then.
 
 ```ts
 declare const Api: HttpApi.HttpApi<
-  "TradingSdk",
+  "TinyburgApi",
   | HttpApiGroup.HttpApiGroup<
       "TinyTowerAccountsGroup",
       | HttpApiEndpoint.HttpApiEndpoint<
@@ -946,7 +946,7 @@ declare const Api: HttpApi.HttpApi<
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/trading-sdk/src/Sdk.ts#L509)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinyburg-sdk/src/Sdk.ts#L509)
 
 Since v1.0.0
 
@@ -1034,7 +1034,7 @@ declare const BitCityAccountsGroup: HttpApiGroup.HttpApiGroup<
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/trading-sdk/src/Sdk.ts#L488)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinyburg-sdk/src/Sdk.ts#L488)
 
 Since v1.0.0
 
@@ -1120,7 +1120,7 @@ declare const DiscoZooAccountsGroup: HttpApiGroup.HttpApiGroup<
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/trading-sdk/src/Sdk.ts#L479)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinyburg-sdk/src/Sdk.ts#L479)
 
 Since v1.0.0
 
@@ -1206,7 +1206,7 @@ declare const LegoTowerAccountsGroup: HttpApiGroup.HttpApiGroup<
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/trading-sdk/src/Sdk.ts#L470)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinyburg-sdk/src/Sdk.ts#L470)
 
 Since v1.0.0
 
@@ -1292,7 +1292,7 @@ declare const PocketPlanesAccountsGroup: HttpApiGroup.HttpApiGroup<
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/trading-sdk/src/Sdk.ts#L452)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinyburg-sdk/src/Sdk.ts#L452)
 
 Since v1.0.0
 
@@ -1378,7 +1378,7 @@ declare const PocketTrainsAccountsGroup: HttpApiGroup.HttpApiGroup<
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/trading-sdk/src/Sdk.ts#L461)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinyburg-sdk/src/Sdk.ts#L461)
 
 Since v1.0.0
 
@@ -1463,7 +1463,7 @@ declare const TinyTowerAccountsGroup: HttpApiGroup.HttpApiGroup<
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/trading-sdk/src/Sdk.ts#L417)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinyburg-sdk/src/Sdk.ts#L417)
 
 Since v1.0.0
 
@@ -1548,7 +1548,7 @@ declare const TinyTowerClassicAccountsGroup: HttpApiGroup.HttpApiGroup<
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/trading-sdk/src/Sdk.ts#L434)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinyburg-sdk/src/Sdk.ts#L434)
 
 Since v1.0.0
 
@@ -1921,7 +1921,7 @@ declare const TinyTowerClassicGroup: HttpApiGroup.HttpApiGroup<
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/trading-sdk/src/Sdk.ts#L443)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinyburg-sdk/src/Sdk.ts#L443)
 
 Since v1.0.0
 
@@ -2294,7 +2294,7 @@ declare const TinyTowerGroup: HttpApiGroup.HttpApiGroup<
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/trading-sdk/src/Sdk.ts#L426)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinyburg-sdk/src/Sdk.ts#L426)
 
 Since v1.0.0
 
@@ -2380,7 +2380,7 @@ declare const TinyTowerVegasAccountsGroup: HttpApiGroup.HttpApiGroup<
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/trading-sdk/src/Sdk.ts#L497)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinyburg-sdk/src/Sdk.ts#L497)
 
 Since v1.0.0
 
@@ -2400,7 +2400,7 @@ declare const FriendSnapshot: Schema.Struct<{
 }>
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/trading-sdk/src/Sdk.ts#L128)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinyburg-sdk/src/Sdk.ts#L128)
 
 Since v1.0.0
 
@@ -2428,7 +2428,7 @@ declare const Gift: Schema.Struct<{
 }>
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/trading-sdk/src/Sdk.ts#L158)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinyburg-sdk/src/Sdk.ts#L158)
 
 Since v1.0.0
 
@@ -2459,7 +2459,7 @@ declare const Gifts: Schema.Struct<{
 }>
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/trading-sdk/src/Sdk.ts#L170)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinyburg-sdk/src/Sdk.ts#L170)
 
 Since v1.0.0
 
@@ -2485,7 +2485,7 @@ declare const ItemToSend: Schema.Struct<{
 }>
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/trading-sdk/src/Sdk.ts#L182)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinyburg-sdk/src/Sdk.ts#L182)
 
 Since v1.0.0
 
@@ -2502,7 +2502,7 @@ declare const LinkedAccount: Schema.Struct<{
 }>
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/trading-sdk/src/Sdk.ts#L49)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinyburg-sdk/src/Sdk.ts#L49)
 
 Since v1.0.0
 
@@ -2519,7 +2519,7 @@ declare const PlayerDetails: Schema.Struct<{
 }>
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/trading-sdk/src/Sdk.ts#L145)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinyburg-sdk/src/Sdk.ts#L145)
 
 Since v1.0.0
 
@@ -2531,7 +2531,7 @@ Since v1.0.0
 declare const RaffleStatus: Schema.Struct<{ readonly entered: Schema.Boolean }>
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/trading-sdk/src/Sdk.ts#L137)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinyburg-sdk/src/Sdk.ts#L137)
 
 Since v1.0.0
 
@@ -2545,7 +2545,7 @@ A save as Nimblebit stores it: the text, and the version it was stored as.
 declare const Save: Schema.Struct<{ readonly saveId: Schema.Number; readonly data: Schema.String }>
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/trading-sdk/src/Sdk.ts#L60)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinyburg-sdk/src/Sdk.ts#L60)
 
 Since v1.0.0
 
@@ -2560,7 +2560,7 @@ in, so a save that does not parse is refused with `400` rather than sent on.
 declare const SaveUpload: Schema.Struct<{ readonly data: Schema.String }>
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/trading-sdk/src/Sdk.ts#L72)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinyburg-sdk/src/Sdk.ts#L72)
 
 Since v1.0.0
 
@@ -2572,7 +2572,7 @@ Since v1.0.0
 declare const SaveVersion: Schema.Struct<{ readonly saveId: Schema.Number }>
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/trading-sdk/src/Sdk.ts#L80)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinyburg-sdk/src/Sdk.ts#L80)
 
 Since v1.0.0
 
@@ -2597,7 +2597,7 @@ declare const Snapshot: Schema.Struct<{
 }>
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/trading-sdk/src/Sdk.ts#L106)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinyburg-sdk/src/Sdk.ts#L106)
 
 Since v1.0.0
 
@@ -2609,7 +2609,7 @@ Since v1.0.0
 declare const SnapshotData: Schema.Struct<{ readonly snapshotId: Schema.Number; readonly data: Schema.String }>
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/trading-sdk/src/Sdk.ts#L116)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinyburg-sdk/src/Sdk.ts#L116)
 
 Since v1.0.0
 
@@ -2630,6 +2630,6 @@ declare const TowerMeta: Schema.Struct<{
 }>
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/trading-sdk/src/Sdk.ts#L91)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinyburg-sdk/src/Sdk.ts#L91)
 
 Since v1.0.0

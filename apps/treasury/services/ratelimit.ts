@@ -2,7 +2,7 @@
  * A single global pacer for everything that ultimately reaches Nimblebit.
  *
  * Both roads out of the treasury end at Nimblebit's sync service: the vault's
- * direct calls obviously, but also every trading-api call, because
+ * direct calls obviously, but also every tinyburg-api call, because
  * tinyburg.app forwards them upstream without a gate of its own. So both go
  * through this one semaphore, and the treasury as a whole never exceeds the
  * house pace however many trades are in flight.

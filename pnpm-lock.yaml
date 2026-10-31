@@ -294,6 +294,9 @@ importers:
       '@tinyburg/shared-ui':
         specifier: workspace:*
         version: link:../shared-ui
+      '@tinyburg/tinyburg-sdk':
+        specifier: workspace:*
+        version: link:../../packages/tinyburg-sdk
       '@tinyburg/tinytower-classic-sdk':
         specifier: workspace:*
         version: link:../../packages/tinytower-classic-sdk
@@ -303,9 +306,6 @@ importers:
       '@tinyburg/tinytower-vegas-sdk':
         specifier: workspace:*
         version: link:../../packages/tinytower-vegas-sdk
-      '@tinyburg/trading-sdk':
-        specifier: workspace:*
-        version: link:../../packages/trading-sdk
       '@yielded/auth':
         specifier: 0.1.0-beta.47
         version: 0.1.0-beta.47(effect@4.1.1)
@@ -366,9 +366,9 @@ importers:
       '@tinyburg/shared-ui':
         specifier: workspace:*
         version: link:../shared-ui
-      '@tinyburg/trading-sdk':
+      '@tinyburg/tinyburg-sdk':
         specifier: workspace:*
-        version: link:../../packages/trading-sdk
+        version: link:../../packages/tinyburg-sdk
       '@yielded/auth':
         specifier: 0.1.0-beta.47
         version: 0.1.0-beta.47(effect@4.1.1)
@@ -466,12 +466,12 @@ importers:
       '@tinyburg/shared-ui':
         specifier: workspace:*
         version: link:../shared-ui
+      '@tinyburg/tinyburg-sdk':
+        specifier: workspace:*
+        version: link:../../packages/tinyburg-sdk
       '@tinyburg/tinytower-sdk':
         specifier: workspace:*
         version: link:../../packages/tinytower-sdk
-      '@tinyburg/trading-sdk':
-        specifier: workspace:*
-        version: link:../../packages/trading-sdk
       '@yielded/auth':
         specifier: 0.1.0-beta.47
         version: 0.1.0-beta.47(effect@4.1.1)
@@ -526,15 +526,15 @@ importers:
       '@tinyburg/shared-ui':
         specifier: workspace:*
         version: link:../shared-ui
+      '@tinyburg/tinyburg-sdk':
+        specifier: workspace:^
+        version: link:../../packages/tinyburg-sdk
       '@tinyburg/tinytower-classic-sdk':
         specifier: workspace:*
         version: link:../../packages/tinytower-classic-sdk
       '@tinyburg/tinytower-sdk':
         specifier: workspace:*
         version: link:../../packages/tinytower-sdk
-      '@tinyburg/trading-sdk':
-        specifier: workspace:^
-        version: link:../../packages/trading-sdk
       '@tinyburg/treasury-sdk':
         specifier: workspace:*
         version: link:../../packages/treasury-sdk
@@ -574,12 +574,12 @@ importers:
       '@tinyburg/nimblebit-sdk':
         specifier: workspace:*
         version: link:../../packages/nimblebit-sdk
+      '@tinyburg/tinyburg-sdk':
+        specifier: workspace:*
+        version: link:../../packages/tinyburg-sdk
       '@tinyburg/tinytower-sdk':
         specifier: workspace:*
         version: link:../../packages/tinytower-sdk
-      '@tinyburg/trading-sdk':
-        specifier: workspace:*
-        version: link:../../packages/trading-sdk
       '@tinyburg/treasury-sdk':
         specifier: workspace:*
         version: link:../../packages/treasury-sdk
@@ -717,6 +717,25 @@ importers:
         specifier: 4.1.1
         version: 4.1.1
 
+  packages/tinyburg-sdk:
+    dependencies:
+      '@tinyburg/nimblebit-sdk':
+        specifier: workspace:^
+        version: link:../nimblebit-sdk
+      '@tinyburg/tinytower-classic-sdk':
+        specifier: workspace:^
+        version: link:../tinytower-classic-sdk
+      '@tinyburg/tinytower-sdk':
+        specifier: workspace:^
+        version: link:../tinytower-sdk
+    devDependencies:
+      '@yielded/auth':
+        specifier: 0.1.0-beta.47
+        version: 0.1.0-beta.47(effect@4.1.1)
+      effect:
+        specifier: 4.1.1
+        version: 4.1.1
+
   packages/tinytower-classic-sdk:
     dependencies:
       '@tinyburg/nimblebit-sdk':
@@ -784,25 +803,6 @@ importers:
       '@tinyburg/nimblebit-sdk':
         specifier: workspace:*
         version: link:../nimblebit-sdk
-    devDependencies:
-      '@yielded/auth':
-        specifier: 0.1.0-beta.47
-        version: 0.1.0-beta.47(effect@4.1.1)
-      effect:
-        specifier: 4.1.1
-        version: 4.1.1
-
-  packages/trading-sdk:
-    dependencies:
-      '@tinyburg/nimblebit-sdk':
-        specifier: workspace:^
-        version: link:../nimblebit-sdk
-      '@tinyburg/tinytower-classic-sdk':
-        specifier: workspace:^
-        version: link:../tinytower-classic-sdk
-      '@tinyburg/tinytower-sdk':
-        specifier: workspace:^
-        version: link:../tinytower-sdk
     devDependencies:
       '@yielded/auth':
         specifier: 0.1.0-beta.47

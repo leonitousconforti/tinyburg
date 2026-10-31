@@ -22,7 +22,7 @@ import { ItemSpec } from "@tinyburg/treasury-sdk/Sdk";
 import { LedgerRepository } from "../domain/ledger.ts";
 import { SpliceRepository } from "../domain/splice.ts";
 import { TradesRepository } from "../domain/trades.ts";
-import { TinyburgTrading } from "../services/tinyburg.ts";
+import { TinyburgApi } from "../services/tinyburg.ts";
 
 const decodeItemSpec = Schema.decodeEffect(Schema.fromJsonString(ItemSpec));
 const decodeSave = Schema.decodeEffect(TinyTower.SaveData);
@@ -160,7 +160,7 @@ export const SpliceWorkflowLive = SpliceWorkflow.toLayer(
         const trades = yield* TradesRepository;
         const splices = yield* SpliceRepository;
         const ledger = yield* LedgerRepository;
-        const tinyburg = yield* TinyburgTrading;
+        const tinyburg = yield* TinyburgApi;
 
         const record = (event: string) => Effect.ignore(ledger.append({ tradeId: payload.tradeId, event }));
 

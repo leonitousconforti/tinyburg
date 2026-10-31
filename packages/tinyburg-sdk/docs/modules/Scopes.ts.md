@@ -73,7 +73,7 @@ declare const BitCity: KeyedArea<
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/trading-sdk/src/Scopes.ts#L103)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinyburg-sdk/src/Scopes.ts#L103)
 
 Since v1.0.0
 
@@ -107,7 +107,7 @@ declare const DiscoZoo: KeyedArea<
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/trading-sdk/src/Scopes.ts#L97)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinyburg-sdk/src/Scopes.ts#L97)
 
 Since v1.0.0
 
@@ -121,7 +121,7 @@ The shape every game's area has, for code that serves any of them.
 type GameArea = typeof TinyTower
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/trading-sdk/src/Scopes.ts#L117)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinyburg-sdk/src/Scopes.ts#L117)
 
 Since v1.0.0
 
@@ -155,7 +155,7 @@ declare const LegoTower: KeyedArea<
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/trading-sdk/src/Scopes.ts#L91)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinyburg-sdk/src/Scopes.ts#L91)
 
 Since v1.0.0
 
@@ -189,7 +189,7 @@ declare const PocketPlanes: KeyedArea<
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/trading-sdk/src/Scopes.ts#L79)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinyburg-sdk/src/Scopes.ts#L79)
 
 Since v1.0.0
 
@@ -223,7 +223,7 @@ declare const PocketTrains: KeyedArea<
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/trading-sdk/src/Scopes.ts#L85)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinyburg-sdk/src/Scopes.ts#L85)
 
 Since v1.0.0
 
@@ -257,7 +257,7 @@ declare const TinyTower: KeyedArea<
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/trading-sdk/src/Scopes.ts#L67)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinyburg-sdk/src/Scopes.ts#L67)
 
 Since v1.0.0
 
@@ -291,7 +291,7 @@ declare const TinyTowerClassic: KeyedArea<
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/trading-sdk/src/Scopes.ts#L73)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinyburg-sdk/src/Scopes.ts#L73)
 
 Since v1.0.0
 
@@ -325,7 +325,7 @@ declare const TinyTowerVegas: KeyedArea<
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/trading-sdk/src/Scopes.ts#L109)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinyburg-sdk/src/Scopes.ts#L109)
 
 Since v1.0.0
 
@@ -365,7 +365,7 @@ declare const Areas: ReadonlyArray<
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/trading-sdk/src/Scopes.ts#L125)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinyburg-sdk/src/Scopes.ts#L125)
 
 Since v1.0.0
 
@@ -380,6 +380,6 @@ their leaves.
 declare const all: () => ReadonlyArray<ScopeDescription>
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/trading-sdk/src/Scopes.ts#L143)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinyburg-sdk/src/Scopes.ts#L143)
 
 Since v1.0.0

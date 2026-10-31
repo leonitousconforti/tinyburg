@@ -51,7 +51,7 @@ import * as Scopes from "./Scopes.ts";
 export const TradeMechanism = Schema.Literals(["gift", "splice"]);
 
 /**
- * The games the treasury trades in. TinyTower only, until the trading api
+ * The games the treasury trades in. TinyTower only, until the tinyburg api
  * serves more.
  *
  * @since 1.0.0

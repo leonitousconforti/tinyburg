@@ -16,7 +16,7 @@ import { appBackLink } from "../ui/chrome.ts";
 // MODEL
 
 export const WizardModel = S.Struct({
-    // Which game this save is being linked from; picks the trading api group
+    // Which game this save is being linked from; picks the tinyburg api group
     // the requests go to and names the game the page is for.
     game: LinkableGame,
     step: S.Literals(["link", "verify"]),
@@ -88,7 +88,7 @@ export type WizardMessage = typeof WizardMessage.Type;
 // them email a verification code to the address its cloud save lives under.
 // The friend code and email are branded schemas, so mistyped input fails
 // here, before a request is made.
-// The trading api gives each game its own accounts group with the same
+// The tinyburg api gives each game its own accounts group with the same
 // shape; the wizard's game picks which one the link and verify calls go to.
 const requestVerificationCode = (game: LinkableGame, friendCode: string, email: string) =>
     Effect.gen(function* () {

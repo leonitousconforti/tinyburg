@@ -15,7 +15,7 @@
         { "path": "packages/tinytower-classic-sdk" },
         { "path": "packages/tinytower-sdk" },
         { "path": "packages/tinytower-vegas-sdk" },
-        { "path": "packages/trading-sdk" },
+        { "path": "packages/tinyburg-sdk" },
         { "path": "packages/treasury-sdk" },
         { "path": "apps/shared-ui" },
         { "path": "apps/archivist" },

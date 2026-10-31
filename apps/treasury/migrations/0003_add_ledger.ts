@@ -4,7 +4,7 @@ import { SqlClient } from "effect/sql";
 /**
  * The escrow ledger: every consequential thing the treasury did or observed,
  * append-only. This is the audit trail that compensates for the vault
- * talking to Nimblebit directly rather than through the trading api's
+ * talking to Nimblebit directly rather than through the tinyburg api's
  * logging, and it is what "where is my item" is answered from.
  */
 export default Effect.flatMap(SqlClient.SqlClient, (sql) =>

@@ -38,7 +38,7 @@ import { LedgerRepository } from "../domain/ledger.ts";
 import { LegsRepository } from "../domain/legs.ts";
 import { TradesRepository } from "../domain/trades.ts";
 import { FIRST_PARTY_CLIENT_ID, TinyburgProvider } from "../services/provider.ts";
-import { TinyburgTrading } from "../services/tinyburg.ts";
+import { TinyburgApi } from "../services/tinyburg.ts";
 import { GiftEscrowWorkflow } from "../workflows/giftEscrow.ts";
 import { RefundWorkflow } from "../workflows/refund.ts";
 import { SpliceWorkflow } from "../workflows/splice.ts";
@@ -59,7 +59,7 @@ const TreasuryGroupLive = HttpApiBuilder.group(
         const legs = yield* LegsRepository;
         const ledger = yield* LedgerRepository;
         const grants = yield* GrantsRepository;
-        const tinyburg = yield* TinyburgTrading;
+        const tinyburg = yield* TinyburgApi;
         const provider = yield* TinyburgProvider;
 
         const connectUrl = `${provider.publicUrl}/auth/connect?returnTo=${encodeURIComponent(`${provider.issuer}/trades`)}`;

@@ -1,7 +1,7 @@
 {
-    "name": "@tinyburg/trading-sdk",
+    "name": "@tinyburg/tinyburg-sdk",
     "version": "0.2.0",
-    "description": "trading sdk for tinyburg.app",
+    "description": "sdk for the tinyburg.app api",
     "keywords": [
         "nimblebit",
         "tinytower",
@@ -13,7 +13,7 @@
     "repository": {
         "type": "git",
         "url": "https://github.com/leonitousconforti/tinyburg.git",
-        "directory": "packages/trading-sdk"
+        "directory": "packages/tinyburg-sdk"
     },
     "files": [
         "src/**/*.ts",

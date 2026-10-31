@@ -82,13 +82,13 @@ The dashboard, the sign-in round trip, the workflows, the cluster, and unattende
 
 The study is keyed by game throughout, and `domain/games.ts` lists all eight of Nimblebit's cloud-sync games. Only two of them produce data:
 
-| Game                                                                            | State                                                                                                                                                                          |
-| ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| TinyTower                                                                       | Readable. Friends live under `Pfrns` in the save.                                                                                                                              |
-| TinyTower Classic                                                               | Readable. Same save format, re-issued under game code `ttc`.                                                                                                                   |
-| Pocket Planes, Pocket Trains, LEGO Tower, Disco Zoo, Bit City, Tiny Tower Vegas | Dormant. Their sdks return a save as raw bytes with no schema to decode, so there is no friends list to read. Their accounts groups are also not yet added to the trading api. |
+| Game                                                                            | State                                                                                                                                                                           |
+| ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| TinyTower                                                                       | Readable. Friends live under `Pfrns` in the save.                                                                                                                               |
+| TinyTower Classic                                                               | Readable. Same save format, re-issued under game code `ttc`.                                                                                                                    |
+| Pocket Planes, Pocket Trains, LEGO Tower, Disco Zoo, Bit City, Tiny Tower Vegas | Dormant. Their sdks return a save as raw bytes with no schema to decode, so there is no friends list to read. Their accounts groups are also not yet added to the tinyburg api. |
 
-A dormant game costs nothing at runtime: no scope is requested for it, no crawl is scheduled for it, and the dashboard says why it is listed but cannot be joined. Lighting one up is one entry in `domain/games.ts` once its `SaveData` schema and its trading api group exist; nothing else in this app changes.
+A dormant game costs nothing at runtime: no scope is requested for it, no crawl is scheduled for it, and the dashboard says why it is listed but cannot be joined. Lighting one up is one entry in `domain/games.ts` once its `SaveData` schema and its tinyburg api group exist; nothing else in this app changes.
 
 The scope the study asks for is derived from that list rather than written out, so the consent screen can never name a game the crawler cannot read. Today that is:
 

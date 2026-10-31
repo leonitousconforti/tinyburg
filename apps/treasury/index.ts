@@ -32,7 +32,7 @@ import { HealthRoutesLive } from "./routes/health.ts";
 import { OAuthRoutesLive } from "./routes/oauth.ts";
 import { TinyburgProvider } from "./services/provider.ts";
 import { NimblebitPacer } from "./services/ratelimit.ts";
-import { TinyburgTrading } from "./services/tinyburg.ts";
+import { TinyburgApi } from "./services/tinyburg.ts";
 import { Vault, VaultAuthLive } from "./services/vault.ts";
 import { GiftEscrowWorkflowLive } from "./workflows/giftEscrow.ts";
 import { RefundWorkflowLive } from "./workflows/refund.ts";
@@ -69,7 +69,7 @@ const RepositoriesLive = Layer.mergeAll(
  */
 const DependenciesLive = Layer.empty.pipe(
     Layer.provideMerge(Vault.Default),
-    Layer.provideMerge(TinyburgTrading.Default),
+    Layer.provideMerge(TinyburgApi.Default),
     Layer.provideMerge(TinyburgProvider.Default),
     Layer.provideMerge(NimblebitPacer.Default),
     Layer.provideMerge(VaultAuthLive),

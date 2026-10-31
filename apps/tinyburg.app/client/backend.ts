@@ -2,7 +2,7 @@ import { Clock, Context, Effect, Layer, Option, Result, Schema as S, Synchronize
 import { HttpClient, HttpClientError, HttpClientRequest, HttpClientResponse } from "effect/http";
 import { HttpApiClient } from "effect/http-api";
 
-import { Api as TradingApi } from "@tinyburg/trading-sdk/Sdk";
+import { Api as TinyburgApi } from "@tinyburg/tinyburg-sdk/Sdk";
 import { Api as TreasuryApi, TreasuryStats } from "@tinyburg/treasury-sdk/Sdk";
 import { AsyncData, Command, Http } from "foldkit";
 import { defineMessageUnion } from "foldkit/message";
@@ -12,12 +12,12 @@ import { User } from "../domain/models.ts";
 import { AuthApi } from "../shared/auth.ts";
 
 /**
- * The derived trading api client, built once at boot. Requests are same-origin
+ * The derived tinyburg api client, built once at boot. Requests are same-origin
  * so the session cookie rides along on its own, and the server accepts it in
  * place of a bearer token, for the scopes it grants the first party.
  */
 export class Api extends Context.Service<Api>()("@tinyburg/tinyburg.app/client/Api", {
-    make: HttpApiClient.make(TradingApi),
+    make: HttpApiClient.make(TinyburgApi),
 }) {
     static readonly Default = Layer.effect(this, Api.make).pipe(Layer.provide(Http.layer));
 }

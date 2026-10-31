@@ -9,9 +9,9 @@
  * of order is how an item disappears.
  *
  * Unlike traders' towers, the vault is reached with its own credentials
- * rather than through the trading api - a treasury that had to OAuth-consent
+ * rather than through the tinyburg api - a treasury that had to OAuth-consent
  * to itself would be a circular bootstrap. The escrow ledger carries the
- * audit trail the trading api would otherwise have provided.
+ * audit trail the tinyburg api would otherwise have provided.
  */
 
 import { Config, Context, Effect, Layer, Option, Schema } from "effect";

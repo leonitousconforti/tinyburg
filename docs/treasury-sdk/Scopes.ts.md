@@ -11,7 +11,7 @@ The scopes the treasury api is guarded by, as one `treasury` area.
 These guard the treasury's own api - proposing, accepting and watching
 trades - not the towers the trades move items between. Acting on a tower
 (depositing an item into escrow, splicing a save) happens through the
-trading api under that game's own scopes, with a grant the player gives the
+tinyburg api under that game's own scopes, with a grant the player gives the
 treasury separately on the consent screen. Splitting the two means "let the
 treasury manage my trades" and "let the treasury touch my tower" are
 distinct questions with distinct answers.

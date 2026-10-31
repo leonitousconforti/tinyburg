@@ -37,7 +37,7 @@ import type { GamePlayerRef } from "../domain/graph.ts";
 import type { PlayerId } from "../domain/model.ts";
 
 import { PlayerIdSchema } from "@tinyburg/nimblebit-sdk/NimblebitConfig";
-import { Api } from "@tinyburg/trading-sdk/Sdk";
+import { Api } from "@tinyburg/tinyburg-sdk/Sdk";
 import * as OAuth from "@yielded/oauth/OAuth";
 
 import { seal, unseal } from "../crypto.ts";
@@ -56,7 +56,7 @@ import { TinyburgClient } from "./tinyburg.ts";
 export { REQUIRED_SCOPE } from "../domain/games.ts";
 
 /**
- * The study asked for a game the trading api does not serve.
+ * The study asked for a game the tinyburg api does not serve.
  *
  * Distinct from a tower being unavailable: nothing is wrong upstream and
  * retrying will not help, the api simply has no group for this game yet.
@@ -212,7 +212,7 @@ export class TinyburgTowers extends Context.Service<TinyburgTowers>()(
                 });
 
             /**
-             * The trading api's groups for one game.
+             * The tinyburg api's groups for one game.
              *
              * The api exposes a pair of groups per game and both have the same
              * shape, but they are separate properties on the derived client, so
@@ -221,7 +221,7 @@ export class TinyburgTowers extends Context.Service<TinyburgTowers>()(
              * actually serves today.
              *
              * The six games beyond TinyTower and Classic have their groups
-             * defined in `@tinyburg/trading-sdk` but not yet added to `Api`, so
+             * defined in `@tinyburg/tinyburg-sdk` but not yet added to `Api`, so
              * there is nothing here to return for them.
              */
             const groupsFor = (client: Effect.Success<ReturnType<typeof clientFor>>, game: GameId) => {
@@ -321,7 +321,7 @@ export class TinyburgTowers extends Context.Service<TinyburgTowers>()(
                     onNone: () =>
                         new GameNotServed({
                             game: options.game,
-                            reason: `the trading api has no group for ${gameInfo[options.game].name}`,
+                            reason: `the tinyburg api has no group for ${gameInfo[options.game].name}`,
                         }),
                     onSome: Effect.succeed,
                 });

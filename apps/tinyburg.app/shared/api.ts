@@ -1,1 +1,1 @@
-export { Api } from "@tinyburg/trading-sdk/Sdk";
+export { Api } from "@tinyburg/tinyburg-sdk/Sdk";

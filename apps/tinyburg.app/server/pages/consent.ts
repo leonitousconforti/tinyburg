@@ -21,7 +21,7 @@ import type * as OAuthServer from "@yielded/auth/OAuthServer";
 import type { HtmlBuilder } from "foldkit/html";
 
 import * as StandalonePage from "@tinyburg/shared-ui/StandalonePage";
-import { Api } from "@tinyburg/trading-sdk/Sdk";
+import { Api } from "@tinyburg/tinyburg-sdk/Sdk";
 import { Api as TreasuryApi } from "@tinyburg/treasury-sdk/Sdk";
 import * as OAuthScope from "@yielded/auth/OAuthScope";
 

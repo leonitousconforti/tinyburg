@@ -3,7 +3,7 @@ import { Schema as S } from "effect";
 /**
  * The games a signed-in player may link a cloud save from, in the order the
  * account page lists them. A game appears here once its accounts group is
- * added to the trading api (`@tinyburg/trading-sdk`'s `Api`); the rest of the
+ * added to the tinyburg api (`@tinyburg/tinyburg-sdk`'s `Api`); the rest of the
  * client reads this list rather than naming a game, so a new game is one
  * entry here plus its group on the api.
  *
@@ -14,7 +14,7 @@ export const LINKABLE_GAME_IDS = ["tinytower", "tinytowerclassic"] as const;
 
 /**
  * A linked game's id, as it appears in the `/towers/@link/:game` url and on
- * the trading api group that serves it.
+ * the tinyburg api group that serves it.
  *
  * @since 1.0.0
  * @category Models

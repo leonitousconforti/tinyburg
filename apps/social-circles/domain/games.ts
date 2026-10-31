@@ -21,8 +21,8 @@ import { Effect, Option, Schema as S } from "effect";
 import type { GameCatalogEntry, GameId } from "../shared/games.ts";
 import type { PlayerIdSchema } from "@tinyburg/nimblebit-sdk/NimblebitConfig";
 
+import * as Scopes from "@tinyburg/tinyburg-sdk/Scopes";
 import { TinyTower } from "@tinyburg/tinytower-sdk";
-import * as Scopes from "@tinyburg/trading-sdk/Scopes";
 
 import { GameIds } from "../shared/games.ts";
 
@@ -81,13 +81,13 @@ const savesDecodeAs = (friendsOf: (save: string) => Effect.Effect<ReadonlyArray<
  *
  * Two distinct walls, and it is worth keeping them apart: a game with no save
  * schema could not be read even if the study could reach it, while a game that
- * merely has no trading api group is one decoder away from working.
+ * merely has no tinyburg api group is one decoder away from working.
  */
 const noSaveSchema = (sdk: string): Reader => ({
     _tag: "Dormant",
     reason:
         `${sdk} returns a save as raw bytes with no schema to decode it, so there is no friends list to read. ` +
-        `Adding a SaveData schema for the game, and its accounts group to the trading api, is all this entry needs.`,
+        `Adding a SaveData schema for the game, and its accounts group to the tinyburg api, is all this entry needs.`,
 });
 
 /**
@@ -194,7 +194,7 @@ export const REQUIRED_SCOPES: ReadonlyArray<string> = [
  */
 export const REQUIRED_SCOPE: string = REQUIRED_SCOPES.join(" ");
 
-// This catalog and the trading api's scope tree name the same games. A game
+// This catalog and the tinyburg api's scope tree name the same games. A game
 // here that the api does not serve would produce scopes no provider grants;
 // a game there that is missing here would be silently unreachable. Neither is
 // visible at the point it goes wrong, so it is checked at boot.
@@ -205,7 +205,7 @@ export const REQUIRED_SCOPE: string = REQUIRED_SCOPES.join(" ");
     const extra = Array.from(declared).filter((name) => !served.has(name));
     if (missing.length > 0 || extra.length > 0) {
         throw new Error(
-            `[social-circles] game catalog and the trading api disagree: ` +
+            `[social-circles] game catalog and the tinyburg api disagree: ` +
                 `served by the api but not listed here [${missing.join(", ")}], ` +
                 `listed here but not served by the api [${extra.join(", ")}]`
         );

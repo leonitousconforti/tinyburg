@@ -1,7 +1,7 @@
 {
     "extends": "../../tsconfig.base.jsonc",
     "references": [
-        { "path": "../../packages/trading-sdk/tsconfig.src.json" },
+        { "path": "../../packages/tinyburg-sdk/tsconfig.src.json" },
         { "path": "../shared-ui/tsconfig.src.json" }
     ],
     "include": [

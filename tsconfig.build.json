@@ -18,7 +18,7 @@
         { "path": "packages/tinytower-classic-sdk/tsconfig.build.json" },
         { "path": "packages/tinytower-sdk/tsconfig.build.json" },
         { "path": "packages/tinytower-vegas-sdk/tsconfig.build.json" },
-        { "path": "packages/trading-sdk/tsconfig.build.json" },
+        { "path": "packages/tinyburg-sdk/tsconfig.build.json" },
         { "path": "packages/treasury-sdk/tsconfig.build.json" },
         { "path": "apps/shared-ui/tsconfig.build.json" },
         { "path": "apps/archivist/tsconfig.json" },

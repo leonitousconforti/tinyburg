@@ -150,7 +150,7 @@ export const CallbackRoutesLive = Effect.gen(function* () {
 
             // The id token is the only thing that says who authorized. The access
             // token is deliberately dropped on the floor: this slice reads
-            // nothing from the trading api, so keeping it would be holding a
+            // nothing from the tinyburg api, so keeping it would be holding a
             // capability with no use for it.
             const { tokens, verifier } = maybeExchange.value;
             if (tokens.idToken === undefined) {

@@ -3,7 +3,7 @@
  *
  * Split out from `domain/games.ts` deliberately. That module knows how to
  * decode each game's save, which means it pulls in `@tinyburg/tinytower-sdk`
- * and the trading api's scope tree; none of that belongs in a browser bundle
+ * and the tinyburg api's scope tree; none of that belongs in a browser bundle
  * whose only need is to render a name and colour a node. Everything here is
  * strings and schemas.
  *
@@ -15,7 +15,7 @@ import { Schema as S } from "effect";
 /**
  * Every game the study knows about, in the order the dashboard lists them.
  *
- * These are the trading api's own area names, so a scope for a game can be
+ * These are the tinyburg api's own area names, so a scope for a game can be
  * built by concatenation. `domain/games.ts` checks that against the api's tree
  * at boot.
  *
