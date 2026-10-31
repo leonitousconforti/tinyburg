@@ -6,13 +6,13 @@ on:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  # Never cancel a release midway, that can leave packages published without tags
+  cancel-in-progress: false
 
 permissions:
   contents: write
   pull-requests: write
   id-token: write
-  packages: write
 
 jobs:
   release:
@@ -21,7 +21,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
-          # This is required to ensure the `GITHUB_TOKEN` we provide below is
+          # This is required to ensure the token changesets/action is given is
           # **always** used when pushing updates to the changesets release branch.
           # Otherwise the default token will be used, and actions on that versioned
           # release branch will not be triggered.
@@ -29,19 +29,14 @@ jobs:
 
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
-          node-version: 24
+          node-version: 26
           registry-url: "https://registry.npmjs.org"
 
       - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6
 
       - run: pnpm install
 
-      - name: Upgrade npm for OIDC support
-        run: npm install -g npm@11
-
-      - uses: changesets/action@8488615a623b1b9c987934bb89eae8af6a946ac1 # v2.1.1
+      - uses: changesets/action@ae32849d5ba541f9ae29e40e22a623bc13562f51 # v2.1.2
         with:
           publish-script: pnpm changeset-publish
           version-script: pnpm changeset-version
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

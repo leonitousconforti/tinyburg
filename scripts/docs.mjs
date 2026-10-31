@@ -50,8 +50,13 @@ nav_order: ${order}
     Fs.writeFileSync(Path.join("docs", pkg, "index.md"), content);
 }
 
+// Every subdirectory of docs is generated, clearing them all also removes the
+// docs of packages that no longer exist
+for (const entry of Fs.readdirSync("docs", { withFileTypes: true })) {
+    if (entry.isDirectory()) Fs.rmSync(Path.join("docs", entry.name), { recursive: true, force: true });
+}
+
 packages().forEach((pkg, i) => {
-    Fs.rmSync(Path.join("docs", pkg), { recursive: true, force: true });
     Fs.mkdirSync(Path.join("docs", pkg), { recursive: true });
     copyFiles(pkg);
     generateIndex(pkg, i + 2);

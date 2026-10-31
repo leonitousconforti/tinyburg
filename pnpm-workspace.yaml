@@ -32,15 +32,16 @@ overrides:
   "madge>typescript": "7.0.2"
 
 peerDependencyRules:
+  # Ranges, so that Renovate's bumps don't break the lockfile update
   allowedVersions:
-    typescript: "7.0.2"
-    "@babel/core": "8.0.10"
-    "@efffrida/frida-tools>effect": "4.1.1"
-    "@efffrida/gplayapi>effect": "4.1.1"
-    "@efffrida/il2cpp-bridge>effect": "4.1.1"
-    "@efffrida/platform>effect": "4.1.1"
-    "@efffrida/polyfills>effect": "4.1.1"
-    "@efffrida/rpc>effect": "4.1.1"
+    typescript: "7"
+    "@babel/core": "8"
+    "@efffrida/frida-tools>effect": "4"
+    "@efffrida/gplayapi>effect": "4"
+    "@efffrida/il2cpp-bridge>effect": "4"
+    "@efffrida/platform>effect": "4"
+    "@efffrida/polyfills>effect": "4"
+    "@efffrida/rpc>effect": "4"
 
 minimumReleaseAgeExclude:
   - "@yielded/*"
@@ -49,7 +50,7 @@ minimumReleaseAgeExclude:
   - "effect"
   - "@foldkit/*"
   - "foldkit"
-  - frida@17.25.0
+  - frida
 
 patchedDependencies:
   "@yielded/jose@0.1.0-beta.47": patches/@yielded__jose@0.1.0-beta.47.patch

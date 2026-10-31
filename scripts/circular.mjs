@@ -1,9 +1,10 @@
 /* eslint-disable no-undef */
 
-import * as glob from "glob";
+import * as Fs from "node:fs";
+
 import madge from "madge";
 
-madge(glob.globSync(["packages/*/src/**/*.ts"]), {
+madge(Fs.globSync("packages/*/src/**/*.ts"), {
     detectiveOptions: {
         ts: {
             skipTypeImports: true,

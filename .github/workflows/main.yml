@@ -19,17 +19,19 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: 26
       - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6
 
       - run: pnpm install
       - run: pnpm clean
       - run: pnpm codegen
+      - run: pnpm build
       - run: pnpm docgen
-      - run: git add packages/**/src && git diff-index --cached HEAD --exit-code packages/**/src
+      - run: git add packages/*/src packages/*/docs docs && git diff-index --cached HEAD --exit-code packages/*/src packages/*/docs docs
       - run: pnpm check
       - run: pnpm circular
       - run: pnpm lint
-      - run: pnpm build
       - run: touch ./.env
       - run: pnpm test
         env:

@@ -1,4 +1,4 @@
-import path from "node:path";
+import url from "node:url";
 
 import type { ViteUserConfig } from "vitest/config";
 
@@ -7,7 +7,7 @@ const config: ViteUserConfig = {
         tsconfigPaths: true,
     },
     test: {
-        setupFiles: [path.join(__dirname, "vitest.setup.ts")],
+        setupFiles: [url.fileURLToPath(new URL("./vitest.setup.ts", import.meta.url))],
         server: { deps: { inline: [/@effect\/vitest/] } },
         fakeTimers: {
             toFake: undefined,
