@@ -1,6 +1,6 @@
 {
     "name": "@tinyburg/treasury-sdk",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "description": "treasury (trade escrow) sdk for tinyburg.app",
     "keywords": [
         "nimblebit",

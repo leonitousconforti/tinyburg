@@ -1,6 +1,6 @@
 {
     "name": "@tinyburg/insight",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "description": "provides information into and about TinyTower using frida",
     "keywords": [
         "nimblebit",

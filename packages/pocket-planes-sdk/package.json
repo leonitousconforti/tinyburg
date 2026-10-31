@@ -1,6 +1,6 @@
 {
     "name": "@tinyburg/pocket-planes-sdk",
-    "version": "0.0.0",
+    "version": "0.1.0",
     "description": "api for the mobile game Pocket Planes by Nimblebit",
     "keywords": [
         "nimblebit",

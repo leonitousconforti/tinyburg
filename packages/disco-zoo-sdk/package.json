@@ -1,6 +1,6 @@
 {
     "name": "@tinyburg/disco-zoo-sdk",
-    "version": "0.0.0",
+    "version": "0.1.0",
     "description": "api for the mobile game Disco Zoo by Nimblebit",
     "keywords": [
         "disco-zoo-sdk",
