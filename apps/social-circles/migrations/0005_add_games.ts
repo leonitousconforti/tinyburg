@@ -23,91 +23,149 @@ import { SqlClient } from "effect/sql";
  * Existing rows are backfilled to `tinytower`, which is the only game the study
  * has ever crawled.
  */
-export default Effect.flatMap(
-    SqlClient.SqlClient,
-    (sql) => sql`
+export default Effect.flatMap(SqlClient.SqlClient, (sql) =>
+    Effect.all(
+        [
+            sql`
         -- The analytics views read the columns being reshaped, so they cannot
         -- survive the change. They are derived state and are rebuilt at the end.
         DROP MATERIALIZED VIEW IF EXISTS mutual_friendships;
+        `,
+            sql`
         DROP MATERIALIZED VIEW IF EXISTS current_friendships;
-
+        `,
+            sql`
         -- Every foreign key pointing at players goes first. They depend on the
         -- unique index this migration replaces, and Postgres will not drop an
         -- index out from under a constraint that uses it.
         ALTER TABLE consents DROP CONSTRAINT IF EXISTS consents_player_id_fkey;
+        `,
+            sql`
         ALTER TABLE crawl_state DROP CONSTRAINT IF EXISTS crawl_state_player_id_fkey;
+        `,
+            sql`
         ALTER TABLE friend_counts DROP CONSTRAINT IF EXISTS friend_counts_player_id_fkey;
+        `,
+            sql`
         ALTER TABLE friendship_events DROP CONSTRAINT IF EXISTS friendship_events_from_player_id_fkey;
+        `,
+            sql`
         ALTER TABLE friendship_events DROP CONSTRAINT IF EXISTS friendship_events_to_player_id_fkey;
-
+        `,
+            sql`
         -- A player is (game, friend code). The default backfills the rows that
         -- predate the column and is then dropped, so a later insert that forgets
         -- to say which game it means fails instead of silently meaning TinyTower.
         ALTER TABLE players ADD COLUMN IF NOT EXISTS game TEXT NOT NULL DEFAULT 'tinytower';
+        `,
+            sql`
         ALTER TABLE players ALTER COLUMN game DROP DEFAULT;
-
+        `,
+            sql`
         ALTER TABLE players DROP CONSTRAINT IF EXISTS players_player_id_key;
+        `,
+            sql`
         ALTER TABLE players ADD CONSTRAINT players_game_player_id_key UNIQUE (game, player_id);
-
+        `,
+            sql`
         -- What the composite foreign keys below point at. Redundant given id is
         -- already the primary key, but a foreign key needs a unique index on
         -- exactly the columns it references.
         ALTER TABLE players ADD CONSTRAINT players_game_id_key UNIQUE (game, id);
-
+        `,
+            sql`
         ALTER TABLE friendship_events ADD COLUMN IF NOT EXISTS game TEXT NOT NULL DEFAULT 'tinytower';
+        `,
+            sql`
         ALTER TABLE friendship_events ALTER COLUMN game DROP DEFAULT;
-
+        `,
+            sql`
         -- Both endpoints must belong to the game the edge claims to be in.
         ALTER TABLE friendship_events ADD CONSTRAINT friendship_events_from_fkey
             FOREIGN KEY (game, from_player_id) REFERENCES players(game, id) ON DELETE CASCADE;
+        `,
+            sql`
         ALTER TABLE friendship_events ADD CONSTRAINT friendship_events_to_fkey
             FOREIGN KEY (game, to_player_id) REFERENCES players(game, id) ON DELETE CASCADE;
-
+        `,
+            sql`
         CREATE INDEX IF NOT EXISTS idx_friendship_events_game ON friendship_events(game, event_timestamp DESC);
-
+        `,
+            sql`
         -- Consent is per tower, and a player who took part in one game has said
         -- nothing about another.
         ALTER TABLE consents ADD COLUMN IF NOT EXISTS game TEXT NOT NULL DEFAULT 'tinytower';
+        `,
+            sql`
         ALTER TABLE consents ALTER COLUMN game DROP DEFAULT;
-
+        `,
+            sql`
         ALTER TABLE consents ADD CONSTRAINT consents_game_player_id_fkey
             FOREIGN KEY (game, player_id) REFERENCES players(game, player_id) ON DELETE CASCADE;
-
+        `,
+            sql`
         ALTER TABLE consents DROP CONSTRAINT IF EXISTS unique_live_consent;
+        `,
+            sql`
         ALTER TABLE consents ADD CONSTRAINT unique_live_consent UNIQUE (game, player_id, granted_at);
-
+        `,
+            sql`
         DROP INDEX IF EXISTS idx_consents_live_player;
+        `,
+            sql`
         CREATE UNIQUE INDEX IF NOT EXISTS idx_consents_live_player
             ON consents(game, player_id) WHERE revoked_at IS NULL;
-
+        `,
+            sql`
         -- Scheduler state is per tower too: one game's tower being unreachable
         -- must not back off another game's.
         ALTER TABLE crawl_state ADD COLUMN IF NOT EXISTS game TEXT NOT NULL DEFAULT 'tinytower';
+        `,
+            sql`
         ALTER TABLE crawl_state ALTER COLUMN game DROP DEFAULT;
-
+        `,
+            sql`
         ALTER TABLE crawl_state DROP CONSTRAINT IF EXISTS crawl_state_pkey;
+        `,
+            sql`
         ALTER TABLE crawl_state ADD CONSTRAINT crawl_state_pkey PRIMARY KEY (game, player_id);
+        `,
+            sql`
         ALTER TABLE crawl_state ADD CONSTRAINT crawl_state_game_player_id_fkey
             FOREIGN KEY (game, player_id) REFERENCES players(game, player_id) ON DELETE CASCADE;
-
+        `,
+            sql`
         ALTER TABLE friend_counts ADD COLUMN IF NOT EXISTS game TEXT NOT NULL DEFAULT 'tinytower';
+        `,
+            sql`
         ALTER TABLE friend_counts ALTER COLUMN game DROP DEFAULT;
-
+        `,
+            sql`
         ALTER TABLE friend_counts ADD CONSTRAINT friend_counts_game_player_id_fkey
             FOREIGN KEY (game, player_id) REFERENCES players(game, player_id) ON DELETE CASCADE;
-
+        `,
+            sql`
         DROP INDEX IF EXISTS idx_friend_counts_player;
+        `,
+            sql`
         CREATE INDEX IF NOT EXISTS idx_friend_counts_player
             ON friend_counts(game, player_id, observed_at DESC);
-
+        `,
+            sql`
         -- A receipt outlives the rows it describes, so it has no foreign key and
         -- has to carry the game itself to stay meaningful.
         ALTER TABLE purge_receipts ADD COLUMN IF NOT EXISTS game TEXT NOT NULL DEFAULT 'tinytower';
+        `,
+            sql`
         ALTER TABLE purge_receipts ALTER COLUMN game DROP DEFAULT;
-
+        `,
+            sql`
         DROP INDEX IF EXISTS idx_purge_receipts_player;
+        `,
+            sql`
         CREATE INDEX IF NOT EXISTS idx_purge_receipts_player ON purge_receipts(game, player_id);
-
+        `,
+            sql`
         -- The views again, now carrying the game. An edge cannot span games, so
         -- one column on the row describes both of its endpoints.
         CREATE MATERIALIZED VIEW IF NOT EXISTS current_friendships AS
@@ -129,14 +187,20 @@ export default Effect.flatMap(
         JOIN players p1 ON fe.from_player_id = p1.id
         JOIN players p2 ON fe.to_player_id = p2.id
         WHERE fe.event_type = 'friended';
-
+        `,
+            sql`
         CREATE UNIQUE INDEX IF NOT EXISTS idx_current_friendships_directed
             ON current_friendships(game, from_player_id, to_player_id);
+        `,
+            sql`
         CREATE INDEX IF NOT EXISTS idx_current_friendships_from_player
             ON current_friendships(game, from_player);
+        `,
+            sql`
         CREATE INDEX IF NOT EXISTS idx_current_friendships_to_player
             ON current_friendships(game, to_player);
-
+        `,
+            sql`
         CREATE MATERIALIZED VIEW IF NOT EXISTS mutual_friendships AS
         SELECT
             a.game,
@@ -150,12 +214,20 @@ export default Effect.flatMap(
             AND a.from_player_id = b.to_player_id
             AND a.to_player_id = b.from_player_id
         WHERE a.from_player_id < a.to_player_id;
-
+        `,
+            sql`
         CREATE UNIQUE INDEX IF NOT EXISTS idx_mutual_friendships_pair
             ON mutual_friendships(game, player_id_a, player_id_b);
+        `,
+            sql`
         CREATE INDEX IF NOT EXISTS idx_mutual_friendships_player_a
             ON mutual_friendships(game, player_a);
+        `,
+            sql`
         CREATE INDEX IF NOT EXISTS idx_mutual_friendships_player_b
             ON mutual_friendships(game, player_b);
-    `
+        `,
+        ],
+        { discard: true }
+    )
 );

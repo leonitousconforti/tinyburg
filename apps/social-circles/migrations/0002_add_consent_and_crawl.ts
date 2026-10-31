@@ -9,9 +9,10 @@ import { SqlClient } from "effect/sql";
  * hangs off a Tinyburg user who has linked (and therefore proven control of)
  * the TinyTower account, so both granting and revoking are authenticated acts.
  */
-export default Effect.flatMap(
-    SqlClient.SqlClient,
-    (sql) => sql`
+export default Effect.flatMap(SqlClient.SqlClient, (sql) =>
+    Effect.all(
+        [
+            sql`
         -- A consent record is the only thing that puts a player in the study.
         -- It is keyed by the Tinyburg user who proved ownership of the player,
         -- so a revocation can only ever come from the same account.
@@ -26,11 +27,15 @@ export default Effect.flatMap(
             -- back gets a new row, leaving the first one as an audit trail.
             CONSTRAINT unique_live_consent UNIQUE (player_id, granted_at)
         );
-
+        `,
+            sql`
         CREATE UNIQUE INDEX IF NOT EXISTS idx_consents_live_player
             ON consents(player_id) WHERE revoked_at IS NULL;
+        `,
+            sql`
         CREATE INDEX IF NOT EXISTS idx_consents_user ON consents(tinyburg_user_id);
-
+        `,
+            sql`
         -- Refresh tokens for the tinyburg.app 'towers' grant. The crawl runs on
         -- a schedule, long after the visitor has closed the tab, so a
         -- user-present access token is not enough. Tokens are stored encrypted;
@@ -45,7 +50,8 @@ export default Effect.flatMap(
             -- retrying a grant the user revoked upstream.
             invalidated_at TIMESTAMPTZ
         );
-
+        `,
+            sql`
         -- Per-player crawl bookkeeping. Lives in its own table rather than on
         -- players so that a purge can drop the player row without leaving
         -- scheduler state behind.
@@ -59,9 +65,11 @@ export default Effect.flatMap(
             next_attempt_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
             last_error TEXT
         );
-
+        `,
+            sql`
         CREATE INDEX IF NOT EXISTS idx_crawl_state_next_attempt ON crawl_state(next_attempt_at);
-
+        `,
+            sql`
         -- The study only ever stores edges between two consenting players, which
         -- makes the graph an induced subgraph over a self-selected population.
         -- Recording how many friends were redacted (a count, never an identity)
@@ -77,9 +85,11 @@ export default Effect.flatMap(
             CONSTRAINT consented_not_greater_than_total
                 CHECK (consented_friends <= total_friends)
         );
-
+        `,
+            sql`
         CREATE INDEX IF NOT EXISTS idx_friend_counts_player ON friend_counts(player_id, observed_at DESC);
-
+        `,
+            sql`
         -- Deletion has to be provable, not just attempted. The purge workflow
         -- writes here so 'has my data been removed' has an auditable answer that
         -- outlives the rows it deleted.
@@ -94,7 +104,11 @@ export default Effect.flatMap(
             edges_removed INTEGER NOT NULL,
             events_removed INTEGER NOT NULL
         );
-
+        `,
+            sql`
         CREATE INDEX IF NOT EXISTS idx_purge_receipts_player ON purge_receipts(player_id);
-    `
+        `,
+        ],
+        { discard: true }
+    )
 );

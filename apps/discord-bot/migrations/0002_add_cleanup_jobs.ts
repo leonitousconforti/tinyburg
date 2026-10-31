@@ -1,9 +1,10 @@
 import { Effect } from "effect";
 import { SqlClient } from "effect/sql";
 
-export default Effect.flatMap(
-    SqlClient.SqlClient,
-    (sql) => sql`
+export default Effect.flatMap(SqlClient.SqlClient, (sql) =>
+    Effect.all(
+        [
+            sql`
         -- A pending link is a /link that was started and never finished: the
         -- row holds the PKCE verifier and the interaction token the callback
         -- would have used. Nothing reads one past its expiry, so removing them
@@ -13,11 +14,15 @@ export default Effect.flatMap(
         -- which matters more here than elsewhere: the bot is off by default in
         -- development and its gateway half can be down for other reasons.
         CREATE EXTENSION IF NOT EXISTS pg_cron;
-
+        `,
+            sql`
         SELECT cron.schedule(
             'purge-expired-pending-links',
             '17 * * * *',
             $$DELETE FROM discord_pending_links WHERE expires_at < NOW()$$
         );
-    `
+        `,
+        ],
+        { discard: true }
+    )
 );

@@ -1,9 +1,10 @@
 import { Effect } from "effect";
 import { SqlClient } from "effect/sql";
 
-export default Effect.flatMap(
-    SqlClient.SqlClient,
-    (sql) => sql`
+export default Effect.flatMap(SqlClient.SqlClient, (sql) =>
+    Effect.all(
+        [
+            sql`
         -- An expired session is already refused on presentation, so this keeps
         -- the table bounded rather than deciding anything. Scheduled inside the
         -- database rather than from a fiber in the study.
@@ -13,11 +14,15 @@ export default Effect.flatMap(
         -- statement, and the cluster is what gives them exactly-once
         -- scheduling.
         CREATE EXTENSION IF NOT EXISTS pg_cron;
-
+        `,
+            sql`
         SELECT cron.schedule(
             'purge-expired-sessions',
             '37 * * * *',
             $$DELETE FROM sessions WHERE expires_at < NOW()$$
         );
-    `
+        `,
+        ],
+        { discard: true }
+    )
 );

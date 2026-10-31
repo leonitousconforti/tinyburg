@@ -1,9 +1,10 @@
 import { Effect } from "effect";
 import { SqlClient } from "effect/sql";
 
-export default Effect.flatMap(
-    SqlClient.SqlClient,
-    (sql) => sql`
+export default Effect.flatMap(SqlClient.SqlClient, (sql) =>
+    Effect.all(
+        [
+            sql`
         -- Users table for storing user accounts. The display name and avatar
         -- are seeded from whichever provider created the account and are the
         -- user's from then on, so linking a second provider later cannot
@@ -15,7 +16,8 @@ export default Effect.flatMap(
             display_name TEXT NOT NULL,
             avatar_url TEXT
         );
-
+        `,
+            sql`
         -- Browser sessions for the first-party app. The cookie carries a secret
         -- the database never stores, only its hash, so a copy of this table
         -- impersonates nobody. The id is the public handle instead: it is what
@@ -41,7 +43,8 @@ export default Effect.flatMap(
             access_token_expires_at TIMESTAMPTZ,
             access_token_jti TEXT
         );
-
+        `,
+            sql`
         -- OAuth accounts linked to users. A user may link as many as they like;
         -- the primary key only stops one provider account from being claimed by
         -- two users.
@@ -62,13 +65,15 @@ export default Effect.flatMap(
             -- Each provider account can only be linked once
             PRIMARY KEY (provider, provider_account_id)
         );
-
+        `,
+            sql`
         -- Revoked tokens table for storing JWT IDs of revoked tokens
         CREATE TABLE IF NOT EXISTS revoked_tokens (
             jti TEXT PRIMARY KEY,
             expires_at TIMESTAMPTZ NOT NULL
         );
-
+        `,
+            sql`
         -- TinyTower accounts linked to users
         CREATE TABLE IF NOT EXISTS tinytower_accounts (
             id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -78,7 +83,8 @@ export default Effect.flatMap(
             player_email TEXT NOT NULL,
             created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
         );
-
+        `,
+            sql`
         -- Pending TinyTower link requests
         CREATE TABLE IF NOT EXISTS pending_tinytower_accounts (
             id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -88,16 +94,32 @@ export default Effect.flatMap(
             created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
             expires_at TIMESTAMPTZ NOT NULL DEFAULT NOW() + INTERVAL '1 day'
         );
-
+        `,
+            sql`
         -- Indexes for common query patterns. Unique constraints already carry
         -- an index of their own, so sessions(token_hash), oauth_accounts'
         -- primary key and tinytower_accounts(player_id) need no help here.
         CREATE INDEX IF NOT EXISTS idx_sessions_user_id_last_seen_at ON sessions(user_id, last_seen_at DESC);
+        `,
+            sql`
         CREATE INDEX IF NOT EXISTS idx_sessions_expires_at ON sessions(expires_at);
+        `,
+            sql`
         CREATE INDEX IF NOT EXISTS idx_oauth_accounts_user_id ON oauth_accounts(user_id);
+        `,
+            sql`
         CREATE INDEX IF NOT EXISTS idx_revoked_tokens_expires_at ON revoked_tokens(expires_at);
+        `,
+            sql`
         CREATE INDEX IF NOT EXISTS idx_tinytower_accounts_user_id ON tinytower_accounts(user_id);
+        `,
+            sql`
         CREATE INDEX IF NOT EXISTS idx_pending_tinytower_accounts_user_id ON pending_tinytower_accounts(user_id);
+        `,
+            sql`
         CREATE INDEX IF NOT EXISTS idx_pending_tinytower_accounts_expires_at ON pending_tinytower_accounts(expires_at);
-    `
+        `,
+        ],
+        { discard: true }
+    )
 );

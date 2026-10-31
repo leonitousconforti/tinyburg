@@ -1,9 +1,10 @@
 import { Effect } from "effect";
 import { SqlClient } from "effect/sql";
 
-export default Effect.flatMap(
-    SqlClient.SqlClient,
-    (sql) => sql`
+export default Effect.flatMap(SqlClient.SqlClient, (sql) =>
+    Effect.all(
+        [
+            sql`
         -- A Discord account bound to a Tinyburg account (the OIDC subject).
         --
         -- Both sides are UNIQUE, so the binding is one to one in both
@@ -24,7 +25,8 @@ export default Effect.flatMap(
             avatar_url TEXT,
             created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
         );
-
+        `,
+            sql`
         -- A '/link' that has been started but not finished: the state and
         -- PKCE verifier for one authorization round trip.
         --
@@ -47,7 +49,11 @@ export default Effect.flatMap(
             created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
             expires_at TIMESTAMPTZ NOT NULL DEFAULT NOW() + INTERVAL '10 minutes'
         );
-
+        `,
+            sql`
         CREATE INDEX IF NOT EXISTS idx_discord_pending_links_expires_at ON discord_pending_links(expires_at);
-    `
+        `,
+        ],
+        { discard: true }
+    )
 );

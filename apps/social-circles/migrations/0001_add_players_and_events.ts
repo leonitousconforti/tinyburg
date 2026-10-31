@@ -2,15 +2,17 @@ import { Effect } from "effect";
 import { SqlClient } from "effect/sql";
 
 // Postgresql database
-export default Effect.flatMap(
-    SqlClient.SqlClient,
-    (sql) => sql`
+export default Effect.flatMap(SqlClient.SqlClient, (sql) =>
+    Effect.all(
+        [
+            sql`
         CREATE TABLE IF NOT EXISTS players (
             id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
             player_id TEXT UNIQUE NOT NULL,
             first_seen_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
         );
-
+        `,
+            sql`
         CREATE TABLE IF NOT EXISTS friendship_events (
             id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
             from_player_id UUID NOT NULL REFERENCES players(id) ON DELETE CASCADE,
@@ -24,13 +26,21 @@ export default Effect.flatMap(
             -- Ensure uniqueness of directed friendship events at a given timestamp
             CONSTRAINT unique_friendship_event UNIQUE (from_player_id, to_player_id, event_timestamp)
         );
-
+        `,
+            sql`
         -- Indexes for common query patterns
         CREATE INDEX IF NOT EXISTS idx_friendship_events_timestamp ON friendship_events(event_timestamp);
+        `,
+            sql`
         CREATE INDEX IF NOT EXISTS idx_friendship_events_from ON friendship_events(from_player_id, event_timestamp DESC);
+        `,
+            sql`
         CREATE INDEX IF NOT EXISTS idx_friendship_events_to ON friendship_events(to_player_id, event_timestamp DESC);
+        `,
+            sql`
         CREATE INDEX IF NOT EXISTS idx_friendship_events_directed_pair ON friendship_events(from_player_id, to_player_id, event_timestamp DESC);
-
+        `,
+            sql`
         -- Materialized view for current one-way friendships (A has friended B)
         CREATE MATERIALIZED VIEW IF NOT EXISTS current_friendships AS
         SELECT
@@ -49,14 +59,20 @@ export default Effect.flatMap(
         JOIN players p1 ON fe.from_player_id = p1.id
         JOIN players p2 ON fe.to_player_id = p2.id
         WHERE fe.event_type = 'friended';
-
+        `,
+            sql`
         CREATE UNIQUE INDEX IF NOT EXISTS idx_current_friendships_directed
             ON current_friendships(from_player_id, to_player_id);
+        `,
+            sql`
         CREATE INDEX IF NOT EXISTS idx_current_friendships_from_player
             ON current_friendships(from_player);
+        `,
+            sql`
         CREATE INDEX IF NOT EXISTS idx_current_friendships_to_player
             ON current_friendships(to_player);
-
+        `,
+            sql`
         -- Materialized view for mutual friendships (A friended B AND B friended A)
         CREATE MATERIALIZED VIEW IF NOT EXISTS mutual_friendships AS
         SELECT
@@ -69,12 +85,20 @@ export default Effect.flatMap(
             ON a.from_player_id = b.to_player_id
             AND a.to_player_id = b.from_player_id
         WHERE a.from_player_id < a.to_player_id;
-
+        `,
+            sql`
         CREATE UNIQUE INDEX IF NOT EXISTS idx_mutual_friendships_pair
             ON mutual_friendships(player_id_a, player_id_b);
+        `,
+            sql`
         CREATE INDEX IF NOT EXISTS idx_mutual_friendships_player_a
             ON mutual_friendships(player_a);
+        `,
+            sql`
         CREATE INDEX IF NOT EXISTS idx_mutual_friendships_player_b
             ON mutual_friendships(player_b);
-    `
+        `,
+        ],
+        { discard: true }
+    )
 );

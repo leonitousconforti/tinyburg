@@ -1,14 +1,18 @@
 import { Effect } from "effect";
 import { SqlClient } from "effect/sql";
 
-export default Effect.flatMap(
-    SqlClient.SqlClient,
-    (sql) => sql`
+export default Effect.flatMap(SqlClient.SqlClient, (sql) =>
+    Effect.all(
+        [
+            sql`
         -- Which Tinyburg account (the OIDC subject) provisioned a key through
         -- the self-service dashboard. NULL for keys handed out by the admin.
         ALTER TABLE api_keys ADD COLUMN IF NOT EXISTS owner_sub UUID;
+        `,
+            sql`
         CREATE INDEX IF NOT EXISTS idx_api_keys_owner_sub ON api_keys(owner_sub) WHERE owner_sub IS NOT NULL;
-
+        `,
+            sql`
         -- Self-service dashboard sessions, created by "sign in with Tinyburg".
         -- Only a hash of the cookie value is stored.
         CREATE TABLE IF NOT EXISTS sessions (
@@ -23,5 +27,8 @@ export default Effect.flatMap(
             elevation_password_ok BOOLEAN,
             elevation_requested_at TIMESTAMPTZ
         );
-    `
+        `,
+        ],
+        { discard: true }
+    )
 );

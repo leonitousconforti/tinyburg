@@ -1,9 +1,10 @@
 import { Effect } from "effect";
 import { SqlClient } from "effect/sql";
 
-export default Effect.flatMap(
-    SqlClient.SqlClient,
-    (sql) => sql`
+export default Effect.flatMap(SqlClient.SqlClient, (sql) =>
+    Effect.all(
+        [
+            sql`
         -- OAuth applications registered by developers. The first party has no
         -- owner to speak of, so the column is nullable and only a developer's
         -- own apps go when their account does.
@@ -20,7 +21,8 @@ export default Effect.flatMap(
             -- rather than left to fail on every attempt.
             redirect_uris TEXT[] NOT NULL CHECK (cardinality(redirect_uris) > 0)
         );
-
+        `,
+            sql`
         -- Pending authorization requests and their (single-use) authorization codes
         CREATE TABLE IF NOT EXISTS oauth_authorization_requests (
             id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -35,9 +37,15 @@ export default Effect.flatMap(
             created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
             expires_at TIMESTAMPTZ NOT NULL DEFAULT NOW() + INTERVAL '10 minutes'
         );
-
+        `,
+            sql`
         -- Indexes for common query patterns
         CREATE INDEX IF NOT EXISTS idx_oauth_clients_owner_user_id ON oauth_clients(owner_user_id);
+        `,
+            sql`
         CREATE INDEX IF NOT EXISTS idx_oauth_authorization_requests_expires_at ON oauth_authorization_requests(expires_at);
-    `
+        `,
+        ],
+        { discard: true }
+    )
 );

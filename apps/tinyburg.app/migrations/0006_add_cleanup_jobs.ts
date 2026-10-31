@@ -1,9 +1,10 @@
 import { Effect } from "effect";
 import { SqlClient } from "effect/sql";
 
-export default Effect.flatMap(
-    SqlClient.SqlClient,
-    (sql) => sql`
+export default Effect.flatMap(SqlClient.SqlClient, (sql) =>
+    Effect.all(
+        [
+            sql`
         -- Expired rows are already invisible to every read path, which filters
         -- on expires_at, so purging them is only about keeping the tables
         -- bounded. pg_cron does that on a schedule inside the database rather
@@ -15,25 +16,29 @@ export default Effect.flatMap(
         -- they grow, and the times are staggered so the five never contend
         -- with each other.
         CREATE EXTENSION IF NOT EXISTS pg_cron;
-
+        `,
+            sql`
         SELECT cron.schedule(
             'purge-expired-sessions',
             '17 * * * *',
             $$DELETE FROM sessions WHERE expires_at < NOW()$$
         );
-
+        `,
+            sql`
         SELECT cron.schedule(
             'purge-expired-revoked-tokens',
             '23 * * * *',
             $$DELETE FROM revoked_tokens WHERE expires_at < NOW()$$
         );
-
+        `,
+            sql`
         SELECT cron.schedule(
             'purge-expired-pending-tinytower-accounts',
             '41 * * * *',
             $$DELETE FROM pending_tinytower_accounts WHERE expires_at < NOW()$$
         );
-
+        `,
+            sql`
         -- Authorization requests live ten minutes and codes five, so this one
         -- runs on a much tighter loop than the others.
         SELECT cron.schedule(
@@ -41,7 +46,8 @@ export default Effect.flatMap(
             '*/15 * * * *',
             $$DELETE FROM oauth_authorization_requests WHERE expires_at < NOW()$$
         );
-
+        `,
+            sql`
         -- Refresh tokens are kept a while past expiry: a replayed token is only
         -- recognisable as reuse while its row still exists, so deleting on the
         -- stroke of expiry would turn a detectable attack into a silent
@@ -51,5 +57,8 @@ export default Effect.flatMap(
             '47 3 * * *',
             $$DELETE FROM refresh_tokens WHERE expires_at < NOW() - INTERVAL '30 days'$$
         );
-    `
+        `,
+        ],
+        { discard: true }
+    )
 );

@@ -14,9 +14,10 @@ import { SqlClient } from "effect/sql";
  * `tower_grants` row is what the background crawl uses. See `services/towers.ts`
  * for why the two are separate.
  */
-export default Effect.flatMap(
-    SqlClient.SqlClient,
-    (sql) => sql`
+export default Effect.flatMap(SqlClient.SqlClient, (sql) =>
+    Effect.all(
+        [
+            sql`
         CREATE TABLE IF NOT EXISTS sessions (
             id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
             -- Only ever the hash. A leaked table is not a set of live cookies.
@@ -30,8 +31,14 @@ export default Effect.flatMap(
             access_token_ciphertext TEXT,
             access_token_expires_at TIMESTAMPTZ
         );
-
+        `,
+            sql`
         CREATE INDEX IF NOT EXISTS idx_sessions_sub ON sessions(sub);
+        `,
+            sql`
         CREATE INDEX IF NOT EXISTS idx_sessions_expires_at ON sessions(expires_at);
-    `
+        `,
+        ],
+        { discard: true }
+    )
 );

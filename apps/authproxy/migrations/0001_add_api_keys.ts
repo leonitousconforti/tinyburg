@@ -12,9 +12,10 @@ import { READONLY_KEY_SCOPES } from "../domain/scopes.ts";
  */
 const readonlyScopes = READONLY_KEY_SCOPES.map((name) => `'${name}'`).join(", ");
 
-export default Effect.flatMap(
-    SqlClient.SqlClient,
-    (sql) => sql`
+export default Effect.flatMap(SqlClient.SqlClient, (sql) =>
+    Effect.all(
+        [
+            sql`
         CREATE TABLE IF NOT EXISTS api_keys (
             id SERIAL PRIMARY KEY,                                  -- Auto incrementing ID
             created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),          -- Timestamp of creation
@@ -26,18 +27,24 @@ export default Effect.flatMap(
             rate_limit_window BIGINT NOT NULL,                      -- Rate limit time window in milliseconds
             description TEXT                                        -- Optional description
         );
-
+        `,
+            sql`
         -- Create an index on the key column for faster lookups
         CREATE INDEX IF NOT EXISTS idx_api_keys_key ON api_keys(key);
-
+        `,
+            sql`
         -- "None" API key with no permitted scopes
         INSERT INTO api_keys (key, description, rate_limit_limit, rate_limit_window, scopes)
         VALUES (${sql.literal(`'${NONE_API_KEY}'`)}, 'Default None Key', 3, (EXTRACT(EPOCH FROM INTERVAL '1 minute') * 1000)::BIGINT, ARRAY[]::TEXT[])
         ON CONFLICT (key) DO NOTHING;
-
+        `,
+            sql`
         -- "Default" API key with read-only scopes
         INSERT INTO api_keys (key, description, rate_limit_limit, rate_limit_window, scopes)
         VALUES (${sql.literal(`'${READONLY_API_KEY}'`)}, 'Default Readonly Key', 3, (EXTRACT(EPOCH FROM INTERVAL '1 minute') * 1000)::BIGINT, ARRAY[${sql.literal(readonlyScopes)}]::TEXT[])
         ON CONFLICT (key) DO NOTHING;
-    `
+        `,
+        ],
+        { discard: true }
+    )
 );

@@ -19,9 +19,10 @@ import { SqlClient } from "effect/sql";
  * revoked and the user has to sign in again. Losing a session beats leaving a
  * thief with an unbounded one.
  */
-export default Effect.flatMap(
-    SqlClient.SqlClient,
-    (sql) => sql`
+export default Effect.flatMap(SqlClient.SqlClient, (sql) =>
+    Effect.all(
+        [
+            sql`
         CREATE TABLE IF NOT EXISTS refresh_tokens (
             id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 
@@ -51,9 +52,17 @@ export default Effect.flatMap(
             -- explicit revocation.
             revoked_at TIMESTAMPTZ
         );
-
+        `,
+            sql`
         CREATE INDEX IF NOT EXISTS idx_refresh_tokens_family ON refresh_tokens(family_id);
+        `,
+            sql`
         CREATE INDEX IF NOT EXISTS idx_refresh_tokens_user ON refresh_tokens(user_id);
+        `,
+            sql`
         CREATE INDEX IF NOT EXISTS idx_refresh_tokens_expires_at ON refresh_tokens(expires_at);
-    `
+        `,
+        ],
+        { discard: true }
+    )
 );

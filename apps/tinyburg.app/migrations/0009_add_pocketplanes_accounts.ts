@@ -1,9 +1,10 @@
 import { Effect } from "effect";
 import { SqlClient } from "effect/sql";
 
-export default Effect.flatMap(
-    SqlClient.SqlClient,
-    (sql) => sql`
+export default Effect.flatMap(SqlClient.SqlClient, (sql) =>
+    Effect.all(
+        [
+            sql`
         -- Pocket Planes accounts, same shape as TinyTower's: a player id, an auth key
         -- that proves the tower is theirs, and the email its cloud save lives
         -- under. Its own tables rather than a game column, because a player id
@@ -16,7 +17,8 @@ export default Effect.flatMap(
             player_email TEXT NOT NULL,
             created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
         );
-
+        `,
+            sql`
         -- Pending Pocket Planes link requests, with the burn bot that asked Nimblebit
         -- for the code, which is the one that has to present it.
         CREATE TABLE IF NOT EXISTS pending_pocketplanes_accounts (
@@ -29,16 +31,25 @@ export default Effect.flatMap(
             created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
             expires_at TIMESTAMPTZ NOT NULL DEFAULT NOW() + INTERVAL '1 day'
         );
-
+        `,
+            sql`
         CREATE INDEX IF NOT EXISTS idx_pocketplanes_accounts_user_id ON pocketplanes_accounts(user_id);
+        `,
+            sql`
         CREATE INDEX IF NOT EXISTS idx_pending_pocketplanes_accounts_user_id ON pending_pocketplanes_accounts(user_id);
+        `,
+            sql`
         CREATE INDEX IF NOT EXISTS idx_pending_pocketplanes_accounts_expires_at ON pending_pocketplanes_accounts(expires_at);
-
+        `,
+            sql`
         -- Swept like the others, on its own minute.
         SELECT cron.schedule(
             'purge-expired-pending-pocketplanes-accounts',
             '5 * * * *',
             $$DELETE FROM pending_pocketplanes_accounts WHERE expires_at < NOW()$$
         );
-    `
+        `,
+        ],
+        { discard: true }
+    )
 );

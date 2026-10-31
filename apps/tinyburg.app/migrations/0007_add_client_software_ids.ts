@@ -1,9 +1,10 @@
 import { Effect } from "effect";
 import { SqlClient } from "effect/sql";
 
-export default Effect.flatMap(
-    SqlClient.SqlClient,
-    (sql) => sql`
+export default Effect.flatMap(SqlClient.SqlClient, (sql) =>
+    Effect.all(
+        [
+            sql`
         -- What makes dynamic client registration (RFC 7591) idempotent.
         --
         -- \`software_id\` is the RFC's identifier for a piece of software rather
@@ -17,8 +18,12 @@ export default Effect.flatMap(
         -- registered by hand or created by migration has no software behind it
         -- to name.
         ALTER TABLE oauth_clients ADD COLUMN IF NOT EXISTS software_id TEXT;
-
+        `,
+            sql`
         CREATE UNIQUE INDEX IF NOT EXISTS idx_oauth_clients_software_id
             ON oauth_clients(software_id) WHERE software_id IS NOT NULL;
-    `
+        `,
+        ],
+        { discard: true }
+    )
 );
