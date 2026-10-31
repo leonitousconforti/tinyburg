@@ -13,7 +13,7 @@ export class CurrentSession extends Context.Service<
 
 export class SessionCookie extends HttpApiMiddleware.Service<SessionCookie, { provides: CurrentSession }>()(
     "@tinyburg/tinyburg.app/shared/auth/SessionCookie",
-    { error: Schema.Union([HttpApiError.Unauthorized, HttpApiError.InternalServerError]) }
+    { error: [HttpApiError.Unauthorized, HttpApiError.InternalServerError] }
 ) {}
 
 const AuthGroup = HttpApiGroup.make("AuthGroup")
