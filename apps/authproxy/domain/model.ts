@@ -1,4 +1,4 @@
-import { Context, Effect, Layer, Schema, SchemaGetter } from "effect";
+import { Context, Effect, Layer, Schema, SchemaGetter, SchemaTransformation } from "effect";
 import { Model } from "effect/schema";
 import { SqlClient, SqlModel, SqlSchema } from "effect/sql";
 
@@ -53,9 +53,12 @@ export class ApiKey extends Model.Class<ApiKey>("ApiKey")({
     description: Schema.OptionFromNullishOr(Schema.String, { onNoneEncoding: null }),
     ownerSub: Schema.OptionFromNullishOr(Schema.String.check(Schema.isUUID()), { onNoneEncoding: null }),
     rateLimitLimit: Schema.Int,
-    rateLimitWindow: Schema.FiniteFromString.pipe(
-        Schema.check(Schema.isGreaterThanOrEqualTo(0)),
-        Schema.decodeTo(Schema.Int),
+    // A BIGINT column, which the Postgres driver reads as a bigint
+    rateLimitWindow: Schema.BigInt.pipe(
+        Schema.decodeTo(
+            Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
+            SchemaTransformation.transform({ decode: Number, encode: BigInt })
+        ),
         Schema.decodeTo(Schema.DurationFromMillis)
     ),
 }) {}

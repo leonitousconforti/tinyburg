@@ -23,6 +23,15 @@ export class Authorization extends HttpApiMiddleware.Service<
     },
 }) {}
 
+/** API keys are uuids; anything else in the bearer slot is no key at all, not a failed lookup. */
+const isApiKey = Schema.is(Schema.String.check(Schema.isUUID()));
+
+/** A 500 says nothing to the caller, so the reason has to land in the log. */
+const internalError = (error: unknown) =>
+    Effect.logError("authorization failed", error).pipe(
+        Effect.andThen(Effect.fail(new HttpApiError.InternalServerError()))
+    );
+
 export const AuthorizationLive = Layer.effect(
     Authorization,
     Effect.gen(function* () {
@@ -62,13 +71,13 @@ export const AuthorizationLive = Layer.effect(
                             "X-RateLimit-Reset": Duration.toSeconds(rateLimitExceeded.retryAfter).toString(),
                         },
                     }).pipe(Effect.succeed),
-                () => new HttpApiError.InternalServerError()
+                internalError
             );
 
         const catch500s = <A, E, R>(effect: Effect.Effect<A, E | SqlError.SqlError | Schema.SchemaError, R>) =>
             effect.pipe(
-                Effect.catchIf(Schema.isSchemaError, () => new HttpApiError.InternalServerError()),
-                Effect.catchIf(SqlError.isSqlError, () => new HttpApiError.InternalServerError())
+                Effect.catchIf(Schema.isSchemaError, internalError),
+                Effect.catchIf(SqlError.isSqlError, internalError)
             );
 
         return {
@@ -76,7 +85,9 @@ export const AuthorizationLive = Layer.effect(
                 function* (next, { credential, endpoint }) {
                     const bearerToken = Redacted.value(credential);
                     const request = yield* HttpServerRequest.HttpServerRequest;
-                    const maybeApiKey = yield* repo.findById(bearerToken).pipe(Effect.catchNoSuchElement);
+                    const maybeApiKey = isApiKey(bearerToken)
+                        ? yield* repo.findById(bearerToken).pipe(Effect.catchNoSuchElement)
+                        : Option.none();
 
                     const headers = request.headers;
                     const doConnectingIp = Headers.get(headers, "do-connecting-ip");
