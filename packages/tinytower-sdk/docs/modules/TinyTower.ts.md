@@ -1,6 +1,6 @@
 ---
 title: TinyTower.ts
-nav_order: 3
+nav_order: 5
 parent: Modules
 ---
 
@@ -37,6 +37,7 @@ Since v1.0.0
   - [sync_pushSnapshot](#sync_pushsnapshot)
   - [sync_retrieveSnapshotList](#sync_retrievesnapshotlist)
 - [Schemas](#schemas)
+  - [Friends](#friends)
   - [SaveData](#savedata)
 
 ---
@@ -67,7 +68,7 @@ declare const device_newPlayer: Effect.Effect<
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L185)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L188)
 
 Since v1.0.0
 
@@ -100,7 +101,7 @@ declare const device_playerDetails: (args_0: {
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L223)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L226)
 
 Since v1.0.0
 
@@ -127,7 +128,7 @@ declare const device_registerEmail: (args_0: {
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L303)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L306)
 
 Since v1.0.0
 
@@ -154,7 +155,7 @@ declare const device_verifyDevice: (args_0: {
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L263)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L266)
 
 Since v1.0.0
 
@@ -182,7 +183,7 @@ declare const raffle_checkEnteredCurrent: (args_0: {
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L821)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L824)
 
 Since v1.0.0
 
@@ -210,7 +211,7 @@ declare const raffle_enterMultiRaffle: (args_0: {
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L773)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L776)
 
 Since v1.0.0
 
@@ -238,7 +239,7 @@ declare const raffle_enterRaffle: (args_0: {
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L725)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L728)
 
 Since v1.0.0
 
@@ -277,7 +278,7 @@ declare const social_getGifts: (args_0: {
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L922)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L925)
 
 Since v1.0.0
 
@@ -316,7 +317,7 @@ declare const social_getVisits: (args_0: {
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L1191)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L1194)
 
 Since v1.0.0
 
@@ -531,7 +532,7 @@ declare const social_pullFriendMeta: (
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L1022)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L1025)
 
 Since v1.0.0
 
@@ -561,7 +562,7 @@ declare const social_pullFriendTower: (
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L1073)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L1076)
 
 Since v1.0.0
 
@@ -591,7 +592,7 @@ declare const social_receiveGift: (
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L973)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L976)
 
 Since v1.0.0
 
@@ -621,7 +622,7 @@ declare const social_retrieveFriendsSnapshotList: (
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L1140)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L1143)
 
 Since v1.0.0
 
@@ -655,7 +656,7 @@ declare const social_sendItem: (
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L861)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L864)
 
 Since v1.0.0
 
@@ -685,7 +686,7 @@ declare const social_visit: (
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L1242)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L1245)
 
 Since v1.0.0
 
@@ -713,7 +714,7 @@ declare const sync_checkForNewerSave: (args_0: {
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L484)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L487)
 
 Since v1.0.0
 
@@ -741,7 +742,7 @@ declare const sync_pullSave: (args_0: {
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L352)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L355)
 
 Since v1.0.0
 
@@ -771,7 +772,7 @@ declare const sync_pullSnapshot: (
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L544)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L547)
 
 Since v1.0.0
 
@@ -801,7 +802,7 @@ declare const sync_pushSave: (
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L416)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L419)
 
 Since v1.0.0
 
@@ -831,7 +832,7 @@ declare const sync_pushSnapshot: (
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L609)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L612)
 
 Since v1.0.0
 
@@ -1048,11 +1049,91 @@ declare const sync_retrieveSnapshotList: (args_0: {
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L677)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L680)
 
 Since v1.0.0
 
 # Schemas
+
+## Friends
+
+How to decode a save's friend list: empty, or the friends a tower follows,
+each with the time they were added where the save recorded one.
+
+**Signature**
+
+```ts
+declare const Friends: Schema.compose<
+  Schema.Union<
+    readonly [
+      Schema.Literal<"">,
+      Schema.compose<
+        Schema.$Array<
+          Schema.Union<
+            readonly [
+              Schema.decodeTo<
+                Schema.Struct<{
+                  readonly displayName: Schema.String
+                  readonly friendId: Schema.toType<Schema.brand<Schema.String, "PlayerId">>
+                  readonly timestamp: Schema.toType<
+                    Schema.decodeTo<
+                      Schema.Union<
+                        readonly [
+                          Schema.Date,
+                          Schema.Struct<{ readonly date: Schema.Date; readonly extraTicks: Schema.BigInt }>
+                        ]
+                      >,
+                      Schema.BigInt,
+                      never,
+                      never
+                    >
+                  >
+                }>,
+                Schema.TemplateLiteralParser<
+                  readonly [
+                    Schema.String,
+                    "|",
+                    Schema.brand<Schema.String, "PlayerId">,
+                    "|",
+                    Schema.decodeTo<
+                      Schema.Union<
+                        readonly [
+                          Schema.Date,
+                          Schema.Struct<{ readonly date: Schema.Date; readonly extraTicks: Schema.BigInt }>
+                        ]
+                      >,
+                      Schema.BigInt,
+                      never,
+                      never
+                    >
+                  ]
+                >,
+                never,
+                never
+              >,
+              Schema.decodeTo<
+                Schema.Struct<{
+                  readonly displayName: Schema.String
+                  readonly friendId: Schema.toType<Schema.brand<Schema.String, "PlayerId">>
+                }>,
+                Schema.TemplateLiteralParser<readonly [Schema.String, "|", Schema.brand<Schema.String, "PlayerId">]>,
+                never,
+                never
+              >
+            ]
+          >
+        >,
+        Schema.decodeTo<Schema.$Array<Schema.String>, Schema.String, never, never>
+      >
+    ]
+  >,
+  Schema.String
+>
+```
+
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L85)
+
+Since v1.0.0
 
 ## SaveData
 
@@ -1094,10 +1175,7 @@ declare const SaveData: Schema.suspend<
           readonly lifts: Schema.decodeTo<Schema.$Array<Schema.String>, Schema.String, never, never>
           readonly lobbies: Schema.decodeTo<Schema.$Array<Schema.String>, Schema.String, never, never>
           readonly bannedFriends: Schema.optionalKey<
-            Schema.compose<
-              Schema.$Array<Schema.String>,
-              Schema.decodeTo<Schema.$Array<Schema.String>, Schema.String, never, never>
-            >
+            Schema.decodeTo<Schema.$Array<Schema.String>, Schema.String, never, never>
           >
           readonly liftSpeed: Schema.optionalKey<Schema.NumberFromString>
           readonly totalPoints: Schema.BigIntFromString
@@ -3987,6 +4065,6 @@ declare const SaveData: Schema.suspend<
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L33)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L93)
 
 Since v1.0.0

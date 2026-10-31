@@ -1100,10 +1100,7 @@ declare const SaveData: Schema.suspend<
           readonly lifts: Schema.decodeTo<Schema.$Array<Schema.String>, Schema.String, never, never>
           readonly lobbies: Schema.decodeTo<Schema.$Array<Schema.String>, Schema.String, never, never>
           readonly bannedFriends: Schema.optionalKey<
-            Schema.compose<
-              Schema.$Array<Schema.String>,
-              Schema.decodeTo<Schema.$Array<Schema.String>, Schema.String, never, never>
-            >
+            Schema.decodeTo<Schema.$Array<Schema.String>, Schema.String, never, never>
           >
           readonly liftSpeed: Schema.optionalKey<Schema.NumberFromString>
           readonly totalPoints: Schema.BigIntFromString

@@ -24,6 +24,66 @@ import * as Floor from "./Floors.ts";
 import * as Mission from "./Missions.ts";
 import * as SyncItemType from "./SyncItemType.ts";
 
+const FriendWithTimestamp = Schema.TemplateLiteralParser([
+    Schema.String,
+    "|",
+    NimblebitConfig.PlayerIdSchema,
+    "|",
+    NimblebitSchema.CSharpDate,
+]).pipe(
+    Schema.decodeTo(
+        Schema.Struct({
+            displayName: Schema.String,
+            friendId: Schema.toType(NimblebitConfig.PlayerIdSchema),
+            timestamp: Schema.toType(NimblebitSchema.CSharpDate),
+        }),
+        SchemaTransformation.transform({
+            encode: ({ displayName, friendId, timestamp }) => [displayName, "|", friendId, "|", timestamp] as const,
+            decode: ([displayName, _, friendId, __, timestamp]) => ({ displayName, friendId, timestamp }) as const,
+        })
+    )
+);
+
+const FriendWithoutTimestamp = Schema.TemplateLiteralParser([Schema.String, "|", NimblebitConfig.PlayerIdSchema]).pipe(
+    Schema.decodeTo(
+        Schema.Struct({
+            displayName: Schema.String,
+            friendId: Schema.toType(NimblebitConfig.PlayerIdSchema),
+        }),
+        SchemaTransformation.transform({
+            encode: ({ displayName, friendId }) => [displayName, "|", friendId] as const,
+            decode: ([displayName, _, friendId]) => ({ displayName, friendId }) as const,
+        })
+    )
+);
+
+/**
+ * A comma separated list of names, where an empty string is an empty list.
+ * Splitting it as it stands would give a list holding one empty name, so a
+ * wardrobe a trade had emptied would read back holding a nameless item.
+ */
+const NameList = Schema.String.pipe(
+    Schema.decodeTo(
+        Schema.Array(Schema.String),
+        SchemaTransformation.transform({
+            decode: (list): ReadonlyArray<string> => (list === "" ? [] : list.split(",")),
+            encode: (names: ReadonlyArray<string>) => names.join(","),
+        })
+    )
+);
+
+const FriendSchema = Schema.Union([FriendWithTimestamp, FriendWithoutTimestamp]);
+const FriendsSchema = Schema.String.pipe(NimblebitSchema.split(), Schema.decodeTo(Schema.Array(FriendSchema)));
+
+/**
+ * How to decode a save's friend list: empty, or the friends a tower follows,
+ * each with the time they were added where the save recorded one.
+ *
+ * @since 1.0.0
+ * @category Schemas
+ */
+export const Friends = Schema.String.pipe(Schema.decodeTo(Schema.Union([Schema.Literal(""), FriendsSchema])));
+
 /**
  * How to decode a SaveData from Nimblebit's object format.
  *
@@ -31,52 +91,6 @@ import * as SyncItemType from "./SyncItemType.ts";
  * @category Schemas
  */
 export const SaveData = Schema.suspend(() => {
-    const FriendWithTimestamp = Schema.TemplateLiteralParser([
-        Schema.String,
-        "|",
-        NimblebitConfig.PlayerIdSchema,
-        "|",
-        NimblebitSchema.CSharpDate,
-    ]).pipe(
-        Schema.decodeTo(
-            Schema.Struct({
-                displayName: Schema.String,
-                friendId: Schema.toType(NimblebitConfig.PlayerIdSchema),
-                timestamp: Schema.toType(NimblebitSchema.CSharpDate),
-            }),
-            SchemaTransformation.transform({
-                encode: ({ displayName, friendId, timestamp }) => [displayName, "|", friendId, "|", timestamp] as const,
-                decode: ([displayName, _, friendId, __, timestamp]) => ({ displayName, friendId, timestamp }) as const,
-            })
-        )
-    );
-
-    const FriendWithoutTimestamp = Schema.TemplateLiteralParser([
-        Schema.String,
-        "|",
-        NimblebitConfig.PlayerIdSchema,
-    ]).pipe(
-        Schema.decodeTo(
-            Schema.Struct({
-                displayName: Schema.String,
-                friendId: Schema.toType(NimblebitConfig.PlayerIdSchema),
-            }),
-            SchemaTransformation.transform({
-                encode: ({ displayName, friendId }) => [displayName, "|", friendId] as const,
-                decode: ([displayName, _, friendId]) => ({ displayName, friendId }) as const,
-            })
-        )
-    );
-
-    const FriendSchema = Schema.Union([FriendWithTimestamp, FriendWithoutTimestamp]);
-    const FriendsSchema = Schema.String.pipe(NimblebitSchema.split(), Schema.decodeTo(Schema.Array(FriendSchema)));
-    const FriendListSchema = Schema.String.pipe(Schema.decodeTo(Schema.Union([Schema.Literal(""), FriendsSchema])));
-
-    const BannedFriendsSchema = Schema.String.pipe(
-        NimblebitSchema.split(),
-        Schema.decodeTo(Schema.Array(Schema.String))
-    );
-
     const from = Schema.String;
     const to = Schema.Struct({
         coins: Schema.NumberFromString.pipe(
@@ -103,25 +117,14 @@ export const SaveData = Schema.suspend(() => {
         lobbyName: Schema.String.annotateKey({ nimblebitSaveDataKey: "Pln" }),
         raffleID: Schema.NumberFromString.annotateKey({ nimblebitSaveDataKey: "Prf" }),
         vipTrialEnd: Schema.BigIntFromString.annotateKey({ nimblebitSaveDataKey: "Pvte" }),
-        costumes: Schema.String.pipe(NimblebitSchema.split(), Schema.annotateKey({ nimblebitSaveDataKey: "Pcos" })),
-        pets: Schema.String.pipe(
-            NimblebitSchema.split(),
-            Schema.annotateKey({ nimblebitSaveDataKey: "Ppets" }),
-            Schema.optionalKey
-        ),
-        missionHist: Schema.String.pipe(
-            NimblebitSchema.split(),
-            Schema.annotateKey({ nimblebitSaveDataKey: "Pmhst" }),
-            Schema.optionalKey
-        ),
-        bbHist: Schema.String.pipe(NimblebitSchema.split(), Schema.annotateKey({ nimblebitSaveDataKey: "Pbhst" })),
-        roofs: Schema.String.pipe(NimblebitSchema.split(), Schema.annotateKey({ nimblebitSaveDataKey: "Prfs" })),
-        lifts: Schema.String.pipe(NimblebitSchema.split(), Schema.annotateKey({ nimblebitSaveDataKey: "Plfs" })),
-        lobbies: Schema.String.pipe(NimblebitSchema.split(), Schema.annotateKey({ nimblebitSaveDataKey: "Plbs" })),
-        bannedFriends: BannedFriendsSchema.pipe(
-            Schema.optionalKey,
-            Schema.annotateKey({ nimblebitSaveDataKey: "Pbf" })
-        ),
+        costumes: NameList.annotateKey({ nimblebitSaveDataKey: "Pcos" }),
+        pets: NameList.pipe(Schema.annotateKey({ nimblebitSaveDataKey: "Ppets" }), Schema.optionalKey),
+        missionHist: NameList.pipe(Schema.annotateKey({ nimblebitSaveDataKey: "Pmhst" }), Schema.optionalKey),
+        bbHist: NameList.annotateKey({ nimblebitSaveDataKey: "Pbhst" }),
+        roofs: NameList.annotateKey({ nimblebitSaveDataKey: "Prfs" }),
+        lifts: NameList.annotateKey({ nimblebitSaveDataKey: "Plfs" }),
+        lobbies: NameList.annotateKey({ nimblebitSaveDataKey: "Plbs" }),
+        bannedFriends: NameList.pipe(Schema.optionalKey, Schema.annotateKey({ nimblebitSaveDataKey: "Pbf" })),
         liftSpeed: Schema.NumberFromString.pipe(
             Schema.annotateKey({ nimblebitSaveDataKey: "Pls" }),
             Schema.optionalKey
@@ -159,7 +162,7 @@ export const SaveData = Schema.suspend(() => {
             Schema.decodeTo(Schema.Array(Floor.Floor)),
             Schema.annotateKey({ nimblebitSaveDataKey: "Pstories" })
         ),
-        friends: FriendListSchema.pipe(Schema.optionalKey, Schema.annotateKey({ nimblebitSaveDataKey: "Pfrns" })),
+        friends: Friends.pipe(Schema.optionalKey, Schema.annotateKey({ nimblebitSaveDataKey: "Pfrns" })),
         bbPosts: Schema.String.pipe(
             NimblebitSchema.split({ separator: "|" }),
             Schema.decodeTo(Schema.Array(BitbookPost.BitbookPost)),

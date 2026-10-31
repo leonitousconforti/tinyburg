@@ -378,9 +378,7 @@
   "Ppig": "25000",
   "Pplim": "25000",
   "autoLiftDisable": 0,
-  "bannedFriends": [
-    "",
-  ],
+  "bannedFriends": [],
   "bbHist": [
     "1798",
     "231",
