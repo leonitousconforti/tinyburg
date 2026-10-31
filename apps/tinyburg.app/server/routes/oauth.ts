@@ -12,7 +12,7 @@ import * as Operations from "@yielded/auth/Operations";
 
 import { SessionsRepository } from "../../domain/sessions.ts";
 import { UsersRepository } from "../../domain/users.ts";
-import { CookiePolicy, PROVIDER_SESSION_COOKIE_NAME, maybeCurrentUser } from "../cookies.ts";
+import { CookiePolicy, PROVIDER_SESSION_COOKIE_NAME, REAUTH_COOKIE_NAME, maybeCurrentUser } from "../cookies.ts";
 import { randomSecret, sha256 } from "../crypto.ts";
 
 /**
@@ -127,7 +127,10 @@ const start = (provider: SignInProvider, mode: "link" | "login") =>
             return bounceToLogin("/account");
         }
 
-        if (mode === "login" && Option.isSome(currentUser)) {
+        // The OAuth server asked for a fresh sign in (see /oauth/login)
+        const request = yield* HttpServerRequest.HttpServerRequest;
+        const reauth = request.cookies[cookiePolicy.name(REAUTH_COOKIE_NAME)] !== undefined;
+        if (mode === "login" && Option.isSome(currentUser) && !reauth) {
             return HttpServerResponse.redirect(Option.getOrElse(returnTo, () => "/towers/@me"));
         }
 
@@ -323,6 +326,14 @@ const callback = (provider: SignInProvider) =>
                 secure: cookiesPolicy.secure,
                 sameSite: "lax",
             }),
+            Effect.map((response) =>
+                HttpServerResponse.expireCookieUnsafe(response, cookiesPolicy.name(REAUTH_COOKIE_NAME), {
+                    httpOnly: true,
+                    path: "/",
+                    secure: cookiesPolicy.secure,
+                    sameSite: "lax",
+                })
+            ),
             Effect.map(done),
             Effect.orElseSucceed(() => failedRedirectByIntent("invalid_oauth_response"))
         );

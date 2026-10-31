@@ -7,8 +7,7 @@ import type { DevelopersRepository } from "../../domain/developers.ts";
 
 import { type Language, fromAcceptLanguage } from "@tinyburg/shared-ui/Internationalization";
 
-import { SessionsRepository } from "../../domain/sessions.ts";
-import { CookiePolicy, PROVIDER_SESSION_COOKIE_NAME, maybeCurrentUser } from "../cookies.ts";
+import { CookiePolicy, REAUTH_COOKIE_NAME, maybeCurrentUser } from "../cookies.ts";
 import { registrationPolicy } from "../environment.ts";
 import { OidcKeys } from "../keys.ts";
 import { ConsentLanguage, registeredClient, scopesOf } from "../oauthLive.ts";
@@ -141,28 +140,27 @@ const delegate = (options: {
  * in: nobody is, the sign in is older than the client accepts, or the visitor
  * chose to use another account.
  *
- * In the last two somebody is signed in already, and the login page would
- * wave them straight back, so their session ends here first. The pending
- * authorization survives in the server's own cookie, and the login page
- * returns to it once the visitor is signed in again.
+ * In the last two somebody is signed in already, and sign in would wave them
+ * straight back. Ending their session on a GET would let any site sign them
+ * out with a link, so instead the browser is marked as owing a fresh sign in
+ * for as long as an authorization stays pending; sign in honours the mark and
+ * the new session replaces the old one. The pending authorization survives in
+ * the server's own cookie, and the login page returns to it once the visitor
+ * is signed in again.
  */
 const login = Effect.gen(function* () {
     const cookies = yield* CookiePolicy;
     const current = yield* maybeCurrentUser;
-    if (Option.isSome(current)) {
-        yield* SessionsRepository.use((repo) => repo.revokeSessionByTokenHash(current.value.session.tokenHash));
-    }
+    const toLogin = HttpServerResponse.redirect(`/login?returnTo=${encodeURIComponent(paths.authorize)}`);
+    if (Option.isNone(current)) return toLogin;
 
-    return HttpServerResponse.expireCookieUnsafe(
-        HttpServerResponse.redirect(`/login?returnTo=${encodeURIComponent(paths.authorize)}`),
-        cookies.name(PROVIDER_SESSION_COOKIE_NAME),
-        {
-            httpOnly: true,
-            path: "/",
-            secure: cookies.secure,
-            sameSite: "lax",
-        }
-    );
+    return HttpServerResponse.setCookieUnsafe(toLogin, cookies.name(REAUTH_COOKIE_NAME), "1", {
+        httpOnly: true,
+        path: "/",
+        secure: cookies.secure,
+        sameSite: "lax",
+        maxAge: "5 minutes",
+    });
 });
 
 const isPath = (path: string): path is `/${string}` => path.startsWith("/");

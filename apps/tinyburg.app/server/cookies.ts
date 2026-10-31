@@ -13,6 +13,13 @@ import { isDevelopment } from "./environment.ts";
 export const PROVIDER_SESSION_COOKIE_NAME = "tinyburg_provider_session";
 
 /**
+ * The name of the cookie that marks a browser as owing a fresh sign in, set
+ * when the OAuth server wants the visitor to authenticate again. Sign in skips
+ * its "already signed in" shortcut while it is there.
+ */
+export const REAUTH_COOKIE_NAME = "tinyburg_reauth";
+
+/**
  * The site's cookie policy, resolved once at boot so request handlers never
  * carry a config failure channel.
  *
