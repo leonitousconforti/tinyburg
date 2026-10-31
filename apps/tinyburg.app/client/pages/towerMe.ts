@@ -190,6 +190,7 @@ export const towerMeView = <M>(
                             towerList(h, msgs, language, towers),
                         ]
                     ),
+                    navRow(h, "/trades", "🤝", msgs.tradesRow.title, msgs.tradesRow.detail),
                     navRow(h, "/account", "🔐", msgs.accountRow.title, msgs.accountRow.detail),
                     navRow(h, "/developers/apps", "🛠️", msgs.developerRow.title, msgs.developerRow.detail),
                 ]

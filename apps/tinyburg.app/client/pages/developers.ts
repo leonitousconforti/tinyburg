@@ -1,8 +1,7 @@
 import type { DevelopersMessages, SharedMessages } from "../messages/types.ts";
 import type { Html, HtmlBuilder } from "foldkit/html";
 
-import { all as gameScopes } from "@tinyburg/trading-sdk/Scopes";
-
+import { API_SCOPES } from "../../shared/scopes.ts";
 import { articleBackLink, articleHeading } from "../ui/chrome.ts";
 
 // Endpoint urls always advertise the public site, matching the old
@@ -14,7 +13,6 @@ const endpointUrls = {
     discovery: `${site}/.well-known/openid-configuration`,
     authorization: `${site}/oauth/tinyburg/authorize`,
     token: `${site}/oauth/tinyburg/token`,
-    userinfo: `${site}/oauth/tinyburg/userinfo`,
 };
 
 const featureCard = <M>(h: HtmlBuilder<M>, icon: string, title: string, description: string): Html =>
@@ -33,16 +31,15 @@ export const developersView = <M>(h: HtmlBuilder<M>, msgs: DevelopersMessages, s
         { name: msgs.endpointNames.discovery, url: endpointUrls.discovery },
         { name: msgs.endpointNames.authorization, url: endpointUrls.authorization },
         { name: msgs.endpointNames.token, url: endpointUrls.token },
-        { name: msgs.endpointNames.userinfo, url: endpointUrls.userinfo },
     ];
 
-    // The OIDC scopes in the visitor's language; the game scopes as the api
-    // that enforces them describes them, which is the same tree the consent
+    // The OIDC scopes in the visitor's language; the api scopes as the apis
+    // that enforce them describe them, which is the same tree the consent
     // screen reads, so a developer sees exactly the words a player will.
     const scopes = [
         { name: "openid", description: msgs.scopeDescriptions.openid },
         { name: "profile", description: msgs.scopeDescriptions.profile },
-        ...gameScopes(),
+        ...API_SCOPES,
     ];
 
     const steps = [msgs.steps.logIn, msgs.steps.register, msgs.steps.point, msgs.steps.signIn];

@@ -1,5 +1,9 @@
+import type { Stats } from "../backend.ts";
 import type { HomeMessages, SharedMessages } from "../messages/types.ts";
+import type { Language } from "@tinyburg/shared-ui/Internationalization";
 import type { Html, HtmlBuilder } from "foldkit/html";
+
+import { AsyncData } from "foldkit";
 
 const navLink = <M>(h: HtmlBuilder<M>, href: string, label: string): Html =>
     h.a([h.Href(href), h.Class("hover:text-gold text-xl text-white no-underline transition-colors")], [label]);
@@ -25,7 +29,30 @@ const heroTower = <M>(h: HtmlBuilder<M>, floors: SharedMessages["floors"]): Html
         ]
     );
 
-export const homeView = <M>(h: HtmlBuilder<M>, msgs: HomeMessages, shared: SharedMessages): Html => {
+export const homeView = <M>(
+    h: HtmlBuilder<M>,
+    msgs: HomeMessages,
+    shared: SharedMessages,
+    language: Language,
+    stats: Stats
+): Html => {
+    /**
+     * The stat tiles show the treasury's real counters once they land;
+     * until then (and if the fetch fails) the launch placeholders stand in,
+     * because a front page must never render blank tiles.
+     */
+    const compact = new Intl.NumberFormat(language, { notation: "compact", maximumFractionDigits: 1 });
+    const placeholders = ["10K+", "50K+", "1M+"];
+    const statValues = AsyncData.matchData(stats, {
+        onEmpty: () => placeholders,
+        onFailure: () => placeholders,
+        onData: (data) => [
+            compact.format(data.activeTraders),
+            compact.format(data.settledTrades),
+            compact.format(data.itemsMoved),
+        ],
+    });
+
     const features = [
         { icon: "🏢", ...msgs.features.tradeBitizens },
         { icon: "🎨", ...msgs.features.costumesPets },
@@ -165,9 +192,9 @@ export const homeView = <M>(h: HtmlBuilder<M>, msgs: HomeMessages, shared: Share
                     h.section(
                         [h.Class("relative z-10 mx-auto flex max-w-6xl flex-wrap justify-center gap-16 px-8 py-16")],
                         [
-                            ["10K+", msgs.stats.activeTraders],
-                            ["50K+", msgs.stats.tradesCompleted],
-                            ["1M+", msgs.stats.bitizensTraded],
+                            [statValues[0], msgs.stats.activeTraders],
+                            [statValues[1], msgs.stats.tradesCompleted],
+                            [statValues[2], msgs.stats.bitizensTraded],
                         ].map(([stat, label]) =>
                             h.div(
                                 [

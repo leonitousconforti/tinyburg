@@ -14,9 +14,11 @@ import {
     CheckingSession,
     FetchLinkedTowers,
     FetchSession,
+    FetchStats,
     LinkedTowers,
     SessionState,
     SignedOut,
+    Stats,
 } from "./backend.ts";
 import { type Messages, type TitleMessages, messagesFor } from "./messages/index.ts";
 import { aboutView } from "./pages/about.ts";
@@ -40,6 +42,19 @@ import { sponsorsView } from "./pages/sponsors.ts";
 import { termsView } from "./pages/terms.ts";
 import { WizardMessage, WizardModel, initialWizardFor, towerLinkView, updateWizard } from "./pages/towerLink.ts";
 import { towerMeView } from "./pages/towerMe.ts";
+import {
+    FetchDetail,
+    FetchGrant,
+    FetchTrades,
+    TradesMessage,
+    TradesModel,
+    enterTradeDetail,
+    enterTrades,
+    initialTrades,
+    tradeDetailView,
+    tradesView,
+    updateTrades,
+} from "./pages/trades.ts";
 import { AppRoute, loginHref, urlToAppRoute } from "./routes.ts";
 import { clouds } from "./ui/chrome.ts";
 
@@ -49,8 +64,10 @@ export const Model = S.Struct({
     route: AppRoute,
     session: SessionState,
     linkedTowers: LinkedTowers.schema,
+    stats: Stats.schema,
     wizard: WizardModel,
     account: AccountModel,
+    trades: TradesModel,
     language: Language,
 });
 export type Model = typeof Model.Type;
@@ -82,7 +99,7 @@ export type NavigationMessage = typeof NavigationMessage.Type;
  * `defineMessageUnion` in its own file, so this stays a list of unions rather
  * than a list of individual constructors.
  */
-export const Message = S.Union([NavigationMessage, BackendMessage, WizardMessage, AccountMessage]);
+export const Message = S.Union([NavigationMessage, BackendMessage, WizardMessage, AccountMessage, TradesMessage]);
 export type Message = typeof Message.Type;
 
 type Step = Update.Return<Model, Message, Backend>;
@@ -131,7 +148,9 @@ const requiresSession = (route: AppRoute): boolean =>
     route._tag === "TowerMe" ||
     route._tag === "TowerLink" ||
     route._tag === "DeveloperApps" ||
-    route._tag === "Account";
+    route._tag === "Account" ||
+    route._tag === "Trades" ||
+    route._tag === "TradeDetail";
 
 /**
  * Page-scoped state resets when its route is entered. Fetched collections are
@@ -143,6 +162,12 @@ const resetPageState = (model: Model, route: AppRoute): Model =>
         route: () => route,
         wizard: (wizard) => (route._tag === "TowerLink" ? initialWizardFor(route.game) : wizard),
         account: (account) => (route._tag === "Account" ? enterAccount(route.link, route.error, account) : account),
+        trades: (trades) =>
+            route._tag === "Trades"
+                ? enterTrades(route.connected, route.error, trades)
+                : route._tag === "TradeDetail"
+                  ? enterTradeDetail(route.tradeId, trades)
+                  : trades,
     });
 
 // UPDATE
@@ -155,6 +180,15 @@ const resetPageState = (model: Model, route: AppRoute): Model =>
  */
 const enterRoute = (model: Model): Step => {
     const { route, session } = model;
+
+    // The front page's stat tiles are public data: refreshed on entry
+    // whatever the session says, with held values rendering while it runs.
+    if (route._tag === "Home") {
+        return Option.match(AsyncData.revalidateOrLoad(model.stats), {
+            onNone: (): Step => ({ model }),
+            onSome: (stats): Step => ({ model: modifyFields(model, { stats: () => stats }), commands: [FetchStats()] }),
+        });
+    }
 
     if (requiresSession(route) && session._tag === "SignedOut") {
         const returnTo = window.location.pathname + window.location.search;
@@ -193,11 +227,50 @@ const enterRoute = (model: Model): Step => {
         };
     }
 
+    if (route._tag === "Trades" && session._tag === "SignedIn") {
+        const grant = AsyncData.revalidateOrLoad(model.trades.grant);
+        const trades = AsyncData.revalidateOrLoad(model.trades.trades);
+        // The linked towers feed the propose form's pickers, so entering the
+        // page revalidates them exactly as My Towers does.
+        const towers = AsyncData.revalidateOrLoad(model.linkedTowers);
+        return {
+            model: modifyFields(model, {
+                linkedTowers: (current) => Option.getOrElse(towers, () => current),
+                trades: (page) =>
+                    modifyFields(page, {
+                        grant: (current) => Option.getOrElse(grant, () => current),
+                        trades: (current) => Option.getOrElse(trades, () => current),
+                    }),
+            }),
+            commands: [
+                ...(Option.isSome(grant) ? [FetchGrant()] : []),
+                ...(Option.isSome(trades) ? [FetchTrades()] : []),
+                ...(Option.isSome(towers) ? [FetchLinkedTowers()] : []),
+            ],
+        };
+    }
+
+    if (route._tag === "TradeDetail" && session._tag === "SignedIn") {
+        const detail = AsyncData.revalidateOrLoad(model.trades.detail);
+        const towers = AsyncData.revalidateOrLoad(model.linkedTowers);
+        return {
+            model: modifyFields(model, {
+                linkedTowers: (current) => Option.getOrElse(towers, () => current),
+                trades: (page) => modifyFields(page, { detail: (current) => Option.getOrElse(detail, () => current) }),
+            }),
+            commands: [
+                ...(Option.isSome(detail) ? [FetchDetail({ tradeId: route.tradeId })] : []),
+                ...(Option.isSome(towers) ? [FetchLinkedTowers()] : []),
+            ],
+        };
+    }
+
     return { model };
 };
 
 const isWizardMessage = S.is(WizardMessage);
 const isAccountMessage = S.is(AccountMessage);
+const isTradesMessage = S.is(TradesMessage);
 
 export const update = (model: Model, message: Message): Step => {
     if (isWizardMessage(message)) {
@@ -227,6 +300,21 @@ export const update = (model: Model, message: Message): Step => {
         return { model: modifyFields(model, { account: () => account }), commands };
     }
 
+    if (isTradesMessage(message)) {
+        const [trades, commands] = updateTrades(model.trades, message);
+
+        // The session ended somewhere else while the page was open; as on the
+        // account page, the app leaves rather than redrawing what it lost.
+        if (message._tag === "TradesSignedOut") {
+            return {
+                model: modifyFields(model, { trades: () => trades, session: () => SignedOut() }),
+                commands: [LoadExternal({ href: "/" })],
+            };
+        }
+
+        return { model: modifyFields(model, { trades: () => trades }), commands: [...commands] };
+    }
+
     return Match.value(message).pipe(
         Match.withReturnType<Step>(),
         Match.tagsExhaustive({
@@ -250,6 +338,7 @@ export const update = (model: Model, message: Message): Step => {
             SettledLinkedTowers: ({ result }) => ({
                 model: modifyFields(model, { linkedTowers: AsyncData.settle(result) }),
             }),
+            SettledStats: ({ result }) => ({ model: modifyFields(model, { stats: AsyncData.settle(result) }) }),
             CompletedNavigation: () => ({ model }),
         })
     );
@@ -270,8 +359,10 @@ export const init: Runtime.RoutingApplicationInit<Model, Message, void, Backend>
                 route,
                 session: CheckingSession(),
                 linkedTowers: LinkedTowers.Idle(),
+                stats: Stats.Idle(),
                 wizard: initialWizardFor("tinytower"),
                 account: initialAccount,
+                trades: initialTrades,
                 language: initialLanguage,
             },
             route
@@ -297,6 +388,8 @@ const routeTitle = (route: AppRoute, titles: TitleMessages): string =>
             TowerMe: () => titles.towerMe,
             TowerLink: () => titles.towerLink,
             Account: () => titles.account,
+            Trades: () => titles.trades,
+            TradeDetail: () => titles.tradeDetail,
             NotFound: () => titles.notFound,
         })
     );
@@ -317,7 +410,7 @@ const pageView = (model: Model, msgs: Messages, h: HtmlBuilder<Message>): Html =
     Match.value(model.route).pipe(
         Match.withReturnType<Html>(),
         Match.tagsExhaustive({
-            Home: () => lazyHome(homeView, [h, msgs.home, msgs.shared]),
+            Home: () => lazyHome(homeView, [h, msgs.home, msgs.shared, model.language, model.stats]),
             About: () => lazyAbout(aboutView, [h, msgs.about, msgs.shared]),
             Login: ({ error, returnTo }) => loginView(h, msgs.login, msgs.shared, returnTo, error),
             Privacy: () => lazyPrivacy(privacyView, [h]),
@@ -336,6 +429,14 @@ const pageView = (model: Model, msgs: Messages, h: HtmlBuilder<Message>): Html =
             Account: () =>
                 model.session._tag === "SignedIn"
                     ? accountView(h, msgs.account, model.language, model.account, model.session.user)
+                    : h.empty,
+            Trades: () =>
+                model.session._tag === "SignedIn"
+                    ? tradesView(h, msgs.trades, model.language, model.trades, model.linkedTowers)
+                    : h.empty,
+            TradeDetail: () =>
+                model.session._tag === "SignedIn"
+                    ? tradeDetailView(h, msgs.trades, model.language, model.trades, model.linkedTowers)
                     : h.empty,
             NotFound: () => lazyNotFound(notFoundView, [h, msgs.notFound, msgs.shared]),
         })
@@ -383,9 +484,11 @@ const routeDepth = (route: AppRoute): number =>
             Developers: () => 1,
             TowerMe: () => 1,
             NotFound: () => 1,
+            Trades: () => 1,
             DeveloperApps: () => 2,
             TowerLink: () => 2,
             Account: () => 2,
+            TradeDetail: () => 2,
         })
     );
 

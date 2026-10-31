@@ -17,6 +17,8 @@ export const AppRoute = defineRouteUnion({
     TowerMe: {},
     TowerLink: { game: LinkableGame },
     Account: { link: S.Option(S.String), error: S.Option(S.String) },
+    Trades: { connected: S.Option(S.String), error: S.Option(S.String) },
+    TradeDetail: { tradeId: S.String },
     NotFound: { path: S.String },
 });
 export type AppRoute = typeof AppRoute.Type;
@@ -53,6 +55,18 @@ export const accountRouter = pipe(
     Route.query(S.Struct({ link: S.OptionFromOptional(S.String), error: S.OptionFromOptional(S.String) })),
     Route.mapTo(AppRoute.Account)
 );
+// The treasury's connect flow lands back on /trades with its outcome in the
+// query; the page opens saying how it went.
+export const tradesRouter = pipe(
+    literal("trades"),
+    Route.query(S.Struct({ connected: S.OptionFromOptional(S.String), error: S.OptionFromOptional(S.String) })),
+    Route.mapTo(AppRoute.Trades)
+);
+export const tradeDetailRouter = pipe(
+    literal("trades"),
+    slash(schemaSegment("tradeId", S.String)),
+    Route.mapTo(AppRoute.TradeDetail)
+);
 
 const routeParser = Route.oneOf(
     homeRouter,
@@ -65,7 +79,10 @@ const routeParser = Route.oneOf(
     developersRouter,
     towerMeRouter,
     towerLinkRouter,
-    accountRouter
+    accountRouter,
+    // Detail before list: /trades/<id> must not fall through to /trades.
+    tradeDetailRouter,
+    tradesRouter
 );
 
 export const urlToAppRoute = Route.parseUrlWithFallback(routeParser, AppRoute.NotFound);

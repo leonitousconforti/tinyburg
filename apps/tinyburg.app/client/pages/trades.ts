@@ -11,7 +11,7 @@ import { SyncItemType } from "@tinyburg/tinytower-sdk/SyncItemType";
 import { GrantStatus, Inventory, TradeDetail, Trade as TradeSchema } from "@tinyburg/treasury-sdk/Sdk";
 import { AsyncData, Command } from "foldkit";
 import { defineMessageUnion } from "foldkit/message";
-import { evo } from "foldkit/struct";
+import { modifyFields } from "foldkit/struct";
 
 import { Treasury } from "../backend.ts";
 import { appBackLink } from "../ui/chrome.ts";
@@ -112,20 +112,21 @@ export const enterTrades = (
     error: Option.Option<string>,
     previous: TradesModel
 ): TradesModel => {
-    const entered: TradesModel = evo(previous, {
+    const entered: TradesModel = modifyFields(previous, {
         detailId: Option.none,
         busy: Option.none,
         notice: Option.none,
         problem: Option.none,
     });
-    if (Option.isSome(error)) return evo(entered, { problem: () => Option.some("connectFailed" as const) });
-    if (Option.contains(connected, "1")) return evo(entered, { notice: () => Option.some("connected" as const) });
+    if (Option.isSome(error)) return modifyFields(entered, { problem: () => Option.some("connectFailed" as const) });
+    if (Option.contains(connected, "1"))
+        return modifyFields(entered, { notice: () => Option.some("connected" as const) });
     return entered;
 };
 
 /** The detail page as entered: transient state cleared, held detail revalidated behind. */
 export const enterTradeDetail = (tradeId: string, previous: TradesModel): TradesModel =>
-    evo(previous, {
+    modifyFields(previous, {
         detailId: () => Option.some(tradeId),
         // A different trade's detail must not flash while the right one loads.
         detail: (detail) => (Option.contains(previous.detailId, tradeId) ? detail : DetailData.Idle()),
@@ -341,38 +342,38 @@ type TradesStep = readonly [TradesModel, ReadonlyArray<Command.Command<TradesMes
 
 /** Starting an action clears whatever the last one had to say about itself. */
 const starting = (model: TradesModel, busy: string): TradesModel =>
-    evo(model, { busy: () => Option.some(busy), notice: Option.none, problem: Option.none });
+    modifyFields(model, { busy: () => Option.some(busy), notice: Option.none, problem: Option.none });
 
 export const updateTrades = (model: TradesModel, message: TradesMessage): TradesStep =>
     Match.value(message).pipe(
         Match.withReturnType<TradesStep>(),
         Match.tagsExhaustive({
-            SettledGrant: ({ result }) => [evo(model, { grant: AsyncData.settle(result) }), []],
-            SettledTrades: ({ result }) => [evo(model, { trades: AsyncData.settle(result) }), []],
-            SettledDetail: ({ result }) => [evo(model, { detail: AsyncData.settle(result) }), []],
+            SettledGrant: ({ result }) => [modifyFields(model, { grant: AsyncData.settle(result) }), []],
+            SettledTrades: ({ result }) => [modifyFields(model, { trades: AsyncData.settle(result) }), []],
+            SettledDetail: ({ result }) => [modifyFields(model, { detail: AsyncData.settle(result) }), []],
 
             ToggledPropose: () => [
-                evo(model, { showPropose: (open) => !open, notice: Option.none, problem: Option.none }),
+                modifyFields(model, { showPropose: (open) => !open, notice: Option.none, problem: Option.none }),
                 [],
             ],
-            ChangedForm: ({ form }) => [evo(model, { form: () => form }), []],
+            ChangedForm: ({ form }) => [modifyFields(model, { form: () => form }), []],
 
             // Picking a tower is also the moment its inventory becomes
             // relevant; a repick of the same tower keeps what is held.
             PickedTower: ({ playerId }) => {
-                const picked = evo(model, { form: (form) => ({ ...form, proposerPlayerId: playerId }) });
+                const picked = modifyFields(model, { form: (form) => ({ ...form, proposerPlayerId: playerId }) });
                 if (Option.contains(model.inventoryFor, playerId)) return [picked, []];
                 return [
-                    evo(picked, {
+                    modifyFields(picked, {
                         inventoryFor: () => Option.some(playerId),
                         inventory: () => InventoryData.Loading(),
                     }),
                     [FetchInventory({ playerId })],
                 ];
             },
-            SettledInventory: ({ result }) => [evo(model, { inventory: AsyncData.settle(result) }), []],
+            SettledInventory: ({ result }) => [modifyFields(model, { inventory: AsyncData.settle(result) }), []],
 
-            ChangedAcceptPlayer: ({ value }) => [evo(model, { acceptPlayerId: () => value }), []],
+            ChangedAcceptPlayer: ({ value }) => [modifyFields(model, { acceptPlayerId: () => value }), []],
 
             SubmittedPropose: () => [starting(model, "propose"), [ProposeTradeCommand({ form: model.form })]],
             ClickedAccept: ({ playerId, tradeId }) => [
@@ -385,7 +386,7 @@ export const updateTrades = (model: TradesModel, message: TradesMessage): Trades
             // Whatever the action was, the fresh trade the server answered
             // with lands in place and both lists revalidate behind it.
             CompletedTradeAction: ({ notice, trade }) => [
-                evo(model, {
+                modifyFields(model, {
                     busy: Option.none,
                     notice: () => Option.some(notice),
                     showPropose: () => false,
@@ -399,11 +400,11 @@ export const updateTrades = (model: TradesModel, message: TradesMessage): Trades
             ],
 
             FailedTradeAction: ({ problem }) => [
-                evo(model, { busy: Option.none, problem: () => Option.some(problem) }),
+                modifyFields(model, { busy: Option.none, problem: () => Option.some(problem) }),
                 [],
             ],
 
-            TradesSignedOut: () => [evo(model, { busy: Option.none }), []],
+            TradesSignedOut: () => [modifyFields(model, { busy: Option.none }), []],
         })
     );
 
