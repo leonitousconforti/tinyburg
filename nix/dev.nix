@@ -245,6 +245,11 @@
               service = "social-circles";
               entry = "apps/social-circles/index.ts";
               port = ports.socialCircles;
+              env = {
+                NODE_ENV = "development";
+                TINYBURG_ISSUER = "http://localhost:${toString ports.tinyburgApp}";
+                TINYBURG_REDIRECT_URI = "http://localhost:${toString ports.socialCircles}/auth/callback";
+              };
             };
 
             discord-bot-backend = backend {
