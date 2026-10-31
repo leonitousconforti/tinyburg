@@ -1,5 +1,11 @@
 # @tinyburg/insight
 
+## 0.2.1
+
+### Patch Changes
+
+- 9b20bdc: Republish from the Release workflow to verify npm trusted publishing. No code changes.
+
 ## 0.2.0
 
 ### Minor Changes
