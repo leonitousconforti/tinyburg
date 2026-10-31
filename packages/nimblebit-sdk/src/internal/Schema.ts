@@ -298,10 +298,15 @@ export const parseNimblebitObject = <
                 }
             ).accumulator;
 
+            // An unknown property that came before every known one decodes as
+            // following nothing, and its run goes back at the very start.
+            const leading = unknownPropertiesByAfter[""] ?? [];
+
             return Function.pipe(
                 Object.entries(knownProperties),
                 Array.sort(order),
                 Array.flatMap((entry) => [entry, ...(unknownPropertiesByAfter[entry[0]] ?? [])]),
+                (entries) => [...leading, ...entries],
                 Array.map(([key, value]) => Tuple.make(tryGetNimblebitSaveDataKey(key), value)),
                 filter,
                 Array.map(entryToString),
