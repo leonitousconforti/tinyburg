@@ -1,5 +1,13 @@
 # @tinyburg/lego-tower-sdk
 
+## 0.1.1
+
+### Patch Changes
+
+- 9b20bdc: Republish from the Release workflow to verify npm trusted publishing. No code changes.
+- Updated dependencies [9b20bdc]
+    - @tinyburg/nimblebit-sdk@0.2.1
+
 ## 0.1.0
 
 ### Minor Changes
