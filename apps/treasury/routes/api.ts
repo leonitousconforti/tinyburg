@@ -9,6 +9,19 @@
  * invariants - who may accept, what a cancel may interrupt - are not
  * enforced here but in the repositories' guarded transitions, so a future
  * caller cannot skip them by taking a different route in.
+ *
+ * Only tinyburg.app's own app may change a trade (`requireFirstParty`):
+ * propose, accept, cancel and confirm answer `403` to any other application,
+ * whatever `treasury` scopes it holds. A trade moves items on a trader's
+ * tower with the grant the trader gave the treasury, not the caller, so a
+ * third party that could propose and accept, or confirm a splice, would
+ * wield `send_item` and `push_save` it was never given, and "both parties
+ * confirm on the web app" would mean nothing. Cancelling moves nothing by
+ * itself, but it ends a trade or starts a refund under a trade in escrow,
+ * which is not a third party's call either. Reading stays open to any
+ * application with the scope: the trades, the grant status, and a tower's
+ * tradeable items, which the treasury reads with its own `pull_save` but
+ * hands back only as the list `treasury:list_inventory` was consented for.
  */
 
 import { DateTime, Duration, Effect, Layer, Option, Schema } from "effect";
@@ -24,7 +37,7 @@ import { GrantsRepository } from "../domain/grants.ts";
 import { LedgerRepository } from "../domain/ledger.ts";
 import { LegsRepository } from "../domain/legs.ts";
 import { TradesRepository } from "../domain/trades.ts";
-import { TinyburgProvider } from "../services/provider.ts";
+import { FIRST_PARTY_CLIENT_ID, TinyburgProvider } from "../services/provider.ts";
 import { TinyburgTrading } from "../services/tinyburg.ts";
 import { GiftEscrowWorkflow } from "../workflows/giftEscrow.ts";
 import { RefundWorkflow } from "../workflows/refund.ts";
@@ -96,6 +109,17 @@ const TreasuryGroupLive = HttpApiBuilder.group(
             };
         }, Effect.orDie);
 
+        /**
+         * The trader, when the application calling is tinyburg.app's own;
+         * `403` for any other. Every endpoint that changes a trade asks
+         * this instead of `requireTrader`.
+         */
+        const requireFirstParty = Effect.gen(function* () {
+            const trader = yield* requireTrader;
+            if (trader.clientId !== FIRST_PARTY_CLIENT_ID) return yield* new HttpApiError.Forbidden();
+            return trader;
+        });
+
         const isParticipant = (trade: Trade, userId: string): boolean =>
             trade.proposerUserId === userId || Option.getOrUndefined(trade.counterpartyUserId) === userId;
 
@@ -152,7 +176,7 @@ const TreasuryGroupLive = HttpApiBuilder.group(
 
             .handle("ProposeTrade", ({ payload }) =>
                 Effect.gen(function* () {
-                    const user = yield* requireTrader;
+                    const user = yield* requireFirstParty;
 
                     // The offer must match the mechanism: gift items ride the
                     // gift channel, splice lists ride the splice, never mixed.
@@ -184,7 +208,7 @@ const TreasuryGroupLive = HttpApiBuilder.group(
 
             .handle("AcceptTrade", ({ params, payload }) =>
                 Effect.gen(function* () {
-                    const user = yield* requireTrader;
+                    const user = yield* requireFirstParty;
 
                     const owns = yield* ownsPlayer(user.userId, payload.playerId);
                     if (!owns) return yield* new HttpApiError.Forbidden();
@@ -218,7 +242,7 @@ const TreasuryGroupLive = HttpApiBuilder.group(
 
             .handle("CancelTrade", ({ params }) =>
                 Effect.gen(function* () {
-                    const user = yield* requireTrader;
+                    const user = yield* requireFirstParty;
                     const trade = yield* participantTrade(params.tradeId, user.userId);
 
                     // Nothing has moved yet: the trade simply ends.
@@ -249,7 +273,7 @@ const TreasuryGroupLive = HttpApiBuilder.group(
 
             .handle("ConfirmSplice", ({ params }) =>
                 Effect.gen(function* () {
-                    const user = yield* requireTrader;
+                    const user = yield* requireFirstParty;
                     const trade = yield* participantTrade(params.tradeId, user.userId);
                     if (trade.mechanism !== "splice") return yield* new HttpApiError.Conflict();
 

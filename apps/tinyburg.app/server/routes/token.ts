@@ -5,7 +5,8 @@ import { DevelopersRepository } from "../../domain/developers.ts";
 import { CookiePolicy, PROVIDER_SESSION_COOKIE_NAME, maybeCurrentUser } from "../cookies.ts";
 import { codeVerifier, sha256 } from "../crypto.ts";
 import { OidcKeys } from "../keys.ts";
-import { FIRST_PARTY_SCOPES, TinyburgOAuth, apiResourceFor, firstPartyRedirectUriFor } from "../oauthServer.ts";
+import { revokeEndedFirstPartyGrants } from "../oauthLive.ts";
+import { FIRST_PARTY_TOKEN_SCOPES, TinyburgOAuth, apiResourceFor, firstPartyRedirectUriFor } from "../oauthServer.ts";
 
 /**
  * GET /auth/token - an access token for the first-party app, a
@@ -31,6 +32,14 @@ import { FIRST_PARTY_SCOPES, TinyburgOAuth, apiResourceFor, firstPartyRedirectUr
  * registered for `offline_access`: the SPA keeps the token in memory and asks
  * again once it lapses or a call is refused. Each answer is a grant of its
  * own, ending with its token, which the hourly sweep then removes.
+ *
+ * The token carries `openid` and the treasury's area and nothing else
+ * (`FIRST_PARTY_TOKEN_SCOPES`), though the first party is registered for
+ * more: the SPA reaches the rest of `/v1` with its cookie, and a token a
+ * script can read should not open the visitor's towers. It also ends with
+ * the session it was minted in (`revokeEndedFirstPartyGrants`), which is
+ * checked once more after minting, since signing out while this ran could
+ * have missed it.
  *
  * Only the site itself may ask (`isSameOrigin`), and only with a session:
  * `403` and `401` otherwise. A failure inside the flow is this server's, and
@@ -103,7 +112,7 @@ export const FirstPartyTokenLive = Layer.unwrap(
                     response_type: "code",
                     client_id: clientId,
                     redirect_uri: redirectUri,
-                    scope: [...FIRST_PARTY_SCOPES].join(" "),
+                    scope: FIRST_PARTY_TOKEN_SCOPES.join(" "),
                     resource,
                     code_challenge: challenge,
                     code_challenge_method: "S256",
@@ -183,6 +192,14 @@ export const FirstPartyTokenLive = Layer.unwrap(
 
             const minted = yield* mint(session);
             if (Option.isNone(minted)) return HttpServerResponse.empty({ status: 401, headers: noStore });
+
+            // Signing out revokes the session's grants, but one that landed
+            // while this was minting may have run before this grant was tied
+            // to the session. Whichever finishes last sees the other.
+            if (Option.isNone(yield* maybeCurrentUser)) {
+                yield* revokeEndedFirstPartyGrants(current.value.user.id);
+                return HttpServerResponse.empty({ status: 401, headers: noStore });
+            }
 
             const { access_token, expires_in, scope } = minted.value;
             return HttpServerResponse.jsonUnsafe(

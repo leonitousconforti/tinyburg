@@ -6,6 +6,7 @@ import { SessionsRepository } from "../../domain/sessions.ts";
 import { UsersRepository } from "../../domain/users.ts";
 import { AuthApi, CurrentSession, SessionCookie } from "../../shared/auth.ts";
 import { CookiePolicy, PROVIDER_SESSION_COOKIE_NAME, maybeCurrentUser } from "../cookies.ts";
+import { revokeEndedFirstPartyGrants } from "../oauthLive.ts";
 
 const SessionCookieLive = Layer.effect(
     SessionCookie,
@@ -72,6 +73,9 @@ const AuthGroupLive = HttpApiBuilder.group(
                         })
                     );
 
+                    // The session's first-party tokens end with it.
+                    if (revoked) yield* revokeEndedFirstPartyGrants(user.id);
+
                     const signedOut = revoked && params.sessionId === current.id;
                     if (signedOut) yield* expireSessionCookie;
                     return { revoked: revoked ? 1 : 0, signedOut };
@@ -86,6 +90,9 @@ const AuthGroupLive = HttpApiBuilder.group(
                             userId: user.id,
                         })
                     );
+
+                    // Their first-party tokens end with them.
+                    if (revoked > 0) yield* revokeEndedFirstPartyGrants(user.id);
 
                     if (query.scope === "all") yield* expireSessionCookie;
                     return { revoked, signedOut: query.scope === "all" };
@@ -117,6 +124,8 @@ const logout = Effect.gen(function* () {
     const maybeUser = yield* maybeCurrentUser;
     if (Option.isSome(maybeUser)) {
         yield* SessionsRepository.use((repo) => repo.revokeSessionByTokenHash(maybeUser.value.session.tokenHash));
+        // The session's first-party tokens end with it.
+        yield* revokeEndedFirstPartyGrants(maybeUser.value.user.id);
     }
 
     return yield* HttpServerResponse.expireCookie(

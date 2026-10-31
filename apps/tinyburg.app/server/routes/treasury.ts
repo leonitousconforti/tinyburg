@@ -13,6 +13,12 @@
  * request (RFC 9110 Section 7.6.1), and cookies, both ways: the visitor's
  * session is this server's and no other service's, and a cookie the
  * treasury set would land on this site's origin.
+ *
+ * Nor does anything outside the api. The router matches the path as it was
+ * sent, dot segments and all, so `/v1/treasury/../../auth/connect` (or its
+ * `%2e%2e` spelling) matches here and would resolve to the treasury's own
+ * `/auth/connect`. The target is resolved first, the way fetch would resolve
+ * it, and only forwarded when it is still under `/v1/treasury/`.
  */
 
 import { Config, Duration, Effect, Layer } from "effect";
@@ -70,10 +76,25 @@ const forwardable = (headers: Headers.Headers, dropped: ReadonlySet<string>): Re
     );
 };
 
+/**
+ * Where `url`, the request target as sent, goes at the treasury: resolved,
+ * dot segments removed, and only if it is still under the treasury's api. The
+ * target is appended to the origin rather than resolved against it, so an
+ * absolute-form request target cannot name another host.
+ */
+const forwardedUrl = (target: string, url: string): string | undefined => {
+    const api = new URL(`${target}/v1/treasury/`).href;
+    const resolved = URL.parse(`${target}${url}`)?.href;
+    return resolved?.startsWith(api) === true ? resolved : undefined;
+};
+
 const proxy = (target: string) =>
     Effect.gen(function* () {
         const request = yield* HttpServerRequest.HttpServerRequest;
         const httpClient = yield* HttpClient.HttpClient;
+
+        const url = forwardedUrl(target, request.url);
+        if (url === undefined) return HttpServerResponse.empty({ status: 404 });
 
         // Node accepts methods fetch cannot send; the treasury serves none of them.
         if (!HttpMethod.isHttpMethod(request.method)) return HttpServerResponse.empty({ status: 405 });
@@ -81,7 +102,7 @@ const proxy = (target: string) =>
         const bodyless = request.method === "GET" || request.method === "HEAD";
         const body = bodyless ? undefined : new Uint8Array(yield* request.arrayBuffer);
 
-        const upstream = HttpClientRequest.make(request.method)(`${target}${request.url}`).pipe(
+        const upstream = HttpClientRequest.make(request.method)(url).pipe(
             HttpClientRequest.setHeaders(forwardable(request.headers, NOT_FORWARDED)),
             (outgoing) =>
                 body === undefined

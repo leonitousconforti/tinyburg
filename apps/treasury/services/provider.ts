@@ -3,10 +3,15 @@
  * provider's metadata, and the scope it asks traders to grant.
  *
  * Registration happens at boot (RFC 7591), keyed on the software id, so the
- * treasury is the same client every run and nothing is persisted. Public
- * client: PKCE carries the proof on the connect flow, and refresh exchanges
- * present the client id alone. The protocol itself is `@yielded/oauth`'s;
- * this module only says which provider, which client, and which scopes.
+ * treasury is the same client every run and nothing is persisted. It is a
+ * confidential client (`client_secret_basic`): it holds every trader's
+ * offline refresh token, with `send_item` and `push_save`, and a refresh
+ * token that leaked from a log, a heap dump or the sealed grants table must
+ * be worth nothing without the secret as well. The provider mints a new
+ * secret on every registration, so the one this boot was given is the only
+ * one that works; it lives in memory and nowhere else. PKCE still guards
+ * the connect flow. The protocol itself is `@yielded/oauth`'s; this module
+ * only says which provider, which client, and which scopes.
  *
  * Boot waits for the provider: registering needs it, and so does everything
  * after (the connect flow, every saga's access token, the keys incoming
@@ -47,6 +52,13 @@ export const USER_GRANT_SCOPES: ReadonlyArray<string> = [
 ];
 
 const SOFTWARE_ID = "tinyburg-treasury";
+
+/**
+ * tinyburg.app's own app, the first party. Its id is fixed in tinyburg.app's
+ * source (`DevelopersRepository.FIRST_PARTY_CLIENT_ID`) and seeded by its
+ * migrations, the same in every deployment, so it is written out here too.
+ */
+export const FIRST_PARTY_CLIENT_ID = "0868602a-9bf8-4e6e-ba20-ccd2b3acc832";
 
 /** How long any one call to the provider may take before it counts as unavailable. */
 const PROVIDER_TIMEOUT_MS = 10_000;
@@ -99,7 +111,7 @@ export class TinyburgProvider extends Context.Service<TinyburgProvider>()(
                     software_id: SOFTWARE_ID,
                     client_name: "Tinyburg Treasury",
                     redirect_uris: [config.redirectUri],
-                    token_endpoint_auth_method: "none",
+                    token_endpoint_auth_method: "client_secret_basic",
                     grant_types: ["authorization_code", "refresh_token"],
                     scope: USER_GRANT_SCOPES.join(" "),
                 },
@@ -112,12 +124,15 @@ export class TinyburgProvider extends Context.Service<TinyburgProvider>()(
                 Effect.retry({ while: (error) => error._tag === "OAuthUnavailable", schedule: providerBackoff })
             );
 
-            // The provider answers registration with a secret only for a
-            // confidential client; the treasury asks to be a public one.
-            const authentication: OAuth.Authentication = Option.match(registration.clientSecret, {
-                onNone: () => ({ method: "none", publicClient: true }),
-                onSome: (secret) => ({ method: "client_secret_post", secret }),
-            });
+            // A confidential client's registration answers with its secret;
+            // one without is a provider that did not register what was asked.
+            if (Option.isNone(registration.clientSecret)) {
+                return yield* Effect.die(new Error(`${config.issuer} registered the treasury without a client secret`));
+            }
+            const authentication: OAuth.Authentication = {
+                method: "client_secret_basic",
+                secret: registration.clientSecret.value,
+            };
 
             const client = yield* OAuth.make({
                 metadata,

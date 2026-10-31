@@ -27,12 +27,21 @@ export const APPLICATION_SCOPES: ReadonlyArray<OAuthScope.OAuthScope> = [
     ...API_SCOPES.map((scope) => scope.name),
 ];
 
+/** The OAuth server's id: its routes live under `/oauth/<id>/...`. */
+const SERVER_ID = "tinyburg";
+
 /**
  * The Tinyburg OAuth server: its routes live under `/oauth/tinyburg/...`, and
  * `makeOpenId` declares `openid`, `profile` and `email` alongside
  * {@link APPLICATION_SCOPES}.
  */
-export const TinyburgOAuth = OAuthServer.makeOpenId("tinyburg", { scopes: APPLICATION_SCOPES });
+export const TinyburgOAuth = OAuthServer.makeOpenId(SERVER_ID, { scopes: APPLICATION_SCOPES });
+
+/**
+ * The namespace the OAuth server files its grants under in
+ * `yielded_oauth_server`: `@yielded/auth` keys them by `<origin>/oauth/<id>`.
+ */
+export const grantNamespaceFor = (issuer: string): string => `${issuer}/oauth/${SERVER_ID}`;
 
 /**
  * The longest the declared scopes may be, joined with spaces, for the OAuth
@@ -47,9 +56,9 @@ export const DECLARED_SCOPES: string = TinyburgOAuth.Scope.literals.join(" ");
 export const SUPPORTED_SCOPES: ReadonlyArray<string> = ["openid", "profile", ...APPLICATION_SCOPES];
 
 /**
- * Everything the first-party app may do on the visitor's behalf: with its
- * session cookie on `/v1`, and in the access tokens `/auth/token` mints for
- * it. Its row in `oauth_clients` is registered for the same scopes.
+ * Everything the first-party app may do on the visitor's behalf, with its
+ * session cookie on `/v1`. Its row in `oauth_clients` is registered for the
+ * same scopes.
  */
 export const FIRST_PARTY_SCOPES: ReadonlySet<string> = new Set([
     "openid",
@@ -57,6 +66,15 @@ export const FIRST_PARTY_SCOPES: ReadonlySet<string> = new Set([
     ...SERVED_GAMES.map((area) => area.name),
     TreasuryScopes.Treasury.name,
 ]);
+
+/**
+ * What the access tokens `/auth/token` mints for the first-party app carry:
+ * the treasury's area, the one api the app calls with a token rather than
+ * its session cookie, and `openid`, which the flow that mints them needs.
+ * The token sits in page memory, where a script could lift it, so it opens
+ * none of `/v1`'s towers (`push_save`, `receive_gift`, `send_item`).
+ */
+export const FIRST_PARTY_TOKEN_SCOPES: ReadonlyArray<string> = ["openid", TreasuryScopes.Treasury.name];
 
 /**
  * The one resource every Tinyburg access token is issued for: the whole api

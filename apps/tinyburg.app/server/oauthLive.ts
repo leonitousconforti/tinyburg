@@ -18,6 +18,7 @@
 import type { SqlError } from "effect/sql";
 
 import { Context, DateTime, Effect, Layer, Option, Schema } from "effect";
+import { SqlClient, SqlSchema } from "effect/sql";
 
 import type { OAuthClient } from "../domain/models.ts";
 import type { Language } from "@tinyburg/shared-ui/Internationalization";
@@ -38,6 +39,7 @@ import {
     TinyburgOAuth,
     apiResourceFor,
     firstPartyRedirectUriFor,
+    grantNamespaceFor,
 } from "./oauthServer.ts";
 import * as ConsentPage from "./pages/consent.ts";
 
@@ -131,7 +133,10 @@ export const registeredClient = (
  * A grant stays good for as long as its user exists: signing out of
  * tinyburg.app ends the session, not the access the visitor gave other
  * applications. The OAuth server still ends every grant when the session it
- * was given in would have expired.
+ * was given in would have expired. The first party's own grants are the
+ * exception, and end with their session ({@link revokeEndedFirstPartyGrants}):
+ * `active` is handed the authentication, not the client, so it cannot tell
+ * them apart from the rest.
  */
 const IdentityLive = Layer.effect(
     TinyburgOAuth.Identity,
@@ -178,6 +183,49 @@ const IdentityLive = Layer.effect(
         });
     })
 );
+
+/**
+ * Revokes the first party's grants for `userId` whose browser session has
+ * ended, signed out, ended from the sessions list, or expired.
+ *
+ * Those grants are the access tokens `/auth/token` minted for the SPA, the
+ * session in another form, so they end with it: a token lifted from the page
+ * stops working at `/v1` the moment its session is signed out, not when it
+ * lapses. Every other client's grants outlive the session they were given in
+ * (`IdentityLive`). The routes that end sessions call this once they have,
+ * and `/auth/token` calls it when its session ended while it was minting.
+ *
+ * The OAuth server revokes a grant by id but cannot list them, so they are
+ * found in `@yielded/auth-persistence`'s table (migration 0015), whose
+ * payload is the grant record (`OAuthServer.Record`) as JSON. The treasury
+ * checks tokens against the keys alone and honors a revoked one until it
+ * lapses, ten minutes at most, as its README accepts.
+ */
+export const revokeEndedFirstPartyGrants = (userId: string) =>
+    Effect.gen(function* () {
+        const sql = yield* SqlClient.SqlClient;
+        const server = yield* TinyburgOAuth.Service;
+        const { issuer } = yield* OidcKeys;
+
+        const ended = yield* SqlSchema.findAll({
+            Request: Schema.String,
+            Result: Schema.Struct({ grantId: Schema.String }),
+            execute: (subjectId) => sql`
+                SELECT grant_id FROM yielded_oauth_server
+                WHERE namespace = ${grantNamespaceFor(issuer)}
+                  AND revoked = 0
+                  AND payload::jsonb #>> '{authorization,clientId}' = ${DevelopersRepository.FIRST_PARTY_CLIENT_ID}
+                  AND payload::jsonb #>> '{authentication,subjectId}' = ${subjectId}
+                  AND NOT EXISTS (
+                      SELECT 1 FROM sessions
+                      WHERE sessions.id::text = yielded_oauth_server.payload::jsonb #>> '{authentication,sessionId}'
+                        AND sessions.expires_at > NOW()
+                  )
+            `,
+        })(userId);
+
+        yield* Effect.forEach(ended, ({ grantId }) => server.revoke(grantId), { discard: true });
+    });
 
 /** Every client is a row of `oauth_clients`; there are no static registrations. */
 const ClientsLive = Layer.effect(
