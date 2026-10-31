@@ -1,6 +1,6 @@
 {
     "name": "@tinyburg/lego-tower-sdk",
-    "version": "0.1.1",
+    "version": "0.1.2",
     "description": "api for the mobile game LEGO Tower by Nimblebit",
     "keywords": [
         "lego-tower-sdk",

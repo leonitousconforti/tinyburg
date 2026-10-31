@@ -1,5 +1,17 @@
 # @tinyburg/tinytower-sdk
 
+## 0.3.0
+
+### Minor Changes
+
+- cf0f658: Add `SaveDiffer`, serializable patches over a decoded save with an exact `diff`, and `Splice`, which takes floors, bitizens, costumes, pets, fittings and currency out of one tower and into another, refusing any edit that would leave a save contradicting itself.
+
+### Patch Changes
+
+- cf0f658: `TinyTower.SaveData` decodes an empty costume, pet, fitting, history or banned friend list as an empty array rather than as one holding an empty name.
+- Updated dependencies [bb4314f]
+    - @tinyburg/nimblebit-sdk@0.2.2
+
 ## 0.2.1
 
 ### Patch Changes

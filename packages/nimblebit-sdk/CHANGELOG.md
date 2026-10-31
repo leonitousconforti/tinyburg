@@ -1,5 +1,11 @@
 # tinyburg/nimblebit-sdk
 
+## 0.2.2
+
+### Patch Changes
+
+- bb4314f: Encode the unknown properties that decoded as coming before every known one back at the start of the object, instead of dropping them.
+
 ## 0.2.1
 
 ### Patch Changes
