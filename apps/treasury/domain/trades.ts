@@ -160,38 +160,79 @@ export class TradesRepository extends Context.Service<TradesRepository>()(
 
             /**
              * Terminal failure with a reason a participant can read. Guarded so a
-             * late failure report cannot overwrite a settlement.
+             * late failure report cannot overwrite a settlement, and, given
+             * `from`, so it cannot overwrite a refund some other road started.
              */
             const fail = (options: {
                 readonly tradeId: string;
                 readonly reason: string;
+                readonly from?: ReadonlyArray<TradeStateValue> | undefined;
             }): Effect.Effect<boolean, SqlError.SqlError, never> =>
                 Effect.map(
                     sql`
                     UPDATE trades SET state = 'failed', failure_reason = ${options.reason}, updated_at = NOW()
                     WHERE id = ${options.tradeId}
                       AND state NOT IN ('settled', 'cancelled', 'refunded', 'expired', 'failed')
+                      AND ${options.from === undefined ? sql.literal("TRUE") : sql.in("state", options.from)}
                     RETURNING id
                 `,
                     (rows) => rows.length > 0
                 );
 
             /**
-             * Expired trades something was already deposited into. These need a
-             * refund saga, not a statement, which is why the pg_cron sweep leaves
-             * them alone.
+             * Escrowing to escrowed, and only with both legs verified in the
+             * vault: the release invariant, held by the database rather than
+             * by whichever saga happens to be asking.
+             */
+            const markEscrowed = (tradeId: string): Effect.Effect<boolean, SqlError.SqlError, never> =>
+                Effect.map(
+                    sql`
+                    UPDATE trades SET state = 'escrowed', updated_at = NOW()
+                    WHERE id = ${tradeId} AND state = 'escrowing'
+                      AND (
+                          SELECT COUNT(*) FROM trade_legs
+                          WHERE trade_legs.trade_id = trades.id AND trade_legs.state = 'verified'
+                      ) = 2
+                    RETURNING id
+                `,
+                    (rows) => rows.length > 0
+                );
+
+            /**
+             * Escrows that stalled with something deposited. These need a
+             * refund saga, not a statement, which is why the pg_cron sweep
+             * leaves them alone. The deadline is the escrow's own, counted from
+             * when it started (the trade's last transition), not the offer's
+             * `expires_at`: an offer accepted a minute before it expires still
+             * gets its full verify window.
              */
             const dueForRefund = SqlSchema.findAll({
-                Request: Schema.Int,
+                Request: Schema.Struct({ limit: Schema.Int, stalledMinutes: Schema.Int }),
                 Result: Trade,
-                execute: (limit) => sql`
+                execute: ({ limit, stalledMinutes }) => sql`
                 SELECT * FROM trades
-                WHERE expires_at < NOW()
-                  AND state IN ('accepted', 'awaiting_confirmation', 'escrowing', 'escrowed')
+                WHERE state IN ('escrowing', 'escrowed')
+                  AND updated_at < NOW() - make_interval(mins => ${stalledMinutes})
                   AND EXISTS (
                       SELECT 1 FROM trade_legs
                       WHERE trade_legs.trade_id = trades.id AND trade_legs.state <> 'pending'
                   )
+                LIMIT ${limit}
+            `,
+            });
+
+            /**
+             * Trades a saga is (or should be) moving, untouched for a while:
+             * where the resume sweep looks for sagas that stopped on a failure.
+             */
+            const inFlight = SqlSchema.findAll({
+                Request: Schema.Struct({ limit: Schema.Int, idleMinutes: Schema.Int }),
+                Result: Trade,
+                execute: ({ limit, idleMinutes }) => sql`
+                SELECT * FROM trades
+                WHERE state IN ('escrowing', 'escrowed', 'releasing', 'refunding', 'executing')
+                  AND updated_at < NOW() - make_interval(mins => ${idleMinutes})
+                ORDER BY updated_at
                 LIMIT ${limit}
             `,
             });
@@ -218,7 +259,19 @@ export class TradesRepository extends Context.Service<TradesRepository>()(
                 })
             );
 
-            return { create, byId, listForUser, transition, accept, confirmSplice, fail, dueForRefund, stats };
+            return {
+                create,
+                byId,
+                listForUser,
+                transition,
+                accept,
+                confirmSplice,
+                fail,
+                markEscrowed,
+                dueForRefund,
+                inFlight,
+                stats,
+            };
         }),
     }
 ) {

@@ -95,7 +95,9 @@ export class TradeLeg extends Model.Class<TradeLeg>("TradeLeg")({
 /**
  * The splice side of a trade: the plan both parties confirmed, the saves as
  * they were pulled, and what was pushed back. The originals are kept so a
- * failed second push can restore the first side.
+ * failed second push can restore the first side, and the push markers say
+ * whether a push was ever attempted, so a moved version can be read as
+ * "somebody synced" or "our push may have landed".
  *
  * @since 1.0.0
  * @category Model
@@ -108,6 +110,8 @@ export class SplicePlan extends Model.Class<SplicePlan>("SplicePlan")({
     counterpartyOriginal: Schema.OptionFromNullishOr(Schema.String, { onNoneEncoding: null }),
     proposerSpliced: Schema.OptionFromNullishOr(Schema.String, { onNoneEncoding: null }),
     counterpartySpliced: Schema.OptionFromNullishOr(Schema.String, { onNoneEncoding: null }),
+    proposerPushStartedAt: Schema.OptionFromNullishOr(Schema.DateTimeUtcFromDate, { onNoneEncoding: null }),
+    counterpartyPushStartedAt: Schema.OptionFromNullishOr(Schema.DateTimeUtcFromDate, { onNoneEncoding: null }),
 }) {}
 
 /**

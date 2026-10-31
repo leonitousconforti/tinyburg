@@ -4,9 +4,14 @@
  * Every deposit sitting in the vault goes back where it came from, and only
  * then is its escrow slot claimed - the same send-before-receive ordering as
  * a release, so a crash between the two leaves the item recoverable in the
- * vault rather than gone. A deposit that was dispatched but never arrived is
- * marked `lost` for the reconciler and ops to chase; there is nothing in the
- * vault to send back.
+ * vault rather than gone.
+ *
+ * A refund can start while the escrow saga is still depositing or verifying
+ * (a cancel, or the expiry sweep). Claiming the trade for refunding stops
+ * any pending deposit from leaving (`LegsRepository.reserveDeposit`), and a
+ * deposit already on its way gets the same chance to land that the escrow
+ * would have given it: only once the vault's queue has been seen without it
+ * for a while is it marked `lost`.
  */
 
 import { Effect, Option, Schema } from "effect";
@@ -16,6 +21,10 @@ import { LedgerRepository } from "../domain/ledger.ts";
 import { LegsRepository } from "../domain/legs.ts";
 import { TradesRepository } from "../domain/trades.ts";
 import { Vault } from "../services/vault.ts";
+import { awaitDeposits, untilTheVaultAnswers } from "./vaultSteps.ts";
+
+/** How many looks at the vault's queue an in-flight deposit gets before it reads as lost. */
+const ARRIVAL_LOOKS = 4;
 
 /**
  * @since 1.0.0
@@ -35,7 +44,13 @@ export const RefundWorkflow = Workflow.make("TreasuryRefund", {
      * execution.
      */
     idempotencyKey: ({ tradeId }) => tradeId,
-});
+})
+    /**
+     * A failure suspends the refund instead of ending it, so the resume
+     * sweep can pick it up where it stopped: a refund that ended in failure
+     * would leave the trade in `refunding` and its items in the vault.
+     */
+    .annotate(Workflow.SuspendOnFailure, true);
 
 /**
  * @since 1.0.0
@@ -47,6 +62,11 @@ export const RefundWorkflowLive = RefundWorkflow.toLayer(
         const legs = yield* LegsRepository;
         const ledger = yield* LedgerRepository;
         const vault = yield* Vault;
+
+        const freshLeg = (legId: string) =>
+            Effect.map(Effect.orDie(legs.forTrade(payload.tradeId)), (current) =>
+                current.find((leg) => leg.id === legId)
+            );
 
         /**
          * Claiming the trade for refunding is itself the guard: if a
@@ -77,71 +97,88 @@ export const RefundWorkflowLive = RefundWorkflow.toLayer(
             return { refunded: 0, lost: 0 };
         }
 
-        const tradeLegs = yield* Effect.orDie(legs.forTrade(payload.tradeId));
-        let refunded = 0;
-        let lost = 0;
+        // Deposits still on their way get their chance to land. Whatever
+        // arrives is verified here, and sent back below like the rest.
+        yield* awaitDeposits({
+            name: "refundArrivals",
+            tradeId: payload.tradeId,
+            state: "refunding",
+            looks: ARRIVAL_LOOKS,
+        });
 
-        for (const leg of tradeLegs) {
-            if (leg.state === "verified" || leg.state === "refund_sent") {
-                // Send back first, claim the slot second: the mirror of a
-                // release, and journaled separately so a crash between the
-                // two resumes at the claim rather than double-sending.
-                yield* Activity.make({
-                    name: `refundSend-${leg.role}`,
-                    execute: Effect.gen(function* () {
-                        const current = yield* Effect.orDie(legs.forTrade(payload.tradeId));
-                        const fresh = current.find((l) => l.id === leg.id);
-                        if (fresh === undefined || fresh.state !== "verified") return;
-                        yield* vault.sendItem({
-                            friendId: leg.fromPlayerId,
-                            itemType: leg.itemType,
-                            itemStr: leg.itemStr,
-                        });
-                        yield* Effect.orDie(legs.transition({ legId: leg.id, from: ["verified"], to: "refund_sent" }));
-                        yield* Effect.ignore(
-                            ledger.append({ tradeId: payload.tradeId, legId: leg.id, event: "refund_sent" })
-                        );
-                    }).pipe(Effect.orDie),
-                });
-
-                yield* Activity.make({
-                    name: `refundSettle-${leg.role}`,
-                    execute: Effect.gen(function* () {
-                        yield* vault.receiveGift(Option.getOrThrow(leg.vaultGiftId));
-                        yield* Effect.orDie(legs.transition({ legId: leg.id, from: ["refund_sent"], to: "refunded" }));
-                        yield* Effect.ignore(
-                            ledger.append({ tradeId: payload.tradeId, legId: leg.id, event: "refunded" })
-                        );
-                    }).pipe(Effect.orDie),
-                });
-                refunded = refunded + 1;
-            } else if (leg.state === "sent") {
-                /**
-                 * Dispatched but never seen in the vault. There is nothing
-                 * to send back; the ledger records it and the reconciler
-                 * keeps watching in case it arrives absurdly late.
-                 */
-                yield* Activity.make({
-                    name: `markLost-${leg.role}`,
-                    execute: Effect.gen(function* () {
-                        yield* Effect.orDie(legs.transition({ legId: leg.id, from: ["sent"], to: "lost" }));
+        /**
+         * Dispatched but never seen in the vault, after the queue was looked
+         * at repeatedly. The transition is guarded, and only a leg that
+         * actually moved to `lost` is recorded as lost: a verifier that won
+         * the race leaves a verified leg, which is refunded below.
+         */
+        yield* Activity.make({
+            name: "markLost",
+            execute: Effect.gen(function* () {
+                for (const leg of yield* Effect.orDie(legs.forTrade(payload.tradeId))) {
+                    if (leg.state !== "sent") continue;
+                    const marked = yield* Effect.orDie(legs.transition({ legId: leg.id, from: ["sent"], to: "lost" }));
+                    if (marked) {
                         yield* Effect.ignore(ledger.append({ tradeId: payload.tradeId, legId: leg.id, event: "lost" }));
-                    }),
-                });
-                lost = lost + 1;
-            }
+                    }
+                }
+            }),
+        });
+
+        /**
+         * Every leg is read fresh by its steps, so a leg verified at any
+         * point before this (by the escrow saga, the arrival watch or the
+         * reconciler) goes back too. No leg of this trade can still become
+         * verified: none is `sent` any more, and none can be reserved while
+         * the trade is `refunding`.
+         */
+        for (const leg of yield* Effect.orDie(legs.forTrade(payload.tradeId))) {
+            // Send back first, claim the slot second: the mirror of a
+            // release, and journaled separately so a crash between the two
+            // resumes at the claim rather than double-sending.
+            yield* untilTheVaultAnswers(
+                `refundSend-${leg.role}`,
+                Effect.gen(function* () {
+                    const fresh = yield* freshLeg(leg.id);
+                    if (fresh === undefined || fresh.state !== "verified") return;
+                    yield* vault.sendItem({
+                        friendId: fresh.fromPlayerId,
+                        itemType: fresh.itemType,
+                        itemStr: fresh.itemStr,
+                    });
+                    yield* Effect.orDie(legs.transition({ legId: leg.id, from: ["verified"], to: "refund_sent" }));
+                    yield* Effect.ignore(
+                        ledger.append({ tradeId: payload.tradeId, legId: leg.id, event: "refund_sent" })
+                    );
+                })
+            );
+
+            yield* untilTheVaultAnswers(
+                `refundSettle-${leg.role}`,
+                Effect.gen(function* () {
+                    const fresh = yield* freshLeg(leg.id);
+                    if (fresh === undefined || fresh.state !== "refund_sent") return;
+                    yield* vault.clearSlot(Option.getOrThrow(fresh.vaultGiftId));
+                    yield* Effect.orDie(legs.transition({ legId: leg.id, from: ["refund_sent"], to: "refunded" }));
+                    yield* Effect.ignore(ledger.append({ tradeId: payload.tradeId, legId: leg.id, event: "refunded" }));
+                })
+            );
         }
 
-        yield* Activity.make({
+        return yield* Activity.make({
             name: "finishRefund",
+            success: Schema.Struct({ refunded: Schema.Finite, lost: Schema.Finite }),
             execute: Effect.gen(function* () {
                 yield* Effect.orDie(
                     trades.transition({ tradeId: payload.tradeId, from: ["refunding"], to: "refunded" })
                 );
                 yield* Effect.ignore(ledger.append({ tradeId: payload.tradeId, event: "trade_refunded" }));
+                const final = yield* Effect.orDie(legs.forTrade(payload.tradeId));
+                return {
+                    refunded: final.filter((leg) => leg.state === "refunded").length,
+                    lost: final.filter((leg) => leg.state === "lost").length,
+                };
             }),
         });
-
-        return { refunded, lost };
     })
 );

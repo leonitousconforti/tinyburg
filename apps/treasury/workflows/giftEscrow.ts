@@ -14,7 +14,7 @@
  */
 
 import { Effect, Option, Schema } from "effect";
-import { Activity, DurableClock, Workflow } from "effect/workflow";
+import { Activity, Workflow } from "effect/workflow";
 
 import type { GiftItem } from "@tinyburg/treasury-sdk/Sdk";
 
@@ -26,9 +26,10 @@ import { TradesRepository } from "../domain/trades.ts";
 import { TinyburgTrading } from "../services/tinyburg.ts";
 import { Vault } from "../services/vault.ts";
 import { RefundWorkflow } from "./refund.ts";
+import { awaitDeposits, untilTheVaultAnswers } from "./vaultSteps.ts";
 
-/** How many times the vault's queue is checked for the deposits. */
-const VERIFY_ATTEMPTS = 6;
+/** How many looks at the vault's queue the deposits get before the trade is refunded. */
+const VERIFY_LOOKS = 6;
 
 const decodeItemSpec = Schema.decodeEffect(Schema.fromJsonString(ItemSpec));
 
@@ -45,7 +46,13 @@ export const GiftEscrowWorkflow = Workflow.make("TreasuryGiftEscrow", {
     }),
     /** A double-submitted accept joins the existing execution instead of racing a second one. */
     idempotencyKey: ({ tradeId }) => tradeId,
-});
+})
+    /**
+     * A failure suspends the escrow instead of ending it, so the resume
+     * sweep can pick it up where it stopped rather than leave the trade in
+     * `escrowing` or `releasing` with items in the vault.
+     */
+    .annotate(Workflow.SuspendOnFailure, true);
 
 /**
  * @since 1.0.0
@@ -69,9 +76,19 @@ export const GiftEscrowWorkflowLive = GiftEscrowWorkflow.toLayer(
                 return { outcome: "failed" as const };
             });
 
-        /** Hands the trade to the refund saga and reports how this one ended. */
+        const freshLeg = (legId: string) =>
+            Effect.map(Effect.orDie(legs.forTrade(payload.tradeId)), (current) =>
+                current.find((leg) => leg.id === legId)
+            );
+
+        /**
+         * Hands the trade to the refund saga (or joins the one a cancel or
+         * the expiry sweep already started) and reports how this one ended.
+         * The ledger entry is an activity so the replays that waiting on the
+         * refund causes record it once.
+         */
         const refundAndFinish = Effect.gen(function* () {
-            yield* record("refund_started");
+            yield* Activity.make({ name: "refundStarted", execute: record("refund_started") });
             yield* RefundWorkflow.execute({ tradeId: payload.tradeId });
             return { outcome: "refunded" as const };
         });
@@ -136,7 +153,14 @@ export const GiftEscrowWorkflowLive = GiftEscrowWorkflow.toLayer(
                     from: ["accepted"],
                     to: "escrowing",
                 });
-                if (!transitioned) return false;
+                if (!transitioned) {
+                    // A replay after the transition committed finds the trade
+                    // escrowing, with or without its legs; anything else is a
+                    // cancel or an expiry that won the race.
+                    const current = yield* trades.byId(payload.tradeId);
+                    if (!Option.exists(current, (trade) => trade.state === "escrowing")) return false;
+                    if ((yield* legs.forTrade(payload.tradeId)).length > 0) return true;
+                }
                 yield* legs.createForTrade({
                     tradeId: payload.tradeId,
                     vaultPlayerId: vault.playerId,
@@ -156,127 +180,132 @@ export const GiftEscrowWorkflowLive = GiftEscrowWorkflow.toLayer(
 
         /**
          * Deposits, one activity per side so each send is journaled and
-         * never replayed. A failure here reports rather than throwing:
-         * whether to refund depends on what the *other* side already did.
+         * never replayed. Each leg is reserved (`pending` to `sent`) before
+         * its send, and only while the trade is still escrowing: a refund
+         * that claimed the trade first stops the deposit from leaving, and
+         * one that claims it after sees the deposit as on its way and waits
+         * for it. A failure here reports rather than throwing: whether to
+         * refund depends on what the *other* side already did.
          */
-        let depositsFailed = "";
+        let stopped: { readonly outcome: "refused" | "failed"; readonly reason: string } | undefined;
         for (const leg of tradeLegs) {
             const result = yield* Activity.make({
                 name: `deposit-${leg.role}`,
-                success: Schema.Struct({ sent: Schema.Boolean, reason: Schema.String }),
+                success: Schema.Struct({
+                    outcome: Schema.Literals(["sent", "refused", "failed"]),
+                    reason: Schema.String,
+                }),
                 execute: Effect.gen(function* () {
-                    const fresh = (yield* Effect.orDie(legs.forTrade(payload.tradeId))).find((l) => l.id === leg.id);
-                    if (fresh === undefined) return { sent: false, reason: "leg disappeared" };
-                    if (fresh.state !== "pending") return { sent: true, reason: "" };
-                    yield* tinyburg.sendItem({
-                        tinyburgUserId: leg.depositorUserId,
-                        playerId: leg.fromPlayerId,
-                        friendId: leg.vaultPlayerId,
-                        itemType: leg.itemType,
-                        item: leg.itemStr,
-                    });
-                    yield* Effect.orDie(legs.transition({ legId: leg.id, from: ["pending"], to: "sent" }));
+                    const fresh = yield* freshLeg(leg.id);
+                    if (fresh === undefined) return { outcome: "failed" as const, reason: "leg disappeared" };
+                    // A replay after the reservation: the send went out, or
+                    // a crash cut it off and the leg reads as lost later.
+                    if (fresh.state !== "pending") return { outcome: "sent" as const, reason: "" };
+
+                    const reserved = yield* Effect.orDie(legs.reserveDeposit(leg.id));
+                    if (!reserved) return { outcome: "refused" as const, reason: "the trade stopped escrowing" };
+
+                    const sent = yield* tinyburg
+                        .sendItem({
+                            tinyburgUserId: leg.depositorUserId,
+                            playerId: leg.fromPlayerId,
+                            friendId: leg.vaultPlayerId,
+                            itemType: leg.itemType,
+                            item: leg.itemStr,
+                        })
+                        .pipe(Effect.retry({ times: 2 }), Effect.result);
+                    if (sent._tag === "Failure") {
+                        // Nothing went out, so the leg is not on its way.
+                        yield* Effect.orDie(legs.transition({ legId: leg.id, from: ["sent"], to: "pending" }));
+                        yield* Effect.ignore(
+                            ledger.append({
+                                tradeId: payload.tradeId,
+                                legId: leg.id,
+                                event: "deposit_failed",
+                                detail: sent.failure.reason,
+                            })
+                        );
+                        return { outcome: "failed" as const, reason: sent.failure.reason };
+                    }
                     yield* Effect.ignore(
                         ledger.append({ tradeId: payload.tradeId, legId: leg.id, event: "deposit_sent" })
                     );
-                    return { sent: true, reason: "" };
-                }).pipe(
-                    Effect.retry({ times: 2 }),
-                    Effect.catch((error) => Effect.succeed({ sent: false, reason: error.reason })),
-                    Effect.orDie
-                ),
+                    return { outcome: "sent" as const, reason: "" };
+                }),
             });
-            if (!result.sent) depositsFailed = result.reason;
+            if (result.outcome !== "sent") {
+                stopped = { outcome: result.outcome, reason: result.reason };
+                break;
+            }
         }
 
-        if (depositsFailed !== "") {
+        if (stopped !== undefined) {
+            // A cancel or the expiry sweep claimed the trade: the refund
+            // owns it now, and this saga ends with it.
+            if (stopped.outcome === "refused") return yield* refundAndFinish;
             // Whatever did go out comes back; a trade where nothing moved
-            // just fails in place.
+            // just fails in place, unless a refund got there first.
             const current = yield* Effect.orDie(legs.forTrade(payload.tradeId));
             if (current.some((leg) => leg.state !== "pending")) return yield* refundAndFinish;
-            return yield* failTrade(`deposit failed: ${depositsFailed}`);
+            const failed = yield* Effect.orDie(
+                trades.fail({
+                    tradeId: payload.tradeId,
+                    reason: `deposit failed: ${stopped.reason}`,
+                    from: ["escrowing"],
+                })
+            );
+            if (!failed) return yield* refundAndFinish;
+            yield* record("trade_failed");
+            return { outcome: "failed" as const };
         }
 
         /**
          * Watch the vault's queue until both deposits appear. The sleeps are
          * durable, so this waits across a deploy instead of restarting the
-         * attempt count.
+         * count, and a look that could not reach the vault does not count.
          */
-        let unverified = tradeLegs.length;
-        for (let attempt = 1; attempt <= VERIFY_ATTEMPTS; attempt = attempt + 1) {
-            unverified = yield* Activity.make({
-                name: `verify-${attempt}`,
-                success: Schema.Finite,
-                execute: Effect.gen(function* () {
-                    const queue = yield* vault.listGifts;
-                    const current = yield* Effect.orDie(legs.forTrade(payload.tradeId));
-                    for (const leg of current) {
-                        if (leg.state !== "sent") continue;
-                        const match = queue.gifts.find(
-                            (gift) =>
-                                gift.from === leg.fromPlayerId &&
-                                gift.type === leg.itemType &&
-                                gift.contents === leg.itemStr
-                        );
-                        if (match !== undefined) {
-                            const verified = yield* Effect.orDie(legs.verify({ legId: leg.id, vaultGiftId: match.id }));
-                            if (verified) {
-                                yield* Effect.ignore(
-                                    ledger.append({
-                                        tradeId: payload.tradeId,
-                                        legId: leg.id,
-                                        event: "deposit_verified",
-                                    })
-                                );
-                            }
-                        }
-                    }
-                    const after = yield* Effect.orDie(legs.forTrade(payload.tradeId));
-                    return after.filter((leg) => leg.state === "sent").length;
-                }).pipe(
-                    Effect.catchTag("VaultUnavailable", () => Effect.succeed(-1)),
-                    Effect.orDie
-                ),
-            });
-
-            if (unverified === 0) break;
-            if (attempt < VERIFY_ATTEMPTS) {
-                yield* DurableClock.sleep({
-                    name: `verifyBackoff-${attempt}`,
-                    duration: `${attempt * 2} minutes`,
-                });
-            }
-        }
-
-        if (unverified !== 0) return yield* refundAndFinish;
+        const arrival = yield* awaitDeposits({
+            name: "verify",
+            tradeId: payload.tradeId,
+            state: "escrowing",
+            looks: VERIFY_LOOKS,
+        });
+        if (arrival !== "arrived") return yield* refundAndFinish;
 
         const releasing = yield* Activity.make({
             name: "startRelease",
             success: Schema.Boolean,
             execute: Effect.gen(function* () {
-                const escrowed = yield* trades.transition({
-                    tradeId: payload.tradeId,
-                    from: ["escrowing"],
-                    to: "escrowed",
-                });
+                // Refused unless both legs are verified in the vault.
+                const escrowed = yield* trades.markEscrowed(payload.tradeId);
                 if (escrowed) yield* Effect.ignore(ledger.append({ tradeId: payload.tradeId, event: "escrowed" }));
-                return yield* trades.transition({ tradeId: payload.tradeId, from: ["escrowed"], to: "releasing" });
+                const released = yield* trades.transition({
+                    tradeId: payload.tradeId,
+                    from: ["escrowed"],
+                    to: "releasing",
+                });
+                if (released) return true;
+                // A replay after the transition committed: already releasing.
+                const current = yield* trades.byId(payload.tradeId);
+                return Option.exists(current, (trade) => trade.state === "releasing");
             }).pipe(Effect.orDie),
         });
-        // A cancel arrived between the deposits and the release: everything
-        // is verified in the vault, so it all goes back.
+        // A cancel arrived between the deposits and the release, or a leg is
+        // not verified: whatever is in the vault goes back.
         if (!releasing) return yield* refundAndFinish;
 
         /**
          * The crossed release. Send onward first, claim the slot second, per
          * leg and journaled per step: a crash after the send resumes at the
-         * claim, and the item is never both unclaimed and unsent.
+         * claim, and the item is never both unclaimed and unsent. Each step
+         * retries until the vault answers, so the trade cannot be left in
+         * `releasing` by an outage.
          */
         for (const leg of tradeLegs) {
-            yield* Activity.make({
-                name: `release-${leg.role}`,
-                execute: Effect.gen(function* () {
-                    const fresh = (yield* Effect.orDie(legs.forTrade(payload.tradeId))).find((l) => l.id === leg.id);
+            yield* untilTheVaultAnswers(
+                `release-${leg.role}`,
+                Effect.gen(function* () {
+                    const fresh = yield* freshLeg(leg.id);
                     if (fresh === undefined || fresh.state !== "verified") return;
                     yield* vault.sendItem({
                         friendId: fresh.toPlayerId,
@@ -285,19 +314,19 @@ export const GiftEscrowWorkflowLive = GiftEscrowWorkflow.toLayer(
                     });
                     yield* Effect.orDie(legs.transition({ legId: leg.id, from: ["verified"], to: "released" }));
                     yield* Effect.ignore(ledger.append({ tradeId: payload.tradeId, legId: leg.id, event: "released" }));
-                }).pipe(Effect.retry({ times: 2 }), Effect.orDie),
-            });
+                })
+            );
 
-            yield* Activity.make({
-                name: `settle-${leg.role}`,
-                execute: Effect.gen(function* () {
-                    const fresh = (yield* Effect.orDie(legs.forTrade(payload.tradeId))).find((l) => l.id === leg.id);
+            yield* untilTheVaultAnswers(
+                `settle-${leg.role}`,
+                Effect.gen(function* () {
+                    const fresh = yield* freshLeg(leg.id);
                     if (fresh === undefined || fresh.state !== "released") return;
-                    yield* vault.receiveGift(Option.getOrThrow(fresh.vaultGiftId));
+                    yield* vault.clearSlot(Option.getOrThrow(fresh.vaultGiftId));
                     yield* Effect.orDie(legs.transition({ legId: leg.id, from: ["released"], to: "settled" }));
                     yield* Effect.ignore(ledger.append({ tradeId: payload.tradeId, legId: leg.id, event: "settled" }));
-                }).pipe(Effect.retry({ times: 2 }), Effect.orDie),
-            });
+                })
+            );
         }
 
         yield* Activity.make({

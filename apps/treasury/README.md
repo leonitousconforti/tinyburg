@@ -14,11 +14,24 @@ vault tower, and a gift trade runs
 1. **Deposit** - each side's item is sent to the vault via the trading api,
    using the OAuth grant the trader gave on the consent screen
    (`/auth/connect`). The item sits in the vault's gift queue, unclaimed.
+   The leg is marked `sent` _before_ the send, and only while the trade is
+   still escrowing, so a refund always sees every deposit that may be on
+   its way.
 2. **Verify** - the vault's queue is polled until both deposits appear,
    matched against the agreed contents _exactly_ (sender, type, and the item
-   string verbatim - the bait-and-switch check).
-3. **Release** - only with both sides verified, the vault forwards each item
-   to the other trader, then claims its own slot to settle the leg.
+   string verbatim - the bait-and-switch check). A gift another leg already
+   claimed is skipped, so the same item offered in two live trades verifies
+   both.
+3. **Release** - only with both sides verified (the database refuses the
+   move to `escrowed` otherwise), the vault forwards each item to the other
+   trader, then claims its own slot to settle the leg.
+
+A **refund** (a cancel, a verify timeout, or an escrow that stalled for two
+hours) can start while deposits are still moving. Claiming the trade for
+refunding stops any deposit that has not left; one already on its way gets
+a few more looks at the vault's queue, is sent back if it lands, and is only
+marked `lost` once the queue has actually been seen without it. Every
+verified deposit then goes back to its sender, and its slot is claimed.
 
 A **save-splice** trade instead pulls both saves, moves the agreed items
 (bitizens, costumes, pets, coins, bux - things the gift channel cannot debit
@@ -29,8 +42,13 @@ splice rather than losing progress.
 
 Everything runs as durable workflows (`workflows/`) on a single-node cluster
 backed by this service's own Postgres, so a deploy mid-trade resumes rather
-than stranding an item in the vault. The `escrow_ledger` is the append-only
-account of every step.
+than stranding an item in the vault. Every vault step of a release or a
+refund retries until the vault answers, with durable waits doubling up to an
+hour, so an outage delays a trade instead of leaving it half done; claiming
+a slot checks the queue first, so a step that runs twice does not fail. A
+saga that hits any other failure suspends rather than ends, and a sweep
+resumes it (see Ops). The `escrow_ledger` is the append-only account of
+every step.
 
 ### The one invariant
 
@@ -45,6 +63,8 @@ _trader's_ grant - claiming via api on a player's own tower destroys the item
 
 An api-sent gift is not debited from the sender's save, so a gift trade
 duplicates both items; this is inherent to the channel and the UI says so.
+Sends cannot be deduplicated either: a send whose answer is lost (or a crash
+right after one) is sent again, so a rare retry can forward an item twice.
 Splice trades are the non-duplicating path.
 
 ## Pieces
@@ -59,7 +79,7 @@ Splice trades are the non-duplicating path.
 | `services/tinyburg.ts`  | Acting on traders' towers through the trading api, grants + rotation       |
 | `services/vault.ts`     | The vault tower, reached with its own Nimblebit credentials                |
 | `workflows/`            | GiftEscrow, Refund, Splice - the durable sagas                             |
-| `cluster/crons.ts`      | Expiry (deposited trades → refund) and the reconciler (queue vs book)      |
+| `cluster/crons.ts`      | Expiry (stalled escrows → refund), resume, and the reconciler              |
 
 ### Who calls it, with what
 
@@ -69,7 +89,10 @@ caller's `Authorization: Bearer <JWT>` included. The token is one
 tinyburg.app issued for the Tinyburg api (`<site>/v1`): the first-party app
 gets it from tinyburg.app's `/auth/token`, any other application uses its
 own. The treasury verifies it locally against tinyburg.app's published keys
-and checks the endpoint's `treasury` scope; it keeps no sessions. A revoked
+and checks the endpoint's `treasury` scope; it keeps no sessions. Only the
+first-party app may propose, accept, cancel or confirm a trade: those act
+with the treasury's own grant on the trader's tower, so another application
+holding `treasury:write` gets a 403. Other applications can read. A revoked
 grant's token keeps working here until it expires (ten minutes at most),
 which is accepted because everything the treasury then does to a tower goes
 through tinyburg.app's `/v1`, where revocation is immediate.
@@ -108,8 +131,21 @@ prefix.
 - **Where is my item:** `SELECT * FROM escrow_ledger WHERE trade_id = ...
   ORDER BY id`. The ledger refuses updates and deletes at the table level.
 - **Orphans and losses:** the reconciler logs `orphan_gift` for vault gifts
-  no trade accounts for and turns long-unseen deposits into `lost` legs; both
-  are ops signals, not automatic actions.
+  no trade accounts for, and warns about deposits still unseen after two
+  hours; both are ops signals, not automatic actions. Only the refund saga
+  marks a leg `lost`, after looking at the queue itself.
+- **Stuck sagas:** every ten minutes the resume sweep looks at trades in
+  flight (`escrowing`, `escrowed`, `releasing`, `refunding`, `executing`)
+  that have not moved for fifteen minutes, and resumes their saga if it
+  suspended on a failure. Each resume logs a warning with the cause, so a
+  saga that keeps failing shows up every sweep. A trade still in flight
+  whose saga has finished is logged too.
+- **Splices for manual review:** a splice push that failed in a way that may
+  still have landed is never undone automatically. The trade fails with a
+  `needs manual review:` reason and a `splice_needs_review` ledger entry;
+  the snapshots pushed before the splice are the way back. A restore of the
+  first side only happens when nothing landed on the second, and only over
+  the exact save the splice left.
 
 ## Dev walkthrough
 
@@ -143,7 +179,9 @@ The full trade loop, clickable, without touching Nimblebit:
 
 ## Not yet verified against production Nimblebit
 
-Gift-queue slot limits, server-side gift expiry, whether `send_item` needs an
+Whether the vault's gift listing is ever truncated (verification and the
+idempotent slot claim both read it as the whole queue), gift-queue slot
+limits, server-side gift expiry, whether `send_item` needs an
 existing friend relationship, and whether the wire `gift_str` round-trips
 exactly what `SendItem` submitted. Probe these with the real vault account
 before opening trades to anyone.

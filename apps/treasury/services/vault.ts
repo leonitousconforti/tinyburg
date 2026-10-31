@@ -106,11 +106,23 @@ export class Vault extends Context.Service<Vault>()("@tinyburg/treasury/services
         }): Effect.Effect<void, VaultUnavailable> =>
             run("send", TinyTower.social_sendItem({ ...player, ...options })).pipe(Effect.asVoid);
 
-        /** Clears a settled or refunded escrow slot. Only ever the last step of a leg. */
-        const receiveGift = (giftId: number): Effect.Effect<void, VaultUnavailable> =>
-            run("receive", TinyTower.social_receiveGift({ ...player, giftId })).pipe(Effect.asVoid);
+        /**
+         * Clears a settled or refunded escrow slot. Only ever the last step of
+         * a leg, after its item went onward. Idempotent, because the step that
+         * calls it can run twice (a crash between the claim and the leg's
+         * transition): a slot no longer in the queue was already cleared, and
+         * claiming it again would fail forever. Answers whether this call did
+         * the claiming.
+         */
+        const clearSlot = (giftId: number): Effect.Effect<boolean, VaultUnavailable> =>
+            Effect.gen(function* () {
+                const queue = yield* listGifts;
+                if (!queue.gifts.some((gift) => gift.id === giftId)) return false;
+                yield* run("receive", TinyTower.social_receiveGift({ ...player, giftId }));
+                return true;
+            });
 
-        return { playerId: vault.playerId, listGifts, sendItem, receiveGift };
+        return { playerId: vault.playerId, listGifts, sendItem, clearSlot };
     }),
 }) {
     static readonly Default = Layer.effect(Vault, Vault.make);

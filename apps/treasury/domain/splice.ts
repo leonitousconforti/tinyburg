@@ -61,7 +61,28 @@ export class SpliceRepository extends Context.Service<SpliceRepository>()(
                 execute: (tradeId) => sql`SELECT * FROM splice_plans WHERE trade_id = ${tradeId}`,
             });
 
-            return { recordPull, recordSpliced, byTrade };
+            /**
+             * Records that a side's push is about to go out. Written before
+             * the push and never cleared, so a later run that finds the
+             * version moved knows the move may be the treasury's own push.
+             */
+            const markPushStarted = (options: {
+                readonly tradeId: string;
+                readonly side: "proposer" | "counterparty";
+            }): Effect.Effect<void, SqlError.SqlError, never> =>
+                (options.side === "proposer"
+                    ? sql`
+                        UPDATE splice_plans SET proposer_push_started_at = COALESCE(proposer_push_started_at, NOW())
+                        WHERE trade_id = ${options.tradeId}
+                    `
+                    : sql`
+                        UPDATE splice_plans
+                        SET counterparty_push_started_at = COALESCE(counterparty_push_started_at, NOW())
+                        WHERE trade_id = ${options.tradeId}
+                    `
+                ).pipe(Effect.asVoid);
+
+            return { recordPull, recordSpliced, byTrade, markPushStarted };
         }),
     }
 ) {

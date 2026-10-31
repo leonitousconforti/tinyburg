@@ -13,6 +13,7 @@
 import { Effect, Option, Schema, type Types } from "effect";
 import { Activity, Workflow } from "effect/workflow";
 
+import type { SplicePlan } from "../domain/model.ts";
 import type { SpliceItems } from "@tinyburg/treasury-sdk/Sdk";
 
 import { Bitizens, TinyTower } from "@tinyburg/tinytower-sdk";
@@ -141,7 +142,14 @@ export const SpliceWorkflow = Workflow.make("TreasurySplice", {
     }),
     /** The second confirmer starts it; a racing first confirmer joins the same execution. */
     idempotencyKey: ({ tradeId }) => tradeId,
-});
+})
+    /**
+     * A failure suspends the splice instead of ending it, so the resume
+     * sweep can pick it up where it stopped rather than leave the trade in
+     * `executing` with one side rewritten. Every expected way out (a
+     * rejection, a conflict) is an answer, not a failure, for that reason.
+     */
+    .annotate(Workflow.SuspendOnFailure, true);
 
 /**
  * @since 1.0.0
@@ -217,22 +225,47 @@ export const SpliceWorkflowLive = SpliceWorkflow.toLayer(
         const started = yield* Activity.make({
             name: "startExecuting",
             success: Schema.Boolean,
-            execute: Effect.orDie(
-                trades.transition({ tradeId: payload.tradeId, from: ["awaiting_confirmation"], to: "executing" })
-            ),
+            execute: Effect.gen(function* () {
+                const started = yield* trades.transition({
+                    tradeId: payload.tradeId,
+                    from: ["awaiting_confirmation"],
+                    to: "executing",
+                });
+                if (started) return true;
+                // A replay after the transition committed: already executing.
+                const current = yield* trades.byId(payload.tradeId);
+                return Option.exists(current, (trade) => trade.state === "executing");
+            }).pipe(Effect.orDie),
         });
         if (!started) return { outcome: "aborted" as const };
 
         /**
          * Pull both saves and keep the originals. `recordPull` refuses to
          * overwrite, so a replay cannot replace the restore point with a
-         * save the first attempt may already have rewritten.
+         * save the first attempt may already have rewritten. The save ids
+         * the pushes are guarded by come from that stored first pull too: a
+         * replay after the player synced must not guard a push of the old
+         * splice with the new version.
          */
         const pulled = yield* Activity.make({
             name: "pullSaves",
-            success: Schema.Struct({ proposerSaveId: Schema.Finite, counterpartySaveId: Schema.Finite }),
-            error: SpliceRejected,
+            success: Schema.NullOr(Schema.Struct({ proposerSaveId: Schema.Finite, counterpartySaveId: Schema.Finite })),
             execute: Effect.gen(function* () {
+                const storedIds = (plan: Option.Option<SplicePlan>) =>
+                    Option.flatMap(plan, (stored) =>
+                        Option.zipWith(
+                            stored.proposerSaveId,
+                            stored.counterpartySaveId,
+                            (proposerSaveId, counterpartySaveId) => ({
+                                proposerSaveId,
+                                counterpartySaveId,
+                            })
+                        )
+                    );
+
+                const already = storedIds(yield* Effect.orDie(splices.byTrade(payload.tradeId)));
+                if (Option.isSome(already)) return already.value;
+
                 const proposerSave = yield* tinyburg.pullSave({
                     tinyburgUserId: trade.proposerUserId,
                     playerId: trade.proposerPlayerId,
@@ -250,16 +283,18 @@ export const SpliceWorkflowLive = SpliceWorkflow.toLayer(
                         counterpartyOriginal: counterpartySave.data,
                     })
                 );
+                const recorded = storedIds(yield* Effect.orDie(splices.byTrade(payload.tradeId)));
+                if (Option.isNone(recorded)) return yield* Effect.die("the splice plan has no save ids after the pull");
                 yield* Effect.ignore(ledger.append({ tradeId: payload.tradeId, event: "splice_pulled" }));
-                return { proposerSaveId: proposerSave.saveId, counterpartySaveId: counterpartySave.saveId };
+                return recorded.value;
             }).pipe(
                 Effect.catchTags({
-                    TowerGrantUnusable: (error) => new SpliceRejected({ reason: error.reason }),
-                    TowerUnavailable: (error) => new SpliceRejected({ reason: error.reason }),
+                    TowerGrantUnusable: () => Effect.succeed(null),
+                    TowerUnavailable: () => Effect.succeed(null),
                 })
             ),
-        }).pipe(Effect.option);
-        if (Option.isNone(pulled)) return yield* failTrade("could not pull both saves");
+        });
+        if (pulled === null) return yield* failTrade("could not pull both saves");
 
         /** The safety rail: an in-game-recoverable backup of both towers, before anything mutates. */
         const snapshotted = yield* Activity.make({
@@ -322,77 +357,140 @@ export const SpliceWorkflowLive = SpliceWorkflow.toLayer(
         if (!computed.ok) return yield* failTrade(computed.reason);
 
         /**
-         * The guarded pushes. The version check is check-then-act against a
-         * live game, so the confirm screen tells players to close their game;
-         * a sync in the gap aborts here with nothing lost. The window between
-         * a push landing and its journal entry is accepted for v1 - a crash
-         * inside it re-runs the version check and reads as a conflict, which
-         * fails safe (the trade fails, the snapshot restores by hand).
+         * Fails the trade for a person to look at: a push may have landed
+         * somewhere the treasury can no longer safely undo by itself. The
+         * snapshots pushed before the splice are the way back.
          */
-        const proposerPushed = yield* Activity.make({
-            name: "pushProposer",
-            success: Schema.Struct({ pushed: Schema.Boolean, reason: Schema.String }),
-            execute: Effect.gen(function* () {
-                const plan = Option.getOrThrow(yield* Effect.orDie(splices.byTrade(payload.tradeId)));
-                const version = yield* tinyburg.checkVersion({
-                    tinyburgUserId: trade.proposerUserId,
-                    playerId: trade.proposerPlayerId,
-                });
-                if (version !== pulled.value.proposerSaveId) {
-                    return { pushed: false, reason: "the proposer's tower synced during the trade" };
-                }
-                yield* tinyburg.pushSave({
-                    tinyburgUserId: trade.proposerUserId,
-                    playerId: trade.proposerPlayerId,
-                    data: Option.getOrElse(plan.proposerSpliced, () => ""),
-                });
-                yield* Effect.ignore(ledger.append({ tradeId: payload.tradeId, event: "splice_pushed_proposer" }));
-                return { pushed: true, reason: "" };
-            }).pipe(Effect.orElseSucceed(() => ({ pushed: false, reason: "could not push the proposer's save" }))),
-        });
-        if (!proposerPushed.pushed) return yield* failTrade(proposerPushed.reason);
+        const needsReview = (reason: string) =>
+            Effect.gen(function* () {
+                yield* Effect.logWarning(`splice trade ${payload.tradeId} needs manual review: ${reason}`);
+                yield* Effect.ignore(
+                    ledger.append({ tradeId: payload.tradeId, event: "splice_needs_review", detail: reason })
+                );
+                return yield* failTrade(`needs manual review: ${reason}`);
+            });
 
-        const counterpartyPushed = yield* Activity.make({
-            name: "pushCounterparty",
-            success: Schema.Struct({ pushed: Schema.Boolean, reason: Schema.String }),
-            execute: Effect.gen(function* () {
-                const plan = Option.getOrThrow(yield* Effect.orDie(splices.byTrade(payload.tradeId)));
-                const version = yield* tinyburg.checkVersion({
-                    tinyburgUserId: counterparty.value.userId,
-                    playerId: counterparty.value.playerId,
-                });
-                if (version !== pulled.value.counterpartySaveId) {
-                    return { pushed: false, reason: "the counterparty's tower synced during the trade" };
-                }
-                yield* tinyburg.pushSave({
-                    tinyburgUserId: counterparty.value.userId,
-                    playerId: counterparty.value.playerId,
-                    data: Option.getOrElse(plan.counterpartySpliced, () => ""),
-                });
-                yield* Effect.ignore(ledger.append({ tradeId: payload.tradeId, event: "splice_pushed_counterparty" }));
-                return { pushed: true, reason: "" };
-            }).pipe(Effect.orElseSucceed(() => ({ pushed: false, reason: "could not push the counterparty's save" }))),
-        });
-
-        if (!counterpartyPushed.pushed) {
-            // Side A is already rewritten, so it goes back to its original
-            // before the trade is failed. Best effort with retries; if even
-            // the restore fails, the pushed snapshot is the player's recovery
-            // and the ledger says exactly what happened.
-            yield* Activity.make({
-                name: "restoreProposer",
+        /**
+         * One guarded push. The version check is check-then-act against a
+         * live game, so the confirm screen tells players to close their game;
+         * a sync in the gap aborts here with nothing lost. The push marker is
+         * written before the push goes out, and that is what tells a moved
+         * version apart: with no marker it is the player syncing, with one it
+         * may be this push having landed (a crash, or a failure whose answer
+         * was lost).
+         *
+         * - `pushed`: the spliced save went up; `savedId` is the version it
+         *   left behind, if that could be read back.
+         * - `conflict`: nothing of the treasury's landed on this tower.
+         * - `unknown`: a push was attempted and may or may not have landed.
+         */
+        const push = (
+            side: "proposer" | "counterparty",
+            owner: { readonly userId: string; readonly playerId: typeof trade.proposerPlayerId },
+            pulledId: number
+        ) =>
+            Activity.make({
+                name: side === "proposer" ? "pushProposer" : "pushCounterparty",
+                success: Schema.Struct({
+                    outcome: Schema.Literals(["pushed", "conflict", "unknown"]),
+                    reason: Schema.String,
+                    savedId: Schema.NullOr(Schema.Finite),
+                }),
                 execute: Effect.gen(function* () {
+                    const tower = { tinyburgUserId: owner.userId, playerId: owner.playerId };
                     const plan = Option.getOrThrow(yield* Effect.orDie(splices.byTrade(payload.tradeId)));
-                    yield* tinyburg.pushSave({
-                        tinyburgUserId: trade.proposerUserId,
-                        playerId: trade.proposerPlayerId,
-                        data: Option.getOrElse(plan.proposerOriginal, () => ""),
-                    });
+                    const attempted = Option.isSome(
+                        side === "proposer" ? plan.proposerPushStartedAt : plan.counterpartyPushStartedAt
+                    );
+                    const nothing = (reason: string) => ({ outcome: "conflict" as const, reason, savedId: null });
+                    const maybe = (reason: string) => ({ outcome: "unknown" as const, reason, savedId: null });
+
+                    const version = yield* Effect.option(tinyburg.checkVersion(tower));
+                    if (Option.isNone(version)) {
+                        return attempted
+                            ? maybe(`could not read the ${side}'s save version after a push was attempted`)
+                            : nothing(`could not check the ${side}'s save version`);
+                    }
+                    if (version.value !== pulledId) {
+                        return attempted
+                            ? maybe(`the ${side}'s save changed after a push was attempted`)
+                            : nothing(`the ${side}'s tower synced during the trade`);
+                    }
+
+                    yield* Effect.orDie(splices.markPushStarted({ tradeId: payload.tradeId, side }));
+                    const pushed = yield* Effect.result(
+                        tinyburg.pushSave({
+                            ...tower,
+                            data: Option.getOrElse(
+                                side === "proposer" ? plan.proposerSpliced : plan.counterpartySpliced,
+                                () => ""
+                            ),
+                        })
+                    );
+                    if (pushed._tag === "Failure") {
+                        // The answer may be lost rather than the push: only an
+                        // unchanged version says it did not land.
+                        const after = yield* Effect.option(tinyburg.checkVersion(tower));
+                        return Option.contains(after, pulledId)
+                            ? nothing(`could not push the ${side}'s save`)
+                            : maybe(`the ${side}'s push failed and may have landed`);
+                    }
+                    yield* Effect.ignore(ledger.append({ tradeId: payload.tradeId, event: `splice_pushed_${side}` }));
+                    const savedId = yield* Effect.option(tinyburg.checkVersion(tower));
+                    return { outcome: "pushed" as const, reason: "", savedId: Option.getOrNull(savedId) };
+                }),
+            });
+
+        const proposerPushed = yield* push(
+            "proposer",
+            { userId: trade.proposerUserId, playerId: trade.proposerPlayerId },
+            pulled.proposerSaveId
+        );
+        if (proposerPushed.outcome === "conflict") return yield* failTrade(proposerPushed.reason);
+        if (proposerPushed.outcome === "unknown") return yield* needsReview(proposerPushed.reason);
+
+        const counterpartyPushed = yield* push("counterparty", counterparty.value, pulled.counterpartySaveId);
+        if (counterpartyPushed.outcome === "unknown") {
+            // The counterparty may hold the spliced save: restoring the
+            // proposer now could destroy one item and duplicate the other.
+            return yield* needsReview(`${counterpartyPushed.reason}; the proposer was left spliced`);
+        }
+
+        if (counterpartyPushed.outcome === "conflict") {
+            /**
+             * Nothing landed on the counterparty, and the proposer is
+             * already rewritten, so it goes back to its original before the
+             * trade is failed. Guarded like every other push: only over the
+             * exact save the splice left, so progress made since is never
+             * overwritten. Anything doubtful goes to manual review instead,
+             * with the pushed snapshot as the player's recovery.
+             */
+            const restored = yield* Activity.make({
+                name: "restoreProposer",
+                success: Schema.Struct({ restored: Schema.Boolean, reason: Schema.String }),
+                execute: Effect.gen(function* () {
+                    if (proposerPushed.savedId === null) {
+                        return { restored: false, reason: "the proposer's version after the splice is unknown" };
+                    }
+                    const tower = { tinyburgUserId: trade.proposerUserId, playerId: trade.proposerPlayerId };
+                    const version = yield* Effect.option(tinyburg.checkVersion(tower));
+                    if (!Option.contains(version, proposerPushed.savedId)) {
+                        return { restored: false, reason: "the proposer's save changed after the splice" };
+                    }
+                    const plan = Option.getOrThrow(yield* Effect.orDie(splices.byTrade(payload.tradeId)));
+                    const pushed = yield* Effect.result(
+                        tinyburg.pushSave({ ...tower, data: Option.getOrElse(plan.proposerOriginal, () => "") })
+                    );
+                    if (pushed._tag === "Failure") return { restored: false, reason: "the restore push failed" };
                     yield* Effect.ignore(
                         ledger.append({ tradeId: payload.tradeId, event: "splice_restored_proposer" })
                     );
-                }).pipe(Effect.retry({ times: 3 }), Effect.ignore),
+                    return { restored: true, reason: "" };
+                }),
             });
+            if (!restored.restored) {
+                return yield* needsReview(`${counterpartyPushed.reason}, and ${restored.reason}`);
+            }
             return yield* failTrade(counterpartyPushed.reason);
         }
 
