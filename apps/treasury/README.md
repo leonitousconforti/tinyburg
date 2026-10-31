@@ -40,6 +40,40 @@ the web app, cloud snapshots of both originals are pushed first, and each
 push is guarded by a version check so a player who kept playing aborts the
 splice rather than losing progress.
 
+The edit itself is the tinytower-sdk's `Splice`. Each side's items are taken
+out of that side's _original_ save, so nobody can hand over something they
+only receive in the same trade, and then each side's items go into the other
+side's tower. `Splice` refuses, failing the trade with a reason that ends in
+the refusal's code, when:
+
+- the giver no longer has the item (`NotOwned`, `InsufficientFunds`),
+- a costume is being worn or a pet kept by somebody in the giver's tower
+  (`InUse`),
+- a costume or pet has an empty name (`InvalidItem`), which names nothing,
+- the receiver already owns the costume or pet (`AlreadyOwned`), since a
+  second copy would add nothing,
+- the receiver has no floor of the kind an arriving bitizen lives on
+  (`NoHomeFloor`),
+- an amount is not a whole number above zero (`InvalidAmount`).
+
+`ListInventory` offers only the costumes and pets `Splice.canExtract` allows,
+which is the same check `Splice` makes for the giver's side.
+
+A bitizen is looked up by the agreed encoded string, exactly, so one who was
+re-dressed or changed jobs since the proposal fails the trade as no longer
+there.
+
+A traded bitizen arrives laid off and undressed: no job, not placed in a
+dream job, no costume and no pet, which stay in the giver's wardrobe. The
+receiver therefore sees a different encoded bitizen string than the one that
+was proposed. How many bitizens fit on one residential floor is not checked.
+
+The splice is computed from the stored originals right after the pull,
+before the snapshots, so a refusal fails the trade before anything is
+snapshotted or pushed to either tower. A computed splice is recorded in the
+ledger as `splice_spliced`, whose detail holds each side's extraction
+patches (`SaveDiffer.SavePatch` JSON).
+
 Everything runs as durable workflows (`workflows/`) on a single-node cluster
 backed by this service's own Postgres, so a deploy mid-trade resumes rather
 than stranding an item in the vault. Every vault step of a release or a
@@ -170,9 +204,12 @@ The full trade loop, clickable, without touching Nimblebit:
    the fake delivers instantly, so the first verify pass lands - and the
    fake's log print each gift moving through the vault.
 5. **Splice trade.** Same, with the save-splice mechanism and, say, a
-   costume for coins. Both sides must press the confirm button; the ledger
-   then shows `splice_pulled`, `splice_snapshot` and both pushes, and the
-   towers' saves in the fake have actually swapped the items.
+   bitizen for coins. Both sides must press the confirm button; the ledger
+   then shows `splice_pulled`, `splice_spliced`, `splice_snapshot` and both
+   pushes, and the towers' saves in the fake have actually swapped the items.
+   Both towers start from the same save, so offering a costume or pet shows
+   a refusal instead: the other tower already owns it (`AlreadyOwned`), and
+   the trade fails before anything is snapshotted.
 6. **The book.** `psql` into the treasury database and read
    `escrow_ledger` for the audit trail, or hit `/v1/treasury/stats` to see
    the home page counters move.

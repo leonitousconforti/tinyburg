@@ -30,7 +30,7 @@ import { HttpApiBuilder, HttpApiError } from "effect/http-api";
 import type { Trade } from "../domain/model.ts";
 import type { PlayerIdSchema } from "@tinyburg/nimblebit-sdk/NimblebitConfig";
 
-import { Bitizens, TinyTower } from "@tinyburg/tinytower-sdk";
+import { Bitizens, Splice, TinyTower } from "@tinyburg/tinytower-sdk";
 import { Api, ItemSpec } from "@tinyburg/treasury-sdk/Sdk";
 
 import { GrantsRepository } from "../domain/grants.ts";
@@ -318,11 +318,16 @@ const TreasuryGroupLive = HttpApiBuilder.group(
                         Effect.mapError(() => new HttpApiError.ServiceUnavailable())
                     );
 
+                    // A costume somebody wears, a pet somebody keeps, or an
+                    // empty name is one Splice refuses to take, so offering it
+                    // would only fail the trade once both sides had confirmed.
                     return {
                         playerId: params.playerId,
                         bitizens,
-                        costumes: decoded.costumes,
-                        pets: decoded.pets ?? [],
+                        costumes: decoded.costumes.filter((costume) =>
+                            Splice.canExtract(decoded, { _tag: "Costume", costume })
+                        ),
+                        pets: (decoded.pets ?? []).filter((pet) => Splice.canExtract(decoded, { _tag: "Pet", pet })),
                         coins: decoded.coins,
                         bux: decoded.bux,
                     };

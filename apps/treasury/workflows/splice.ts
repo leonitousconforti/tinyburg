@@ -1,22 +1,24 @@
 /**
- * A save-splice trade: both saves pulled, snapshotted, rewritten and pushed.
+ * A save-splice trade: both saves pulled, the splice computed, both
+ * originals snapshotted, and the rewritten saves pushed.
  *
  * This is the mechanism the gift channel cannot provide - costumes, pets and
  * currency move here, and items are debited from the giver rather than
  * duplicated - and it is also the dangerous one, which is why it only runs
- * after *both* parties confirmed on the web app, why cloud snapshots of both
- * originals are pushed before anything is rewritten, and why each push is
- * guarded by a version check so a player who kept playing aborts the splice
- * instead of losing progress.
+ * after *both* parties confirmed on the web app, why the splice is computed
+ * from the stored originals before either tower is touched, why cloud
+ * snapshots of both originals are pushed before anything is rewritten, and
+ * why each push is guarded by a version check so a player who kept playing
+ * aborts the splice instead of losing progress.
  */
 
-import { Effect, Option, Schema, type Types } from "effect";
+import { Effect, Function, Option, Schema } from "effect";
 import { Activity, Workflow } from "effect/workflow";
 
 import type { SplicePlan } from "../domain/model.ts";
-import type { SpliceItems } from "@tinyburg/treasury-sdk/Sdk";
+import type { SpliceItem, SpliceItems } from "@tinyburg/treasury-sdk/Sdk";
 
-import { Bitizens, TinyTower } from "@tinyburg/tinytower-sdk";
+import { Bitizens, SaveDiffer, Splice, TinyTower } from "@tinyburg/tinytower-sdk";
 import { ItemSpec } from "@tinyburg/treasury-sdk/Sdk";
 
 import { LedgerRepository } from "../domain/ledger.ts";
@@ -29,12 +31,26 @@ const decodeSave = Schema.decodeEffect(TinyTower.SaveData);
 const encodeSave = Schema.encodeEffect(TinyTower.SaveData);
 const encodeBitizen = Schema.encodeEffect(Bitizens.Bitizen);
 
-type MutableSave = Types.DeepMutable<typeof TinyTower.SaveData.Type>;
+/**
+ * The detail of a `splice_spliced` ledger entry: the edits that took each
+ * side's agreed items out of its original save, in order. What arrived on
+ * each side is what left the other, so together with the stored originals
+ * these two patches account for the whole splice.
+ */
+const SplicedDetail = Schema.fromJsonString(
+    Schema.Struct({ proposer: SaveDiffer.SavePatch, counterparty: SaveDiffer.SavePatch })
+);
+const encodeSplicedDetail = Schema.encodeEffect(SplicedDetail);
+
+type Side = "proposer" | "counterparty";
+
+type SpliceEntry = typeof SpliceItem.Type;
 
 /**
  * The splice could not be computed as agreed: an offered item was not in the
- * giver's save, or a balance was short. Nothing has been pushed when this is
- * raised; it fails the trade with a reason the participants can read.
+ * giver's save, or `Splice` refused an edit that would leave either tower
+ * contradicting itself. Raised before either tower is snapshotted or pushed;
+ * it fails the trade with a reason the participants can read.
  */
 class SpliceRejected extends Schema.Error<SpliceRejected, { readonly brand: unique symbol }>(
     "@tinyburg/treasury/SpliceRejected"
@@ -43,90 +59,145 @@ class SpliceRejected extends Schema.Error<SpliceRejected, { readonly brand: uniq
     reason: Schema.String,
 }) {}
 
+/** A `Splice` refusal as the trade's failure reason, its code kept for support. */
+const refused =
+    (context: string) =>
+    (error: Splice.SpliceError): SpliceRejected =>
+        new SpliceRejected({ reason: `${context}: ${error.message} (${error.reason})` });
+
 /**
- * Moves one side's items out of the giver's decoded save and into the
- * receiver's. Every removal is by exact match against what was agreed, so
- * the save that ends up pushed contains precisely the trade both parties
- * confirmed and nothing else.
+ * Finds the bitizen agreed by its full encoded string. Positions shift as
+ * earlier items of the same side come out, so this always looks at the save
+ * as it stands now, and the match is exact: a bitizen re-dressed or moved
+ * to another job since the proposal is no longer the one agreed.
  */
-// The early exits return never-typed values; the normal path runs to the end.
-// oxlint-disable-next-line typescript/consistent-return
-const applyItems = Effect.fnUntraced(function* (
-    giver: MutableSave,
-    receiver: MutableSave,
-    items: typeof SpliceItems.Type extends { readonly items: infer I } ? I : never
-) {
-    for (const entry of items) {
-        switch (entry.kind) {
-            case "bitizen": {
-                if (entry.item === undefined) {
-                    return yield* new SpliceRejected({ reason: "a bitizen entry carries no item" });
-                }
-                let index = -1;
-                for (let candidate = 0; candidate < giver.bzns.length; candidate = candidate + 1) {
-                    const encoded = yield* encodeBitizen(giver.bzns[candidate]).pipe(
-                        Effect.mapError(() => new SpliceRejected({ reason: "a bitizen in the save would not encode" }))
-                    );
-                    if (encoded === entry.item) {
-                        index = candidate;
-                        break;
-                    }
-                }
-                if (index === -1) {
-                    return yield* new SpliceRejected({ reason: "the giver no longer has the offered bitizen" });
-                }
-                const [moved] = giver.bzns.splice(index, 1);
-                receiver.bzns.push(moved);
-                break;
-            }
-            case "costume": {
-                if (entry.item === undefined) {
-                    return yield* new SpliceRejected({ reason: "a costume entry carries no item" });
-                }
-                const index = giver.costumes.indexOf(entry.item);
-                if (index === -1) {
-                    return yield* new SpliceRejected({ reason: "the giver no longer has the offered costume" });
-                }
-                giver.costumes.splice(index, 1);
-                receiver.costumes.push(entry.item);
-                break;
-            }
-            case "pet": {
-                if (entry.item === undefined) {
-                    return yield* new SpliceRejected({ reason: "a pet entry carries no item" });
-                }
-                const pets = giver.pets ?? [];
-                const index = pets.indexOf(entry.item);
-                if (index === -1) {
-                    return yield* new SpliceRejected({ reason: "the giver no longer has the offered pet" });
-                }
-                pets.splice(index, 1);
-                giver.pets = pets;
-                receiver.pets = [...(receiver.pets ?? []), entry.item];
-                break;
-            }
-            case "coins": {
-                const amount = entry.amount ?? 0;
-                if (amount <= 0) return yield* new SpliceRejected({ reason: "a coin entry carries no amount" });
-                if (giver.coins < amount) {
-                    return yield* new SpliceRejected({ reason: "the giver no longer has the offered coins" });
-                }
-                giver.coins = giver.coins - amount;
-                receiver.coins = receiver.coins + amount;
-                break;
-            }
-            case "bux": {
-                const amount = entry.amount ?? 0;
-                if (amount <= 0) return yield* new SpliceRejected({ reason: "a bux entry carries no amount" });
-                if (giver.bux < amount) {
-                    return yield* new SpliceRejected({ reason: "the giver no longer has the offered bux" });
-                }
-                giver.bux = giver.bux - amount;
-                receiver.bux = receiver.bux + amount;
-                break;
-            }
+const bitizenSelector = Effect.fnUntraced(function* (side: Side, save: SaveDiffer.SaveData, item: string) {
+    const encoded = yield* Effect.forEach(save.bzns, (bitizen) => encodeBitizen(bitizen)).pipe(
+        Effect.mapError(() => new SpliceRejected({ reason: `a bitizen in the ${side}'s save would not encode` }))
+    );
+    const index = encoded.indexOf(item);
+    if (index === -1) {
+        return yield* new SpliceRejected({ reason: `the ${side} no longer has the offered bitizen` });
+    }
+    return { _tag: "Bitizen", index } satisfies Splice.Selector;
+});
+
+/** Names one agreed item the way `Splice` addresses it in the giver's current save. */
+const selectorFor = (
+    side: Side,
+    save: SaveDiffer.SaveData,
+    entry: SpliceEntry
+): Effect.Effect<Splice.Selector, SpliceRejected, never> => {
+    const missing = (what: string) =>
+        Effect.fail(new SpliceRejected({ reason: `a ${entry.kind} entry carries no ${what}` }));
+    switch (entry.kind) {
+        case "bitizen": {
+            return entry.item === undefined ? missing("item") : bitizenSelector(side, save, entry.item);
+        }
+        case "costume": {
+            return entry.item === undefined
+                ? missing("item")
+                : Effect.succeed({ _tag: "Costume", costume: entry.item });
+        }
+        case "pet": {
+            return entry.item === undefined ? missing("item") : Effect.succeed({ _tag: "Pet", pet: entry.item });
+        }
+        case "coins":
+        case "bux": {
+            // A zero or negative amount is Splice's to refuse, as `InvalidAmount`.
+            return entry.amount === undefined
+                ? missing("amount")
+                : Effect.succeed({ _tag: "Currency", currency: entry.kind, amount: entry.amount });
+        }
+        default: {
+            return Function.absurd(entry.kind);
         }
     }
+};
+
+/** One side's agreed items, taken out of its save. */
+interface Taken {
+    /** The giver's tower without them. */
+    readonly save: SaveDiffer.SaveData;
+    /** What the other side receives. */
+    readonly holdings: ReadonlyArray<Splice.Holding>;
+    /** Every extraction's edit, in order, for the ledger. */
+    readonly patch: SaveDiffer.SavePatch;
+}
+
+/**
+ * Takes every agreed item out of the giver's save, one after another, each
+ * from the save the previous one left.
+ */
+const takeFrom = Effect.fnUntraced(function* (
+    side: Side,
+    original: SaveDiffer.SaveData,
+    items: ReadonlyArray<SpliceEntry>
+) {
+    let taken: Taken = { save: original, holdings: [], patch: [] };
+    for (const entry of items) {
+        const selector = yield* selectorFor(side, taken.save, entry);
+        const extraction = yield* Splice.extract(taken.save, selector).pipe(
+            Effect.mapError(refused(`the ${side} cannot hand over what was agreed`))
+        );
+        taken = {
+            save: extraction.save,
+            holdings: [...taken.holdings, extraction.holding],
+            patch: [...taken.patch, ...extraction.patch],
+        };
+    }
+    return taken;
+});
+
+/** Puts the other side's holdings into a save, one after another. */
+const deliverTo = Effect.fnUntraced(function* (
+    side: Side,
+    save: SaveDiffer.SaveData,
+    holdings: ReadonlyArray<Splice.Holding>
+) {
+    let delivered = save;
+    for (const holding of holdings) {
+        delivered = yield* Splice.insert(delivered, holding).pipe(
+            Effect.mapError(refused(`the ${side} cannot take what was agreed`))
+        );
+    }
+    return delivered;
+});
+
+/**
+ * The splice itself, a function of the two stored originals and the agreed
+ * lists and nothing else, so a replay computes exactly what the first run
+ * did.
+ *
+ * Both sides' items come out of the *original* saves before anything goes
+ * in, so every ownership check is against what the player actually had and
+ * neither side can hand over something it only receives in this same trade.
+ * Only then does each side's haul go into the other's tower.
+ */
+const spliceSaves = Effect.fnUntraced(function* (options: {
+    readonly proposerOriginal: string;
+    readonly counterpartyOriginal: string;
+    readonly gives: ReadonlyArray<SpliceEntry>;
+    readonly wants: ReadonlyArray<SpliceEntry>;
+}) {
+    const fromProposer = yield* takeFrom("proposer", yield* decodeSave(options.proposerOriginal), options.gives);
+    const fromCounterparty = yield* takeFrom(
+        "counterparty",
+        yield* decodeSave(options.counterpartyOriginal),
+        options.wants
+    );
+
+    const proposerSave = yield* deliverTo("proposer", fromProposer.save, fromCounterparty.holdings);
+    const counterpartySave = yield* deliverTo("counterparty", fromCounterparty.save, fromProposer.holdings);
+
+    // Whatever gets pushed has to read back as a save.
+    const proposerSpliced = yield* encodeSave(proposerSave);
+    const counterpartySpliced = yield* encodeSave(counterpartySave);
+    yield* decodeSave(proposerSpliced);
+    yield* decodeSave(counterpartySpliced);
+
+    const detail = yield* encodeSplicedDetail({ proposer: fromProposer.patch, counterparty: fromCounterparty.patch });
+    return { proposerSpliced, counterpartySpliced, detail };
 });
 
 /**
@@ -296,6 +367,44 @@ export const SpliceWorkflowLive = SpliceWorkflow.toLayer(
         });
         if (pulled === null) return yield* failTrade("could not pull both saves");
 
+        /**
+         * The splice, computed before anything leaves the treasury: a trade
+         * `Splice` refuses fails here, before either tower is snapshotted
+         * or pushed. It reads only the stored originals, so running it
+         * again after a crash records the same splice it did the first time.
+         */
+        const computed = yield* Activity.make({
+            name: "computeSplice",
+            success: Schema.Struct({ ok: Schema.Boolean, reason: Schema.String }),
+            execute: Effect.gen(function* () {
+                const plan = yield* Effect.orDie(splices.byTrade(payload.tradeId));
+                if (Option.isNone(plan)) return { ok: false, reason: "splice plan disappeared" };
+
+                const spliced = yield* spliceSaves({
+                    proposerOriginal: Option.getOrElse(plan.value.proposerOriginal, () => ""),
+                    counterpartyOriginal: Option.getOrElse(plan.value.counterpartyOriginal, () => ""),
+                    gives: givesSpec.items,
+                    wants: wantsSpec.items,
+                });
+
+                yield* Effect.orDie(
+                    splices.recordSpliced({
+                        tradeId: payload.tradeId,
+                        proposerSpliced: spliced.proposerSpliced,
+                        counterpartySpliced: spliced.counterpartySpliced,
+                    })
+                );
+                yield* Effect.ignore(
+                    ledger.append({ tradeId: payload.tradeId, event: "splice_spliced", detail: spliced.detail })
+                );
+                return { ok: true, reason: "" };
+            }).pipe(
+                Effect.catchTag("SpliceRejected", (error) => Effect.succeed({ ok: false, reason: error.reason })),
+                Effect.orElseSucceed(() => ({ ok: false, reason: "the saves would not splice" }))
+            ),
+        });
+        if (!computed.ok) return yield* failTrade(computed.reason);
+
         /** The safety rail: an in-game-recoverable backup of both towers, before anything mutates. */
         const snapshotted = yield* Activity.make({
             name: "snapshots",
@@ -320,41 +429,6 @@ export const SpliceWorkflowLive = SpliceWorkflow.toLayer(
             }).pipe(Effect.orElseSucceed(() => false)),
         });
         if (!snapshotted) return yield* failTrade("could not snapshot both towers before splicing");
-
-        /** Pure computation: decode, move the agreed items, re-encode, re-decode as a sanity check. */
-        const computed = yield* Activity.make({
-            name: "computeSplice",
-            success: Schema.Struct({ ok: Schema.Boolean, reason: Schema.String }),
-            execute: Effect.gen(function* () {
-                const plan = yield* Effect.orDie(splices.byTrade(payload.tradeId));
-                if (Option.isNone(plan)) return { ok: false, reason: "splice plan disappeared" };
-                const proposerOriginal = Option.getOrElse(plan.value.proposerOriginal, () => "");
-                const counterpartyOriginal = Option.getOrElse(plan.value.counterpartyOriginal, () => "");
-
-                // The decoded saves are mutated in place before re-encoding.
-                // oxlint-disable-next-line typescript/no-unsafe-type-assertion
-                const proposerSave = (yield* decodeSave(proposerOriginal)) as MutableSave;
-                // oxlint-disable-next-line typescript/no-unsafe-type-assertion
-                const counterpartySave = (yield* decodeSave(counterpartyOriginal)) as MutableSave;
-
-                yield* applyItems(proposerSave, counterpartySave, givesSpec.items);
-                yield* applyItems(counterpartySave, proposerSave, wantsSpec.items);
-
-                const proposerSpliced = yield* encodeSave(proposerSave);
-                const counterpartySpliced = yield* encodeSave(counterpartySave);
-                yield* decodeSave(proposerSpliced);
-                yield* decodeSave(counterpartySpliced);
-
-                yield* Effect.orDie(
-                    splices.recordSpliced({ tradeId: payload.tradeId, proposerSpliced, counterpartySpliced })
-                );
-                return { ok: true, reason: "" };
-            }).pipe(
-                Effect.catchTag("SpliceRejected", (error) => Effect.succeed({ ok: false, reason: error.reason })),
-                Effect.orElseSucceed(() => ({ ok: false, reason: "the saves would not splice" }))
-            ),
-        });
-        if (!computed.ok) return yield* failTrade(computed.reason);
 
         /**
          * Fails the trade for a person to look at: a push may have landed
