@@ -1,6 +1,6 @@
 {
     "name": "@tinyburg/bitcity-sdk",
-    "version": "0.1.1",
+    "version": "0.1.2",
     "description": "api for the mobile game Bit City by Nimblebit",
     "keywords": [
         "bitcity-sdk",
