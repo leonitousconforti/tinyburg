@@ -1,6 +1,6 @@
 ---
 title: Scopes.ts
-nav_order: 4
+nav_order: 3
 parent: Modules
 ---
 
@@ -39,7 +39,7 @@ The game's areas, by name, for annotating endpoints.
 declare const { device: Device, social: Social }: any
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/src/Scopes.ts#L68)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/pocket-planes-sdk/src/Scopes.ts#L68)
 
 Since v1.0.0
 
@@ -61,7 +61,7 @@ declare const PocketPlanes: Game & {
 }
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/src/Scopes.ts#L17)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/pocket-planes-sdk/src/Scopes.ts#L17)
 
 Since v1.0.0
 
@@ -75,7 +75,7 @@ Since v1.0.0
 declare const Games: ReadonlyArray<Game>
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/src/Scopes.ts#L74)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/pocket-planes-sdk/src/Scopes.ts#L74)
 
 Since v1.0.0
 
@@ -87,6 +87,6 @@ Since v1.0.0
 declare const all: () => ReadonlyArray<ScopeDescription>
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/src/Scopes.ts#L80)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/pocket-planes-sdk/src/Scopes.ts#L80)
 
 Since v1.0.0

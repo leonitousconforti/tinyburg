@@ -2,7 +2,7 @@
     "$schema": "../../node_modules/@effect/docgen/schema.json",
     "srcLink": "https://github.com/leonitousconforti/tinyburg/blob/main/packages/insight/src/",
     "exclude": ["src/frida/**/*.ts", "src/shared/**/*.ts"],
-    "projectHomepage": "https://github.com/leonitousconforti/tinyburg/packages/insight",
+    "projectHomepage": "https://github.com/leonitousconforti/tinyburg/tree/main/packages/insight",
     "examplesCompilerOptions": {
         "noEmit": true,
         "strict": true,

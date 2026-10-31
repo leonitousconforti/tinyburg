@@ -2,7 +2,7 @@
     "$schema": "../../node_modules/@effect/docgen/schema.json",
     "srcLink": "https://github.com/leonitousconforti/tinyburg/blob/main/packages/doorman/src/",
     "exclude": ["src/internal/**/*.ts"],
-    "projectHomepage": "https://github.com/leonitousconforti/tinyburg/packages/doorman",
+    "projectHomepage": "https://github.com/leonitousconforti/tinyburg/tree/main/packages/doorman",
     "examplesCompilerOptions": {
         "noEmit": true,
         "strict": true,

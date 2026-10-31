@@ -10,7 +10,7 @@ Participation runs through **sign in with Tinyburg**. You sign in at tinyburg.ap
 
 That indirection is the point. The study never sees your Nimblebit auth key, only a scoped OAuth grant against tinyburg.app that you can revoke at any time from your Tinyburg account. It also means the study does not need to be your in-game friend, so "Only Friend Visits" can stay on and there is no friend-list cap on how many people can take part.
 
-Two rules follow from this and are enforced in the schema, not left to good intentions:
+Three rules follow from this and are enforced in the schema, not left to good intentions:
 
 1. **An edge needs both endpoints.** A friendship is recorded only when _both_ players have live consent. If you take part and your friend does not, that connection is never stored.
 2. **Revocation is authenticated.** Only the Tinyburg account that granted consent for a player can withdraw it. A friend code by itself does nothing.

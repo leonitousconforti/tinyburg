@@ -2,7 +2,7 @@
     "$schema": "../../node_modules/@effect/docgen/schema.json",
     "srcLink": "https://github.com/leonitousconforti/tinyburg/blob/main/packages/trading-sdk/src/",
     "exclude": ["src/internal/**/*.ts"],
-    "projectHomepage": "https://github.com/leonitousconforti/tinyburg/packages/trading-sdk",
+    "projectHomepage": "https://github.com/leonitousconforti/tinyburg/tree/main/packages/trading-sdk",
     "examplesCompilerOptions": {
         "noEmit": true,
         "strict": true,

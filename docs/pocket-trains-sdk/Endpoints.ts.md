@@ -381,7 +381,7 @@ declare const Api: HttpApi.HttpApi<
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/src/Endpoints.ts#L325)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/pocket-trains-sdk/src/Endpoints.ts#L325)
 
 Since v1.0.0
 
@@ -399,7 +399,7 @@ gift_str, h}` (no `c`, unlike pp). Left open for the data-schema work.
 declare const Gift: Schema.Unknown
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/src/Endpoints.ts#L69)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/pocket-trains-sdk/src/Endpoints.ts#L69)
 
 Since v1.0.0
 
@@ -415,6 +415,6 @@ int, h}`. Left open for the data-schema work.
 declare const PTGift: Schema.Unknown
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/src/Endpoints.ts#L79)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/pocket-trains-sdk/src/Endpoints.ts#L79)
 
 Since v1.0.0

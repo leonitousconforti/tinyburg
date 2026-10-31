@@ -1,6 +1,6 @@
 ---
 title: Scopes.ts
-nav_order: 4
+nav_order: 3
 parent: "@tinyburg/bitcity-sdk"
 ---
 
@@ -39,7 +39,7 @@ The game's areas, by name, for annotating endpoints.
 declare const { device: Device, social: Social }: any
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/src/Scopes.ts#L64)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/bitcity-sdk/src/Scopes.ts#L64)
 
 Since v1.0.0
 
@@ -58,7 +58,7 @@ declare const BitCity: Game & {
 }
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/src/Scopes.ts#L17)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/bitcity-sdk/src/Scopes.ts#L17)
 
 Since v1.0.0
 
@@ -72,7 +72,7 @@ Since v1.0.0
 declare const Games: ReadonlyArray<Game>
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/src/Scopes.ts#L70)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/bitcity-sdk/src/Scopes.ts#L70)
 
 Since v1.0.0
 
@@ -84,6 +84,6 @@ Since v1.0.0
 declare const all: () => ReadonlyArray<ScopeDescription>
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/src/Scopes.ts#L76)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/bitcity-sdk/src/Scopes.ts#L76)
 
 Since v1.0.0

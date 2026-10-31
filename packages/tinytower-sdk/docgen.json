@@ -15,7 +15,7 @@
         "src/Roofs.ts",
         "src/SyncItemType.ts"
     ],
-    "projectHomepage": "https://github.com/leonitousconforti/tinyburg/packages/tinytower-sdk",
+    "projectHomepage": "https://github.com/leonitousconforti/tinyburg/tree/main/packages/tinytower-sdk",
     "examplesCompilerOptions": {
         "noEmit": true,
         "strict": true,

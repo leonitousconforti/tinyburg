@@ -1,6 +1,6 @@
 ---
 title: PocketTrains.ts
-nav_order: 3
+nav_order: 2
 parent: "@tinyburg/pocket-trains-sdk"
 ---
 
@@ -58,7 +58,7 @@ declare const device_newPlayer: Effect.Effect<
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/src/PocketTrains.ts#L38)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/pocket-trains-sdk/src/PocketTrains.ts#L38)
 
 Since v1.0.0
 
@@ -93,7 +93,7 @@ declare const device_playerDetails: (args_0: {
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/src/PocketTrains.ts#L75)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/pocket-trains-sdk/src/PocketTrains.ts#L75)
 
 Since v1.0.0
 
@@ -122,7 +122,7 @@ declare const social_getItems: (args_0: {
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/src/PocketTrains.ts#L155)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/pocket-trains-sdk/src/PocketTrains.ts#L155)
 
 Since v1.0.0
 
@@ -157,6 +157,6 @@ declare const sync_pullSave: (args_0: {
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/src/PocketTrains.ts#L115)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/pocket-trains-sdk/src/PocketTrains.ts#L115)
 
 Since v1.0.0

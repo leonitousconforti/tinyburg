@@ -8,4 +8,4 @@ Send your bitizens to `DF4NP`
 
 ## Self hosting
 
-You need to request an api key with at least the following scopes: `social_getGifts`, `social_pullFriendMeta`, `social_sendItem`, and `social_receiveGift`.
+You need to request an api key with at least the following scopes: `tinytower:social:get_gifts`, `tinytower:social:pull_friend_meta`, `tinytower:social:send_item`, and `tinytower:social:receive_gift` (or their `tinytower:social:read` and `tinytower:social:write` branches).

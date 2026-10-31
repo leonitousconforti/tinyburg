@@ -477,7 +477,7 @@ declare const Api: HttpApi.HttpApi<
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/src/Endpoints.ts#L407)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/pocket-planes-sdk/src/Endpoints.ts#L407)
 
 Since v1.0.0
 
@@ -494,6 +494,6 @@ work. Verified only that `get_visits`/`get_gifts` return `{ gifts: [...] }`.
 declare const Gift: Schema.Unknown
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/src/Endpoints.ts#L98)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/pocket-planes-sdk/src/Endpoints.ts#L98)
 
 Since v1.0.0

@@ -1,6 +1,6 @@
 ---
 title: PocketPlanes.ts
-nav_order: 3
+nav_order: 2
 parent: "@tinyburg/pocket-planes-sdk"
 ---
 
@@ -60,7 +60,7 @@ declare const device_newPlayer: Effect.Effect<
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/src/PocketPlanes.ts#L38)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/pocket-planes-sdk/src/PocketPlanes.ts#L38)
 
 Since v1.0.0
 
@@ -95,7 +95,7 @@ declare const device_playerDetails: (args_0: {
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/src/PocketPlanes.ts#L75)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/pocket-planes-sdk/src/PocketPlanes.ts#L75)
 
 Since v1.0.0
 
@@ -124,7 +124,7 @@ declare const social_getGifts: (args_0: {
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/src/PocketPlanes.ts#L193)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/pocket-planes-sdk/src/PocketPlanes.ts#L193)
 
 Since v1.0.0
 
@@ -153,7 +153,7 @@ declare const social_getVisits: (args_0: {
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/src/PocketPlanes.ts#L154)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/pocket-planes-sdk/src/PocketPlanes.ts#L154)
 
 Since v1.0.0
 
@@ -182,7 +182,7 @@ declare const social_requestItems: (args_0: {
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/src/PocketPlanes.ts#L233)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/pocket-planes-sdk/src/PocketPlanes.ts#L233)
 
 Since v1.0.0
 
@@ -217,6 +217,6 @@ declare const sync_pullSave: (args_0: {
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/src/PocketPlanes.ts#L115)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/pocket-planes-sdk/src/PocketPlanes.ts#L115)
 
 Since v1.0.0

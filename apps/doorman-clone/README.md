@@ -13,5 +13,5 @@ drives the game itself - elevator rides, restocking, building.
 
 ## Self hosting
 
-You need an api key with at least the `social_getVisits`, `social_sendItem` and
-`social_receiveGift` scopes
+You need an api key with at least the `tinytower:social:get_visits`,
+`tinytower:social:send_item` and `tinytower:social:receive_gift` scopes

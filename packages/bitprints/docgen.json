@@ -2,7 +2,7 @@
     "$schema": "../../node_modules/@effect/docgen/schema.json",
     "srcLink": "https://github.com/leonitousconforti/tinyburg/blob/main/packages/bitprints/src/",
     "exclude": ["src/internal/**/*.ts"],
-    "projectHomepage": "https://github.com/leonitousconforti/tinyburg/packages/bitprints",
+    "projectHomepage": "https://github.com/leonitousconforti/tinyburg/tree/main/packages/bitprints",
     "examplesCompilerOptions": {
         "noEmit": true,
         "strict": true,

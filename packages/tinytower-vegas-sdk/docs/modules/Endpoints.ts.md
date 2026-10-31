@@ -441,7 +441,7 @@ declare const Api: HttpApi.HttpApi<
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/src/Endpoints.ts#L358)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-vegas-sdk/src/Endpoints.ts#L358)
 
 Since v1.0.0
 
@@ -459,6 +459,6 @@ gift_str, h}` (no `c`, unlike pp). Left open for the data-schema work.
 declare const Gift: Schema.Unknown
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/src/Endpoints.ts#L65)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-vegas-sdk/src/Endpoints.ts#L65)
 
 Since v1.0.0

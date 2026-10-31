@@ -1,0 +1,20 @@
+{
+    "$schema": "../../node_modules/@effect/docgen/schema.json",
+    "srcLink": "https://github.com/leonitousconforti/tinyburg/blob/main/packages/pocket-trains-sdk/src/",
+    "exclude": ["src/index.ts", "src/internal/**/*.ts"],
+    "projectHomepage": "https://github.com/leonitousconforti/tinyburg/tree/main/packages/pocket-trains-sdk",
+    "examplesCompilerOptions": {
+        "noEmit": true,
+        "strict": true,
+        "skipLibCheck": true,
+        "moduleResolution": "Bundler",
+        "module": "ES2022",
+        "target": "ES2022",
+        "lib": ["ES2022"],
+        "baseUrl": "../../",
+        "paths": {
+            "@tinyburg/pocket-trains-sdk": ["./src/index.js"],
+            "@tinyburg/pocket-trains-sdk/*": ["./src/*.js"]
+        }
+    }
+}

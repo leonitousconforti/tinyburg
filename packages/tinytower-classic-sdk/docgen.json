@@ -2,7 +2,7 @@
     "$schema": "../../node_modules/@effect/docgen/schema.json",
     "srcLink": "https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-classic-sdk/src/",
     "exclude": ["src/index.ts", "src/internal/**/*.ts"],
-    "projectHomepage": "https://github.com/leonitousconforti/tinyburg/packages/tinytower-classic-sdk",
+    "projectHomepage": "https://github.com/leonitousconforti/tinyburg/tree/main/packages/tinytower-classic-sdk",
     "examplesCompilerOptions": {
         "noEmit": true,
         "strict": true,

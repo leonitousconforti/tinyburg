@@ -489,7 +489,7 @@ declare const Api: HttpApi.HttpApi<
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/src/Endpoints.ts#L406)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/lego-tower-sdk/src/Endpoints.ts#L406)
 
 Since v1.0.0
 
@@ -507,7 +507,7 @@ gift_str, h}` (no `c`, unlike pp). Left open for the data-schema work.
 declare const Gift: Schema.Unknown
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/src/Endpoints.ts#L81)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/lego-tower-sdk/src/Endpoints.ts#L81)
 
 Since v1.0.0
 
@@ -523,6 +523,6 @@ chars (e.g. `1QVVY7`), so the shared `PlayerId`
 declare const PlayerId: Schema.brand<Schema.String, "PlayerId">
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/src/Endpoints.ts#L43)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/lego-tower-sdk/src/Endpoints.ts#L43)
 
 Since v1.0.0
