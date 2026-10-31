@@ -1,0 +1,31 @@
+{
+    "extends": "../../tsconfig.base.jsonc",
+    "references": [
+        { "path": "../../packages/nimblebit-sdk/tsconfig.src.json" },
+        { "path": "../../packages/tinytower-sdk/tsconfig.src.json" },
+        { "path": "../../packages/trading-sdk/tsconfig.src.json" },
+        { "path": "../../packages/treasury-sdk/tsconfig.src.json" }
+    ],
+    "include": [
+        "cluster",
+        "domain",
+        "migrations",
+        "routes",
+        "services",
+        "test",
+        "workflows",
+        "cookies.ts",
+        "crypto.ts",
+        "index.ts"
+    ],
+    "compilerOptions": {
+        "noEmit": true,
+        "declaration": false,
+        "declarationMap": false,
+        "composite": false,
+        "incremental": false,
+        "types": ["node"],
+        "allowImportingTsExtensions": true,
+        "rewriteRelativeImportExtensions": false
+    }
+}

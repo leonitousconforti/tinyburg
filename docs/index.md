@@ -31,3 +31,4 @@ The Tinyburg monorepo is organized into multiple packages and apps. Below is an 
 | `@tinyburg/tinytower-sdk` | Api for the mobile game TinyTower by Nimblebit | [README](https://github.com/leonitousconforti/tinyburg/tree/main/packages/tinytower-sdk#readme) |
 | `@tinyburg/tinytower-vegas-sdk` | Api for the mobile game Tiny Tower Vegas by Nimblebit | [README](https://github.com/leonitousconforti/tinyburg/tree/main/packages/tinytower-vegas-sdk#readme) |
 | `@tinyburg/trading-sdk` | Trading sdk for tinyburg.app | [README](https://github.com/leonitousconforti/tinyburg/tree/main/packages/trading-sdk#readme) |
+| `@tinyburg/treasury-sdk` | Treasury (trade escrow) sdk for tinyburg.app | [README](https://github.com/leonitousconforti/tinyburg/tree/main/packages/treasury-sdk#readme) |

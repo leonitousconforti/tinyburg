@@ -18,6 +18,7 @@
             authproxy = 3001;
             socialCircles = 3002;
             discordBot = 3003;
+            treasury = 3004;
           };
 
           namespaces = {
@@ -43,6 +44,10 @@
             discord-bot = {
               port = 54323;
               name = "discord_bot";
+            };
+            treasury = {
+              port = 54324;
+              name = "treasury";
             };
           };
 
@@ -221,6 +226,7 @@
                 SITE_URL = "http://localhost:${toString ports.tinyburgApp}";
                 GOOGLE_REDIRECT_URI = "http://localhost:${toString ports.tinyburgApp}/auth/google/callback";
                 DISCORD_REDIRECT_URI = "http://localhost:${toString ports.tinyburgApp}/auth/discord/callback";
+                TREASURY_URL = "http://localhost:${toString ports.treasury}";
               };
             };
 
@@ -268,6 +274,23 @@
               };
             };
 
+            treasury-backend = backend {
+              service = "treasury";
+              entry = "apps/treasury/index.ts";
+              port = ports.treasury;
+              env = {
+                NODE_ENV = "development";
+                TINYBURG_ISSUER = "http://localhost:${toString ports.tinyburgApp}";
+                TINYBURG_REDIRECT_URI = "http://localhost:${toString ports.treasury}/auth/callback";
+                PUBLIC_URL = "http://localhost:${toString ports.treasury}";
+              };
+              depends_on = {
+                tinyburg-app-backend.condition = "process_started";
+                tinyburg-app-client.condition = "process_started";
+              };
+            };
+
+            fake-nimblebit = worker { entry = "apps/treasury/test/fake-nimblebit.ts"; };
             auto-gold-bits = worker { entry = "apps/auto-gold-bits/index.ts"; };
             doorman-clone = worker { entry = "apps/doorman-clone/index.ts"; };
             archivist = worker {

@@ -22,7 +22,7 @@ but break every sign in. Forward the ports instead, so they are localhost on
 your machine too:
 
 ```sh
-ssh -N -L 3000:localhost:3000 -L 3001:localhost:3001 -L 3002:localhost:3002 -L 3003:localhost:3003 <user>@<dev box>
+ssh -N -L 3000:localhost:3000 -L 3001:localhost:3001 -L 3002:localhost:3002 -L 3003:localhost:3003 -L 3004:localhost:3004 <user>@<dev box>
 ```
 
 Or once in `~/.ssh/config` on your machine, after which a plain `ssh <dev box>`
@@ -34,8 +34,11 @@ Host <dev box>
     LocalForward 3001 localhost:3001
     LocalForward 3002 localhost:3002
     LocalForward 3003 localhost:3003
+    LocalForward 3004 localhost:3004
 ```
 
 Then open http://localhost:3000 (tinyburg.app), http://localhost:3001
 (authproxy), http://localhost:3002 (social-circles) and http://localhost:3003
-(discord-bot) in your own browser.
+(discord-bot) in your own browser. The treasury's api is reached through
+tinyburg.app at `/v1/treasury`, but its connect flow runs in the browser at
+http://localhost:3004, so forward that port too.

@@ -16,6 +16,7 @@
         { "path": "packages/tinytower-sdk" },
         { "path": "packages/tinytower-vegas-sdk" },
         { "path": "packages/trading-sdk" },
+        { "path": "packages/treasury-sdk" },
         { "path": "apps/shared-ui" },
         { "path": "apps/archivist" },
         { "path": "apps/authproxy" },
@@ -23,6 +24,7 @@
         { "path": "apps/discord-bot" },
         { "path": "apps/doorman-clone" },
         { "path": "apps/social-circles" },
-        { "path": "apps/tinyburg.app" }
+        { "path": "apps/tinyburg.app" },
+        { "path": "apps/treasury" }
     ]
 }

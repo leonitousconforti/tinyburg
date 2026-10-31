@@ -20,6 +20,7 @@
         "@tinyburg/tinytower-classic-sdk": "workspace:*",
         "@tinyburg/tinytower-sdk": "workspace:*",
         "@tinyburg/trading-sdk": "workspace:^",
+        "@tinyburg/treasury-sdk": "workspace:*",
         "@yielded/auth": "0.1.0-beta.47",
         "@yielded/auth-persistence": "0.1.0-beta.47",
         "effect": "4.1.1",

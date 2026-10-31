@@ -535,6 +535,9 @@ importers:
       '@tinyburg/trading-sdk':
         specifier: workspace:^
         version: link:../../packages/trading-sdk
+      '@tinyburg/treasury-sdk':
+        specifier: workspace:*
+        version: link:../../packages/treasury-sdk
       '@yielded/auth':
         specifier: 0.1.0-beta.47
         version: 0.1.0-beta.47(effect@4.1.1)
@@ -559,6 +562,45 @@ importers:
       vite:
         specifier: 8.3.5
         version: 8.3.5
+
+  apps/treasury:
+    dependencies:
+      '@effect/platform-node':
+        specifier: 4.1.1
+        version: 4.1.1(effect@4.1.1)(redis@6.3.1)
+      '@effect/sql-pg':
+        specifier: 4.1.1
+        version: 4.1.1(effect@4.1.1)
+      '@tinyburg/nimblebit-sdk':
+        specifier: workspace:*
+        version: link:../../packages/nimblebit-sdk
+      '@tinyburg/tinytower-sdk':
+        specifier: workspace:*
+        version: link:../../packages/tinytower-sdk
+      '@tinyburg/trading-sdk':
+        specifier: workspace:*
+        version: link:../../packages/trading-sdk
+      '@tinyburg/treasury-sdk':
+        specifier: workspace:*
+        version: link:../../packages/treasury-sdk
+      '@yielded/auth':
+        specifier: 0.1.0-beta.47
+        version: 0.1.0-beta.47(effect@4.1.1)
+      '@yielded/jose':
+        specifier: 0.1.0-beta.47
+        version: 0.1.0-beta.47(patch_hash=5d26c8e1069c9b4cf7d4edefd49c43a8a3de9f54c730aac17aff46a95f09d247)(effect@4.1.1)
+      '@yielded/oauth':
+        specifier: 0.1.0-beta.47
+        version: 0.1.0-beta.47(patch_hash=db1de8c9952c6b3965c025f23956acfd8e1e5f8746b9aefd0e7ac4e823b89d5d)(effect@4.1.1)
+      effect:
+        specifier: 4.1.1
+        version: 4.1.1
+      redis:
+        specifier: 6.3.1
+        version: 6.3.1
+      typescript:
+        specifier: 7.0.2
+        version: 7.0.2
 
   packages/bitcity-sdk:
     dependencies:
@@ -758,6 +800,22 @@ importers:
       '@tinyburg/tinytower-classic-sdk':
         specifier: workspace:^
         version: link:../tinytower-classic-sdk
+      '@tinyburg/tinytower-sdk':
+        specifier: workspace:^
+        version: link:../tinytower-sdk
+    devDependencies:
+      '@yielded/auth':
+        specifier: 0.1.0-beta.47
+        version: 0.1.0-beta.47(effect@4.1.1)
+      effect:
+        specifier: 4.1.1
+        version: 4.1.1
+
+  packages/treasury-sdk:
+    dependencies:
+      '@tinyburg/nimblebit-sdk':
+        specifier: workspace:^
+        version: link:../nimblebit-sdk
       '@tinyburg/tinytower-sdk':
         specifier: workspace:^
         version: link:../tinytower-sdk
