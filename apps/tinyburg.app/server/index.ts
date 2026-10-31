@@ -21,6 +21,8 @@ import { OidcProviderLive } from "./routes/oidc.ts";
 import { DynamicRegistrationLive } from "./routes/registration.ts";
 import { StandaloneStylesheetLive } from "./routes/standalone.ts";
 import { StaticRoutesLive } from "./routes/static.ts";
+import { FirstPartyTokenLive } from "./routes/token.ts";
+import { TreasuryProxyLive } from "./routes/treasury.ts";
 
 /**
  * Baseline security headers on every response. Nothing this site serves is
@@ -58,6 +60,8 @@ const AllRoutes = Layer.mergeAll(
     OidcProviderLive,
     DynamicRegistrationLive,
     StandaloneStylesheetLive,
+    FirstPartyTokenLive,
+    TreasuryProxyLive,
     StaticRoutesLive,
     SecurityHeadersLive
 );

@@ -31,7 +31,14 @@ import { SessionsRepository } from "../domain/sessions.ts";
 import { UsersRepository } from "../domain/users.ts";
 import { CookiePolicy, maybeCurrentUser } from "./cookies.ts";
 import { OidcKeys } from "./keys.ts";
-import { OFFLINE_ACCESS, TinyburgOAuth } from "./oauthServer.ts";
+import {
+    DECLARED_SCOPES,
+    MAX_DECLARED_SCOPE_LENGTH,
+    OFFLINE_ACCESS,
+    TinyburgOAuth,
+    apiResourceFor,
+    firstPartyRedirectUriFor,
+} from "./oauthServer.ts";
 import * as ConsentPage from "./pages/consent.ts";
 
 /** The scopes in a space-separated scope string, as `oauth_clients.scope` stores them. */
@@ -60,11 +67,19 @@ export const grantTypesFor = (scope: string): ReadonlyArray<"authorization_code"
  * A stored client as the OAuth server registers it, with absent fields
  * omitted: the server refuses a registration carrying keys it does not know
  * or values it cannot use.
+ *
+ * The first party's redirect uri is the one exception to the row: it is
+ * derived from the site's own origin (`firstPartyRedirectUriFor`), because
+ * `/auth/token` derives the same one to match it, and a row cannot follow
+ * `SITE_URL` from one deployment to the next.
  */
-const registrationOf = (row: OAuthClient) => ({
+const registrationOf = (row: OAuthClient, issuer: string) => ({
     clientId: row.id,
     name: row.name,
-    redirectUris: [...row.redirectUris],
+    redirectUris:
+        row.id === DevelopersRepository.FIRST_PARTY_CLIENT_ID
+            ? [firstPartyRedirectUriFor(issuer)]
+            : [...row.redirectUris],
     grantTypes: grantTypesFor(row.scope),
     ...Option.match(row.secretHash, {
         onNone: () => ({}),
@@ -86,7 +101,7 @@ export const registeredClient = (
 ): Effect.Effect<
     Option.Option<{ readonly registration: OAuthServer.Client; readonly scopes: ReadonlySet<string> }>,
     SqlError.SqlError | Schema.SchemaError,
-    DevelopersRepository
+    DevelopersRepository | OidcKeys
 > =>
     Effect.gen(function* () {
         // Anything else would reach Postgres as a failed uuid cast, which
@@ -96,7 +111,8 @@ export const registeredClient = (
         const row = yield* DevelopersRepository.use((repo) => repo.findOAuthClient(clientId));
         if (Option.isNone(row)) return Option.none();
 
-        const registration = registrationOf(row.value);
+        const { issuer } = yield* OidcKeys;
+        const registration = registrationOf(row.value, issuer);
         if (!Schema.is(OAuthServer.Client)(registration)) {
             yield* Effect.logWarning(`oauth client ${clientId} is not a registration the OAuth server can use`);
             return Option.none();
@@ -166,16 +182,20 @@ const IdentityLive = Layer.effect(
 /** Every client is a row of `oauth_clients`; there are no static registrations. */
 const ClientsLive = Layer.effect(
     TinyburgOAuth.Clients,
-    Effect.map(DevelopersRepository, (developers) =>
-        TinyburgOAuth.Clients.of({
+    Effect.gen(function* () {
+        const developers = yield* DevelopersRepository;
+        const keys = yield* OidcKeys;
+
+        return TinyburgOAuth.Clients.of({
             get: (clientId) =>
                 registeredClient(clientId).pipe(
                     Effect.provideService(DevelopersRepository, developers),
+                    Effect.provideService(OidcKeys, keys),
                     Effect.map(Option.match({ onNone: () => undefined, onSome: ({ registration }) => registration })),
                     Effect.mapError(() => OAuthServer.Unavailable.make({}))
                 ),
-        })
-    )
+        });
+    })
 );
 
 /**
@@ -187,13 +207,17 @@ const ClientsLive = Layer.effect(
  */
 const AuthorizationLive = Layer.effect(
     TinyburgOAuth.Authorization,
-    Effect.map(DevelopersRepository, (developers) =>
-        TinyburgOAuth.Authorization.of({
+    Effect.gen(function* () {
+        const developers = yield* DevelopersRepository;
+        const keys = yield* OidcKeys;
+
+        return TinyburgOAuth.Authorization.of({
             authorize: ({ clientId, grantType, scopes }) =>
                 grantType === "refresh_token" && !scopes.includes(OFFLINE_ACCESS)
                     ? Effect.succeed({ scopes: [] })
                     : registeredClient(clientId).pipe(
                           Effect.provideService(DevelopersRepository, developers),
+                          Effect.provideService(OidcKeys, keys),
                           Effect.map(
                               Option.match({
                                   onNone: () => ({ scopes: [] }),
@@ -202,8 +226,8 @@ const AuthorizationLive = Layer.effect(
                           ),
                           Effect.mapError(() => OAuthServer.Unavailable.make({}))
                       ),
-        })
-    )
+        });
+    })
 );
 
 /** The consent screen, in the visitor's language (`ConsentLanguage`). */
@@ -233,21 +257,43 @@ const OpenIdConsentLive = Layer.succeed(
  * Its origin is the site's own, so every endpoint and the issuer agree with
  * what the browser and the relying parties see. Sign in happens at
  * `/oauth/login`, which hands over to the app's own login page
- * (`./routes/oidc.ts`). Access tokens are opaque, because the declared scopes
- * are too many to fit in a JWT, and refresh tokens are on for the clients
- * registered for `offline_access`.
+ * (`./routes/oidc.ts`). Refresh tokens are on for the clients registered for
+ * `offline_access`.
+ *
+ * Access tokens are RS256 JWTs (RFC 9068) for one resource, the api under
+ * `/v1` (`apiResourceFor`), signed with the same key as ID tokens and
+ * published in the same JWKS. This server still checks each one against its
+ * grant, so revoking a grant ends its tokens here at once; the treasury,
+ * behind `/v1/treasury`, verifies them against the JWKS alone.
+ *
+ * The server refuses JWT access tokens when the declared scopes, joined, are
+ * longer than {@link MAX_DECLARED_SCOPE_LENGTH}; that refusal is an anonymous
+ * configuration error, so the length is checked first and named here.
  */
 export const OAuthServerLive = Layer.unwrap(
-    Effect.map(OidcKeys, (keys) =>
-        TinyburgOAuth.layer({
+    Effect.gen(function* () {
+        const keys = yield* OidcKeys;
+
+        if (DECLARED_SCOPES.length > MAX_DECLARED_SCOPE_LENGTH) {
+            return yield* Effect.die(
+                new Error(
+                    `the declared scopes join to ${DECLARED_SCOPES.length} characters, ` +
+                        `past the ${MAX_DECLARED_SCOPE_LENGTH} JWT access tokens allow`
+                )
+            );
+        }
+
+        return TinyburgOAuth.layer({
             origin: keys.issuer,
+            resource: apiResourceFor(keys.issuer),
+            accessTokenFormat: "jwt",
             clients: [],
             loginPath: "/oauth/login",
             keys: keys.signingKeys,
             identityKeys: keys.identityKeys,
             refreshTokens: true,
-        })
-    )
+        });
+    })
 ).pipe(
     Layer.provide([
         IdentityLive,

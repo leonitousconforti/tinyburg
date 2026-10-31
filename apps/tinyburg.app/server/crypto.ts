@@ -24,6 +24,12 @@ export const randomSecret = (): string =>
     Array.from(crypto.getRandomValues(new Uint8Array(48)), (byte) => byte.toString(16).padStart(2, "0")).join("");
 
 /**
+ * A PKCE code verifier (RFC 7636 Section 4.1): 256 random bits as unpadded
+ * base64url, 43 characters, the shortest the RFC allows.
+ */
+export const codeVerifier = (): string => Base64Url.encode(crypto.getRandomValues(new Uint8Array(32)));
+
+/**
  * Whether two strings are equal, compared in constant time over equal
  * lengths. For digests and other values of a known length, where the length
  * itself gives nothing away.

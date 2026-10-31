@@ -35,8 +35,8 @@ export * as Scopes from "./Scopes.ts"
  * accepts. The scopes are the tree in `Scopes`, and every endpoint here is
  * annotated with the leaf that guards it.
  *
- * Every endpoint is bearer authenticated: an application presents the opaque
- * access token the Tinyburg OAuth server issued it, and tinyburg.app checks it
+ * Every endpoint is bearer authenticated: an application presents the JWT
+ * access token the Tinyburg OAuth server issued it for `<site>/v1`, checked
  * against the grant behind it on every call. The first-party app is the one
  * caller without a token: it calls with the player's session cookie, and is
  * held to the scopes tinyburg.app grants itself.

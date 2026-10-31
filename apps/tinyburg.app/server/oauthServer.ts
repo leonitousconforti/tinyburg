@@ -1,8 +1,10 @@
 import { Context, Effect } from "effect";
 
-import * as TradingScopes from "@tinyburg/trading-sdk/Scopes";
+import * as TreasuryScopes from "@tinyburg/treasury-sdk/Scopes";
 import * as OAuthScope from "@yielded/auth/OAuthScope";
 import * as OAuthServer from "@yielded/auth/OAuthServer";
+
+import { API_SCOPES, SERVED_GAMES } from "../shared/scopes.ts";
 
 /**
  * The scope a client asks for when it needs to act while the user is away.
@@ -12,13 +14,17 @@ export const OFFLINE_ACCESS = OAuthScope.make("offline_access");
 
 /**
  * Every scope the provider declares beyond the OpenID ones: `offline_access`,
- * and every node of the game scope tree in `@tinyburg/trading-sdk`, read off
- * it rather than listed again here so a scope an endpoint accepts is always
- * one a client may ask for.
+ * and the scopes of the apis that exist behind `/v1` ({@link API_SCOPES}),
+ * so a scope an endpoint accepts is always one a client may ask for.
+ *
+ * Access tokens are JWTs that carry the declared scopes, and `@yielded/auth`
+ * refuses JWT access tokens once the declared scopes joined pass
+ * {@link MAX_DECLARED_SCOPE_LENGTH} characters, which is why the games
+ * without an api here are left out: every game would not fit.
  */
 export const APPLICATION_SCOPES: ReadonlyArray<OAuthScope.OAuthScope> = [
     OFFLINE_ACCESS,
-    ...TradingScopes.all().map((scope) => scope.name),
+    ...API_SCOPES.map((scope) => scope.name),
 ];
 
 /**
@@ -28,11 +34,45 @@ export const APPLICATION_SCOPES: ReadonlyArray<OAuthScope.OAuthScope> = [
  */
 export const TinyburgOAuth = OAuthServer.makeOpenId("tinyburg", { scopes: APPLICATION_SCOPES });
 
+/**
+ * The longest the declared scopes may be, joined with spaces, for the OAuth
+ * server to issue JWT access tokens: `@yielded/auth` refuses to start past it.
+ */
+export const MAX_DECLARED_SCOPE_LENGTH = 4096;
+
+/** Every scope the server declares, joined with spaces, as `@yielded/auth` measures it. */
+export const DECLARED_SCOPES: string = TinyburgOAuth.Scope.literals.join(" ");
+
 /** Every scope a client may register for: the OpenID ones it uses, and {@link APPLICATION_SCOPES}. */
 export const SUPPORTED_SCOPES: ReadonlyArray<string> = ["openid", "profile", ...APPLICATION_SCOPES];
 
-/** Everything the first-party app may do on the visitor's behalf with its session cookie. */
-export const FIRST_PARTY_SCOPES: ReadonlySet<string> = new Set(["openid", "profile", "tinytower", "tinytowerclassic"]);
+/**
+ * Everything the first-party app may do on the visitor's behalf: with its
+ * session cookie on `/v1`, and in the access tokens `/auth/token` mints for
+ * it. Its row in `oauth_clients` is registered for the same scopes.
+ */
+export const FIRST_PARTY_SCOPES: ReadonlySet<string> = new Set([
+    "openid",
+    "profile",
+    ...SERVED_GAMES.map((area) => area.name),
+    TreasuryScopes.Treasury.name,
+]);
+
+/**
+ * The one resource every Tinyburg access token is issued for: the whole api
+ * under `/v1`, tinyburg.app's own endpoints and the treasury's behind it
+ * alike. A token's audience, and the path of its protected resource
+ * metadata, `/.well-known/oauth-protected-resource/v1`.
+ */
+export const apiResourceFor = (issuer: string): string => `${issuer}/v1`;
+
+/**
+ * Where the first party's authorization codes are sent. Only ever matched,
+ * never visited: `/auth/token` runs the first party's authorization inside
+ * this server and reads the code off the redirect. Derived from the site's
+ * own origin so every deployment matches itself, whatever its row stores.
+ */
+export const firstPartyRedirectUriFor = (issuer: string): string => `${issuer}/auth/token`;
 
 /** Who a `/v1` request acts for: the user, and the client acting for them. */
 export interface Caller {

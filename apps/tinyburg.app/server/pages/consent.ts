@@ -22,17 +22,18 @@ import type { HtmlBuilder } from "foldkit/html";
 
 import * as StandalonePage from "@tinyburg/shared-ui/StandalonePage";
 import { Api } from "@tinyburg/trading-sdk/Sdk";
+import { Api as TreasuryApi } from "@tinyburg/treasury-sdk/Sdk";
 import * as OAuthScope from "@yielded/auth/OAuthScope";
 
 import { consentMessagesFor } from "./consentMessages.ts";
 
 /**
- * What each game scope means, read off the api that enforces it. English
- * only, by decision: the sentence a player consents to and the endpoint it
- * unlocks are one declaration, so they cannot disagree.
+ * What each game and treasury scope means, read off the api that enforces
+ * it. English only, by decision: the sentence a player consents to and the
+ * endpoint it unlocks are one declaration, so they cannot disagree.
  */
 const gameScopeDescriptions: ReadonlyMap<string, string> = new Map(
-    OAuthScope.catalog(Api).map((scope) => [scope.name, scope.description])
+    [...OAuthScope.catalog(Api), ...OAuthScope.catalog(TreasuryApi)].map((scope) => [scope.name, scope.description])
 );
 
 /**

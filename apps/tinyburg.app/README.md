@@ -19,15 +19,18 @@ routes in `server/routes/oidc.ts` hand every request to it.
 | Discovery     | `/.well-known/openid-configuration`    |
 | Authorization | `/oauth/tinyburg/authorize`            |
 | Token         | `/oauth/tinyburg/token`                |
-| Userinfo      | `/oauth/tinyburg/userinfo`             |
 | Revocation    | `/oauth/tinyburg/revoke`               |
 | JWKS          | `/oauth/tinyburg/jwks`                 |
 | Registration  | `/oauth/register`, where it is offered |
 
 Grants: `authorization_code` (PKCE required, S256 only) and `refresh_token`.
 Public clients register no secret; the code challenge carries the proof.
-Access tokens are opaque and last ten minutes; ID tokens are RS256 and last
-five.
+Access tokens are RS256 JWTs (`typ: at+jwt`) for one resource, the whole api
+at `${SITE_URL}/v1`, and last ten minutes; ID tokens are RS256 and last five.
+Both are signed with the keys published at the JWKS endpoint, so a service
+behind `/v1` (the treasury) checks a token locally. There is no userinfo
+endpoint: `@yielded/auth` serves one only when it is the token's resource, and
+the ID token already carries the claims.
 
 ### Scopes
 
@@ -41,18 +44,30 @@ five.
 | `tinytower:write`                                | Every write: link and unlink accounts, push saves and snapshots, raffles, gifts, items, visits |
 | `tinytower:<leaf>`                               | One endpoint, e.g. `tinytower:pull_save`, `tinytower:list_accounts`                            |
 | `tinytowerclassic`, `tinytowerclassic:read`, ... | The same tree for TinyTower Classic, at `/v1/tinytowerclassic/...`                             |
+| `treasury`, `treasury:read`, `treasury:write`    | The treasury's escrowed trades, at `/v1/treasury/...`, with a leaf per endpoint                |
 
 The game scopes are a tree declared once in `@tinyburg/trading-sdk`'s `Scopes`
-module, one area per game with a leaf per endpoint of the trading api: each
+module, one area per game with a leaf per endpoint of the trading api, and the
+treasury's area is declared the same way in `@tinyburg/treasury-sdk`: each
 endpoint is annotated with `OAuthScope.Required`, accepting its leaf, its
-`:read`/`:write` branch, and the game, and the consent screen, the developers
-page and discovery all read the same tree. A client may only request scopes
+`:read`/`:write` branch, and the area, and the consent screen, the developers
+page and discovery all read the same trees. Only the games served here are
+declared (`shared/scopes.ts`): the access tokens carry the declared scopes,
+and `@yielded/auth` refuses JWT access tokens once they pass 4096 characters
+joined, which every game's tree would. A client may only request scopes
 it is registered for: anything else is refused with an error page before
 consent, and the token endpoint grants only registered scopes again on every
 refresh.
 
-The first-party SPA holds no token. It calls `/v1` with its session cookie,
-and is held to `openid profile tinytower tinytowerclassic`.
+The first-party SPA calls this server's own `/v1` with its session cookie,
+and is held to `openid profile tinytower tinytowerclassic treasury`. The
+treasury reads no cookie, so for `/v1/treasury` the SPA asks `GET /auth/token`
+(`server/routes/token.ts`, same-origin and session only) for an access token:
+it runs the first party's authorization code flow inside the server and
+answers `{ access_token, token_type, expires_in, scope }`, with no refresh
+token. The SPA keeps it in memory and asks again when it lapses or a call is
+refused. `/v1/treasury/*` is a reverse proxy to the treasury
+(`TREASURY_URL`), `Authorization` included and cookies excluded.
 
 ### Consent
 
@@ -72,8 +87,12 @@ no way to tell a client replaying its own token from a thief spending a stolen
 one. A grant lasts at most thirty days from its first code exchange, and never
 past the expiry of the session it was given in; refreshing does not extend it.
 
-Revoking either token revokes the whole grant. No token is stored: each is a
-sealed credential naming a grant and its current version.
+Revoking either token revokes the whole grant. No token is stored: a refresh
+token is a sealed credential naming a grant and its current version, and an
+access token a JWT naming the grant. This server checks the grant behind every
+token on `/v1`, so revocation is immediate here; the treasury checks tokens
+locally, so a revoked grant's access token keeps working there until it
+expires.
 
 ## Scheduled sweeps
 

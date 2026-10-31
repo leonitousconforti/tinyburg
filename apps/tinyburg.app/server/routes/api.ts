@@ -1,4 +1,4 @@
-import { Context, DateTime, Effect, Layer, Option, Redacted, Schema } from "effect";
+import { Config, Context, DateTime, Effect, Layer, Option, Redacted, Schema } from "effect";
 import { Headers, HttpClient, HttpEffect, HttpServerRequest, HttpServerResponse } from "effect/http";
 import { HttpApiBuilder, HttpApiError } from "effect/http-api";
 
@@ -23,19 +23,22 @@ import { CurrentCaller, FIRST_PARTY_SCOPES, TinyburgOAuth, requireCaller } from 
 /**
  * Who may call `/v1`, and as whom.
  *
- * An application calls with the opaque access token the OAuth server issued
- * it, and the OAuth server's own `RequireAccess` (`securityLayer`) checks it
- * against the grant behind it and the endpoint's scope requirement.
+ * An application calls with the JWT access token the OAuth server issued it
+ * for the api (`apiResourceFor`), and the OAuth server's own `RequireAccess`
+ * (`securityLayer`) checks it against the grant behind it, so a revoked
+ * grant's tokens stop here at once, and against the endpoint's scope
+ * requirement.
  *
- * The first-party app holds no token: it is the site itself, calling with
- * the visitor's session cookie, and is held to the scopes tinyburg.app grants
- * itself (`FIRST_PARTY_SCOPES`). Only a request with no Authorization header
- * at all is read that way, so a token that fails never falls back to the
- * cookie riding alongside it. A request with neither goes to the OAuth
- * server, which refuses it with the challenge that says where to get a
- * token. Lax session cookies still ride along on requests from sibling
- * subdomains, so anything but a GET or HEAD on the cookie path must come from
- * the site itself (`Sec-Fetch-Site: same-origin`).
+ * The first-party app needs no token here: it is the site itself, calling
+ * with the visitor's session cookie, and is held to the scopes tinyburg.app
+ * grants itself (`FIRST_PARTY_SCOPES`); it gets a token from `/auth/token`
+ * (`./token.ts`) for the treasury, which reads no cookie. Only a request with
+ * no Authorization header at all is read that way, so a token that fails
+ * never falls back to the cookie riding alongside it. A request with neither
+ * goes to the OAuth server, which refuses it with the challenge that says
+ * where to get a token. Lax session cookies still ride along on requests from
+ * sibling subdomains, so anything but a GET or HEAD on the cookie path must
+ * come from the site itself (`Sec-Fetch-Site: same-origin`).
  *
  * Either way the handler finds the caller in `CurrentCaller`.
  */
@@ -600,6 +603,24 @@ export const ApiLive = HttpApiBuilder.layer(Api).pipe(
     // linked account's own key: the authproxy is for callers who hold a key
     // of their own, and this is what serves callers who do not. One set of
     // Nimblebit credentials for every game, until a game turns out to need
-    // its own.
-    Layer.provide(NimblebitAuth.layerDirectConfig())
+    // its own. A custom host (the dev stack's fake Nimblebit) takes over
+    // when NIMBLEBIT_HOST is set to anything but blank; production never
+    // sets it.
+    Layer.provide(
+        Layer.unwrap(
+            Effect.map(
+                Config.option(Config.String("NIMBLEBIT_HOST")).pipe(
+                    Config.map(Option.filter((host) => host.trim() !== ""))
+                ),
+                Option.match({
+                    onNone: () => NimblebitAuth.layerDirectConfig(),
+                    onSome: (host) =>
+                        NimblebitAuth.layerCustomHostConfig({
+                            host: Config.succeed(host),
+                            authKey: Config.Redacted("NIMBLEBIT_AUTH_KEY"),
+                        }),
+                })
+            )
+        )
+    )
 );

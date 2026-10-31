@@ -3,10 +3,9 @@ import type { SqlError } from "effect/sql";
 import { Effect, Layer, Option, Schema } from "effect";
 import { HttpRouter, HttpServerRequest, HttpServerResponse } from "effect/http";
 
-import type { DevelopersRepository } from "../../domain/developers.ts";
-
 import { type Language, fromAcceptLanguage } from "@tinyburg/shared-ui/Internationalization";
 
+import { DevelopersRepository } from "../../domain/developers.ts";
 import { CookiePolicy, REAUTH_COOKIE_NAME, maybeCurrentUser } from "../cookies.ts";
 import { registrationPolicy } from "../environment.ts";
 import { OidcKeys } from "../keys.ts";
@@ -36,13 +35,23 @@ const { paths } = TinyburgOAuth;
  * otherwise only find out about after consenting, when the token endpoint
  * quietly dropped the scopes the client never had. A request naming no
  * client is the server's to call malformed.
+ *
+ * The first party is unknown here too. It never authorizes in a browser:
+ * `/auth/token` runs its authorization inside this server, and since the
+ * first party is never asked for consent, a page that sent a visitor here
+ * in its name would have a code minted for them without a word.
  */
 const refusalFor = (
     params: URLSearchParams
-): Effect.Effect<Option.Option<ErrorPage.ErrorKey>, SqlError.SqlError | Schema.SchemaError, DevelopersRepository> =>
+): Effect.Effect<
+    Option.Option<ErrorPage.ErrorKey>,
+    SqlError.SqlError | Schema.SchemaError,
+    DevelopersRepository | OidcKeys
+> =>
     Effect.gen(function* () {
         const clientId = params.get("client_id");
         if (clientId === null) return Option.none();
+        if (clientId === DevelopersRepository.FIRST_PARTY_CLIENT_ID) return Option.some("unknownClient");
 
         const client = yield* registeredClient(clientId);
         if (Option.isNone(client)) return Option.some("unknownClient");
