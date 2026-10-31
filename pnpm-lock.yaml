@@ -565,9 +565,6 @@ importers:
       '@tinyburg/nimblebit-sdk':
         specifier: workspace:*
         version: link:../nimblebit-sdk
-      pako:
-        specifier: 3.0.3
-        version: 3.0.3
     devDependencies:
       '@yielded/auth':
         specifier: 0.1.0-beta.47
@@ -583,9 +580,6 @@ importers:
       '@tinyburg/nimblebit-sdk':
         specifier: workspace:*
         version: link:../nimblebit-sdk
-      pako:
-        specifier: 3.0.3
-        version: 3.0.3
     devDependencies:
       '@yielded/auth':
         specifier: 0.1.0-beta.47
@@ -638,9 +632,6 @@ importers:
       '@tinyburg/nimblebit-sdk':
         specifier: workspace:*
         version: link:../nimblebit-sdk
-      pako:
-        specifier: 3.0.3
-        version: 3.0.3
     devDependencies:
       '@yielded/auth':
         specifier: 0.1.0-beta.47
@@ -663,9 +654,6 @@ importers:
       '@tinyburg/nimblebit-sdk':
         specifier: workspace:*
         version: link:../nimblebit-sdk
-      pako:
-        specifier: 3.0.3
-        version: 3.0.3
     devDependencies:
       '@yielded/auth':
         specifier: 0.1.0-beta.47
@@ -679,9 +667,6 @@ importers:
       '@tinyburg/nimblebit-sdk':
         specifier: workspace:*
         version: link:../nimblebit-sdk
-      pako:
-        specifier: 3.0.3
-        version: 3.0.3
     devDependencies:
       '@yielded/auth':
         specifier: 0.1.0-beta.47
@@ -757,9 +742,6 @@ importers:
       '@tinyburg/nimblebit-sdk':
         specifier: workspace:*
         version: link:../nimblebit-sdk
-      pako:
-        specifier: 3.0.3
-        version: 3.0.3
     devDependencies:
       '@yielded/auth':
         specifier: 0.1.0-beta.47

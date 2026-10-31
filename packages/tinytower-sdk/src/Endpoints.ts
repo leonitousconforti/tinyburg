@@ -370,7 +370,7 @@ export const RaffleCheckEnteredCurrentEndpoint = HttpApiEndpoint.get(
     "RaffleCheckEnteredCurrent",
     "/raffle/entered_current/tt/:playerId/:salt/:hash",
     {
-        params: { playerId: NimblebitConfig.PlayerIdSchema, salt: Schema.Int, hash: Schema.String },
+        params: { playerId: NimblebitConfig.PlayerIdSchema, salt: U32, hash: Schema.String },
         error: ApiErrors,
         success: [ErrorResponse, EnteredResponse, NotEnteredResponse],
     }
