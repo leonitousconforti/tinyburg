@@ -47,6 +47,16 @@
           };
 
           postgresFor = service: "${service}-postgres";
+
+          # initdb and postgres refuse to run as a user they cannot name. Nix's
+          # glibc only reads /etc/passwd, so a user that comes from LDAP/SSSD
+          # (or any other NSS module) is nameless to them. nss_wrapper hands
+          # them a one-line passwd and group, written by dev-dirs.
+          nssWrapper = [
+            "LD_PRELOAD=${pkgs.nss_wrapper}/lib/libnss_wrapper.so"
+            "NSS_WRAPPER_PASSWD=.dev/nss/passwd"
+            "NSS_WRAPPER_GROUP=.dev/nss/group"
+          ];
           databaseUrl =
             service:
             "postgres://postgres@127.0.0.1:${toString databases.${service}.port}/${databases.${service}.name}";
@@ -57,9 +67,13 @@
               pg = postgresFor service;
             in
             {
-              ${pg}.namespace = namespaces.infra;
+              ${pg} = {
+                namespace = namespaces.infra;
+                environment = nssWrapper;
+              };
               "${pg}-init" = {
                 namespace = namespaces.infra;
+                environment = nssWrapper;
                 depends_on."dev-dirs".condition = "process_completed_successfully";
               };
             }
@@ -169,7 +183,13 @@
           settings.processes = postgresNamespaces // {
             dev-dirs = {
               namespace = namespaces.setup;
-              command = "${lib.getExe' pkgs.coreutils "mkdir"} -p .dev/postgres .dev/seaweedfs";
+              command = ''
+                ${lib.getExe' pkgs.coreutils "mkdir"} -p .dev/postgres .dev/seaweedfs .dev/nss
+                uid=$(${lib.getExe' pkgs.coreutils "id"} -u)
+                gid=$(${lib.getExe' pkgs.coreutils "id"} -g)
+                printf 'dev:x:%s:%s:dev:%s:/bin/sh\n' "$uid" "$gid" "$PWD" > .dev/nss/passwd
+                printf 'dev:x:%s:\n' "$gid" > .dev/nss/group
+              '';
             };
 
             seaweedfs = {
