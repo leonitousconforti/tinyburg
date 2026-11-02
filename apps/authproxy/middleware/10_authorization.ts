@@ -7,16 +7,24 @@ import { SqlError } from "effect/sql";
 import { NimblebitScopes } from "@tinyburg/nimblebit-sdk";
 import * as OAuthScope from "@yielded/auth/OAuthScope";
 
-import { ApiKey, ApiKeyValue, Repository } from "../domain/model.ts";
+import { ApiKey, ApiKeyValue, type CurrentApiKey, Repository } from "../domain/model.ts";
 
-export class Authorization extends HttpApiMiddleware.Service<Authorization>()("Authorization", {
+export class Authorization extends HttpApiMiddleware.Service<
+    Authorization,
+    {
+        // Written out to mirror the neighboring signatures.
+        // oxlint-disable-next-line typescript/no-redundant-type-constituents
+        provides: CurrentApiKey & never;
+    }
+>()("Authorization", {
     error: [HttpApiError.Unauthorized, HttpApiError.Forbidden, HttpApiError.InternalServerError],
     security: {
         bearer: HttpApiSecurity.bearer,
     },
 }) {}
 
-/** Anything in the bearer slot that is not an API key is no key at all, not a failed lookup. */
+/** Anything in the bearer slot that is not an API key is no key at all, not a
+ * failed lookup. */
 const isApiKey = Schema.is(ApiKeyValue);
 
 /** A 500 says nothing to the caller, so the reason has to land in the log. */
@@ -115,9 +123,9 @@ const make = (options: { readonly unscoped?: OAuthScope.Requirement }) =>
 
                         // The scopes that unlock this endpoint are read off the
                         // endpoint itself: the `OAuthScope.Required` annotation
-                        // stamped on it in its game's sdk. A key needs one of them,
-                        // by name, exactly. An endpoint carrying none takes the
-                        // layer's `unscoped`, if it has one.
+                        // stamped on it in its game's sdk. A key needs one of
+                        // them, by name, exactly. An endpoint carrying none
+                        // takes the layer's `unscoped`, if it has one.
                         const requirement =
                             Context.getOrUndefined(endpoint.annotations, OAuthScope.Required) ?? options.unscoped;
                         const isAuthenticated = Option.isSome(maybeApiKey);
@@ -170,9 +178,9 @@ export const AuthorizationLive = make({});
 
 /**
  * For a game whose sdk leaves some reads unscoped: sync (and LEGO Tower's
- * trades) has no write side yet, so it is not in the scope tree. Those take
- * the game's `:read` branch, or the whole game. `DeviceNewPlayer` is
- * unscoped too, but its handler refuses it anyway.
+ * trades) has no write side yet, so it is not in the scope tree. Those take the
+ * game's `:read` branch, or the whole game. `DeviceNewPlayer` is unscoped too,
+ * but its handler refuses it anyway.
  */
 export const authorizationLiveFor = (game: NimblebitScopes.Game) =>
     make({
