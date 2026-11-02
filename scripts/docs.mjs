@@ -57,7 +57,6 @@ for (const entry of Fs.readdirSync("docs", { withFileTypes: true })) {
 }
 
 packages().forEach((pkg, i) => {
-    Fs.mkdirSync(Path.join("docs", pkg), { recursive: true });
     copyFiles(pkg);
     generateIndex(pkg, i + 2);
 });
