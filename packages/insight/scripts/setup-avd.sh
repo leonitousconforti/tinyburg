@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
-# One-time setup of the Android emulator insight drives.
+# One-time setup of the Android emulator insight drives. Delete the existing AVD
+# with `avdmanager delete avd -n Small_Phone`
+
 set -euo pipefail
 
 avd="Small_Phone"
