@@ -1,9 +1,16 @@
 {
     "extends": "../../tsconfig.base.jsonc",
     "references": [
+        { "path": "../../packages/bitcity-sdk/tsconfig.src.json" },
+        { "path": "../../packages/disco-zoo-sdk/tsconfig.src.json" },
+        { "path": "../../packages/lego-tower-sdk/tsconfig.src.json" },
         { "path": "../../packages/nimblebit-sdk/tsconfig.src.json" },
-        { "path": "../../packages/tinytower-sdk/tsconfig.src.json" },
+        { "path": "../../packages/pocket-planes-sdk/tsconfig.src.json" },
+        { "path": "../../packages/pocket-trains-sdk/tsconfig.src.json" },
         { "path": "../../packages/tinyburg-sdk/tsconfig.src.json" },
+        { "path": "../../packages/tinytower-classic-sdk/tsconfig.src.json" },
+        { "path": "../../packages/tinytower-sdk/tsconfig.src.json" },
+        { "path": "../../packages/tinytower-vegas-sdk/tsconfig.src.json" },
         { "path": "../shared-ui/tsconfig.src.json" }
     ],
     "include": [
