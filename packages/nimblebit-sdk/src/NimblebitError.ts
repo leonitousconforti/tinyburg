@@ -9,15 +9,15 @@ import * as internal from "./internal/Error.ts";
 
 /**
  * @since 1.0.0
- * @category Errors
+ * @category Type ids
  */
-export const NimblebitErrorTypeId: typeof internal.NimblebitErrorTypeId = internal.NimblebitErrorTypeId;
+export const TypeId: TypeId = internal.TypeId;
 
 /**
  * @since 1.0.0
- * @category Errors
+ * @category Type ids
  */
-export type NimblebitErrorTypeId = typeof NimblebitErrorTypeId;
+export type TypeId = "~@tinyburg/nimblebit-sdk/NimblebitError";
 
 /**
  * @since 1.0.0

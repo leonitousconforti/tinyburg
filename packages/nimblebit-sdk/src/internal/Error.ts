@@ -5,13 +5,13 @@ import * as Predicate from "effect/Predicate";
  * @since 1.0.0
  * @category Error
  */
-export const NimblebitErrorTypeId: unique symbol = Symbol.for("@tinyburg/nimblebit-sdk/NimblebitError");
+export const TypeId = "~@tinyburg/nimblebit-sdk/NimblebitError";
 
 /**
  * @since 1.0.0
  * @category Error
  */
-export const isNimblebitError = (u: unknown): u is NimblebitError => Predicate.hasProperty(u, NimblebitErrorTypeId);
+export const isNimblebitError = (u: unknown): u is NimblebitError => Predicate.hasProperty(u, TypeId);
 
 /**
  * @since 1.0.0
@@ -22,5 +22,5 @@ export class NimblebitError extends Data.TaggedError("NimblebitError")<{
     module: string;
     cause: unknown;
 }> {
-    readonly [NimblebitErrorTypeId]: typeof NimblebitErrorTypeId = NimblebitErrorTypeId;
+    readonly [TypeId] = TypeId;
 }

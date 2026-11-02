@@ -17,9 +17,10 @@ Since v1.0.0
 - [Errors](#errors)
   - [NimblebitError](#nimblebiterror)
   - [NimblebitError (type alias)](#nimblebiterror-type-alias)
-  - [NimblebitErrorTypeId](#nimblebiterrortypeid)
-  - [NimblebitErrorTypeId (type alias)](#nimblebiterrortypeid-type-alias)
   - [isNimblebitError](#isnimblebiterror)
+- [Type ids](#type-ids)
+  - [TypeId](#typeid)
+  - [TypeId (type alias)](#typeid-type-alias)
 
 ---
 
@@ -49,30 +50,6 @@ type NimblebitError = internal.NimblebitError
 
 Since v1.0.0
 
-## NimblebitErrorTypeId
-
-**Signature**
-
-```ts
-declare const NimblebitErrorTypeId: unique symbol
-```
-
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/NimblebitError.ts#L14)
-
-Since v1.0.0
-
-## NimblebitErrorTypeId (type alias)
-
-**Signature**
-
-```ts
-type NimblebitErrorTypeId = typeof NimblebitErrorTypeId
-```
-
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/NimblebitError.ts#L20)
-
-Since v1.0.0
-
 ## isNimblebitError
 
 **Signature**
@@ -82,5 +59,31 @@ declare const isNimblebitError: (u: unknown) => u is NimblebitError
 ```
 
 [Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/NimblebitError.ts#L26)
+
+Since v1.0.0
+
+# Type ids
+
+## TypeId
+
+**Signature**
+
+```ts
+declare const TypeId: "~@tinyburg/nimblebit-sdk/NimblebitError"
+```
+
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/NimblebitError.ts#L14)
+
+Since v1.0.0
+
+## TypeId (type alias)
+
+**Signature**
+
+```ts
+type TypeId = "~@tinyburg/nimblebit-sdk/NimblebitError"
+```
+
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/NimblebitError.ts#L20)
 
 Since v1.0.0
