@@ -9,12 +9,12 @@
 
 import type { SqlError } from "effect/sql";
 
-import { Context, Effect, Layer, Option, Schema } from "effect";
+import { Array, Context, Effect, Layer, Schema } from "effect";
 import { SqlClient, SqlSchema } from "effect/sql";
 
-import type { GameId } from "./games.ts";
-import type { PlayerId } from "./model.ts";
+import { PlayerIdSchema } from "@tinyburg/nimblebit-sdk/NimblebitConfig";
 
+import { GameId } from "./games.ts";
 import { TowerGrant } from "./model.ts";
 
 export class GrantsRepository extends Context.Service<GrantsRepository>()(
@@ -73,25 +73,21 @@ export class GrantsRepository extends Context.Service<GrantsRepository>()(
              * The user who can act for a player, if the study still holds a
              * usable grant for them.
              */
-            const findUserForPlayer = (options: {
-                readonly game: GameId;
-                readonly playerId: PlayerId;
-            }): Effect.Effect<Option.Option<string>, SqlError.SqlError, never> =>
-                Effect.map(
+            const findUserForPlayer = SqlSchema.findOneOption({
+                Request: Schema.Struct({ game: GameId, playerId: PlayerIdSchema }),
+                Result: Schema.String,
+                execute: ({ game, playerId }) =>
                     sql`
                         SELECT g.tinyburg_user_id
                         FROM tower_grants g
                         JOIN consents c ON c.tinyburg_user_id = g.tinyburg_user_id
-                        WHERE c.game = ${options.game}
-                          AND c.player_id = ${options.playerId}
+                        WHERE c.game = ${game}
+                          AND c.player_id = ${playerId}
                           AND c.revoked_at IS NULL
                           AND g.invalidated_at IS NULL
                         LIMIT 1
-                    `,
-                    // Bridges an untyped runtime boundary; the shape is guaranteed by construction, not by the compiler.
-                    // oxlint-disable-next-line typescript/no-unsafe-type-assertion
-                    (rows) => Option.fromNullishOr(rows[0]?.["tinyburgUserId"] as string | undefined)
-                );
+                    `.pipe(Effect.map(Array.map((row) => row["tinyburgUserId"]))),
+            });
 
             return {
                 upsert,

@@ -8,11 +8,12 @@
 
 import type { SqlError } from "effect/sql";
 
-import { Context, Effect, Layer, Schema } from "effect";
+import { Context, Effect, Layer, Option, Schema } from "effect";
 import { SqlClient, SqlSchema } from "effect/sql";
 
-import type { GameId } from "./games.ts";
+import { PlayerIdSchema } from "@tinyburg/nimblebit-sdk/NimblebitConfig";
 
+import { GameId } from "./games.ts";
 import { type PlayerId, PurgeReceipt } from "./model.ts";
 
 export class PurgeRepository extends Context.Service<PurgeRepository>()(
@@ -25,29 +26,30 @@ export class PurgeRepository extends Context.Service<PurgeRepository>()(
              * How much of the graph mentions this player, counted before
              * anything is removed so the receipt can report real numbers.
              */
+            const footprint = SqlSchema.findOneOption({
+                Request: Schema.Struct({ game: GameId, playerId: PlayerIdSchema }),
+                Result: Schema.Struct({ events: Schema.Int, edges: Schema.Int }),
+                execute: ({ game, playerId }) => sql`
+                    SELECT
+                        (SELECT COUNT(*)::int FROM friendship_events fe
+                         JOIN players p ON p.id IN (fe.from_player_id, fe.to_player_id)
+                         WHERE fe.game = ${game} AND p.player_id = ${playerId}) AS events,
+                        (SELECT COUNT(*)::int FROM current_friendships cf
+                         WHERE cf.game = ${game}
+                           AND (cf.from_player = ${playerId} OR cf.to_player = ${playerId})) AS edges
+                `,
+            });
             const countFootprint = (
                 game: GameId,
                 playerId: PlayerId
-            ): Effect.Effect<{ readonly events: number; readonly edges: number }, SqlError.SqlError, never> =>
+            ): Effect.Effect<
+                { readonly events: number; readonly edges: number },
+                SqlError.SqlError | Schema.SchemaError,
+                never
+            > =>
                 Effect.map(
-                    sql`
-                        SELECT
-                            (SELECT COUNT(*) FROM friendship_events fe
-                             JOIN players p ON p.id IN (fe.from_player_id, fe.to_player_id)
-                             WHERE fe.game = ${game} AND p.player_id = ${playerId}) AS events,
-                            (SELECT COUNT(*) FROM current_friendships cf
-                             WHERE cf.game = ${game}
-                               AND (cf.from_player = ${playerId} OR cf.to_player = ${playerId})) AS edges
-                    `,
-                    (rows) => {
-                        // Bridges an untyped runtime boundary; the shape is guaranteed by construction, not by the compiler.
-                        // oxlint-disable-next-line typescript/no-unsafe-type-assertion
-                        const row = rows[0] as { events: string | number; edges: string | number } | undefined;
-                        return {
-                            events: Number(row?.events ?? 0),
-                            edges: Number(row?.edges ?? 0),
-                        };
-                    }
+                    footprint({ game, playerId }),
+                    Option.getOrElse(() => ({ events: 0, edges: 0 }))
                 );
 
             /**

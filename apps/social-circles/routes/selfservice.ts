@@ -201,7 +201,9 @@ const SelfServiceGroupLive = HttpApiBuilder.group(
                             return yield* new HttpApiError.Forbidden();
                         }
 
-                        const friends = yield* graph.mutualFriendsOf(params.game, params.playerId).pipe(Effect.orDie);
+                        const friends = yield* graph
+                            .mutualFriendsOf({ game: params.game, playerId: params.playerId })
+                            .pipe(Effect.orDie);
                         const [status] = yield* graph.statusFor([params]).pipe(Effect.orDie);
 
                         return {

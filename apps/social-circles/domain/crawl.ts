@@ -8,7 +8,7 @@
 
 import type { SqlError } from "effect/sql";
 
-import { Context, Effect, Layer, Schema } from "effect";
+import { Array, Context, Effect, Layer, Option, Schema } from "effect";
 import { SqlClient, SqlSchema } from "effect/sql";
 
 import type { PlayerId } from "./model.ts";
@@ -108,19 +108,20 @@ export class CrawlStateRepository extends Context.Service<CrawlStateRepository>(
              * The save fingerprint from the last successful crawl, used to skip
              * the diff when a player's tower has not changed.
              */
-            const lastSaveVersion = (
-                game: GameId,
-                playerId: PlayerId
-            ): Effect.Effect<string | null, SqlError.SqlError, never> =>
-                Effect.map(
+            const findLastSaveVersion = SqlSchema.findOneOption({
+                Request: Schema.Struct({ game: GameId, playerId: PlayerIdSchema }),
+                Result: Schema.NullOr(Schema.String),
+                execute: ({ game, playerId }) =>
                     sql`
                         SELECT last_save_version FROM crawl_state
                         WHERE game = ${game} AND player_id = ${playerId}
-                    `,
-                    // Bridges an untyped runtime boundary; the shape is guaranteed by construction, not by the compiler.
-                    // oxlint-disable-next-line typescript/no-unsafe-type-assertion
-                    (rows) => (rows[0]?.["lastSaveVersion"] as string | undefined) ?? null
-                );
+                    `.pipe(Effect.map(Array.map((row) => row["lastSaveVersion"]))),
+            });
+            const lastSaveVersion = (
+                game: GameId,
+                playerId: PlayerId
+            ): Effect.Effect<string | null, SqlError.SqlError | Schema.SchemaError, never> =>
+                Effect.map(findLastSaveVersion({ game, playerId }), Option.getOrNull);
 
             return {
                 enroll,

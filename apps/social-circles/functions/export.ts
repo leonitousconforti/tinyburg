@@ -10,19 +10,16 @@
 import { Array, Effect, Function, Graph } from "effect";
 
 import { GraphRepository } from "../domain/graph.ts";
-import { gamePlayerKey } from "../shared/games.ts";
+import { type GameId, gamePlayerKey } from "../shared/games.ts";
 
 /** `[game, a, b]` as the views return it, flattened to the two node labels. */
-const endpoints = (entry: readonly [string, string, string]): readonly [string, string] => {
-    const [game, a, b] = entry;
-    // Bridges an untyped runtime boundary; the shape is guaranteed by construction, not by the compiler.
-    // oxlint-disable-next-line typescript/no-unsafe-type-assertion
-    const asGame = game as Parameters<typeof gamePlayerKey>[0]["game"];
-    return [gamePlayerKey({ game: asGame, playerId: a }), gamePlayerKey({ game: asGame, playerId: b })];
-};
+const endpoints = ([game, a, b]: readonly [GameId, string, string]): readonly [string, string] => [
+    gamePlayerKey({ game, playerId: a }),
+    gamePlayerKey({ game, playerId: b }),
+];
 
 /** Every node label in the dataset, and the pairs to join, computed once. */
-const layout = (entries: ReadonlyArray<readonly [string, string, string]>) => {
+const layout = (entries: ReadonlyArray<readonly [GameId, string, string]>) => {
     const pairs = entries.map(endpoints);
     return { pairs, labels: Array.dedupe(pairs.flatMap(([from, to]) => [from, to])) };
 };

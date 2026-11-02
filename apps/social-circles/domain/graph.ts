@@ -21,10 +21,11 @@ import type { SqlError } from "effect/sql";
 import { Array, Context, Effect, Layer, Schema, pipe } from "effect";
 import { SqlClient, SqlSchema } from "effect/sql";
 
-import type { GameId } from "./games.ts";
 import type { PlayerId } from "./model.ts";
 
 import { PlayerIdSchema } from "@tinyburg/nimblebit-sdk/NimblebitConfig";
+
+import { GameId } from "./games.ts";
 
 /**
  * One player of one game, as the graph identifies them.
@@ -37,8 +38,14 @@ export interface GamePlayerRef {
     readonly playerId: PlayerId;
 }
 
+/** One player of one game, as a query parameter. */
+const GamePlayer = Schema.Struct({ game: GameId, playerId: PlayerIdSchema });
+
+/** A list of refs as the two parallel arrays a composite `unnest` wants. */
+const GamePlayerColumns = Schema.Struct({ games: Schema.Array(GameId), playerIds: Schema.Array(PlayerIdSchema) });
+
 /** Splits a list of refs into the two parallel arrays a composite `unnest` wants. */
-const columns = (players: ReadonlyArray<GamePlayerRef>): readonly [Array<string>, Array<string>] => [
+const columns = (players: ReadonlyArray<GamePlayerRef>): readonly [Array<GameId>, Array<PlayerId>] => [
     players.map((player) => player.game),
     players.map((player) => player.playerId),
 ];
@@ -61,11 +68,10 @@ export class GraphRepository extends Context.Service<GraphRepository>()(
              * The view is now for analytics and export only, where a snapshot
              * that lags by a few minutes is fine.
              */
-            const currentFriendsOf = (
-                game: GameId,
-                fromPlayer: PlayerId
-            ): Effect.Effect<ReadonlyArray<PlayerId>, SqlError.SqlError, never> =>
-                Effect.map(
+            const currentFriendsOf = SqlSchema.findAll({
+                Request: GamePlayer,
+                Result: PlayerIdSchema,
+                execute: ({ game, playerId }) =>
                     sql`
                         SELECT p2.player_id AS friend
                         FROM (
@@ -74,16 +80,27 @@ export class GraphRepository extends Context.Service<GraphRepository>()(
                                 fe.event_type
                             FROM friendship_events fe
                             JOIN players p1 ON fe.from_player_id = p1.id
-                            WHERE fe.game = ${game} AND p1.player_id = ${fromPlayer}
+                            WHERE fe.game = ${game} AND p1.player_id = ${playerId}
                             ORDER BY fe.from_player_id, fe.to_player_id, fe.event_timestamp DESC
                         ) latest
                         JOIN players p2 ON latest.to_player_id = p2.id
                         WHERE latest.event_type = 'friended'
-                    `,
-                    // Bridges an untyped runtime boundary; the shape is guaranteed by construction, not by the compiler.
-                    // oxlint-disable-next-line typescript/no-unsafe-type-assertion
-                    Array.map((row) => row["friend"] as PlayerId)
-                );
+                    `.pipe(Effect.map(Array.map((row) => row["friend"]))),
+            });
+
+            /** Which of `candidates` are in the study, in this game. */
+            const consentedAmong = SqlSchema.findAll({
+                Request: Schema.Struct({ game: GameId, candidates: Schema.Array(PlayerIdSchema) }),
+                Result: PlayerIdSchema,
+                execute: ({ candidates, game }) =>
+                    sql`
+                        SELECT player_id
+                        FROM consents
+                        WHERE revoked_at IS NULL
+                          AND game = ${game}
+                          AND player_id = ANY(${candidates}::text[])
+                    `.pipe(Effect.map(Array.map((row) => row["playerId"]))),
+            });
 
             /**
              * Writes edges, keeping only those whose *other* endpoint has also
@@ -165,21 +182,10 @@ export class GraphRepository extends Context.Service<GraphRepository>()(
 
                 // Which of this player's friends are in the study, in this game.
                 // Everyone else is dropped, and only ever counted.
-                const consentedFriends = yield* pipe(
-                    sql`
-                        SELECT player_id
-                        FROM consents
-                        WHERE revoked_at IS NULL
-                          AND game = ${game}
-                          AND player_id = ANY(${candidates}::text[])
-                    `,
-                    // Bridges an untyped runtime boundary; the shape is guaranteed by construction, not by the compiler.
-                    // oxlint-disable-next-line typescript/no-unsafe-type-assertion
-                    Effect.map((rows) => new Set(rows.map((row) => row["playerId"] as PlayerId)))
-                );
+                const consentedFriends = new Set(yield* consentedAmong({ game, candidates }));
 
                 const newSet = new Set(candidates.filter((friend) => consentedFriends.has(friend)));
-                const existingSet = new Set(yield* currentFriendsOf(game, fromPlayer));
+                const existingSet = new Set(yield* currentFriendsOf({ game, playerId: fromPlayer }));
 
                 const toAdd = new Set(Array.filter(Array.fromIterable(newSet), (f) => !existingSet.has(f)));
                 const toRemove = new Set(Array.filter(Array.fromIterable(existingSet), (f) => !newSet.has(f)));
@@ -207,7 +213,7 @@ export class GraphRepository extends Context.Service<GraphRepository>()(
 
             const currentFriendships = SqlSchema.findAll({
                 Request: Schema.Void,
-                Result: Schema.Tuple([Schema.String, PlayerIdSchema, PlayerIdSchema]),
+                Result: Schema.Tuple([GameId, PlayerIdSchema, PlayerIdSchema]),
                 execute: () =>
                     sql`SELECT game, from_player, to_player FROM current_friendships`.pipe(
                         Effect.map(Array.map(({ fromPlayer, game, toPlayer }) => [game, fromPlayer, toPlayer]))
@@ -216,27 +222,23 @@ export class GraphRepository extends Context.Service<GraphRepository>()(
 
             const mutualFriendships = SqlSchema.findAll({
                 Request: Schema.Void,
-                Result: Schema.Tuple([Schema.String, PlayerIdSchema, PlayerIdSchema]),
+                Result: Schema.Tuple([GameId, PlayerIdSchema, PlayerIdSchema]),
                 execute: () =>
                     sql`SELECT game, player_a, player_b FROM mutual_friendships`.pipe(
                         Effect.map(Array.map(({ game, playerA, playerB }) => [game, playerA, playerB]))
                     ),
             });
 
-            const mutualFriendsOf = (
-                game: GameId,
-                playerId: PlayerId
-            ): Effect.Effect<ReadonlyArray<PlayerId>, SqlError.SqlError, never> =>
-                Effect.map(
+            const mutualFriendsOf = SqlSchema.findAll({
+                Request: GamePlayer,
+                Result: PlayerIdSchema,
+                execute: ({ game, playerId }) =>
                     sql`
                         SELECT CASE WHEN player_a = ${playerId} THEN player_b ELSE player_a END AS friend
                         FROM mutual_friendships
                         WHERE game = ${game} AND (player_a = ${playerId} OR player_b = ${playerId})
-                    `,
-                    // Bridges an untyped runtime boundary; the shape is guaranteed by construction, not by the compiler.
-                    // oxlint-disable-next-line typescript/no-unsafe-type-assertion
-                    Array.map((row) => row["friend"] as PlayerId)
-                );
+                    `.pipe(Effect.map(Array.map((row) => row["friend"]))),
+            });
 
             /**
              * Everything the dashboard shows about a set of towers, in one
@@ -247,47 +249,105 @@ export class GraphRepository extends Context.Service<GraphRepository>()(
              * row saying so. The dashboard needs to render "not taking part"
              * just as much as it needs to render a circle.
              */
+            const statusRows = SqlSchema.findAll({
+                Request: GamePlayerColumns,
+                Result: Schema.Struct({
+                    game: GameId,
+                    playerId: PlayerIdSchema,
+                    enrolled: Schema.Boolean,
+                    totalFriends: Schema.Int,
+                    consentedFriends: Schema.Int,
+                    lastSuccessAt: Schema.NullOr(Schema.Date),
+                }),
+                execute: ({ games, playerIds }) => sql`
+                    SELECT
+                        requested.game AS game,
+                        requested.player_id AS player_id,
+                        (c.player_id IS NOT NULL) AS enrolled,
+                        COALESCE(fc.total_friends, 0) AS total_friends,
+                        COALESCE(fc.consented_friends, 0) AS consented_friends,
+                        cs.last_success_at AS last_success_at
+                    FROM unnest(${games}::text[], ${playerIds}::text[]) AS requested(game, player_id)
+                    LEFT JOIN consents c
+                        ON c.game = requested.game
+                        AND c.player_id = requested.player_id
+                        AND c.revoked_at IS NULL
+                    LEFT JOIN crawl_state cs
+                        ON cs.game = requested.game AND cs.player_id = requested.player_id
+                    LEFT JOIN LATERAL (
+                        SELECT total_friends, consented_friends
+                        FROM friend_counts
+                        WHERE game = requested.game AND player_id = requested.player_id
+                        ORDER BY observed_at DESC
+                        LIMIT 1
+                    ) fc ON TRUE
+                `,
+            });
+
             const statusFor = (players: ReadonlyArray<GamePlayerRef>) => {
                 if (players.length === 0) return Effect.succeed([]);
                 const [games, playerIds] = columns(players);
-                return Effect.map(
-                    sql`
-                        SELECT
-                            requested.game AS game,
-                            requested.player_id AS player_id,
-                            (c.player_id IS NOT NULL) AS enrolled,
-                            COALESCE(fc.total_friends, 0) AS total_friends,
-                            COALESCE(fc.consented_friends, 0) AS consented_friends,
-                            cs.last_success_at AS last_success_at
-                        FROM unnest(${games}::text[], ${playerIds}::text[]) AS requested(game, player_id)
-                        LEFT JOIN consents c
-                            ON c.game = requested.game
-                            AND c.player_id = requested.player_id
-                            AND c.revoked_at IS NULL
-                        LEFT JOIN crawl_state cs
-                            ON cs.game = requested.game AND cs.player_id = requested.player_id
-                        LEFT JOIN LATERAL (
-                            SELECT total_friends, consented_friends
-                            FROM friend_counts
-                            WHERE game = requested.game AND player_id = requested.player_id
-                            ORDER BY observed_at DESC
-                            LIMIT 1
-                        ) fc ON TRUE
-                    `,
-                    Array.map((row) => ({
-                        // Bridges an untyped runtime boundary; the shape is guaranteed by construction, not by the compiler.
-                        // oxlint-disable-next-line typescript/no-unsafe-type-assertion
-                        game: row["game"] as GameId,
-                        // oxlint-disable-next-line typescript/no-unsafe-type-assertion
-                        playerId: row["playerId"] as PlayerId,
-                        enrolled: row["enrolled"] === true,
-                        totalFriends: Number(row["totalFriends"] ?? 0),
-                        consentedFriends: Number(row["consentedFriends"] ?? 0),
-                        // oxlint-disable-next-line typescript/no-unsafe-type-assertion
-                        lastSuccessAt: (row["lastSuccessAt"] ?? null) as Date | null,
-                    }))
-                );
+                return statusRows({ games, playerIds });
             };
+
+            /**
+             * Everyone a visitor may see: their own towers, and the players
+             * mutually friended with one of them.
+             */
+            const circleNodes = SqlSchema.findAll({
+                Request: GamePlayerColumns,
+                Result: Schema.Struct({ game: GameId, playerId: PlayerIdSchema, mine: Schema.Boolean }),
+                execute: ({ games, playerIds }) =>
+                    sql`
+                    WITH mine AS (
+                        SELECT * FROM unnest(${games}::text[], ${playerIds}::text[]) AS t(game, player_id)
+                    )
+                    SELECT game, player_id, bool_or(is_mine) AS is_mine
+                    FROM (
+                        SELECT m.game, m.player_id, TRUE AS is_mine FROM mine m
+                        UNION ALL
+                        SELECT
+                            mf.game,
+                            CASE WHEN mf.player_a = m.player_id THEN mf.player_b ELSE mf.player_a END,
+                            FALSE
+                        FROM mutual_friendships mf
+                        JOIN mine m
+                            ON m.game = mf.game
+                            AND m.player_id IN (mf.player_a, mf.player_b)
+                    ) everyone
+                    GROUP BY game, player_id
+                `.pipe(Effect.map(Array.map(({ game, isMine, playerId }) => ({ game, playerId, mine: isMine })))),
+            });
+
+            /**
+             * The subgraph induced by {@link circleNodes}: an edge is kept only
+             * when both of its endpoints are nodes there.
+             */
+            const circleEdges = SqlSchema.findAll({
+                Request: GamePlayerColumns,
+                Result: Schema.Struct({ game: GameId, a: PlayerIdSchema, b: PlayerIdSchema }),
+                execute: ({ games, playerIds }) =>
+                    sql`
+                    WITH mine AS (
+                        SELECT * FROM unnest(${games}::text[], ${playerIds}::text[]) AS t(game, player_id)
+                    ),
+                    circle AS (
+                        SELECT m.game, m.player_id FROM mine m
+                        UNION
+                        SELECT
+                            mf.game,
+                            CASE WHEN mf.player_a = m.player_id THEN mf.player_b ELSE mf.player_a END
+                        FROM mutual_friendships mf
+                        JOIN mine m
+                            ON m.game = mf.game
+                            AND m.player_id IN (mf.player_a, mf.player_b)
+                    )
+                    SELECT mf.game, mf.player_a, mf.player_b
+                    FROM mutual_friendships mf
+                    JOIN circle a ON a.game = mf.game AND a.player_id = mf.player_a
+                    JOIN circle b ON b.game = mf.game AND b.player_id = mf.player_b
+                `.pipe(Effect.map(Array.map(({ game, playerA, playerB }) => ({ game, a: playerA, b: playerB })))),
+            });
 
             /**
              * The visitor's circles across every game, as a graph.
@@ -311,73 +371,8 @@ export class GraphRepository extends Context.Service<GraphRepository>()(
             const circleGraphFor = Effect.fnUntraced(function* (owned: ReadonlyArray<GamePlayerRef>) {
                 if (owned.length === 0) return { nodes: [], edges: [] };
                 const [games, playerIds] = columns(owned);
-
-                // Everyone the visitor may see: their own towers, and the
-                // players mutually friended with one of them.
-                const nodes = yield* Effect.map(
-                    sql`
-                        WITH mine AS (
-                            SELECT * FROM unnest(${games}::text[], ${playerIds}::text[]) AS t(game, player_id)
-                        )
-                        SELECT game, player_id, bool_or(is_mine) AS is_mine
-                        FROM (
-                            SELECT m.game, m.player_id, TRUE AS is_mine FROM mine m
-                            UNION ALL
-                            SELECT
-                                mf.game,
-                                CASE WHEN mf.player_a = m.player_id THEN mf.player_b ELSE mf.player_a END,
-                                FALSE
-                            FROM mutual_friendships mf
-                            JOIN mine m
-                                ON m.game = mf.game
-                                AND m.player_id IN (mf.player_a, mf.player_b)
-                        ) everyone
-                        GROUP BY game, player_id
-                    `,
-                    Array.map((row) => ({
-                        // Bridges an untyped runtime boundary; the shape is guaranteed by construction, not by the compiler.
-                        // oxlint-disable-next-line typescript/no-unsafe-type-assertion
-                        game: row["game"] as GameId,
-                        // oxlint-disable-next-line typescript/no-unsafe-type-assertion
-                        playerId: row["playerId"] as PlayerId,
-                        mine: row["isMine"] === true,
-                    }))
-                );
-
-                // The induced subgraph: an edge is kept only when both of its
-                // endpoints are already nodes above.
-                const edges = yield* Effect.map(
-                    sql`
-                        WITH mine AS (
-                            SELECT * FROM unnest(${games}::text[], ${playerIds}::text[]) AS t(game, player_id)
-                        ),
-                        circle AS (
-                            SELECT m.game, m.player_id FROM mine m
-                            UNION
-                            SELECT
-                                mf.game,
-                                CASE WHEN mf.player_a = m.player_id THEN mf.player_b ELSE mf.player_a END
-                            FROM mutual_friendships mf
-                            JOIN mine m
-                                ON m.game = mf.game
-                                AND m.player_id IN (mf.player_a, mf.player_b)
-                        )
-                        SELECT mf.game, mf.player_a, mf.player_b
-                        FROM mutual_friendships mf
-                        JOIN circle a ON a.game = mf.game AND a.player_id = mf.player_a
-                        JOIN circle b ON b.game = mf.game AND b.player_id = mf.player_b
-                    `,
-                    Array.map((row) => ({
-                        // Bridges an untyped runtime boundary; the shape is guaranteed by construction, not by the compiler.
-                        // oxlint-disable-next-line typescript/no-unsafe-type-assertion
-                        game: row["game"] as GameId,
-                        // oxlint-disable-next-line typescript/no-unsafe-type-assertion
-                        a: row["playerA"] as PlayerId,
-                        // oxlint-disable-next-line typescript/no-unsafe-type-assertion
-                        b: row["playerB"] as PlayerId,
-                    }))
-                );
-
+                const nodes = yield* circleNodes({ games, playerIds });
+                const edges = yield* circleEdges({ games, playerIds });
                 return { nodes, edges };
             });
 
