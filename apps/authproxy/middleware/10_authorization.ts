@@ -7,7 +7,7 @@ import { SqlError } from "effect/sql";
 import { NimblebitScopes } from "@tinyburg/nimblebit-sdk";
 import * as OAuthScope from "@yielded/auth/OAuthScope";
 
-import { ApiKey, type CurrentApiKey, Repository } from "../domain/model.ts";
+import { ApiKey, ApiKeyValue, type CurrentApiKey, Repository } from "../domain/model.ts";
 
 export class Authorization extends HttpApiMiddleware.Service<
     Authorization,
@@ -23,8 +23,8 @@ export class Authorization extends HttpApiMiddleware.Service<
     },
 }) {}
 
-/** API keys are uuids; anything else in the bearer slot is no key at all, not a failed lookup. */
-const isApiKey = Schema.is(Schema.String.check(Schema.isUUID()));
+/** Anything in the bearer slot that is not an API key is no key at all, not a failed lookup. */
+const isApiKey = Schema.is(ApiKeyValue);
 
 /** A 500 says nothing to the caller, so the reason has to land in the log. */
 const internalError = (error: unknown) =>

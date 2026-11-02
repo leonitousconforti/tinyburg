@@ -29,6 +29,19 @@ export const NONE_API_KEY = "00000000-0000-0000-0000-000000000001";
 export const READONLY_API_KEY = "00000000-0000-0000-0000-000000000002";
 
 /**
+ * What an API key looks like: a uuid, or one of the two seeded keys, which
+ * carry no version digit and so are not uuids.
+ *
+ * @since 1.0.0
+ * @category Models
+ */
+export const ApiKeyValue = Schema.Union([
+    Schema.String.check(Schema.isUUID()),
+    Schema.Literal(NONE_API_KEY),
+    Schema.Literal(READONLY_API_KEY),
+]);
+
+/**
  * An API key in the authproxy system.
  *
  * @since 1.0.0
@@ -39,11 +52,7 @@ export class ApiKey extends Model.Class<ApiKey>("ApiKey")({
     revoked: Schema.Boolean.pipe(Model.FieldExcept(["insert"])),
     lastUsedAt: Model.DateTimeUpdateFromDate,
     createdAt: Model.DateTimeInsertFromDate,
-    key: Schema.Union([
-        Schema.String.check(Schema.isUUID()),
-        Schema.Literal(NONE_API_KEY),
-        Schema.Literal(READONLY_API_KEY),
-    ]).pipe(Model.FieldExcept(["insert"])),
+    key: ApiKeyValue.pipe(Model.FieldExcept(["insert"])),
     scopes: Schema.UniqueArray(Schema.String).pipe(
         Schema.decodeTo(Schema.ReadonlySet(Schema.String), {
             encode: SchemaGetter.transform((set) => Array.from(set)),
