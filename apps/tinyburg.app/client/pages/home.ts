@@ -37,15 +37,14 @@ export const homeView = <M>(
     stats: Stats
 ): Html => {
     /**
-     * The stat tiles show the treasury's real counters once they land;
-     * until then (and if the fetch fails) the launch placeholders stand in,
-     * because a front page must never render blank tiles.
+     * The stat tiles show the treasury's real counters, and the row is left
+     * out until they land (or if the fetch fails): a front page must never
+     * render blank tiles, and made-up numbers would be a claim.
      */
     const compact = new Intl.NumberFormat(language, { notation: "compact", maximumFractionDigits: 1 });
-    const placeholders = ["10K+", "50K+", "1M+"];
     const statValues = AsyncData.matchData(stats, {
-        onEmpty: () => placeholders,
-        onFailure: () => placeholders,
+        onEmpty: () => undefined,
+        onFailure: () => undefined,
         onData: (data) => [
             compact.format(data.activeTraders),
             compact.format(data.settledTrades),
@@ -189,26 +188,34 @@ export const homeView = <M>(
                             ),
                         ]
                     ),
-                    h.section(
-                        [h.Class("relative z-10 mx-auto flex max-w-6xl flex-wrap justify-center gap-16 px-8 py-16")],
-                        [
-                            [statValues[0], msgs.stats.activeTraders],
-                            [statValues[1], msgs.stats.tradesCompleted],
-                            [statValues[2], msgs.stats.bitizensTraded],
-                        ].map(([stat, label]) =>
-                            h.div(
-                                [
-                                    h.Class(
-                                        "bg-dark-blue/90 shadow-pixel border-gold rounded-lg border-3 px-12 py-8 text-center"
-                                    ),
-                                ],
-                                [
-                                    h.span([h.Class("font-pixel text-gold block text-3xl")], [stat ?? ""]),
-                                    h.span([h.Class("mt-2 block text-xl text-white")], [label ?? ""]),
-                                ]
-                            )
-                        )
-                    ),
+                    ...(statValues === undefined
+                        ? []
+                        : [
+                              h.section(
+                                  [
+                                      h.Class(
+                                          "relative z-10 mx-auto flex max-w-6xl flex-wrap justify-center gap-16 px-8 py-16"
+                                      ),
+                                  ],
+                                  [
+                                      [statValues[0], msgs.stats.activeTraders],
+                                      [statValues[1], msgs.stats.tradesCompleted],
+                                      [statValues[2], msgs.stats.bitizensTraded],
+                                  ].map(([stat, label]) =>
+                                      h.div(
+                                          [
+                                              h.Class(
+                                                  "bg-dark-blue/90 shadow-pixel border-gold rounded-lg border-3 px-12 py-8 text-center"
+                                              ),
+                                          ],
+                                          [
+                                              h.span([h.Class("font-pixel text-gold block text-3xl")], [stat ?? ""]),
+                                              h.span([h.Class("mt-2 block text-xl text-white")], [label ?? ""]),
+                                          ]
+                                      )
+                                  )
+                              ),
+                          ]),
                     h.section(
                         [
                             h.Class(
@@ -272,8 +279,6 @@ export const homeView = <M>(
                                 [],
                                 [
                                     h.h4([h.Class("font-pixel text-gold mb-4 text-sm")], [msgs.community]),
-                                    footerLink(h, "/discord", "Discord"),
-                                    footerLink(h, "/reddit", "Reddit"),
                                     footerLink(h, "/sponsors", msgs.sponsors),
                                 ]
                             ),
