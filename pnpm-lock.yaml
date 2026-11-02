@@ -249,8 +249,8 @@ importers:
         specifier: 4.1.1
         version: 4.1.1(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))(redis@6.3.1)
       '@efffrida/gplayapi':
-        specifier: 0.0.39
-        version: 0.0.39(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+        specifier: 0.0.40
+        version: 0.0.40(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
       effect:
         specifier: 4.1.1
         version: 4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
@@ -640,26 +640,26 @@ importers:
         specifier: 2.16.0
         version: 2.16.0
       '@efffrida/frida-tools':
-        specifier: 0.0.63
-        version: 0.0.63(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+        specifier: 0.0.64
+        version: 0.0.64(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
       '@efffrida/gplayapi':
-        specifier: 0.0.39
-        version: 0.0.39(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+        specifier: 0.0.40
+        version: 0.0.40(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
       '@efffrida/il2cpp-bridge':
-        specifier: 0.0.58
-        version: 0.0.58(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+        specifier: 0.0.59
+        version: 0.0.59(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
       '@efffrida/platform':
-        specifier: 0.0.50
-        version: 0.0.50(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+        specifier: 0.0.51
+        version: 0.0.51(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
       '@efffrida/polyfills':
-        specifier: 0.0.21
-        version: 0.0.21
+        specifier: 0.0.22
+        version: 0.0.22
       '@efffrida/rpc':
-        specifier: 0.0.66
-        version: 0.0.66(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+        specifier: 0.0.67
+        version: 0.0.67(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
       frida:
-        specifier: 17.25.0
-        version: 17.25.0
+        specifier: 17.25.1
+        version: 17.25.1
       frida-il2cpp-bridge:
         specifier: 0.14.0
         version: 0.14.0
@@ -776,11 +776,11 @@ importers:
         specifier: 4.1.1
         version: 4.1.1(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))(vitest@5.0.5)
       '@efffrida/frida-tools':
-        specifier: 0.0.63
-        version: 0.0.63(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+        specifier: 0.0.64
+        version: 0.0.64(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
       '@efffrida/gplayapi':
-        specifier: 0.0.39
-        version: 0.0.39(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+        specifier: 0.0.40
+        version: 0.0.40(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
       '@tinyburg/insight':
         specifier: workspace:*
         version: link:../insight
@@ -851,23 +851,23 @@ importers:
         specifier: 4.1.1
         version: 4.1.1(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))(redis@6.3.1)
       '@efffrida/frida-tools':
-        specifier: 0.0.63
-        version: 0.0.63(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+        specifier: 0.0.64
+        version: 0.0.64(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
       '@efffrida/gplayapi':
-        specifier: 0.0.39
-        version: 0.0.39(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+        specifier: 0.0.40
+        version: 0.0.40(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
       '@efffrida/il2cpp-bridge':
-        specifier: 0.0.58
-        version: 0.0.58(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+        specifier: 0.0.59
+        version: 0.0.59(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
       '@efffrida/platform':
-        specifier: 0.0.50
-        version: 0.0.50(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+        specifier: 0.0.51
+        version: 0.0.51(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
       '@efffrida/polyfills':
-        specifier: 0.0.21
-        version: 0.0.21
+        specifier: 0.0.22
+        version: 0.0.22
       '@efffrida/rpc':
-        specifier: 0.0.66
-        version: 0.0.66(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+        specifier: 0.0.67
+        version: 0.0.67(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
       '@types/frida-gum':
         specifier: 19.12.0
         version: 19.12.0
@@ -1220,33 +1220,33 @@ packages:
       effect: ^4.1.1
       vitest: '>=5.0.0 <6.0.0'
 
-  '@efffrida/frida-tools@0.0.63':
-    resolution: {integrity: sha512-dbq4sqPRdli9Xe6AMPhD+ZyPQjMQerrghQv3Wq/P2Ov+JNy/FvonRV4LPAb/VD1JH3dFluDiuzWw5FIGflHSbw==}
+  '@efffrida/frida-tools@0.0.64':
+    resolution: {integrity: sha512-Rl1o6+Sf+GC9cdm0M3iu+miBBmItRkmjr8puA6AaP5kr69TX69dkjhDkH9v5PZAMYzF3l6u6u176TvTdb7ZpXg==}
     engines: {node: '>=24'}
     peerDependencies:
       effect: 4.1.1
 
-  '@efffrida/gplayapi@0.0.39':
-    resolution: {integrity: sha512-PnzrPsH1y1zcj8jldnnwUo+LfP22kxYeYKph24vH+xXlOtnoisyvBWV37m1KpqstjjkpHJ/5eWTWOuokIC2BCw==}
+  '@efffrida/gplayapi@0.0.40':
+    resolution: {integrity: sha512-6VUfFjRZRowN4PBkKvXntGtdKjx69P+nZA26vm27JYsB4ZgBRSCNS5Tr2M0C/QpUUN+nNYiuNR3VeAGX0/NEGg==}
     engines: {node: '>=24'}
     peerDependencies:
       effect: 4.1.1
 
-  '@efffrida/il2cpp-bridge@0.0.58':
-    resolution: {integrity: sha512-q7wqAUzD1P9459VCvR35gQwZdKfi9eReW1M0FN2dBYUxT3JL3hsUvQjvkYlhN3LIEGKmE45oCOQO6NN6n8LxIA==}
+  '@efffrida/il2cpp-bridge@0.0.59':
+    resolution: {integrity: sha512-R3kwLBIMK/NchRoJOp3nYdoN/OVkocys6S4hgmyoue/2IBvGP2Lm5nAD3ZRNj2InbZDR+8JTxIKRCSN4MSbUmg==}
     peerDependencies:
       effect: 4.1.1
 
-  '@efffrida/platform@0.0.50':
-    resolution: {integrity: sha512-ucelzzAcMkbXxMMaJM3cRvfO5FxeSFIKHqJKLG4C+0K9vnjqIKSkoj7vsxKRp6yG3XtvsUtP0ZzvFtOaeLyk0Q==}
+  '@efffrida/platform@0.0.51':
+    resolution: {integrity: sha512-JmXcUHjHnaMxbbwms5+w/rpbdDMILAFTfEh1H+ybt5BSksKAVnuoUfse4/wQbAZi7lOfxoZJalmkOZnty+FyIQ==}
     peerDependencies:
       effect: 4.1.1
 
-  '@efffrida/polyfills@0.0.21':
-    resolution: {integrity: sha512-PL3cRpXc0HXaKpPn5MHV+QtHBCrblFaDsALKgDO/YXwY4UrGLENqqPljsnc6RI4g/wQun5YVHqTse2k08YDgNQ==}
+  '@efffrida/polyfills@0.0.22':
+    resolution: {integrity: sha512-dTvH1NPLgH9fRtsaGETDP16fjpaXEWCvwFRjr9XYH8lpcxs2gbO2+BtV7oWSMMML5K9eKPfqfUjktaHLGWrFOQ==}
 
-  '@efffrida/rpc@0.0.66':
-    resolution: {integrity: sha512-Z5myKsPfGFHiZ3ssAkE6OGIgIvsMxzFB9QhBGDxKAVCWsWpewLmak9t2n4AuruOqYXB4drkDMjFp1cR9FexJLg==}
+  '@efffrida/rpc@0.0.67':
+    resolution: {integrity: sha512-xLRbmKms/b92ZBBo4kkflNT9HB4rsRWyimNShsaaCv0lhgrCZHnkMMaWnUkaaSdpTsb8jW66aoYH7Dc7VXZOaQ==}
     engines: {node: '>=24'}
     peerDependencies:
       effect: 4.1.1
@@ -2678,8 +2678,8 @@ packages:
     resolution: {integrity: sha512-rtqHgsE3x1j05QV7hfowEsRynf276xHhEJPgoh87Dv7PEa9Zz13VLxRtt19DNVCtIzyCfH1vdMANUCtMYU29Kw==}
     hasBin: true
 
-  frida@17.25.0:
-    resolution: {integrity: sha512-ZGLPWJo004pcFzDucW26SX0oBt6mHnmBqVGt5C8ZjDy9N+4KRBlh/aieVV0DRs/mcoyYxsKziwJ7hW8372X1UQ==}
+  frida@17.25.1:
+    resolution: {integrity: sha512-Lh0+ymWrhBa9/6g8rJmmEtmmWij13wi1wdHzi4nTkx7fRyZFKYylLY8gXIVae+SFZsMuSaoK5K/Vm3gfVKpTCg==}
     engines: {node: '>=16'}
 
   fs-constants@1.0.0:
@@ -4186,35 +4186,35 @@ snapshots:
       effect: 4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
       vitest: 5.0.5(patch_hash=330117083d54876c7134dd38164636c1694bc1bd0492dc8c50c11f485e8d6d99)(vite@8.3.5)
 
-  '@efffrida/frida-tools@0.0.63(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))':
+  '@efffrida/frida-tools@0.0.64(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))':
     dependencies:
       effect: 4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
-      frida: 17.25.0
+      frida: 17.25.1
 
-  '@efffrida/gplayapi@0.0.39(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))':
+  '@efffrida/gplayapi@0.0.40(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))':
     dependencies:
       '@bufbuild/protobuf': 2.16.0
       effect: 4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
 
-  '@efffrida/il2cpp-bridge@0.0.58(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))':
+  '@efffrida/il2cpp-bridge@0.0.59(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))':
     dependencies:
       effect: 4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
       frida-il2cpp-bridge: 0.14.0
 
-  '@efffrida/platform@0.0.50(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))':
+  '@efffrida/platform@0.0.51(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))':
     dependencies:
       effect: 4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
 
-  '@efffrida/polyfills@0.0.21':
+  '@efffrida/polyfills@0.0.22':
     dependencies:
       abort-controller: 3.0.0
       event-target-polyfill: 0.0.4
       text-encoding-utf-8: 1.0.2
 
-  '@efffrida/rpc@0.0.66(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))':
+  '@efffrida/rpc@0.0.67(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))':
     dependencies:
-      '@efffrida/frida-tools': 0.0.63(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
-      '@efffrida/polyfills': 0.0.21
+      '@efffrida/frida-tools': 0.0.64(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+      '@efffrida/polyfills': 0.0.22
       effect: 4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
 
   '@esbuild/aix-ppc64@0.28.2':
@@ -5337,7 +5337,7 @@ snapshots:
 
   frida-il2cpp-bridge@0.14.0: {}
 
-  frida@17.25.0:
+  frida@17.25.1:
     dependencies:
       bindings: 1.5.0
       minimatch: 10.2.6
