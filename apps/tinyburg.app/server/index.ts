@@ -16,11 +16,11 @@ import { OidcKeys } from "./keys.ts";
 import { OAuthServerLive } from "./oauthLive.ts";
 import { ApiLive } from "./routes/api.ts";
 import { AuthRoutesLive } from "./routes/auth.ts";
+import { ClientRoutesLive } from "./routes/client.ts";
 import { OAuthRoutesLive } from "./routes/oauth.ts";
 import { OidcProviderLive } from "./routes/oidc.ts";
 import { DynamicRegistrationLive } from "./routes/registration.ts";
 import { StandaloneStylesheetLive } from "./routes/standalone.ts";
-import { StaticRoutesLive } from "./routes/static.ts";
 import { FirstPartyTokenLive } from "./routes/token.ts";
 import { TreasuryProxyLive } from "./routes/treasury.ts";
 
@@ -62,7 +62,7 @@ const AllRoutes = Layer.mergeAll(
     StandaloneStylesheetLive,
     FirstPartyTokenLive,
     TreasuryProxyLive,
-    StaticRoutesLive,
+    ClientRoutesLive,
     SecurityHeadersLive
 );
 

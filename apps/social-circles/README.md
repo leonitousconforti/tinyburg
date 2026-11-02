@@ -49,8 +49,9 @@ One process runs everything, on a single-node Effect cluster backed by the same 
 
 ### Running it
 
-There is no vite dev server. The Effect http server serves `dist/client` in
-development exactly as in production, so build the SPA first:
+There is no vite dev server. The Effect http server serves `dist/` in
+development exactly as in production (the browser assets, and the server
+renderer for every page), so build the client first:
 
 ```sh
 pnpm --filter @tinyburg/social-circles build

@@ -1,9 +1,9 @@
 # tinyburg.app
 
-A [foldkit](https://foldkit.dev) single-page app served by an Effect http server.
+A [foldkit](https://foldkit.dev) app served by an Effect http server, which renders each page on the server for the browser to hydrate.
 
 - `client/` is the foldkit SPA: one Model, one update function, routes parsed with `Route` combinators, and side effects as Commands. Data comes from the server through an `HttpApiClient` derived from the shared api spec.
-- `server/` is the Effect http server: OAuth login/callback routes for Google and Discord (the app's own sign-in), the "Sign in with Tinyburg" OIDC provider built on [`@yielded/auth`](https://yielded.dev/auth/)'s OAuth server, session cookies backed by Postgres, the `TinyburgApi` HttpApi implementation, and static serving of the built client with an SPA fallback.
+- `server/` is the Effect http server: OAuth login/callback routes for Google and Discord (the app's own sign-in), the "Sign in with Tinyburg" OIDC provider built on [`@yielded/auth`](https://yielded.dev/auth/)'s OAuth server, session cookies backed by Postgres, the `TinyburgApi` HttpApi implementation, and the built client: its assets as files, and every other GET rendered by `client/entry.server.ts` (through `ServerRendering` in shared-ui).
 - `domain/` and `migrations/` are the repositories, models, and Postgres migrations.
 
 ## The OIDC provider

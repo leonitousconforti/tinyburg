@@ -19,6 +19,11 @@ import { HttpClient } from "effect/http";
 import * as OAuth from "@yielded/oauth/OAuth";
 import * as Oidc from "@yielded/oauth/Oidc";
 
+/** Where tinyburg sends the visitor back to after sign in, on the study's own origin. */
+export const redirectUri: Config.Config<string> = Config.String("TINYBURG_REDIRECT_URI").pipe(
+    Config.withDefault("http://localhost:3002/auth/callback")
+);
+
 const tinyburgConfig = Config.all({
     issuer: Config.String("TINYBURG_ISSUER").pipe(
         Config.withDefault("https://tinyburg.app"),
@@ -28,7 +33,7 @@ const tinyburgConfig = Config.all({
     // the provider; sign in simply fails at tinyburg.app until it is set.
     clientId: Config.String("TINYBURG_CLIENT_ID").pipe(Config.withDefault("unconfigured")),
     clientSecret: Config.option(Config.Redacted("TINYBURG_CLIENT_SECRET")),
-    redirectUri: Config.String("TINYBURG_REDIRECT_URI").pipe(Config.withDefault("http://localhost:3002/auth/callback")),
+    redirectUri,
 });
 
 /** How long any one call to the provider may take before it counts as unavailable. */

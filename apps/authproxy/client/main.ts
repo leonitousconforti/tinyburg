@@ -3,7 +3,7 @@ import { Effect, Match, Option, Schema as S } from "effect";
 import type { TitleMessages } from "./messages/types.ts";
 import type { Document, Html, HtmlBuilder } from "foldkit/html";
 
-import { Language, fromNavigator } from "@tinyburg/shared-ui/Internationalization";
+import { Language } from "@tinyburg/shared-ui/Internationalization";
 import { AsyncData, Command, Navigation, Render, type Runtime, type Update, Url } from "foldkit";
 import { defineMessageUnion } from "foldkit/message";
 import { modifyFields } from "foldkit/struct";
@@ -50,13 +50,12 @@ export const Model = S.Struct({
 export type Model = typeof Model.Type;
 
 /**
- * Negotiated once at boot: the browser's languages against the ones tinyburg
- * speaks. Module scope so `entry.ts` can stamp `<html lang>` with the same
- * answer; guarded so importing this module in tests never touches a browser.
+ * What the server knows about a request that the page depends on, rendered
+ * into the html and read back by the hydrating browser so both start from the
+ * same model. The language is negotiated from `Accept-Language`.
  */
-export const initialLanguage = fromNavigator(
-    typeof navigator === "undefined" ? [] : (navigator.languages ?? [navigator.language])
-);
+export const Flags = S.Struct({ language: Language });
+export type Flags = typeof Flags.Type;
 
 // MESSAGE
 
@@ -78,6 +77,12 @@ export const Message = S.Union([NavigationMessage, BackendMessage, KeysMessage, 
 export type Message = typeof Message.Type;
 
 type Step = Update.Return<Model, Message, Backend>;
+
+/** Routing for the browser runtime; the server render only needs to know there is some. */
+export const routing: Runtime.RoutingConfig<Message> = {
+    onUrlRequest: (request) => NavigationMessage.ClickedLink({ request }),
+    onUrlChange: (url) => NavigationMessage.ChangedUrl({ url }),
+};
 
 // COMMAND
 
@@ -216,7 +221,7 @@ export const update = (model: Model, message: Message): Step => {
 
 // INIT
 
-export const init: Runtime.RoutingApplicationInit<Model, Message, void, Backend> = (url) => {
+export const init: Runtime.RoutingApplicationInit<Model, Message, Flags, Backend> = (flags, url) => {
     const route = urlToAppRoute(url);
 
     // The session answer decides the gated route, so it is the first thing
@@ -225,7 +230,7 @@ export const init: Runtime.RoutingApplicationInit<Model, Message, void, Backend>
         resetPageState(
             {
                 route,
-                language: initialLanguage,
+                language: flags.language,
                 session: CheckingSession(),
                 scopes: ScopeCatalog.Loading(),
                 keys: initialKeys,
@@ -293,5 +298,6 @@ const pageKey = (model: Model): string =>
 
 export const view = (model: Model, h: HtmlBuilder<Message>): Document => ({
     title: routeTitle(model.route, messagesFor(model.language).titles),
+    lang: model.language,
     body: h.div([], [h.keyed("div")(pageKey(model), [], [pageView(model, h)])]),
 });

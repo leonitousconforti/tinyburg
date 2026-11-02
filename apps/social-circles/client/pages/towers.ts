@@ -5,7 +5,7 @@ import type { TowersMessages } from "../messages/types.ts";
 import type { Html, HtmlBuilder } from "foldkit/html";
 
 import { PlayerIdSchema } from "@tinyburg/nimblebit-sdk/NimblebitConfig";
-import { type Language, longDate } from "@tinyburg/shared-ui/Internationalization";
+import { Language, longDate } from "@tinyburg/shared-ui/Internationalization";
 import { AsyncData, Command } from "foldkit";
 import { defineMessageUnion } from "foldkit/message";
 import { modifyFields } from "foldkit/struct";
@@ -13,7 +13,7 @@ import { modifyFields } from "foldkit/struct";
 import { Circle, CircleGraph, TowerStatus } from "../../shared/api.ts";
 import { GameCatalogEntry, type GameId, GameIds, gamePlayerKey } from "../../shared/games.ts";
 import { Self, type SessionInfo } from "../backend.ts";
-import { initialLanguage, messagesFor } from "../messages/index.ts";
+import { messagesFor } from "../messages/index.ts";
 import { banner, card, dangerButton, primaryButton, quietButton } from "../ui/chrome.ts";
 import { GraphLayout, forceGraphLegend, forceGraphView, layout } from "../ui/forceGraph.ts";
 
@@ -110,23 +110,24 @@ export type TowersMessage = typeof TowersMessage.Type;
 
 // COMMAND
 
-// The language is decided once at init and never changes (no switcher), so
-// commands and update may resolve the text they put into the model directly
-// from `initialLanguage` rather than threading it through the runtime.
-const towersMsgs = (): TowersMessages => messagesFor(initialLanguage).towers;
+// Commands and update put text into the model, so they are handed the page's
+// language (the Flags the server negotiated) to resolve it in.
+const towersMsgs = (language: Language): TowersMessages => messagesFor(language).towers;
 
 export const FetchTowers = Command.define("FetchTowers", {
+    args: { language: Language },
     messages: [TowersMessage.SettledTowers, TowersMessage.SignedOutElsewhere],
-    execute: Effect.gen(function* () {
-        const self = yield* Self;
-        const towers = yield* self.SelfServiceGroup.towers();
-        return TowersMessage.SettledTowers({ result: Result.succeed(towers) });
-    }).pipe(
-        Effect.catchTag("Unauthorized", () => Effect.succeed(TowersMessage.SignedOutElsewhere())),
-        Effect.catch(() =>
-            Effect.succeed(TowersMessage.SettledTowers({ result: Result.fail(towersMsgs().loadFailed) }))
-        )
-    ),
+    execute: ({ language }) =>
+        Effect.gen(function* () {
+            const self = yield* Self;
+            const towers = yield* self.SelfServiceGroup.towers();
+            return TowersMessage.SettledTowers({ result: Result.succeed(towers) });
+        }).pipe(
+            Effect.catchTag("Unauthorized", () => Effect.succeed(TowersMessage.SignedOutElsewhere())),
+            Effect.catch(() =>
+                Effect.succeed(TowersMessage.SettledTowers({ result: Result.fail(towersMsgs(language).loadFailed) }))
+            )
+        ),
 });
 
 /**
@@ -151,9 +152,9 @@ export const FetchGraph = Command.define("FetchGraph", {
 });
 
 const Enroll = Command.define("Enroll", {
-    args: { tower: TowerRef },
+    args: { tower: TowerRef, language: Language },
     messages: [TowersMessage.CompletedEnroll, TowersMessage.FailedAction, TowersMessage.SignedOutElsewhere],
-    execute: ({ tower }) =>
+    execute: ({ language, tower }) =>
         Effect.gen(function* () {
             const self = yield* Self;
             const result = yield* self.SelfServiceGroup.enroll({ params: tower });
@@ -161,16 +162,18 @@ const Enroll = Command.define("Enroll", {
         }).pipe(
             Effect.catchTag("Unauthorized", () => Effect.succeed(TowersMessage.SignedOutElsewhere())),
             Effect.catchTag("Forbidden", () =>
-                Effect.succeed(TowersMessage.FailedAction({ message: towersMsgs().enrollForbidden }))
+                Effect.succeed(TowersMessage.FailedAction({ message: towersMsgs(language).enrollForbidden }))
             ),
-            Effect.catch(() => Effect.succeed(TowersMessage.FailedAction({ message: towersMsgs().actionFailed })))
+            Effect.catch(() =>
+                Effect.succeed(TowersMessage.FailedAction({ message: towersMsgs(language).actionFailed }))
+            )
         ),
 });
 
 const Withdraw = Command.define("Withdraw", {
-    args: { tower: TowerRef },
+    args: { tower: TowerRef, language: Language },
     messages: [TowersMessage.CompletedWithdraw, TowersMessage.FailedAction, TowersMessage.SignedOutElsewhere],
-    execute: ({ tower }) =>
+    execute: ({ language, tower }) =>
         Effect.gen(function* () {
             const self = yield* Self;
             const receipt = yield* self.SelfServiceGroup.withdraw({ params: tower });
@@ -178,23 +181,27 @@ const Withdraw = Command.define("Withdraw", {
         }).pipe(
             Effect.catchTag("Unauthorized", () => Effect.succeed(TowersMessage.SignedOutElsewhere())),
             Effect.catchTag("NotFound", () =>
-                Effect.succeed(TowersMessage.FailedAction({ message: towersMsgs().withdrawNotFound }))
+                Effect.succeed(TowersMessage.FailedAction({ message: towersMsgs(language).withdrawNotFound }))
             ),
-            Effect.catch(() => Effect.succeed(TowersMessage.FailedAction({ message: towersMsgs().actionFailed })))
+            Effect.catch(() =>
+                Effect.succeed(TowersMessage.FailedAction({ message: towersMsgs(language).actionFailed }))
+            )
         ),
 });
 
 const FetchCircle = Command.define("FetchCircle", {
-    args: { tower: TowerRef },
+    args: { tower: TowerRef, language: Language },
     messages: [TowersMessage.SettledCircle, TowersMessage.FailedAction, TowersMessage.SignedOutElsewhere],
-    execute: ({ tower }) =>
+    execute: ({ language, tower }) =>
         Effect.gen(function* () {
             const self = yield* Self;
             const circle = yield* self.SelfServiceGroup.circle({ params: tower });
             return TowersMessage.SettledCircle({ circle });
         }).pipe(
             Effect.catchTag("Unauthorized", () => Effect.succeed(TowersMessage.SignedOutElsewhere())),
-            Effect.catch(() => Effect.succeed(TowersMessage.FailedAction({ message: towersMsgs().actionFailed })))
+            Effect.catch(() =>
+                Effect.succeed(TowersMessage.FailedAction({ message: towersMsgs(language).actionFailed }))
+            )
         ),
 });
 
@@ -214,7 +221,7 @@ const starting = (model: TowersModel, busy: TowerRef): TowersModel =>
 const refetch = (model: TowersModel): TowersModel =>
     modifyFields(model, { towers: (towers) => Option.getOrElse(AsyncData.revalidate(towers), () => towers) });
 
-export const updateTowers = (model: TowersModel, message: TowersMessage): TowersStep =>
+export const updateTowers = (model: TowersModel, message: TowersMessage, language: Language): TowersStep =>
     Match.value(message).pipe(
         Match.withReturnType<TowersStep>(),
         Match.tagsExhaustive({
@@ -236,21 +243,24 @@ export const updateTowers = (model: TowersModel, message: TowersMessage): Towers
                 [],
             ],
 
-            ClickedEnroll: ({ tower }) => [starting(model, tower), [Enroll({ tower })]],
+            ClickedEnroll: ({ tower }) => [starting(model, tower), [Enroll({ tower, language })]],
 
             CompletedEnroll: ({ crawled }) => [
                 modifyFields(refetch(model), {
                     busy: Option.none,
-                    notice: () => Option.some(crawled ? towersMsgs().enrolledCrawled : towersMsgs().enrolledPending),
+                    notice: () =>
+                        Option.some(
+                            crawled ? towersMsgs(language).enrolledCrawled : towersMsgs(language).enrolledPending
+                        ),
                 }),
-                [FetchTowers(), FetchGraph()],
+                [FetchTowers({ language }), FetchGraph()],
             ],
 
             // First click arms, second acts. The armed state is per row, so
             // arming one and clicking another does not delete the wrong tower.
             ClickedWithdraw: ({ tower }) =>
                 Option.contains(model.armedWithdraw, gamePlayerKey(tower))
-                    ? [starting(model, tower), [Withdraw({ tower })]]
+                    ? [starting(model, tower), [Withdraw({ tower, language })]]
                     : [
                           modifyFields(model, {
                               armedWithdraw: () => Option.some(gamePlayerKey(tower)),
@@ -263,12 +273,12 @@ export const updateTowers = (model: TowersModel, message: TowersMessage): Towers
                 modifyFields(refetch(model), {
                     busy: Option.none,
                     circle: Option.none,
-                    notice: () => Option.some(towersMsgs().withdrawn(eventsRemoved)),
+                    notice: () => Option.some(towersMsgs(language).withdrawn(eventsRemoved)),
                 }),
-                [FetchTowers(), FetchGraph()],
+                [FetchTowers({ language }), FetchGraph()],
             ],
 
-            ClickedCircle: ({ tower }) => [starting(model, tower), [FetchCircle({ tower })]],
+            ClickedCircle: ({ tower }) => [starting(model, tower), [FetchCircle({ tower, language })]],
             SettledCircle: ({ circle }) => [
                 modifyFields(model, { circle: () => Option.some(circle), busy: Option.none }),
                 [],

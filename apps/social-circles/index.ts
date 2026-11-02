@@ -25,9 +25,9 @@ import { GrantsRepository } from "./domain/grants.ts";
 import { GraphRepository } from "./domain/graph.ts";
 import { PurgeRepository } from "./domain/purge.ts";
 import { SessionsRepository } from "./domain/sessions.ts";
+import { ClientRoutesLive } from "./routes/client.ts";
 import { OAuthRoutesLive } from "./routes/oauth.ts";
 import { SelfServiceApiLive } from "./routes/selfservice.ts";
-import { StaticRoutesLive } from "./routes/static.ts";
 import { CrawlService } from "./services/crawl.ts";
 import { NimblebitPacer } from "./services/ratelimit.ts";
 import { TinyburgClient } from "./services/tinyburg.ts";
@@ -35,8 +35,8 @@ import { TinyburgTowers } from "./services/towers.ts";
 import { ConsentWorkflowLive } from "./workflows/consent.ts";
 import { PurgeWorkflowLive } from "./workflows/purge.ts";
 
-/** Static last, so its SPA fallback never shadows a route the study owns. */
-const AllRoutes = Layer.mergeAll(SelfServiceApiLive, OAuthRoutesLive, StaticRoutesLive);
+/** The client last, so its catch-all GET never shadows a route the study owns. */
+const AllRoutes = Layer.mergeAll(SelfServiceApiLive, OAuthRoutesLive, ClientRoutesLive);
 
 const DotEnvLive = Effect.map(ConfigProvider.fromDotEnv(), ConfigProvider.nested("SOCIALCIRCLES"));
 

@@ -9,7 +9,7 @@ import { defineMessageUnion } from "foldkit/message";
 import { modifyFields } from "foldkit/struct";
 
 import { type Backend, BackendMessage, CheckingSession, FetchSession, SessionState, SignedOut } from "./backend.ts";
-import { initialLanguage, messagesFor } from "./messages/index.ts";
+import { messagesFor } from "./messages/index.ts";
 import { homeView } from "./pages/home.ts";
 import { loginView } from "./pages/login.ts";
 import { notFoundView } from "./pages/notFound.ts";
@@ -39,6 +39,14 @@ export const Model = S.Struct({
 });
 export type Model = typeof Model.Type;
 
+/**
+ * What the server knows about a request that the page depends on, rendered
+ * into the html and read back by the hydrating browser so both start from the
+ * same model. The language is negotiated from `Accept-Language`.
+ */
+export const Flags = S.Struct({ language: Language });
+export type Flags = typeof Flags.Type;
+
 // MESSAGE
 
 /** The application's own messages: everything about where the browser is. */
@@ -59,6 +67,12 @@ export const Message = S.Union([NavigationMessage, BackendMessage, TowersMessage
 export type Message = typeof Message.Type;
 
 type Step = Update.Return<Model, Message, Backend>;
+
+/** Routing for the browser runtime; the server render only needs to know there is some. */
+export const routing: Runtime.RoutingConfig<Message> = {
+    onUrlRequest: (request) => NavigationMessage.ClickedLink({ request }),
+    onUrlChange: (url) => NavigationMessage.ChangedUrl({ url }),
+};
 
 // COMMAND
 
@@ -120,7 +134,7 @@ const enterRoute = (model: Model): Step => {
                 model: modifyFields(model, {
                     towers: (towersModel) => modifyFields(towersModel, { towers: () => towers }),
                 }),
-                commands: [FetchTowers(), ...alongside],
+                commands: [FetchTowers({ language: model.language }), ...alongside],
             }),
         });
     }
@@ -132,7 +146,7 @@ const isTowersMessage = S.is(TowersMessage);
 
 export const update = (model: Model, message: Message): Step => {
     if (isTowersMessage(message)) {
-        const [towers, towersCommands] = updateTowers(model.towers, message);
+        const [towers, towersCommands] = updateTowers(model.towers, message, model.language);
         const commands: Array<Command.Command<Message, never, Backend>> = [...towersCommands];
 
         // The session ended elsewhere; the server owns the way back.
@@ -169,7 +183,7 @@ export const update = (model: Model, message: Message): Step => {
 
 // INIT
 
-export const init: Runtime.RoutingApplicationInit<Model, Message, void, Backend> = (url) => {
+export const init: Runtime.RoutingApplicationInit<Model, Message, Flags, Backend> = (flags, url) => {
     const route = urlToAppRoute(url);
 
     // The session answer decides the gated route, so it is the first thing
@@ -180,7 +194,7 @@ export const init: Runtime.RoutingApplicationInit<Model, Message, void, Backend>
                 route,
                 session: CheckingSession(),
                 towers: initialTowers,
-                language: initialLanguage,
+                language: flags.language,
             },
             route
         )
@@ -232,5 +246,6 @@ const pageKey = (model: Model): string =>
 
 export const view = (model: Model, h: HtmlBuilder<Message>): Document => ({
     title: routeTitle(model.route, messagesFor(model.language).titles),
+    lang: model.language,
     body: h.div([], [h.keyed("div")(pageKey(model), [], [pageView(model, h)])]),
 });

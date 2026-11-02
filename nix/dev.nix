@@ -109,7 +109,7 @@
                 corepack
               ]
             }:$PATH
-            exec pnpm --filter ${filter} exec vite build --watch
+            exec pnpm --filter ${filter} exec node "$PWD/scripts/vite-watch.mjs"
           '';
 
           backend =

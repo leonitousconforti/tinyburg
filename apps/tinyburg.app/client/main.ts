@@ -2,7 +2,7 @@ import { Effect, Match, Option, Schema as S } from "effect";
 
 import type { Document, Html, HtmlBuilder } from "foldkit/html";
 
-import { Language, fromNavigator } from "@tinyburg/shared-ui/Internationalization";
+import { Language } from "@tinyburg/shared-ui/Internationalization";
 import { AsyncData, Command, Dom, Navigation, Render, type Runtime, type Update, Url } from "foldkit";
 import { createLazy } from "foldkit/html";
 import { defineMessageUnion } from "foldkit/message";
@@ -77,14 +77,15 @@ export const Model = S.Struct({
 export type Model = typeof Model.Type;
 
 /**
- * Negotiated once from the browser's preferences at module load (precedent:
- * the module-scope `matchMedia` below). There is no switcher yet, so the
- * language is plain model data that never changes after init. Guarded for the
- * node test environment, which has no `navigator`.
+ * What the server knows about a request that the page depends on, rendered
+ * into the html and read back by the hydrating browser so both start from the
+ * same model.
+ *
+ * The language is negotiated from `Accept-Language` on the server. There is no
+ * switcher yet, so it is plain model data that never changes after init.
  */
-export const initialLanguage = fromNavigator(
-    typeof navigator === "undefined" ? [] : (navigator.languages ?? [navigator.language])
-);
+export const Flags = S.Struct({ language: Language });
+export type Flags = typeof Flags.Type;
 
 // MESSAGE
 
@@ -107,6 +108,12 @@ export const Message = S.Union([NavigationMessage, BackendMessage, WizardMessage
 export type Message = typeof Message.Type;
 
 type Step = Update.Return<Model, Message, Backend>;
+
+/** Routing for the browser runtime; the server render only needs to know there is some. */
+export const routing: Runtime.RoutingConfig<Message> = {
+    onUrlRequest: (request) => NavigationMessage.ClickedLink({ request }),
+    onUrlChange: (url) => NavigationMessage.ChangedUrl({ url }),
+};
 
 // COMMAND
 
@@ -362,7 +369,7 @@ export const update = (model: Model, message: Message): Step => {
 
 // INIT
 
-export const init: Runtime.RoutingApplicationInit<Model, Message, void, Backend> = (url) => {
+export const init: Runtime.RoutingApplicationInit<Model, Message, Flags, Backend> = (flags, url) => {
     const route = urlToAppRoute(url);
 
     // The session answer decides every gated route, so it is the first thing
@@ -380,7 +387,7 @@ export const init: Runtime.RoutingApplicationInit<Model, Message, void, Backend>
                 wizard: initialWizardFor("tinytower"),
                 account: initialAccount,
                 trades: initialTrades,
-                language: initialLanguage,
+                language: flags.language,
             },
             route
         )
@@ -480,6 +487,7 @@ export const view = (model: Model, h: HtmlBuilder<Message>): Document => {
     const msgs = messagesFor(model.language);
     return {
         title: routeTitle(model.route, msgs.titles),
+        lang: model.language,
         body: h.div([], [clouds(h), h.keyed("div")(pageKey(model), [], [pageView(model, msgs, h)])]),
     };
 };
@@ -518,8 +526,9 @@ const routeDepth = (route: AppRoute): number =>
     );
 
 // Read live rather than sampled once: the visitor can turn the preference on
-// mid-session and the next navigation has to honor it.
-const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+// mid-session and the next navigation has to honor it. Looked up on use rather
+// than at module load, because the server render imports this module too.
+const prefersReducedMotion = (): boolean => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 /**
  * Decides which renders animate. Only the ones that replace the whole page do:
@@ -533,7 +542,7 @@ const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)
  * all, which also spares the document the brief freeze one imposes.
  */
 export const viewTransition: Runtime.ViewTransitionConfig<Model, Message> = ({ message, model, previousModel }) => {
-    if (prefersReducedMotion.matches) return false;
+    if (prefersReducedMotion()) return false;
 
     if (message._tag === "ChangedUrl") {
         const descent = routeDepth(model.route) - routeDepth(previousModel.route);

@@ -1,6 +1,15 @@
 import { Config, Option, type Redacted } from "effect";
 
 /**
+ * Where the site is served from, without a trailing slash: the OIDC issuer,
+ * and the origin server-rendered pages resolve their request urls against.
+ */
+export const siteUrl: Config.Config<string> = Config.String("SITE_URL").pipe(
+    Config.withDefault("https://tinyburg.app"),
+    Config.map((url) => url.replace(/\/$/, ""))
+);
+
+/**
  * Whether the server is running in development.
  *
  * `NODE_ENV` defaults to production, so a deployment that forgets to set it

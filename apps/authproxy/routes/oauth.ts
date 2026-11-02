@@ -15,11 +15,14 @@ import { randomSecret, sha256 } from "../crypto.ts";
 import { SessionsRepository } from "../domain/sessions.ts";
 import { register } from "../registration.ts";
 
+/** Where tinyburg sends the visitor back to after sign in, on the authproxy's own origin. */
+export const redirectUri: Config.Config<string> = Config.String("TINYBURG_OAUTH_REDIRECT_URI");
+
 const tinyburgConfig = Config.all({
     adminPassword: Config.Redacted("ADMIN_PASSWORD"),
     adminPlayerIds: Config.Array(NimblebitConfig.PlayerIdSchema, "ADMIN_PLAYER_IDS"),
     registrationToken: Config.option(Config.Redacted("TINYBURG_OAUTH_REGISTRATION_TOKEN")),
-    redirectUri: Config.String("TINYBURG_OAUTH_REDIRECT_URI"),
+    redirectUri,
     issuer: Config.String("TINYBURG_OAUTH_ISSUER").pipe(
         Config.withDefault("https://tinyburg.app"),
         Config.map((issuer) => issuer.replace(/\/$/, ""))

@@ -3,23 +3,19 @@ import "./styles/global.css";
 import { Runtime } from "foldkit";
 
 import { BackendLive } from "./backend.ts";
-import { Model, NavigationMessage, init, initialLanguage, update, view } from "./main.ts";
+import { Flags, Model, init, routing, update, view } from "./main.ts";
 
 const application = Runtime.makeApplication({
     Model,
+    Flags,
     init,
     update,
     view,
     container: document.getElementById("root"),
     resources: BackendLive,
-    routing: {
-        onUrlRequest: (request) => NavigationMessage.ClickedLink({ request }),
-        onUrlChange: (url) => NavigationMessage.ChangedUrl({ url }),
-    },
+    routing,
 });
 
-// index.html is served statically, so the document language can only be
-// corrected here, once the negotiated answer is known.
-document.documentElement.lang = initialLanguage;
-
-Runtime.run(application);
+// The server rendered this page (entry.server.ts): adopt its DOM, starting
+// from the Flags it embedded, rather than building the page again.
+Runtime.hydrate(application);

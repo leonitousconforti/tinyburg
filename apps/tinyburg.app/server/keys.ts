@@ -3,6 +3,8 @@ import { Config, Context, Effect, Layer, Redacted, Schema } from "effect";
 import type * as OAuthServer from "@yielded/auth/OAuthServer";
 import type { SessionSigningKeyring } from "@yielded/auth/Sessions";
 
+import { siteUrl } from "./environment.ts";
+
 /**
  * The RSA private key the provider signs ID tokens with, as a JWK. The OAuth
  * server signs RS256 only, and names the key by `kid` in its JWKS, so both
@@ -32,10 +34,7 @@ const RsaPrivateJwk = Schema.Struct({
  */
 export class OidcKeys extends Context.Service<OidcKeys>()("@tinyburg/tinyburg.app/server/OidcKeys", {
     make: Effect.gen(function* () {
-        const issuer = yield* Config.String("SITE_URL").pipe(
-            Config.withDefault("https://tinyburg.app"),
-            Config.map((url) => url.replace(/\/$/, ""))
-        );
+        const issuer = yield* siteUrl;
 
         const privateJwk = yield* Effect.flatMap(Config.Redacted("OIDC_PRIVATE_JWK"), (jwk) =>
             Schema.decodeEffect(Schema.fromJsonString(RsaPrivateJwk))(Redacted.value(jwk))

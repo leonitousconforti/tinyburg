@@ -63,3 +63,14 @@ identical behaviour with scripting turned off.
 bundle may import it. It also depends on this package's `exports` pointing at
 `./src/*`, so the `.css` and `.html` sit next to the compiled module at runtime;
 pointing them at `dist` would need the build to copy both.
+
+## Server rendering
+
+`ServerRendering` is the other server-only module: the Effect half of a foldkit
+app that renders on the server and hydrates in the browser. An app's `vite
+build` (with the plugin's `ssr.build`) writes its browser assets to
+`dist/client` and a fetch handler to `dist/server/fetch.js`; the app's server
+mounts `ServerRendering.layer({ dist, origin })` after its own routes, which
+answers a GET with a file when one exists and with a rendered page otherwise.
+The handler is loaded on the first page request, so the server can start before
+the first build lands.
