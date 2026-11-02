@@ -1,5 +1,3 @@
-/* eslint-disable no-undef */
-
 import * as Fs from "node:fs";
 
 import madge from "madge";

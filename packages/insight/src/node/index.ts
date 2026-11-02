@@ -124,10 +124,6 @@ export const DeviceLive: Layer.Layer<
         hidden: true,
     }),
     Effect.fnUntraced(
-        // The early exits return never-typed values; the normal path runs to
-        // the end.
-        //
-        // oxlint-disable-next-line typescript/consistent-return
         function* (deviceCtx: Context.Context<FridaDevice.FridaDevice>) {
             const path = yield* Path.Path;
 

@@ -44,84 +44,84 @@ export const highestArchivedVersion = Effect.fnUntraced(function* (bundleIdentif
         : Option.none();
 });
 
-export const archiveToS3 = Effect.fnUntraced(
-    // The early exits return never-typed values; the normal path runs to the end.
-    // oxlint-disable-next-line typescript/consistent-return
-    function* (options: { bundleIdentifier: BundleIdentifier; offerType: number; versionCode: number | bigint }) {
-        const bucket = yield* bucketName;
-        const streams = yield* GooglePlayApi.downloadToStreams(options.bundleIdentifier, options).pipe(
-            Effect.catchNoSuchElement
+export const archiveToS3 = Effect.fnUntraced(function* (options: {
+    bundleIdentifier: BundleIdentifier;
+    offerType: number;
+    versionCode: number | bigint;
+}) {
+    const bucket = yield* bucketName;
+    const streams = yield* GooglePlayApi.downloadToStreams(options.bundleIdentifier, options).pipe(
+        Effect.catchNoSuchElement
+    );
+
+    if (Option.isNone(streams)) {
+        return yield* Effect.logInfo(
+            `No delivery data available for ${options.bundleIdentifier} version ${options.versionCode}`
+        );
+    }
+
+    for (const { stream, integrity, size, name } of streams.value) {
+        const checksumAlgorithm = Match.value(integrity).pipe(
+            Match.when({ "SHA-1": Match.string }, () => "SHA1" as const),
+            Match.when({ "SHA-256": Match.string }, () => "SHA256" as const),
+            Match.exhaustive
         );
 
-        if (Option.isNone(streams)) {
-            return yield* Effect.logInfo(
-                `No delivery data available for ${options.bundleIdentifier} version ${options.versionCode}`
-            );
-        }
+        const integrityBase64 = Match.value(integrity).pipe(
+            Match.when({ "SHA-1": Match.string }, ({ "SHA-1": sha1Hash }) =>
+                Buffer.from(sha1Hash, "hex").toString("base64")
+            ),
+            Match.when({ "SHA-256": Match.string }, ({ "SHA-256": sha256Hash }) =>
+                Buffer.from(sha256Hash, "hex").toString("base64")
+            ),
+            Match.exhaustive
+        );
 
-        for (const { stream, integrity, size, name } of streams.value) {
-            const checksumAlgorithm = Match.value(integrity).pipe(
-                Match.when({ "SHA-1": Match.string }, () => "SHA1" as const),
-                Match.when({ "SHA-256": Match.string }, () => "SHA256" as const),
+        const maybeExistingUpload = yield* Effect.flatMap(S3, (s3) =>
+            s3.getObject({
+                Bucket: bucket,
+                Key: keyFor({ ...options, name }),
+            })
+        ).pipe(
+            Effect.flatMap(Effect.succeedSome),
+            Effect.catchTag("NoSuchKey", () => Effect.succeedNone)
+        );
+
+        // If the upload already exists, let's just check its integrity
+        if (Option.isSome(maybeExistingUpload)) {
+            const existingUploadIntegrity = Match.value(integrity).pipe(
+                Match.when({ "SHA-1": Match.string }, () => maybeExistingUpload.value.ChecksumSHA1),
+                Match.when({ "SHA-256": Match.string }, () => maybeExistingUpload.value.ChecksumSHA256),
                 Match.exhaustive
             );
 
-            const integrityBase64 = Match.value(integrity).pipe(
-                Match.when({ "SHA-1": Match.string }, ({ "SHA-1": sha1Hash }) =>
-                    Buffer.from(sha1Hash, "hex").toString("base64")
-                ),
-                Match.when({ "SHA-256": Match.string }, ({ "SHA-256": sha256Hash }) =>
-                    Buffer.from(sha256Hash, "hex").toString("base64")
-                ),
-                Match.exhaustive
-            );
-
-            const maybeExistingUpload = yield* Effect.flatMap(S3, (s3) =>
-                s3.getObject({
-                    Bucket: bucket,
-                    Key: keyFor({ ...options, name }),
-                })
-            ).pipe(
-                Effect.flatMap(Effect.succeedSome),
-                Effect.catchTag("NoSuchKey", () => Effect.succeedNone)
-            );
-
-            // If the upload already exists, let's just check its integrity
-            if (Option.isSome(maybeExistingUpload)) {
-                const existingUploadIntegrity = Match.value(integrity).pipe(
-                    Match.when({ "SHA-1": Match.string }, () => maybeExistingUpload.value.ChecksumSHA1),
-                    Match.when({ "SHA-256": Match.string }, () => maybeExistingUpload.value.ChecksumSHA256),
-                    Match.exhaustive
+            if (existingUploadIntegrity !== integrityBase64) {
+                yield* Effect.logDebug(
+                    `Integrity check for existing upload ${options.bundleIdentifier}/${name} version ${options.versionCode} failed`
                 );
-
-                if (existingUploadIntegrity !== integrityBase64) {
-                    yield* Effect.logDebug(
-                        `Integrity check for existing upload ${options.bundleIdentifier}/${name} version ${options.versionCode} failed`
-                    );
-                } else {
-                    yield* Effect.logDebug(
-                        `Integrity check for existing upload ${options.bundleIdentifier}/${name} version ${options.versionCode} passed`
-                    );
-                    continue;
-                }
+            } else {
+                yield* Effect.logDebug(
+                    `Integrity check for existing upload ${options.bundleIdentifier}/${name} version ${options.versionCode} passed`
+                );
+                continue;
             }
-
-            yield* S3.use((s3) =>
-                s3.putObject({
-                    ACL: "private",
-                    Bucket: bucket,
-                    ContentLength: Number(size),
-                    Body: NodeStream.toReadableNever(stream),
-                    ChecksumAlgorithm: checksumAlgorithm,
-                    Key: keyFor({ ...options, name }),
-                    ...("SHA-1" in integrity ? { ChecksumSHA1: integrityBase64 } : {}),
-                    ...("SHA-256" in integrity ? { ChecksumSHA256: integrityBase64 } : {}),
-                })
-            );
-
-            yield* Effect.logDebug(
-                `Successfully uploaded ${options.bundleIdentifier}/${name} version ${options.versionCode} to S3`
-            );
         }
+
+        yield* S3.use((s3) =>
+            s3.putObject({
+                ACL: "private",
+                Bucket: bucket,
+                ContentLength: Number(size),
+                Body: NodeStream.toReadableNever(stream),
+                ChecksumAlgorithm: checksumAlgorithm,
+                Key: keyFor({ ...options, name }),
+                ...("SHA-1" in integrity ? { ChecksumSHA1: integrityBase64 } : {}),
+                ...("SHA-256" in integrity ? { ChecksumSHA256: integrityBase64 } : {}),
+            })
+        );
+
+        yield* Effect.logDebug(
+            `Successfully uploaded ${options.bundleIdentifier}/${name} version ${options.versionCode} to S3`
+        );
     }
-);
+});

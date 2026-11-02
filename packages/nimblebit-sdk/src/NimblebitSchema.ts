@@ -96,8 +96,6 @@ export const CSharpDate: Schema.decodeTo<
         ]
     >,
     Schema.BigInt,
-    // Written out for readability alongside the neighbouring signatures.
-    // oxlint-disable-next-line typescript/no-unnecessary-type-arguments
     never
 > = internal.CSharpDate;
 

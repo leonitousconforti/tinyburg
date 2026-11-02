@@ -258,8 +258,6 @@ const accountsHandlers = ({ asBurnBot, key, nimblebit, sdk, towers, upstreamOrRe
         }).pipe(Effect.orDie),
 
     LinkAccount: ({ payload }: { readonly payload: { readonly playerId: PlayerId; readonly email: PlayerEmail } }) =>
-        // The early exits return never-typed values; the normal path runs to the end.
-        // oxlint-disable-next-line typescript/consistent-return
         Effect.gen(function* () {
             const { userId } = yield* requireCaller;
 
@@ -291,8 +289,6 @@ const accountsHandlers = ({ asBurnBot, key, nimblebit, sdk, towers, upstreamOrRe
         readonly params: { readonly playerId: PlayerId };
         readonly payload: { readonly verificationCode: string };
     }) =>
-        // The early exits return never-typed values; the normal path runs to the end.
-        // oxlint-disable-next-line typescript/consistent-return
         Effect.gen(function* () {
             const { userId } = yield* requireCaller;
 
@@ -327,8 +323,6 @@ const accountsHandlers = ({ asBurnBot, key, nimblebit, sdk, towers, upstreamOrRe
         }),
 
     UnlinkAccount: ({ params }: { readonly params: { readonly playerId: PlayerId } }) =>
-        // The early exits return never-typed values; the normal path runs to the end.
-        // oxlint-disable-next-line typescript/consistent-return
         Effect.gen(function* () {
             const { userId } = yield* requireCaller;
             const removed = yield* towers.unlink({ userId, playerId: params.playerId }).pipe(Effect.orDie);

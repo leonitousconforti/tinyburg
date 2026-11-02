@@ -1,0 +1,14 @@
+{
+    "$schema": "https://json.schemastore.org/tsconfig",
+    "extends": "./tsconfig.base.jsonc",
+    "include": ["vitest.*.ts"],
+    "compilerOptions": {
+        "tsBuildInfoFile": ".tsbuildinfo/vitest.tsbuildinfo",
+        "outDir": ".tsbuildinfo/vitest",
+        "noEmit": true,
+        "types": ["node"],
+        // `fakeTimers.toFake: undefined` clears vitest's default list, which its config types do
+        // not model.
+        "exactOptionalPropertyTypes": false
+    }
+}

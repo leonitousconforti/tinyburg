@@ -105,8 +105,6 @@ const AuthGroupLive = HttpApiBuilder.group(
                 }).pipe(Effect.mapError(() => new HttpApiError.InternalServerError()))
             )
             .handle("unlinkAccount", ({ params }) =>
-                // The early exits return never-typed values; the normal path runs to the end.
-                // oxlint-disable-next-line typescript/consistent-return
                 Effect.gen(function* () {
                     const { user } = yield* CurrentSession;
                     const unlinked = yield* UsersRepository.use((repo) =>

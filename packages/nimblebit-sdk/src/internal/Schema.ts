@@ -140,8 +140,6 @@ const decodeRegexCache = Effect.runSync(
     Cache.make({
         capacity: 200,
         timeToLive: Duration.minutes(10),
-        // Written out for readability alongside the neighbouring signatures.
-        // oxlint-disable-next-line typescript/no-unnecessary-type-arguments
         lookup: (key: PropertyKey): Effect.Effect<RegExp, never> =>
             Effect.sync(() => new RegExp(`\\[${String(key)}\\]([\\s\\S]*?)\\[${String(key)}\\]`, "m")),
     })

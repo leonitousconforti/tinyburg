@@ -25,6 +25,7 @@
         { "path": "apps/doorman-clone" },
         { "path": "apps/social-circles" },
         { "path": "apps/tinyburg.app" },
-        { "path": "apps/treasury" }
+        { "path": "apps/treasury" },
+        { "path": "tsconfig.vitest.json" }
     ]
 }

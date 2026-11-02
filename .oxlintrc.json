@@ -65,6 +65,10 @@
         // Writing out the defaulted `never` channels keeps the public signatures readable
         // side by side, so this one stays off.
         "typescript/no-unnecessary-type-arguments": "off",
+        // An `Effect.gen` that exits early with `return yield* new SomeError()` and otherwise runs
+        // off the end is the idiom `effecttsgo/missing-return-yield-star` asks for, and exactly
+        // what this rule reports.
+        "typescript/consistent-return": "off",
         // Code quality
         "eslint/no-console": "error",
         "eslint/no-var": "error",
