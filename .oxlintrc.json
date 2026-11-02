@@ -37,10 +37,11 @@
         }
     ],
     "rules": {
-        // Both of these are design signals about error channels rather than defects, and the code
-        // they point at is in flight. Surfaced as warnings for now.
-        "effecttsgo/any-unknown-in-error-context": "warn",
-        "effecttsgo/global-error-in-effect-failure": "warn",
+        // Several public entry points are deliberately exposed as zero-argument functions returning
+        // an Effect, so that adding parameters later is not a breaking change. Worth seeing, not
+        // worth failing the build over.
+        "effecttsgo/lazy-effect": "warn",
+        "effecttsgo/unstable-api-usage": "off",
         // Import rules
         "typescript/consistent-type-imports": [
             "error",
@@ -49,6 +50,7 @@
             }
         ],
         "typescript/no-import-type-side-effects": "error",
+        // oxfmt sorts the import declarations but not the names inside their braces.
         "eslint/sort-imports": [
             "error",
             {
@@ -65,6 +67,10 @@
         // Writing out the defaulted `never` channels keeps the public signatures readable
         // side by side, so this one stays off.
         "typescript/no-unnecessary-type-arguments": "off",
+        // efffrida turns off `no-duplicate-type-constituents`, `no-unsafe-type-assertion`,
+        // `restrict-template-expressions` and `unbound-method` for its `?: T | undefined` style and
+        // its Frida binding layer. This repo has neither and passes all four, so they stay on.
+        //
         // An `Effect.gen` that exits early with `return yield* new SomeError()` and otherwise runs
         // off the end is the idiom `effecttsgo/missing-return-yield-star` asks for, and exactly
         // what this rule reports.
