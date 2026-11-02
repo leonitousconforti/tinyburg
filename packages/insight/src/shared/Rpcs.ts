@@ -1,5 +1,5 @@
+import { Schema } from "effect";
 import { Rpc, RpcGroup } from "effect/rpc";
-import * as Schema from "effect/Schema";
 
 export const TowerCredentials = Schema.Struct({
     playerId: Schema.String,
@@ -12,14 +12,6 @@ export class GameState extends Schema.Class<GameState, { readonly brand: unique 
     coins: Schema.Int,
     elevatorSpeed: Schema.Finite,
     goldenTickets: Schema.Int,
-    // allTimeGoldenTickets: Schema.Finite,
-    // numberOfFloors: Schema.Finite,
-    // numberOfBitizens: Schema.Finite,
-    // numberOfRoofsUnlocked: Schema.Finite,
-    // numberOfLobbiesUnlocked: Schema.Finite,
-    // numberOfCostumesUnlocked: Schema.Finite,
-    // numberOfElevatorsUnlocked: Schema.Finite,
-    // gameScreen: Schema.String,
 }) {}
 
 export class Rpcs extends RpcGroup.make(
