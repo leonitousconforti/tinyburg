@@ -29,12 +29,16 @@ import {
 } from "@efffrida/frida-tools";
 import { type AndroidDevice, GooglePlayApi, type PlayAccount } from "@efffrida/gplayapi";
 import { FridaRpcClient } from "@efffrida/rpc/node";
-import { JsPlatform } from "frida";
+import { JsPlatform, Realm } from "frida";
 
 const NdJsonSerialization = RpcSerialization.layerNdjson;
 const ProtocolLive = Layer.provide(FridaRpcClient.layerProtocolFrida(), NdJsonSerialization);
 
 /**
+ * TinyTower ships only ARM libraries, which the x86_64 emulator runs through
+ * Android's ARM translation. The agent attaches in the emulated realm, where
+ * that ARM code (libil2cpp.so among it) lives.
+ *
  * @since 1.0.0
  * @category Frida
  */
@@ -42,7 +46,7 @@ export const SessionLive: Layer.Layer<
     FridaSession.FridaSession,
     FridaSessionError.FridaSessionError,
     FridaDevice.FridaDevice
-> = FridaSession.layer("com.nimblebit.tinytower");
+> = FridaSession.layer("com.nimblebit.tinytower", { realm: Realm.Emulated });
 
 /**
  * @since 1.0.0
@@ -113,8 +117,8 @@ export const DeviceLive: Layer.Layer<
     | PlayAccount.PlayAccount
 > = Layer.tap(
     FridaDevice.layerAndroidEmulatorDeviceConfig("Small_Phone", {
-        fridaExecutable: "/data/local/tmp/frida-server-17.17.0-android-arm64",
-        extraEmulatorArgs: ["-gpu", "swiftshader_indirect"],
+        fridaExecutable: "/data/local/tmp/frida-server",
+        extraEmulatorArgs: ["-gpu", "swiftshader_indirect", "-no-metrics"],
     }),
     Effect.fnUntraced(
         // The early exits return never-typed values; the normal path runs to the end.
@@ -133,7 +137,7 @@ export const DeviceLive: Layer.Layer<
             });
 
             // Take straight from @efffrida/frida-tools for how it resolves adb
-            const androidSdk = yield* Config.String("ANDROID_SDK").pipe(
+            const androidSdk = yield* Config.String("ANDROID_HOME").pipe(
                 Config.map((androidSdk) => ({
                     adbExecutable: path.join(androidSdk, "platform-tools", "adb"),
                     emulatorExecutable: path.join(androidSdk, "emulator", "emulator"),

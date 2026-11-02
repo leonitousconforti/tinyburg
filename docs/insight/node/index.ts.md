@@ -34,7 +34,7 @@ declare const AgentLive: Layer.Layer<
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/insight/src/index.ts#L66)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/insight/src/index.ts#L70)
 
 Since v1.0.0
 
@@ -54,7 +54,7 @@ declare const AgentWatched: <A, E, R>(
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/insight/src/index.ts#L76)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/insight/src/index.ts#L80)
 
 Since v1.0.0
 
@@ -84,7 +84,7 @@ declare const DeviceLive: Layer.Layer<
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/insight/src/index.ts#L98)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/insight/src/index.ts#L102)
 
 Since v1.0.0
 
@@ -100,11 +100,15 @@ declare const ScriptLive: Layer.Layer<
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/insight/src/index.ts#L51)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/insight/src/index.ts#L55)
 
 Since v1.0.0
 
 ## SessionLive
+
+TinyTower ships only ARM libraries, which the x86_64 emulator runs through
+Android's ARM translation. The agent attaches in the emulated realm, where
+that ARM code (libil2cpp.so among it) lives.
 
 **Signature**
 
@@ -116,6 +120,6 @@ declare const SessionLive: Layer.Layer<
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/insight/src/index.ts#L41)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/insight/src/index.ts#L45)
 
 Since v1.0.0
