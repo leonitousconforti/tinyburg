@@ -19,6 +19,10 @@ if ! avdmanager list avd -c 2>/dev/null | grep -qx "$avd"; then
     echo no | avdmanager create avd -n "$avd" -k "system-images;android-34;google_apis;x86_64" -d small_phone >/dev/null 2>&1
 fi
 
+# Start adb's server with its output detached. One started by a later adb call
+# inherits this script's stdout and keeps a caller's pipe open after we exit.
+adb start-server </dev/null >/dev/null 2>&1
+
 work=$(mktemp -d)
 trap 'adb -s "$serial" emu kill >/dev/null 2>&1 || true; rm -rf "$work"' EXIT
 
