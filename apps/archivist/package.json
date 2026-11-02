@@ -7,7 +7,7 @@
         "@bufbuild/protobuf": "2.16.0",
         "@effect-aws/client-s3": "2.0.0",
         "@effect/platform-node": "4.1.1",
-        "@efffrida/gplayapi": "0.0.38",
+        "@efffrida/gplayapi": "0.0.39",
         "effect": "4.1.1",
         "redis": "6.3.1"
     }

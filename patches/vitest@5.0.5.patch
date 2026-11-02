@@ -1,0 +1,13 @@
+diff --git a/dist/chunks/run.BPv-BBRv.js b/dist/chunks/run.BPv-BBRv.js
+index 5c235b31744aebca14b9a79dd0836fa0faa9740f..5fd564665baf75cdc5788d1c2b281335a3e26feb 100644
+--- a/dist/chunks/run.BPv-BBRv.js
++++ b/dist/chunks/run.BPv-BBRv.js
+@@ -3015,7 +3015,7 @@ function formatTitle(template, items, idx) {
+ 	const inspectOptions = { truncate: runner.config.taskTitleValueFormatTruncate };
+ 	const isObjectItem = isObject(items[0]);
+ 	function formatAttribute(s) {
+-		return s.replace(/\$([$\p{ID_Continue}.]+)/gu, (_, key) => {
++		return s.replace(/\$([$\w.]+)/g, (_, key) => {
+ 			const isArrayKey = /^\d+$/.test(key);
+ 			if (!isObjectItem && !isArrayKey) return `$${key}`;
+ 			const arrayElement = isArrayKey ? objectAttr(items, key) : void 0;

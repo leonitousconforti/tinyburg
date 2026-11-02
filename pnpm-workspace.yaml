@@ -52,6 +52,11 @@ minimumReleaseAgeExclude:
   - "foldkit"
   - frida
 
+# effect and vitest: Frida's V8 runtime is built without ICU, so regexes using
+# `\p{...}` fail to compile inside agents (copied from efffrida). Drop these
+# once https://github.com/frida/frida-gum/issues/1195 is resolved.
 patchedDependencies:
   "@yielded/jose@0.1.0-beta.47": patches/@yielded__jose@0.1.0-beta.47.patch
   "@yielded/oauth@0.1.0-beta.47": patches/@yielded__oauth@0.1.0-beta.47.patch
+  effect@4.1.1: patches/effect@4.1.1.patch
+  vitest@5.0.5: patches/vitest@5.0.5.patch
