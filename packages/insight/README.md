@@ -17,7 +17,9 @@ images on an x86_64 host.
    container.
 3. Once: `packages/insight/scripts/setup-avd.sh` creates the `Small_Phone`
    AVD and puts a `frida-server` matching the `frida` package at
-   `/data/local/tmp/frida-server`.
+   `/data/local/tmp/frida-server`, then saves a snapshot that insight boots
+   from. Rerun it after updating the flake: a new emulator or system image
+   makes the snapshot unusable, and insight falls back to a full boot.
 
 `DeviceLive` then boots `Small_Phone` read-only, installs TinyTower from
 Google Play and starts `frida-server`.
