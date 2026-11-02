@@ -4,7 +4,7 @@ import { RpcClient } from "effect/rpc";
 
 import { NodeRuntime, NodeServices } from "@effect/platform-node";
 import { AndroidDevice, GooglePlayApi, PlayAccount } from "@efffrida/gplayapi";
-import { AgentLive, DeviceLive } from "@tinyburg/insight/node/index";
+import { AgentLive, DeviceLive } from "@tinyburg/insight/node";
 import { Rpcs } from "@tinyburg/insight/shared/Rpcs";
 
 const sortIndexable = <T extends Readonly<{ index: string }>>(

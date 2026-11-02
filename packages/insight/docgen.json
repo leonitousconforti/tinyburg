@@ -13,7 +13,6 @@
         "lib": ["ES2022"],
         "baseUrl": "../../",
         "paths": {
-            "@tinyburg/insight": ["./src/index.js"],
             "@tinyburg/insight/*": ["./src/*.js"]
         }
     }
