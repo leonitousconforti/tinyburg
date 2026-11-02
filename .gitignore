@@ -18,6 +18,11 @@ docs/examples/
 # Banish DS_STORE
 .DS_Store
 
+# scratchpad files
+scratchpad/**/*.ts
+!scratchpad/agent.ts
+!scratchpad/playground.ts
+
 # Unity
 Assembly-CSharp.dll
 
