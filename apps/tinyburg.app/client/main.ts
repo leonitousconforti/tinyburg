@@ -13,9 +13,11 @@ import {
     BackendMessage,
     CheckingSession,
     FetchLinkedTowers,
+    FetchOffers,
     FetchSession,
     FetchStats,
     LinkedTowers,
+    Offers,
     SessionState,
     SignedOut,
     Stats,
@@ -36,6 +38,7 @@ import { developerAppsView } from "./pages/developerApps.ts";
 import { developersView } from "./pages/developers.ts";
 import { homeView } from "./pages/home.ts";
 import { loginView } from "./pages/login.ts";
+import { marketView } from "./pages/market.ts";
 import { notFoundView } from "./pages/notFound.ts";
 import { privacyView } from "./pages/privacy.ts";
 import { sponsorsView } from "./pages/sponsors.ts";
@@ -65,6 +68,7 @@ export const Model = S.Struct({
     session: SessionState,
     linkedTowers: LinkedTowers.schema,
     stats: Stats.schema,
+    offers: Offers.schema,
     wizard: WizardModel,
     account: AccountModel,
     trades: TradesModel,
@@ -187,6 +191,17 @@ const enterRoute = (model: Model): Step => {
         return Option.match(AsyncData.revalidateOrLoad(model.stats), {
             onNone: (): Step => ({ model }),
             onSome: (stats): Step => ({ model: modifyFields(model, { stats: () => stats }), commands: [FetchStats()] }),
+        });
+    }
+
+    // The market pages' offers are public too, and one list feeds both.
+    if (route._tag === "Bitizens" || route._tag === "Costumes") {
+        return Option.match(AsyncData.revalidateOrLoad(model.offers), {
+            onNone: (): Step => ({ model }),
+            onSome: (offers): Step => ({
+                model: modifyFields(model, { offers: () => offers }),
+                commands: [FetchOffers()],
+            }),
         });
     }
 
@@ -339,6 +354,7 @@ export const update = (model: Model, message: Message): Step => {
                 model: modifyFields(model, { linkedTowers: AsyncData.settle(result) }),
             }),
             SettledStats: ({ result }) => ({ model: modifyFields(model, { stats: AsyncData.settle(result) }) }),
+            SettledOffers: ({ result }) => ({ model: modifyFields(model, { offers: AsyncData.settle(result) }) }),
             CompletedNavigation: () => ({ model }),
         })
     );
@@ -360,6 +376,7 @@ export const init: Runtime.RoutingApplicationInit<Model, Message, void, Backend>
                 session: CheckingSession(),
                 linkedTowers: LinkedTowers.Idle(),
                 stats: Stats.Idle(),
+                offers: Offers.Idle(),
                 wizard: initialWizardFor("tinytower"),
                 account: initialAccount,
                 trades: initialTrades,
@@ -390,6 +407,8 @@ const routeTitle = (route: AppRoute, titles: TitleMessages): string =>
             Account: () => titles.account,
             Trades: () => titles.trades,
             TradeDetail: () => titles.tradeDetail,
+            Bitizens: () => titles.bitizens,
+            Costumes: () => titles.costumes,
             NotFound: () => titles.notFound,
         })
     );
@@ -438,6 +457,10 @@ const pageView = (model: Model, msgs: Messages, h: HtmlBuilder<Message>): Html =
                 model.session._tag === "SignedIn"
                     ? tradeDetailView(h, msgs.trades, model.language, model.trades, model.linkedTowers)
                     : h.empty,
+            Bitizens: () =>
+                marketView(h, "bitizens", msgs.market, msgs.trades, msgs.shared, model.language, model.offers),
+            Costumes: () =>
+                marketView(h, "costumes", msgs.market, msgs.trades, msgs.shared, model.language, model.offers),
             NotFound: () => lazyNotFound(notFoundView, [h, msgs.notFound, msgs.shared]),
         })
     );
@@ -485,6 +508,8 @@ const routeDepth = (route: AppRoute): number =>
             TowerMe: () => 1,
             NotFound: () => 1,
             Trades: () => 1,
+            Bitizens: () => 1,
+            Costumes: () => 1,
             DeveloperApps: () => 2,
             TowerLink: () => 2,
             Account: () => 2,

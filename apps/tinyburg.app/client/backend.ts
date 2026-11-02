@@ -3,7 +3,7 @@ import { HttpClient, HttpClientError, HttpClientRequest, HttpClientResponse } fr
 import { HttpApiClient } from "effect/http-api";
 
 import { Api as TinyburgApi } from "@tinyburg/tinyburg-sdk/Sdk";
-import { Api as TreasuryApi, TreasuryStats } from "@tinyburg/treasury-sdk/Sdk";
+import { OpenOffer, Api as TreasuryApi, TreasuryStats } from "@tinyburg/treasury-sdk/Sdk";
 import { AsyncData, Command, Http } from "foldkit";
 import { defineMessageUnion } from "foldkit/message";
 import { taggedStruct } from "foldkit/schema";
@@ -187,6 +187,10 @@ export type LinkedTowers = typeof LinkedTowers.schema.Type;
 export const Stats = AsyncData.Schema(TreasuryStats, S.Literals(["loadFailed"]));
 export type Stats = typeof Stats.schema.Type;
 
+/** The treasury's open offers, which the market pages filter by what they give. */
+export const Offers = AsyncData.Schema(S.Array(OpenOffer), S.Literals(["loadFailed"]));
+export type Offers = typeof Offers.schema.Type;
+
 /**
  * What the backend tells the application.
  *
@@ -202,6 +206,8 @@ export const BackendMessage = defineMessageUnion({
     SettledLinkedTowers: { result: S.Result(S.Array(LinkedTower), S.Literals(["loadFailed"])) },
 
     SettledStats: { result: S.Result(TreasuryStats, S.Literals(["loadFailed"])) },
+
+    SettledOffers: { result: S.Result(S.Array(OpenOffer), S.Literals(["loadFailed"])) },
 });
 export type BackendMessage = typeof BackendMessage.Type;
 
@@ -231,6 +237,16 @@ export const FetchStats = Command.define("FetchStats", {
         const stats = yield* treasury.TreasuryPublicGroup.Stats();
         return BackendMessage.SettledStats({ result: Result.succeed(stats) });
     }).pipe(Effect.catch(() => Effect.succeed(BackendMessage.SettledStats({ result: Result.fail("loadFailed") })))),
+});
+
+/** The open offers for the market pages: public too, like the counters. */
+export const FetchOffers = Command.define("FetchOffers", {
+    messages: [BackendMessage.SettledOffers],
+    execute: Effect.gen(function* () {
+        const treasury = yield* Treasury;
+        const offers = yield* treasury.TreasuryPublicGroup.OpenOffers();
+        return BackendMessage.SettledOffers({ result: Result.succeed(offers) });
+    }).pipe(Effect.catch(() => Effect.succeed(BackendMessage.SettledOffers({ result: Result.fail("loadFailed") })))),
 });
 
 export const FetchLinkedTowers = Command.define("FetchLinkedTowers", {

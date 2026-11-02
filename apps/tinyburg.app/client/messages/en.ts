@@ -29,6 +29,8 @@ export const en: Messages = {
         account: "Account & Security | Tinyburg",
         trades: "Trades | Tinyburg",
         tradeDetail: "Trade | Tinyburg",
+        bitizens: "Bitizens for Trade | Tinyburg",
+        costumes: "Costumes & Pets for Trade | Tinyburg",
         notFound: "Page Not Found | Tinyburg",
     },
     home: {
@@ -455,6 +457,20 @@ export const en: Messages = {
         confirmButton: "I Understand - Confirm the Splice",
         awaitingOther: "You have confirmed. Waiting for the other trader.",
         failureReason: (reason: string) => `Failed: ${reason}`,
+    },
+    market: {
+        bitizens: {
+            heading: "Bitizens for Trade",
+            tagline: "Open offers that give away a bitizen. Any player with a linked tower can take one.",
+            empty: "No open offer gives away a bitizen right now.",
+        },
+        costumes: {
+            heading: "Costumes & Pets for Trade",
+            tagline: "Open offers that give away a costume or a pet. Any player with a linked tower can take one.",
+            empty: "No open offer gives away a costume or a pet right now.",
+        },
+        makeOffer: "Make an offer",
+        viewOffer: "View offer →",
     },
     notFound: {
         heading: "Floor Not Found",

@@ -35,6 +35,8 @@ export const fr: Messages = {
         account: "Compte et sécurité | Tinyburg",
         trades: "Échanges | Tinyburg",
         tradeDetail: "Échange | Tinyburg",
+        bitizens: "Bitizens à échanger | Tinyburg",
+        costumes: "Costumes et animaux à échanger | Tinyburg",
         notFound: "Page introuvable | Tinyburg",
     },
     home: {
@@ -470,6 +472,21 @@ export const fr: Messages = {
         confirmButton: "Compris - confirmer la fusion",
         awaitingOther: "Tu as confirmé. En attente de l'autre partie.",
         failureReason: (reason: string) => `Échec : ${reason}`,
+    },
+    market: {
+        bitizens: {
+            heading: "Bitizens à échanger",
+            tagline: "Offres ouvertes qui cèdent un bitizen. Tout joueur avec une tour liée peut en accepter une.",
+            empty: "Aucune offre ouverte ne cède de bitizen pour le moment.",
+        },
+        costumes: {
+            heading: "Costumes et animaux à échanger",
+            tagline:
+                "Offres ouvertes qui cèdent un costume ou un animal. Tout joueur avec une tour liée peut en accepter une.",
+            empty: "Aucune offre ouverte ne cède de costume ou d'animal pour le moment.",
+        },
+        makeOffer: "Faire une offre",
+        viewOffer: "Voir l'offre →",
     },
     notFound: {
         heading: "Étage introuvable",

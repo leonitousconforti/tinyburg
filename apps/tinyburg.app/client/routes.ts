@@ -19,6 +19,8 @@ export const AppRoute = defineRouteUnion({
     Account: { link: S.Option(S.String), error: S.Option(S.String) },
     Trades: { connected: S.Option(S.String), error: S.Option(S.String) },
     TradeDetail: { tradeId: S.String },
+    Bitizens: {},
+    Costumes: {},
     NotFound: { path: S.String },
 });
 export type AppRoute = typeof AppRoute.Type;
@@ -67,6 +69,8 @@ export const tradeDetailRouter = pipe(
     slash(schemaSegment("tradeId", S.String)),
     Route.mapTo(AppRoute.TradeDetail)
 );
+export const bitizensRouter = pipe(literal("bitizens"), Route.mapTo(AppRoute.Bitizens));
+export const costumesRouter = pipe(literal("costumes"), Route.mapTo(AppRoute.Costumes));
 
 const routeParser = Route.oneOf(
     homeRouter,
@@ -82,7 +86,9 @@ const routeParser = Route.oneOf(
     accountRouter,
     // Detail before list: /trades/<id> must not fall through to /trades.
     tradeDetailRouter,
-    tradesRouter
+    tradesRouter,
+    bitizensRouter,
+    costumesRouter
 );
 
 export const urlToAppRoute = Route.parseUrlWithFallback(routeParser, AppRoute.NotFound);

@@ -38,6 +38,8 @@ export interface TitleMessages {
     readonly account: string;
     readonly trades: string;
     readonly tradeDetail: string;
+    readonly bitizens: string;
+    readonly costumes: string;
     readonly notFound: string;
 }
 
@@ -390,6 +392,20 @@ export interface TradesMessages {
     readonly failureReason: (reason: string) => string;
 }
 
+/** One market page: the open offers that give one kind of item. */
+export interface MarketPageMessages {
+    readonly heading: string;
+    readonly tagline: string;
+    readonly empty: string;
+}
+
+export interface MarketMessages {
+    readonly bitizens: MarketPageMessages;
+    readonly costumes: MarketPageMessages;
+    readonly makeOffer: string;
+    readonly viewOffer: string;
+}
+
 export interface NotFoundMessages {
     readonly heading: string;
     readonly body: string;
@@ -410,5 +426,6 @@ export interface Messages {
     readonly towerLink: TowerLinkMessages;
     readonly towerMe: TowerMeMessages;
     readonly trades: TradesMessages;
+    readonly market: MarketMessages;
     readonly notFound: NotFoundMessages;
 }

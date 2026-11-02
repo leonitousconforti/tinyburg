@@ -35,6 +35,8 @@ export const de: Messages = {
         account: "Konto & Sicherheit | Tinyburg",
         trades: "Trades | Tinyburg",
         tradeDetail: "Trade | Tinyburg",
+        bitizens: "Bitizens zum Tauschen | Tinyburg",
+        costumes: "Kostüme & Haustiere zum Tauschen | Tinyburg",
         notFound: "Seite nicht gefunden | Tinyburg",
     },
     home: {
@@ -475,6 +477,22 @@ export const de: Messages = {
         confirmButton: "Verstanden - Splice bestätigen",
         awaitingOther: "Du hast bestätigt. Warte auf den anderen Handelspartner.",
         failureReason: (reason: string) => `Fehlgeschlagen: ${reason}`,
+    },
+    market: {
+        bitizens: {
+            heading: "Bitizens zum Tauschen",
+            tagline:
+                "Offene Angebote, die einen Bitizen abgeben. Jeder Spieler mit einem verknüpften Tower kann eines annehmen.",
+            empty: "Gerade gibt kein offenes Angebot einen Bitizen ab.",
+        },
+        costumes: {
+            heading: "Kostüme & Haustiere zum Tauschen",
+            tagline:
+                "Offene Angebote, die ein Kostüm oder ein Haustier abgeben. Jeder Spieler mit einem verknüpften Tower kann eines annehmen.",
+            empty: "Gerade gibt kein offenes Angebot ein Kostüm oder ein Haustier ab.",
+        },
+        makeOffer: "Angebot erstellen",
+        viewOffer: "Angebot ansehen →",
     },
     notFound: {
         heading: "Etage nicht gefunden",

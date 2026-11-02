@@ -35,6 +35,8 @@ export const es: Messages = {
         account: "Cuenta y seguridad | Tinyburg",
         trades: "Intercambios | Tinyburg",
         tradeDetail: "Intercambio | Tinyburg",
+        bitizens: "Bitizens en intercambio | Tinyburg",
+        costumes: "Disfraces y mascotas en intercambio | Tinyburg",
         notFound: "Página no encontrada | Tinyburg",
     },
     home: {
@@ -469,6 +471,22 @@ export const es: Messages = {
         confirmButton: "Entendido: confirmar el empalme",
         awaitingOther: "Has confirmado. Esperando a la otra persona.",
         failureReason: (reason: string) => `Fallido: ${reason}`,
+    },
+    market: {
+        bitizens: {
+            heading: "Bitizens en intercambio",
+            tagline:
+                "Ofertas abiertas que entregan un bitizen. Cualquier jugador con una torre vinculada puede aceptarlas.",
+            empty: "Ahora mismo ninguna oferta abierta entrega un bitizen.",
+        },
+        costumes: {
+            heading: "Disfraces y mascotas en intercambio",
+            tagline:
+                "Ofertas abiertas que entregan un disfraz o una mascota. Cualquier jugador con una torre vinculada puede aceptarlas.",
+            empty: "Ahora mismo ninguna oferta abierta entrega un disfraz o una mascota.",
+        },
+        makeOffer: "Hacer una oferta",
+        viewOffer: "Ver oferta →",
     },
     notFound: {
         heading: "Piso no encontrado",
