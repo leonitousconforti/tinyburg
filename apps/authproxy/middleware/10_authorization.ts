@@ -32,131 +32,161 @@ const internalError = (error: unknown) =>
         Effect.andThen(Effect.fail(new HttpApiError.InternalServerError()))
     );
 
-export const AuthorizationLive = Layer.effect(
-    Authorization,
-    Effect.gen(function* () {
-        const repo = yield* Repository;
-        const rateLimiter = yield* RateLimiter.make;
+/**
+ * `unscoped` is what an endpoint without an `OAuthScope.Required` asks for.
+ * Left out, such an endpoint is one no key may call.
+ */
+const make = (options: { readonly unscoped?: OAuthScope.Requirement }) =>
+    Layer.effect(
+        Authorization,
+        Effect.gen(function* () {
+            const repo = yield* Repository;
+            const rateLimiter = yield* RateLimiter.make;
 
-        const unauthenticatedLimit = 3;
-        const unauthenticatedWindow = Duration.minutes(1);
+            const unauthenticatedLimit = 3;
+            const unauthenticatedWindow = Duration.minutes(1);
 
-        const seededNoneApiKeyEffect = repo.seededNoneApiKey.pipe(
-            Effect.map((apiKey) => apiKey.key),
-            Effect.catchNoSuchElement,
-            Effect.map(Option.getOrUndefined)
-        );
-
-        const seededReadonlyApiKeyEffect = repo.seededReadonlyApiKey.pipe(
-            Effect.map((apiKey) => apiKey.key),
-            Effect.catchNoSuchElement,
-            Effect.map(Option.getOrUndefined)
-        );
-
-        const catch429s = <A, E, R>(
-            effect: Effect.Effect<A, E | RateLimiter.RateLimiterError, R>
-        ): Effect.Effect<A | HttpServerResponse.HttpServerResponse, E | HttpApiError.InternalServerError, R> =>
-            Effect.catchReason(
-                effect,
-                "RateLimiterError",
-                "RateLimitExceeded",
-                (rateLimitExceeded) =>
-                    HttpServerResponse.raw("", {
-                        status: 429,
-                        contentLength: 0,
-                        statusText: "Too Many Requests",
-                        headers: {
-                            "X-RateLimit-Limit": rateLimitExceeded.limit.toString(),
-                            "X-RateLimit-Remaining": rateLimitExceeded.remaining.toString(),
-                            "X-RateLimit-Reset": Duration.toSeconds(rateLimitExceeded.retryAfter).toString(),
-                        },
-                    }).pipe(Effect.succeed),
-                internalError
+            const seededNoneApiKeyEffect = repo.seededNoneApiKey.pipe(
+                Effect.map((apiKey) => apiKey.key),
+                Effect.catchNoSuchElement,
+                Effect.map(Option.getOrUndefined)
             );
 
-        const catch500s = <A, E, R>(effect: Effect.Effect<A, E | SqlError.SqlError | Schema.SchemaError, R>) =>
-            effect.pipe(
-                Effect.catchIf(Schema.isSchemaError, internalError),
-                Effect.catchIf(SqlError.isSqlError, internalError)
+            const seededReadonlyApiKeyEffect = repo.seededReadonlyApiKey.pipe(
+                Effect.map((apiKey) => apiKey.key),
+                Effect.catchNoSuchElement,
+                Effect.map(Option.getOrUndefined)
             );
 
-        return {
-            bearer: Effect.fnUntraced(
-                function* (next, { credential, endpoint }) {
-                    const bearerToken = Redacted.value(credential);
-                    const request = yield* HttpServerRequest.HttpServerRequest;
-                    const maybeApiKey = isApiKey(bearerToken)
-                        ? yield* repo.findById(bearerToken).pipe(Effect.catchNoSuchElement)
-                        : Option.none();
+            const catch429s = <A, E, R>(
+                effect: Effect.Effect<A, E | RateLimiter.RateLimiterError, R>
+            ): Effect.Effect<A | HttpServerResponse.HttpServerResponse, E | HttpApiError.InternalServerError, R> =>
+                Effect.catchReason(
+                    effect,
+                    "RateLimiterError",
+                    "RateLimitExceeded",
+                    (rateLimitExceeded) =>
+                        HttpServerResponse.raw("", {
+                            status: 429,
+                            contentLength: 0,
+                            statusText: "Too Many Requests",
+                            headers: {
+                                "X-RateLimit-Limit": rateLimitExceeded.limit.toString(),
+                                "X-RateLimit-Remaining": rateLimitExceeded.remaining.toString(),
+                                "X-RateLimit-Reset": Duration.toSeconds(rateLimitExceeded.retryAfter).toString(),
+                            },
+                        }).pipe(Effect.succeed),
+                    internalError
+                );
 
-                    const headers = request.headers;
-                    const doConnectingIp = Headers.get(headers, "do-connecting-ip");
+            const catch500s = <A, E, R>(effect: Effect.Effect<A, E | SqlError.SqlError | Schema.SchemaError, R>) =>
+                effect.pipe(
+                    Effect.catchIf(Schema.isSchemaError, internalError),
+                    Effect.catchIf(SqlError.isSqlError, internalError)
+                );
 
-                    const seededNoneApiKey = yield* seededNoneApiKeyEffect;
-                    const seededReadonlyApiKey = yield* seededReadonlyApiKeyEffect;
+            return {
+                bearer: Effect.fnUntraced(
+                    function* (next, { credential, endpoint }) {
+                        const bearerToken = Redacted.value(credential);
+                        const request = yield* HttpServerRequest.HttpServerRequest;
+                        const maybeApiKey = isApiKey(bearerToken)
+                            ? yield* repo.findById(bearerToken).pipe(Effect.catchNoSuchElement)
+                            : Option.none();
 
-                    yield* rateLimiter.consume({
-                        onExceeded: "fail",
-                        algorithm: "fixed-window",
-                        key: maybeApiKey.pipe(
-                            Option.map((apiKey) => apiKey.key),
-                            Option.filter((key) => key !== seededNoneApiKey),
-                            Option.filter((key) => key !== seededReadonlyApiKey),
-                            Option.orElse(() => doConnectingIp),
-                            Option.getOrElse(() => "unknown")
-                        ),
-                        limit: maybeApiKey.pipe(
-                            Option.map((apiKey) => apiKey.rateLimitLimit),
-                            Option.getOrElse(() => unauthenticatedLimit)
-                        ),
-                        window: maybeApiKey.pipe(
-                            Option.map((apiKey) => apiKey.rateLimitWindow),
-                            Option.getOrElse(() => unauthenticatedWindow)
-                        ),
-                    });
+                        const headers = request.headers;
+                        const doConnectingIp = Headers.get(headers, "do-connecting-ip");
 
-                    // The scopes that unlock this endpoint are read off the
-                    // endpoint itself: the `OAuthScope.Required` annotation
-                    // stamped on it in its game's sdk. A key needs one of them,
-                    // by name, exactly. An endpoint carrying none is one no key
-                    // may call through the proxy, whatever it holds.
-                    const requirement = Context.getOrUndefined(endpoint.annotations, OAuthScope.Required);
-                    const isAuthenticated = Option.isSome(maybeApiKey);
-                    const isAuthorized =
-                        isAuthenticated &&
-                        requirement !== undefined &&
-                        NimblebitScopes.isSatisfied(requirement, maybeApiKey.value.scopes) &&
-                        !maybeApiKey.value.revoked;
+                        const seededNoneApiKey = yield* seededNoneApiKeyEffect;
+                        const seededReadonlyApiKey = yield* seededReadonlyApiKeyEffect;
 
-                    if (!isAuthenticated) return yield* new HttpApiError.Unauthorized();
-                    else if (!isAuthorized) return yield* new HttpApiError.Forbidden();
+                        yield* rateLimiter.consume({
+                            onExceeded: "fail",
+                            algorithm: "fixed-window",
+                            key: maybeApiKey.pipe(
+                                Option.map((apiKey) => apiKey.key),
+                                Option.filter((key) => key !== seededNoneApiKey),
+                                Option.filter((key) => key !== seededReadonlyApiKey),
+                                Option.orElse(() => doConnectingIp),
+                                Option.getOrElse(() => "unknown")
+                            ),
+                            limit: maybeApiKey.pipe(
+                                Option.map((apiKey) => apiKey.rateLimitLimit),
+                                Option.getOrElse(() => unauthenticatedLimit)
+                            ),
+                            window: maybeApiKey.pipe(
+                                Option.map((apiKey) => apiKey.rateLimitWindow),
+                                Option.getOrElse(() => unauthenticatedWindow)
+                            ),
+                        });
 
-                    const now = yield* DateTime.now;
-                    const apiKeyLastUsedAt = maybeApiKey.value.lastUsedAt;
+                        // The scopes that unlock this endpoint are read off the
+                        // endpoint itself: the `OAuthScope.Required` annotation
+                        // stamped on it in its game's sdk. A key needs one of them,
+                        // by name, exactly. An endpoint carrying none takes the
+                        // layer's `unscoped`, if it has one.
+                        const requirement =
+                            Context.getOrUndefined(endpoint.annotations, OAuthScope.Required) ?? options.unscoped;
+                        const isAuthenticated = Option.isSome(maybeApiKey);
+                        const isAuthorized =
+                            isAuthenticated &&
+                            requirement !== undefined &&
+                            NimblebitScopes.isSatisfied(requirement, maybeApiKey.value.scopes) &&
+                            !maybeApiKey.value.revoked;
 
-                    if (
-                        Duration.isGreaterThanOrEqualTo(DateTime.distance(apiKeyLastUsedAt, now), Duration.minutes(1))
-                    ) {
-                        const updatedApiKey = yield* ApiKey.update
-                            .makeEffect({
-                                key: maybeApiKey.value.key,
-                                scopes: maybeApiKey.value.scopes,
-                                revoked: maybeApiKey.value.revoked,
-                                description: maybeApiKey.value.description,
-                                ownerSub: maybeApiKey.value.ownerSub,
-                                rateLimitLimit: maybeApiKey.value.rateLimitLimit,
-                                rateLimitWindow: maybeApiKey.value.rateLimitWindow,
-                            })
-                            .pipe(Effect.mapError((issue) => new Schema.SchemaError(issue)));
+                        if (!isAuthenticated) return yield* new HttpApiError.Unauthorized();
+                        else if (!isAuthorized) return yield* new HttpApiError.Forbidden();
 
-                        yield* repo.updateVoid(updatedApiKey);
-                    }
+                        const now = yield* DateTime.now;
+                        const apiKeyLastUsedAt = maybeApiKey.value.lastUsedAt;
 
-                    return yield* next;
-                },
-                catch500s,
-                catch429s
-            ),
-        };
-    })
-);
+                        if (
+                            Duration.isGreaterThanOrEqualTo(
+                                DateTime.distance(apiKeyLastUsedAt, now),
+                                Duration.minutes(1)
+                            )
+                        ) {
+                            const updatedApiKey = yield* ApiKey.update
+                                .makeEffect({
+                                    key: maybeApiKey.value.key,
+                                    scopes: maybeApiKey.value.scopes,
+                                    revoked: maybeApiKey.value.revoked,
+                                    description: maybeApiKey.value.description,
+                                    ownerSub: maybeApiKey.value.ownerSub,
+                                    rateLimitLimit: maybeApiKey.value.rateLimitLimit,
+                                    rateLimitWindow: maybeApiKey.value.rateLimitWindow,
+                                })
+                                .pipe(Effect.mapError((issue) => new Schema.SchemaError(issue)));
+
+                            yield* repo.updateVoid(updatedApiKey);
+                        }
+
+                        return yield* next;
+                    },
+                    catch500s,
+                    catch429s
+                ),
+            };
+        })
+    );
+
+/**
+ * For TinyTower and Classic, whose sdks scope every endpoint.
+ */
+export const AuthorizationLive = make({});
+
+/**
+ * For a game whose sdk leaves some reads unscoped: sync (and LEGO Tower's
+ * trades) has no write side yet, so it is not in the scope tree. Those take
+ * the game's `:read` branch, or the whole game. `DeviceNewPlayer` is
+ * unscoped too, but its handler refuses it anyway.
+ */
+export const authorizationLiveFor = (game: NimblebitScopes.Game) =>
+    make({
+        unscoped: {
+            anyOf: [
+                { name: game.name, description: game.description },
+                { name: game.read.name, description: game.read.description },
+            ],
+        },
+    });

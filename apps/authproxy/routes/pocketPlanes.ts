@@ -4,8 +4,9 @@ import { Config, Context, Effect, Function, Layer, type Schema } from "effect";
 import { HttpApiBuilder, HttpApiClient, HttpApiError } from "effect/http-api";
 
 import { NimblebitAuth, NimblebitConfig } from "@tinyburg/nimblebit-sdk";
-import { Endpoints } from "@tinyburg/pocket-planes-sdk";
+import { Endpoints, Scopes } from "@tinyburg/pocket-planes-sdk";
 
+import { Authorization, authorizationLiveFor } from "../middleware/10_authorization.ts";
 import { AuthProxyApiDecodeHash, AuthProxyApiDecodeHashLive } from "../middleware/20_tinytowerDecode.ts";
 
 /** @internal */
@@ -22,15 +23,8 @@ const catch500s = <A, E, R>(effect: Effect.Effect<A, E | Schema.SchemaError | Ht
         Effect.catchTag("HttpClientError", () => new HttpApiError.InternalServerError())
     );
 
-/**
- * NOTE: the `Authorization` (bearer + scope) middleware is intentionally not
- * applied yet - not every endpoint here carries an `OAuthScope.Required`, and
- * `Authorization` forbids any endpoint that carries none. Add
- * `.middleware(Authorization)` (and `AuthorizationLive` below) once they all do.
- *
- * @internal
- */
-const Api = Endpoints.Api.middleware(AuthProxyApiDecodeHash);
+/** @internal */
+const Api = Endpoints.Api.middleware(Authorization).middleware(AuthProxyApiDecodeHash);
 
 /**
  * @since 1.0.0
@@ -90,7 +84,7 @@ export const PocketPlanesSocialLive = HttpApiBuilder.group(
  */
 export const PocketPlanesApiLive = HttpApiBuilder.layer(Api).pipe(
     Layer.provide([PocketPlanesDeviceManagementLive, PocketPlanesSyncManagementLive, PocketPlanesSocialLive]),
-    Layer.provide(AuthProxyApiDecodeHashLive),
+    Layer.provide([authorizationLiveFor(Scopes.PocketPlanes), AuthProxyApiDecodeHashLive]),
     Layer.provide(
         NimblebitAuth.layerDirectConfig(
             Config.schema(NimblebitConfig.NimblebitAuthKeySchema, "POCKETPLANES_NIMBLEBIT_AUTH_KEY")
