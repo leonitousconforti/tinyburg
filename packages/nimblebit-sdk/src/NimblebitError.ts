@@ -11,7 +11,7 @@ import * as internal from "./internal/Error.ts";
  * @since 1.0.0
  * @category Errors
  */
-export const NimblebitErrorTypeId: unique symbol = internal.NimblebitErrorTypeId;
+export const NimblebitErrorTypeId: typeof internal.NimblebitErrorTypeId = internal.NimblebitErrorTypeId;
 
 /**
  * @since 1.0.0

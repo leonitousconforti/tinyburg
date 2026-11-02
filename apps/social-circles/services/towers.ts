@@ -284,9 +284,7 @@ export class TinyburgTowers extends Context.Service<TinyburgTowers>()(
                                     (cause) =>
                                         new TowerGrantUnusable({
                                             tinyburgUserId: options.tinyburgUserId,
-                                            // Frida's runtime handles are not plain strings; interpolating them here is intentional.
-                                            // oxlint-disable-next-line typescript/restrict-template-expressions
-                                            reason: `could not list linked ${game.name} accounts: ${cause}`,
+                                            reason: `could not list linked ${game.name} accounts: ${String(cause)}`,
                                             permanent: false,
                                         })
                                 )
@@ -332,9 +330,7 @@ export class TinyburgTowers extends Context.Service<TinyburgTowers>()(
                         (cause) =>
                             new TowerUnavailable({
                                 playerId: options.playerId,
-                                // Frida's runtime handles are not plain strings; interpolating them here is intentional.
-                                // oxlint-disable-next-line typescript/restrict-template-expressions
-                                reason: `pull failed: ${cause}`,
+                                reason: `pull failed: ${String(cause)}`,
                             })
                     )
                 );

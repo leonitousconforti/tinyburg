@@ -88,9 +88,7 @@ export class Vault extends Context.Service<Vault>()("@tinyburg/treasury/services
                     Effect.mapError(
                         (cause) =>
                             new VaultUnavailable({
-                                // Sdk failures are not plain strings; interpolating them here is intentional.
-                                // oxlint-disable-next-line typescript/restrict-template-expressions
-                                reason: `${what} failed: ${cause}`,
+                                reason: `${what} failed: ${String(cause)}`,
                             })
                     )
                 )

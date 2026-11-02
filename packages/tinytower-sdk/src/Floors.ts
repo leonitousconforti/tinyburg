@@ -426,11 +426,16 @@ const FloorIdSchema = Schema.suspend(() => {
               }>;
     }[ValidFloorIndices];
 
-    // Bridges an untyped runtime boundary; the shape is guaranteed by construction, not by the compiler.
+    const isValidFloor = (floor: Floor): floor is ValidFloor => floor.type !== floorType.None;
+    const isValidFloorIndex = (index: number): index is ValidFloorIndices =>
+        Option.exists(Array.get(floors, index), isValidFloor);
+
+    // One struct per valid floor, which the compiler sees as a single struct
+    // over every valid name and type rather than their union.
     // oxlint-disable-next-line typescript/no-unsafe-type-assertion
     const validFloorsSchema = Function.pipe(
         floors,
-        Array.filter((floor) => floor.type !== floorType.None),
+        Array.filter(isValidFloor),
         Array.map((floor) =>
             Schema.Struct({
                 name: Schema.Literal(floor.name),
@@ -439,15 +444,12 @@ const FloorIdSchema = Schema.suspend(() => {
         )
     ) as Array<ValidFloorsSchema>;
 
-    // Bridges an untyped runtime boundary; the shape is guaranteed by construction, not by the compiler.
+    // Every valid index, which the compiler sees as any number of them rather
+    // than the one tuple `ValidIndicesSchema` spells out.
     // oxlint-disable-next-line typescript/no-unsafe-type-assertion
     const validIndicesSchema = Function.pipe(
-        floors,
-        Array.map((floor, index) => ({ ...floor, index })),
-        Array.filter(({ type }) => type !== floorType.None),
-        // Bridges an untyped runtime boundary; the shape is guaranteed by construction, not by the compiler.
-        // oxlint-disable-next-line typescript/no-unsafe-type-assertion
-        Array.map(({ index }) => index as unknown as ValidFloorIndices),
+        Array.map(floors, (_, index) => index),
+        Array.filter(isValidFloorIndex),
         (literals) => Schema.Literals(literals)
     ) as ValidIndicesSchema;
 
@@ -465,10 +467,8 @@ const FloorIdSchema = Schema.suspend(() => {
             Schema.Union(validFloorsSchema),
             SchemaTransformation.transformEffect({
                 encode: (input: ValidFloor) =>
-                    Option.match(tryFindFloor(input), {
-                        // Bridges an untyped runtime boundary; the shape is guaranteed by construction, not by the compiler.
-                        // oxlint-disable-next-line typescript/no-unsafe-type-assertion
-                        onSome: (index) => Effect.succeed(index as ValidFloorIndices),
+                    Option.match(Option.filter(tryFindFloor(input), isValidFloorIndex), {
+                        onSome: Effect.succeed,
                         onNone: () =>
                             Effect.fail(
                                 new SchemaIssue.InvalidValue(
@@ -480,10 +480,8 @@ const FloorIdSchema = Schema.suspend(() => {
                             ),
                     }),
                 decode: (index: ValidFloorIndices) =>
-                    Option.match(Array.get(floors, index), {
-                        // Bridges an untyped runtime boundary; the shape is guaranteed by construction, not by the compiler.
-                        // oxlint-disable-next-line typescript/no-unsafe-type-assertion
-                        onSome: (floor) => Effect.succeed(floor as ValidFloor),
+                    Option.match(Option.filter(Array.get(floors, index), isValidFloor), {
+                        onSome: Effect.succeed,
                         onNone: () =>
                             Effect.fail(
                                 new SchemaIssue.InvalidValue(

@@ -7,16 +7,9 @@ import { SqlError } from "effect/sql";
 import { NimblebitScopes } from "@tinyburg/nimblebit-sdk";
 import * as OAuthScope from "@yielded/auth/OAuthScope";
 
-import { ApiKey, ApiKeyValue, type CurrentApiKey, Repository } from "../domain/model.ts";
+import { ApiKey, ApiKeyValue, Repository } from "../domain/model.ts";
 
-export class Authorization extends HttpApiMiddleware.Service<
-    Authorization,
-    {
-        // Written out to mirror the neighboring signatures.
-        // oxlint-disable-next-line typescript/no-redundant-type-constituents
-        provides: CurrentApiKey & never;
-    }
->()("Authorization", {
+export class Authorization extends HttpApiMiddleware.Service<Authorization>()("Authorization", {
     error: [HttpApiError.Unauthorized, HttpApiError.Forbidden, HttpApiError.InternalServerError],
     security: {
         bearer: HttpApiSecurity.bearer,

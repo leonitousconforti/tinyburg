@@ -203,9 +203,7 @@ const RpcsLive = Rpcs.toLayer(
                 const types = readEnum(FloorTypeClass);
                 const floors = pipe(
                     FloorsField.value,
-                    // Passed straight into an Effect combinator that calls it with the right receiver.
-                    // oxlint-disable-next-line typescript/unbound-method
-                    Extensions.Dictionary.lift<number, Il2Cpp.Object>,
+                    (object) => Extensions.Dictionary.lift<number, Il2Cpp.Object>(object),
                     (floorInfo) => floorInfo.entries,
                     Array.map(([floorIndex, floorObject]) => {
                         const index = floorIndex.toString();
@@ -319,9 +317,7 @@ const RpcsLive = Rpcs.toLayer(
                 const mediaTypes = readEnum(PostMediaTypeClass);
                 const posts = pipe(
                     PostsField.value,
-                    // Passed straight into an Effect combinator that calls it with the right receiver.
-                    // oxlint-disable-next-line typescript/unbound-method
-                    Extensions.Dictionary.lift<number, Il2Cpp.Object>,
+                    (object) => Extensions.Dictionary.lift<number, Il2Cpp.Object>(object),
                     (postDict) => postDict.values,
                     Array.map((postObject) => liftNimblebitDSO(postObject).toRecord()),
                     Array.map(Record.map((object) => object.toString()))
@@ -351,9 +347,10 @@ const RpcsLive = Rpcs.toLayer(
                     Array.fromIterable<Il2Cpp.Field.Type>,
                     Array.filterMap(readString)
                 );
-                // Passed straight into an Effect combinator that calls it with the right receiver.
-                // oxlint-disable-next-line typescript/unbound-method
-                const readObjectList = Function.compose(Extensions.List.lift<Il2Cpp.Object>, readStringArray);
+                const readObjectList = Function.compose(
+                    (object: Il2Cpp.Object) => Extensions.List.lift<Il2Cpp.Object>(object),
+                    readStringArray
+                );
 
                 const LocalizationManagerInstance = Il2Cpp.gc.choose(LocalizationManager)[0];
                 const MaleNamesField = LocalizationManagerInstance.field<StringArray>("maleNames");
@@ -389,9 +386,7 @@ const RpcsLive = Rpcs.toLayer(
                 const TipMissionsField = yield* tryFieldCached<Il2Cpp.Object>(VMissionDataClass, "tipMissions");
                 const TutorialMissionsField = yield* tryFieldCached<Il2Cpp.Object>(VMissionDataClass, "tutMissions");
                 const values = Function.compose(
-                    // Passed straight into an Effect combinator that calls it with the right receiver.
-                    // oxlint-disable-next-line typescript/unbound-method
-                    Extensions.Dictionary.lift<number, Il2Cpp.Object>,
+                    (object: Il2Cpp.Object) => Extensions.Dictionary.lift<number, Il2Cpp.Object>(object),
                     (dict) => dict.values
                 );
 

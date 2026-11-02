@@ -1,17 +1,11 @@
 import * as Data from "effect/Data";
 import * as Predicate from "effect/Predicate";
 
-import type * as NimblebitErrorType from "../NimblebitError.ts";
-
 /**
  * @since 1.0.0
  * @category Error
  */
-// Bridges an untyped runtime boundary; the shape is guaranteed by construction, not by the compiler.
-// oxlint-disable-next-line typescript/no-unsafe-type-assertion
-export const NimblebitErrorTypeId: NimblebitErrorType.NimblebitErrorTypeId = Symbol.for(
-    "@tinyburg/nimblebit-sdk/NimblebitError"
-) as NimblebitErrorType.NimblebitErrorTypeId;
+export const NimblebitErrorTypeId: unique symbol = Symbol.for("@tinyburg/nimblebit-sdk/NimblebitError");
 
 /**
  * @since 1.0.0

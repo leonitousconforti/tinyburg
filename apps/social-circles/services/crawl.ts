@@ -105,11 +105,13 @@ export class CrawlService extends Context.Service<CrawlService>()("@tinyburg/soc
              * deliberate: `syncFriends` does the consent filtering itself so it
              * can count what it dropped.
              */
-            const observed = yield* reader.friendsOf(save).pipe(
-                // Frida's runtime handles are not plain strings; interpolating them here is intentional.
-                // oxlint-disable-next-line typescript/restrict-template-expressions
-                Effect.mapError((cause) => new TowerUnavailable({ playerId, reason: `save did not decode: ${cause}` }))
-            );
+            const observed = yield* reader
+                .friendsOf(save)
+                .pipe(
+                    Effect.mapError(
+                        (cause) => new TowerUnavailable({ playerId, reason: `save did not decode: ${String(cause)}` })
+                    )
+                );
 
             const result = yield* graph.syncFriends(game, playerId, observed).pipe(Effect.orDie);
 

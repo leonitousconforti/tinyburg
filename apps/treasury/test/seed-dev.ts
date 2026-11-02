@@ -18,7 +18,7 @@
  *     node apps/treasury/test/seed-dev.ts
  */
 
-import { Config, Effect, Layer, Redacted, Result, Schema, String } from "effect";
+import { Config, Effect, Layer, Predicate, Redacted, Result, Schema, String } from "effect";
 import { FetchHttpClient } from "effect/http";
 import { SqlClient } from "effect/sql";
 
@@ -64,16 +64,13 @@ const snapshotSave = Effect.gen(function* () {
 
     const revive = (value: unknown): unknown => {
         if (Array.isArray(value)) return value.map(revive);
-        if (value === null || typeof value !== "object" || value instanceof Date) return value;
-        // A plain object at this point; the guard above excluded everything else.
-        // oxlint-disable-next-line typescript/no-unsafe-type-assertion
-        const record = value as Record<string, unknown>;
-        if (record["_id"] === "Result") {
-            return record["_tag"] === "Success"
-                ? Result.succeed(revive(record["value"]))
-                : Result.fail(revive(record["failure"]));
+        if (!Predicate.isObject(value) || value instanceof Date) return value;
+        if (value["_id"] === "Result") {
+            return value["_tag"] === "Success"
+                ? Result.succeed(revive(value["value"]))
+                : Result.fail(revive(value["failure"]));
         }
-        return Object.fromEntries(Object.entries(record).map(([key, entry]) => [key, revive(entry)]));
+        return Object.fromEntries(Object.entries(value).map(([key, entry]) => [key, revive(entry)]));
     };
 
     // Round-tripped through the schema so a corpus drift fails loudly here,

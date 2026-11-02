@@ -1451,18 +1451,17 @@ export const BitizenAttributes = Schema.suspend(() => {
                     const earrings = nimblebit.hasEarrings
                         ? makeSuccess(nimblebit.earringsColor)
                         : makeFailure(nimblebit.earringsColor);
+                    const hatGender: "bi" | "male" | "female" = nimblebit.hasBiHat
+                        ? "bi"
+                        : nimblebit.hasMaleHat
+                          ? "male"
+                          : "female";
                     const hat =
                         nimblebit.hasBiHat || nimblebit.hasMaleHat || nimblebit.hasFemaleHat
                             ? makeSuccess({
                                   index: nimblebit.hatIndex,
                                   color: nimblebit.hatColor,
-                                  // Load-bearing: without it the branches widen to `string` and the
-                                  // struct no longer matches the schema's decoded type.
-                                  // oxlint-disable-next-line typescript/no-unnecessary-type-assertion
-                                  gender: (nimblebit.hasBiHat ? "bi" : nimblebit.hasMaleHat ? "male" : "female") as
-                                      | "bi"
-                                      | "male"
-                                      | "female",
+                                  gender: hatGender,
                               })
                             : makeFailure({
                                   index: nimblebit.hatIndex,
@@ -1525,10 +1524,7 @@ export const Bitizen = Schema.Struct({
             Schema.Boolean,
             SchemaTransformation.transform({
                 decode: (s) => s === "1",
-                // Load-bearing: without it the branches widen to `string`, which is not the
-                // encoded type of `Schema.Literals(["0", "1"])`.
-                // oxlint-disable-next-line typescript/no-unnecessary-type-assertion
-                encode: (b) => (b ? "1" : "0") as "0" | "1",
+                encode: (b): "0" | "1" => (b ? "1" : "0"),
             })
         ),
         Schema.annotateKey({ nimblebitSaveDataKey: "d" })

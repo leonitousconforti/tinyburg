@@ -1,6 +1,4 @@
-// oxlint-disable typescript/no-unsafe-type-assertion
-
-import { Array, Config, ConfigProvider, Effect, Layer, Schema, type Types } from "effect";
+import { Array, Config, ConfigProvider, Effect, Layer, Schema } from "effect";
 import { FetchHttpClient } from "effect/http";
 
 import { NodeCrypto, NodeRuntime, NodeServices } from "@effect/platform-node";
@@ -26,27 +24,25 @@ const program = Effect.gen(function* () {
 
     // For every bitizen gift...
     for (const bitizenGift of bitizenGifts) {
-        // Upgrade their skills to 9s
         const bitizen = yield* Schema.decodeEffect(Bitizens.Bitizen)(bitizenGift.contents);
-        const mutableBitizen = bitizen as Types.DeepMutable<typeof bitizen>;
-        mutableBitizen.attributes.skills.creative = 9;
-        mutableBitizen.attributes.skills.food = 9;
-        mutableBitizen.attributes.skills.recreation = 9;
-        mutableBitizen.attributes.skills.retail = 9;
-        mutableBitizen.attributes.skills.service = 9;
-
-        // If they have a requested floor, set their dream job to that floor
         const friendMeta = yield* TinyTower.social_pullFriendMeta({
             ...authenticatedPlayer,
             friendId: bitizenGift.from,
         });
 
-        if (friendMeta.requestedFloorId !== -1) {
-            mutableBitizen.dreamJobIndex = friendMeta.requestedFloorId;
-        }
+        // Upgrade their skills to 9s, and if they have a requested floor, set
+        // their dream job to that floor
+        const upgraded: typeof bitizen = {
+            ...bitizen,
+            attributes: {
+                ...bitizen.attributes,
+                skills: { ...bitizen.attributes.skills, creative: 9, food: 9, recreation: 9, retail: 9, service: 9 },
+            },
+            dreamJobIndex: friendMeta.requestedFloorId === -1 ? bitizen.dreamJobIndex : friendMeta.requestedFloorId,
+        };
 
         // Send the upgraded bitizen back to the friend
-        const encodedBitizen = yield* Schema.encodeEffect(Bitizens.Bitizen)(mutableBitizen);
+        const encodedBitizen = yield* Schema.encodeEffect(Bitizens.Bitizen)(upgraded);
         yield* TinyTower.social_sendItem({
             ...authenticatedPlayer,
             friendId: bitizenGift.from,

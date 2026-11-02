@@ -250,9 +250,7 @@ export class TinyburgApi extends Context.Service<TinyburgApi>()("@tinyburg/treas
         const unavailable = (playerId: PlayerId, what: string) => (cause: unknown) =>
             new TowerUnavailable({
                 playerId,
-                // Endpoint failures are not plain strings; interpolating them here is intentional.
-                // oxlint-disable-next-line typescript/restrict-template-expressions
-                reason: `${what} failed: ${cause}`,
+                reason: `${what} failed: ${String(cause)}`,
             });
 
         /**
@@ -267,9 +265,7 @@ export class TinyburgApi extends Context.Service<TinyburgApi>()("@tinyburg/treas
                     (cause) =>
                         new TowerGrantUnusable({
                             tinyburgUserId,
-                            // Endpoint failures are not plain strings; interpolating them here is intentional.
-                            // oxlint-disable-next-line typescript/restrict-template-expressions
-                            reason: `could not list linked accounts: ${cause}`,
+                            reason: `could not list linked accounts: ${String(cause)}`,
                             permanent: false,
                         })
                 )
