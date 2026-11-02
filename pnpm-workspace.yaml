@@ -21,11 +21,7 @@ packages:
   - scratchpad
 
 allowBuilds:
-  '@parcel/watcher': true
-  esbuild: true
   frida: true
-  msgpackr-extract: true
-  sharp: true
 
 overrides:
   "@effect/docgen>typescript": "7.0.2"
