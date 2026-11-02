@@ -183,8 +183,10 @@ const generateData = Effect.gen(function* () {
     );
 }).pipe(Effect.scoped, Effect.provide(Layer.provideMerge(AgentLive, DeviceLive)));
 
+// An anonymous account from Aurora Store's dispenser, so no Google credentials
+// are needed. The hosted dispenser refuses datacenter ip ranges.
 const Live = pipe(
-    Layer.mergeAll(AndroidDevice.layerEmbeddedPixel7a, PlayAccount.layerConfig()),
+    Layer.mergeAll(AndroidDevice.layerEmbeddedPixel7a, PlayAccount.layerAuroraDispenser()),
     Layer.provideMerge(FetchHttpClient.layer),
     Layer.provideMerge(NodeServices.layer)
 );
