@@ -32,6 +32,9 @@ overrides:
   "madge>typescript": "7.0.2"
 
 peerDependencyRules:
+  ignoreMissing:
+    - tsx
+
   # Ranges, so that Renovate's bumps don't break the lockfile update
   allowedVersions:
     typescript: "7"

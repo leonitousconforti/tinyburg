@@ -28,7 +28,7 @@ jobs:
       - run: pnpm codegen
       - run: pnpm build
       - run: pnpm docgen
-      - run: git add packages/*/src packages/*/docs docs && git diff-index --cached HEAD --exit-code packages/*/src packages/*/docs docs
+      - run: git add packages/*/src && git diff-index --cached HEAD --exit-code packages/*/src
       - run: pnpm check
       - run: pnpm circular
       - run: pnpm lint

@@ -80,7 +80,7 @@
         },
         {
             "description": "Group build tools packages into one PR",
-            "matchPackageNames": ["oxfmt", "oxlint", "@effect/build-utils", "@effect/tsgo", "typescript", "tsx"],
+            "matchPackageNames": ["oxfmt", "oxlint", "@effect/build-utils", "@effect/tsgo", "typescript"],
             "groupName": "build tools packages",
             "addLabels": ["pnpm"]
         },

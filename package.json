@@ -7,7 +7,6 @@
         "build": "tsc -b tsconfig.build.json && pnpm --recursive --parallel --filter \"./packages/**/*\" run build",
         "circular": "node scripts/circular.mjs",
         "test": "vitest",
-        "coverage": "vitest --coverage",
         "check": "tsc -b tsconfig.json",
         "check-recursive": "pnpm --recursive --filter \"./packages/**/*\" exec tsc -b tsconfig.json",
         "lint": "oxlint --disable-nested-config && oxfmt --check apps packages scratchpad scripts",
@@ -26,7 +25,6 @@
         "@effect/docgen": "4.1.1",
         "@effect/tsgo": "0.63.0",
         "@types/node": "26.6.6",
-        "@vitest/coverage-v8": "5.0.5",
         "babel-plugin-annotate-pure-calls": "0.5.0",
         "effect": "4.1.1",
         "madge": "8.0.0",
@@ -34,7 +32,6 @@
         "oxlint": "1.90.0",
         "oxlint-tsgolint": "7.0.2005",
         "redis": "6.3.1",
-        "tsx": "4.23.15",
         "typescript": "7.0.2",
         "vite": "8.3.5",
         "vitest": "5.0.5"
