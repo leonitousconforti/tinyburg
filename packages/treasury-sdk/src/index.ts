@@ -32,14 +32,14 @@ export * as Scopes from "./Scopes.ts"
  * save-splice trade instead rewrites both saves directly, which is why it
  * requires an explicit confirmation from both parties before anything runs.
  *
- * Every endpoint but the public stats is bearer authenticated with a JWT
- * access token the Tinyburg OAuth server issued for the Tinyburg api
- * (`<site>/v1`), and guarded by a leaf of the `treasury` scope area in
- * `Scopes`. The treasury lives behind tinyburg.app: the paths here are
- * reached at `<site>/v1/treasury/*`, which tinyburg.app forwards verbatim,
- * `Authorization` header included. The first-party app gets its token from
- * tinyburg.app's `/auth/token`; any other application uses the one it was
- * issued.
+ * Every endpoint but the public stats and open offers is bearer
+ * authenticated with a JWT access token the Tinyburg OAuth server issued for
+ * the Tinyburg api (`<site>/v1`), and guarded by a leaf of the `treasury`
+ * scope area in `Scopes`. The treasury lives behind tinyburg.app: the paths
+ * here are reached at `<site>/v1/treasury/*`, which tinyburg.app forwards
+ * verbatim, `Authorization` header included. The first-party app gets its
+ * token from tinyburg.app's `/auth/token`; any other application uses the
+ * one it was issued.
  *
  * A token without the endpoint's scope is refused with `403` and an
  * `insufficient_scope` challenge. Any other `403` from a trade endpoint

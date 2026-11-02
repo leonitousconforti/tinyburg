@@ -8,14 +8,14 @@
  * save-splice trade instead rewrites both saves directly, which is why it
  * requires an explicit confirmation from both parties before anything runs.
  *
- * Every endpoint but the public stats is bearer authenticated with a JWT
- * access token the Tinyburg OAuth server issued for the Tinyburg api
- * (`<site>/v1`), and guarded by a leaf of the `treasury` scope area in
- * `Scopes`. The treasury lives behind tinyburg.app: the paths here are
- * reached at `<site>/v1/treasury/*`, which tinyburg.app forwards verbatim,
- * `Authorization` header included. The first-party app gets its token from
- * tinyburg.app's `/auth/token`; any other application uses the one it was
- * issued.
+ * Every endpoint but the public stats and open offers is bearer
+ * authenticated with a JWT access token the Tinyburg OAuth server issued for
+ * the Tinyburg api (`<site>/v1`), and guarded by a leaf of the `treasury`
+ * scope area in `Scopes`. The treasury lives behind tinyburg.app: the paths
+ * here are reached at `<site>/v1/treasury/*`, which tinyburg.app forwards
+ * verbatim, `Authorization` header included. The first-party app gets its
+ * token from tinyburg.app's `/auth/token`; any other application uses the
+ * one it was issued.
  *
  * A token without the endpoint's scope is refused with `403` and an
  * `insufficient_scope` challenge. Any other `403` from a trade endpoint
@@ -205,7 +205,8 @@ export const LedgerEvent = Schema.Struct({
 });
 
 /**
- * A trade with its legs and its history, for the participants only.
+ * A trade with its legs and its history, for the participants, or for any
+ * trader while it is an open offer.
  *
  * @since 1.0.0
  * @category Schemas
@@ -245,6 +246,24 @@ export const Inventory = Schema.Struct({
     pets: Schema.Array(Schema.String),
     coins: Schema.Int,
     bux: Schema.Int,
+});
+
+/**
+ * An open offer as anyone may see it: what it gives and wants, and until
+ * when. Who made it is left out, because the list is public; taking one is
+ * `AcceptTrade` with the id.
+ *
+ * @since 1.0.0
+ * @category Schemas
+ */
+export const OpenOffer = Schema.Struct({
+    id: Schema.String,
+    mechanism: TradeMechanism,
+    game: TradeGame,
+    gives: ItemSpec,
+    wants: ItemSpec,
+    createdAt: Schema.DateTimeUtcFromString,
+    expiresAt: Schema.DateTimeUtcFromString,
 });
 
 /**
@@ -345,6 +364,10 @@ const GetStats = HttpApiEndpoint.get("Stats", "/v1/treasury/stats", {
     success: TreasuryStats,
 });
 
+const ListOpenOffers = HttpApiEndpoint.get("OpenOffers", "/v1/treasury/offers", {
+    success: Schema.Array(OpenOffer),
+});
+
 // ---------------------------------------------------------------------------
 // Groups
 // ---------------------------------------------------------------------------
@@ -371,14 +394,15 @@ export const TreasuryGroup = HttpApiGroup.make("TreasuryGroup")
 
 /**
  * What the treasury tells anyone at all: the stat counters the home page
- * shows. The one group without `RequireAccess` or a scope requirement, and
- * it must stay that way - the home page is public, so this rides
- * tinyburg.app's proxy without a token behind it.
+ * shows, and the open offers the market pages list. The one group without
+ * `RequireAccess` or a scope requirement, and it must stay that way - those
+ * pages are public, so this rides tinyburg.app's proxy without a token
+ * behind it.
  *
  * @since 1.0.0
  * @category Groups
  */
-export const TreasuryPublicGroup = HttpApiGroup.make("TreasuryPublicGroup").add(GetStats);
+export const TreasuryPublicGroup = HttpApiGroup.make("TreasuryPublicGroup").add(GetStats).add(ListOpenOffers);
 
 /**
  * @since 1.0.0

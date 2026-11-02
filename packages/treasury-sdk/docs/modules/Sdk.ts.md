@@ -15,14 +15,14 @@ are verified, and only then is each item forwarded to the other side. A
 save-splice trade instead rewrites both saves directly, which is why it
 requires an explicit confirmation from both parties before anything runs.
 
-Every endpoint but the public stats is bearer authenticated with a JWT
-access token the Tinyburg OAuth server issued for the Tinyburg api
-(`<site>/v1`), and guarded by a leaf of the `treasury` scope area in
-`Scopes`. The treasury lives behind tinyburg.app: the paths here are
-reached at `<site>/v1/treasury/*`, which tinyburg.app forwards verbatim,
-`Authorization` header included. The first-party app gets its token from
-tinyburg.app's `/auth/token`; any other application uses the one it was
-issued.
+Every endpoint but the public stats and open offers is bearer
+authenticated with a JWT access token the Tinyburg OAuth server issued for
+the Tinyburg api (`<site>/v1`), and guarded by a leaf of the `treasury`
+scope area in `Scopes`. The treasury lives behind tinyburg.app: the paths
+here are reached at `<site>/v1/treasury/*`, which tinyburg.app forwards
+verbatim, `Authorization` header included. The first-party app gets its
+token from tinyburg.app's `/auth/token`; any other application uses the
+one it was issued.
 
 A token without the endpoint's scope is refused with `403` and an
 `insufficient_scope` challenge. Any other `403` from a trade endpoint
@@ -48,6 +48,7 @@ Since v1.0.0
   - [ItemSpec](#itemspec)
   - [LedgerEvent](#ledgerevent)
   - [LegState](#legstate)
+  - [OpenOffer](#openoffer)
   - [SpliceItem](#spliceitem)
   - [SpliceItems](#spliceitems)
   - [Trade](#trade)
@@ -804,31 +805,108 @@ declare const Api: HttpApi.HttpApi<
     >
   | HttpApiGroup.HttpApiGroup<
       "TreasuryPublicGroup",
-      HttpApiEndpoint.HttpApiEndpoint<
-        "Stats",
-        "GET",
-        "/v1/treasury/stats",
-        never,
-        never,
-        never,
-        never,
-        Schema.toCodecJson<
-          Schema.Struct<{
-            readonly activeTraders: Schema.Int
-            readonly settledTrades: Schema.Int
-            readonly itemsMoved: Schema.Int
-          }>
+      | HttpApiEndpoint.HttpApiEndpoint<
+          "Stats",
+          "GET",
+          "/v1/treasury/stats",
+          never,
+          never,
+          never,
+          never,
+          Schema.toCodecJson<
+            Schema.Struct<{
+              readonly activeTraders: Schema.Int
+              readonly settledTrades: Schema.Int
+              readonly itemsMoved: Schema.Int
+            }>
+          >,
+          never,
+          never,
+          never
+        >
+      | HttpApiEndpoint.HttpApiEndpoint<
+          "OpenOffers",
+          "GET",
+          "/v1/treasury/offers",
+          never,
+          never,
+          never,
+          never,
+          Schema.toCodecJson<
+            Schema.$Array<
+              Schema.Struct<{
+                readonly id: Schema.String
+                readonly mechanism: Schema.Literals<readonly ["gift", "splice"]>
+                readonly game: Schema.Literals<readonly ["tinytower"]>
+                readonly gives: Schema.Union<
+                  readonly [
+                    Schema.Struct<{
+                      readonly _tag: Schema.tag<"GiftItem">
+                      readonly itemType: Schema.Enum<{
+                        readonly None: "None"
+                        readonly Play: "Play"
+                        readonly Gift: "Gift"
+                        readonly Cloud: "Cloud"
+                        readonly Raffle: "Raffle"
+                        readonly Visit: "Visit"
+                        readonly Leaderboards: "Leaderboards"
+                      }>
+                      readonly item: Schema.String
+                    }>,
+                    Schema.Struct<{
+                      readonly _tag: Schema.tag<"SpliceItems">
+                      readonly items: Schema.$Array<
+                        Schema.Struct<{
+                          readonly kind: Schema.Literals<readonly ["bitizen", "costume", "pet", "coins", "bux"]>
+                          readonly item: Schema.optional<Schema.String>
+                          readonly amount: Schema.optional<Schema.Int>
+                        }>
+                      >
+                    }>
+                  ]
+                >
+                readonly wants: Schema.Union<
+                  readonly [
+                    Schema.Struct<{
+                      readonly _tag: Schema.tag<"GiftItem">
+                      readonly itemType: Schema.Enum<{
+                        readonly None: "None"
+                        readonly Play: "Play"
+                        readonly Gift: "Gift"
+                        readonly Cloud: "Cloud"
+                        readonly Raffle: "Raffle"
+                        readonly Visit: "Visit"
+                        readonly Leaderboards: "Leaderboards"
+                      }>
+                      readonly item: Schema.String
+                    }>,
+                    Schema.Struct<{
+                      readonly _tag: Schema.tag<"SpliceItems">
+                      readonly items: Schema.$Array<
+                        Schema.Struct<{
+                          readonly kind: Schema.Literals<readonly ["bitizen", "costume", "pet", "coins", "bux"]>
+                          readonly item: Schema.optional<Schema.String>
+                          readonly amount: Schema.optional<Schema.Int>
+                        }>
+                      >
+                    }>
+                  ]
+                >
+                readonly createdAt: Schema.DateTimeUtcFromString
+                readonly expiresAt: Schema.DateTimeUtcFromString
+              }>
+            >
+          >,
+          never,
+          never,
+          never
         >,
-        never,
-        never,
-        never
-      >,
       false
     >
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/treasury-sdk/src/Sdk.ts#L387)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/treasury-sdk/src/Sdk.ts#L411)
 
 Since v1.0.0
 
@@ -1576,46 +1654,124 @@ declare const TreasuryGroup: HttpApiGroup.HttpApiGroup<
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/treasury-sdk/src/Sdk.ts#L360)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/treasury-sdk/src/Sdk.ts#L383)
 
 Since v1.0.0
 
 ## TreasuryPublicGroup
 
 What the treasury tells anyone at all: the stat counters the home page
-shows. The one group without `RequireAccess` or a scope requirement, and
-it must stay that way - the home page is public, so this rides
-tinyburg.app's proxy without a token behind it.
+shows, and the open offers the market pages list. The one group without
+`RequireAccess` or a scope requirement, and it must stay that way - those
+pages are public, so this rides tinyburg.app's proxy without a token
+behind it.
 
 **Signature**
 
 ```ts
 declare const TreasuryPublicGroup: HttpApiGroup.HttpApiGroup<
   "TreasuryPublicGroup",
-  HttpApiEndpoint.HttpApiEndpoint<
-    "Stats",
-    "GET",
-    "/v1/treasury/stats",
-    never,
-    never,
-    never,
-    never,
-    Schema.toCodecJson<
-      Schema.Struct<{
-        readonly activeTraders: Schema.Int
-        readonly settledTrades: Schema.Int
-        readonly itemsMoved: Schema.Int
-      }>
+  | HttpApiEndpoint.HttpApiEndpoint<
+      "Stats",
+      "GET",
+      "/v1/treasury/stats",
+      never,
+      never,
+      never,
+      never,
+      Schema.toCodecJson<
+        Schema.Struct<{
+          readonly activeTraders: Schema.Int
+          readonly settledTrades: Schema.Int
+          readonly itemsMoved: Schema.Int
+        }>
+      >,
+      never,
+      never,
+      never
+    >
+  | HttpApiEndpoint.HttpApiEndpoint<
+      "OpenOffers",
+      "GET",
+      "/v1/treasury/offers",
+      never,
+      never,
+      never,
+      never,
+      Schema.toCodecJson<
+        Schema.$Array<
+          Schema.Struct<{
+            readonly id: Schema.String
+            readonly mechanism: Schema.Literals<readonly ["gift", "splice"]>
+            readonly game: Schema.Literals<readonly ["tinytower"]>
+            readonly gives: Schema.Union<
+              readonly [
+                Schema.Struct<{
+                  readonly _tag: Schema.tag<"GiftItem">
+                  readonly itemType: Schema.Enum<{
+                    readonly None: "None"
+                    readonly Play: "Play"
+                    readonly Gift: "Gift"
+                    readonly Cloud: "Cloud"
+                    readonly Raffle: "Raffle"
+                    readonly Visit: "Visit"
+                    readonly Leaderboards: "Leaderboards"
+                  }>
+                  readonly item: Schema.String
+                }>,
+                Schema.Struct<{
+                  readonly _tag: Schema.tag<"SpliceItems">
+                  readonly items: Schema.$Array<
+                    Schema.Struct<{
+                      readonly kind: Schema.Literals<readonly ["bitizen", "costume", "pet", "coins", "bux"]>
+                      readonly item: Schema.optional<Schema.String>
+                      readonly amount: Schema.optional<Schema.Int>
+                    }>
+                  >
+                }>
+              ]
+            >
+            readonly wants: Schema.Union<
+              readonly [
+                Schema.Struct<{
+                  readonly _tag: Schema.tag<"GiftItem">
+                  readonly itemType: Schema.Enum<{
+                    readonly None: "None"
+                    readonly Play: "Play"
+                    readonly Gift: "Gift"
+                    readonly Cloud: "Cloud"
+                    readonly Raffle: "Raffle"
+                    readonly Visit: "Visit"
+                    readonly Leaderboards: "Leaderboards"
+                  }>
+                  readonly item: Schema.String
+                }>,
+                Schema.Struct<{
+                  readonly _tag: Schema.tag<"SpliceItems">
+                  readonly items: Schema.$Array<
+                    Schema.Struct<{
+                      readonly kind: Schema.Literals<readonly ["bitizen", "costume", "pet", "coins", "bux"]>
+                      readonly item: Schema.optional<Schema.String>
+                      readonly amount: Schema.optional<Schema.Int>
+                    }>
+                  >
+                }>
+              ]
+            >
+            readonly createdAt: Schema.DateTimeUtcFromString
+            readonly expiresAt: Schema.DateTimeUtcFromString
+          }>
+        >
+      >,
+      never,
+      never,
+      never
     >,
-    never,
-    never,
-    never
-  >,
   false
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/treasury-sdk/src/Sdk.ts#L381)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/treasury-sdk/src/Sdk.ts#L405)
 
 Since v1.0.0
 
@@ -1664,7 +1820,7 @@ declare const GrantStatus: Schema.Struct<{
 }>
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/treasury-sdk/src/Sdk.ts#L227)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/treasury-sdk/src/Sdk.ts#L228)
 
 Since v1.0.0
 
@@ -1687,7 +1843,7 @@ declare const Inventory: Schema.Struct<{
 }>
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/treasury-sdk/src/Sdk.ts#L241)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/treasury-sdk/src/Sdk.ts#L242)
 
 Since v1.0.0
 
@@ -1763,6 +1919,82 @@ declare const LegState: Schema.Literals<
 ```
 
 [Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/treasury-sdk/src/Sdk.ts#L97)
+
+Since v1.0.0
+
+## OpenOffer
+
+An open offer as anyone may see it: what it gives and wants, and until
+when. Who made it is left out, because the list is public; taking one is
+`AcceptTrade` with the id.
+
+**Signature**
+
+```ts
+declare const OpenOffer: Schema.Struct<{
+  readonly id: Schema.String
+  readonly mechanism: Schema.Literals<readonly ["gift", "splice"]>
+  readonly game: Schema.Literals<readonly ["tinytower"]>
+  readonly gives: Schema.Union<
+    readonly [
+      Schema.Struct<{
+        readonly _tag: Schema.tag<"GiftItem">
+        readonly itemType: Schema.Enum<{
+          readonly None: "None"
+          readonly Play: "Play"
+          readonly Gift: "Gift"
+          readonly Cloud: "Cloud"
+          readonly Raffle: "Raffle"
+          readonly Visit: "Visit"
+          readonly Leaderboards: "Leaderboards"
+        }>
+        readonly item: Schema.String
+      }>,
+      Schema.Struct<{
+        readonly _tag: Schema.tag<"SpliceItems">
+        readonly items: Schema.$Array<
+          Schema.Struct<{
+            readonly kind: Schema.Literals<readonly ["bitizen", "costume", "pet", "coins", "bux"]>
+            readonly item: Schema.optional<Schema.String>
+            readonly amount: Schema.optional<Schema.Int>
+          }>
+        >
+      }>
+    ]
+  >
+  readonly wants: Schema.Union<
+    readonly [
+      Schema.Struct<{
+        readonly _tag: Schema.tag<"GiftItem">
+        readonly itemType: Schema.Enum<{
+          readonly None: "None"
+          readonly Play: "Play"
+          readonly Gift: "Gift"
+          readonly Cloud: "Cloud"
+          readonly Raffle: "Raffle"
+          readonly Visit: "Visit"
+          readonly Leaderboards: "Leaderboards"
+        }>
+        readonly item: Schema.String
+      }>,
+      Schema.Struct<{
+        readonly _tag: Schema.tag<"SpliceItems">
+        readonly items: Schema.$Array<
+          Schema.Struct<{
+            readonly kind: Schema.Literals<readonly ["bitizen", "costume", "pet", "coins", "bux"]>
+            readonly item: Schema.optional<Schema.String>
+            readonly amount: Schema.optional<Schema.Int>
+          }>
+        >
+      }>
+    ]
+  >
+  readonly createdAt: Schema.DateTimeUtcFromString
+  readonly expiresAt: Schema.DateTimeUtcFromString
+}>
+```
+
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/treasury-sdk/src/Sdk.ts#L259)
 
 Since v1.0.0
 
@@ -1907,7 +2139,8 @@ Since v1.0.0
 
 ## TradeDetail
 
-A trade with its legs and its history, for the participants only.
+A trade with its legs and its history, for the participants, or for any
+trader while it is an open offer.
 
 **Signature**
 
@@ -2023,7 +2256,7 @@ declare const TradeDetail: Schema.Struct<{
 }>
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/treasury-sdk/src/Sdk.ts#L213)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/treasury-sdk/src/Sdk.ts#L214)
 
 Since v1.0.0
 
@@ -2155,7 +2388,7 @@ declare const TradeProposal: Schema.Struct<{
 }>
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/treasury-sdk/src/Sdk.ts#L267)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/treasury-sdk/src/Sdk.ts#L286)
 
 Since v1.0.0
 
@@ -2219,6 +2452,6 @@ declare const TreasuryStats: Schema.Struct<{
 }>
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/treasury-sdk/src/Sdk.ts#L257)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/treasury-sdk/src/Sdk.ts#L276)
 
 Since v1.0.0

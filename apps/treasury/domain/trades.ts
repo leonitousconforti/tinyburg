@@ -83,6 +83,22 @@ export class TradesRepository extends Context.Service<TradesRepository>()(
             });
 
             /**
+             * The open offers anyone could take, newest first: what the public
+             * market lists, so the same rows `listForUser` adds for everyone.
+             */
+            const openOffers = SqlSchema.findAll({
+                Request: Schema.Struct({ limit: Schema.Int }),
+                Result: Trade,
+                execute: ({ limit }) => sql`
+                SELECT * FROM trades
+                WHERE state = 'proposed' AND counterparty_user_id IS NULL
+                  AND counterparty_player_id IS NULL AND expires_at > NOW()
+                ORDER BY created_at DESC
+                LIMIT ${limit}
+            `,
+            });
+
+            /**
              * Moves a trade from any of `from` to `to`, and says whether it
              * happened. A `false` is not an error, it is the answer: somebody
              * else got there first.
@@ -263,6 +279,7 @@ export class TradesRepository extends Context.Service<TradesRepository>()(
                 create,
                 byId,
                 listForUser,
+                openOffers,
                 transition,
                 accept,
                 confirmSplice,

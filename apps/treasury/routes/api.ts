@@ -5,7 +5,8 @@
  * is, and whether the token may call the endpoint at all, is
  * `routes/access.ts`'s business), and the
  * participant checks all answer `404` rather than `403` for someone else's
- * trade: the api never confirms a trade exists to a stranger. The deeper
+ * trade: the api never confirms a trade exists to a stranger, unless it is
+ * an open offer, which the public market lists anyway. The deeper
  * invariants - who may accept, what a cancel may interrupt - are not
  * enforced here but in the repositories' guarded transitions, so a future
  * caller cannot skip them by taking a different route in.
@@ -123,6 +124,26 @@ const TreasuryGroupLive = HttpApiBuilder.group(
         const isParticipant = (trade: Trade, userId: string): boolean =>
             trade.proposerUserId === userId || Option.getOrUndefined(trade.counterpartyUserId) === userId;
 
+        /**
+         * An offer anyone could take. The market lists these publicly, and a
+         * trader accepts one from its page, so its page is open to them.
+         */
+        const isOpenOffer = (trade: Trade, now: DateTime.Utc): boolean =>
+            trade.state === "proposed" &&
+            Option.isNone(trade.counterpartyUserId) &&
+            Option.isNone(trade.counterpartyPlayerId) &&
+            DateTime.isGreaterThan(trade.expiresAt, now);
+
+        /** A trade the caller may look at: one of their own, or an open offer. `404` otherwise. */
+        const visibleTrade = Effect.fnUntraced(function* (tradeId: string, userId: string) {
+            const trade = yield* Effect.orDie(trades.byId(tradeId));
+            const now = yield* DateTime.now;
+            if (Option.isNone(trade) || !(isParticipant(trade.value, userId) || isOpenOffer(trade.value, now))) {
+                return yield* new HttpApiError.NotFound();
+            }
+            return trade.value;
+        });
+
         /** A participant's trade, or `404` - existence is not confirmed to strangers. */
         const participantTrade = Effect.fnUntraced(function* (tradeId: string, userId: string) {
             const trade = yield* Effect.orDie(trades.byId(tradeId));
@@ -156,7 +177,7 @@ const TreasuryGroupLive = HttpApiBuilder.group(
             .handle("GetTrade", ({ params }) =>
                 Effect.gen(function* () {
                     const user = yield* requireTrader;
-                    const trade = yield* participantTrade(params.tradeId, user.userId);
+                    const trade = yield* visibleTrade(params.tradeId, user.userId);
                     const tradeLegs = yield* Effect.orDie(legs.forTrade(trade.id));
                     const history = yield* Effect.orDie(ledger.forTrade(trade.id));
                     return {
@@ -336,10 +357,24 @@ const TreasuryGroupLive = HttpApiBuilder.group(
     })
 );
 
+/** An open offer as the public market shows it: nothing about who made it. */
+const encodeOffer = Effect.fnUntraced(function* (trade: Trade) {
+    return {
+        id: trade.id,
+        mechanism: trade.mechanism,
+        game: trade.game,
+        gives: yield* decodeItemSpec(trade.gives),
+        wants: yield* decodeItemSpec(trade.wants),
+        createdAt: trade.createdAt,
+        expiresAt: trade.expiresAt,
+    };
+});
+
 /**
- * The public counters, cached so an unauthenticated endpoint on the front
- * page cannot become a database hammer. A miss after the TTL recomputes;
- * everything in between serves the held value.
+ * The public counters and open offers, cached so an unauthenticated endpoint
+ * cannot become a database hammer. A miss after the TTL recomputes;
+ * everything in between serves the held value. The offers' TTL is short: one
+ * taken meanwhile still shows, and accepting it answers `409`.
  */
 const TreasuryPublicGroupLive = HttpApiBuilder.group(
     Api,
@@ -347,7 +382,12 @@ const TreasuryPublicGroupLive = HttpApiBuilder.group(
     Effect.fnUntraced(function* (handlers) {
         const trades = yield* TradesRepository;
         const [cachedStats] = yield* Effect.orDie(trades.stats).pipe(Effect.cachedInvalidateWithTTL("1 minute"));
-        return handlers.handle("Stats", () => cachedStats);
+        const [cachedOffers] = yield* trades.openOffers({ limit: 100 }).pipe(
+            Effect.flatMap((offers) => Effect.forEach(offers, encodeOffer)),
+            Effect.orDie,
+            Effect.cachedInvalidateWithTTL("10 seconds")
+        );
+        return handlers.handle("Stats", () => cachedStats).handle("OpenOffers", () => cachedOffers);
     })
 );
 

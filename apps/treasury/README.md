@@ -131,6 +131,13 @@ grant's token keeps working here until it expires (ten minutes at most),
 which is accepted because everything the treasury then does to a tower goes
 through tinyburg.app's `/v1`, where revocation is immediate.
 
+Two endpoints need no token: `/v1/treasury/stats`, the home page's
+counters, and `/v1/treasury/offers`, the live open offers (no counterparty
+named) that tinyburg.app's `/bitizens` and `/costumes` pages list. Offers
+are listed without who made them, and both answers are cached briefly. A
+trader may open an open offer's page, which is where it is accepted; every
+other trade stays `404` to anyone but its two sides.
+
 The one thing the browser reaches directly is the connect flow at
 `PUBLIC_URL`, which sends the trader to tinyburg.app's consent screen and back.
 
