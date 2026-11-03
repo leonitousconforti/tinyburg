@@ -4,10 +4,11 @@ provides information into and about TinyTower using frida.
 
 ## Running it
 
-insight drives TinyTower on an Android emulator: an x86_64 Android 14 image,
+insight drives TinyTower on an Android emulator: an x86_64 Android 16 image,
 where the game's ARM-only libraries run through Android's ARM translation and
 the agent attaches in Frida's emulated realm. The emulator refuses arm64
-images on an x86_64 host.
+images on an x86_64 host, and Android 14's translator kills the game on
+instructions it does not support.
 
 1. Enter the Android shell from the repository root: `nix develop .#android`.
    It carries the SDK, the emulator and the system image, and sets

@@ -41,12 +41,13 @@
           };
 
           # For insight: the emulator and a rootable (Google APIs, not Play
-          # Store) Android 14 image in both ABIs. TinyTower ships only ARM
+          # Store) Android 16 image in both ABIs. TinyTower ships only ARM
           # libraries, which an x86_64 image runs through Android's ARM
           # translation and an arm64 image runs natively (fully emulated on an
-          # x86_64 host).
+          # x86_64 host). Android 14's translator lacks instructions the game
+          # uses and kills it within seconds; Android 16's runs it.
           android = androidPkgs.androidenv.composeAndroidPackages {
-            platformVersions = [ "34" ];
+            platformVersions = [ "36" ];
             buildToolsVersions = [ ];
             includeCmake = false;
             includeEmulator = true;

@@ -46,7 +46,7 @@ http://localhost:3004, so forward that port too.
 ## The Android shell
 
 `nix develop .#android` is the default shell plus the Android SDK: platform
-tools, the emulator, and Android 14 Google APIs system images for x86_64 and
-arm64. It sets `ANDROID_HOME`. The first entry downloads about 3.6 GB. The
+tools, the emulator, and Android 16 Google APIs system images for x86_64 and
+arm64. It sets `ANDROID_HOME`. The first entry downloads about 4.2 GB. The
 SDK is unfree and its license is accepted in `flake.nix`, for this shell's
 nixpkgs only. See `packages/insight/README.md` for running insight on it.

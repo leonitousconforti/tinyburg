@@ -5,7 +5,7 @@
 set -euo pipefail
 
 avd="Small_Phone"
-image="system-images;android-34;google_apis;x86_64"
+image="system-images;android-36;google_apis;x86_64"
 frida_server=/data/local/tmp/frida-server
 
 cd "$(dirname "$0")/.."
@@ -33,6 +33,8 @@ device root
 device wait-for-device
 device push "$work/frida-server" "$frida_server"
 device shell chmod 755 "$frida_server"
+# Without this the push can come back truncated on the next boot.
+device shell sync
 device emu kill
 
 # The emulator keeps writing the snapshot while it shuts down.
