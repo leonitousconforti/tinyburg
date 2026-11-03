@@ -17,8 +17,8 @@
         "prepare": "effect-tsgo patch --typescript --oxlint"
     },
     "devDependencies": {
-        "@babel/cli": "8.0.6",
-        "@babel/core": "8.0.10",
+        "@babel/cli": "8.1.0",
+        "@babel/core": "8.1.0",
         "@changesets/cli": "3.0.3",
         "@changesets/config": "4.0.1",
         "@effect/build-utils": "0.8.9",
