@@ -50,13 +50,13 @@
     },
     "dependencies": {
         "@bufbuild/protobuf": "2.16.0",
-        "@efffrida/frida-tools": "0.0.64",
+        "@efffrida/frida-tools": "0.0.65",
         "@efffrida/gplayapi": "0.0.40",
         "@efffrida/il2cpp-bridge": "0.0.59",
         "@efffrida/platform": "0.0.51",
         "@efffrida/polyfills": "0.0.22",
-        "@efffrida/rpc": "0.0.67",
-        "frida": "17.25.1",
+        "@efffrida/rpc": "0.0.68",
+        "frida": "17.25.2",
         "frida-il2cpp-bridge": "0.14.0"
     },
     "devDependencies": {
