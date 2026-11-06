@@ -17,6 +17,14 @@ device() { adb -e "$@"; }
 # "no" answers avdmanager's question about a custom hardware profile.
 echo no | avdmanager create avd --force -n "$avd" -k "$image" -d small_phone
 
+# The small_phone profile asks for 1 GB, which the emulator raises to 2.5 GB.
+# With TinyTower running that leaves the guest short of memory, and adb's
+# connection to the emulator then drops mid-transfer, taking frida-server and
+# its port forward with it. The RAM size is part of the snapshot saved below.
+config="${ANDROID_AVD_HOME:-${ANDROID_USER_HOME:-$HOME/.android}/avd}/$avd.avd/config.ini"
+sed -i 's/^hw\.ramSize=.*/hw.ramSize=4096/' "$config"
+grep -qx 'hw.ramSize=4096' "$config"
+
 # Download frida-server for the emulator's architecture and decompress it to a
 # temporary file.
 work=$(mktemp -d)
