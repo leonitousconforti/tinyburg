@@ -30,7 +30,7 @@
         "madge": "8.0.0",
         "oxfmt": "0.75.0",
         "oxlint": "1.90.0",
-        "oxlint-tsgolint": "7.0.2005",
+        "oxlint-tsgolint": "7.0.2006",
         "redis": "6.3.1",
         "typescript": "7.0.2",
         "vite": "8.3.5",
