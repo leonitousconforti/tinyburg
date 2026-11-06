@@ -54,19 +54,19 @@
     },
     "devDependencies": {
         "@bufbuild/protobuf": "2.16.0",
-        "@effect/platform-node": "4.1.1",
-        "@effect/vitest": "4.1.1",
+        "@effect/platform-node": "4.1.2",
+        "@effect/vitest": "4.1.2",
         "@efffrida/frida-tools": "0.0.66",
         "@efffrida/gplayapi": "0.0.40",
         "@tinyburg/insight": "workspace:*",
         "@yielded/auth": "0.1.0-beta.47",
-        "effect": "4.1.1",
+        "effect": "4.1.2",
         "redis": "6.3.1",
         "vite": "8.3.5",
         "vitest": "5.0.5"
     },
     "peerDependencies": {
         "@yielded/auth": "0.1.0-beta.47",
-        "effect": "4.1.1"
+        "effect": "4.1.2"
     }
 }
