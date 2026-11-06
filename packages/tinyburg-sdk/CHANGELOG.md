@@ -1,5 +1,19 @@
 # @tinyburg/tinyburg-sdk
 
+## 0.2.2
+
+### Patch Changes
+
+- Updated dependencies [b3011f7]
+- Updated dependencies [cf0f658]
+- Updated dependencies [aad505b]
+- Updated dependencies [bb4314f]
+- Updated dependencies [97dec84]
+- Updated dependencies [cf0f658]
+    - @tinyburg/tinytower-sdk@0.3.0
+    - @tinyburg/nimblebit-sdk@0.3.0
+    - @tinyburg/tinytower-classic-sdk@0.2.2
+
 ## 0.2.1
 
 ### Patch Changes

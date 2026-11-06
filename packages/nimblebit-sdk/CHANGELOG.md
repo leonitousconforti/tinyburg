@@ -1,5 +1,15 @@
 # tinyburg/nimblebit-sdk
 
+## 0.3.0
+
+### Minor Changes
+
+- 97dec84: `NimblebitError.NimblebitErrorTypeId` is now `NimblebitError.TypeId`, the string `"~@tinyburg/nimblebit-sdk/NimblebitError"` rather than a symbol, following Effect 4's type ids.
+
+### Patch Changes
+
+- bb4314f: Encode the unknown properties that decoded as coming before every known one back at the start of the object, instead of dropping them.
+
 ## 0.2.1
 
 ### Patch Changes
