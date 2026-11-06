@@ -61,10 +61,10 @@
     },
     "devDependencies": {
         "@types/frida-gum": "19.13.0",
-        "effect": "4.1.1"
+        "effect": "4.1.2"
     },
     "peerDependencies": {
-        "effect": "4.1.1"
+        "effect": "4.1.2"
     },
     "engines": {
         "node": ">=24"
