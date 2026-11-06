@@ -18,7 +18,7 @@
         "@efffrida/platform": "0.0.51",
         "@efffrida/polyfills": "0.0.22",
         "@efffrida/rpc": "0.0.69",
-        "@types/frida-gum": "19.12.0",
+        "@types/frida-gum": "19.13.0",
         "@types/node": "26.6.6",
         "effect": "4.1.1",
         "redis": "6.3.1"
