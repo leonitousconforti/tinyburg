@@ -24,4 +24,6 @@ instructions it does not support.
    boot. Rerun it after updating `frida` too, so the server matches.
 
 `DeviceLive` then boots `Small_Phone` read-only, installs TinyTower from
-Google Play and starts `frida-server`.
+Google Play and starts `frida-server`, restarting it (at most 5 times) if it
+exits. Sessions on a crashed server detach, and `pnpm generate` in
+tinytower-sdk then retries with a new session.
