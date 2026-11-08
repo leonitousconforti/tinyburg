@@ -11,7 +11,7 @@
     },
     "devDependencies": {
         "@bufbuild/protobuf": "2.16.0",
-        "@effect/platform-node": "4.1.1",
+        "@effect/platform-node": "4.1.2",
         "@efffrida/frida-tools": "0.0.66",
         "@efffrida/gplayapi": "0.0.40",
         "@efffrida/il2cpp-bridge": "0.0.59",
@@ -20,7 +20,7 @@
         "@efffrida/rpc": "0.0.69",
         "@types/frida-gum": "19.13.0",
         "@types/node": "26.6.6",
-        "effect": "4.1.1",
+        "effect": "4.1.2",
         "redis": "6.3.1"
     }
 }

@@ -56,15 +56,15 @@
         "@efffrida/platform": "0.0.51",
         "@efffrida/polyfills": "0.0.22",
         "@efffrida/rpc": "0.0.69",
-        "frida": "17.26.0",
+        "frida": "17.26.2",
         "frida-il2cpp-bridge": "0.14.0"
     },
     "devDependencies": {
         "@types/frida-gum": "19.13.0",
-        "effect": "4.1.1"
+        "effect": "4.1.2"
     },
     "peerDependencies": {
-        "effect": "4.1.1"
+        "effect": "4.1.2"
     },
     "engines": {
         "node": ">=24"
