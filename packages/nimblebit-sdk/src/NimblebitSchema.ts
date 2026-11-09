@@ -99,25 +99,6 @@ export const parseNimblebitOrderedList = <
     return Schema.String.pipe(Schema.decodeTo(to, transformation));
 };
 
-/** @internal */
-type UnknownEntry = {
-    readonly value: string;
-    readonly $locationMetadata: {
-        readonly after: string | null | undefined;
-    };
-};
-
-/** @internal */
-const UnknownEntries = Schema.Record(
-    Schema.String,
-    Schema.Struct({
-        value: Schema.String,
-        $locationMetadata: Schema.Struct({
-            after: Schema.NullishOr(Schema.String),
-        }),
-    })
-);
-
 /**
  * @since 1.0.0
  * @category Parsers
@@ -165,8 +146,30 @@ export const parseNimblebitObject = <
 
     // Bridges an untyped runtime boundary; the shape is guaranteed by construction, not by the compiler.
     // oxlint-disable-next-line typescript/no-unsafe-type-assertion
-    const to = struct.mapFields(Struct.assign({ $unknown: UnknownEntries })) as Schema.Struct<
-        Fields & { readonly $unknown: typeof UnknownEntries }
+    const to = struct.mapFields(
+        Struct.assign({
+            $unknown: Schema.Record(
+                Schema.String,
+                Schema.Struct({
+                    value: Schema.String,
+                    $locationMetadata: Schema.Struct({
+                        after: Schema.NullishOr(Schema.String),
+                    }),
+                })
+            ),
+        })
+    ) as Schema.Struct<
+        Fields & {
+            readonly $unknown: Schema.$Record<
+                Schema.String,
+                Schema.Struct<{
+                    value: Schema.String;
+                    $locationMetadata: Schema.Struct<{
+                        after: Schema.NullishOr<Schema.String>;
+                    }>;
+                }>
+            >;
+        }
     >;
     type Encoded = (typeof to)["Encoded"];
 
@@ -176,7 +179,15 @@ export const parseNimblebitObject = <
             // Bridges an untyped runtime boundary; the shape is guaranteed by construction, not by the compiler.
             // oxlint-disable-next-line typescript/no-unsafe-type-assertion
             const { $unknown, ...known } = properties as unknown as Record<string, string | null | undefined> & {
-                readonly $unknown: Readonly<Record<string, UnknownEntry>>;
+                readonly $unknown: Record<
+                    string,
+                    {
+                        value: string;
+                        $locationMetadata: {
+                            after: string | null | undefined;
+                        };
+                    }
+                >;
             };
 
             // Each run of consecutive unknown properties goes back after the
@@ -217,7 +228,15 @@ export const parseNimblebitObject = <
             }
 
             const knownFields = new Set(known.map(([field]) => field));
-            const unknown: Record<string, UnknownEntry> = {};
+            const unknown: Record<
+                string,
+                {
+                    value: string;
+                    $locationMetadata: {
+                        after: string | null | undefined;
+                    };
+                }
+            > = {};
             let lastField: string | null = null;
             for (const [, key, value] of str.matchAll(/\[([^\]]+)\]([\s\S]*?)\[\1\]/g)) {
                 const field = toFieldName(key);
