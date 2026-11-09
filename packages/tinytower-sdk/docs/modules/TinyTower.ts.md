@@ -56,14 +56,7 @@ declare const device_newPlayer: Effect.Effect<
     readonly playerId: string & Brand<"PlayerId">
     readonly playerSs: Redacted.Redacted<string> & Brand<"PlayerAuthKey">
   },
-  | NimblebitError
-  | Forbidden
-  | BadRequest
-  | Unauthorized
-  | InternalServerError
-  | Schema.SchemaError
-  | PlatformError
-  | HttpClientError,
+  NimblebitError | Forbidden | BadRequest | Unauthorized | InternalServerError | Schema.SchemaError | HttpClientError,
   NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
 >
 ```
@@ -91,14 +84,7 @@ declare const device_playerDetails: (args_0: {
     readonly saveVersion: number
     readonly checksum: string
   },
-  | NimblebitError
-  | Forbidden
-  | BadRequest
-  | Unauthorized
-  | InternalServerError
-  | Schema.SchemaError
-  | PlatformError
-  | HttpClientError,
+  NimblebitError | Forbidden | BadRequest | Unauthorized | InternalServerError | Schema.SchemaError | HttpClientError,
   NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
 >
 ```
@@ -118,14 +104,7 @@ declare const device_registerEmail: (args_0: {
   playerEmail: typeof NimblebitConfig.PlayerEmailSchema.Type
 }) => Effect.Effect<
   "NewDevice" | "NewEmail",
-  | NimblebitError
-  | Forbidden
-  | BadRequest
-  | Unauthorized
-  | InternalServerError
-  | Schema.SchemaError
-  | PlatformError
-  | HttpClientError,
+  NimblebitError | Forbidden | BadRequest | Unauthorized | InternalServerError | Schema.SchemaError | HttpClientError,
   NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
 >
 ```
@@ -173,19 +152,12 @@ declare const raffle_checkEnteredCurrent: (args_0: {
   readonly playerId: string & Brand<"PlayerId">
 }) => Effect.Effect<
   boolean,
-  | NimblebitError
-  | Forbidden
-  | BadRequest
-  | Unauthorized
-  | InternalServerError
-  | Schema.SchemaError
-  | PlatformError
-  | HttpClientError,
+  NimblebitError | Forbidden | BadRequest | Unauthorized | InternalServerError | Schema.SchemaError | HttpClientError,
   NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L838)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L836)
 
 Since v1.0.0
 
@@ -201,19 +173,12 @@ declare const raffle_enterMultiRaffle: (args_0: {
   readonly playerId: string & Brand<"PlayerId">
 }) => Effect.Effect<
   void,
-  | NimblebitError
-  | Forbidden
-  | BadRequest
-  | Unauthorized
-  | InternalServerError
-  | Schema.SchemaError
-  | PlatformError
-  | HttpClientError,
+  NimblebitError | Forbidden | BadRequest | Unauthorized | InternalServerError | Schema.SchemaError | HttpClientError,
   NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L790)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L788)
 
 Since v1.0.0
 
@@ -229,19 +194,12 @@ declare const raffle_enterRaffle: (args_0: {
   readonly playerId: string & Brand<"PlayerId">
 }) => Effect.Effect<
   void,
-  | NimblebitError
-  | Forbidden
-  | BadRequest
-  | Unauthorized
-  | InternalServerError
-  | Schema.SchemaError
-  | PlatformError
-  | HttpClientError,
+  NimblebitError | Forbidden | BadRequest | Unauthorized | InternalServerError | Schema.SchemaError | HttpClientError,
   NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L742)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L740)
 
 Since v1.0.0
 
@@ -268,19 +226,12 @@ declare const social_getGifts: (args_0: {
       readonly c: unknown
     }>
   },
-  | NimblebitError
-  | Forbidden
-  | BadRequest
-  | Unauthorized
-  | InternalServerError
-  | Schema.SchemaError
-  | PlatformError
-  | HttpClientError,
+  NimblebitError | Forbidden | BadRequest | Unauthorized | InternalServerError | Schema.SchemaError | HttpClientError,
   NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L939)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L937)
 
 Since v1.0.0
 
@@ -307,19 +258,12 @@ declare const social_getVisits: (args_0: {
       readonly c: unknown
     }>
   },
-  | NimblebitError
-  | Forbidden
-  | BadRequest
-  | Unauthorized
-  | InternalServerError
-  | Schema.SchemaError
-  | PlatformError
-  | HttpClientError,
+  NimblebitError | Forbidden | BadRequest | Unauthorized | InternalServerError | Schema.SchemaError | HttpClientError,
   NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L1212)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L1210)
 
 Since v1.0.0
 
@@ -523,19 +467,12 @@ declare const social_pullFriendMeta: (
     readonly ts: string
     readonly bitbook?: string | undefined
   },
-  | NimblebitError
-  | Forbidden
-  | BadRequest
-  | Unauthorized
-  | InternalServerError
-  | Schema.SchemaError
-  | PlatformError
-  | HttpClientError,
+  NimblebitError | Forbidden | BadRequest | Unauthorized | InternalServerError | Schema.SchemaError | HttpClientError,
   NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L1040)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L1038)
 
 Since v1.0.0
 
@@ -553,19 +490,12 @@ declare const social_pullFriendTower: (
   } & { friendId: Schema.Schema.Type<typeof NimblebitConfig.PlayerIdSchema> }
 ) => Effect.Effect<
   { saveId: number; data: string },
-  | NimblebitError
-  | Forbidden
-  | BadRequest
-  | Unauthorized
-  | InternalServerError
-  | Schema.SchemaError
-  | PlatformError
-  | HttpClientError,
+  NimblebitError | Forbidden | BadRequest | Unauthorized | InternalServerError | Schema.SchemaError | HttpClientError,
   NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L1094)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L1092)
 
 Since v1.0.0
 
@@ -583,19 +513,12 @@ declare const social_receiveGift: (
   } & { giftId: number }
 ) => Effect.Effect<
   void,
-  | NimblebitError
-  | Forbidden
-  | BadRequest
-  | Unauthorized
-  | InternalServerError
-  | Schema.SchemaError
-  | PlatformError
-  | HttpClientError,
+  NimblebitError | Forbidden | BadRequest | Unauthorized | InternalServerError | Schema.SchemaError | HttpClientError,
   NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L990)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L988)
 
 Since v1.0.0
 
@@ -613,19 +536,12 @@ declare const social_retrieveFriendsSnapshotList: (
   } & { friendId: Schema.Schema.Type<typeof NimblebitConfig.PlayerIdSchema> }
 ) => Effect.Effect<
   ReadonlyArray<{ readonly meta: any; readonly snapshotId: number; readonly created: Date }>,
-  | NimblebitError
-  | Forbidden
-  | BadRequest
-  | Unauthorized
-  | InternalServerError
-  | Schema.SchemaError
-  | PlatformError
-  | HttpClientError,
+  NimblebitError | Forbidden | BadRequest | Unauthorized | InternalServerError | Schema.SchemaError | HttpClientError,
   NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L1161)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L1159)
 
 Since v1.0.0
 
@@ -647,19 +563,12 @@ declare const social_sendItem: (
   }
 ) => Effect.Effect<
   void,
-  | NimblebitError
-  | Forbidden
-  | BadRequest
-  | Unauthorized
-  | InternalServerError
-  | Schema.SchemaError
-  | PlatformError
-  | HttpClientError,
+  NimblebitError | Forbidden | BadRequest | Unauthorized | InternalServerError | Schema.SchemaError | HttpClientError,
   NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L878)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L876)
 
 Since v1.0.0
 
@@ -677,19 +586,12 @@ declare const social_visit: (
   } & { friendId: Schema.Schema.Type<typeof NimblebitConfig.PlayerIdSchema> }
 ) => Effect.Effect<
   void,
-  | NimblebitError
-  | Forbidden
-  | BadRequest
-  | Unauthorized
-  | InternalServerError
-  | Schema.SchemaError
-  | PlatformError
-  | HttpClientError,
+  NimblebitError | Forbidden | BadRequest | Unauthorized | InternalServerError | Schema.SchemaError | HttpClientError,
   NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L1263)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L1261)
 
 Since v1.0.0
 
@@ -705,14 +607,7 @@ declare const sync_checkForNewerSave: (args_0: {
   readonly playerId: string & Brand<"PlayerId">
 }) => Effect.Effect<
   number,
-  | NimblebitError
-  | Forbidden
-  | BadRequest
-  | Unauthorized
-  | InternalServerError
-  | Schema.SchemaError
-  | PlatformError
-  | HttpClientError,
+  NimblebitError | Forbidden | BadRequest | Unauthorized | InternalServerError | Schema.SchemaError | HttpClientError,
   NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
 >
 ```
@@ -733,14 +628,7 @@ declare const sync_pullSave: (args_0: {
   readonly playerId: string & Brand<"PlayerId">
 }) => Effect.Effect<
   { saveId: number; data: string },
-  | NimblebitError
-  | Forbidden
-  | BadRequest
-  | Unauthorized
-  | InternalServerError
-  | Schema.SchemaError
-  | PlatformError
-  | HttpClientError,
+  NimblebitError | Forbidden | BadRequest | Unauthorized | InternalServerError | Schema.SchemaError | HttpClientError,
   NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
 >
 ```
@@ -763,19 +651,12 @@ declare const sync_pullSnapshot: (
   } & { snapshotId: number }
 ) => Effect.Effect<
   { snapshotId: number; data: string },
-  | NimblebitError
-  | Forbidden
-  | BadRequest
-  | Unauthorized
-  | InternalServerError
-  | Schema.SchemaError
-  | PlatformError
-  | HttpClientError,
+  NimblebitError | Forbidden | BadRequest | Unauthorized | InternalServerError | Schema.SchemaError | HttpClientError,
   NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L561)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L559)
 
 Since v1.0.0
 
@@ -793,14 +674,7 @@ declare const sync_pushSave: (
   } & { data: Schema.Schema.Type<typeof SaveData> }
 ) => Effect.Effect<
   void,
-  | NimblebitError
-  | Forbidden
-  | BadRequest
-  | Unauthorized
-  | InternalServerError
-  | Schema.SchemaError
-  | PlatformError
-  | HttpClientError,
+  NimblebitError | Forbidden | BadRequest | Unauthorized | InternalServerError | Schema.SchemaError | HttpClientError,
   NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
 >
 ```
@@ -823,19 +697,12 @@ declare const sync_pushSnapshot: (
   } & { data: Schema.Schema.Type<typeof SaveData> }
 ) => Effect.Effect<
   void,
-  | NimblebitError
-  | Forbidden
-  | BadRequest
-  | Unauthorized
-  | InternalServerError
-  | Schema.SchemaError
-  | PlatformError
-  | HttpClientError,
+  NimblebitError | Forbidden | BadRequest | Unauthorized | InternalServerError | Schema.SchemaError | HttpClientError,
   NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L626)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L624)
 
 Since v1.0.0
 
@@ -1040,19 +907,12 @@ declare const sync_retrieveSnapshotList: (args_0: {
       readonly bitbook?: string | undefined
     }
   }>,
-  | NimblebitError
-  | Forbidden
-  | BadRequest
-  | Unauthorized
-  | InternalServerError
-  | Schema.SchemaError
-  | PlatformError
-  | HttpClientError,
+  NimblebitError | Forbidden | BadRequest | Unauthorized | InternalServerError | Schema.SchemaError | HttpClientError,
   NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L694)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-sdk/src/TinyTower.ts#L692)
 
 Since v1.0.0
 

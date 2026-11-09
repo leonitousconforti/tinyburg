@@ -10,7 +10,7 @@ Tiny Tower Vegas SDK: signed calls against Nimblebit's NBSync service.
 
 Signing reuses `@tinyburg/nimblebit-sdk` (`NimblebitAuth`): the game secret
 salt (from `NBSync._ss`) is provided as the auth key, and each request is
-`md5(<preimage> + <secret salt>)` with a random uint32 `salt` in the path.
+`md5(<preimage> + <secret salt>)` with a random signed int32 `salt` in the path.
 All method preimages below are the Tiny Tower formula with the `vegas` game code.
 
 The methods that were exercised live against sync.nimblebit.com are marked
@@ -46,14 +46,7 @@ declare const device_newPlayer: Effect.Effect<
     readonly playerId: string & Brand<"PlayerId">
     readonly playerSs: Redacted.Redacted<string> & Brand<"PlayerAuthKey">
   },
-  | NimblebitError
-  | Forbidden
-  | BadRequest
-  | Unauthorized
-  | InternalServerError
-  | Schema.SchemaError
-  | PlatformError
-  | HttpClientError,
+  NimblebitError | Forbidden | BadRequest | Unauthorized | InternalServerError | Schema.SchemaError | HttpClientError,
   NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
 >
 ```
@@ -81,14 +74,7 @@ declare const device_playerDetails: (args_0: {
     readonly saveVersion: number
     readonly checksum: string
   },
-  | NimblebitError
-  | Forbidden
-  | BadRequest
-  | Unauthorized
-  | InternalServerError
-  | Schema.SchemaError
-  | PlatformError
-  | HttpClientError,
+  NimblebitError | Forbidden | BadRequest | Unauthorized | InternalServerError | Schema.SchemaError | HttpClientError,
   NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
 >
 ```
@@ -110,14 +96,7 @@ declare const social_getItems: (args_0: {
   readonly playerId: string & Brand<"PlayerId">
 }) => Effect.Effect<
   { readonly success: "NotFound" } | { readonly success: "Found"; readonly gifts: ReadonlyArray<unknown> },
-  | NimblebitError
-  | Forbidden
-  | BadRequest
-  | Unauthorized
-  | InternalServerError
-  | Schema.SchemaError
-  | PlatformError
-  | HttpClientError,
+  NimblebitError | Forbidden | BadRequest | Unauthorized | InternalServerError | Schema.SchemaError | HttpClientError,
   NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
 >
 ```
@@ -145,14 +124,7 @@ declare const sync_pullSave: (args_0: {
       readonly checksum: string
       readonly saveId: number
     },
-  | NimblebitError
-  | Forbidden
-  | BadRequest
-  | Unauthorized
-  | InternalServerError
-  | Schema.SchemaError
-  | PlatformError
-  | HttpClientError,
+  NimblebitError | Forbidden | BadRequest | Unauthorized | InternalServerError | Schema.SchemaError | HttpClientError,
   NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
 >
 ```

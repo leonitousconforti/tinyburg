@@ -48,7 +48,7 @@ export const PlayerId = Schema.String.pipe(
 );
 
 /** @internal */
-export const U32 = Schema.Int.check(Schema.isUint32());
+export const I32 = Schema.Int.check(Schema.isInt32());
 
 /** @internal */
 export const ApiErrors = [
@@ -82,7 +82,7 @@ export const Gift = Schema.Unknown;
 
 /** @internal */
 export const DeviceNewPlayerEndpoint = HttpApiEndpoint.get("DeviceNewPlayer", "/register/lt/:salt1/:salt2/:hash", {
-    params: { salt1: U32, salt2: U32, hash: Schema.String },
+    params: { salt1: I32, salt2: I32, hash: Schema.String },
     error: ApiErrors,
     success: [
         ErrorResponse,
@@ -98,7 +98,7 @@ export const DevicePlayerDetailsEndpoint = HttpApiEndpoint.get(
     "DevicePlayerDetails",
     "/player_details/lt/:playerId/:salt/:hash",
     {
-        params: { playerId: PlayerId, salt: U32, hash: Schema.String },
+        params: { playerId: PlayerId, salt: I32, hash: Schema.String },
         error: ApiErrors,
         success: [
             ErrorResponse,
@@ -145,7 +145,7 @@ export const DeviceVerifyDeviceEndpoint = HttpApiEndpoint.get(
  * @internal
  */
 export const SyncPullSaveEndpoint = HttpApiEndpoint.get("SyncPullSave", "/sync/pull/lt/:playerId/:salt/:hash", {
-    params: { playerId: PlayerId, salt: U32, hash: Schema.String },
+    params: { playerId: PlayerId, salt: I32, hash: Schema.String },
     error: ApiErrors,
     success: [
         ErrorResponse,
@@ -168,7 +168,7 @@ export const SyncCheckForNewerSaveEndpoint = HttpApiEndpoint.get(
     "SyncCheckForNewerSave",
     "/sync/current_version/lt/:playerId/:salt/:hash",
     {
-        params: { playerId: PlayerId, salt: U32, hash: Schema.String },
+        params: { playerId: PlayerId, salt: I32, hash: Schema.String },
         error: ApiErrors,
         success: [
             ErrorResponse,
@@ -189,7 +189,7 @@ export const SyncCheckForNewerSaveEndpoint = HttpApiEndpoint.get(
  * @internal
  */
 export const SocialGetItemsEndpoint = HttpApiEndpoint.get("SocialGetItems", "/get_items/lt/:playerId/:salt/:hash", {
-    params: { playerId: PlayerId, salt: U32, hash: Schema.String },
+    params: { playerId: PlayerId, salt: I32, hash: Schema.String },
     error: ApiErrors,
     success: [
         ErrorResponse,
@@ -212,7 +212,7 @@ export const SocialSendItemEndpoint = HttpApiEndpoint.post(
             itemType: Schema.String,
             playerId: PlayerId,
             friendId: PlayerId,
-            salt: U32,
+            salt: I32,
             hash: Schema.String,
         },
         payload: Schema.Struct({ itemStr: Schema.String }),
@@ -234,7 +234,7 @@ export const SocialPullFriendGameEndpoint = HttpApiEndpoint.get(
         params: {
             playerId: PlayerId,
             friendId: PlayerId,
-            salt: U32,
+            salt: I32,
             hash: Schema.String,
         },
         error: ApiErrors,
@@ -262,7 +262,7 @@ export const SocialPullFriendMetaEndpoint = HttpApiEndpoint.post(
     "SocialPullFriendMeta",
     "/friend/pull_meta/lt/:playerId/:salt/:hash",
     {
-        params: { playerId: PlayerId, salt: U32, hash: Schema.String },
+        params: { playerId: PlayerId, salt: I32, hash: Schema.String },
         payload: Schema.Struct({ friends: PlayerId }),
         error: ApiErrors,
         success: [
@@ -282,7 +282,7 @@ export const SocialPullFriendMetaEndpoint = HttpApiEndpoint.post(
  * @internal
  */
 export const SocialGetVisitsEndpoint = HttpApiEndpoint.get("SocialGetVisits", "/get_visits/lt/:playerId/:salt/:hash", {
-    params: { playerId: PlayerId, salt: U32, hash: Schema.String },
+    params: { playerId: PlayerId, salt: I32, hash: Schema.String },
     error: ApiErrors,
     success: [
         ErrorResponse,
@@ -301,7 +301,7 @@ export const SyncRetrieveSnapshotListEndpoint = HttpApiEndpoint.get(
     "SyncRetrieveSnapshotList",
     "/sync/current_snapshots/lt/:playerId/:salt/:hash",
     {
-        params: { playerId: PlayerId, salt: U32, hash: Schema.String },
+        params: { playerId: PlayerId, salt: I32, hash: Schema.String },
         error: ApiErrors,
         success: [
             ErrorResponse,
@@ -329,7 +329,7 @@ export const SyncPullSnapshotEndpoint = HttpApiEndpoint.get(
     "SyncPullSnapshot",
     "/sync/pull_snapshot/lt/:playerId/:snapshotId/:salt/:hash",
     {
-        params: { playerId: PlayerId, snapshotId: Schema.Int, salt: U32, hash: Schema.String },
+        params: { playerId: PlayerId, snapshotId: Schema.Int, salt: I32, hash: Schema.String },
         error: ApiErrors,
         success: [
             ErrorResponse,
@@ -351,7 +351,7 @@ export const SyncPullSnapshotEndpoint = HttpApiEndpoint.get(
  * @internal
  */
 export const TradeGetTradesEndpoint = HttpApiEndpoint.get("TradeGetTrades", "/get_trades/lt/:playerId/:salt/:hash", {
-    params: { playerId: PlayerId, salt: U32, hash: Schema.String },
+    params: { playerId: PlayerId, salt: I32, hash: Schema.String },
     error: ApiErrors,
     success: [
         ErrorResponse,

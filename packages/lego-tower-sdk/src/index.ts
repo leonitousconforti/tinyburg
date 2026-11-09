@@ -34,7 +34,7 @@ export * as Endpoints from "./Endpoints.ts"
  *
  * Signing reuses `@tinyburg/nimblebit-sdk` (`NimblebitAuth`): the game secret
  * salt (from `NBSync._ss`) is provided as the auth key, and each request is
- * `md5(<preimage> + <secret salt>)` with a random uint32 `salt` in the path.
+ * `md5(<preimage> + <secret salt>)` with a random signed int32 `salt` in the path.
  * All method preimages below are the Tiny Tower formula with the `lt` game code.
  *
  * The methods that were exercised live against sync.nimblebit.com are marked

@@ -24,7 +24,7 @@ import { GAME_CODE } from "./Game.ts";
 import * as Scopes from "./Scopes.ts";
 
 /** @internal */
-export const U32 = Schema.Int.check(Schema.isUint32());
+export const I32 = Schema.Int.check(Schema.isInt32());
 
 /**
  * Errors shared by every endpoint in the api.
@@ -127,7 +127,7 @@ export const DeviceNewPlayerEndpoint = HttpApiEndpoint.get(
     "DeviceNewPlayer",
     `/register/${GAME_CODE}/:salt1/:salt2/:hash`,
     {
-        params: { salt1: U32, salt2: U32, hash: Schema.String },
+        params: { salt1: I32, salt2: I32, hash: Schema.String },
         error: ApiErrors,
         success: [
             ErrorResponse,
@@ -149,7 +149,7 @@ export const DevicePlayerDetailsEndpoint = HttpApiEndpoint.get(
     "DevicePlayerDetails",
     `/player_details/${GAME_CODE}/:playerId/:salt/:hash`,
     {
-        params: { playerId: NimblebitConfig.PlayerIdSchema, salt: U32, hash: Schema.String },
+        params: { playerId: NimblebitConfig.PlayerIdSchema, salt: I32, hash: Schema.String },
         error: ApiErrors,
         success: [
             ErrorResponse,
@@ -207,7 +207,7 @@ export const DeviceRegisterEmailEndpoint = HttpApiEndpoint.post(
     "DeviceRegisterEmail",
     `/register_email/${GAME_CODE}/:playerId/:salt/:hash`,
     {
-        params: { playerId: NimblebitConfig.PlayerIdSchema, salt: U32, hash: Schema.String },
+        params: { playerId: NimblebitConfig.PlayerIdSchema, salt: I32, hash: Schema.String },
         payload: Schema.Struct({ promote: Schema.Literal(1), email: Schema.Redacted(Schema.String) }),
         error: ApiErrors,
         success: [
@@ -223,7 +223,7 @@ export const SyncPullSaveEndpoint = HttpApiEndpoint.get(
     "SyncPullSave",
     `/sync/pull/${GAME_CODE}/:playerId/:salt/:hash`,
     {
-        params: { playerId: NimblebitConfig.PlayerIdSchema, salt: U32, hash: Schema.String },
+        params: { playerId: NimblebitConfig.PlayerIdSchema, salt: I32, hash: Schema.String },
         error: ApiErrors,
         success: [
             ErrorResponse,
@@ -248,7 +248,7 @@ export const SyncPushSaveEndpoint = HttpApiEndpoint.post(
     "SyncPushSave",
     `/sync/push/${GAME_CODE}/:playerId/:salt/:hash`,
     {
-        params: { playerId: NimblebitConfig.PlayerIdSchema, salt: U32, hash: Schema.String },
+        params: { playerId: NimblebitConfig.PlayerIdSchema, salt: I32, hash: Schema.String },
         payload: Schema.Struct({
             data: Schema.Uint8ArrayFromBase64,
             doorman: Bitizen.Bitizen,
@@ -275,7 +275,7 @@ export const SyncCheckForNewerSaveEndpoint = HttpApiEndpoint.get(
     "SyncCheckForNewerSave",
     `/sync/current_version/${GAME_CODE}/:playerId/:salt/:hash`,
     {
-        params: { playerId: NimblebitConfig.PlayerIdSchema, salt: U32, hash: Schema.String },
+        params: { playerId: NimblebitConfig.PlayerIdSchema, salt: I32, hash: Schema.String },
         error: ApiErrors,
         success: [
             ErrorResponse,
@@ -299,7 +299,7 @@ export const SyncPullSnapshotEndpoint = HttpApiEndpoint.get(
     "SyncPullSnapshot",
     `/sync/pull_snapshot/${GAME_CODE}/:playerId/:snapshotId/:salt/:hash`,
     {
-        params: { playerId: NimblebitConfig.PlayerIdSchema, snapshotId: Schema.Int, salt: U32, hash: Schema.String },
+        params: { playerId: NimblebitConfig.PlayerIdSchema, snapshotId: Schema.Int, salt: I32, hash: Schema.String },
         error: ApiErrors,
         success: [
             ErrorResponse,
@@ -324,7 +324,7 @@ export const SyncPushSnapshotEndpoint = HttpApiEndpoint.post(
     "SyncPushSnapshot",
     `/sync/push_snapshot/${GAME_CODE}/:playerId/:salt/:hash`,
     {
-        params: { playerId: NimblebitConfig.PlayerIdSchema, salt: U32, hash: Schema.String },
+        params: { playerId: NimblebitConfig.PlayerIdSchema, salt: I32, hash: Schema.String },
         payload: Schema.Struct({
             data: Schema.Uint8ArrayFromBase64,
             doorman: Bitizen.Bitizen,
@@ -351,7 +351,7 @@ export const SyncRetrieveSnapshotListEndpoint = HttpApiEndpoint.get(
     "SyncRetrieveSnapshotList",
     `/sync/current_snapshots/${GAME_CODE}/:playerId/:salt/:hash`,
     {
-        params: { playerId: NimblebitConfig.PlayerIdSchema, salt: U32, hash: Schema.String },
+        params: { playerId: NimblebitConfig.PlayerIdSchema, salt: I32, hash: Schema.String },
         error: ApiErrors,
         success: [
             ErrorResponse,
@@ -375,7 +375,7 @@ export const RaffleEnterEndpoint = HttpApiEndpoint.get(
     "RaffleEnter",
     `/raffle/enter/${GAME_CODE}/:playerId/:salt/:hash`,
     {
-        params: { playerId: NimblebitConfig.PlayerIdSchema, salt: U32, hash: Schema.String },
+        params: { playerId: NimblebitConfig.PlayerIdSchema, salt: I32, hash: Schema.String },
         error: ApiErrors,
         success: [ErrorResponse, EnteredResponse, NotEnteredResponse],
     }
@@ -386,7 +386,7 @@ export const RaffleEnterMultiEndpoint = HttpApiEndpoint.get(
     "RaffleEnterMulti",
     `/raffle/enter_multi/${GAME_CODE}/:playerId/:salt/:hash`,
     {
-        params: { playerId: NimblebitConfig.PlayerIdSchema, salt: U32, hash: Schema.String },
+        params: { playerId: NimblebitConfig.PlayerIdSchema, salt: I32, hash: Schema.String },
         error: ApiErrors,
         success: [ErrorResponse, EnteredResponse, NotEnteredResponse],
     }
@@ -397,7 +397,7 @@ export const RaffleCheckEnteredCurrentEndpoint = HttpApiEndpoint.get(
     "RaffleCheckEnteredCurrent",
     `/raffle/entered_current/${GAME_CODE}/:playerId/:salt/:hash`,
     {
-        params: { playerId: NimblebitConfig.PlayerIdSchema, salt: U32, hash: Schema.String },
+        params: { playerId: NimblebitConfig.PlayerIdSchema, salt: I32, hash: Schema.String },
         error: ApiErrors,
         success: [ErrorResponse, EnteredResponse, NotEnteredResponse],
     }
@@ -412,7 +412,7 @@ export const SocialSendItemEndpoint = HttpApiEndpoint.post(
             syncItemType: Schema.Enum(SyncItemType.SyncItemType),
             playerId: NimblebitConfig.PlayerIdSchema,
             friendId: NimblebitConfig.PlayerIdSchema,
-            salt: U32,
+            salt: I32,
             hash: Schema.String,
         },
         payload: Schema.Struct({ itemStr: Schema.String }),
@@ -426,7 +426,7 @@ export const SocialGetGiftsEndpoint = HttpApiEndpoint.get(
     "SocialGetGifts",
     `/get_gifts/${GAME_CODE}/:playerId/:salt/:hash`,
     {
-        params: { playerId: NimblebitConfig.PlayerIdSchema, salt: U32, hash: Schema.String },
+        params: { playerId: NimblebitConfig.PlayerIdSchema, salt: I32, hash: Schema.String },
         error: ApiErrors,
         success: [
             ErrorResponse,
@@ -445,7 +445,7 @@ export const SocialReceiveGiftEndpoint = HttpApiEndpoint.get(
     "SocialReceiveGift",
     `/receive_item/${GAME_CODE}/:playerId/:giftId/:salt/:hash`,
     {
-        params: { playerId: NimblebitConfig.PlayerIdSchema, giftId: Schema.Int, salt: U32, hash: Schema.String },
+        params: { playerId: NimblebitConfig.PlayerIdSchema, giftId: Schema.Int, salt: I32, hash: Schema.String },
         error: ApiErrors,
         success: [ErrorResponse, ReceivedResponse, NotReceivedResponse],
     }
@@ -456,7 +456,7 @@ export const SocialPullFriendMetaEndpoint = HttpApiEndpoint.post(
     "SocialPullFriendMeta",
     `/friend/pull_meta/${GAME_CODE}/:playerId/:salt/:hash`,
     {
-        params: { playerId: NimblebitConfig.PlayerIdSchema, salt: U32, hash: Schema.String },
+        params: { playerId: NimblebitConfig.PlayerIdSchema, salt: I32, hash: Schema.String },
         payload: Schema.Struct({ friends: NimblebitConfig.PlayerIdSchema }),
         error: ApiErrors,
         success: [
@@ -478,7 +478,7 @@ export const SocialPullFriendTowerEndpoint = HttpApiEndpoint.get(
         params: {
             playerId: NimblebitConfig.PlayerIdSchema,
             friendId: NimblebitConfig.PlayerIdSchema,
-            salt: U32,
+            salt: I32,
             hash: Schema.String,
         },
         error: ApiErrors,
@@ -510,7 +510,7 @@ export const SocialRetrieveFriendsSnapshotListEndpoint = HttpApiEndpoint.get(
         params: {
             playerId: NimblebitConfig.PlayerIdSchema,
             friendId: NimblebitConfig.PlayerIdSchema,
-            salt: U32,
+            salt: I32,
             hash: Schema.String,
         },
         error: ApiErrors,
@@ -554,7 +554,7 @@ export const SocialGetVisitsEndpoint = HttpApiEndpoint.get(
     "SocialGetVisits",
     `/get_visits/${GAME_CODE}/:playerId/:salt/:hash`,
     {
-        params: { playerId: NimblebitConfig.PlayerIdSchema, salt: U32, hash: Schema.String },
+        params: { playerId: NimblebitConfig.PlayerIdSchema, salt: I32, hash: Schema.String },
         error: ApiErrors,
         success: [
             ErrorResponse,

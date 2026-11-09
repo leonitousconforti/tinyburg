@@ -246,9 +246,9 @@ export class NimblebitAuth extends Context.Service<
             Effect.catch(() => Effect.die(new Error(`No burnbots are configured for ${game}`)))
         );
 
-    /** A random uint32, the range the endpoints' salt params accept. */
+    /** A random signed int32, like the salts the games send. */
     private static readonly Salt = (random: SecureRandom.SecureRandom["Service"]): Effect.Effect<number> =>
-        random.intBetween(0, 0xffff_ffff);
+        random.intBetween(-0x8000_0000, 0x7fff_ffff);
 
     public static readonly Direct = (
         authKey: Schema.Schema.Type<typeof NimblebitConfig.NimblebitAuthKeySchema>
