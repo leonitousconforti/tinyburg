@@ -1,6 +1,6 @@
 {
     "name": "@tinyburg/tinytower-vegas-sdk",
-    "version": "0.1.1",
+    "version": "0.1.2",
     "description": "api for the mobile game Tiny Tower Vegas by Nimblebit",
     "keywords": [
         "nimblebit",

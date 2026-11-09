@@ -1,5 +1,16 @@
 # @tinyburg/lego-tower-sdk
 
+## 0.1.2
+
+### Patch Changes
+
+- f2a4875: `NimblebitAuth` now draws signed int32 salts, as the games do, and every SDK's endpoints accept a negative `salt`.
+- Updated dependencies [bb4314f]
+- Updated dependencies [c779076]
+- Updated dependencies [97dec84]
+- Updated dependencies [f2a4875]
+    - @tinyburg/nimblebit-sdk@0.3.0
+
 ## 0.1.1
 
 ### Patch Changes

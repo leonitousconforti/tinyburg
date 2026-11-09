@@ -1,5 +1,18 @@
 # @tinyburg/insight
 
+## 0.3.0
+
+### Minor Changes
+
+- d5bfdc9: Run against an x86_64 emulator: the session attaches in Frida's emulated realm (TinyTower ships only ARM libraries, which run through Android's ARM translation there), the emulator starts `/data/local/tmp/frida-server` instead of a versioned arm64 build, and the SDK is found through `ANDROID_HOME` (as `@efffrida/frida-tools` does) instead of `ANDROID_SDK`.
+
+### Patch Changes
+
+- 8c5f5bd: Drop the direct `@bufbuild/protobuf` dependency. `@efffrida/gplayapi` depends on it itself.
+- 2ec1bdc: Update `effect` to 4.1.2 and the `@efffrida/*` dependencies to the releases built for it. `DeviceLive` now restarts `frida-server` when it exits, at most 5 times, and sessions on the old server detach.
+- aad505b: Update `frida` to 17.26.2 and the `@efffrida/*` dependencies to the releases built against it. 17.25.0 and 17.25.1 crashed Unity games on attach on Android, and 17.26.0 resolves exports of the game's own libraries in the emulated realm.
+- d51822d: Export the node entry point as `@tinyburg/insight/node`, like `@efffrida/rpc/node`. The `@tinyburg/insight/node/index` path is no longer exported.
+
 ## 0.2.1
 
 ### Patch Changes

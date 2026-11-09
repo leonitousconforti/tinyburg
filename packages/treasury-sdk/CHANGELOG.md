@@ -1,5 +1,25 @@
 # @tinyburg/treasury-sdk
 
+## 0.3.0
+
+### Minor Changes
+
+- 160e0ac: Add `OpenOffers` to `TreasuryPublicGroup`: `GET /v1/treasury/offers` lists the live open offers, without who made them, for anyone. `GetTrade` now also answers any trader for an open offer, so it can be accepted from its page.
+
+### Patch Changes
+
+- Updated dependencies [2ec1bdc]
+- Updated dependencies [cf0f658]
+- Updated dependencies [aad505b]
+- Updated dependencies [bb4314f]
+- Updated dependencies [c779076]
+- Updated dependencies [97dec84]
+- Updated dependencies [cf0f658]
+- Updated dependencies [f2a4875]
+- Updated dependencies [faf14b1]
+    - @tinyburg/tinytower-sdk@0.3.0
+    - @tinyburg/nimblebit-sdk@0.3.0
+
 ## 0.2.1
 
 ### Patch Changes
