@@ -100,6 +100,8 @@ const DeviceManagementLive = HttpApiBuilder.group(
                             playerEmail: yield* decodeEmail(tower.email).pipe(Effect.orDie),
                             registered: true,
                             blacklisted: false,
+                            saveVersion: tower.save?.saveId ?? 0,
+                            checksum: "fake",
                         },
                     };
                 })
@@ -168,11 +170,10 @@ const SyncManagementLive = HttpApiBuilder.group(
                 .handle("SyncCheckForNewerSave", ({ params }) =>
                     Effect.sync(() => {
                         const tower = towerFor(params.playerId);
-                        // Version 0 rather than NotFound for a fresh tower:
-                        // the sdk's push asks for the current version first,
-                        // and a tower nobody pushed to yet must accept its
-                        // first save rather than refuse it.
-                        return { success: "Found" as const, checksum: "fake", saveId: tower.save?.saveId ?? 0 };
+                        // What sync.nimblebit.com answers for a tower nobody
+                        // pushed to yet; the sdk's push starts from 0 then
+                        if (tower.save === undefined) return { error: "NoSave" };
+                        return { success: "Found" as const, checksum: "fake", saveId: tower.save.saveId };
                     })
                 )
                 .handle("SyncPushSnapshot", ({ params, payload }) =>

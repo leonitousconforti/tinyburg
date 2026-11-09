@@ -93,6 +93,8 @@ declare const device_playerDetails: (args_0: {
     readonly playerId: string & Brand<"PlayerId">
     readonly registered: boolean
     readonly blacklisted: boolean
+    readonly saveVersion: number
+    readonly checksum: string
   },
   | NimblebitError
   | Forbidden
@@ -188,7 +190,7 @@ declare const raffle_checkEnteredCurrent: (args_0: {
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-classic-sdk/src/TinyTowerClassic.ts#L689)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-classic-sdk/src/TinyTowerClassic.ts#L703)
 
 Since v1.0.0
 
@@ -216,7 +218,7 @@ declare const raffle_enterMultiRaffle: (args_0: {
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-classic-sdk/src/TinyTowerClassic.ts#L641)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-classic-sdk/src/TinyTowerClassic.ts#L655)
 
 Since v1.0.0
 
@@ -244,7 +246,7 @@ declare const raffle_enterRaffle: (args_0: {
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-classic-sdk/src/TinyTowerClassic.ts#L593)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-classic-sdk/src/TinyTowerClassic.ts#L607)
 
 Since v1.0.0
 
@@ -265,7 +267,7 @@ declare const social_getGifts: (args_0: {
       readonly id: number
       readonly to: string & Brand<"PlayerId">
       readonly from: string & Brand<"PlayerId">
-      readonly type: "None" | "Play" | "Gift" | "Cloud" | "Raffle" | "Visit" | "Leaderboards"
+      readonly type: "None" | "Play" | "Gift" | "Cloud" | "Raffle" | "Visit" | "Leaderboards" | "Promo" | "Referral"
       readonly contents: string
       readonly checksum: string
       readonly c: unknown
@@ -283,7 +285,7 @@ declare const social_getGifts: (args_0: {
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-classic-sdk/src/TinyTowerClassic.ts#L790)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-classic-sdk/src/TinyTowerClassic.ts#L804)
 
 Since v1.0.0
 
@@ -304,7 +306,7 @@ declare const social_getVisits: (args_0: {
       readonly id: number
       readonly to: string & Brand<"PlayerId">
       readonly from: string & Brand<"PlayerId">
-      readonly type: "None" | "Play" | "Gift" | "Cloud" | "Raffle" | "Visit" | "Leaderboards"
+      readonly type: "None" | "Play" | "Gift" | "Cloud" | "Raffle" | "Visit" | "Leaderboards" | "Promo" | "Referral"
       readonly contents: string
       readonly checksum: string
       readonly c: unknown
@@ -322,13 +324,14 @@ declare const social_getVisits: (args_0: {
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-classic-sdk/src/TinyTowerClassic.ts#L1067)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-classic-sdk/src/TinyTowerClassic.ts#L1085)
 
 Since v1.0.0
 
 ## social_pullFriendMeta
 
-Pulls metadata about a friend's tower from the Nimblebit servers.
+Pulls metadata about a friend's tower from the Nimblebit servers. Resolves
+to `undefined` when Nimblebit has no tower for that friend.
 
 **Signature**
 
@@ -413,6 +416,7 @@ declare const social_pullFriendMeta: (
         | "raccoon"
         | "sheep"
         | "snowman"
+        | "toucan"
         | "unicorn"
         | "robot"
         | "ankylosaurus"
@@ -469,7 +473,6 @@ declare const social_pullFriendMeta: (
         | "squirrel"
         | "stegosaurus"
         | "tiger"
-        | "toucan"
         | "tribble"
         | "triceratops"
         | "turtle"
@@ -537,7 +540,7 @@ declare const social_pullFriendMeta: (
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-classic-sdk/src/TinyTowerClassic.ts#L892)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-classic-sdk/src/TinyTowerClassic.ts#L907)
 
 Since v1.0.0
 
@@ -567,7 +570,7 @@ declare const social_pullFriendTower: (
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-classic-sdk/src/TinyTowerClassic.ts#L945)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-classic-sdk/src/TinyTowerClassic.ts#L963)
 
 Since v1.0.0
 
@@ -597,7 +600,7 @@ declare const social_receiveGift: (
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-classic-sdk/src/TinyTowerClassic.ts#L841)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-classic-sdk/src/TinyTowerClassic.ts#L855)
 
 Since v1.0.0
 
@@ -627,7 +630,7 @@ declare const social_retrieveFriendsSnapshotList: (
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-classic-sdk/src/TinyTowerClassic.ts#L1014)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-classic-sdk/src/TinyTowerClassic.ts#L1032)
 
 Since v1.0.0
 
@@ -661,7 +664,7 @@ declare const social_sendItem: (
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-classic-sdk/src/TinyTowerClassic.ts#L729)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-classic-sdk/src/TinyTowerClassic.ts#L743)
 
 Since v1.0.0
 
@@ -691,7 +694,7 @@ declare const social_visit: (
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-classic-sdk/src/TinyTowerClassic.ts#L1118)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-classic-sdk/src/TinyTowerClassic.ts#L1136)
 
 Since v1.0.0
 
@@ -777,7 +780,7 @@ declare const sync_pullSnapshot: (
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-classic-sdk/src/TinyTowerClassic.ts#L408)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-classic-sdk/src/TinyTowerClassic.ts#L422)
 
 Since v1.0.0
 
@@ -837,7 +840,7 @@ declare const sync_pushSnapshot: (
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-classic-sdk/src/TinyTowerClassic.ts#L475)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-classic-sdk/src/TinyTowerClassic.ts#L489)
 
 Since v1.0.0
 
@@ -929,6 +932,7 @@ declare const sync_retrieveSnapshotList: (args_0: {
           | "raccoon"
           | "sheep"
           | "snowman"
+          | "toucan"
           | "unicorn"
           | "robot"
           | "ankylosaurus"
@@ -985,7 +989,6 @@ declare const sync_retrieveSnapshotList: (args_0: {
           | "squirrel"
           | "stegosaurus"
           | "tiger"
-          | "toucan"
           | "tribble"
           | "triceratops"
           | "turtle"
@@ -1054,7 +1057,7 @@ declare const sync_retrieveSnapshotList: (args_0: {
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-classic-sdk/src/TinyTowerClassic.ts#L545)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-classic-sdk/src/TinyTowerClassic.ts#L559)
 
 Since v1.0.0
 
@@ -1296,6 +1299,7 @@ declare const SaveData: Schema.suspend<
                           | "ghosthustler"
                           | "gift"
                           | "gingerbread"
+                          | "gleaner"
                           | "gold dress"
                           | "golden_ornament"
                           | "golfer"
@@ -1363,6 +1367,7 @@ declare const SaveData: Schema.suspend<
                           | "neanderthal"
                           | "nerd"
                           | "ninja"
+                          | "nosferatu"
                           | "nurse"
                           | "old diver"
                           | "overalls"
@@ -1418,6 +1423,7 @@ declare const SaveData: Schema.suspend<
                           | "santa"
                           | "santa_claus"
                           | "santas_hat"
+                          | "scarecrow"
                           | "security"
                           | "sera"
                           | "shark"
@@ -1448,7 +1454,10 @@ declare const SaveData: Schema.suspend<
                           | "superbit"
                           | "surgeon"
                           | "swimmer"
+                          | "teenage_witch"
+                          | "tiki mask"
                           | "toga"
+                          | "toucan"
                           | "tourist"
                           | "tourist diver"
                           | "travel agent"
@@ -1522,6 +1531,7 @@ declare const SaveData: Schema.suspend<
                       | "raccoon"
                       | "sheep"
                       | "snowman"
+                      | "toucan"
                       | "unicorn"
                       | "robot"
                       | "ankylosaurus"
@@ -1578,7 +1588,6 @@ declare const SaveData: Schema.suspend<
                       | "squirrel"
                       | "stegosaurus"
                       | "tiger"
-                      | "toucan"
                       | "tribble"
                       | "triceratops"
                       | "turtle"
@@ -2136,6 +2145,7 @@ declare const SaveData: Schema.suspend<
                               | "ghosthustler"
                               | "gift"
                               | "gingerbread"
+                              | "gleaner"
                               | "gold dress"
                               | "golden_ornament"
                               | "golfer"
@@ -2203,6 +2213,7 @@ declare const SaveData: Schema.suspend<
                               | "neanderthal"
                               | "nerd"
                               | "ninja"
+                              | "nosferatu"
                               | "nurse"
                               | "old diver"
                               | "overalls"
@@ -2258,6 +2269,7 @@ declare const SaveData: Schema.suspend<
                               | "santa"
                               | "santa_claus"
                               | "santas_hat"
+                              | "scarecrow"
                               | "security"
                               | "sera"
                               | "shark"
@@ -2288,7 +2300,10 @@ declare const SaveData: Schema.suspend<
                               | "superbit"
                               | "surgeon"
                               | "swimmer"
+                              | "teenage_witch"
+                              | "tiki mask"
                               | "toga"
+                              | "toucan"
                               | "tourist"
                               | "tourist diver"
                               | "travel agent"
@@ -2362,6 +2377,7 @@ declare const SaveData: Schema.suspend<
                           | "raccoon"
                           | "sheep"
                           | "snowman"
+                          | "toucan"
                           | "unicorn"
                           | "robot"
                           | "ankylosaurus"
@@ -2418,7 +2434,6 @@ declare const SaveData: Schema.suspend<
                           | "squirrel"
                           | "stegosaurus"
                           | "tiger"
-                          | "toucan"
                           | "tribble"
                           | "triceratops"
                           | "turtle"
@@ -3194,6 +3209,7 @@ declare const SaveData: Schema.suspend<
                                     | "ghosthustler"
                                     | "gift"
                                     | "gingerbread"
+                                    | "gleaner"
                                     | "gold dress"
                                     | "golden_ornament"
                                     | "golfer"
@@ -3261,6 +3277,7 @@ declare const SaveData: Schema.suspend<
                                     | "neanderthal"
                                     | "nerd"
                                     | "ninja"
+                                    | "nosferatu"
                                     | "nurse"
                                     | "old diver"
                                     | "overalls"
@@ -3316,6 +3333,7 @@ declare const SaveData: Schema.suspend<
                                     | "santa"
                                     | "santa_claus"
                                     | "santas_hat"
+                                    | "scarecrow"
                                     | "security"
                                     | "sera"
                                     | "shark"
@@ -3346,7 +3364,10 @@ declare const SaveData: Schema.suspend<
                                     | "superbit"
                                     | "surgeon"
                                     | "swimmer"
+                                    | "teenage_witch"
+                                    | "tiki mask"
                                     | "toga"
+                                    | "toucan"
                                     | "tourist"
                                     | "tourist diver"
                                     | "travel agent"
@@ -3420,6 +3441,7 @@ declare const SaveData: Schema.suspend<
                                 | "raccoon"
                                 | "sheep"
                                 | "snowman"
+                                | "toucan"
                                 | "unicorn"
                                 | "robot"
                                 | "ankylosaurus"
@@ -3476,7 +3498,6 @@ declare const SaveData: Schema.suspend<
                                 | "squirrel"
                                 | "stegosaurus"
                                 | "tiger"
-                                | "toucan"
                                 | "tribble"
                                 | "triceratops"
                                 | "turtle"

@@ -27,4 +27,10 @@ export const SyncItemType = {
     Visit: "Visit",
 
     Leaderboards: "Leaderboards",
+
+    /** In the game's `NBSyncItemType` (4), not yet seen on the wire. */
+    Promo: "Promo",
+
+    /** In the game's `NBSyncItemType` (7), not yet seen on the wire. */
+    Referral: "Referral",
 } as const;

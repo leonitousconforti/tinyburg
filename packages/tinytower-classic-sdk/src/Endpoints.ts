@@ -159,10 +159,13 @@ export const DevicePlayerDetailsEndpoint = HttpApiEndpoint.get(
                     playerId: NimblebitConfig.PlayerIdSchema,
                     registered: Schema.NumberFromString.pipe(Schema.decodeTo(Schema.BooleanFromBit)),
                     blacklisted: Schema.NumberFromString.pipe(Schema.decodeTo(Schema.BooleanFromBit)),
+                    saveVersion: Schema.NumberFromString.pipe(Schema.decodeTo(Schema.Int)),
+                    checksum: Schema.String,
                 }).pipe(
                     Schema.encodeKeys({
                         playerEmail: "email",
                         playerId: "player_id",
+                        checksum: "h",
                     })
                 ),
             }),
