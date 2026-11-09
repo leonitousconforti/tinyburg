@@ -1,7 +1,7 @@
-diff --git a/dist/chunks/run.BPv-BBRv.js b/dist/chunks/run.BPv-BBRv.js
-index 5c235b31744aebca14b9a79dd0836fa0faa9740f..5fd564665baf75cdc5788d1c2b281335a3e26feb 100644
---- a/dist/chunks/run.BPv-BBRv.js
-+++ b/dist/chunks/run.BPv-BBRv.js
+diff --git a/dist/chunks/run.CjdgFZiW.js b/dist/chunks/run.CjdgFZiW.js
+index d2a302f3d62b186039eb505663ae9d04676981a6..833f0974dd7617d3ff5793a6954d27e1e202f4a3 100644
+--- a/dist/chunks/run.CjdgFZiW.js
++++ b/dist/chunks/run.CjdgFZiW.js
 @@ -3015,7 +3015,7 @@ function formatTitle(template, items, idx) {
  	const inspectOptions = { truncate: runner.config.taskTitleValueFormatTruncate };
  	const isObjectItem = isObject(items[0]);
