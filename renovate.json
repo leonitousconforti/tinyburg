@@ -7,10 +7,10 @@
         "helpers:pinGitHubActionDigests"
     ],
     "labels": ["dependencies", "renovate"],
-    "ignorePaths": ["**/node_modules/**", "repos/effect/**", "repos/effect-smol/**"],
-    "enabledManagers": ["github-actions", "nix", "git-submodules", "pip_requirements", "npm"],
     "automerge": true,
     "automergeType": "branch",
+    "ignorePaths": ["**/node_modules/**", "repos/effect/**"],
+    "enabledManagers": ["github-actions", "nix", "git-submodules", "pip_requirements", "npm"],
     "git-submodules": {
         "enabled": true
     },
