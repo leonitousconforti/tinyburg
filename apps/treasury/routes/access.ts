@@ -111,7 +111,7 @@ export const RequireAccessLive = Layer.effect(
                 // the caller can fix.
                 if (requirement === undefined) {
                     yield* Effect.logError(
-                        `${group.identifier}.${endpoint.name} is guarded without a scope requirement`
+                        `${group.identifier}.${endpoint.identifier} is guarded without a scope requirement`
                     );
                     return yield* new HttpApiError.ServiceUnavailable();
                 }

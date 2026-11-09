@@ -17,10 +17,11 @@
  * added.
  *
  * The module also checks, when loaded, that every scoped endpoint accepts its
- * game and exactly one of the game's `:read` and `:write` scopes. An endpoint
- * that accepted both would let a read-only key write, and one that accepted
- * neither would have no side to list its scope under, and the place to learn
- * either is boot rather than a request.
+ * game, exactly one of the game's `:read` and `:write` scopes, and otherwise
+ * only that game's scopes. An endpoint that accepted both sides, or another
+ * game's self-serve scope, would let a read-only key write, and one that
+ * accepted neither side would have no side to list its scope under, and the
+ * place to learn either is boot rather than a request.
  *
  * @since 1.0.0
  */
@@ -96,21 +97,25 @@ const catalogGame = <Id extends string, Groups extends HttpApiGroup.Constraint>(
             const requirement = Context.getOrUndefined(mergedAnnotations, OAuthScope.Required);
             if (requirement === undefined) return;
 
+            const at = `${group.identifier}.${endpoint.identifier}`;
             const entries = [...(requirement.allOf ?? []), ...(requirement.anyOf ?? [])];
             const names = new Set(entries.map((entry) => (typeof entry === "string" ? entry : entry.name)));
             if (!names.has(game.name) || names.has(read.name) === names.has(write.name)) {
                 throw new Error(
-                    `[authproxy] ${group.identifier}.${endpoint.name} must accept ${game.name} and exactly one of ` +
-                        `${read.name} and ${write.name}`
+                    `[authproxy] ${at} must accept ${game.name} and exactly one of ${read.name} and ${write.name}`
                 );
             }
 
             const side = names.has(read.name) ? reads : writes;
             for (const entry of entries) {
                 if (typeof entry === "string") {
-                    throw new Error(`[authproxy] ${group.identifier}.${endpoint.name} accepts ${entry} undescribed`);
+                    throw new Error(`[authproxy] ${at} accepts ${entry} undescribed`);
                 }
                 if (entry.name !== game.name && entry.name !== read.name && entry.name !== write.name) {
+                    // Another game's scope could be one that game lets anyone grant themselves.
+                    if (!entry.name.startsWith(`${game.name}:`)) {
+                        throw new Error(`[authproxy] ${at} accepts ${entry.name}, which is not a ${game.name} scope`);
+                    }
                     side.set(entry.name, entry);
                 }
             }
