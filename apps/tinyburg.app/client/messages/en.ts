@@ -314,7 +314,7 @@ export const en: Messages = {
         step1: "Step 1 of 2",
         step2: "Step 2 of 2",
         friendCodeLabel: "Friend Code",
-        friendCodeTitle: "Up to 5 letters or numbers",
+        friendCodeTitle: "Up to 6 letters or numbers",
         friendCodeHint: "You can find it on the Friends tab in TinyTower",
         emailLabel: "Cloud Sync Email",
         emailHint: "The email your cloud save is registered with. Nimblebit will send a verification code to it.",

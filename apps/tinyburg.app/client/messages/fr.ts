@@ -326,7 +326,7 @@ export const fr: Messages = {
         step1: "Étape 1 sur 2",
         step2: "Étape 2 sur 2",
         friendCodeLabel: "Code ami",
-        friendCodeTitle: "Jusqu'à 5 lettres ou chiffres",
+        friendCodeTitle: "Jusqu'à 6 lettres ou chiffres",
         friendCodeHint: "Tu le trouveras dans l'onglet Amis de TinyTower",
         emailLabel: "E-mail de synchronisation cloud",
         emailHint:

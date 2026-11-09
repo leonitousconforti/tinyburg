@@ -62,7 +62,8 @@ HttpRouter.serve(AllRoutes, { routerConfig: { maxParamLength: 500 } }).pipe(
         CookiePolicy.Default,
         FetchHttpClient.layer,
         NodeCrypto.layerSecureRandom,
-        // PKCE and ID token verification at tinyburg.app sign in.
+        // Nimblebit request signing, and PKCE and ID token verification at
+        // tinyburg.app sign in.
         NodeCrypto.layerDigest,
         NodeCrypto.layerMac,
         NodeCrypto.layerSignature,

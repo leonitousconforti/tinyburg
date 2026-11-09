@@ -329,7 +329,7 @@ export const de: Messages = {
         step1: "Schritt 1 von 2",
         step2: "Schritt 2 von 2",
         friendCodeLabel: "Freundescode",
-        friendCodeTitle: "Bis zu 5 Buchstaben oder Ziffern",
+        friendCodeTitle: "Bis zu 6 Buchstaben oder Ziffern",
         friendCodeHint: "Sie finden ihn im Freunde-Tab in TinyTower",
         emailLabel: "Cloud-Sync-E-Mail",
         emailHint:

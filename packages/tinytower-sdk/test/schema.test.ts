@@ -18,7 +18,7 @@ const ConfigLayerLive = DotEnvLayer.pipe(Layer.provideMerge(NodeServices.layer))
 const Live = Layer.mergeAll(
     FetchHttpClient.layer,
     NimblebitAuth.layerDirectConfig(NimblebitConfig.NimblebitAuthKeyConfig)
-).pipe(Layer.provide(NodeCrypto.layerSecureRandom), Layer.provideMerge(ConfigLayerLive));
+).pipe(Layer.provide([NodeCrypto.layerSecureRandom, NodeCrypto.layerDigest]), Layer.provideMerge(ConfigLayerLive));
 
 const runtime = ManagedRuntime.make(Live);
 
