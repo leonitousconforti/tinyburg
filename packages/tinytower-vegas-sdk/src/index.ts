@@ -31,23 +31,38 @@ export * as Elevators from "./Elevators.ts"
 /**
  * Tiny Tower Vegas (game code `vegas`) NBSync api endpoints.
  *
- * Signing: a random `salt` (signed int32) goes in the path, and `hash` is
- * `md5(<preimage> + <game secret salt>)` with the preimage
- * `vegas/<playerId>/<salt><playerAuthKey>` (variants noted per endpoint). The
- * secret salt is the value extracted from `NBSync._ss`.
+ * Signing: `hash` is `md5(<preimage> + <game secret salt>)`, where the secret
+ * salt is `NBSync._ss` and the usual preimage is
+ * `vegas/<playerId>/<salt><playerAuthKey>` (variants noted per endpoint). Every
+ * NBSync request the game made, `register` included, used this md5 scheme. The
+ * game's `salt` is a signed int32 (OBSERVED: -2037394745). The `U32` salt
+ * params only accept uint32 salts, which the server also accepts (REPLAYED), so
+ * a game-style negative salt fails param decoding here.
  *
- * Verification (live server + Frida DTO inspection of the game, 2026-08-26):
- * - Signing is MD5, server-validated (same scheme as Tiny Tower / Pocket
- *   Planes; the game computes SHA-256 only for the unauthenticated `register`).
- * - Response envelopes VERIFIED by reading the game's DTO classes at runtime:
- *   register, player_details, sync/pull (NBSyncGameSaveResponse), current_version,
- *   verify_device, friend/pull_game, friend/pull_meta (meta is a flat
- *   Dictionary<String,Object> on pt), send_item (NBSyncItemsSendResponse),
- *   get_items (NBSyncItemsGetResponse: success/gifts, NO `total` unlike pp).
- *   `get_items` was also exercised live with a burnbot.
- * - Standard NBSync endpoint set plus get_visits and receive_item.
+ * Provenance used below:
  *
- * Game-specific save/meta schemas are left as `Schema.Unknown` placeholders.
+ * - OBSERVED: the game made this request (Play build 1.5.2, 2026-11-09).
+ * - REPLAYED: the SDK's client function succeeded against the live server
+ *   (2026-11-09).
+ * - DTO: the game's class has these fields.
+ * - LITERAL: the path is compiled into the game but was not exercised.
+ * - DERIVED: inferred from Tiny Tower.
+ *
+ * The game has only three NBSync response DTOs: NBSyncItemsGetResponse
+ * `{success, gifts, total Int32, error}`, NBSyncItemsSendResponse `{success,
+ * error}` and NBSyncItemsReceiveResponse `{success, error, id}`. No other reply
+ * has a DTO class.
+ *
+ * Not modelled yet (LITERAL only): `register_email`, `event/details`,
+ * `event/leaderboards`, `event/register_group` and `event/send_score`. Also
+ * left out are the Game Center, Play Games and Facebook flows (`register_gc`,
+ * `check_gc`, `swap_gc`, `register_pg`, `check_pg`, `swap_pg`, `register_fb`,
+ * `friends`, `friends_fb`), and the save upload: `NBSync.pushToServer` hands
+ * saves to the game's Java plugin (`com.nimblebit.nbsync.SyncPush`), which posts them to
+ * `/sync/push/` outside the il2cpp code the probe hooks.
+ *
+ * Game-specific save, meta, gift and snapshot schemas are left as
+ * `Schema.Unknown` placeholders.
  *
  * @since 1.0.0
  * @category Endpoints
@@ -105,13 +120,15 @@ export * as Scopes from "./Scopes.ts"
  *
  * Signing reuses `@tinyburg/nimblebit-sdk` (`NimblebitAuth`): the game secret
  * salt (from `NBSync._ss`) is provided as the auth key, and each request is
- * `md5(<preimage> + <secret salt>)` with a random signed int32 `salt` in the path.
- * All method preimages below are the Tiny Tower formula with the `vegas` game code.
+ * `md5(<preimage> + <secret salt>)` with a random `salt` in the path. The SDK
+ * draws uint32 salts, which the server accepts; the game sends signed int32
+ * ones. Each preimage below is the one the game was OBSERVED signing (Play
+ * build 1.5.2, 2026-11-09), except `sync_pullSave`'s, which the game did not
+ * send.
  *
- * The methods that were exercised live against sync.nimblebit.com are marked
- * VERIFIED; save-bearing / write paths follow the same pattern but were not
- * exercised. Save bytes are returned raw (base64-decoded); inflating (pako) and
- * parsing into a save schema is left to the caller.
+ * Functions marked REPLAYED succeeded against sync.nimblebit.com (2026-11-09).
+ * Save bytes are returned raw (base64-decoded); inflating (pako) and parsing
+ * into a save schema is left to the caller.
  *
  * @since 1.0.0
  * @category SDK
