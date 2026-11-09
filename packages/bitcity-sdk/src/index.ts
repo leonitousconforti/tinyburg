@@ -49,13 +49,15 @@ export * as Endpoints from "./Endpoints.ts"
 /**
  * The scopes the Bit City api is guarded by: `bitcity` for the whole game,
  * `bitcity:read` and `bitcity:write` for every endpoint that only looks or that
- * changes a player's game, and one scope per endpoint, such as
+ * changes a player's game, a `:read` and a `:write` scope for each area of the
+ * api, such as `bitcity:device:read`, and one scope per endpoint, such as
  * `bitcity:device:player_details`.
  *
- * Each endpoint accepts its own scope, its side's and the game's, narrowest
- * first: `{ anyOf: [DevicePlayerDetails, Read, BitCity] }`. An endpoint this
- * module has no scope for is left unscoped, and the authproxy guards it with
- * `bitcity:read` or `bitcity`.
+ * Each endpoint accepts its own scope, its area's side, the game's side and the
+ * game, narrowest first:
+ * `{ anyOf: [DevicePlayerDetails, DeviceRead, Read, BitCity] }`. An endpoint
+ * this module has no scope for is left unscoped, and the authproxy guards it
+ * with `bitcity:read` or `bitcity`.
  *
  * @since 1.0.0
  * @category Scopes

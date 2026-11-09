@@ -56,7 +56,7 @@ export const ScopeCatalogNode = Schema.Struct({
 });
 
 /**
- * A game's `:read` or `:write` scope and the endpoint scopes it covers.
+ * An area's `:read` or `:write` scope and the endpoint scopes it covers.
  *
  * @since 1.0.0
  * @category Schemas
@@ -67,16 +67,26 @@ export const ScopeCatalogBranch = Schema.Struct({
 });
 
 /**
- * A game: the scope for all of it, then its `:read` and `:write` scopes, each
- * with the endpoint scopes it covers.
+ * A game's `:read` or `:write` scope and the area scopes on that side.
+ *
+ * @since 1.0.0
+ * @category Schemas
+ */
+export const ScopeCatalogSide = Schema.Struct({
+    ...ScopeCatalogNode.fields,
+    areas: Schema.Array(ScopeCatalogBranch),
+});
+
+/**
+ * A game: the scope for all of it, then its `:read` and `:write` sides.
  *
  * @since 1.0.0
  * @category Schemas
  */
 export const ScopeCatalogGame = Schema.Struct({
     ...ScopeCatalogNode.fields,
-    read: ScopeCatalogBranch,
-    write: ScopeCatalogBranch,
+    read: ScopeCatalogSide,
+    write: ScopeCatalogSide,
 });
 
 /**

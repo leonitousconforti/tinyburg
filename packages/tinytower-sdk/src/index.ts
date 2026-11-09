@@ -133,11 +133,13 @@ export * as SaveDiffer from "./SaveDiffer.ts"
 /**
  * The scopes the TinyTower api is guarded by: `tinytower` for the whole game,
  * `tinytower:read` and `tinytower:write` for every endpoint that only looks or
- * that changes a player's game, and one scope per endpoint, such as
+ * that changes a player's game, a `:read` and a `:write` scope for each area of
+ * the api, such as `tinytower:device:read`, and one scope per endpoint, such as
  * `tinytower:device:player_details`.
  *
- * Each endpoint accepts its own scope, its side's and the game's, narrowest
- * first: `{ anyOf: [DevicePlayerDetails, Read, TinyTower] }`.
+ * Each endpoint accepts its own scope, its area's side, the game's side and the
+ * game, narrowest first:
+ * `{ anyOf: [DevicePlayerDetails, DeviceRead, Read, TinyTower] }`.
  *
  * @since 1.0.0
  * @category Scopes

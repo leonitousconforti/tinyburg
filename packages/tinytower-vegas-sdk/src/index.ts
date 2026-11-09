@@ -31,13 +31,16 @@ export * as Endpoints from "./Endpoints.ts"
 /**
  * The scopes the Tiny Tower Vegas api is guarded by: `tinytowervegas` for the
  * whole game, `tinytowervegas:read` and `tinytowervegas:write` for every
- * endpoint that only looks or that changes a player's game, and one scope per
- * endpoint, such as `tinytowervegas:device:player_details`.
+ * endpoint that only looks or that changes a player's game, a `:read` and a
+ * `:write` scope for each area of the api, such as
+ * `tinytowervegas:device:read`, and one scope per endpoint, such as
+ * `tinytowervegas:device:player_details`.
  *
- * Each endpoint accepts its own scope, its side's and the game's, narrowest
- * first: `{ anyOf: [DevicePlayerDetails, Read, TinyTowerVegas] }`. An endpoint
- * this module has no scope for is left unscoped, and the authproxy guards it
- * with `tinytowervegas:read` or `tinytowervegas`.
+ * Each endpoint accepts its own scope, its area's side, the game's side and the
+ * game, narrowest first:
+ * `{ anyOf: [DevicePlayerDetails, DeviceRead, Read, TinyTowerVegas] }`. An
+ * endpoint this module has no scope for is left unscoped, and the authproxy
+ * guards it with `tinytowervegas:read` or `tinytowervegas`.
  *
  * @since 1.0.0
  * @category Scopes

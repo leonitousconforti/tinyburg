@@ -137,7 +137,9 @@ export const DevicePlayerDetailsEndpoint = HttpApiEndpoint.get(
             }),
         ],
     }
-).annotate(OAuthScope.Required, { anyOf: [Scopes.DevicePlayerDetails, Scopes.Read, Scopes.PocketPlanes] });
+).annotate(OAuthScope.Required, {
+    anyOf: [Scopes.DevicePlayerDetails, Scopes.DeviceRead, Scopes.Read, Scopes.PocketPlanes],
+});
 
 /**
  * DERIVED from Tiny Tower; not yet confirmed for pp.
@@ -162,7 +164,9 @@ export const DeviceVerifyDeviceEndpoint = HttpApiEndpoint.get(
             ),
         ],
     }
-).annotate(OAuthScope.Required, { anyOf: [Scopes.DeviceVerifyDevice, Scopes.Write, Scopes.PocketPlanes] });
+).annotate(OAuthScope.Required, {
+    anyOf: [Scopes.DeviceVerifyDevice, Scopes.DeviceWrite, Scopes.Write, Scopes.PocketPlanes],
+});
 
 /**
  * DERIVED from Tiny Tower; not yet confirmed for pp.
@@ -182,7 +186,9 @@ export const DeviceRegisterEmailEndpoint = HttpApiEndpoint.post(
             Schema.Struct({ success: Schema.Literal("NewDevice") }),
         ],
     }
-).annotate(OAuthScope.Required, { anyOf: [Scopes.DeviceRegisterEmail, Scopes.Write, Scopes.PocketPlanes] });
+).annotate(OAuthScope.Required, {
+    anyOf: [Scopes.DeviceRegisterEmail, Scopes.DeviceWrite, Scopes.Write, Scopes.PocketPlanes],
+});
 
 /**
  * Pull the player's cloud save. `data` is base64 pako-deflated bytes (parse into
@@ -243,7 +249,9 @@ export const SocialGetVisitsEndpoint = HttpApiEndpoint.get("SocialGetVisits", "/
         NotFoundResponse,
         Schema.Struct({ success: Schema.Literal("Found"), gifts: Schema.Array(Gift), total: Schema.Int }),
     ],
-}).annotate(OAuthScope.Required, { anyOf: [Scopes.SocialGetVisits, Scopes.Read, Scopes.PocketPlanes] });
+}).annotate(OAuthScope.Required, {
+    anyOf: [Scopes.SocialGetVisits, Scopes.SocialRead, Scopes.Read, Scopes.PocketPlanes],
+});
 
 /**
  * VERIFIED: `/get_gifts/pp/:playerId/:salt/:hash` -> `{ success:"Found", gifts:[...], total }`.
@@ -258,7 +266,9 @@ export const SocialGetGiftsEndpoint = HttpApiEndpoint.get("SocialGetGifts", "/ge
         NotFoundResponse,
         Schema.Struct({ success: Schema.Literal("Found"), gifts: Schema.Array(Gift), total: Schema.Int }),
     ],
-}).annotate(OAuthScope.Required, { anyOf: [Scopes.SocialGetGifts, Scopes.Read, Scopes.PocketPlanes] });
+}).annotate(OAuthScope.Required, {
+    anyOf: [Scopes.SocialGetGifts, Scopes.SocialRead, Scopes.Read, Scopes.PocketPlanes],
+});
 
 /**
  * VERIFIED: `/request_items/pp/:playerId/:salt/:hash` -> `{ success:"Found", gifts:[...] }`
@@ -278,7 +288,9 @@ export const SocialRequestItemsEndpoint = HttpApiEndpoint.get(
             Schema.Struct({ success: Schema.Literal("Found"), gifts: Schema.Array(Gift) }),
         ],
     }
-).annotate(OAuthScope.Required, { anyOf: [Scopes.SocialRequestItems, Scopes.Read, Scopes.PocketPlanes] });
+).annotate(OAuthScope.Required, {
+    anyOf: [Scopes.SocialRequestItems, Scopes.SocialRead, Scopes.Read, Scopes.PocketPlanes],
+});
 
 /**
  * DERIVED from Tiny Tower. Sends an item to a friend (write path, not exercised).
@@ -300,7 +312,9 @@ export const SocialSendItemEndpoint = HttpApiEndpoint.post(
         error: ApiErrors,
         success: [ErrorResponse, SentResponse, NotSentResponse],
     }
-).annotate(OAuthScope.Required, { anyOf: [Scopes.SocialSendItem, Scopes.Write, Scopes.PocketPlanes] });
+).annotate(OAuthScope.Required, {
+    anyOf: [Scopes.SocialSendItem, Scopes.SocialWrite, Scopes.Write, Scopes.PocketPlanes],
+});
 
 /**
  * Preimage `pp/<playerId>/<giftId>/<salt><playerAuthKey>` (path derived from Tiny
@@ -320,7 +334,9 @@ export const SocialReceiveItemEndpoint = HttpApiEndpoint.get(
             NotReceivedResponse,
         ],
     }
-).annotate(OAuthScope.Required, { anyOf: [Scopes.SocialReceiveItem, Scopes.Write, Scopes.PocketPlanes] });
+).annotate(OAuthScope.Required, {
+    anyOf: [Scopes.SocialReceiveItem, Scopes.SocialWrite, Scopes.Write, Scopes.PocketPlanes],
+});
 
 /**
  * DERIVED from Tiny Tower; preimage `pp/<playerId>/<salt><friendId><playerAuthKey>`.
@@ -344,7 +360,9 @@ export const SocialPullFriendMetaEndpoint = HttpApiEndpoint.post(
             }),
         ],
     }
-).annotate(OAuthScope.Required, { anyOf: [Scopes.SocialPullFriendMeta, Scopes.Read, Scopes.PocketPlanes] });
+).annotate(OAuthScope.Required, {
+    anyOf: [Scopes.SocialPullFriendMeta, Scopes.SocialRead, Scopes.Read, Scopes.PocketPlanes],
+});
 
 /**
  * DERIVED from Tiny Tower; preimage `pp/<playerId>/<friendId>/<salt><playerAuthKey>`.
@@ -374,7 +392,9 @@ export const SocialPullFriendGameEndpoint = HttpApiEndpoint.get(
             }).pipe(Schema.encodeKeys({ checksum: "h", saveId: "id", playerId: "player_id" })),
         ],
     }
-).annotate(OAuthScope.Required, { anyOf: [Scopes.SocialPullFriendGame, Scopes.Read, Scopes.PocketPlanes] });
+).annotate(OAuthScope.Required, {
+    anyOf: [Scopes.SocialPullFriendGame, Scopes.SocialRead, Scopes.Read, Scopes.PocketPlanes],
+});
 
 /** @internal */
 export const DeviceManagementGroup = HttpApiGroup.make("DeviceManagementGroup")

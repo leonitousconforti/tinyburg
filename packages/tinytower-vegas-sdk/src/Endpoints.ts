@@ -99,7 +99,9 @@ export const DevicePlayerDetailsEndpoint = HttpApiEndpoint.get(
             }),
         ],
     }
-).annotate(OAuthScope.Required, { anyOf: [Scopes.DevicePlayerDetails, Scopes.Read, Scopes.TinyTowerVegas] });
+).annotate(OAuthScope.Required, {
+    anyOf: [Scopes.DevicePlayerDetails, Scopes.DeviceRead, Scopes.Read, Scopes.TinyTowerVegas],
+});
 
 /** @internal */
 export const DeviceVerifyDeviceEndpoint = HttpApiEndpoint.get(
@@ -120,7 +122,9 @@ export const DeviceVerifyDeviceEndpoint = HttpApiEndpoint.get(
             ),
         ],
     }
-).annotate(OAuthScope.Required, { anyOf: [Scopes.DeviceVerifyDevice, Scopes.Write, Scopes.TinyTowerVegas] });
+).annotate(OAuthScope.Required, {
+    anyOf: [Scopes.DeviceVerifyDevice, Scopes.DeviceWrite, Scopes.Write, Scopes.TinyTowerVegas],
+});
 
 /**
  * Pull the player's cloud save. VERIFIED envelope (NBSyncGameSaveResponse). No-save
@@ -180,7 +184,9 @@ export const SocialGetItemsEndpoint = HttpApiEndpoint.get("SocialGetItems", "/ge
         NotFoundResponse,
         Schema.Struct({ success: Schema.Literal("Found"), gifts: Schema.Array(Gift) }),
     ],
-}).annotate(OAuthScope.Required, { anyOf: [Scopes.SocialGetItems, Scopes.Read, Scopes.TinyTowerVegas] });
+}).annotate(OAuthScope.Required, {
+    anyOf: [Scopes.SocialGetItems, Scopes.SocialRead, Scopes.Read, Scopes.TinyTowerVegas],
+});
 
 /**
  * DERIVED from Tiny Tower. Sends an item to a friend. Response VERIFIED
@@ -203,7 +209,9 @@ export const SocialSendItemEndpoint = HttpApiEndpoint.post(
         error: ApiErrors,
         success: [ErrorResponse, SentResponse, NotSentResponse],
     }
-).annotate(OAuthScope.Required, { anyOf: [Scopes.SocialSendItem, Scopes.Write, Scopes.TinyTowerVegas] });
+).annotate(OAuthScope.Required, {
+    anyOf: [Scopes.SocialSendItem, Scopes.SocialWrite, Scopes.Write, Scopes.TinyTowerVegas],
+});
 
 /**
  * VERIFIED envelope (NBSyncFriendGameSaveResponse); preimage
@@ -234,7 +242,9 @@ export const SocialPullFriendGameEndpoint = HttpApiEndpoint.get(
             }).pipe(Schema.encodeKeys({ checksum: "h", saveId: "id", playerId: "player_id" })),
         ],
     }
-).annotate(OAuthScope.Required, { anyOf: [Scopes.SocialPullFriendGame, Scopes.Read, Scopes.TinyTowerVegas] });
+).annotate(OAuthScope.Required, {
+    anyOf: [Scopes.SocialPullFriendGame, Scopes.SocialRead, Scopes.Read, Scopes.TinyTowerVegas],
+});
 
 /**
  * VERIFIED envelope (NBSyncFriendGameMetaResponse; `meta` is a flat
@@ -258,7 +268,9 @@ export const SocialPullFriendMetaEndpoint = HttpApiEndpoint.post(
             }),
         ],
     }
-).annotate(OAuthScope.Required, { anyOf: [Scopes.SocialPullFriendMeta, Scopes.Read, Scopes.TinyTowerVegas] });
+).annotate(OAuthScope.Required, {
+    anyOf: [Scopes.SocialPullFriendMeta, Scopes.SocialRead, Scopes.Read, Scopes.TinyTowerVegas],
+});
 
 /**
  * VERIFIED path: `/get_visits/vegas/:playerId/:salt/:hash`. Same envelope as get_items.
@@ -277,7 +289,9 @@ export const SocialGetVisitsEndpoint = HttpApiEndpoint.get(
             Schema.Struct({ success: Schema.Literal("Found"), gifts: Schema.Array(Gift) }),
         ],
     }
-).annotate(OAuthScope.Required, { anyOf: [Scopes.SocialGetVisits, Scopes.Read, Scopes.TinyTowerVegas] });
+).annotate(OAuthScope.Required, {
+    anyOf: [Scopes.SocialGetVisits, Scopes.SocialRead, Scopes.Read, Scopes.TinyTowerVegas],
+});
 
 /**
  * Preimage `vegas/<playerId>/<giftId>/<salt><playerAuthKey>`. Response DTO
@@ -297,7 +311,9 @@ export const SocialReceiveItemEndpoint = HttpApiEndpoint.get(
             Schema.Struct({ success: Schema.Literal("NotReceived") }),
         ],
     }
-).annotate(OAuthScope.Required, { anyOf: [Scopes.SocialReceiveItem, Scopes.Write, Scopes.TinyTowerVegas] });
+).annotate(OAuthScope.Required, {
+    anyOf: [Scopes.SocialReceiveItem, Scopes.SocialWrite, Scopes.Write, Scopes.TinyTowerVegas],
+});
 
 /**
  * Snapshot list. Vegas exposes `/sync/current_snapshots/` (and a friend variant).

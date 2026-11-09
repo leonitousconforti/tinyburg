@@ -3,8 +3,9 @@
  * scope editor.
  *
  * One section per game. Its header is the game itself, then one card each for
- * the game's `:read` and `:write` scopes with the endpoint scopes under them,
- * each a plain checkbox line indented one step deeper than the one above.
+ * the game's `:read` and `:write` scopes, with the area scopes on that side
+ * and the endpoint scopes under them, each a plain checkbox line indented one
+ * step deeper than the one above.
  * Picking a scope grants everything beneath it, so the lines under a picked
  * scope show as checked and cannot be unpicked on their own - they are
  * implied, not chosen. A scope the page does not offer at all (the writes, on
@@ -16,12 +17,17 @@
  * the shorter one does not, so {@link toggleScope} keeps it to the shorter one.
  */
 
-import type { CatalogBranch, CatalogGame, CatalogNode } from "./backend.ts";
+import type { CatalogBranch, CatalogGame, CatalogNode, CatalogSide } from "./backend.ts";
 import type { Html, HtmlBuilder } from "foldkit/html";
+
+const sideNodes = (side: CatalogSide): ReadonlyArray<CatalogNode> => [
+    side,
+    ...side.areas.flatMap((area) => [area, ...area.children]),
+];
 
 /** Every scope in the catalog, in display order. */
 export const flatten = (catalog: ReadonlyArray<CatalogGame>): ReadonlyArray<CatalogNode> =>
-    catalog.flatMap((game) => [game, game.read, ...game.read.children, game.write, ...game.write.children]);
+    catalog.flatMap((game) => [game, ...sideNodes(game.read), ...sideNodes(game.write)]);
 
 /** The catalog as a lookup, for the chips on a key row. */
 export const descriptionsOf = (catalog: ReadonlyArray<CatalogGame>): ReadonlyMap<string, string> =>
@@ -29,23 +35,24 @@ export const descriptionsOf = (catalog: ReadonlyArray<CatalogGame>): ReadonlyMap
 
 /**
  * Node name to the names of every node above it. What a node is beneath is
- * what grants it: an endpoint scope is under its side's scope and the game,
- * and each side is under the game.
+ * what grants it: an endpoint scope is under its area's side, the game's side
+ * and the game; an area's side is under the game's side and the game; and
+ * each of the game's sides is under the game.
  */
 const ancestorsOf = (catalog: ReadonlyArray<CatalogGame>): ReadonlyMap<string, ReadonlyArray<string>> =>
     new Map(
-        catalog.flatMap((game): Array<[string, ReadonlyArray<string>]> => [
-            [game.read.name, [game.name]],
-            [game.write.name, [game.name]],
-            ...game.read.children.map((leaf): [string, ReadonlyArray<string>] => [
-                leaf.name,
-                [game.read.name, game.name],
-            ]),
-            ...game.write.children.map((leaf): [string, ReadonlyArray<string>] => [
-                leaf.name,
-                [game.write.name, game.name],
-            ]),
-        ])
+        catalog.flatMap((game) =>
+            [game.read, game.write].flatMap((side): Array<[string, ReadonlyArray<string>]> => [
+                [side.name, [game.name]],
+                ...side.areas.flatMap((area): Array<[string, ReadonlyArray<string>]> => [
+                    [area.name, [side.name, game.name]],
+                    ...area.children.map((leaf): [string, ReadonlyArray<string>] => [
+                        leaf.name,
+                        [area.name, side.name, game.name],
+                    ]),
+                ]),
+            ])
+        )
     );
 
 /** Node name to the names of every node beneath it: the inverse of {@link ancestorsOf}. */
@@ -96,7 +103,7 @@ export interface PickerOptions<M> {
     readonly onSelectGame: (name: string) => M;
 }
 
-type Rank = "game" | "branch" | "leaf";
+type Rank = "game" | "side" | "area" | "leaf";
 
 /**
  * The name as a row shows it. Under a game's heading every name starts with
@@ -120,7 +127,7 @@ const line = <M>(
     const offered = options.selectable(node);
     const enabled = offered && !implied;
 
-    // Every branch and leaf has a box, disabled where it cannot be picked:
+    // Every side, area and leaf has a box, disabled where it cannot be picked:
     // because an ancestor already grants it, or because this page does not
     // offer it. An unoffered game gets none, being a heading over halves of
     // which one may well be on offer.
@@ -136,7 +143,7 @@ const line = <M>(
               ]);
 
     const tone = offered ? (implied ? "text-gray-500" : "text-gray-800") : "text-gray-400";
-    const size = rank === "game" ? "text-2xl" : rank === "branch" ? "text-lg" : "text-base";
+    const size = rank === "game" ? "text-2xl" : rank === "side" ? "text-xl" : rank === "area" ? "text-lg" : "text-base";
 
     return h.label(
         [h.Class(`flex items-start gap-2 ${enabled ? "cursor-pointer" : ""}`.trim())],
@@ -153,20 +160,38 @@ const line = <M>(
     );
 };
 
-const branchCard = <M>(
+const areaBlock = <M>(
     h: HtmlBuilder<M>,
     options: PickerOptions<M>,
     ancestors: ReadonlyMap<string, ReadonlyArray<string>>,
-    branch: CatalogBranch,
+    area: CatalogBranch,
     strip: string
 ): Html =>
     h.div(
-        [h.Class("flex flex-col gap-1 rounded-lg border-2 border-gray-300 bg-white p-3")],
+        [h.Class("flex flex-col gap-1")],
         [
-            line(h, options, ancestors, branch, "branch", strip),
+            line(h, options, ancestors, area, "area", strip),
             h.div(
                 [h.Class("ml-5 flex flex-col gap-0.5")],
-                branch.children.map((leaf) => line(h, options, ancestors, leaf, "leaf", strip))
+                area.children.map((leaf) => line(h, options, ancestors, leaf, "leaf", strip))
+            ),
+        ]
+    );
+
+const sideCard = <M>(
+    h: HtmlBuilder<M>,
+    options: PickerOptions<M>,
+    ancestors: ReadonlyMap<string, ReadonlyArray<string>>,
+    side: CatalogSide,
+    strip: string
+): Html =>
+    h.div(
+        [h.Class("flex flex-col gap-2 rounded-lg border-2 border-gray-300 bg-white p-3")],
+        [
+            line(h, options, ancestors, side, "side", strip),
+            h.div(
+                [h.Class("ml-5 flex flex-col gap-2")],
+                side.areas.map((area) => areaBlock(h, options, ancestors, area, strip))
             ),
         ]
     );
@@ -190,8 +215,8 @@ const gameSection = <M>(
             h.div(
                 [h.Class("grid gap-3 sm:grid-cols-2")],
                 [
-                    branchCard(h, options, ancestors, game.read, game.name),
-                    branchCard(h, options, ancestors, game.write, game.name),
+                    sideCard(h, options, ancestors, game.read, game.name),
+                    sideCard(h, options, ancestors, game.write, game.name),
                 ]
             ),
         ]

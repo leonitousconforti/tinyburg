@@ -99,7 +99,9 @@ export const DevicePlayerDetailsEndpoint = HttpApiEndpoint.get(
             }),
         ],
     }
-).annotate(OAuthScope.Required, { anyOf: [Scopes.DevicePlayerDetails, Scopes.Read, Scopes.DiscoZoo] });
+).annotate(OAuthScope.Required, {
+    anyOf: [Scopes.DevicePlayerDetails, Scopes.DeviceRead, Scopes.Read, Scopes.DiscoZoo],
+});
 
 /** @internal */
 export const DeviceVerifyDeviceEndpoint = HttpApiEndpoint.get(
@@ -120,7 +122,9 @@ export const DeviceVerifyDeviceEndpoint = HttpApiEndpoint.get(
             ),
         ],
     }
-).annotate(OAuthScope.Required, { anyOf: [Scopes.DeviceVerifyDevice, Scopes.Write, Scopes.DiscoZoo] });
+).annotate(OAuthScope.Required, {
+    anyOf: [Scopes.DeviceVerifyDevice, Scopes.DeviceWrite, Scopes.Write, Scopes.DiscoZoo],
+});
 
 /**
  * Pull the player's cloud save. VERIFIED envelope (NBSyncGameSaveResponse). No-save
@@ -180,7 +184,7 @@ export const SocialGetItemsEndpoint = HttpApiEndpoint.get("SocialGetItems", "/ge
         NotFoundResponse,
         Schema.Struct({ success: Schema.Literal("Found"), gifts: Schema.Array(Gift) }),
     ],
-}).annotate(OAuthScope.Required, { anyOf: [Scopes.SocialGetItems, Scopes.Read, Scopes.DiscoZoo] });
+}).annotate(OAuthScope.Required, { anyOf: [Scopes.SocialGetItems, Scopes.SocialRead, Scopes.Read, Scopes.DiscoZoo] });
 
 /**
  * DERIVED from Tiny Tower. Sends an item to a friend. Response VERIFIED
@@ -203,7 +207,7 @@ export const SocialSendItemEndpoint = HttpApiEndpoint.post(
         error: ApiErrors,
         success: [ErrorResponse, SentResponse, NotSentResponse],
     }
-).annotate(OAuthScope.Required, { anyOf: [Scopes.SocialSendItem, Scopes.Write, Scopes.DiscoZoo] });
+).annotate(OAuthScope.Required, { anyOf: [Scopes.SocialSendItem, Scopes.SocialWrite, Scopes.Write, Scopes.DiscoZoo] });
 
 /**
  * VERIFIED envelope (NBSyncFriendGameSaveResponse); preimage
@@ -234,7 +238,9 @@ export const SocialPullFriendGameEndpoint = HttpApiEndpoint.get(
             }).pipe(Schema.encodeKeys({ checksum: "h", saveId: "id", playerId: "player_id" })),
         ],
     }
-).annotate(OAuthScope.Required, { anyOf: [Scopes.SocialPullFriendGame, Scopes.Read, Scopes.DiscoZoo] });
+).annotate(OAuthScope.Required, {
+    anyOf: [Scopes.SocialPullFriendGame, Scopes.SocialRead, Scopes.Read, Scopes.DiscoZoo],
+});
 
 /**
  * VERIFIED envelope (NBSyncFriendGameMetaResponse; `meta` is a flat
@@ -258,7 +264,9 @@ export const SocialPullFriendMetaEndpoint = HttpApiEndpoint.post(
             }),
         ],
     }
-).annotate(OAuthScope.Required, { anyOf: [Scopes.SocialPullFriendMeta, Scopes.Read, Scopes.DiscoZoo] });
+).annotate(OAuthScope.Required, {
+    anyOf: [Scopes.SocialPullFriendMeta, Scopes.SocialRead, Scopes.Read, Scopes.DiscoZoo],
+});
 
 /**
  * VERIFIED path: `/get_visits/dz/:playerId/:salt/:hash`. Same envelope as get_items.
@@ -273,7 +281,7 @@ export const SocialGetVisitsEndpoint = HttpApiEndpoint.get("SocialGetVisits", "/
         NotFoundResponse,
         Schema.Struct({ success: Schema.Literal("Found"), gifts: Schema.Array(Gift) }),
     ],
-}).annotate(OAuthScope.Required, { anyOf: [Scopes.SocialGetVisits, Scopes.Read, Scopes.DiscoZoo] });
+}).annotate(OAuthScope.Required, { anyOf: [Scopes.SocialGetVisits, Scopes.SocialRead, Scopes.Read, Scopes.DiscoZoo] });
 
 /**
  * Preimage `dz/<playerId>/<giftId>/<salt><playerAuthKey>`. Response DTO
@@ -293,7 +301,9 @@ export const SocialReceiveItemEndpoint = HttpApiEndpoint.get(
             Schema.Struct({ success: Schema.Literal("NotReceived") }),
         ],
     }
-).annotate(OAuthScope.Required, { anyOf: [Scopes.SocialReceiveItem, Scopes.Write, Scopes.DiscoZoo] });
+).annotate(OAuthScope.Required, {
+    anyOf: [Scopes.SocialReceiveItem, Scopes.SocialWrite, Scopes.Write, Scopes.DiscoZoo],
+});
 
 /** @internal */
 export const DeviceManagementGroup = HttpApiGroup.make("DeviceManagementGroup")

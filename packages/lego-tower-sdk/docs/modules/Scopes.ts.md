@@ -8,13 +8,15 @@ parent: Modules
 
 The scopes the LEGO Tower api is guarded by: `legotower` for the whole game,
 `legotower:read` and `legotower:write` for every endpoint that only looks or
-that changes a player's game, and one scope per endpoint, such as
+that changes a player's game, a `:read` and a `:write` scope for each area of
+the api, such as `legotower:device:read`, and one scope per endpoint, such as
 `legotower:device:player_details`.
 
-Each endpoint accepts its own scope, its side's and the game's, narrowest
-first: `{ anyOf: [DevicePlayerDetails, Read, LEGOTower] }`. An endpoint this
-module has no scope for is left unscoped, and the authproxy guards it with
-`legotower:read` or `legotower`.
+Each endpoint accepts its own scope, its area's side, the game's side and the
+game, narrowest first:
+`{ anyOf: [DevicePlayerDetails, DeviceRead, Read, LEGOTower] }`. An endpoint
+this module has no scope for is left unscoped, and the authproxy guards it
+with `legotower:read` or `legotower`.
 
 Since v1.0.0
 
@@ -22,22 +24,27 @@ Since v1.0.0
 
 ## Exports Grouped by Category
 
-- [Endpoints](#endpoints)
+- [Device](#device)
   - [DevicePlayerDetails](#deviceplayerdetails)
+  - [DeviceRead](#deviceread)
   - [DeviceVerifyDevice](#deviceverifydevice)
-  - [SocialGetItems](#socialgetitems)
-  - [SocialGetVisits](#socialgetvisits)
-  - [SocialPullFriendGame](#socialpullfriendgame)
-  - [SocialPullFriendMeta](#socialpullfriendmeta)
-  - [SocialSendItem](#socialsenditem)
+  - [DeviceWrite](#devicewrite)
 - [Game](#game)
   - [LEGOTower](#legotower)
   - [Read](#read)
   - [Write](#write)
+- [Social](#social)
+  - [SocialGetItems](#socialgetitems)
+  - [SocialGetVisits](#socialgetvisits)
+  - [SocialPullFriendGame](#socialpullfriendgame)
+  - [SocialPullFriendMeta](#socialpullfriendmeta)
+  - [SocialRead](#socialread)
+  - [SocialSendItem](#socialsenditem)
+  - [SocialWrite](#socialwrite)
 
 ---
 
-# Endpoints
+# Device
 
 ## DevicePlayerDetails
 
@@ -47,7 +54,19 @@ Since v1.0.0
 declare const DevicePlayerDetails: OAuthScope.Described<OAuthScope.OAuthScope<string>>
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/lego-tower-sdk/src/Scopes.ts#L49)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/lego-tower-sdk/src/Scopes.ts#L69)
+
+Since v1.0.0
+
+## DeviceRead
+
+**Signature**
+
+```ts
+declare const DeviceRead: OAuthScope.Described<OAuthScope.OAuthScope<string>>
+```
+
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/lego-tower-sdk/src/Scopes.ts#L51)
 
 Since v1.0.0
 
@@ -59,67 +78,19 @@ Since v1.0.0
 declare const DeviceVerifyDevice: OAuthScope.Described<OAuthScope.OAuthScope<string>>
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/lego-tower-sdk/src/Scopes.ts#L58)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/lego-tower-sdk/src/Scopes.ts#L78)
 
 Since v1.0.0
 
-## SocialGetItems
+## DeviceWrite
 
 **Signature**
 
 ```ts
-declare const SocialGetItems: OAuthScope.Described<OAuthScope.OAuthScope<string>>
+declare const DeviceWrite: OAuthScope.Described<OAuthScope.OAuthScope<string>>
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/lego-tower-sdk/src/Scopes.ts#L67)
-
-Since v1.0.0
-
-## SocialGetVisits
-
-**Signature**
-
-```ts
-declare const SocialGetVisits: OAuthScope.Described<OAuthScope.OAuthScope<string>>
-```
-
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/lego-tower-sdk/src/Scopes.ts#L76)
-
-Since v1.0.0
-
-## SocialPullFriendGame
-
-**Signature**
-
-```ts
-declare const SocialPullFriendGame: OAuthScope.Described<OAuthScope.OAuthScope<string>>
-```
-
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/lego-tower-sdk/src/Scopes.ts#L85)
-
-Since v1.0.0
-
-## SocialPullFriendMeta
-
-**Signature**
-
-```ts
-declare const SocialPullFriendMeta: OAuthScope.Described<OAuthScope.OAuthScope<string>>
-```
-
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/lego-tower-sdk/src/Scopes.ts#L94)
-
-Since v1.0.0
-
-## SocialSendItem
-
-**Signature**
-
-```ts
-declare const SocialSendItem: OAuthScope.Described<OAuthScope.OAuthScope<string>>
-```
-
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/lego-tower-sdk/src/Scopes.ts#L103)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/lego-tower-sdk/src/Scopes.ts#L60)
 
 Since v1.0.0
 
@@ -133,7 +104,7 @@ Since v1.0.0
 declare const LEGOTower: OAuthScope.Described<OAuthScope.OAuthScope<string>>
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/lego-tower-sdk/src/Scopes.ts#L22)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/lego-tower-sdk/src/Scopes.ts#L24)
 
 Since v1.0.0
 
@@ -145,7 +116,7 @@ Since v1.0.0
 declare const Read: OAuthScope.Described<OAuthScope.OAuthScope<string>>
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/lego-tower-sdk/src/Scopes.ts#L31)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/lego-tower-sdk/src/Scopes.ts#L33)
 
 Since v1.0.0
 
@@ -157,6 +128,92 @@ Since v1.0.0
 declare const Write: OAuthScope.Described<OAuthScope.OAuthScope<string>>
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/lego-tower-sdk/src/Scopes.ts#L40)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/lego-tower-sdk/src/Scopes.ts#L42)
+
+Since v1.0.0
+
+# Social
+
+## SocialGetItems
+
+**Signature**
+
+```ts
+declare const SocialGetItems: OAuthScope.Described<OAuthScope.OAuthScope<string>>
+```
+
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/lego-tower-sdk/src/Scopes.ts#L105)
+
+Since v1.0.0
+
+## SocialGetVisits
+
+**Signature**
+
+```ts
+declare const SocialGetVisits: OAuthScope.Described<OAuthScope.OAuthScope<string>>
+```
+
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/lego-tower-sdk/src/Scopes.ts#L114)
+
+Since v1.0.0
+
+## SocialPullFriendGame
+
+**Signature**
+
+```ts
+declare const SocialPullFriendGame: OAuthScope.Described<OAuthScope.OAuthScope<string>>
+```
+
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/lego-tower-sdk/src/Scopes.ts#L123)
+
+Since v1.0.0
+
+## SocialPullFriendMeta
+
+**Signature**
+
+```ts
+declare const SocialPullFriendMeta: OAuthScope.Described<OAuthScope.OAuthScope<string>>
+```
+
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/lego-tower-sdk/src/Scopes.ts#L132)
+
+Since v1.0.0
+
+## SocialRead
+
+**Signature**
+
+```ts
+declare const SocialRead: OAuthScope.Described<OAuthScope.OAuthScope<string>>
+```
+
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/lego-tower-sdk/src/Scopes.ts#L87)
+
+Since v1.0.0
+
+## SocialSendItem
+
+**Signature**
+
+```ts
+declare const SocialSendItem: OAuthScope.Described<OAuthScope.OAuthScope<string>>
+```
+
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/lego-tower-sdk/src/Scopes.ts#L141)
+
+Since v1.0.0
+
+## SocialWrite
+
+**Signature**
+
+```ts
+declare const SocialWrite: OAuthScope.Described<OAuthScope.OAuthScope<string>>
+```
+
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/lego-tower-sdk/src/Scopes.ts#L96)
 
 Since v1.0.0
