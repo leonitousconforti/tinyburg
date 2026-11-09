@@ -7,6 +7,7 @@
 
 import * as Effect from "effect/Effect";
 import * as Schema from "effect/Schema";
+import * as SchemaGetter from "effect/SchemaGetter";
 import * as SchemaIssue from "effect/SchemaIssue";
 import * as SchemaTransformation from "effect/SchemaTransformation";
 import * as Struct from "effect/Struct";
@@ -324,7 +325,8 @@ export const UnityColor: Schema.decodeTo<
 );
 
 /**
- * Splits a string on `separator` (`","` by default).
+ * Splits a string on `separator` (`","` by default). An empty string is an
+ * empty list, not a list holding one empty string.
  *
  * @since 1.0.0
  * @category Schemas
@@ -338,10 +340,10 @@ export const split =
         return from.pipe(
             Schema.decodeTo(
                 Schema.Array(Schema.String),
-                SchemaTransformation.transform({
-                    encode: (array) => array.join(separator),
-                    decode: (str) => str.split(separator),
-                })
+                new SchemaTransformation.Transformation(
+                    SchemaGetter.split({ separator }),
+                    SchemaGetter.transform((array: ReadonlyArray<string>) => array.join(separator))
+                )
             )
         );
     };
