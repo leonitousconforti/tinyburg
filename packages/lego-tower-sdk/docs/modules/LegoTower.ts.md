@@ -156,7 +156,7 @@ declare const social_getMailbox: (args_0: {
   | InternalServerError
   | Schema.SchemaError
   | HttpClientError,
-  any
+  NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
 >
 ```
 
@@ -190,7 +190,7 @@ declare const social_getMailboxCount: (args_0: {
   | InternalServerError
   | Schema.SchemaError
   | HttpClientError,
-  any
+  NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
 >
 ```
 
@@ -293,7 +293,7 @@ declare const social_retrieveFriendsSnapshotList: (
   | InternalServerError
   | Schema.SchemaError
   | HttpClientError,
-  any
+  NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
 >
 ```
 

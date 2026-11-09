@@ -12,9 +12,8 @@ Signing: a random `salt` goes in the path, and `hash` is
 `md5(<preimage> + <game secret salt>)` with the preimage
 `lt/<playerId>/<salt><playerAuthKey>` (variants noted per endpoint). The
 secret salt is the value of `NBSync._ss`. Every NBSync request the game
-made, `register` included, was signed this way. The game's salt is a signed
-int32 (it sent a negative one); the `salt` params here accept only uint32,
-which is what `NimblebitAuth` generates.
+made, `register` included, was signed this way. Salts are signed int32, as
+the game sends (it sent a negative one).
 
 Each endpoint says how it is known (Play build 1.27.2, 2026-11-09):
 
@@ -463,7 +462,7 @@ declare const Api: HttpApi.HttpApi<
           "GET",
           "/get_mailbox_count/lt/:playerId/:salt/:hash",
           Schema.toCodecStringTree<
-            Schema.Struct<{ playerId: Schema.brand<Schema.String, "PlayerId">; salt: any; hash: Schema.String }>
+            Schema.Struct<{ playerId: Schema.brand<Schema.String, "PlayerId">; salt: Schema.Int; hash: Schema.String }>
           >,
           never,
           never,
@@ -492,7 +491,7 @@ declare const Api: HttpApi.HttpApi<
           "GET",
           "/get_mailbox/lt/:playerId/:salt/:hash",
           Schema.toCodecStringTree<
-            Schema.Struct<{ playerId: Schema.brand<Schema.String, "PlayerId">; salt: any; hash: Schema.String }>
+            Schema.Struct<{ playerId: Schema.brand<Schema.String, "PlayerId">; salt: Schema.Int; hash: Schema.String }>
           >,
           never,
           never,
@@ -524,7 +523,7 @@ declare const Api: HttpApi.HttpApi<
             Schema.Struct<{
               playerId: Schema.brand<Schema.String, "PlayerId">
               friendId: Schema.brand<Schema.String, "PlayerId">
-              salt: any
+              salt: Schema.Int
               hash: Schema.String
             }>
           >,
@@ -594,7 +593,7 @@ declare const Api: HttpApi.HttpApi<
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/lego-tower-sdk/src/Endpoints.ts#L603)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/lego-tower-sdk/src/Endpoints.ts#L602)
 
 Since v1.0.0
 
@@ -613,7 +612,7 @@ declare const AuthenticatedPlayerConfig: Config.Config<{
 }>
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/lego-tower-sdk/src/Endpoints.ts#L82)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/lego-tower-sdk/src/Endpoints.ts#L81)
 
 Since v1.0.0
 
@@ -634,7 +633,7 @@ declare const AuthenticatedPlayer: Schema.Struct<{
 }>
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/lego-tower-sdk/src/Endpoints.ts#L71)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/lego-tower-sdk/src/Endpoints.ts#L70)
 
 Since v1.0.0
 
@@ -652,7 +651,7 @@ observed, so the wire type of `item_type` is unknown.
 declare const Gift: Schema.Unknown
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/lego-tower-sdk/src/Endpoints.ts#L120)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/lego-tower-sdk/src/Endpoints.ts#L119)
 
 Since v1.0.0
 
@@ -668,6 +667,6 @@ chars (e.g. `1QVVY7`), so the shared `PlayerId`
 declare const PlayerId: Schema.brand<Schema.String, "PlayerId">
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/lego-tower-sdk/src/Endpoints.ts#L56)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/lego-tower-sdk/src/Endpoints.ts#L55)
 
 Since v1.0.0

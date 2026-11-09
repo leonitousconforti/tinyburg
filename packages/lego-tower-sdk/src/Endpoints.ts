@@ -5,9 +5,8 @@
  * `md5(<preimage> + <game secret salt>)` with the preimage
  * `lt/<playerId>/<salt><playerAuthKey>` (variants noted per endpoint). The
  * secret salt is the value of `NBSync._ss`. Every NBSync request the game
- * made, `register` included, was signed this way. The game's salt is a signed
- * int32 (it sent a negative one); the `salt` params here accept only uint32,
- * which is what `NimblebitAuth` generates.
+ * made, `register` included, was signed this way. Salts are signed int32, as
+ * the game sends (it sent a negative one).
  *
  * Each endpoint says how it is known (Play build 1.27.2, 2026-11-09):
  * - OBSERVED: the game made this request.
@@ -392,7 +391,7 @@ export const SocialGetMailboxCountEndpoint = HttpApiEndpoint.get(
     "SocialGetMailboxCount",
     "/get_mailbox_count/lt/:playerId/:salt/:hash",
     {
-        params: { playerId: PlayerId, salt: U32, hash: Schema.String },
+        params: { playerId: PlayerId, salt: I32, hash: Schema.String },
         error: ApiErrors,
         success: [
             ErrorResponse,
@@ -424,7 +423,7 @@ export const SocialGetMailboxEndpoint = HttpApiEndpoint.get(
     "SocialGetMailbox",
     "/get_mailbox/lt/:playerId/:salt/:hash",
     {
-        params: { playerId: PlayerId, salt: U32, hash: Schema.String },
+        params: { playerId: PlayerId, salt: I32, hash: Schema.String },
         error: ApiErrors,
         success: [
             ErrorResponse,
@@ -459,7 +458,7 @@ export const SocialRetrieveFriendsSnapshotListEndpoint = HttpApiEndpoint.get(
         params: {
             playerId: PlayerId,
             friendId: PlayerId,
-            salt: U32,
+            salt: I32,
             hash: Schema.String,
         },
         error: ApiErrors,
