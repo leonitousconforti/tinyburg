@@ -13,8 +13,7 @@ Signing: a random `salt` goes in the path, and `hash` is
 `bc/<playerId>/<salt><playerAuthKey>` (variants noted per endpoint). The
 secret salt is the value extracted from `NBSync._ss`. Every request the game
 made was signed this way, `register` included.
-The game's salt is a signed int32 (it sent a negative one), while the `salt`
-params here accept only the uint32 salts `NimblebitAuth` generates.
+Salts are signed int32, as the game sends (it sent a negative one).
 
 Provenance in the comments below:
 
@@ -356,7 +355,7 @@ declare const Api: HttpApi.HttpApi<
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/bitcity-sdk/src/Endpoints.ts#L342)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/bitcity-sdk/src/Endpoints.ts#L341)
 
 Since v1.0.0
 
@@ -376,6 +375,6 @@ number or a name is unobserved.
 declare const Gift: Schema.Unknown
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/bitcity-sdk/src/Endpoints.ts#L74)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/bitcity-sdk/src/Endpoints.ts#L73)
 
 Since v1.0.0
