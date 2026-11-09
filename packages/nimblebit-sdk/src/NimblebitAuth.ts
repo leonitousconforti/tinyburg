@@ -247,10 +247,8 @@ export class NimblebitAuth extends Context.Service<
         );
 
     /** A random uint32, the range the endpoints' salt params accept. */
-    private static readonly salt = (random: SecureRandom.SecureRandom["Service"]): Effect.Effect<number> =>
+    private static readonly Salt = (random: SecureRandom.SecureRandom["Service"]): Effect.Effect<number> =>
         random.intBetween(0, 0xffff_ffff);
-
-    private static readonly encoder = new TextEncoder();
 
     public static readonly Direct = (
         authKey: Schema.Schema.Type<typeof NimblebitConfig.NimblebitAuthKeySchema>
@@ -260,12 +258,13 @@ export class NimblebitAuth extends Context.Service<
             Effect.gen(function* () {
                 const random = yield* SecureRandom.SecureRandom;
                 const digest = yield* Digest.Digest;
+                const encoder = new TextEncoder();
                 return {
                     host: "https://sync.nimblebit.com",
                     authKey,
-                    salt: NimblebitAuth.salt(random),
+                    salt: NimblebitAuth.Salt(random),
                     sign: (data: string) =>
-                        digest.digestHex(Digest.md5, NimblebitAuth.encoder.encode(data + Redacted.value(authKey))),
+                        digest.digestHex(Digest.md5, encoder.encode(data + Redacted.value(authKey))),
                     burnbot: NimblebitAuth.burnbot,
                 };
             })
@@ -290,7 +289,7 @@ export class NimblebitAuth extends Context.Service<
             Effect.map(SecureRandom.SecureRandom, (random) => ({
                 host,
                 authKey,
-                salt: NimblebitAuth.salt(random),
+                salt: NimblebitAuth.Salt(random),
                 sign: Schema.encodeEffect(Schema.StringFromBase64Url),
                 burnbot: NimblebitAuth.burnbot,
             }))
