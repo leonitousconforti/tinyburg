@@ -1,10 +1,10 @@
 /**
  * Pocket Trains (game code `pt`) NBSync api endpoints.
  *
- * Signing: a random `salt` (uint32 here; no negative game salt has been
- * observed) goes in the path, and `hash` is `md5(<preimage> + <game secret
- * salt>)` with the preimage `pt/<playerId>/<salt><playerAuthKey>` (variants
- * noted per endpoint). The secret salt is the value extracted from `NBSync._ss`.
+ * Signing: a random `salt` (signed int32) goes in the path, and `hash` is
+ * `md5(<preimage> + <game secret salt>)` with the preimage
+ * `pt/<playerId>/<salt><playerAuthKey>` (variants noted per endpoint). The
+ * secret salt is the value extracted from `NBSync._ss`.
  *
  * Provenance, per endpoint (2026-11-09):
  *
