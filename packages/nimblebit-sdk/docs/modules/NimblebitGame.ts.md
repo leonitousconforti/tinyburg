@@ -61,7 +61,7 @@ Since v1.0.0
 **Signature**
 
 ```ts
-type NimblebitGame = (typeof NimblebitGameSchema.literals)[number]
+type NimblebitGame = (typeof NimblebitGameSchema)["Type"]
 ```
 
 [Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/NimblebitGame.ts#L30)

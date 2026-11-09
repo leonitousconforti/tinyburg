@@ -250,7 +250,6 @@ export class NimblebitAuth extends Context.Service<
     ) => Effect.Effect<Schema.Schema.Type<typeof NimblebitConfig.AuthenticatedPlayerSchema>, never, never> = (game) =>
         Random.choice(NimblebitAuth.burnBots[game]);
 
-    /** A random signed int32, like the salts the games send. */
     private static readonly Salt = (random: SecureRandom.SecureRandom["Service"]): Effect.Effect<number> =>
         random.intBetween(-0x8000_0000, 0x7fff_ffff);
 
@@ -267,9 +266,9 @@ export class NimblebitAuth extends Context.Service<
                     host: "https://sync.nimblebit.com",
                     authKey,
                     salt: NimblebitAuth.Salt(random),
+                    burnbot: NimblebitAuth.burnbot,
                     sign: (data: string) =>
                         digest.digestHex(Digest.md5, encoder.encode(data + Redacted.value(authKey))),
-                    burnbot: NimblebitAuth.burnbot,
                 };
             })
         );

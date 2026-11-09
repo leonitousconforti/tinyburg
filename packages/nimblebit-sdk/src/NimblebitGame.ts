@@ -27,7 +27,7 @@ export const NimblebitGameSchema = Schema.Literals([
  * @since 1.0.0
  * @category Games
  */
-export type NimblebitGame = (typeof NimblebitGameSchema.literals)[number];
+export type NimblebitGame = (typeof NimblebitGameSchema)["Type"];
 
 /**
  * @since 1.0.0
