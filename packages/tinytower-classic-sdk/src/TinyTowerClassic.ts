@@ -303,7 +303,7 @@ export const sync_pushSave = Effect.fn("sync_pushSave")(function* ({
     const hash = yield* nimblebitAuth.sign(
         `${GAME_CODE}/${playerId}/${salt}${dataAsBase64}${Redacted.value(playerAuthKey)}`
     );
-    const saveVersion = yield* sync_checkForNewerSave({ playerAuthKey, playerId });
+    const saveVersion = yield* currentSaveVersion({ playerAuthKey, playerId });
 
     const response = yield* endpoint({
         params: { playerId, salt, hash },
@@ -398,6 +398,18 @@ export const sync_checkForNewerSave = Effect.fn("sync_checkForNewerSave")(functi
 
     return response.saveId;
 });
+
+/**
+ * The save version a push builds on. A player who has never pushed has none:
+ * `sync/current_version` answers `{ error: "NoSave" }` (and `player_details`
+ * reports `saveVersion` 0), so their first push starts from 0.
+ */
+const currentSaveVersion = (player: Schema.Schema.Type<typeof NimblebitConfig.AuthenticatedPlayerSchema>) =>
+    Effect.catchIf(
+        sync_checkForNewerSave(player),
+        (error) => NimblebitError.isNimblebitError(error) && error.cause === "NoSave",
+        () => Effect.succeed(0)
+    );
 
 /**
  * Pulls a specific snapshot from the Nimblebit servers.
@@ -500,7 +512,7 @@ export const sync_pushSnapshot = Effect.fn("sync_pushSnapshot")(function* ({
     const hash = yield* nimblebitAuth.sign(
         `${GAME_CODE}/${playerId}/${salt}${dataAsBase64}${Redacted.value(playerAuthKey)}`
     );
-    const saveVersion = yield* sync_checkForNewerSave({ playerAuthKey, playerId });
+    const saveVersion = yield* currentSaveVersion({ playerAuthKey, playerId });
 
     const response = yield* endpoint({
         params: { playerId, salt, hash },
@@ -884,7 +896,8 @@ export const social_receiveGift = Effect.fn("social_receiveGift")(function* ({
 });
 
 /**
- * Pulls metadata about a friend's tower from the Nimblebit servers.
+ * Pulls metadata about a friend's tower from the Nimblebit servers. Resolves
+ * to `undefined` when Nimblebit has no tower for that friend.
  *
  * @since 1.0.0
  * @category SDK
@@ -933,7 +946,10 @@ export const social_pullFriendMeta = Effect.fn("social_pullFriendMeta")(function
         });
     }
 
-    return response.meta[friendId];
+    // Nimblebit answers `Found` even for a friend it has no tower for, and
+    // leaves them out of the map
+    const meta: (typeof response.meta)[typeof friendId] | undefined = response.meta[friendId];
+    return meta;
 });
 
 /**
