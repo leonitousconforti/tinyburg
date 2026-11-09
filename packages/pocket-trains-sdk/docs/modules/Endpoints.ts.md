@@ -12,9 +12,6 @@ Signing: a random `salt` (uint32 here; no negative game salt has been
 observed) goes in the path, and `hash` is `md5(<preimage> + <game secret
 salt>)` with the preimage `pt/<playerId>/<salt><playerAuthKey>` (variants
 noted per endpoint). The secret salt is the value extracted from `NBSync._ss`.
-The game itself signs every NBSync request it was seen making with SHA-256
-over the same preimage plus a second 64-char secret derived via `NBSync.Q`.
-The server accepts both schemes.
 
 Provenance, per endpoint (2026-11-09):
 
@@ -398,7 +395,7 @@ declare const Api: HttpApi.HttpApi<
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/pocket-trains-sdk/src/Endpoints.ts#L389)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/pocket-trains-sdk/src/Endpoints.ts#L385)
 
 Since v1.0.0
 
@@ -425,7 +422,7 @@ declare const Gift: Schema.Struct<{
 }>
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/pocket-trains-sdk/src/Endpoints.ts#L78)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/pocket-trains-sdk/src/Endpoints.ts#L75)
 
 Since v1.0.0
 
@@ -441,6 +438,6 @@ String, gift_type: String, gift_str: Int32, gift_quantity: Int32, h: String}`.
 declare const PTGift: Schema.Unknown
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/pocket-trains-sdk/src/Endpoints.ts#L97)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/pocket-trains-sdk/src/Endpoints.ts#L94)
 
 Since v1.0.0

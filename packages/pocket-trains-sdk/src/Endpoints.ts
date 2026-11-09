@@ -5,9 +5,6 @@
  * observed) goes in the path, and `hash` is `md5(<preimage> + <game secret
  * salt>)` with the preimage `pt/<playerId>/<salt><playerAuthKey>` (variants
  * noted per endpoint). The secret salt is the value extracted from `NBSync._ss`.
- * The game itself signs every NBSync request it was seen making with SHA-256
- * over the same preimage plus a second 64-char secret derived via `NBSync.Q`.
- * The server accepts both schemes.
  *
  * Provenance, per endpoint (2026-11-09):
  *
@@ -115,8 +112,7 @@ export const DeviceNewPlayerEndpoint = HttpApiEndpoint.get("DeviceNewPlayer", "/
 });
 
 /**
- * OBSERVED and REPLAYED. `h` is 32 hex chars for an md5-signed request and 64
- * for a SHA-256 one.
+ * OBSERVED and REPLAYED.
  *
  * @internal
  */

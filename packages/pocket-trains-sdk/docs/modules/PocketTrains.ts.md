@@ -12,8 +12,7 @@ Signing reuses `@tinyburg/nimblebit-sdk` (`NimblebitAuth`): the game secret
 salt (from `NBSync._ss`) is provided as the auth key, and each request is
 `md5(<preimage> + <secret salt>)` with a random signed int32 `salt` in the path.
 Each preimage matches the one the game was seen signing, except `get_items`,
-whose game request was not observed. The game hashes with SHA-256 and another
-secret instead; the server accepts both.
+whose game request was not observed.
 
 Each method says whether the game was OBSERVED making its request and whether
 the method was REPLAYED against sync.nimblebit.com (2026-11-09). Save bytes
@@ -63,7 +62,7 @@ declare const device_newPlayer: Effect.Effect<
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/pocket-trains-sdk/src/PocketTrains.ts#L41)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/pocket-trains-sdk/src/PocketTrains.ts#L40)
 
 Since v1.0.0
 
@@ -97,7 +96,7 @@ declare const device_playerDetails: (args_0: {
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/pocket-trains-sdk/src/PocketTrains.ts#L78)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/pocket-trains-sdk/src/PocketTrains.ts#L77)
 
 Since v1.0.0
 
@@ -139,7 +138,7 @@ declare const social_getItems: (args_0: {
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/pocket-trains-sdk/src/PocketTrains.ts#L202)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/pocket-trains-sdk/src/PocketTrains.ts#L201)
 
 Since v1.0.0
 
@@ -178,7 +177,7 @@ declare const social_pullFriendGame: (
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/pocket-trains-sdk/src/PocketTrains.ts#L244)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/pocket-trains-sdk/src/PocketTrains.ts#L243)
 
 Since v1.0.0
 
@@ -211,7 +210,7 @@ declare const social_pullFriendMeta: (
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/pocket-trains-sdk/src/PocketTrains.ts#L289)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/pocket-trains-sdk/src/PocketTrains.ts#L288)
 
 Since v1.0.0
 
@@ -240,7 +239,7 @@ declare const sync_checkForNewerSave: (args_0: {
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/pocket-trains-sdk/src/PocketTrains.ts#L160)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/pocket-trains-sdk/src/PocketTrains.ts#L159)
 
 Since v1.0.0
 
@@ -275,6 +274,6 @@ declare const sync_pullSave: (args_0: {
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/pocket-trains-sdk/src/PocketTrains.ts#L119)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/pocket-trains-sdk/src/PocketTrains.ts#L118)
 
 Since v1.0.0

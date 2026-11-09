@@ -26,9 +26,6 @@ export * as Cities from "./Cities.ts"
  * observed) goes in the path, and `hash` is `md5(<preimage> + <game secret
  * salt>)` with the preimage `pt/<playerId>/<salt><playerAuthKey>` (variants
  * noted per endpoint). The secret salt is the value extracted from `NBSync._ss`.
- * The game itself signs every NBSync request it was seen making with SHA-256
- * over the same preimage plus a second 64-char secret derived via `NBSync.Q`.
- * The server accepts both schemes.
  *
  * Provenance, per endpoint (2026-11-09):
  *
@@ -83,8 +80,7 @@ export * as Events from "./Events.ts"
  * salt (from `NBSync._ss`) is provided as the auth key, and each request is
  * `md5(<preimage> + <secret salt>)` with a random signed int32 `salt` in the path.
  * Each preimage matches the one the game was seen signing, except `get_items`,
- * whose game request was not observed. The game hashes with SHA-256 and another
- * secret instead; the server accepts both.
+ * whose game request was not observed.
  *
  * Each method says whether the game was OBSERVED making its request and whether
  * the method was REPLAYED against sync.nimblebit.com (2026-11-09). Save bytes
