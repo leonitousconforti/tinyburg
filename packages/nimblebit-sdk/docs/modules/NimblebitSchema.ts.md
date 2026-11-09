@@ -51,7 +51,7 @@ declare const parseNimblebitObject: <Fields extends { readonly [x: PropertyKey]:
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/NimblebitSchema.ts#L59)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/NimblebitSchema.ts#L124)
 
 Since v1.0.0
 
@@ -85,13 +85,17 @@ declare const parseNimblebitOrderedList: <
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/NimblebitSchema.ts#L24)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/NimblebitSchema.ts#L29)
 
 Since v1.0.0
 
 # Schemas
 
 ## CSharpDate
+
+A C# `DateTime.Ticks` value. Ticks are 100ns, finer than a js `Date` can
+hold, so decoding keeps the remainder as `extraTicks` and encoding adds it
+back.
 
 **Signature**
 
@@ -106,11 +110,13 @@ declare const CSharpDate: Schema.decodeTo<
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/NimblebitSchema.ts#L88)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/NimblebitSchema.ts#L252)
 
 Since v1.0.0
 
 ## UnityColor
+
+A Unity color written as `"r:g:b"`, each channel 0-255.
 
 **Signature**
 
@@ -118,24 +124,20 @@ Since v1.0.0
 declare const UnityColor: Schema.decodeTo<
   Schema.Struct<{ readonly r: Schema.Int; readonly g: Schema.Int; readonly b: Schema.Int }>,
   Schema.TemplateLiteralParser<
-    readonly [
-      Schema.compose<Schema.Finite, Schema.FiniteFromString>,
-      ":",
-      Schema.compose<Schema.Finite, Schema.FiniteFromString>,
-      ":",
-      Schema.compose<Schema.Finite, Schema.FiniteFromString>
-    ]
+    readonly [Schema.FiniteFromString, ":", Schema.FiniteFromString, ":", Schema.FiniteFromString]
   >,
   never,
   never
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/NimblebitSchema.ts#L106)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/NimblebitSchema.ts#L299)
 
 Since v1.0.0
 
 ## split
+
+Splits a string on `separator` (`","` by default).
 
 **Signature**
 
@@ -145,6 +147,6 @@ declare const split: (options?: {
 }) => (from: Schema.String) => Schema.decodeTo<Schema.$Array<Schema.String>, Schema.String, never, never>
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/NimblebitSchema.ts#L129)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/NimblebitSchema.ts#L332)
 
 Since v1.0.0
