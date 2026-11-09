@@ -10,8 +10,7 @@ Disco Zoo SDK: signed calls against Nimblebit's NBSync service.
 
 Signing reuses `@tinyburg/nimblebit-sdk` (`NimblebitAuth`): the game secret
 salt (from `NBSync._ss`) is provided as the auth key, and each request is
-`md5(<preimage> + <secret salt>)` with a random uint32 `salt` in the path.
-The game itself uses signed int32 salts; the server accepts both.
+`md5(<preimage> + <secret salt>)` with a random signed int32 `salt` in the path.
 
 Each method says where its preimage comes from (Play build 1.6.3,
 2026-11-09): OBSERVED (the game made this request) or REPLAYED (this function
@@ -54,15 +53,14 @@ declare const device_newPlayer: Effect.Effect<
   | BadRequest
   | Unauthorized
   | InternalServerError
-  | NimblebitError
+  | NimblebitError.NimblebitError
   | Schema.SchemaError
-  | PlatformError
   | HttpClientError,
   NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/disco-zoo-sdk/src/DiscoZoo.ts#L40)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/disco-zoo-sdk/src/DiscoZoo.ts#L39)
 
 Since v1.0.0
 
@@ -89,15 +87,14 @@ declare const device_playerDetails: (args_0: {
   | BadRequest
   | Unauthorized
   | InternalServerError
-  | NimblebitError
+  | NimblebitError.NimblebitError
   | Schema.SchemaError
-  | PlatformError
   | HttpClientError,
   NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/disco-zoo-sdk/src/DiscoZoo.ts#L77)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/disco-zoo-sdk/src/DiscoZoo.ts#L76)
 
 Since v1.0.0
 
@@ -118,15 +115,14 @@ declare const social_getItems: (args_0: {
   | BadRequest
   | Unauthorized
   | InternalServerError
-  | NimblebitError
+  | NimblebitError.NimblebitError
   | Schema.SchemaError
-  | PlatformError
   | HttpClientError,
   NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/disco-zoo-sdk/src/DiscoZoo.ts#L159)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/disco-zoo-sdk/src/DiscoZoo.ts#L158)
 
 Since v1.0.0
 
@@ -158,15 +154,14 @@ declare const social_pullFriendGame: (
   | BadRequest
   | Unauthorized
   | InternalServerError
-  | NimblebitError
+  | NimblebitError.NimblebitError
   | Schema.SchemaError
-  | PlatformError
   | HttpClientError,
   NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/disco-zoo-sdk/src/DiscoZoo.ts#L201)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/disco-zoo-sdk/src/DiscoZoo.ts#L200)
 
 Since v1.0.0
 
@@ -194,15 +189,14 @@ declare const social_pullFriendMeta: (
   | BadRequest
   | Unauthorized
   | InternalServerError
-  | NimblebitError
+  | NimblebitError.NimblebitError
   | Schema.SchemaError
-  | PlatformError
   | HttpClientError,
   NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/disco-zoo-sdk/src/DiscoZoo.ts#L248)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/disco-zoo-sdk/src/DiscoZoo.ts#L247)
 
 Since v1.0.0
 
@@ -231,14 +225,13 @@ declare const sync_pullSave: (args_0: {
   | BadRequest
   | Unauthorized
   | InternalServerError
-  | NimblebitError
+  | NimblebitError.NimblebitError
   | Schema.SchemaError
-  | PlatformError
   | HttpClientError,
   NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/disco-zoo-sdk/src/DiscoZoo.ts#L119)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/disco-zoo-sdk/src/DiscoZoo.ts#L118)
 
 Since v1.0.0

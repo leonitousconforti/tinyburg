@@ -14,9 +14,8 @@ Signing: a random `salt` goes in the path, and `hash` is
 secret salt is the value of `NBSync._ss`. Every NBSync call, register
 included, uses MD5.
 
-The game's salt is a signed int32 string (it sent `-867764578` and got
-`Found`), but the `salt` params here accept uint32 only, which is what the
-SDK generates.
+Salts are signed int32, as the game sends (it sent `-867764578` and got
+`Found`).
 
 Provenance (Play build 1.6.3, 2026-11-09):
 
@@ -419,7 +418,7 @@ declare const Api: HttpApi.HttpApi<
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/disco-zoo-sdk/src/Endpoints.ts#L381)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/disco-zoo-sdk/src/Endpoints.ts#L390)
 
 Since v1.0.0
 
@@ -439,6 +438,6 @@ an Int32 enum: None=0, Play=1, Gift=2, Visit=3, Promo=4.
 declare const Gift: Schema.Unknown
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/disco-zoo-sdk/src/Endpoints.ts#L79)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/disco-zoo-sdk/src/Endpoints.ts#L78)
 
 Since v1.0.0

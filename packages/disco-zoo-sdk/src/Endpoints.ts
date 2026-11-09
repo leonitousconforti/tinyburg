@@ -7,9 +7,8 @@
  * secret salt is the value of `NBSync._ss`. Every NBSync call, register
  * included, uses MD5.
  *
- * The game's salt is a signed int32 string (it sent `-867764578` and got
- * `Found`), but the `salt` params here accept uint32 only, which is what the
- * SDK generates.
+ * Salts are signed int32, as the game sends (it sent `-867764578` and got
+ * `Found`).
  *
  * Provenance (Play build 1.6.3, 2026-11-09):
  *

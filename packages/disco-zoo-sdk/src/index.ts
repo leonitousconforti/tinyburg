@@ -26,8 +26,7 @@ export * as Decorations from "./Decorations.ts"
  *
  * Signing reuses `@tinyburg/nimblebit-sdk` (`NimblebitAuth`): the game secret
  * salt (from `NBSync._ss`) is provided as the auth key, and each request is
- * `md5(<preimage> + <secret salt>)` with a random uint32 `salt` in the path.
- * The game itself uses signed int32 salts; the server accepts both.
+ * `md5(<preimage> + <secret salt>)` with a random signed int32 `salt` in the path.
  *
  * Each method says where its preimage comes from (Play build 1.6.3,
  * 2026-11-09): OBSERVED (the game made this request) or REPLAYED (this function
@@ -49,9 +48,8 @@ export * as DiscoZoo from "./DiscoZoo.ts"
  * secret salt is the value of `NBSync._ss`. Every NBSync call, register
  * included, uses MD5.
  *
- * The game's salt is a signed int32 string (it sent `-867764578` and got
- * `Found`), but the `salt` params here accept uint32 only, which is what the
- * SDK generates.
+ * Salts are signed int32, as the game sends (it sent `-867764578` and got
+ * `Found`).
  *
  * Provenance (Play build 1.6.3, 2026-11-09):
  *
