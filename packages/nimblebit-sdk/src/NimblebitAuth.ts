@@ -5,8 +5,6 @@
  * @category Auth
  */
 
-import type * as PlatformError from "effect/PlatformError";
-
 import * as Config from "effect/Config";
 import * as Context from "effect/Context";
 import { Digest, SecureRandom } from "effect/crypto";
@@ -41,7 +39,7 @@ export class NimblebitAuth extends Context.Service<
           }
     ) & {
         readonly sign: (data: string) => Effect.Effect<string, Schema.SchemaError>;
-        readonly salt: Effect.Effect<number, PlatformError.PlatformError>;
+        readonly salt: Effect.Effect<number>;
         readonly burnbot: (
             game: NimblebitGame
         ) => Effect.Effect<Schema.Schema.Type<typeof NimblebitConfig.AuthenticatedPlayerSchema>, never, never>;
@@ -248,22 +246,29 @@ export class NimblebitAuth extends Context.Service<
             Effect.catch(() => Effect.die(new Error(`No burnbots are configured for ${game}`)))
         );
 
-    private static readonly Salt: Effect.Effect<number, never, SecureRandom.SecureRandom> = Effect.map(
-        SecureRandom.SecureRandom.use((random) => random.randomBytes(4)),
-        (bytes) => new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength).getUint32(0, false)
-    );
+    /** A random signed int32, like the salts the games send. */
+    private static readonly Salt = (random: SecureRandom.SecureRandom["Service"]): Effect.Effect<number> =>
+        random.intBetween(-0x8000_0000, 0x7fff_ffff);
 
     public static readonly Direct = (
         authKey: Schema.Schema.Type<typeof NimblebitConfig.NimblebitAuthKeySchema>
     ): Layer.Layer<NimblebitAuth, never, SecureRandom.SecureRandom | Digest.Digest> =>
-        Effect.map(Effect.all([SecureRandom.SecureRandom, Digest.Digest]), ([random, digest]) => ({
-            sign: (data: string) =>
-                digest.digestHex(Digest.md5, new TextEncoder().encode(data + Redacted.value(authKey))),
-            salt: NimblebitAuth.Salt.pipe(Effect.provideService(SecureRandom.SecureRandom, random)),
-            burnbot: NimblebitAuth.burnbot,
-            host: "https://sync.nimblebit.com",
-            authKey,
-        })).pipe(Layer.effect(this));
+        Layer.effect(
+            NimblebitAuth,
+            Effect.gen(function* () {
+                const random = yield* SecureRandom.SecureRandom;
+                const digest = yield* Digest.Digest;
+                const encoder = new TextEncoder();
+                return {
+                    host: "https://sync.nimblebit.com",
+                    authKey,
+                    salt: NimblebitAuth.Salt(random),
+                    sign: (data: string) =>
+                        digest.digestHex(Digest.md5, encoder.encode(data + Redacted.value(authKey))),
+                    burnbot: NimblebitAuth.burnbot,
+                };
+            })
+        );
 
     public static readonly DirectConfig = (
         config: Config.Config<
@@ -279,13 +284,16 @@ export class NimblebitAuth extends Context.Service<
         host: string;
         authKey: Redacted.Redacted;
     }): Layer.Layer<NimblebitAuth, never, SecureRandom.SecureRandom> =>
-        Effect.map(SecureRandom.SecureRandom, (random) => ({
-            salt: NimblebitAuth.Salt.pipe(Effect.provideService(SecureRandom.SecureRandom, random)),
-            sign: Schema.encodeEffect(Schema.StringFromBase64Url),
-            burnbot: NimblebitAuth.burnbot,
-            authKey,
-            host,
-        })).pipe(Layer.effect(this));
+        Layer.effect(
+            NimblebitAuth,
+            Effect.map(SecureRandom.SecureRandom, (random) => ({
+                host,
+                authKey,
+                salt: NimblebitAuth.Salt(random),
+                sign: Schema.encodeEffect(Schema.StringFromBase64Url),
+                burnbot: NimblebitAuth.burnbot,
+            }))
+        );
 
     public static readonly CustomHostConfig = (
         options: Config.Wrap<{

@@ -36,7 +36,7 @@ import * as OAuthScope from "@yielded/auth/OAuthScope";
 import * as Scopes from "./Scopes.ts";
 
 /** @internal */
-export const U32 = Schema.Int.check(Schema.isUint32());
+export const I32 = Schema.Int.check(Schema.isInt32());
 
 /** @internal */
 export const ApiErrors = [
@@ -80,7 +80,7 @@ export const PTGift = Schema.Unknown;
 
 /** @internal */
 export const DeviceNewPlayerEndpoint = HttpApiEndpoint.get("DeviceNewPlayer", "/register/pt/:salt1/:salt2/:hash", {
-    params: { salt1: U32, salt2: U32, hash: Schema.String },
+    params: { salt1: I32, salt2: I32, hash: Schema.String },
     error: ApiErrors,
     success: [
         ErrorResponse,
@@ -96,7 +96,7 @@ export const DevicePlayerDetailsEndpoint = HttpApiEndpoint.get(
     "DevicePlayerDetails",
     "/player_details/pt/:playerId/:salt/:hash",
     {
-        params: { playerId: NimblebitConfig.PlayerIdSchema, salt: U32, hash: Schema.String },
+        params: { playerId: NimblebitConfig.PlayerIdSchema, salt: I32, hash: Schema.String },
         error: ApiErrors,
         success: [
             ErrorResponse,
@@ -143,7 +143,7 @@ export const DeviceVerifyDeviceEndpoint = HttpApiEndpoint.get(
  * @internal
  */
 export const SyncPullSaveEndpoint = HttpApiEndpoint.get("SyncPullSave", "/sync/pull/pt/:playerId/:salt/:hash", {
-    params: { playerId: NimblebitConfig.PlayerIdSchema, salt: U32, hash: Schema.String },
+    params: { playerId: NimblebitConfig.PlayerIdSchema, salt: I32, hash: Schema.String },
     error: ApiErrors,
     success: [
         ErrorResponse,
@@ -166,7 +166,7 @@ export const SyncCheckForNewerSaveEndpoint = HttpApiEndpoint.get(
     "SyncCheckForNewerSave",
     "/sync/current_version/pt/:playerId/:salt/:hash",
     {
-        params: { playerId: NimblebitConfig.PlayerIdSchema, salt: U32, hash: Schema.String },
+        params: { playerId: NimblebitConfig.PlayerIdSchema, salt: I32, hash: Schema.String },
         error: ApiErrors,
         success: [
             ErrorResponse,
@@ -187,7 +187,7 @@ export const SyncCheckForNewerSaveEndpoint = HttpApiEndpoint.get(
  * @internal
  */
 export const SocialGetItemsEndpoint = HttpApiEndpoint.get("SocialGetItems", "/get_items/pt/:playerId/:salt/:hash", {
-    params: { playerId: NimblebitConfig.PlayerIdSchema, salt: U32, hash: Schema.String },
+    params: { playerId: NimblebitConfig.PlayerIdSchema, salt: I32, hash: Schema.String },
     error: ApiErrors,
     success: [
         ErrorResponse,
@@ -209,7 +209,7 @@ export const SocialGetGiftsPtEndpoint = HttpApiEndpoint.get(
     "SocialGetGiftsPt",
     "/get_gifts_pt/pt/:playerId/:salt/:hash",
     {
-        params: { playerId: NimblebitConfig.PlayerIdSchema, salt: U32, hash: Schema.String },
+        params: { playerId: NimblebitConfig.PlayerIdSchema, salt: I32, hash: Schema.String },
         error: ApiErrors,
         success: [
             ErrorResponse,
@@ -233,7 +233,7 @@ export const SocialSendItemEndpoint = HttpApiEndpoint.post(
             itemType: Schema.String,
             playerId: NimblebitConfig.PlayerIdSchema,
             friendId: NimblebitConfig.PlayerIdSchema,
-            salt: U32,
+            salt: I32,
             hash: Schema.String,
         },
         payload: Schema.Struct({ itemStr: Schema.String }),
@@ -255,7 +255,7 @@ export const SocialPullFriendGameEndpoint = HttpApiEndpoint.get(
         params: {
             playerId: NimblebitConfig.PlayerIdSchema,
             friendId: NimblebitConfig.PlayerIdSchema,
-            salt: U32,
+            salt: I32,
             hash: Schema.String,
         },
         error: ApiErrors,
@@ -283,7 +283,7 @@ export const SocialPullFriendMetaEndpoint = HttpApiEndpoint.post(
     "SocialPullFriendMeta",
     "/friend/pull_meta/pt/:playerId/:salt/:hash",
     {
-        params: { playerId: NimblebitConfig.PlayerIdSchema, salt: U32, hash: Schema.String },
+        params: { playerId: NimblebitConfig.PlayerIdSchema, salt: I32, hash: Schema.String },
         payload: Schema.Struct({ friends: NimblebitConfig.PlayerIdSchema }),
         error: ApiErrors,
         success: [
