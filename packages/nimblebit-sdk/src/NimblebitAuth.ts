@@ -5,9 +5,12 @@
  * @category Auth
  */
 
+import type * as Array from "effect/Array";
+
 import * as Config from "effect/Config";
 import * as Context from "effect/Context";
-import { Digest, SecureRandom } from "effect/crypto";
+import * as Digest from "effect/crypto/Digest";
+import * as SecureRandom from "effect/crypto/SecureRandom";
 import * as Effect from "effect/Effect";
 import * as Layer from "effect/Layer";
 import * as Random from "effect/Random";
@@ -46,13 +49,13 @@ export class NimblebitAuth extends Context.Service<
     }
 >()("NimblebitAuth") {
     /**
-     * Throwaway players per game, for requests that need a player but not
-     * any particular one. Games without any yet have an empty pool, and
-     * asking for one of those dies rather than handing back `undefined`.
+     * Throwaway players per game, for requests that need a player but not any
+     * particular one. Games without any yet have an empty pool, and asking for
+     * one of those dies rather than handing back `undefined`.
      */
     private static readonly burnBots: Record<
         NimblebitGame,
-        ReadonlyArray<Schema.Schema.Type<typeof NimblebitConfig.AuthenticatedPlayerSchema>>
+        Array.NonEmptyReadonlyArray<Schema.Schema.Type<typeof NimblebitConfig.AuthenticatedPlayerSchema>>
     > = {
         bitcity: [
             {
@@ -210,7 +213,10 @@ export class NimblebitAuth extends Context.Service<
                 ),
             },
         ],
-        tinytowerclassic: [],
+        // oxlint-disable-next-line typescript/no-unsafe-type-assertion
+        tinytowerclassic: [] as unknown as Array.NonEmptyReadonlyArray<
+            Schema.Schema.Type<typeof NimblebitConfig.AuthenticatedPlayerSchema>
+        >,
         tinytowervegas: [
             {
                 playerId: NimblebitConfig.PlayerIdSchema.make("707P8"),
@@ -242,9 +248,7 @@ export class NimblebitAuth extends Context.Service<
     private static readonly burnbot: (
         game: NimblebitGame
     ) => Effect.Effect<Schema.Schema.Type<typeof NimblebitConfig.AuthenticatedPlayerSchema>, never, never> = (game) =>
-        Random.choice(NimblebitAuth.burnBots[game]).pipe(
-            Effect.catch(() => Effect.die(new Error(`No burnbots are configured for ${game}`)))
-        );
+        Random.choice(NimblebitAuth.burnBots[game]);
 
     /** A random signed int32, like the salts the games send. */
     private static readonly Salt = (random: SecureRandom.SecureRandom["Service"]): Effect.Effect<number> =>
