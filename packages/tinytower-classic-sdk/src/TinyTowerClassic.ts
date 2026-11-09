@@ -407,9 +407,7 @@ export const sync_checkForNewerSave = Effect.fn("sync_checkForNewerSave")(functi
 const currentSaveVersion = (player: Schema.Schema.Type<typeof NimblebitConfig.AuthenticatedPlayerSchema>) =>
     Effect.catchIf(
         sync_checkForNewerSave(player),
-        (error) =>
-            NimblebitError.isNimblebitError(error) &&
-            (error.cause === "NoSave" || error.cause === "Player has no save data"),
+        (error) => NimblebitError.isNimblebitError(error) && error.cause === "NoSave",
         () => Effect.succeed(0)
     );
 
