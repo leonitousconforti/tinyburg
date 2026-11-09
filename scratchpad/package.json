@@ -17,7 +17,7 @@
         "@efffrida/il2cpp-bridge": "0.0.60",
         "@efffrida/platform": "0.0.52",
         "@efffrida/polyfills": "0.0.23",
-        "@efffrida/rpc": "0.0.70",
+        "@efffrida/rpc": "0.0.71",
         "@types/frida-gum": "19.13.0",
         "@types/node": "26.6.6",
         "effect": "4.1.2",

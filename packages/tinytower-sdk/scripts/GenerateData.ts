@@ -1,9 +1,9 @@
 import { Array, Effect, FileSystem, Layer, Order, Path, Record, pipe } from "effect";
 import { FetchHttpClient } from "effect/http";
-import { RpcClient } from "effect/rpc";
+import { RpcClient, RpcClientError } from "effect/rpc";
 
 import { NodeRuntime, NodeServices } from "@effect/platform-node";
-import { FridaDevice, FridaSession, FridaSessionError } from "@efffrida/frida-tools";
+import { FridaDevice, FridaSessionError } from "@efffrida/frida-tools";
 import { AndroidDevice, GooglePlayApi, PlayAccount } from "@efffrida/gplayapi";
 import { AgentLive, DeviceLive } from "@tinyburg/insight/node";
 import { Rpcs } from "@tinyburg/insight/shared/Rpcs";
@@ -53,22 +53,16 @@ const replaceGeneratedContent = (
         yield* fileSystem.writeFileString(filePath, updatedContent);
     });
 
-// A crashed frida-server shows up as "detached" while generating, or as a
-// failed spawn, attach, resume, load or RPC call while the agent starts.
-// "compile" errors come from building the agent and would happen again
-const isRetryable = (error: unknown): error is FridaSessionError.FridaSessionError =>
-    error instanceof FridaSessionError.FridaSessionError && error.when !== "compile";
-
-// The agent's RPCs fail with an RpcClientError when its session detaches, so
-// ask the session whether that is why
-const failIfDetached = <A, E, R>(
-    self: Effect.Effect<A, E, R>
-): Effect.Effect<A, E | FridaSessionError.FridaSessionError, R | FridaSession.FridaSession> =>
-    Effect.flatMap(FridaSession.FridaSession, ({ session }) =>
-        Effect.mapError(self, (error) =>
-            session.isDetached() ? new FridaSessionError.FridaSessionError({ when: "detached", cause: error }) : error
-        )
-    );
+// A crashed frida-server shows up as a failed spawn, attach, resume, load or
+// RPC call while the agent starts, and as a "detached" FridaSessionError, the
+// cause of the RpcClientError, for each RPC after that. "compile" errors come
+// from building the agent and would happen again
+const isRetryable = (error: unknown): boolean => {
+    if (error instanceof FridaSessionError.FridaSessionError) return error.when !== "compile";
+    if (!(error instanceof RpcClientError.RpcClientError) || error.reason._tag !== "RpcClientDefect") return false;
+    const cause = error.reason.cause;
+    return cause instanceof FridaSessionError.FridaSessionError && cause.when === "detached";
+};
 
 const generateData = Effect.gen(function* () {
     const path = yield* Path.Path;
@@ -198,10 +192,9 @@ const generateData = Effect.gen(function* () {
         `
     );
 }).pipe(
-    failIfDetached,
     Effect.scoped,
     Effect.provide(AgentLive, { local: true }),
-    Effect.tapError((error) => (isRetryable(error) ? Effect.logWarning(error.message, error.cause) : Effect.void)),
+    Effect.tapError((error) => (isRetryable(error) ? Effect.logWarning(error) : Effect.void)),
     // frida-server can crash (killed, or a segfault). The emulator device
     // restarts it, so try again with a new session, script and agent on the
     // same emulator once it answers. A crash of TinyTower itself also detaches
