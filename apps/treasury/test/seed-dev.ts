@@ -18,7 +18,7 @@
  *     node apps/treasury/test/seed-dev.ts
  */
 
-import { Config, Effect, Layer, Predicate, Redacted, Result, Schema, String } from "effect";
+import { Config, DateTime, Effect, Layer, Predicate, Redacted, Result, Schema, String } from "effect";
 import { FetchHttpClient } from "effect/http";
 import { SqlClient } from "effect/sql";
 
@@ -53,18 +53,20 @@ const SNAPSHOT = new URL("../../../packages/tinytower-sdk/test/snapshots/2021331
 
 /**
  * A decoded save, recovered from the snapshot corpus. The files are vitest
- * pretty-format output: JS object literals with bare `Date` literals and
- * effect `Result`s flattened to `{ _id, _tag, value | failure }`.
+ * pretty-format output: JS object literals with bare ISO timestamps for
+ * `DateTime`s and effect `Result`s flattened to `{ _id, _tag, value | failure }`.
  */
 const snapshotSave = Effect.gen(function* () {
-    const text = fs.readFileSync(SNAPSHOT, "utf8").replace(/: (\d{4}-\d{2}-\d{2}T[\d:.]+Z)/g, ': new Date("$1")');
+    const text = fs
+        .readFileSync(SNAPSHOT, "utf8")
+        .replace(/: (\d{4}-\d{2}-\d{2}T[\d:.]+Z)/g, ': DateTime.makeUnsafe("$1")');
     // The corpus is trusted repo content; evaluating it is the entire point.
     // oxlint-disable-next-line typescript/no-implied-eval
-    const raw: unknown = Function(`return (${text})`)();
+    const raw: unknown = Function("DateTime", `return (${text})`)(DateTime);
 
     const revive = (value: unknown): unknown => {
         if (Array.isArray(value)) return value.map(revive);
-        if (!Predicate.isObject(value) || value instanceof Date) return value;
+        if (!Predicate.isObject(value) || DateTime.isDateTime(value)) return value;
         if (value["_id"] === "Result") {
             return value["_tag"] === "Success"
                 ? Result.succeed(revive(value["value"]))

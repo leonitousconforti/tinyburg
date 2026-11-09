@@ -2,9 +2,13 @@ import { ConfigProvider, Effect, Layer, ManagedRuntime, Path, Schema } from "eff
 import { FetchHttpClient } from "effect/http";
 
 import { NodeCrypto, NodeServices } from "@effect/platform-node";
-import { describe, it } from "@effect/vitest";
+import { describe, expect, it } from "@effect/vitest";
 import { NimblebitAuth, NimblebitConfig } from "@tinyburg/nimblebit-sdk";
 import { TinyTower } from "@tinyburg/tinytower-sdk";
+
+import { DateTimeSerializer } from "./utils/snapshots.ts";
+
+expect.addSnapshotSerializer(DateTimeSerializer);
 
 // The environment first (CI passes the key as a secret), then the repo's .env
 const DotEnvLayer = Path.Path.pipe(

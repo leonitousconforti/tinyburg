@@ -1176,11 +1176,11 @@ const applyOp = (save: SaveData, op: SaveOp): SaveData => {
  * Identity of a floor, bitizen or other decoded value, for comparison
  * purposes.
  *
- * Decoded saves hold `Date`, `bigint` and `Result` values, so neither `===` nor
- * `Equal.equals` says anything useful about two separately decoded copies of
- * the same floor. Serializing is the cheap way to ask "is this the same
- * thing?", and key order is stable because every value here came out of the
- * same schema.
+ * Decoded saves hold `DateTime`, `bigint` and `Result` values, so neither
+ * `===` nor `Equal.equals` says anything useful about two separately decoded
+ * copies of the same floor. Serializing is the cheap way to ask "is this the
+ * same thing?", and key order is stable because every value here came out of
+ * the same schema.
  *
  * JSON has no way to write a `bigint`, and it writes `NaN` and the infinities
  * as `null` and `-0` as `0`, all of which a decoded save can hold. Those are

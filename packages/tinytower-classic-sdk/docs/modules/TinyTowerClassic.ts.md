@@ -2769,8 +2769,8 @@ declare const SaveData: Schema.suspend<
                       Schema.decodeTo<
                         Schema.Union<
                           readonly [
-                            Schema.Date,
-                            Schema.Struct<{ readonly date: Schema.Date; readonly extraTicks: Schema.BigInt }>
+                            Schema.DateTimeUtc,
+                            Schema.Struct<{ readonly date: Schema.DateTimeUtc; readonly extraTicks: Schema.BigInt }>
                           ]
                         >,
                         Schema.BigInt,
@@ -2787,8 +2787,8 @@ declare const SaveData: Schema.suspend<
                       Schema.decodeTo<
                         Schema.Union<
                           readonly [
-                            Schema.Date,
-                            Schema.Struct<{ readonly date: Schema.Date; readonly extraTicks: Schema.BigInt }>
+                            Schema.DateTimeUtc,
+                            Schema.Struct<{ readonly date: Schema.DateTimeUtc; readonly extraTicks: Schema.BigInt }>
                           ]
                         >,
                         Schema.BigInt,
@@ -2811,8 +2811,8 @@ declare const SaveData: Schema.suspend<
                           Schema.decodeTo<
                             Schema.Union<
                               readonly [
-                                Schema.Date,
-                                Schema.Struct<{ readonly date: Schema.Date; readonly extraTicks: Schema.BigInt }>
+                                Schema.DateTimeUtc,
+                                Schema.Struct<{ readonly date: Schema.DateTimeUtc; readonly extraTicks: Schema.BigInt }>
                               ]
                             >,
                             Schema.BigInt,
@@ -2864,8 +2864,11 @@ declare const SaveData: Schema.suspend<
                                 Schema.decodeTo<
                                   Schema.Union<
                                     readonly [
-                                      Schema.Date,
-                                      Schema.Struct<{ readonly date: Schema.Date; readonly extraTicks: Schema.BigInt }>
+                                      Schema.DateTimeUtc,
+                                      Schema.Struct<{
+                                        readonly date: Schema.DateTimeUtc
+                                        readonly extraTicks: Schema.BigInt
+                                      }>
                                     ]
                                   >,
                                   Schema.BigInt,
@@ -2883,8 +2886,11 @@ declare const SaveData: Schema.suspend<
                                 Schema.decodeTo<
                                   Schema.Union<
                                     readonly [
-                                      Schema.Date,
-                                      Schema.Struct<{ readonly date: Schema.Date; readonly extraTicks: Schema.BigInt }>
+                                      Schema.DateTimeUtc,
+                                      Schema.Struct<{
+                                        readonly date: Schema.DateTimeUtc
+                                        readonly extraTicks: Schema.BigInt
+                                      }>
                                     ]
                                   >,
                                   Schema.BigInt,
@@ -3814,8 +3820,8 @@ declare const SaveData: Schema.suspend<
                       Schema.decodeTo<
                         Schema.Union<
                           readonly [
-                            Schema.Date,
-                            Schema.Struct<{ readonly date: Schema.Date; readonly extraTicks: Schema.BigInt }>
+                            Schema.DateTimeUtc,
+                            Schema.Struct<{ readonly date: Schema.DateTimeUtc; readonly extraTicks: Schema.BigInt }>
                           ]
                         >,
                         Schema.BigInt,

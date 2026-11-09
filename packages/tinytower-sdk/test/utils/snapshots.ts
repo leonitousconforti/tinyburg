@@ -6,16 +6,18 @@
  * decoded save. That output does not escape quotes inside strings, and several
  * saves hold JSON in their raw entries, so it cannot be evaluated as
  * JavaScript. It is read line by line instead, which works because every
- * property and array item sits on its own line. Two things the serializer
- * changed are then undone: effect `Result`s come back from
- * `{ _id, _tag, value | failure }` records, and raw `$unknown` entries, whose
- * keys came out sorted, are put back in file order, which the encoder needs.
+ * property and array item sits on its own line. Bare ISO timestamps, which is
+ * how {@link DateTimeSerializer} prints a `DateTime`, come back as
+ * `DateTime.Utc`s. Two things the serializer changed are then undone: effect
+ * `Result`s come back from `{ _id, _tag, value | failure }` records, and raw
+ * `$unknown` entries, whose keys came out sorted, are put back in file order,
+ * which the encoder needs.
  *
  * Every save is encoded and decoded again before use, so drift between the
  * corpus and the schema fails loudly here.
  */
 
-import { Effect, Result, Schema } from "effect";
+import { DateTime, Effect, Result, Schema } from "effect";
 
 import * as fs from "node:fs";
 
@@ -28,8 +30,18 @@ export const snapshotIds: ReadonlyArray<string> = fs.readdirSync(DIRECTORY).sort
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z$/;
 
+/**
+ * Prints a `DateTime` the way vitest prints a `Date`, as a bare ISO timestamp,
+ * which is what the recorded snapshots hold. Left to itself vitest would print
+ * the quoted string from `DateTime`'s `toJSON`.
+ */
+export const DateTimeSerializer = {
+    test: (value: unknown): boolean => DateTime.isDateTime(value),
+    serialize: (value: DateTime.DateTime): string => DateTime.formatIso(value),
+};
+
 const isRecord = (value: unknown): value is Record<string, unknown> =>
-    typeof value === "object" && value !== null && !Array.isArray(value) && !(value instanceof Date);
+    typeof value === "object" && value !== null && !Array.isArray(value) && !DateTime.isDateTime(value);
 
 /** Raw entries in the order the save file had them, each run after its head. */
 const inFileOrder = (entries: Record<string, unknown>): Record<string, unknown> => {
@@ -69,7 +81,7 @@ const scalar = (token: string): unknown => {
     if (token === "true") return true;
     if (token === "false") return false;
     if (/^-?\d+n$/.test(token)) return BigInt(token.slice(0, -1));
-    if (ISO_DATE.test(token)) return new Date(token);
+    if (ISO_DATE.test(token)) return DateTime.makeUnsafe(token);
     const number = Number(token);
     if (token !== "" && (!Number.isNaN(number) || token === "NaN")) return number;
     throw new Error(`Unrecognised snapshot value: ${token.slice(0, 80)}`);

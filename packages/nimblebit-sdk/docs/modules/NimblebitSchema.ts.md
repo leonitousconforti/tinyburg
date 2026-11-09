@@ -51,7 +51,7 @@ declare const parseNimblebitObject: <Fields extends { readonly [x: PropertyKey]:
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/NimblebitSchema.ts#L120)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/NimblebitSchema.ts#L122)
 
 Since v1.0.0
 
@@ -85,7 +85,7 @@ declare const parseNimblebitOrderedList: <
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/NimblebitSchema.ts#L27)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/NimblebitSchema.ts#L29)
 
 Since v1.0.0
 
@@ -93,26 +93,28 @@ Since v1.0.0
 
 ## CSharpDate
 
-A C# `DateTime.Ticks` value. Ticks are 100ns, finer than a js `Date` can
-hold, so decoding keeps the remainder as `extraTicks` and encoding adds it
-back.
+A C# `DateTime.Ticks` value, decoded to a `DateTime.Utc`. Ticks are 100ns,
+finer than a `DateTime` can hold, so decoding keeps the remainder as
+`extraTicks` and encoding adds it back. A tick count outside what a
+`DateTime` can hold fails to decode.
 
 **Signature**
 
 ```ts
-declare const CSharpDate: Schema.suspend<
-  Schema.decodeTo<
-    Schema.Union<
-      readonly [Schema.Date, Schema.Struct<{ readonly date: Schema.Date; readonly extraTicks: Schema.BigInt }>]
-    >,
-    Schema.BigInt,
-    never,
-    never
-  >
+declare const CSharpDate: Schema.decodeTo<
+  Schema.Union<
+    readonly [
+      Schema.DateTimeUtc,
+      Schema.Struct<{ readonly date: Schema.DateTimeUtc; readonly extraTicks: Schema.BigInt }>
+    ]
+  >,
+  Schema.BigInt,
+  never,
+  never
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/NimblebitSchema.ts#L294)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/NimblebitSchema.ts#L297)
 
 Since v1.0.0
 
@@ -133,7 +135,7 @@ declare const UnityColor: Schema.decodeTo<
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/NimblebitSchema.ts#L349)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/NimblebitSchema.ts#L367)
 
 Since v1.0.0
 
@@ -150,6 +152,6 @@ declare const split: (options?: {
 }) => (from: Schema.String) => Schema.decodeTo<Schema.$Array<Schema.String>, Schema.String, never, never>
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/NimblebitSchema.ts#L383)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/NimblebitSchema.ts#L401)
 
 Since v1.0.0

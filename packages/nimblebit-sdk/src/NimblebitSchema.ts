@@ -5,7 +5,9 @@
  * @category Schemas
  */
 
+import * as DateTime from "effect/DateTime";
 import * as Effect from "effect/Effect";
+import * as Option from "effect/Option";
 import * as Schema from "effect/Schema";
 import * as SchemaGetter from "effect/SchemaGetter";
 import * as SchemaIssue from "effect/SchemaIssue";
@@ -284,58 +286,74 @@ export const parseNimblebitObject = <
 };
 
 /**
- * A C# `DateTime.Ticks` value. Ticks are 100ns, finer than a js `Date` can
- * hold, so decoding keeps the remainder as `extraTicks` and encoding adds it
- * back.
+ * A C# `DateTime.Ticks` value, decoded to a `DateTime.Utc`. Ticks are 100ns,
+ * finer than a `DateTime` can hold, so decoding keeps the remainder as
+ * `extraTicks` and encoding adds it back. A tick count outside what a
+ * `DateTime` can hold fails to decode.
  *
  * @since 1.0.0
  * @category Schemas
  */
-export const CSharpDate: Schema.suspend<
-    Schema.decodeTo<
-        Schema.Union<
-            readonly [
-                Schema.Date,
-                Schema.Struct<{
-                    readonly date: Schema.Date;
-                    readonly extraTicks: Schema.BigInt;
-                }>,
-            ]
-        >,
-        Schema.BigInt,
-        never
-    >
-> = Schema.suspend(() => {
+export const CSharpDate: Schema.decodeTo<
+    Schema.Union<
+        readonly [
+            Schema.DateTimeUtc,
+            Schema.Struct<{
+                readonly date: Schema.DateTimeUtc;
+                readonly extraTicks: Schema.BigInt;
+            }>,
+        ]
+    >,
+    Schema.BigInt,
+    never
+> = (() => {
     const ticksPerMillisecond = 10_000n;
     const unixEpochTicks = 621_355_968_000_000_000n;
 
     return Schema.BigInt.pipe(
         Schema.decodeTo(
             Schema.Union([
-                Schema.Date,
+                Schema.DateTimeUtc,
                 Schema.Struct({
-                    date: Schema.Date,
+                    date: Schema.DateTimeUtc,
                     extraTicks: Schema.BigInt,
                 }),
             ]),
-            SchemaTransformation.transform({
+            SchemaTransformation.transformEffect({
                 encode: (input) => {
-                    const date = "date" in input ? input.date : input;
-                    const extraTicks = "extraTicks" in input ? input.extraTicks : 0n;
-                    return BigInt(date.getTime()) * ticksPerMillisecond + unixEpochTicks + extraTicks;
+                    const { date, extraTicks } = DateTime.isDateTime(input) ? { date: input, extraTicks: 0n } : input;
+
+                    // Effect's DateTime arithmetic can leave a fraction of a
+                    // millisecond, which is whole ticks here.
+                    const ms = DateTime.toEpochMillis(date);
+                    const wholeMs = Math.floor(ms);
+                    const fractionTicks = BigInt(Math.round((ms - wholeMs) * Number(ticksPerMillisecond)));
+                    return Effect.succeed(
+                        BigInt(wholeMs) * ticksPerMillisecond + unixEpochTicks + fractionTicks + extraTicks
+                    );
                 },
-                decode: (cSharpTicks) => {
+                decode: (cSharpTicks, options) => {
                     // Take the remainder off first so the division is exact,
                     // which keeps dates before 1970 from rounding toward the
                     // epoch.
                     const extraTicks = cSharpTicks % ticksPerMillisecond;
                     const ms = (cSharpTicks - extraTicks - unixEpochTicks) / ticksPerMillisecond;
-                    return { date: new Date(Number(ms)), extraTicks } as const;
+                    return Option.match(DateTime.make(Number(ms)), {
+                        onNone: () =>
+                            Effect.fail(
+                                new SchemaIssue.InvalidValue(
+                                    { expected: "C# ticks within the range of a DateTime" },
+                                    cSharpTicks,
+                                    options
+                                )
+                            ),
+                        onSome: (date) => Effect.succeed({ date, extraTicks }),
+                    });
                 },
             })
         )
     );
-});
+})();
 
 /** @internal */
 const ColorChannel = Schema.Int.check(Schema.isBetween({ minimum: 0, maximum: 255 }));
