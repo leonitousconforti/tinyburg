@@ -53,7 +53,6 @@
         "pako": "3.0.3"
     },
     "devDependencies": {
-        "@bufbuild/protobuf": "2.16.0",
         "@effect/platform-node": "4.1.2",
         "@effect/vitest": "4.1.2",
         "@efffrida/frida-tools": "0.0.67",
