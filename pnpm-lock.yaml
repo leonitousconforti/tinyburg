@@ -649,8 +649,8 @@ importers:
         specifier: 0.0.23
         version: 0.0.23
       '@efffrida/rpc':
-        specifier: 0.0.70
-        version: 0.0.70(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+        specifier: 0.0.71
+        version: 0.0.71(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
       frida:
         specifier: 17.26.2
         version: 17.26.2
@@ -860,8 +860,8 @@ importers:
         specifier: 0.0.23
         version: 0.0.23
       '@efffrida/rpc':
-        specifier: 0.0.70
-        version: 0.0.70(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+        specifier: 0.0.71
+        version: 0.0.71(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
       '@types/frida-gum':
         specifier: 19.13.0
         version: 19.13.0
@@ -1244,8 +1244,8 @@ packages:
   '@efffrida/polyfills@0.0.23':
     resolution: {integrity: sha512-obleLGayYKtAJIopmqEJ/a7pxn9kwiM7HQsb5zwWzGH6LpK9YsXDI6aBSUnR9QYmMtbXo8pI41sksXC4+ti0ZQ==}
 
-  '@efffrida/rpc@0.0.70':
-    resolution: {integrity: sha512-p7vPu7vWMi/8ebr59rF9WLVfK4E9f4C1giupmCVTkPylpYKUfkQsBTcspeJXvClb8OWEWDvtETIUqRq6eyTOKg==}
+  '@efffrida/rpc@0.0.71':
+    resolution: {integrity: sha512-rg2IGOK6LzqSVLeyvsf5CaUj9QXJpGoVKW2X/rqdn8Vr/MOaWz974CeQAd28jI9HjNvWwoQAarjtJl81unBdTA==}
     engines: {node: '>=24'}
     peerDependencies:
       effect: 4.1.2
@@ -4044,7 +4044,7 @@ snapshots:
       event-target-polyfill: 0.0.4
       text-encoding-utf-8: 1.0.2
 
-  '@efffrida/rpc@0.0.70(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))':
+  '@efffrida/rpc@0.0.71(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))':
     dependencies:
       '@efffrida/frida-tools': 0.0.67(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
       '@efffrida/polyfills': 0.0.23

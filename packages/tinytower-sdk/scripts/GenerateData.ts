@@ -1,8 +1,9 @@
 import { Array, Effect, FileSystem, Layer, Order, Path, Record, pipe } from "effect";
 import { FetchHttpClient } from "effect/http";
-import { RpcClient } from "effect/rpc";
+import { RpcClient, RpcClientError } from "effect/rpc";
 
 import { NodeRuntime, NodeServices } from "@effect/platform-node";
+import { FridaDevice, FridaSessionError } from "@efffrida/frida-tools";
 import { AndroidDevice, GooglePlayApi, PlayAccount } from "@efffrida/gplayapi";
 import { AgentLive, DeviceLive } from "@tinyburg/insight/node";
 import { Rpcs } from "@tinyburg/insight/shared/Rpcs";
@@ -51,6 +52,17 @@ const replaceGeneratedContent = (
 
         yield* fileSystem.writeFileString(filePath, updatedContent);
     });
+
+// A crashed frida-server shows up as a failed spawn, attach, resume, load or
+// RPC call while the agent starts, and as a "detached" FridaSessionError, the
+// cause of the RpcClientError, for each RPC after that. "compile" errors come
+// from building the agent and would happen again
+const isRetryable = (error: unknown): boolean => {
+    if (error instanceof FridaSessionError.FridaSessionError) return error.when !== "compile";
+    if (!(error instanceof RpcClientError.RpcClientError) || error.reason._tag !== "RpcClientDefect") return false;
+    const cause = error.reason.cause;
+    return cause instanceof FridaSessionError.FridaSessionError && cause.when === "detached";
+};
 
 const generateData = Effect.gen(function* () {
     const path = yield* Path.Path;
@@ -179,7 +191,18 @@ const generateData = Effect.gen(function* () {
         export type Roof = (typeof roofs)[number];
         `
     );
-}).pipe(Effect.scoped, Effect.provide(Layer.provideMerge(AgentLive, DeviceLive)));
+}).pipe(
+    Effect.scoped,
+    Effect.provide(AgentLive, { local: true }),
+    Effect.tapError((error) => (isRetryable(error) ? Effect.logWarning(error) : Effect.void)),
+    // frida-server can crash (killed, or a segfault). The emulator device
+    // restarts it, so try again with a new session, script and agent on the
+    // same emulator once it answers. A crash of TinyTower itself also detaches
+    // the session, so it is retried too
+    (attempt) => Effect.andThen(FridaDevice.awaitReachable(), attempt),
+    Effect.retry({ times: 2, while: isRetryable }),
+    Effect.provide(DeviceLive)
+);
 
 // An anonymous account from Aurora Store's dispenser, so no Google credentials
 // are needed. The hosted dispenser refuses datacenter ip ranges.

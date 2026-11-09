@@ -55,7 +55,7 @@
         "@efffrida/il2cpp-bridge": "0.0.60",
         "@efffrida/platform": "0.0.52",
         "@efffrida/polyfills": "0.0.23",
-        "@efffrida/rpc": "0.0.70",
+        "@efffrida/rpc": "0.0.71",
         "frida": "17.26.2",
         "frida-il2cpp-bridge": "0.14.0"
     },
