@@ -26,13 +26,14 @@ export * as Decorations from "./Decorations.ts"
  *
  * Signing reuses `@tinyburg/nimblebit-sdk` (`NimblebitAuth`): the game secret
  * salt (from `NBSync._ss`) is provided as the auth key, and each request is
- * `md5(<preimage> + <secret salt>)` with a random signed int32 `salt` in the path.
- * All method preimages below are the Tiny Tower formula with the `dz` game code.
+ * `md5(<preimage> + <secret salt>)` with a random uint32 `salt` in the path.
+ * The game itself uses signed int32 salts; the server accepts both.
  *
- * The methods that were exercised live against sync.nimblebit.com are marked
- * VERIFIED; save-bearing / write paths follow the same pattern but were not
- * exercised. Save bytes are returned raw (base64-decoded); inflating (pako) and
- * parsing into a save schema is left to the caller.
+ * Each method says where its preimage comes from (Play build 1.6.3,
+ * 2026-11-09): OBSERVED (the game made this request) or REPLAYED (this function
+ * was accepted by the live server). Save bytes are returned raw
+ * (base64-decoded); inflating (pako) and parsing into a save schema is left to
+ * the caller.
  *
  * @since 1.0.0
  * @category SDK
@@ -42,23 +43,35 @@ export * as DiscoZoo from "./DiscoZoo.ts"
 /**
  * Disco Zoo (game code `dz`) NBSync api endpoints.
  *
- * Signing: a random `salt` (signed int32) goes in the path, and `hash` is
+ * Signing: a random `salt` goes in the path, and `hash` is
  * `md5(<preimage> + <game secret salt>)` with the preimage
  * `dz/<playerId>/<salt><playerAuthKey>` (variants noted per endpoint). The
- * secret salt is the value extracted from `NBSync._ss`.
+ * secret salt is the value of `NBSync._ss`. Every NBSync call, register
+ * included, uses MD5; the server rejected SHA-256 replays.
  *
- * Verification (live server + Frida DTO inspection of the game, 2026-08-26):
- * - Signing is MD5, server-validated (same scheme as Tiny Tower / Pocket
- *   Planes; the game computes SHA-256 only for the unauthenticated `register`).
- * - Response envelopes VERIFIED by reading the game's DTO classes at runtime:
- *   register, player_details, sync/pull (NBSyncGameSaveResponse), current_version,
- *   verify_device, friend/pull_game, friend/pull_meta (meta is a flat
- *   Dictionary<String,Object> on pt), send_item (NBSyncItemsSendResponse),
- *   get_items (NBSyncItemsGetResponse: success/gifts, NO `total` unlike pp).
- *   `get_items` was also exercised live with a burnbot.
- * - Standard NBSync endpoint set plus get_visits and receive_item.
+ * The game's salt is a signed int32 string (it sent `-867764578` and got
+ * `Found`), but the `salt` params here accept uint32 only, which is what the
+ * SDK generates.
  *
- * Game-specific save/meta schemas are left as `Schema.Unknown` placeholders.
+ * Provenance (Play build 1.6.3, 2026-11-09):
+ *
+ * - OBSERVED, the game made the request: register, player_details, get_items,
+ *   friend/pull_game, friend/pull_meta.
+ * - REPLAYED, the SDK's client function was accepted by the live server:
+ *   register, player_details, get_items, and sync/pull (SaveNotFound for a
+ *   fresh player).
+ * - DTO, the game's response class has the fields named per endpoint.
+ * - LITERAL, the path is compiled into the game but was not exercised:
+ *   verify_device, sync/current_version, get_visits, receive_item, send_item.
+ * - DERIVED, inferred from Tiny Tower.
+ *
+ * Not modelled yet (LITERAL only): `register_email`, `register_email_lang`,
+ * `friend/editorpull_game`, and the Facebook and Play Games login flows
+ * (`register_fb`, `swap_fb`, `register_pg`, `check_pg`, `swap_pg`), and the
+ * save upload, which the game's Java plugin (`com.nimblebit.nbsync.SyncPush`) sends to
+ * `/sync/push/` outside the il2cpp code the probe hooks.
+ *
+ * Gift and friend meta schemas are left as `Schema.Unknown` placeholders.
  *
  * @since 1.0.0
  * @category Endpoints

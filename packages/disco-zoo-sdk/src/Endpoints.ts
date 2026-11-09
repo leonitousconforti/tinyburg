@@ -1,23 +1,35 @@
 /**
  * Disco Zoo (game code `dz`) NBSync api endpoints.
  *
- * Signing: a random `salt` (signed int32) goes in the path, and `hash` is
+ * Signing: a random `salt` goes in the path, and `hash` is
  * `md5(<preimage> + <game secret salt>)` with the preimage
  * `dz/<playerId>/<salt><playerAuthKey>` (variants noted per endpoint). The
- * secret salt is the value extracted from `NBSync._ss`.
+ * secret salt is the value of `NBSync._ss`. Every NBSync call, register
+ * included, uses MD5; the server rejected SHA-256 replays.
  *
- * Verification (live server + Frida DTO inspection of the game, 2026-08-26):
- * - Signing is MD5, server-validated (same scheme as Tiny Tower / Pocket
- *   Planes; the game computes SHA-256 only for the unauthenticated `register`).
- * - Response envelopes VERIFIED by reading the game's DTO classes at runtime:
- *   register, player_details, sync/pull (NBSyncGameSaveResponse), current_version,
- *   verify_device, friend/pull_game, friend/pull_meta (meta is a flat
- *   Dictionary<String,Object> on pt), send_item (NBSyncItemsSendResponse),
- *   get_items (NBSyncItemsGetResponse: success/gifts, NO `total` unlike pp).
- *   `get_items` was also exercised live with a burnbot.
- * - Standard NBSync endpoint set plus get_visits and receive_item.
+ * The game's salt is a signed int32 string (it sent `-867764578` and got
+ * `Found`), but the `salt` params here accept uint32 only, which is what the
+ * SDK generates.
  *
- * Game-specific save/meta schemas are left as `Schema.Unknown` placeholders.
+ * Provenance (Play build 1.6.3, 2026-11-09):
+ *
+ * - OBSERVED, the game made the request: register, player_details, get_items,
+ *   friend/pull_game, friend/pull_meta.
+ * - REPLAYED, the SDK's client function was accepted by the live server:
+ *   register, player_details, get_items, and sync/pull (SaveNotFound for a
+ *   fresh player).
+ * - DTO, the game's response class has the fields named per endpoint.
+ * - LITERAL, the path is compiled into the game but was not exercised:
+ *   verify_device, sync/current_version, get_visits, receive_item, send_item.
+ * - DERIVED, inferred from Tiny Tower.
+ *
+ * Not modelled yet (LITERAL only): `register_email`, `register_email_lang`,
+ * `friend/editorpull_game`, and the Facebook and Play Games login flows
+ * (`register_fb`, `swap_fb`, `register_pg`, `check_pg`, `swap_pg`), and the
+ * save upload, which the game's Java plugin (`com.nimblebit.nbsync.SyncPush`) sends to
+ * `/sync/push/` outside the il2cpp code the probe hooks.
+ *
+ * Gift and friend meta schemas are left as `Schema.Unknown` placeholders.
  *
  * @since 1.0.0
  * @category Endpoints
@@ -55,16 +67,24 @@ export const SentResponse = Schema.Struct({ success: Schema.Literal("Sent") });
 export const NotSentResponse = Schema.Struct({ success: Schema.Literal("NotSent") });
 
 /**
- * A gift/item in the general item channel (get_items / send_item). Verified DTO
- * NBSyncItemsGift on pt: `{gift_id, gift_to, gift_from, gift_type, item_type,
- * gift_str, h}` (no `c`, unlike pp). Left open for the data-schema work.
+ * A gift/item in the get_items / get_visits channel. Left open because every
+ * observed `gifts` array was empty. DTO NBSyncItemsGift: `{gift_id: String,
+ * gift_to: String, gift_from: String, gift_type: String, item_type:
+ * NBSyncItemType, gift_str: String, h: String}`, with no `c`. NBSyncItemType is
+ * an Int32 enum: None=0, Play=1, Gift=2, Visit=3, Promo=4.
  *
  * @since 1.0.0
  * @category Schemas
  */
 export const Gift = Schema.Unknown;
 
-/** @internal */
+/**
+ * OBSERVED and REPLAYED, preimage `dz/<salt1>/<salt2>`. DTO
+ * NBSyncRegisterResponse also has `registered: Int32`, which the observed
+ * response did not carry and which is not modelled.
+ *
+ * @internal
+ */
 export const DeviceNewPlayerEndpoint = HttpApiEndpoint.get("DeviceNewPlayer", "/register/dz/:salt1/:salt2/:hash", {
     params: { salt1: I32, salt2: I32, hash: Schema.String },
     error: ApiErrors,
@@ -77,7 +97,13 @@ export const DeviceNewPlayerEndpoint = HttpApiEndpoint.get("DeviceNewPlayer", "/
     ],
 });
 
-/** @internal */
+/**
+ * OBSERVED and REPLAYED. The numeric fields arrive as strings (`"0"`). DTO
+ * NBSyncPlayerDetailsResponse: `{success, player: Dictionary<String,Object>,
+ * error}`.
+ *
+ * @internal
+ */
 export const DevicePlayerDetailsEndpoint = HttpApiEndpoint.get(
     "DevicePlayerDetails",
     "/player_details/dz/:playerId/:salt/:hash",
@@ -103,7 +129,13 @@ export const DevicePlayerDetailsEndpoint = HttpApiEndpoint.get(
     anyOf: [Scopes.DevicePlayerDetails, Scopes.DeviceRead, Scopes.Read, Scopes.DiscoZoo],
 });
 
-/** @internal */
+/**
+ * LITERAL. Field names match DTO NBSyncVerifyCodeResponse `{success, player_id,
+ * player_ss, player_email, error}`. The `NewDevice` literal, the path after the
+ * segment and the lack of signing are DERIVED.
+ *
+ * @internal
+ */
 export const DeviceVerifyDeviceEndpoint = HttpApiEndpoint.get(
     "DeviceVerifyDevice",
     "/verify_device/dz/:playerId/:verificationCode",
@@ -127,8 +159,12 @@ export const DeviceVerifyDeviceEndpoint = HttpApiEndpoint.get(
 });
 
 /**
- * Pull the player's cloud save. VERIFIED envelope (NBSyncGameSaveResponse). No-save
- * case returns `{ error: "SaveNotFound" }`. `data` is base64 pako-deflated bytes.
+ * Pull the player's cloud save. REPLAYED: the server accepted the SDK's path
+ * and signature and answered `{ error: "SaveNotFound" }` for a fresh player.
+ * The Found body is not captured yet; its field names come from DTO
+ * NBSyncGameSaveResponse `{success, h, id: Int32, data, error}`. `saveId` is
+ * decoded from a string, which is unobserved here (player_details sends its
+ * ints as strings). `data` is base64 pako-deflated bytes (DERIVED).
  *
  * @internal
  */
@@ -148,7 +184,8 @@ export const SyncPullSaveEndpoint = HttpApiEndpoint.get("SyncPullSave", "/sync/p
 });
 
 /**
- * VERIFIED envelope (NBSyncCurrentCheckResponse); no-save returns `{ error: "NoSave" }`.
+ * LITERAL. Field names from DTO NBSyncCurrentCheckResponse `{success, h, id:
+ * Int32, error}`. The no-save reply was not observed.
  *
  * @internal
  */
@@ -171,8 +208,9 @@ export const SyncCheckForNewerSaveEndpoint = HttpApiEndpoint.get(
 );
 
 /**
- * VERIFIED live: `/get_items/dz/:playerId/:salt/:hash` -> `{ success:"Found",
- * gifts:[...] }` (NBSyncItemsGetResponse; no `total` on pt).
+ * OBSERVED and REPLAYED: `{ success: "Found", gifts: [] }`. DTO
+ * NBSyncItemsGetResponse `{success, gifts: List<NBSyncItemsGift>, error}` has
+ * no `total`.
  *
  * @internal
  */
@@ -187,8 +225,13 @@ export const SocialGetItemsEndpoint = HttpApiEndpoint.get("SocialGetItems", "/ge
 }).annotate(OAuthScope.Required, { anyOf: [Scopes.SocialGetItems, Scopes.SocialRead, Scopes.Read, Scopes.DiscoZoo] });
 
 /**
- * DERIVED from Tiny Tower. Sends an item to a friend. Response VERIFIED
- * (NBSyncItemsSendResponse: success/error). pt also has a `/send_pt/` variant.
+ * Sends an item to a friend. LITERAL; the path shape, preimage and the
+ * Sent/NotSent literals are DERIVED. Response fields match DTO
+ * NBSyncItemsSendResponse `{success, error}`. The game holds the item type as
+ * NBSyncItemType (None=0, Play=1, Gift=2, Visit=3, Promo=4); whether the path
+ * carries its name or its int is unobserved. The game posts form fields, but
+ * this payload goes out as JSON, and whether the server accepts JSON is
+ * unverified. The form field name is unobserved.
  *
  * @internal
  */
@@ -210,8 +253,11 @@ export const SocialSendItemEndpoint = HttpApiEndpoint.post(
 ).annotate(OAuthScope.Required, { anyOf: [Scopes.SocialSendItem, Scopes.SocialWrite, Scopes.Write, Scopes.DiscoZoo] });
 
 /**
- * VERIFIED envelope (NBSyncFriendGameSaveResponse); preimage
- * `dz/<playerId>/<friendId>/<salt><playerAuthKey>`.
+ * OBSERVED, preimage `dz/<playerId>/<friendId>/<salt><playerAuthKey>`. The game
+ * was driven with its own id as `friendId`, so the order of the two ids is not
+ * disambiguated. Only `{ error: "SaveNotFound" }` was observed; the Found field
+ * names come from DTO NBSyncFriendGameSaveResponse `{success, h, id: Int32,
+ * player_id, data, error}`.
  *
  * @internal
  */
@@ -243,8 +289,16 @@ export const SocialPullFriendGameEndpoint = HttpApiEndpoint.get(
 });
 
 /**
- * VERIFIED envelope (NBSyncFriendGameMetaResponse; `meta` is a flat
- * Dictionary<String,Object> on pt). Preimage `dz/<playerId>/<salt><friendId><playerAuthKey>`.
+ * OBSERVED, preimage `dz/<playerId>/<salt><friends><playerAuthKey>`, response
+ * `{ success: "Found", meta: {} }`. The game was driven with its own id as the
+ * friend, so the two ids are not disambiguated. DTO NBSyncFriendGameMetaResponse
+ * `{success, meta: Dictionary<String,Object>, error}`. The game builds its own
+ * meta as a string map (SyncMeta.metaDSO), but no non-empty meta was captured.
+ *
+ * The game posts `friends` as a form field, but this payload goes out as JSON,
+ * and whether the server accepts JSON is unverified. The game also sends a
+ * list of friends (List<String>, join format unobserved), while this payload
+ * carries one player id.
  *
  * @internal
  */
@@ -269,7 +323,8 @@ export const SocialPullFriendMetaEndpoint = HttpApiEndpoint.post(
 });
 
 /**
- * VERIFIED path: `/get_visits/dz/:playerId/:salt/:hash`. Same envelope as get_items.
+ * LITERAL. The full path, the preimage and the envelope (assumed equal to
+ * get_items) are DERIVED. Driving NBSyncItems.getSyncVisits issued no request.
  *
  * @internal
  */
@@ -284,8 +339,10 @@ export const SocialGetVisitsEndpoint = HttpApiEndpoint.get("SocialGetVisits", "/
 }).annotate(OAuthScope.Required, { anyOf: [Scopes.SocialGetVisits, Scopes.SocialRead, Scopes.Read, Scopes.DiscoZoo] });
 
 /**
- * Preimage `dz/<playerId>/<giftId>/<salt><playerAuthKey>`. Response DTO
- * NBSyncItemsReceiveResponse (success/error/id).
+ * LITERAL. Response fields match DTO NBSyncItemsReceiveResponse `{success,
+ * error, id: String}`. The preimage `dz/<playerId>/<giftId>/<salt><playerAuthKey>`
+ * and the Received/NotReceived literals are DERIVED. The game holds gift ids as
+ * strings (NBSyncItemsGift.gift_id), while `giftId` here is an Int.
  *
  * @internal
  */
