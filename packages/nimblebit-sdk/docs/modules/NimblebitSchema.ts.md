@@ -51,7 +51,7 @@ declare const parseNimblebitObject: <Fields extends { readonly [x: PropertyKey]:
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/NimblebitSchema.ts#L108)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/NimblebitSchema.ts#L120)
 
 Since v1.0.0
 
@@ -85,7 +85,7 @@ declare const parseNimblebitOrderedList: <
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/NimblebitSchema.ts#L30)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/NimblebitSchema.ts#L27)
 
 Since v1.0.0
 
@@ -100,17 +100,19 @@ back.
 **Signature**
 
 ```ts
-declare const CSharpDate: Schema.decodeTo<
-  Schema.Union<
-    readonly [Schema.Date, Schema.Struct<{ readonly date: Schema.Date; readonly extraTicks: Schema.BigInt }>]
-  >,
-  Schema.BigInt,
-  never,
-  never
+declare const CSharpDate: Schema.suspend<
+  Schema.decodeTo<
+    Schema.Union<
+      readonly [Schema.Date, Schema.Struct<{ readonly date: Schema.Date; readonly extraTicks: Schema.BigInt }>]
+    >,
+    Schema.BigInt,
+    never,
+    never
+  >
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/NimblebitSchema.ts#L273)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/NimblebitSchema.ts#L294)
 
 Since v1.0.0
 
@@ -131,7 +133,7 @@ declare const UnityColor: Schema.decodeTo<
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/NimblebitSchema.ts#L320)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/NimblebitSchema.ts#L349)
 
 Since v1.0.0
 
@@ -148,6 +150,6 @@ declare const split: (options?: {
 }) => (from: Schema.String) => Schema.decodeTo<Schema.$Array<Schema.String>, Schema.String, never, never>
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/NimblebitSchema.ts#L354)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/NimblebitSchema.ts#L383)
 
 Since v1.0.0

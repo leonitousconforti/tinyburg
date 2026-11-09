@@ -20,9 +20,6 @@ declare module "effect/Schema" {
     }
 }
 
-/** @internal */
-const escapeRegExp = (str: string): string => str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-
 /**
  * @since 1.0.0
  * @category Parsers
@@ -57,8 +54,18 @@ export const parseNimblebitOrderedList = <
     Items[number]["schema"]["DecodingServices"],
     Items[number]["schema"]["EncodingServices"]
 > => {
-    type Fields = { [K in Items[number]["property"]]: Extract<Items[number], { property: K }>["schema"] };
-    // Bridges an untyped runtime boundary; the shape is guaranteed by construction, not by the compiler.
+    type Fields = {
+        [K in Items[number]["property"]]: Extract<
+            Items[number],
+            {
+                property: K;
+            }
+        >["schema"];
+    };
+
+    // Bridges an untyped runtime boundary; the shape is guaranteed by
+    // construction, not by the compiler.
+    //
     // oxlint-disable-next-line typescript/no-unsafe-type-assertion
     const fields = Object.fromEntries(items.map((item) => [item.property, item.schema])) as Fields;
     const to = Schema.Struct({ $unknown: Schema.Array(Schema.String), ...fields });
@@ -66,7 +73,9 @@ export const parseNimblebitOrderedList = <
     const transformation = SchemaTransformation.transformEffect({
         // { a: "123", b: "456", $unknown: ["789"] } -> "123,456,789"
         encode: (properties: (typeof to)["Encoded"]): Effect.Effect<string, SchemaIssue.Issue, never> => {
-            // Bridges an untyped runtime boundary; the shape is guaranteed by construction, not by the compiler.
+            // Bridges an untyped runtime boundary; the shape is guaranteed by
+            // construction, not by the compiler.
+            //
             // oxlint-disable-next-line typescript/no-unsafe-type-assertion
             const record = properties as unknown as Readonly<Record<PropertyKey, string>> & {
                 readonly $unknown: ReadonlyArray<string>;
@@ -88,7 +97,10 @@ export const parseNimblebitOrderedList = <
             }
 
             const known = items.map((item, index) => [item.property, parts[index]] as const);
-            // Bridges an untyped runtime boundary; the shape is guaranteed by construction, not by the compiler.
+
+            // Bridges an untyped runtime boundary; the shape is guaranteed by
+            // construction, not by the compiler.
+            //
             // oxlint-disable-next-line typescript/no-unsafe-type-assertion
             const obj = Object.fromEntries([
                 ...known,
@@ -129,14 +141,17 @@ export const parseNimblebitObject = <
     Schema.Struct.DecodingServices<Fields>,
     Schema.Struct.EncodingServices<Fields>
 > => {
-    // Field name -> save data key, in declaration order (which is also the encode order).
+    // Field name -> save data key, in declaration order (which is also the
+    // encode order).
     const saveDataKeys = new Map(
         Object.entries(struct.fields).map(
             ([field, schema]) => [field, Schema.resolveAnnotationsKey(schema)?.nimblebitSaveDataKey ?? field] as const
         )
     );
+
     const fieldNames = new Map(Array.from(saveDataKeys, ([field, key]) => [key, field] as const));
     const order = new Map(Array.from(saveDataKeys.keys(), (field, index) => [field, index] as const));
+    const escapeRegExp = (str: string): string => str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     const matchers = Array.from(
         saveDataKeys,
         ([field, key]) =>
@@ -146,7 +161,9 @@ export const parseNimblebitObject = <
     const toSaveDataKey = (field: string): string => saveDataKeys.get(field) ?? field;
     const toFieldName = (key: string): string => fieldNames.get(key) ?? key;
 
-    // Bridges an untyped runtime boundary; the shape is guaranteed by construction, not by the compiler.
+    // Bridges an untyped runtime boundary; the shape is guaranteed by
+    // construction, not by the compiler.
+    //
     // oxlint-disable-next-line typescript/no-unsafe-type-assertion
     const to = struct.mapFields(
         Struct.assign({
@@ -177,7 +194,9 @@ export const parseNimblebitObject = <
     const transformation = SchemaTransformation.transform({
         // { a: "123", b: "456" } -> "[a]123[a][b]456[b]"
         encode: (properties: (typeof to)["Encoded"]): string => {
-            // Bridges an untyped runtime boundary; the shape is guaranteed by construction, not by the compiler.
+            // Bridges an untyped runtime boundary; the shape is guaranteed by
+            // construction, not by the compiler.
+            //
             // oxlint-disable-next-line typescript/no-unsafe-type-assertion
             const { $unknown, ...known } = properties as unknown as Record<string, string | null | undefined> & {
                 readonly $unknown: Record<
@@ -192,8 +211,8 @@ export const parseNimblebitObject = <
             };
 
             // Each run of consecutive unknown properties goes back after the
-            // property that preceded the run, keyed by that property's name.
-            // A run that came before every known property is keyed by "".
+            // property that preceded the run, keyed by that property's name. A
+            // run that came before every known property is keyed by "".
             const runs = new Map<string, Array<readonly [string, string]>>();
             let lastKey: string | null | undefined = null;
             let run: Array<readonly [string, string]> = [];
@@ -238,16 +257,24 @@ export const parseNimblebitObject = <
                     };
                 }
             > = {};
+
             let lastField: string | null = null;
             for (const [, key, value] of str.matchAll(/\[([^\]]+)\]([\s\S]*?)\[\1\]/g)) {
                 const field = toFieldName(key);
                 if (!knownFields.has(field)) {
-                    unknown[field] = { value, $locationMetadata: { after: lastField } };
+                    unknown[field] = {
+                        value,
+                        $locationMetadata: {
+                            after: lastField,
+                        },
+                    };
                 }
                 lastField = field;
             }
 
-            // Bridges an untyped runtime boundary; the shape is guaranteed by construction, not by the compiler.
+            // Bridges an untyped runtime boundary; the shape is guaranteed by
+            // construction, not by the compiler.
+            //
             // oxlint-disable-next-line typescript/no-unsafe-type-assertion
             return Object.fromEntries([...known, ["$unknown", unknown]]) as (typeof to)["Encoded"];
         },
@@ -255,12 +282,6 @@ export const parseNimblebitObject = <
 
     return Schema.String.pipe(Schema.decodeTo(to, transformation));
 };
-
-/** @internal */
-const ticksPerMillisecond = 10_000n;
-
-/** @internal */
-const unixEpochTicks = 621_355_968_000_000_000n;
 
 /**
  * A C# `DateTime.Ticks` value. Ticks are 100ns, finer than a js `Date` can
@@ -270,43 +291,51 @@ const unixEpochTicks = 621_355_968_000_000_000n;
  * @since 1.0.0
  * @category Schemas
  */
-export const CSharpDate: Schema.decodeTo<
-    Schema.Union<
-        readonly [
-            Schema.Date,
-            Schema.Struct<{
-                readonly date: Schema.Date;
-                readonly extraTicks: Schema.BigInt;
-            }>,
-        ]
-    >,
-    Schema.BigInt,
-    never
-> = Schema.BigInt.pipe(
-    Schema.decodeTo(
-        Schema.Union([
-            Schema.Date,
-            Schema.Struct({
-                date: Schema.Date,
-                extraTicks: Schema.BigInt,
-            }),
-        ]),
-        SchemaTransformation.transform({
-            encode: (input) => {
-                const date = "date" in input ? input.date : input;
-                const extraTicks = "extraTicks" in input ? input.extraTicks : 0n;
-                return BigInt(date.getTime()) * ticksPerMillisecond + unixEpochTicks + extraTicks;
-            },
-            decode: (cSharpTicks) => {
-                // Take the remainder off first so the division is exact, which
-                // keeps dates before 1970 from rounding toward the epoch.
-                const extraTicks = cSharpTicks % ticksPerMillisecond;
-                const ms = (cSharpTicks - extraTicks - unixEpochTicks) / ticksPerMillisecond;
-                return { date: new Date(Number(ms)), extraTicks } as const;
-            },
-        })
-    )
-);
+export const CSharpDate: Schema.suspend<
+    Schema.decodeTo<
+        Schema.Union<
+            readonly [
+                Schema.Date,
+                Schema.Struct<{
+                    readonly date: Schema.Date;
+                    readonly extraTicks: Schema.BigInt;
+                }>,
+            ]
+        >,
+        Schema.BigInt,
+        never
+    >
+> = Schema.suspend(() => {
+    const ticksPerMillisecond = 10_000n;
+    const unixEpochTicks = 621_355_968_000_000_000n;
+
+    return Schema.BigInt.pipe(
+        Schema.decodeTo(
+            Schema.Union([
+                Schema.Date,
+                Schema.Struct({
+                    date: Schema.Date,
+                    extraTicks: Schema.BigInt,
+                }),
+            ]),
+            SchemaTransformation.transform({
+                encode: (input) => {
+                    const date = "date" in input ? input.date : input;
+                    const extraTicks = "extraTicks" in input ? input.extraTicks : 0n;
+                    return BigInt(date.getTime()) * ticksPerMillisecond + unixEpochTicks + extraTicks;
+                },
+                decode: (cSharpTicks) => {
+                    // Take the remainder off first so the division is exact,
+                    // which keeps dates before 1970 from rounding toward the
+                    // epoch.
+                    const extraTicks = cSharpTicks % ticksPerMillisecond;
+                    const ms = (cSharpTicks - extraTicks - unixEpochTicks) / ticksPerMillisecond;
+                    return { date: new Date(Number(ms)), extraTicks } as const;
+                },
+            })
+        )
+    );
+});
 
 /** @internal */
 const ColorChannel = Schema.Int.check(Schema.isBetween({ minimum: 0, maximum: 255 }));
