@@ -34,10 +34,8 @@ export * as Elevators from "./Elevators.ts"
  * Signing: `hash` is `md5(<preimage> + <game secret salt>)`, where the secret
  * salt is `NBSync._ss` and the usual preimage is
  * `vegas/<playerId>/<salt><playerAuthKey>` (variants noted per endpoint). Every
- * NBSync request the game made, `register` included, used this md5 scheme. The
- * game's `salt` is a signed int32 (OBSERVED: -2037394745). The `U32` salt
- * params only accept uint32 salts, which the server also accepts (REPLAYED), so
- * a game-style negative salt fails param decoding here.
+ * NBSync request the game made, `register` included, used this md5 scheme.
+ * Salts are signed int32, as the game sends (OBSERVED: -2037394745).
  *
  * Provenance used below:
  *
@@ -120,9 +118,8 @@ export * as Scopes from "./Scopes.ts"
  *
  * Signing reuses `@tinyburg/nimblebit-sdk` (`NimblebitAuth`): the game secret
  * salt (from `NBSync._ss`) is provided as the auth key, and each request is
- * `md5(<preimage> + <secret salt>)` with a random `salt` in the path. The SDK
- * draws uint32 salts, which the server accepts; the game sends signed int32
- * ones. Each preimage below is the one the game was OBSERVED signing (Play
+ * `md5(<preimage> + <secret salt>)` with a random signed int32 `salt` in the
+ * path, as the game sends. Each preimage below is the one the game was OBSERVED signing (Play
  * build 1.5.2, 2026-11-09), except `sync_pullSave`'s, which the game did not
  * send.
  *

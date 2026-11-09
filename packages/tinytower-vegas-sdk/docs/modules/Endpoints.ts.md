@@ -11,10 +11,8 @@ Tiny Tower Vegas (game code `vegas`) NBSync api endpoints.
 Signing: `hash` is `md5(<preimage> + <game secret salt>)`, where the secret
 salt is `NBSync._ss` and the usual preimage is
 `vegas/<playerId>/<salt><playerAuthKey>` (variants noted per endpoint). Every
-NBSync request the game made, `register` included, used this md5 scheme. The
-game's `salt` is a signed int32 (OBSERVED: -2037394745). The `U32` salt
-params only accept uint32 salts, which the server also accepts (REPLAYED), so
-a game-style negative salt fails param decoding here.
+NBSync request the game made, `register` included, used this md5 scheme.
+Salts are signed int32, as the game sends (OBSERVED: -2037394745).
 
 Provenance used below:
 
@@ -460,7 +458,7 @@ declare const Api: HttpApi.HttpApi<
             Schema.Struct<{
               playerId: Schema.brand<Schema.String, "PlayerId">
               friendId: Schema.brand<Schema.String, "PlayerId">
-              salt: any
+              salt: Schema.Int
               hash: Schema.String
             }>
           >,
@@ -489,7 +487,7 @@ declare const Api: HttpApi.HttpApi<
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-vegas-sdk/src/Endpoints.ts#L466)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-vegas-sdk/src/Endpoints.ts#L464)
 
 Since v1.0.0
 
@@ -511,6 +509,6 @@ are unobserved.
 declare const Gift: Schema.Unknown
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-vegas-sdk/src/Endpoints.ts#L84)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-vegas-sdk/src/Endpoints.ts#L82)
 
 Since v1.0.0

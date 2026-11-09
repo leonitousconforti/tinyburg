@@ -4,10 +4,8 @@
  * Signing: `hash` is `md5(<preimage> + <game secret salt>)`, where the secret
  * salt is `NBSync._ss` and the usual preimage is
  * `vegas/<playerId>/<salt><playerAuthKey>` (variants noted per endpoint). Every
- * NBSync request the game made, `register` included, used this md5 scheme. The
- * game's `salt` is a signed int32 (OBSERVED: -2037394745). The `U32` salt
- * params only accept uint32 salts, which the server also accepts (REPLAYED), so
- * a game-style negative salt fails param decoding here.
+ * NBSync request the game made, `register` included, used this md5 scheme.
+ * Salts are signed int32, as the game sends (OBSERVED: -2037394745).
  *
  * Provenance used below:
  *
@@ -421,7 +419,7 @@ export const SocialRetrieveFriendsSnapshotListEndpoint = HttpApiEndpoint.get(
         params: {
             playerId: NimblebitConfig.PlayerIdSchema,
             friendId: NimblebitConfig.PlayerIdSchema,
-            salt: U32,
+            salt: I32,
             hash: Schema.String,
         },
         error: ApiErrors,

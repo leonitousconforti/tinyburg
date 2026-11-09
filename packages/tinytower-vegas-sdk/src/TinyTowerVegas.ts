@@ -3,9 +3,8 @@
  *
  * Signing reuses `@tinyburg/nimblebit-sdk` (`NimblebitAuth`): the game secret
  * salt (from `NBSync._ss`) is provided as the auth key, and each request is
- * `md5(<preimage> + <secret salt>)` with a random `salt` in the path. The SDK
- * draws uint32 salts, which the server accepts; the game sends signed int32
- * ones. Each preimage below is the one the game was OBSERVED signing (Play
+ * `md5(<preimage> + <secret salt>)` with a random signed int32 `salt` in the
+ * path, as the game sends. Each preimage below is the one the game was OBSERVED signing (Play
  * build 1.5.2, 2026-11-09), except `sync_pullSave`'s, which the game did not
  * send.
  *

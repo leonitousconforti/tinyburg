@@ -10,9 +10,8 @@ Tiny Tower Vegas SDK: signed calls against Nimblebit's NBSync service.
 
 Signing reuses `@tinyburg/nimblebit-sdk` (`NimblebitAuth`): the game secret
 salt (from `NBSync._ss`) is provided as the auth key, and each request is
-`md5(<preimage> + <secret salt>)` with a random `salt` in the path. The SDK
-draws uint32 salts, which the server accepts; the game sends signed int32
-ones. Each preimage below is the one the game was OBSERVED signing (Play
+`md5(<preimage> + <secret salt>)` with a random signed int32 `salt` in the
+path, as the game sends. Each preimage below is the one the game was OBSERVED signing (Play
 build 1.5.2, 2026-11-09), except `sync_pullSave`'s, which the game did not
 send.
 
@@ -64,7 +63,7 @@ declare const device_newPlayer: Effect.Effect<
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-vegas-sdk/src/TinyTowerVegas.ts#L41)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-vegas-sdk/src/TinyTowerVegas.ts#L40)
 
 Since v1.0.0
 
@@ -98,7 +97,7 @@ declare const device_playerDetails: (args_0: {
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-vegas-sdk/src/TinyTowerVegas.ts#L78)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-vegas-sdk/src/TinyTowerVegas.ts#L77)
 
 Since v1.0.0
 
@@ -132,7 +131,7 @@ declare const social_getItems: (args_0: {
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-vegas-sdk/src/TinyTowerVegas.ts#L161)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-vegas-sdk/src/TinyTowerVegas.ts#L160)
 
 Since v1.0.0
 
@@ -161,7 +160,7 @@ declare const social_getVisits: (args_0: {
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-vegas-sdk/src/TinyTowerVegas.ts#L201)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-vegas-sdk/src/TinyTowerVegas.ts#L200)
 
 Since v1.0.0
 
@@ -202,7 +201,7 @@ declare const social_pullFriendGame: (
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-vegas-sdk/src/TinyTowerVegas.ts#L245)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-vegas-sdk/src/TinyTowerVegas.ts#L244)
 
 Since v1.0.0
 
@@ -236,7 +235,7 @@ declare const social_pullFriendMeta: (
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-vegas-sdk/src/TinyTowerVegas.ts#L291)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-vegas-sdk/src/TinyTowerVegas.ts#L290)
 
 Since v1.0.0
 
@@ -265,11 +264,11 @@ declare const social_retrieveFriendsSnapshotList: (
   | InternalServerError
   | Schema.SchemaError
   | HttpClientError,
-  any
+  NimblebitAuth.NimblebitAuth | HttpClient.HttpClient
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-vegas-sdk/src/TinyTowerVegas.ts#L337)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-vegas-sdk/src/TinyTowerVegas.ts#L336)
 
 Since v1.0.0
 
@@ -305,6 +304,6 @@ declare const sync_pullSave: (args_0: {
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-vegas-sdk/src/TinyTowerVegas.ts#L120)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-vegas-sdk/src/TinyTowerVegas.ts#L119)
 
 Since v1.0.0
