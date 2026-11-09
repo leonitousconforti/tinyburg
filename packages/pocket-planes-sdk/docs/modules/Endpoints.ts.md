@@ -22,9 +22,8 @@ Signing: a random `salt` goes in the path, and `hash` is
 `pp/<playerId>/<salt><playerAuthKey>` (variants noted per endpoint). Every
 REPLAYED client function used this scheme.
 
-Salts: the game sends signed int32 salts (OBSERVED `-783493558` on
-pull_meta), but the params schemas here accept only uint32, which is what
-`NimblebitAuth.salt` generates.
+Salts are signed int32, as the game sends (OBSERVED `-783493558` on
+pull_meta).
 
 POST payloads: the game posts form fields (OBSERVED on pull_meta). The POST
 endpoints here encode their payloads as JSON, and whether the server
@@ -479,7 +478,7 @@ declare const Api: HttpApi.HttpApi<
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/pocket-planes-sdk/src/Endpoints.ts#L471)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/pocket-planes-sdk/src/Endpoints.ts#L470)
 
 Since v1.0.0
 
@@ -500,6 +499,6 @@ Raffle=6.
 declare const Gift: Schema.Unknown
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/pocket-planes-sdk/src/Endpoints.ts#L104)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/pocket-planes-sdk/src/Endpoints.ts#L103)
 
 Since v1.0.0
