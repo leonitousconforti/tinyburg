@@ -41,6 +41,9 @@
         // an Effect, so that adding parameters later is not a breaking change. Worth seeing, not
         // worth failing the build over.
         "effecttsgo/lazy-effect": "warn",
+        // The only bare Effect.tryPromise (copying a key in authproxy) is followed by an
+        // Effect.catch that turns any failure into a message.
+        "effecttsgo/effect-try-without-catch": "warn",
         "effecttsgo/unstable-api-usage": "off",
         // Import rules
         "typescript/consistent-type-imports": [
