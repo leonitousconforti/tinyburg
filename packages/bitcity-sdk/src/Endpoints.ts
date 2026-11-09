@@ -5,7 +5,7 @@
  * `md5(<preimage> + <game secret salt>)` with the preimage
  * `bc/<playerId>/<salt><playerAuthKey>` (variants noted per endpoint). The
  * secret salt is the value extracted from `NBSync._ss`. Every request the game
- * made was signed this way, `register` included; no SHA-256 signing was seen.
+ * made was signed this way, `register` included.
  * The game's salt is a signed int32 (it sent a negative one), while the `salt`
  * params here accept only the uint32 salts `NimblebitAuth` generates.
  *
