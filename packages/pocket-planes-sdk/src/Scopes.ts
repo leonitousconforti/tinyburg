@@ -131,7 +131,7 @@ export const SocialGetGifts: OAuthScope.Described = {
  */
 export const SocialRequestItems: OAuthScope.Described = {
     name: OAuthScope.make("pocketplanes:social:request_items"),
-    description: "See the item requests waiting for a player",
+    description: "See the items and gifts waiting for a player",
 };
 
 /**

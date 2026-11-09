@@ -8,38 +8,46 @@ parent: Modules
 
 Pocket Planes (game code `pp`) NBSync api endpoints.
 
-Signing: a random `salt` (signed int32 - the game emits negatives too) goes
-in the path, and `hash` is `md5(<preimage> + <game secret salt>)` where the
-preimage is `pp/<playerId>/<salt><playerAuthKey>` (variants noted per
-endpoint). The secret salt is the value extracted from `NBSync._ss`.
+Provenance words used below:
 
-Verification (against the live server + Frida inspection of the game,
-2026-08-26):
+- OBSERVED: the game made this request (Play build 2.17.3, 2026-11-09).
+- REPLAYED: the SDK's client function succeeded against the live server
+  (2026-11-09).
+- DTO: the game's response class has these fields.
+- LITERAL: the path is compiled into the game but was not exercised.
+- DERIVED: inferred from Tiny Tower.
 
-- Signing is MD5, VERIFIED server-side: `player_details` accepts the MD5 hash
-  and rejects a garbage hash, no hash, and a SHA-256 hash. (The game itself
-  computes SHA-256 in `NBSync.genHash` for the unauthenticated `register`
-  call, which the server also accepts via MD5 - so it does not affect the
-  authenticated endpoints this SDK signs.)
-- Response envelopes VERIFIED by reading the game's DTO classes at runtime
-  (immune to the metadata obfuscation): register (NBSyncRegisterResponse),
-  player_details (NBSyncPlayerDetailsResponse), sync/pull
-  (NBSyncGameSaveResponse: success/h/id/data), current_version
-  (NBSyncCurrentCheckResponse), verify_device (NBSyncVerifyCodeResponse:
-  success/player_id/player_ss/player_email - no photo/nickname on pp),
-  get_visits/get_gifts (NBSyncItemsGetResponse), send_item
-  (NBSyncItemsSendResponse), receive_item (NBSyncItemsReceiveResponse: also
-  carries an `id`), friend/pull_game (NBSyncFriendGameSaveResponse),
-  friend/pull_meta (NBSyncFriendGameMetaResponse). register/player_details/
-  get_visits/get_gifts/request_items were also exercised live with a burnbot.
-- Still open: pp appears to have NO snapshots (`sync/current_snapshots`
-  returns Invalid Request), so `pull_snapshot` here is unconfirmed and may
-  not exist. register_email is DERIVED from Tiny Tower.
+Signing: a random `salt` goes in the path, and `hash` is
+`md5(<preimage> + <NBSync._ss>)` where the preimage is
+`pp/<playerId>/<salt><playerAuthKey>` (variants noted per endpoint). Every
+REPLAYED client function used this scheme. The game signs its own `NBSync`
+requests (register, player_details, sync/current_version, sync/pull,
+friend/pull_game, friend/pull_meta) with
+`sha256(<preimage> + <128-char secret>)`, which the server also accepts, and
+its `NBSyncItems` requests (request_items, get_visits) with md5 and
+`NBSync._ss` (OBSERVED). A replay signed with sha256 and `NBSync._ss` was
+rejected.
 
-Game-specific payload/item schemas (the `gifts` element - real shape is
-NBSyncItemsGift {gift_id, gift_to, gift_from, gift_type, item_type, gift_str,
-h, c} - friend meta, save push meta) are `Schema.Unknown` placeholders for
-the data-schema work.
+Salts: the game sends signed int32 salts (OBSERVED `-783493558` on
+pull_meta), but the params schemas here accept only uint32, which is what
+`NimblebitAuth.salt` generates.
+
+POST payloads: the game posts form fields (OBSERVED on pull_meta). The POST
+endpoints here encode their payloads as JSON, and whether the server
+accepts JSON is unverified.
+
+pp has no snapshot endpoints. Saves are uploaded by the game's Java plugin
+(`com.nimblebit.nbsync.SyncPush`, whose dex holds `/sync/push/`), outside the il2cpp
+code the probe hooks, so no push endpoint is modelled yet.
+
+Not modelled yet:
+
+- `new_id/verify` (LITERAL).
+- Play Games and Facebook login flows (LITERAL): `check_pg`, `register_pg`,
+  `swap_pg`, `register_fb`, `swap_fb`.
+- Static S3 files the game fetches at startup (OBSERVED, not NBSync):
+  `NBStatic/ppVersion.json` (`{ current, min }`) and
+  `NBStatic/sync/tt/current.ics`.
 
 Since v1.0.0
 
@@ -477,7 +485,7 @@ declare const Api: HttpApi.HttpApi<
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/pocket-planes-sdk/src/Endpoints.ts#L407)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/pocket-planes-sdk/src/Endpoints.ts#L481)
 
 Since v1.0.0
 
@@ -485,8 +493,12 @@ Since v1.0.0
 
 ## Gift
 
-One gift/visit item. Shape is game-specific; left open for the data-schema
-work. Verified only that `get_visits`/`get_gifts` return `{ gifts: [...] }`.
+One element of a `gifts` array. Still `Schema.Unknown`: every `gifts` array
+seen on the wire was empty. DTO `NBSyncItemsGift`: `gift_id` String,
+`gift_to` String, `gift_from` String, `gift_type` String, `item_type`
+NBSyncItemType, `gift_str` String, `h` String, `c` Int32. DTO
+`NBSyncItemType`: None=0, Play=1, Gift=2, Visit=3, Promo=4, Cloud=5,
+Raffle=6.
 
 **Signature**
 
@@ -494,6 +506,6 @@ work. Verified only that `get_visits`/`get_gifts` return `{ gifts: [...] }`.
 declare const Gift: Schema.Unknown
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/pocket-planes-sdk/src/Endpoints.ts#L98)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/pocket-planes-sdk/src/Endpoints.ts#L110)
 
 Since v1.0.0
