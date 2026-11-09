@@ -5,8 +5,7 @@
  * salt (from `NBSync._ss`) is provided as the auth key, and each request is
  * `md5(<preimage> + <secret salt>)` with a random signed int32 `salt` in the path.
  * The preimages below are the ones the game used (OBSERVED), except for
- * get_gifts, which the game never calls. The game signs its own `NBSync`
- * requests with sha256 and another secret; see `Endpoints` for details.
+ * get_gifts, which the game never calls.
  *
  * Each function is marked OBSERVED when the game made its request (Play build
  * 2.17.3, 2026-11-09) and REPLAYED when the function itself succeeded against

@@ -12,8 +12,7 @@ Signing reuses `@tinyburg/nimblebit-sdk` (`NimblebitAuth`): the game secret
 salt (from `NBSync._ss`) is provided as the auth key, and each request is
 `md5(<preimage> + <secret salt>)` with a random signed int32 `salt` in the path.
 The preimages below are the ones the game used (OBSERVED), except for
-get_gifts, which the game never calls. The game signs its own `NBSync`
-requests with sha256 and another secret; see `Endpoints` for details.
+get_gifts, which the game never calls.
 
 Each function is marked OBSERVED when the game made its request (Play build
 2.17.3, 2026-11-09) and REPLAYED when the function itself succeeded against
@@ -65,7 +64,7 @@ declare const device_newPlayer: Effect.Effect<
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/pocket-planes-sdk/src/PocketPlanes.ts#L41)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/pocket-planes-sdk/src/PocketPlanes.ts#L40)
 
 Since v1.0.0
 
@@ -99,7 +98,7 @@ declare const device_playerDetails: (args_0: {
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/pocket-planes-sdk/src/PocketPlanes.ts#L78)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/pocket-planes-sdk/src/PocketPlanes.ts#L77)
 
 Since v1.0.0
 
@@ -128,7 +127,7 @@ declare const social_getGifts: (args_0: {
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/pocket-planes-sdk/src/PocketPlanes.ts#L239)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/pocket-planes-sdk/src/PocketPlanes.ts#L238)
 
 Since v1.0.0
 
@@ -157,7 +156,7 @@ declare const social_getVisits: (args_0: {
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/pocket-planes-sdk/src/PocketPlanes.ts#L199)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/pocket-planes-sdk/src/PocketPlanes.ts#L198)
 
 Since v1.0.0
 
@@ -195,7 +194,7 @@ declare const social_pullFriendGame: (
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/pocket-planes-sdk/src/PocketPlanes.ts#L365)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/pocket-planes-sdk/src/PocketPlanes.ts#L364)
 
 Since v1.0.0
 
@@ -227,7 +226,7 @@ declare const social_pullFriendMeta: (
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/pocket-planes-sdk/src/PocketPlanes.ts#L321)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/pocket-planes-sdk/src/PocketPlanes.ts#L320)
 
 Since v1.0.0
 
@@ -256,7 +255,7 @@ declare const social_requestItems: (args_0: {
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/pocket-planes-sdk/src/PocketPlanes.ts#L280)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/pocket-planes-sdk/src/PocketPlanes.ts#L279)
 
 Since v1.0.0
 
@@ -284,7 +283,7 @@ declare const sync_checkForNewerSave: (args_0: {
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/pocket-planes-sdk/src/PocketPlanes.ts#L159)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/pocket-planes-sdk/src/PocketPlanes.ts#L158)
 
 Since v1.0.0
 
@@ -319,6 +318,6 @@ declare const sync_pullSave: (args_0: {
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/pocket-planes-sdk/src/PocketPlanes.ts#L119)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/pocket-planes-sdk/src/PocketPlanes.ts#L118)
 
 Since v1.0.0

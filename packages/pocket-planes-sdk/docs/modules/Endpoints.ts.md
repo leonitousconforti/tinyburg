@@ -20,13 +20,7 @@ Provenance words used below:
 Signing: a random `salt` goes in the path, and `hash` is
 `md5(<preimage> + <NBSync._ss>)` where the preimage is
 `pp/<playerId>/<salt><playerAuthKey>` (variants noted per endpoint). Every
-REPLAYED client function used this scheme. The game signs its own `NBSync`
-requests (register, player_details, sync/current_version, sync/pull,
-friend/pull_game, friend/pull_meta) with
-`sha256(<preimage> + <128-char secret>)`, which the server also accepts, and
-its `NBSyncItems` requests (request_items, get_visits) with md5 and
-`NBSync._ss` (OBSERVED). A replay signed with sha256 and `NBSync._ss` was
-rejected.
+REPLAYED client function used this scheme.
 
 Salts: the game sends signed int32 salts (OBSERVED `-783493558` on
 pull_meta), but the params schemas here accept only uint32, which is what
@@ -485,7 +479,7 @@ declare const Api: HttpApi.HttpApi<
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/pocket-planes-sdk/src/Endpoints.ts#L481)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/pocket-planes-sdk/src/Endpoints.ts#L471)
 
 Since v1.0.0
 
@@ -506,6 +500,6 @@ Raffle=6.
 declare const Gift: Schema.Unknown
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/pocket-planes-sdk/src/Endpoints.ts#L110)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/pocket-planes-sdk/src/Endpoints.ts#L104)
 
 Since v1.0.0

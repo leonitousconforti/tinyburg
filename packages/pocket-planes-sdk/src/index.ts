@@ -48,13 +48,7 @@ export * as CityEvents from "./CityEvents.ts"
  * Signing: a random `salt` goes in the path, and `hash` is
  * `md5(<preimage> + <NBSync._ss>)` where the preimage is
  * `pp/<playerId>/<salt><playerAuthKey>` (variants noted per endpoint). Every
- * REPLAYED client function used this scheme. The game signs its own `NBSync`
- * requests (register, player_details, sync/current_version, sync/pull,
- * friend/pull_game, friend/pull_meta) with
- * `sha256(<preimage> + <128-char secret>)`, which the server also accepts, and
- * its `NBSyncItems` requests (request_items, get_visits) with md5 and
- * `NBSync._ss` (OBSERVED). A replay signed with sha256 and `NBSync._ss` was
- * rejected.
+ * REPLAYED client function used this scheme.
  *
  * Salts: the game sends signed int32 salts (OBSERVED `-783493558` on
  * pull_meta), but the params schemas here accept only uint32, which is what
@@ -101,8 +95,7 @@ export * as Planes from "./Planes.ts"
  * salt (from `NBSync._ss`) is provided as the auth key, and each request is
  * `md5(<preimage> + <secret salt>)` with a random signed int32 `salt` in the path.
  * The preimages below are the ones the game used (OBSERVED), except for
- * get_gifts, which the game never calls. The game signs its own `NBSync`
- * requests with sha256 and another secret; see `Endpoints` for details.
+ * get_gifts, which the game never calls.
  *
  * Each function is marked OBSERVED when the game made its request (Play build
  * 2.17.3, 2026-11-09) and REPLAYED when the function itself succeeded against

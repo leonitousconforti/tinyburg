@@ -12,13 +12,7 @@
  * Signing: a random `salt` goes in the path, and `hash` is
  * `md5(<preimage> + <NBSync._ss>)` where the preimage is
  * `pp/<playerId>/<salt><playerAuthKey>` (variants noted per endpoint). Every
- * REPLAYED client function used this scheme. The game signs its own `NBSync`
- * requests (register, player_details, sync/current_version, sync/pull,
- * friend/pull_game, friend/pull_meta) with
- * `sha256(<preimage> + <128-char secret>)`, which the server also accepts, and
- * its `NBSyncItems` requests (request_items, get_visits) with md5 and
- * `NBSync._ss` (OBSERVED). A replay signed with sha256 and `NBSync._ss` was
- * rejected.
+ * REPLAYED client function used this scheme.
  *
  * Salts: the game sends signed int32 salts (OBSERVED `-783493558` on
  * pull_meta), but the params schemas here accept only uint32, which is what
@@ -150,10 +144,6 @@ export const DevicePlayerDetailsEndpoint = HttpApiEndpoint.get(
                     registered: Schema.NumberFromString.pipe(Schema.decodeTo(Schema.BooleanFromBit)),
                     blacklisted: Schema.NumberFromString.pipe(Schema.decodeTo(Schema.BooleanFromBit)),
                     saveVersion: Schema.NumberFromString.pipe(Schema.decodeTo(Schema.Int)),
-                    /**
-                     * Uses the request's hash algorithm: 64 hex characters when
-                     * the request was signed with sha256, 32 with md5.
-                     */
                     checksum: Schema.String,
                 }).pipe(Schema.encodeKeys({ playerId: "player_id", playerEmail: "email", checksum: "h" })),
             }),
