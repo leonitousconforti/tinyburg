@@ -135,7 +135,7 @@ declare const UnityColor: Schema.decodeTo<
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/NimblebitSchema.ts#L367)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/NimblebitSchema.ts#L368)
 
 Since v1.0.0
 
@@ -152,6 +152,6 @@ declare const split: (options?: {
 }) => (from: Schema.String) => Schema.decodeTo<Schema.$Array<Schema.String>, Schema.String, never, never>
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/NimblebitSchema.ts#L401)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/NimblebitSchema.ts#L406)
 
 Since v1.0.0

@@ -359,9 +359,6 @@ export const CSharpDate: Schema.decodeTo<
     );
 })();
 
-/** @internal */
-const ColorChannel = Schema.Int.check(Schema.isBetween({ minimum: 0, maximum: 255 }));
-
 /**
  * A Unity color written as `"r:g:b"`, each channel 0-255.
  *
@@ -387,7 +384,11 @@ export const UnityColor: Schema.decodeTo<
     Schema.FiniteFromString,
 ]).pipe(
     Schema.decodeTo(
-        Schema.Struct({ r: ColorChannel, g: ColorChannel, b: ColorChannel }),
+        Schema.Struct({
+            r: Schema.Int.check(Schema.isBetween({ minimum: 0, maximum: 255 })),
+            g: Schema.Int.check(Schema.isBetween({ minimum: 0, maximum: 255 })),
+            b: Schema.Int.check(Schema.isBetween({ minimum: 0, maximum: 255 })),
+        }),
         SchemaTransformation.transform({
             encode: (color) => [color.r, ":", color.g, ":", color.b] as const,
             decode: (parts) => ({ r: parts[0], g: parts[2], b: parts[4] }) as const,
