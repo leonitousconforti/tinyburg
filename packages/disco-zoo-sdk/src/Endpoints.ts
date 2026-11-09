@@ -5,7 +5,7 @@
  * `md5(<preimage> + <game secret salt>)` with the preimage
  * `dz/<playerId>/<salt><playerAuthKey>` (variants noted per endpoint). The
  * secret salt is the value of `NBSync._ss`. Every NBSync call, register
- * included, uses MD5; the server rejected SHA-256 replays.
+ * included, uses MD5.
  *
  * The game's salt is a signed int32 string (it sent `-867764578` and got
  * `Found`), but the `salt` params here accept uint32 only, which is what the
