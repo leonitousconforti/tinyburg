@@ -339,6 +339,11 @@ export const CSharpDate: Schema.decodeTo<
                     const extraTicks = cSharpTicks % ticksPerMillisecond;
                     const ms = (cSharpTicks - extraTicks - unixEpochTicks) / ticksPerMillisecond;
                     return Option.match(DateTime.make(Number(ms)), {
+                        onSome: (date) =>
+                            Effect.succeed({
+                                date,
+                                extraTicks,
+                            }),
                         onNone: () =>
                             Effect.fail(
                                 new SchemaIssue.InvalidValue(
@@ -347,7 +352,6 @@ export const CSharpDate: Schema.decodeTo<
                                     options
                                 )
                             ),
-                        onSome: (date) => Effect.succeed({ date, extraTicks }),
                     });
                 },
             })
