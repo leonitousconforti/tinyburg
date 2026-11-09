@@ -63,13 +63,15 @@ export * as PocketPlanes from "./PocketPlanes.ts"
 /**
  * The scopes the Pocket Planes api is guarded by: `pocketplanes` for the whole
  * game, `pocketplanes:read` and `pocketplanes:write` for every endpoint that
- * only looks or that changes a player's game, and one scope per endpoint, such
- * as `pocketplanes:device:player_details`.
+ * only looks or that changes a player's game, a `:read` and a `:write` scope
+ * for each area of the api, such as `pocketplanes:device:read`, and one scope
+ * per endpoint, such as `pocketplanes:device:player_details`.
  *
- * Each endpoint accepts its own scope, its side's and the game's, narrowest
- * first: `{ anyOf: [DevicePlayerDetails, Read, PocketPlanes] }`. An endpoint
- * this module has no scope for is left unscoped, and the authproxy guards it
- * with `pocketplanes:read` or `pocketplanes`.
+ * Each endpoint accepts its own scope, its area's side, the game's side and the
+ * game, narrowest first:
+ * `{ anyOf: [DevicePlayerDetails, DeviceRead, Read, PocketPlanes] }`. An
+ * endpoint this module has no scope for is left unscoped, and the authproxy
+ * guards it with `pocketplanes:read` or `pocketplanes`.
  *
  * @since 1.0.0
  * @category Scopes

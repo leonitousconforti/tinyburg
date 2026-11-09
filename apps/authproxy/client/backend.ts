@@ -6,7 +6,13 @@ import { defineMessageUnion } from "foldkit/message";
 import { taggedStruct } from "foldkit/schema";
 
 import { Session } from "../domain/sessions.ts";
-import { type ScopeCatalogBranch, ScopeCatalogGame, type ScopeCatalogNode, SelfServiceApi } from "../shared/api.ts";
+import {
+    type ScopeCatalogBranch,
+    ScopeCatalogGame,
+    type ScopeCatalogNode,
+    type ScopeCatalogSide,
+    SelfServiceApi,
+} from "../shared/api.ts";
 
 /**
  * The derived client for the cookie-session self-service api. Requests are
@@ -39,12 +45,13 @@ export type SessionState = typeof SessionState.Type;
 
 /**
  * The scopes as the proxy offers them, straight from the catalog endpoint:
- * one entry per game, with its `:read` and `:write` scopes and the endpoint
- * scopes under those. The dashboard holds no list of its own: what it shows
+ * one entry per game, with its `:read` and `:write` scopes, the area scopes on
+ * each side, and the endpoint scopes under those. The dashboard holds no list of its own: what it shows
  * is what the server read off the game endpoints, so a scope cannot be
  * offered here that is not enforced there.
  */
 export type CatalogGame = typeof ScopeCatalogGame.Type;
+export type CatalogSide = typeof ScopeCatalogSide.Type;
 export type CatalogBranch = typeof ScopeCatalogBranch.Type;
 export type CatalogNode = typeof ScopeCatalogNode.Type;
 

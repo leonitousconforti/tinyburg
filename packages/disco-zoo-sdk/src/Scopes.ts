@@ -1,13 +1,15 @@
 /**
  * The scopes the Disco Zoo api is guarded by: `discozoo` for the whole game,
  * `discozoo:read` and `discozoo:write` for every endpoint that only looks or
- * that changes a player's game, and one scope per endpoint, such as
+ * that changes a player's game, a `:read` and a `:write` scope for each area of
+ * the api, such as `discozoo:device:read`, and one scope per endpoint, such as
  * `discozoo:device:player_details`.
  *
- * Each endpoint accepts its own scope, its side's and the game's, narrowest
- * first: `{ anyOf: [DevicePlayerDetails, Read, DiscoZoo] }`. An endpoint this
- * module has no scope for is left unscoped, and the authproxy guards it with
- * `discozoo:read` or `discozoo`.
+ * Each endpoint accepts its own scope, its area's side, the game's side and the
+ * game, narrowest first:
+ * `{ anyOf: [DevicePlayerDetails, DeviceRead, Read, DiscoZoo] }`. An endpoint
+ * this module has no scope for is left unscoped, and the authproxy guards it
+ * with `discozoo:read` or `discozoo`.
  *
  * @since 1.0.0
  * @category Scopes
@@ -44,7 +46,25 @@ export const Write: OAuthScope.Described = {
 
 /**
  * @since 1.0.0
- * @category Endpoints
+ * @category Device
+ */
+export const DeviceRead: OAuthScope.Described = {
+    name: OAuthScope.make("discozoo:device:read"),
+    description: "Look up player accounts",
+};
+
+/**
+ * @since 1.0.0
+ * @category Device
+ */
+export const DeviceWrite: OAuthScope.Described = {
+    name: OAuthScope.make("discozoo:device:write"),
+    description: "Change a player's account or devices",
+};
+
+/**
+ * @since 1.0.0
+ * @category Device
  */
 export const DevicePlayerDetails: OAuthScope.Described = {
     name: OAuthScope.make("discozoo:device:player_details"),
@@ -53,7 +73,7 @@ export const DevicePlayerDetails: OAuthScope.Described = {
 
 /**
  * @since 1.0.0
- * @category Endpoints
+ * @category Device
  */
 export const DeviceVerifyDevice: OAuthScope.Described = {
     name: OAuthScope.make("discozoo:device:verify_device"),
@@ -62,7 +82,25 @@ export const DeviceVerifyDevice: OAuthScope.Described = {
 
 /**
  * @since 1.0.0
- * @category Endpoints
+ * @category Social
+ */
+export const SocialRead: OAuthScope.Described = {
+    name: OAuthScope.make("discozoo:social:read"),
+    description: "See items, visits and friends' games",
+};
+
+/**
+ * @since 1.0.0
+ * @category Social
+ */
+export const SocialWrite: OAuthScope.Described = {
+    name: OAuthScope.make("discozoo:social:write"),
+    description: "Send and accept items",
+};
+
+/**
+ * @since 1.0.0
+ * @category Social
  */
 export const SocialGetItems: OAuthScope.Described = {
     name: OAuthScope.make("discozoo:social:get_items"),
@@ -71,7 +109,7 @@ export const SocialGetItems: OAuthScope.Described = {
 
 /**
  * @since 1.0.0
- * @category Endpoints
+ * @category Social
  */
 export const SocialGetVisits: OAuthScope.Described = {
     name: OAuthScope.make("discozoo:social:get_visits"),
@@ -80,7 +118,7 @@ export const SocialGetVisits: OAuthScope.Described = {
 
 /**
  * @since 1.0.0
- * @category Endpoints
+ * @category Social
  */
 export const SocialPullFriendGame: OAuthScope.Described = {
     name: OAuthScope.make("discozoo:social:pull_friend_game"),
@@ -89,7 +127,7 @@ export const SocialPullFriendGame: OAuthScope.Described = {
 
 /**
  * @since 1.0.0
- * @category Endpoints
+ * @category Social
  */
 export const SocialPullFriendMeta: OAuthScope.Described = {
     name: OAuthScope.make("discozoo:social:pull_friend_meta"),
@@ -98,7 +136,7 @@ export const SocialPullFriendMeta: OAuthScope.Described = {
 
 /**
  * @since 1.0.0
- * @category Endpoints
+ * @category Social
  */
 export const SocialSendItem: OAuthScope.Described = {
     name: OAuthScope.make("discozoo:social:send_item"),
@@ -107,7 +145,7 @@ export const SocialSendItem: OAuthScope.Described = {
 
 /**
  * @since 1.0.0
- * @category Endpoints
+ * @category Social
  */
 export const SocialReceiveItem: OAuthScope.Described = {
     name: OAuthScope.make("discozoo:social:receive_item"),

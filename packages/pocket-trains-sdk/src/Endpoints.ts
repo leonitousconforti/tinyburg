@@ -113,7 +113,9 @@ export const DevicePlayerDetailsEndpoint = HttpApiEndpoint.get(
             }),
         ],
     }
-).annotate(OAuthScope.Required, { anyOf: [Scopes.DevicePlayerDetails, Scopes.Read, Scopes.PocketTrains] });
+).annotate(OAuthScope.Required, {
+    anyOf: [Scopes.DevicePlayerDetails, Scopes.DeviceRead, Scopes.Read, Scopes.PocketTrains],
+});
 
 /** @internal */
 export const DeviceVerifyDeviceEndpoint = HttpApiEndpoint.get(
@@ -134,7 +136,9 @@ export const DeviceVerifyDeviceEndpoint = HttpApiEndpoint.get(
             ),
         ],
     }
-).annotate(OAuthScope.Required, { anyOf: [Scopes.DeviceVerifyDevice, Scopes.Write, Scopes.PocketTrains] });
+).annotate(OAuthScope.Required, {
+    anyOf: [Scopes.DeviceVerifyDevice, Scopes.DeviceWrite, Scopes.Write, Scopes.PocketTrains],
+});
 
 /**
  * Pull the player's cloud save. VERIFIED envelope (NBSyncGameSaveResponse). No-save
@@ -194,7 +198,9 @@ export const SocialGetItemsEndpoint = HttpApiEndpoint.get("SocialGetItems", "/ge
         NotFoundResponse,
         Schema.Struct({ success: Schema.Literal("Found"), gifts: Schema.Array(Gift) }),
     ],
-}).annotate(OAuthScope.Required, { anyOf: [Scopes.SocialGetItems, Scopes.Read, Scopes.PocketTrains] });
+}).annotate(OAuthScope.Required, {
+    anyOf: [Scopes.SocialGetItems, Scopes.SocialRead, Scopes.Read, Scopes.PocketTrains],
+});
 
 /**
  * Pocket Trains gift channel. Response VERIFIED (NBSyncGetPTGiftResponse) but the
@@ -217,7 +223,9 @@ export const SocialGetGiftsPtEndpoint = HttpApiEndpoint.get(
             Schema.Struct({ success: Schema.Literal("Found"), gifts: Schema.Array(PTGift) }),
         ],
     }
-).annotate(OAuthScope.Required, { anyOf: [Scopes.SocialGetGiftsPt, Scopes.Read, Scopes.PocketTrains] });
+).annotate(OAuthScope.Required, {
+    anyOf: [Scopes.SocialGetGiftsPt, Scopes.SocialRead, Scopes.Read, Scopes.PocketTrains],
+});
 
 /**
  * DERIVED from Tiny Tower. Sends an item to a friend. Response VERIFIED
@@ -240,7 +248,9 @@ export const SocialSendItemEndpoint = HttpApiEndpoint.post(
         error: ApiErrors,
         success: [ErrorResponse, SentResponse, NotSentResponse],
     }
-).annotate(OAuthScope.Required, { anyOf: [Scopes.SocialSendItem, Scopes.Write, Scopes.PocketTrains] });
+).annotate(OAuthScope.Required, {
+    anyOf: [Scopes.SocialSendItem, Scopes.SocialWrite, Scopes.Write, Scopes.PocketTrains],
+});
 
 /**
  * VERIFIED envelope (NBSyncFriendGameSaveResponse); preimage
@@ -271,7 +281,9 @@ export const SocialPullFriendGameEndpoint = HttpApiEndpoint.get(
             }).pipe(Schema.encodeKeys({ checksum: "h", saveId: "id", playerId: "player_id" })),
         ],
     }
-).annotate(OAuthScope.Required, { anyOf: [Scopes.SocialPullFriendGame, Scopes.Read, Scopes.PocketTrains] });
+).annotate(OAuthScope.Required, {
+    anyOf: [Scopes.SocialPullFriendGame, Scopes.SocialRead, Scopes.Read, Scopes.PocketTrains],
+});
 
 /**
  * VERIFIED envelope (NBSyncFriendGameMetaResponse; `meta` is a flat
@@ -295,7 +307,9 @@ export const SocialPullFriendMetaEndpoint = HttpApiEndpoint.post(
             }),
         ],
     }
-).annotate(OAuthScope.Required, { anyOf: [Scopes.SocialPullFriendMeta, Scopes.Read, Scopes.PocketTrains] });
+).annotate(OAuthScope.Required, {
+    anyOf: [Scopes.SocialPullFriendMeta, Scopes.SocialRead, Scopes.Read, Scopes.PocketTrains],
+});
 
 /** @internal */
 export const DeviceManagementGroup = HttpApiGroup.make("DeviceManagementGroup")

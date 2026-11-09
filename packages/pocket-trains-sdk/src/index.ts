@@ -53,13 +53,15 @@ export * as PocketTrains from "./PocketTrains.ts"
 /**
  * The scopes the Pocket Trains api is guarded by: `pockettrains` for the whole
  * game, `pockettrains:read` and `pockettrains:write` for every endpoint that
- * only looks or that changes a player's game, and one scope per endpoint, such
- * as `pockettrains:device:player_details`.
+ * only looks or that changes a player's game, a `:read` and a `:write` scope
+ * for each area of the api, such as `pockettrains:device:read`, and one scope
+ * per endpoint, such as `pockettrains:device:player_details`.
  *
- * Each endpoint accepts its own scope, its side's and the game's, narrowest
- * first: `{ anyOf: [DevicePlayerDetails, Read, PocketTrains] }`. An endpoint
- * this module has no scope for is left unscoped, and the authproxy guards it
- * with `pockettrains:read` or `pockettrains`.
+ * Each endpoint accepts its own scope, its area's side, the game's side and the
+ * game, narrowest first:
+ * `{ anyOf: [DevicePlayerDetails, DeviceRead, Read, PocketTrains] }`. An
+ * endpoint this module has no scope for is left unscoped, and the authproxy
+ * guards it with `pockettrains:read` or `pockettrains`.
  *
  * @since 1.0.0
  * @category Scopes

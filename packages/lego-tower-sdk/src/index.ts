@@ -50,13 +50,15 @@ export * as LegoTower from "./LegoTower.ts"
 /**
  * The scopes the LEGO Tower api is guarded by: `legotower` for the whole game,
  * `legotower:read` and `legotower:write` for every endpoint that only looks or
- * that changes a player's game, and one scope per endpoint, such as
+ * that changes a player's game, a `:read` and a `:write` scope for each area of
+ * the api, such as `legotower:device:read`, and one scope per endpoint, such as
  * `legotower:device:player_details`.
  *
- * Each endpoint accepts its own scope, its side's and the game's, narrowest
- * first: `{ anyOf: [DevicePlayerDetails, Read, LEGOTower] }`. An endpoint this
- * module has no scope for is left unscoped, and the authproxy guards it with
- * `legotower:read` or `legotower`.
+ * Each endpoint accepts its own scope, its area's side, the game's side and the
+ * game, narrowest first:
+ * `{ anyOf: [DevicePlayerDetails, DeviceRead, Read, LEGOTower] }`. An endpoint
+ * this module has no scope for is left unscoped, and the authproxy guards it
+ * with `legotower:read` or `legotower`.
  *
  * @since 1.0.0
  * @category Scopes

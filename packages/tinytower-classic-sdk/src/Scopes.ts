@@ -1,12 +1,15 @@
 /**
  * The scopes the TinyTower Classic api is guarded by: `tinytowerclassic` for
  * the whole game, `tinytowerclassic:read` and `tinytowerclassic:write` for
- * every endpoint that only looks or that changes a player's game, and one scope
- * per endpoint, such as `tinytowerclassic:device:player_details`.
+ * every endpoint that only looks or that changes a player's game, a `:read` and
+ * a `:write` scope for each area of the api, such as
+ * `tinytowerclassic:device:read`, and one scope per endpoint, such as
+ * `tinytowerclassic:device:player_details`.
  *
- * Each endpoint accepts its own scope, its side's and the game's, narrowest
- * first: `{ anyOf: [DevicePlayerDetails, Read, TinyTowerClassic] }`. They are
- * TinyTower's scopes under the `tinytowerclassic` game, with the same
+ * Each endpoint accepts its own scope, its area's side, the game's side and the
+ * game, narrowest first:
+ * `{ anyOf: [DevicePlayerDetails, DeviceRead, Read, TinyTowerClassic] }`. They
+ * are TinyTower's scopes under the `tinytowerclassic` game, with the same
  * descriptions.
  *
  * @since 1.0.0
@@ -44,7 +47,25 @@ export const Write: OAuthScope.Described = {
 
 /**
  * @since 1.0.0
- * @category Endpoints
+ * @category Device
+ */
+export const DeviceRead: OAuthScope.Described = {
+    name: OAuthScope.make("tinytowerclassic:device:read"),
+    description: "Look up player accounts",
+};
+
+/**
+ * @since 1.0.0
+ * @category Device
+ */
+export const DeviceWrite: OAuthScope.Described = {
+    name: OAuthScope.make("tinytowerclassic:device:write"),
+    description: "Change a player's account or devices",
+};
+
+/**
+ * @since 1.0.0
+ * @category Device
  */
 export const DevicePlayerDetails: OAuthScope.Described = {
     name: OAuthScope.make("tinytowerclassic:device:player_details"),
@@ -53,7 +74,7 @@ export const DevicePlayerDetails: OAuthScope.Described = {
 
 /**
  * @since 1.0.0
- * @category Endpoints
+ * @category Device
  */
 export const DeviceRegisterEmail: OAuthScope.Described = {
     name: OAuthScope.make("tinytowerclassic:device:register_email"),
@@ -62,7 +83,7 @@ export const DeviceRegisterEmail: OAuthScope.Described = {
 
 /**
  * @since 1.0.0
- * @category Endpoints
+ * @category Device
  */
 export const DeviceVerifyDevice: OAuthScope.Described = {
     name: OAuthScope.make("tinytowerclassic:device:verify_device"),
@@ -71,7 +92,25 @@ export const DeviceVerifyDevice: OAuthScope.Described = {
 
 /**
  * @since 1.0.0
- * @category Endpoints
+ * @category Sync
+ */
+export const SyncRead: OAuthScope.Described = {
+    name: OAuthScope.make("tinytowerclassic:sync:read"),
+    description: "Download saves and snapshots",
+};
+
+/**
+ * @since 1.0.0
+ * @category Sync
+ */
+export const SyncWrite: OAuthScope.Described = {
+    name: OAuthScope.make("tinytowerclassic:sync:write"),
+    description: "Upload saves and snapshots",
+};
+
+/**
+ * @since 1.0.0
+ * @category Sync
  */
 export const SyncPullSave: OAuthScope.Described = {
     name: OAuthScope.make("tinytowerclassic:sync:pull_save"),
@@ -80,7 +119,7 @@ export const SyncPullSave: OAuthScope.Described = {
 
 /**
  * @since 1.0.0
- * @category Endpoints
+ * @category Sync
  */
 export const SyncCheckVersion: OAuthScope.Described = {
     name: OAuthScope.make("tinytowerclassic:sync:check_version"),
@@ -89,7 +128,7 @@ export const SyncCheckVersion: OAuthScope.Described = {
 
 /**
  * @since 1.0.0
- * @category Endpoints
+ * @category Sync
  */
 export const SyncPullSnapshot: OAuthScope.Described = {
     name: OAuthScope.make("tinytowerclassic:sync:pull_snapshot"),
@@ -98,7 +137,7 @@ export const SyncPullSnapshot: OAuthScope.Described = {
 
 /**
  * @since 1.0.0
- * @category Endpoints
+ * @category Sync
  */
 export const SyncListSnapshots: OAuthScope.Described = {
     name: OAuthScope.make("tinytowerclassic:sync:list_snapshots"),
@@ -107,7 +146,7 @@ export const SyncListSnapshots: OAuthScope.Described = {
 
 /**
  * @since 1.0.0
- * @category Endpoints
+ * @category Sync
  */
 export const SyncPushSave: OAuthScope.Described = {
     name: OAuthScope.make("tinytowerclassic:sync:push_save"),
@@ -116,7 +155,7 @@ export const SyncPushSave: OAuthScope.Described = {
 
 /**
  * @since 1.0.0
- * @category Endpoints
+ * @category Sync
  */
 export const SyncPushSnapshot: OAuthScope.Described = {
     name: OAuthScope.make("tinytowerclassic:sync:push_snapshot"),
@@ -125,7 +164,25 @@ export const SyncPushSnapshot: OAuthScope.Described = {
 
 /**
  * @since 1.0.0
- * @category Endpoints
+ * @category Raffle
+ */
+export const RaffleRead: OAuthScope.Described = {
+    name: OAuthScope.make("tinytowerclassic:raffle:read"),
+    description: "Check raffle entries",
+};
+
+/**
+ * @since 1.0.0
+ * @category Raffle
+ */
+export const RaffleWrite: OAuthScope.Described = {
+    name: OAuthScope.make("tinytowerclassic:raffle:write"),
+    description: "Enter raffles",
+};
+
+/**
+ * @since 1.0.0
+ * @category Raffle
  */
 export const RaffleCheckEntered: OAuthScope.Described = {
     name: OAuthScope.make("tinytowerclassic:raffle:check_entered"),
@@ -134,7 +191,7 @@ export const RaffleCheckEntered: OAuthScope.Described = {
 
 /**
  * @since 1.0.0
- * @category Endpoints
+ * @category Raffle
  */
 export const RaffleEnter: OAuthScope.Described = {
     name: OAuthScope.make("tinytowerclassic:raffle:enter"),
@@ -143,7 +200,7 @@ export const RaffleEnter: OAuthScope.Described = {
 
 /**
  * @since 1.0.0
- * @category Endpoints
+ * @category Raffle
  */
 export const RaffleEnterMulti: OAuthScope.Described = {
     name: OAuthScope.make("tinytowerclassic:raffle:enter_multi"),
@@ -152,7 +209,25 @@ export const RaffleEnterMulti: OAuthScope.Described = {
 
 /**
  * @since 1.0.0
- * @category Endpoints
+ * @category Social
+ */
+export const SocialRead: OAuthScope.Described = {
+    name: OAuthScope.make("tinytowerclassic:social:read"),
+    description: "See gifts, visits and friends' towers",
+};
+
+/**
+ * @since 1.0.0
+ * @category Social
+ */
+export const SocialWrite: OAuthScope.Described = {
+    name: OAuthScope.make("tinytowerclassic:social:write"),
+    description: "Send and accept gifts and items",
+};
+
+/**
+ * @since 1.0.0
+ * @category Social
  */
 export const SocialGetGifts: OAuthScope.Described = {
     name: OAuthScope.make("tinytowerclassic:social:get_gifts"),
@@ -161,7 +236,7 @@ export const SocialGetGifts: OAuthScope.Described = {
 
 /**
  * @since 1.0.0
- * @category Endpoints
+ * @category Social
  */
 export const SocialGetVisits: OAuthScope.Described = {
     name: OAuthScope.make("tinytowerclassic:social:get_visits"),
@@ -170,7 +245,7 @@ export const SocialGetVisits: OAuthScope.Described = {
 
 /**
  * @since 1.0.0
- * @category Endpoints
+ * @category Social
  */
 export const SocialPullFriendMeta: OAuthScope.Described = {
     name: OAuthScope.make("tinytowerclassic:social:pull_friend_meta"),
@@ -179,7 +254,7 @@ export const SocialPullFriendMeta: OAuthScope.Described = {
 
 /**
  * @since 1.0.0
- * @category Endpoints
+ * @category Social
  */
 export const SocialPullFriendTower: OAuthScope.Described = {
     name: OAuthScope.make("tinytowerclassic:social:pull_friend_tower"),
@@ -188,7 +263,7 @@ export const SocialPullFriendTower: OAuthScope.Described = {
 
 /**
  * @since 1.0.0
- * @category Endpoints
+ * @category Social
  */
 export const SocialListFriendSnapshots: OAuthScope.Described = {
     name: OAuthScope.make("tinytowerclassic:social:list_friend_snapshots"),
@@ -197,7 +272,7 @@ export const SocialListFriendSnapshots: OAuthScope.Described = {
 
 /**
  * @since 1.0.0
- * @category Endpoints
+ * @category Social
  */
 export const SocialSendItem: OAuthScope.Described = {
     name: OAuthScope.make("tinytowerclassic:social:send_item"),
@@ -206,7 +281,7 @@ export const SocialSendItem: OAuthScope.Described = {
 
 /**
  * @since 1.0.0
- * @category Endpoints
+ * @category Social
  */
 export const SocialReceiveGift: OAuthScope.Described = {
     name: OAuthScope.make("tinytowerclassic:social:receive_gift"),
