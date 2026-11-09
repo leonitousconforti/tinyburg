@@ -169,7 +169,7 @@ overrides:
 patchedDependencies:
   '@yielded/jose@0.1.0-beta.47': 5d26c8e1069c9b4cf7d4edefd49c43a8a3de9f54c730aac17aff46a95f09d247
   '@yielded/oauth@0.1.0-beta.47': db1de8c9952c6b3965c025f23956acfd8e1e5f8746b9aefd0e7ac4e823b89d5d
-  effect@4.1.1: bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132
+  effect@4.1.2: bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132
   vitest@5.0.5: 330117083d54876c7134dd38164636c1694bc1bd0492dc8c50c11f485e8d6d99
 
 importers:
@@ -192,8 +192,8 @@ importers:
         specifier: 0.8.9
         version: 0.8.9
       '@effect/docgen':
-        specifier: 4.1.1
-        version: 4.1.1(redis@6.3.1)(typescript@7.0.2)
+        specifier: 4.1.2
+        version: 4.1.2(redis@6.3.1)(typescript@7.0.2)
       '@effect/tsgo':
         specifier: 0.63.0
         version: 0.63.0
@@ -204,8 +204,8 @@ importers:
         specifier: 0.5.0
         version: 0.5.0(@babel/core@8.1.0)
       effect:
-        specifier: 4.1.1
-        version: 4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
+        specifier: 4.1.2
+        version: 4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
       madge:
         specifier: 8.0.0
         version: 8.0.0(typescript@7.0.2)
@@ -238,16 +238,16 @@ importers:
         version: 2.16.0
       '@effect-aws/client-s3':
         specifier: 2.0.0
-        version: 2.0.0(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+        version: 2.0.0(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
       '@effect/platform-node':
-        specifier: 4.1.1
-        version: 4.1.1(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))(redis@6.3.1)
+        specifier: 4.1.2
+        version: 4.1.2(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))(redis@6.3.1)
       '@efffrida/gplayapi':
-        specifier: 0.0.40
-        version: 0.0.40(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+        specifier: 0.0.41
+        version: 0.0.41(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
       effect:
-        specifier: 4.1.1
-        version: 4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
+        specifier: 4.1.2
+        version: 4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
       redis:
         specifier: 6.3.1
         version: 6.3.1
@@ -255,17 +255,17 @@ importers:
   apps/authproxy:
     dependencies:
       '@effect/platform-browser':
-        specifier: 4.1.1
-        version: 4.1.1(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+        specifier: 4.1.2
+        version: 4.1.2(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
       '@effect/platform-node':
-        specifier: 4.1.1
-        version: 4.1.1(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))(redis@6.3.1)
+        specifier: 4.1.2
+        version: 4.1.2(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))(redis@6.3.1)
       '@effect/sql-pg':
-        specifier: 4.1.1
-        version: 4.1.1(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+        specifier: 4.1.2
+        version: 4.1.2(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
       '@foldkit/vite-plugin':
         specifier: 0.29.0
-        version: 0.29.0(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))(foldkit@0.170.0(@effect/platform-browser@4.1.1(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)))(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)))(redis@6.3.1)(vite@8.3.5)
+        version: 0.29.0(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))(foldkit@0.170.0(@effect/platform-browser@4.1.2(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)))(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)))(redis@6.3.1)(vite@8.3.5)
       '@tailwindcss/vite':
         specifier: 4.3.3
         version: 4.3.3(vite@8.3.5)
@@ -304,16 +304,16 @@ importers:
         version: link:../../packages/tinytower-vegas-sdk
       '@yielded/auth':
         specifier: 0.1.0-beta.47
-        version: 0.1.0-beta.47(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+        version: 0.1.0-beta.47(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
       '@yielded/oauth':
         specifier: 0.1.0-beta.47
-        version: 0.1.0-beta.47(patch_hash=db1de8c9952c6b3965c025f23956acfd8e1e5f8746b9aefd0e7ac4e823b89d5d)(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+        version: 0.1.0-beta.47(patch_hash=db1de8c9952c6b3965c025f23956acfd8e1e5f8746b9aefd0e7ac4e823b89d5d)(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
       effect:
-        specifier: 4.1.1
-        version: 4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
+        specifier: 4.1.2
+        version: 4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
       foldkit:
         specifier: 0.170.0
-        version: 0.170.0(@effect/platform-browser@4.1.1(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)))(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+        version: 0.170.0(@effect/platform-browser@4.1.2(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)))(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
       redis:
         specifier: 6.3.1
         version: 6.3.1
@@ -330,8 +330,8 @@ importers:
   apps/auto-gold-bits:
     dependencies:
       '@effect/platform-node':
-        specifier: 4.1.1
-        version: 4.1.1(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))(redis@6.3.1)
+        specifier: 4.1.2
+        version: 4.1.2(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))(redis@6.3.1)
       '@tinyburg/nimblebit-sdk':
         specifier: workspace:*
         version: link:../../packages/nimblebit-sdk
@@ -340,10 +340,10 @@ importers:
         version: link:../../packages/tinytower-sdk
       '@yielded/auth':
         specifier: 0.1.0-beta.47
-        version: 0.1.0-beta.47(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+        version: 0.1.0-beta.47(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
       effect:
-        specifier: 4.1.1
-        version: 4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
+        specifier: 4.1.2
+        version: 4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
       redis:
         specifier: 6.3.1
         version: 6.3.1
@@ -351,14 +351,14 @@ importers:
   apps/discord-bot:
     dependencies:
       '@effect/platform-browser':
-        specifier: 4.1.1
-        version: 4.1.1(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+        specifier: 4.1.2
+        version: 4.1.2(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
       '@effect/platform-node':
-        specifier: 4.1.1
-        version: 4.1.1(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))(redis@6.3.1)
+        specifier: 4.1.2
+        version: 4.1.2(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))(redis@6.3.1)
       '@effect/sql-pg':
-        specifier: 4.1.1
-        version: 4.1.1(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+        specifier: 4.1.2
+        version: 4.1.2(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
       '@tinyburg/shared-ui':
         specifier: workspace:*
         version: link:../shared-ui
@@ -367,19 +367,19 @@ importers:
         version: link:../../packages/tinyburg-sdk
       '@yielded/auth':
         specifier: 0.1.0-beta.47
-        version: 0.1.0-beta.47(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+        version: 0.1.0-beta.47(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
       '@yielded/oauth':
         specifier: 0.1.0-beta.47
-        version: 0.1.0-beta.47(patch_hash=db1de8c9952c6b3965c025f23956acfd8e1e5f8746b9aefd0e7ac4e823b89d5d)(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+        version: 0.1.0-beta.47(patch_hash=db1de8c9952c6b3965c025f23956acfd8e1e5f8746b9aefd0e7ac4e823b89d5d)(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
       dfx:
         specifier: 1.1.1
-        version: 1.1.1(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+        version: 1.1.1(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
       effect:
-        specifier: 4.1.1
-        version: 4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
+        specifier: 4.1.2
+        version: 4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
       foldkit:
         specifier: 0.170.0
-        version: 0.170.0(@effect/platform-browser@4.1.1(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)))(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+        version: 0.170.0(@effect/platform-browser@4.1.2(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)))(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
       redis:
         specifier: 6.3.1
         version: 6.3.1
@@ -393,8 +393,8 @@ importers:
   apps/doorman-clone:
     dependencies:
       '@effect/platform-node':
-        specifier: 4.1.1
-        version: 4.1.1(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))(redis@6.3.1)
+        specifier: 4.1.2
+        version: 4.1.2(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))(redis@6.3.1)
       '@tinyburg/nimblebit-sdk':
         specifier: workspace:*
         version: link:../../packages/nimblebit-sdk
@@ -403,10 +403,10 @@ importers:
         version: link:../../packages/tinytower-sdk
       '@yielded/auth':
         specifier: 0.1.0-beta.47
-        version: 0.1.0-beta.47(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+        version: 0.1.0-beta.47(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
       effect:
-        specifier: 4.1.1
-        version: 4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
+        specifier: 4.1.2
+        version: 4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
       redis:
         specifier: 6.3.1
         version: 6.3.1
@@ -424,29 +424,29 @@ importers:
         version: 5.3.0
     devDependencies:
       '@effect/platform-browser':
-        specifier: 4.1.1
-        version: 4.1.1(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+        specifier: 4.1.2
+        version: 4.1.2(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
       effect:
-        specifier: 4.1.1
-        version: 4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
+        specifier: 4.1.2
+        version: 4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
       foldkit:
         specifier: 0.170.0
-        version: 0.170.0(@effect/platform-browser@4.1.1(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)))(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+        version: 0.170.0(@effect/platform-browser@4.1.2(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)))(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
 
   apps/social-circles:
     dependencies:
       '@effect/platform-browser':
-        specifier: 4.1.1
-        version: 4.1.1(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+        specifier: 4.1.2
+        version: 4.1.2(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
       '@effect/platform-node':
-        specifier: 4.1.1
-        version: 4.1.1(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))(redis@6.3.1)
+        specifier: 4.1.2
+        version: 4.1.2(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))(redis@6.3.1)
       '@effect/sql-pg':
-        specifier: 4.1.1
-        version: 4.1.1(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+        specifier: 4.1.2
+        version: 4.1.2(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
       '@foldkit/vite-plugin':
         specifier: 0.29.0
-        version: 0.29.0(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))(foldkit@0.170.0(@effect/platform-browser@4.1.1(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)))(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)))(redis@6.3.1)(vite@8.3.5)
+        version: 0.29.0(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))(foldkit@0.170.0(@effect/platform-browser@4.1.2(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)))(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)))(redis@6.3.1)(vite@8.3.5)
       '@fontsource/press-start-2p':
         specifier: 5.3.0
         version: 5.3.0
@@ -470,16 +470,16 @@ importers:
         version: link:../../packages/tinytower-sdk
       '@yielded/auth':
         specifier: 0.1.0-beta.47
-        version: 0.1.0-beta.47(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+        version: 0.1.0-beta.47(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
       '@yielded/oauth':
         specifier: 0.1.0-beta.47
-        version: 0.1.0-beta.47(patch_hash=db1de8c9952c6b3965c025f23956acfd8e1e5f8746b9aefd0e7ac4e823b89d5d)(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+        version: 0.1.0-beta.47(patch_hash=db1de8c9952c6b3965c025f23956acfd8e1e5f8746b9aefd0e7ac4e823b89d5d)(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
       effect:
-        specifier: 4.1.1
-        version: 4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
+        specifier: 4.1.2
+        version: 4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
       foldkit:
         specifier: 0.170.0
-        version: 0.170.0(@effect/platform-browser@4.1.1(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)))(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+        version: 0.170.0(@effect/platform-browser@4.1.2(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)))(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
       redis:
         specifier: 6.3.1
         version: 6.3.1
@@ -496,17 +496,17 @@ importers:
   apps/tinyburg.app:
     dependencies:
       '@effect/platform-browser':
-        specifier: 4.1.1
-        version: 4.1.1(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+        specifier: 4.1.2
+        version: 4.1.2(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
       '@effect/platform-node':
-        specifier: 4.1.1
-        version: 4.1.1(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))(redis@6.3.1)
+        specifier: 4.1.2
+        version: 4.1.2(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))(redis@6.3.1)
       '@effect/sql-pg':
-        specifier: 4.1.1
-        version: 4.1.1(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+        specifier: 4.1.2
+        version: 4.1.2(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
       '@foldkit/vite-plugin':
         specifier: 0.29.0
-        version: 0.29.0(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))(foldkit@0.170.0(@effect/platform-browser@4.1.1(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)))(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)))(redis@6.3.1)(vite@8.3.5)
+        version: 0.29.0(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))(foldkit@0.170.0(@effect/platform-browser@4.1.2(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)))(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)))(redis@6.3.1)(vite@8.3.5)
       '@fontsource/press-start-2p':
         specifier: 5.3.0
         version: 5.3.0
@@ -536,16 +536,16 @@ importers:
         version: link:../../packages/treasury-sdk
       '@yielded/auth':
         specifier: 0.1.0-beta.47
-        version: 0.1.0-beta.47(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+        version: 0.1.0-beta.47(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
       '@yielded/auth-persistence':
         specifier: 0.1.0-beta.47
-        version: 0.1.0-beta.47(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+        version: 0.1.0-beta.47(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
       effect:
-        specifier: 4.1.1
-        version: 4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
+        specifier: 4.1.2
+        version: 4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
       foldkit:
         specifier: 0.170.0
-        version: 0.170.0(@effect/platform-browser@4.1.1(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)))(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+        version: 0.170.0(@effect/platform-browser@4.1.2(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)))(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
       redis:
         specifier: 6.3.1
         version: 6.3.1
@@ -562,11 +562,11 @@ importers:
   apps/treasury:
     dependencies:
       '@effect/platform-node':
-        specifier: 4.1.1
-        version: 4.1.1(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))(redis@6.3.1)
+        specifier: 4.1.2
+        version: 4.1.2(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))(redis@6.3.1)
       '@effect/sql-pg':
-        specifier: 4.1.1
-        version: 4.1.1(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+        specifier: 4.1.2
+        version: 4.1.2(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
       '@tinyburg/nimblebit-sdk':
         specifier: workspace:*
         version: link:../../packages/nimblebit-sdk
@@ -581,16 +581,16 @@ importers:
         version: link:../../packages/treasury-sdk
       '@yielded/auth':
         specifier: 0.1.0-beta.47
-        version: 0.1.0-beta.47(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+        version: 0.1.0-beta.47(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
       '@yielded/jose':
         specifier: 0.1.0-beta.47
-        version: 0.1.0-beta.47(patch_hash=5d26c8e1069c9b4cf7d4edefd49c43a8a3de9f54c730aac17aff46a95f09d247)(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+        version: 0.1.0-beta.47(patch_hash=5d26c8e1069c9b4cf7d4edefd49c43a8a3de9f54c730aac17aff46a95f09d247)(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
       '@yielded/oauth':
         specifier: 0.1.0-beta.47
-        version: 0.1.0-beta.47(patch_hash=db1de8c9952c6b3965c025f23956acfd8e1e5f8746b9aefd0e7ac4e823b89d5d)(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+        version: 0.1.0-beta.47(patch_hash=db1de8c9952c6b3965c025f23956acfd8e1e5f8746b9aefd0e7ac4e823b89d5d)(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
       effect:
-        specifier: 4.1.1
-        version: 4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
+        specifier: 4.1.2
+        version: 4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
       redis:
         specifier: 6.3.1
         version: 6.3.1
@@ -606,10 +606,10 @@ importers:
     devDependencies:
       '@yielded/auth':
         specifier: 0.1.0-beta.47
-        version: 0.1.0-beta.47(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+        version: 0.1.0-beta.47(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
       effect:
-        specifier: 4.1.1
-        version: 4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
+        specifier: 4.1.2
+        version: 4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
 
   packages/bitprints: {}
 
@@ -621,10 +621,10 @@ importers:
     devDependencies:
       '@yielded/auth':
         specifier: 0.1.0-beta.47
-        version: 0.1.0-beta.47(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+        version: 0.1.0-beta.47(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
       effect:
-        specifier: 4.1.1
-        version: 4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
+        specifier: 4.1.2
+        version: 4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
 
   packages/doorman: {}
 
@@ -634,26 +634,26 @@ importers:
         specifier: 2.16.0
         version: 2.16.0
       '@efffrida/frida-tools':
-        specifier: 0.0.66
-        version: 0.0.66(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+        specifier: 0.0.67
+        version: 0.0.67(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
       '@efffrida/gplayapi':
-        specifier: 0.0.40
-        version: 0.0.40(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+        specifier: 0.0.41
+        version: 0.0.41(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
       '@efffrida/il2cpp-bridge':
-        specifier: 0.0.59
-        version: 0.0.59(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+        specifier: 0.0.60
+        version: 0.0.60(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
       '@efffrida/platform':
-        specifier: 0.0.51
-        version: 0.0.51(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+        specifier: 0.0.52
+        version: 0.0.52(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
       '@efffrida/polyfills':
-        specifier: 0.0.22
-        version: 0.0.22
+        specifier: 0.0.23
+        version: 0.0.23
       '@efffrida/rpc':
-        specifier: 0.0.69
-        version: 0.0.69(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+        specifier: 0.0.70
+        version: 0.0.70(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
       frida:
-        specifier: 17.26.0
-        version: 17.26.0
+        specifier: 17.26.2
+        version: 17.26.2
       frida-il2cpp-bridge:
         specifier: 0.14.0
         version: 0.14.0
@@ -662,8 +662,8 @@ importers:
         specifier: 19.13.0
         version: 19.13.0
       effect:
-        specifier: 4.1.1
-        version: 4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
+        specifier: 4.1.2
+        version: 4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
 
   packages/lego-tower-sdk:
     dependencies:
@@ -673,19 +673,19 @@ importers:
     devDependencies:
       '@yielded/auth':
         specifier: 0.1.0-beta.47
-        version: 0.1.0-beta.47(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+        version: 0.1.0-beta.47(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
       effect:
-        specifier: 4.1.1
-        version: 4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
+        specifier: 4.1.2
+        version: 4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
 
   packages/nimblebit-sdk:
     devDependencies:
       '@yielded/auth':
         specifier: 0.1.0-beta.47
-        version: 0.1.0-beta.47(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+        version: 0.1.0-beta.47(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
       effect:
-        specifier: 4.1.1
-        version: 4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
+        specifier: 4.1.2
+        version: 4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
 
   packages/pocket-planes-sdk:
     dependencies:
@@ -695,10 +695,10 @@ importers:
     devDependencies:
       '@yielded/auth':
         specifier: 0.1.0-beta.47
-        version: 0.1.0-beta.47(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+        version: 0.1.0-beta.47(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
       effect:
-        specifier: 4.1.1
-        version: 4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
+        specifier: 4.1.2
+        version: 4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
 
   packages/pocket-trains-sdk:
     dependencies:
@@ -708,10 +708,10 @@ importers:
     devDependencies:
       '@yielded/auth':
         specifier: 0.1.0-beta.47
-        version: 0.1.0-beta.47(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+        version: 0.1.0-beta.47(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
       effect:
-        specifier: 4.1.1
-        version: 4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
+        specifier: 4.1.2
+        version: 4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
 
   packages/tinyburg-sdk:
     dependencies:
@@ -727,10 +727,10 @@ importers:
     devDependencies:
       '@yielded/auth':
         specifier: 0.1.0-beta.47
-        version: 0.1.0-beta.47(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+        version: 0.1.0-beta.47(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
       effect:
-        specifier: 4.1.1
-        version: 4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
+        specifier: 4.1.2
+        version: 4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
 
   packages/tinytower-classic-sdk:
     dependencies:
@@ -746,10 +746,10 @@ importers:
     devDependencies:
       '@yielded/auth':
         specifier: 0.1.0-beta.47
-        version: 0.1.0-beta.47(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+        version: 0.1.0-beta.47(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
       effect:
-        specifier: 4.1.1
-        version: 4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
+        specifier: 4.1.2
+        version: 4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
 
   packages/tinytower-sdk:
     dependencies:
@@ -764,26 +764,26 @@ importers:
         specifier: 2.16.0
         version: 2.16.0
       '@effect/platform-node':
-        specifier: 4.1.1
-        version: 4.1.1(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))(redis@6.3.1)
+        specifier: 4.1.2
+        version: 4.1.2(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))(redis@6.3.1)
       '@effect/vitest':
-        specifier: 4.1.1
-        version: 4.1.1(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))(vitest@5.0.5(patch_hash=330117083d54876c7134dd38164636c1694bc1bd0492dc8c50c11f485e8d6d99)(vite@8.3.5))
+        specifier: 4.1.2
+        version: 4.1.2(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))(vitest@5.0.5(patch_hash=330117083d54876c7134dd38164636c1694bc1bd0492dc8c50c11f485e8d6d99)(vite@8.3.5))
       '@efffrida/frida-tools':
-        specifier: 0.0.66
-        version: 0.0.66(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+        specifier: 0.0.67
+        version: 0.0.67(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
       '@efffrida/gplayapi':
-        specifier: 0.0.40
-        version: 0.0.40(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+        specifier: 0.0.41
+        version: 0.0.41(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
       '@tinyburg/insight':
         specifier: workspace:*
         version: link:../insight
       '@yielded/auth':
         specifier: 0.1.0-beta.47
-        version: 0.1.0-beta.47(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+        version: 0.1.0-beta.47(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
       effect:
-        specifier: 4.1.1
-        version: 4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
+        specifier: 4.1.2
+        version: 4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
       redis:
         specifier: 6.3.1
         version: 6.3.1
@@ -802,10 +802,10 @@ importers:
     devDependencies:
       '@yielded/auth':
         specifier: 0.1.0-beta.47
-        version: 0.1.0-beta.47(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+        version: 0.1.0-beta.47(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
       effect:
-        specifier: 4.1.1
-        version: 4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
+        specifier: 4.1.2
+        version: 4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
 
   packages/treasury-sdk:
     dependencies:
@@ -818,10 +818,10 @@ importers:
     devDependencies:
       '@yielded/auth':
         specifier: 0.1.0-beta.47
-        version: 0.1.0-beta.47(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+        version: 0.1.0-beta.47(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
       effect:
-        specifier: 4.1.1
-        version: 4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
+        specifier: 4.1.2
+        version: 4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
 
   scratchpad:
     dependencies:
@@ -836,32 +836,32 @@ importers:
         version: link:../packages/tinytower-sdk
       '@yielded/auth':
         specifier: 0.1.0-beta.47
-        version: 0.1.0-beta.47(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+        version: 0.1.0-beta.47(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
     devDependencies:
       '@bufbuild/protobuf':
         specifier: 2.16.0
         version: 2.16.0
       '@effect/platform-node':
-        specifier: 4.1.1
-        version: 4.1.1(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))(redis@6.3.1)
+        specifier: 4.1.2
+        version: 4.1.2(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))(redis@6.3.1)
       '@efffrida/frida-tools':
-        specifier: 0.0.66
-        version: 0.0.66(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+        specifier: 0.0.67
+        version: 0.0.67(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
       '@efffrida/gplayapi':
-        specifier: 0.0.40
-        version: 0.0.40(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+        specifier: 0.0.41
+        version: 0.0.41(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
       '@efffrida/il2cpp-bridge':
-        specifier: 0.0.59
-        version: 0.0.59(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+        specifier: 0.0.60
+        version: 0.0.60(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
       '@efffrida/platform':
-        specifier: 0.0.51
-        version: 0.0.51(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+        specifier: 0.0.52
+        version: 0.0.52(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
       '@efffrida/polyfills':
-        specifier: 0.0.22
-        version: 0.0.22
+        specifier: 0.0.23
+        version: 0.0.23
       '@efffrida/rpc':
-        specifier: 0.0.69
-        version: 0.0.69(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+        specifier: 0.0.70
+        version: 0.0.70(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
       '@types/frida-gum':
         specifier: 19.13.0
         version: 19.13.0
@@ -869,8 +869,8 @@ importers:
         specifier: 26.6.6
         version: 26.6.6
       effect:
-        specifier: 4.1.1
-        version: 4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
+        specifier: 4.1.2
+        version: 4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
       redis:
         specifier: 6.3.1
         version: 6.3.1
@@ -1037,6 +1037,9 @@ packages:
   '@bufbuild/protobuf@2.16.0':
     resolution: {integrity: sha512-FWa0sPlqYGJgpTs6OxBRcL/AW4JT0OIO+W1ajerluoTVh8CV0B7XM1qsNCRgnkSCkRCgOICKHRQlY17jrsm0+Q==}
 
+  '@bufbuild/protobuf@2.17.0':
+    resolution: {integrity: sha512-hcPkSz6D7MiTU/5VBBhK+kxaYDoOdQ6yJRFJ3kS8Nydp+VZXfg1vrpABKPNod8bXMufsVCmiUJVIKFzCzta4uw==}
+
   '@changesets/apply-release-plan@8.1.1':
     resolution: {integrity: sha512-nk2Hbq3M9NeHMdaIRBDvawKrQJzXB9sGyBUE5yWnIKtvdcNCPj75zBekJYr0gTT2ecJH3eFeTrc8eisPImcv0Q==}
     engines: {node: ^22.11 || ^24 || >=26}
@@ -1129,8 +1132,8 @@ packages:
     engines: {node: '>=16.17.1'}
     hasBin: true
 
-  '@effect/docgen@4.1.1':
-    resolution: {integrity: sha512-RjjizClydAQLwraEYJcll/FO+fp39TAOUuZ9WzUIa2TOvjD2ywWVu7FyRgipwI0r7MQXKBfs84/cA6CDHQ6+nQ==}
+  '@effect/docgen@4.1.2':
+    resolution: {integrity: sha512-R4e0mxxY9B5v8Sdr2tWjjQL9nIlOwT0J8baQ3zgF4wth89rmVcDH7NA2r1ojwlArq17h/Y8ZgLi2ViQgsenRfw==}
     engines: {node: '>=22.19.0'}
     hasBin: true
     peerDependencies:
@@ -1142,10 +1145,10 @@ packages:
     engines: {node: '>=0.10.0'}
     hasBin: true
 
-  '@effect/platform-browser@4.1.1':
-    resolution: {integrity: sha512-bfJuCUX0qPv0fqVWq65cLNWoSFHt2vPDMn0m2cpaxz51/gaCclT3yBAk3JxN/7aEBvcKVXMui9G8uz4a9uoDgA==}
+  '@effect/platform-browser@4.1.2':
+    resolution: {integrity: sha512-O+C5hpnfdphBhSaOndFw8XA3dBG0x4SiF3m3QJzJwZZOlB4nGe+ghCZgknyaLcxigA8NqUtEj73rSsVVwshYFA==}
     peerDependencies:
-      effect: ^4.1.1
+      effect: ^4.1.2
 
   '@effect/platform-node-shared@4.1.1':
     resolution: {integrity: sha512-29zdEDs3i5W+t92+mWTFNSfzSHsTpZMcFZ9k4lkkz4tETlC1m4lRwjdjieJtvQ/bKHMnYrCtZwizsBFSf3L5Yg==}
@@ -1153,17 +1156,23 @@ packages:
     peerDependencies:
       effect: ^4.1.1
 
-  '@effect/platform-node@4.1.1':
-    resolution: {integrity: sha512-Oy3eP27XeipUgejftptHy0zf2W75HU8/yPKwBqdz8uYxAvWdf4c48OFYs6KJX/+uIEKdMjnF6mXYgbauWgIcVA==}
+  '@effect/platform-node-shared@4.1.2':
+    resolution: {integrity: sha512-wSwl9A/G1hcVvF8nLI+YfB3EyOIDvWS6+lsTZBkmgDnPBL7m8YWZF+1HD+mdEsb52SUGfukip46Q3gRwSdk3QA==}
     engines: {node: '>=22.19.0'}
     peerDependencies:
-      effect: ^4.1.1
+      effect: ^4.1.2
+
+  '@effect/platform-node@4.1.2':
+    resolution: {integrity: sha512-ye0UjxORdd5Qu3paZ1LljgGOALWHt7muP9VTpjUSCNfcesiB/Hm7wPJIvZeu4gnwpTe5BtEnO1VHngWqjJp8mA==}
+    engines: {node: '>=22.19.0'}
+    peerDependencies:
+      effect: ^4.1.2
       redis: '>=5.1.0 <7.0.0'
 
-  '@effect/sql-pg@4.1.1':
-    resolution: {integrity: sha512-NiCzHPTFyI85/fbRdGhQgSa3QpuvByqVv8QaENSBuCFavvuWemIdSbWpKPQXESXU3yYq6PUR0KHY8fFfmWrXlA==}
+  '@effect/sql-pg@4.1.2':
+    resolution: {integrity: sha512-0UehR7B5W8dC+dX6fDeWStLbVbBb2M4pk4HBATEeH0cmV4Odl2lckTg0jFmLuadekTLa4OyB+bZQo1yTG1y2Mw==}
     peerDependencies:
-      effect: ^4.1.1
+      effect: ^4.1.2
 
   '@effect/tsgo-darwin-arm64@0.63.0':
     resolution: {integrity: sha512-KBvYatuEol71+i+BERWuDRU9XE+4sTK78N83Ko6VNF5gy6yXiujj/bgtWs2P3cDGXsevAV6L+HtpuAWjAQKC6Q==}
@@ -1204,42 +1213,42 @@ packages:
     resolution: {integrity: sha512-bRbvVj+YLE/nBmcBWGAwsul3mjEYlqqOmWMxvwSVKq/oNnJEuZYgi2OFDeUf7q49E2g3w+oMHMWyN2QayZ77RQ==}
     hasBin: true
 
-  '@effect/vitest@4.1.1':
-    resolution: {integrity: sha512-VkE9EUXE4G7mXMmV3X3Iu+6k3pZswWjOf7PB2qiaHMoFAZAPtHp+eUZo9oJM4Ip5z+ghQ9K0IDAQM2iG6+w5MA==}
+  '@effect/vitest@4.1.2':
+    resolution: {integrity: sha512-JJPwAHkJHxvM/woW9mMW/khjasAHcmwWdOMAgMy16rfqsxcVhFDnrRsvN9VI2+kMv8zDCCyBE2q1n5hzZlfE0w==}
     peerDependencies:
-      effect: ^4.1.1
+      effect: ^4.1.2
       vitest: '>=5.0.0 <6.0.0'
 
-  '@efffrida/frida-tools@0.0.66':
-    resolution: {integrity: sha512-amB3YyCnAbCKfUL7tNEU0ZLQitkvpzHLnISH+d9sYrhF+erDINp2RZ20FrpoWq4tSezeCv3vD8TFMGWmVYM2Lw==}
+  '@efffrida/frida-tools@0.0.67':
+    resolution: {integrity: sha512-faJXbmibKhIw5Iy8D8SUqNqjYlaWoX0vpPr+kkJsSpeKdxrGaE6XKTJx1uq6Ttwh5smPD2dAA4Qlb7xZ4DNPpA==}
     engines: {node: '>=24'}
     peerDependencies:
-      effect: 4.1.1
+      effect: 4.1.2
 
-  '@efffrida/gplayapi@0.0.40':
-    resolution: {integrity: sha512-6VUfFjRZRowN4PBkKvXntGtdKjx69P+nZA26vm27JYsB4ZgBRSCNS5Tr2M0C/QpUUN+nNYiuNR3VeAGX0/NEGg==}
+  '@efffrida/gplayapi@0.0.41':
+    resolution: {integrity: sha512-a0wvcShgnN5iewK3Wd924qW9rmMrLG0I64e3EZzWt5C5FJ14FdjLvDdqo4gEaYK1dFBZleXgafq1qXnpqEBfHw==}
     engines: {node: '>=24'}
     peerDependencies:
-      effect: 4.1.1
+      effect: 4.1.2
 
-  '@efffrida/il2cpp-bridge@0.0.59':
-    resolution: {integrity: sha512-R3kwLBIMK/NchRoJOp3nYdoN/OVkocys6S4hgmyoue/2IBvGP2Lm5nAD3ZRNj2InbZDR+8JTxIKRCSN4MSbUmg==}
+  '@efffrida/il2cpp-bridge@0.0.60':
+    resolution: {integrity: sha512-3zEnNWXNvAMfYXKyWSruLB2+e7uxWzZp5Oot0nkqD5j69VeBFUCK7zLk2ppcuBeUDji7AxtLcIcYlsedak+VRw==}
     peerDependencies:
-      effect: 4.1.1
+      effect: 4.1.2
 
-  '@efffrida/platform@0.0.51':
-    resolution: {integrity: sha512-JmXcUHjHnaMxbbwms5+w/rpbdDMILAFTfEh1H+ybt5BSksKAVnuoUfse4/wQbAZi7lOfxoZJalmkOZnty+FyIQ==}
+  '@efffrida/platform@0.0.52':
+    resolution: {integrity: sha512-0K1JVPwIGe116cC627YRBkQ1aw7PCC6czvhZMXc7fPT5ERLBu4Gq0wuNNW4FEtYRnwWrgptgZDsN8esHMPxt7g==}
     peerDependencies:
-      effect: 4.1.1
+      effect: 4.1.2
 
-  '@efffrida/polyfills@0.0.22':
-    resolution: {integrity: sha512-dTvH1NPLgH9fRtsaGETDP16fjpaXEWCvwFRjr9XYH8lpcxs2gbO2+BtV7oWSMMML5K9eKPfqfUjktaHLGWrFOQ==}
+  '@efffrida/polyfills@0.0.23':
+    resolution: {integrity: sha512-obleLGayYKtAJIopmqEJ/a7pxn9kwiM7HQsb5zwWzGH6LpK9YsXDI6aBSUnR9QYmMtbXo8pI41sksXC4+ti0ZQ==}
 
-  '@efffrida/rpc@0.0.69':
-    resolution: {integrity: sha512-ZgoFVX7qEajAEZHYHaV9iimZuFJFDAi2ojNw4yaD3MeQsYmMIQgUAJdde2A2gQH3/PlgEqSk8/VYiDC2y5o0gg==}
+  '@efffrida/rpc@0.0.70':
+    resolution: {integrity: sha512-p7vPu7vWMi/8ebr59rF9WLVfK4E9f4C1giupmCVTkPylpYKUfkQsBTcspeJXvClb8OWEWDvtETIUqRq6eyTOKg==}
     engines: {node: '>=24'}
     peerDependencies:
-      effect: 4.1.1
+      effect: 4.1.2
 
   '@foldkit/vite-plugin@0.29.0':
     resolution: {integrity: sha512-nLRScsxd7qzFI0omrkBsP9HtF+B0qhJ+wBEDhWSix+6yy2pmo8GXInq/Cdwu1OnaNkvo2+K4BOC/ZaV+/U7q0Q==}
@@ -2350,8 +2359,8 @@ packages:
     resolution: {integrity: sha512-yS+Q5i3hBf7GBkd4KG8a7eBNNWNGLTaEwwYWUijIYM7zrlYDM0BFXHjjPWlWZ1Rg7UaddZeIDmi9jF3HmqiQ2w==}
     engines: {node: '>=6.0.0'}
 
-  effect@4.1.1:
-    resolution: {integrity: sha512-XYu65BrcmNqu5i7PPvP4dqL+R5ma37zIsfuSPjcn78mog+6e5PkilNg7Xo+pBpjXJYlWEIpH4j91tMrfW05CMw==}
+  effect@4.1.2:
+    resolution: {integrity: sha512-d3Oah1WyKxFLFh19yWheS5IXIVaITzxZ71JkE1rkUozq/6EcJSU5nPk5bF2QrSygZ3SQoiNQB8TsxFriyMeMaQ==}
 
   electron-to-chromium@1.5.467:
     resolution: {integrity: sha512-Nw9X371rtZmYcBSnEijnCDONILjs93biCZO34juC7MBOmK8E+GFnyD4T/WvyrlJkppul7oxg6TwvtKst9SODTw==}
@@ -2490,8 +2499,8 @@ packages:
     resolution: {integrity: sha512-rtqHgsE3x1j05QV7hfowEsRynf276xHhEJPgoh87Dv7PEa9Zz13VLxRtt19DNVCtIzyCfH1vdMANUCtMYU29Kw==}
     hasBin: true
 
-  frida@17.26.0:
-    resolution: {integrity: sha512-mkpL+LGgHTwqe3U6dXm2fvyCWftTiyNIj0wTzMd2K8GYBfKRU2q3Z2QhxHvn7okoo+XwTm1NOwzNdV+d4i0CXg==}
+  frida@17.26.2:
+    resolution: {integrity: sha512-1dmLg8vOihZ/EQrJQN65/aUEAjlJc/qjej6kvsuhFTqpb7h0/itjGI1AtC+rhUntWaZlomzAO3zbeLxK2lsLBg==}
     engines: {node: '>=16'}
 
   fs-constants@1.0.0:
@@ -2518,10 +2527,6 @@ packages:
 
   github-from-package@0.0.0:
     resolution: {integrity: sha512-SyHy3T1v2NUXn29OsWdxmK6RwHD+vkj3v8en8AOBZ1wBQ/hCAQ5bAQTD02kW4W9tUp/3Qh6J8r9EvntiyCmOOw==}
-
-  glob@13.0.6:
-    resolution: {integrity: sha512-Wjlyrolmm8uDpm/ogGyXZXb1Z+Ca2B8NbJwqBVg0axK9GbBeoS7yGV6vjXnYdGm6X53iehEuxxbyiKp8QmN4Vw==}
-    engines: {node: 18 || 20 || >=22}
 
   glob@14.0.3:
     resolution: {integrity: sha512-A1vjIwC3qpdCso45Iw127gnp7sPhqgY8lUQhDrArIs+GbmfaaVPFuoyy7WyLT9EPZCRZ7j7aLdwUhQmHWesEow==}
@@ -3006,10 +3011,6 @@ packages:
   path-parse@1.0.7:
     resolution: {integrity: sha512-LDJzPVEEEPR+y48z93A0Ed0yXb8pAByGWo/k5YYdYgpY2/2EsOsksJrq7lOHxryrVOn1ejG6oAp8ahvOIQD8sw==}
 
-  path-scurry@2.0.2:
-    resolution: {integrity: sha512-3O/iVVsJAPsOnpwWIeD+d6z/7PmqApyQePUtCndjatj/9I5LylHvt5qluFaBT3I5h3r1ejfR056c+FCv+NnNXg==}
-    engines: {node: 18 || 20 || >=22}
-
   path-scurry@3.0.0:
     resolution: {integrity: sha512-1pTbQqH1wIwMi/eleQ5leFTTCkzFsPcgXNjwOA8YGGW/W4/kHT3dssE7Z6NH+zuqNLOzOB0uaD61yl7cAcVhgg==}
     engines: {node: 18 || 20 || >=22}
@@ -3465,6 +3466,18 @@ packages:
       utf-8-validate:
         optional: true
 
+  ws@8.22.1:
+    resolution: {integrity: sha512-oyL6OPYme/CmiFvNuGzeoxCJ4nOrZE2O1FwM9MWM1AsGri6nLXB2pg+lNA8aLeXMSav0J6eIVS1j6vUPzUtK9g==}
+    engines: {node: '>=10.0.0'}
+    peerDependencies:
+      bufferutil: ^4.0.1
+      utf-8-validate: '>=5.0.2'
+    peerDependenciesMeta:
+      bufferutil:
+        optional: true
+      utf-8-validate:
+        optional: true
+
   xtend@4.0.2:
     resolution: {integrity: sha512-LKYU1iAXJXUgAXn9URjiu+MWhyUXHsvfp7mcuYm9dSUKK0/CjtrUwFAxD82/mCWbtLsGjFIad0wIsod4zrTAEQ==}
     engines: {node: '>=0.4'}
@@ -3756,6 +3769,8 @@ snapshots:
 
   '@bufbuild/protobuf@2.16.0': {}
 
+  '@bufbuild/protobuf@2.17.0': {}
+
   '@changesets/apply-release-plan@8.1.1':
     dependencies:
       '@changesets/config': 4.0.1
@@ -3879,35 +3894,35 @@ snapshots:
 
   '@discoveryjs/json-ext@1.1.0': {}
 
-  '@effect-aws/client-s3@2.0.0(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))':
+  '@effect-aws/client-s3@2.0.0(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))':
     dependencies:
       '@aws-sdk/client-s3': 3.1160.0
       '@aws-sdk/s3-request-presigner': 3.1160.0
       '@aws-sdk/types': 3.975.0
-      '@effect-aws/commons': 1.0.0(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
-      effect: 4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
+      '@effect-aws/commons': 1.0.0(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+      effect: 4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
 
-  '@effect-aws/commons@1.0.0(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))':
+  '@effect-aws/commons@1.0.0(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))':
     dependencies:
       '@smithy/protocol-http': 5.6.2
       '@smithy/smithy-client': 4.15.2
       '@smithy/types': 4.19.0
-      effect: 4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
+      effect: 4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
 
   '@effect/build-utils@0.8.9':
     dependencies:
       micromatch: 4.0.8
       pkg-entry-points: 1.1.2
 
-  '@effect/docgen@4.1.1(redis@6.3.1)(typescript@7.0.2)':
+  '@effect/docgen@4.1.2(redis@6.3.1)(typescript@7.0.2)':
     dependencies:
       '@babel/code-frame': 8.0.6
       '@effect/markdown-toc': 0.1.0
-      '@effect/platform-node': 4.1.1(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))(redis@6.3.1)
+      '@effect/platform-node': 4.1.2(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))(redis@6.3.1)
       chalk: 6.0.1
       doctrine: 3.0.0
-      effect: 4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
-      glob: 13.0.6
+      effect: 4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
+      glob: 14.0.3
       prettier: 3.9.10
       ts-morph: 28.0.0
       tsconfck: 3.1.6(typescript@7.0.2)
@@ -3932,32 +3947,41 @@ snapshots:
       repeat-string: 1.6.1
       strip-color: 0.1.0
 
-  '@effect/platform-browser@4.1.1(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))':
+  '@effect/platform-browser@4.1.2(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))':
     dependencies:
-      effect: 4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
+      effect: 4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
 
-  '@effect/platform-node-shared@4.1.1(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))':
+  '@effect/platform-node-shared@4.1.1(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))':
     dependencies:
       '@types/ws': 8.18.2
-      effect: 4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
+      effect: 4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
       ws: 8.22.0
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
 
-  '@effect/platform-node@4.1.1(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))(redis@6.3.1)':
+  '@effect/platform-node-shared@4.1.2(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))':
     dependencies:
-      '@effect/platform-node-shared': 4.1.1(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
-      effect: 4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
+      '@types/ws': 8.18.2
+      effect: 4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
+      ws: 8.22.1
+    transitivePeerDependencies:
+      - bufferutil
+      - utf-8-validate
+
+  '@effect/platform-node@4.1.2(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))(redis@6.3.1)':
+    dependencies:
+      '@effect/platform-node-shared': 4.1.2(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+      effect: 4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
       redis: 6.3.1
       undici: 8.12.3
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
 
-  '@effect/sql-pg@4.1.1(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))':
+  '@effect/sql-pg@4.1.2(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))':
     dependencies:
-      effect: 4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
+      effect: 4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
 
   '@effect/tsgo-darwin-arm64@0.63.0':
     optional: true
@@ -3990,48 +4014,48 @@ snapshots:
       '@effect/tsgo-win32-arm64': 0.63.0
       '@effect/tsgo-win32-x64': 0.63.0
 
-  '@effect/vitest@4.1.1(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))(vitest@5.0.5(patch_hash=330117083d54876c7134dd38164636c1694bc1bd0492dc8c50c11f485e8d6d99)(vite@8.3.5))':
+  '@effect/vitest@4.1.2(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))(vitest@5.0.5(patch_hash=330117083d54876c7134dd38164636c1694bc1bd0492dc8c50c11f485e8d6d99)(vite@8.3.5))':
     dependencies:
-      effect: 4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
+      effect: 4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
       vitest: 5.0.5(patch_hash=330117083d54876c7134dd38164636c1694bc1bd0492dc8c50c11f485e8d6d99)(vite@8.3.5)
 
-  '@efffrida/frida-tools@0.0.66(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))':
+  '@efffrida/frida-tools@0.0.67(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))':
     dependencies:
-      effect: 4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
-      frida: 17.26.0
+      effect: 4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
+      frida: 17.26.2
 
-  '@efffrida/gplayapi@0.0.40(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))':
+  '@efffrida/gplayapi@0.0.41(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))':
     dependencies:
-      '@bufbuild/protobuf': 2.16.0
-      effect: 4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
+      '@bufbuild/protobuf': 2.17.0
+      effect: 4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
 
-  '@efffrida/il2cpp-bridge@0.0.59(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))':
+  '@efffrida/il2cpp-bridge@0.0.60(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))':
     dependencies:
-      effect: 4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
+      effect: 4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
       frida-il2cpp-bridge: 0.14.0
 
-  '@efffrida/platform@0.0.51(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))':
+  '@efffrida/platform@0.0.52(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))':
     dependencies:
-      effect: 4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
+      effect: 4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
 
-  '@efffrida/polyfills@0.0.22':
+  '@efffrida/polyfills@0.0.23':
     dependencies:
       abort-controller: 3.0.0
       event-target-polyfill: 0.0.4
       text-encoding-utf-8: 1.0.2
 
-  '@efffrida/rpc@0.0.69(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))':
+  '@efffrida/rpc@0.0.70(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))':
     dependencies:
-      '@efffrida/frida-tools': 0.0.66(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
-      '@efffrida/polyfills': 0.0.22
-      effect: 4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
+      '@efffrida/frida-tools': 0.0.67(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+      '@efffrida/polyfills': 0.0.23
+      effect: 4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
 
-  '@foldkit/vite-plugin@0.29.0(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))(foldkit@0.170.0(@effect/platform-browser@4.1.1(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)))(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)))(redis@6.3.1)(vite@8.3.5)':
+  '@foldkit/vite-plugin@0.29.0(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))(foldkit@0.170.0(@effect/platform-browser@4.1.2(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)))(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)))(redis@6.3.1)(vite@8.3.5)':
     dependencies:
-      '@effect/platform-node': 4.1.1(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))(redis@6.3.1)
-      '@effect/platform-node-shared': 4.1.1(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
-      effect: 4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
-      foldkit: 0.170.0(@effect/platform-browser@4.1.1(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)))(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+      '@effect/platform-node': 4.1.2(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))(redis@6.3.1)
+      '@effect/platform-node-shared': 4.1.1(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+      effect: 4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
+      foldkit: 0.170.0(@effect/platform-browser@4.1.2(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)))(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
       magic-string: 1.4.5
       vite: 8.3.5
       vitefu: 1.1.3(vite@8.3.5)
@@ -4649,25 +4673,25 @@ snapshots:
 
   '@vue/shared@3.5.44': {}
 
-  '@yielded/auth-persistence@0.1.0-beta.47(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))':
+  '@yielded/auth-persistence@0.1.0-beta.47(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))':
     dependencies:
-      '@yielded/auth': 0.1.0-beta.47(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
-      effect: 4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
+      '@yielded/auth': 0.1.0-beta.47(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+      effect: 4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
 
-  '@yielded/auth@0.1.0-beta.47(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))':
+  '@yielded/auth@0.1.0-beta.47(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))':
     dependencies:
-      '@yielded/jose': 0.1.0-beta.47(patch_hash=5d26c8e1069c9b4cf7d4edefd49c43a8a3de9f54c730aac17aff46a95f09d247)(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
-      '@yielded/oauth': 0.1.0-beta.47(patch_hash=db1de8c9952c6b3965c025f23956acfd8e1e5f8746b9aefd0e7ac4e823b89d5d)(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
-      effect: 4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
+      '@yielded/jose': 0.1.0-beta.47(patch_hash=5d26c8e1069c9b4cf7d4edefd49c43a8a3de9f54c730aac17aff46a95f09d247)(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+      '@yielded/oauth': 0.1.0-beta.47(patch_hash=db1de8c9952c6b3965c025f23956acfd8e1e5f8746b9aefd0e7ac4e823b89d5d)(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+      effect: 4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
 
-  '@yielded/jose@0.1.0-beta.47(patch_hash=5d26c8e1069c9b4cf7d4edefd49c43a8a3de9f54c730aac17aff46a95f09d247)(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))':
+  '@yielded/jose@0.1.0-beta.47(patch_hash=5d26c8e1069c9b4cf7d4edefd49c43a8a3de9f54c730aac17aff46a95f09d247)(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))':
     dependencies:
-      effect: 4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
+      effect: 4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
 
-  '@yielded/oauth@0.1.0-beta.47(patch_hash=db1de8c9952c6b3965c025f23956acfd8e1e5f8746b9aefd0e7ac4e823b89d5d)(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))':
+  '@yielded/oauth@0.1.0-beta.47(patch_hash=db1de8c9952c6b3965c025f23956acfd8e1e5f8746b9aefd0e7ac4e823b89d5d)(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))':
     dependencies:
-      '@yielded/jose': 0.1.0-beta.47(patch_hash=5d26c8e1069c9b4cf7d4edefd49c43a8a3de9f54c730aac17aff46a95f09d247)(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
-      effect: 4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
+      '@yielded/jose': 0.1.0-beta.47(patch_hash=5d26c8e1069c9b4cf7d4edefd49c43a8a3de9f54c730aac17aff46a95f09d247)(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+      effect: 4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
 
   abort-controller@3.0.0:
     dependencies:
@@ -4880,10 +4904,10 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  dfx@1.1.1(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)):
+  dfx@1.1.1(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)):
     dependencies:
       discord-api-types: 0.38.57
-      effect: 4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
+      effect: 4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
     optionalDependencies:
       discord-verify: 1.2.0
 
@@ -4900,7 +4924,7 @@ snapshots:
     dependencies:
       esutils: 2.0.3
 
-  effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132): {}
+  effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132): {}
 
   electron-to-chromium@1.5.467: {}
 
@@ -5007,17 +5031,17 @@ snapshots:
 
   flru@1.0.2: {}
 
-  foldkit@0.170.0(@effect/platform-browser@4.1.1(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)))(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)):
+  foldkit@0.170.0(@effect/platform-browser@4.1.2(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)))(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)):
     dependencies:
-      '@effect/platform-browser': 4.1.1(effect@4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
-      effect: 4.1.1(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
+      '@effect/platform-browser': 4.1.2(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+      effect: 4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
       parse5: 8.0.1
 
   for-in@1.0.2: {}
 
   frida-il2cpp-bridge@0.14.0: {}
 
-  frida@17.26.0:
+  frida@17.26.2:
     dependencies:
       bindings: 1.5.0
       minimatch: 10.2.6
@@ -5040,12 +5064,6 @@ snapshots:
   get-own-enumerable-property-symbols@3.0.2: {}
 
   github-from-package@0.0.0: {}
-
-  glob@13.0.6:
-    dependencies:
-      minimatch: 10.2.6
-      minipass: 7.1.3
-      path-scurry: 2.0.2
 
   glob@14.0.3:
     dependencies:
@@ -5469,11 +5487,6 @@ snapshots:
   path-browserify@1.0.1: {}
 
   path-parse@1.0.7: {}
-
-  path-scurry@2.0.2:
-    dependencies:
-      lru-cache: 11.5.3
-      minipass: 7.1.3
 
   path-scurry@3.0.0:
     dependencies:
@@ -5919,6 +5932,8 @@ snapshots:
   wrappy@1.0.2: {}
 
   ws@8.22.0: {}
+
+  ws@8.22.1: {}
 
   xtend@4.0.2: {}
 
