@@ -6,14 +6,15 @@ parent: "@tinyburg/tinyburg-sdk"
 
 ## index.ts overview
 
-The scopes an application can be granted over a player's games, as a tree.
+The scopes an application can be granted over a player's games.
 
-One area per game. Each splits into a `:read` and a `:write` branch with a
-leaf per endpoint beneath, so a player can grant exactly as much as an
-application asks for: `tinytower:read` for everything that only looks,
-`tinytower:pull_save` for one thing, `tinytower` for all of it. The tree is
-built with the same `defineArea` the TinyTower sdk uses for the authproxy's
-keys, so both catalogs have one shape and one set of rules.
+Each game has a scope for all of it, one for everything that only looks and
+one for everything that changes something, and one per endpoint, so a
+player can grant exactly as much as an application asks for: `tinytower`
+for all of it, `tinytower:read` for everything that only looks,
+`tinytower:pull_save` for one thing. An endpoint accepts its own scope, its
+side's and the game's, narrowest first:
+`{ anyOf: [TinyTower.PullSave, TinyTower.Read, TinyTower.Game] }`.
 
 These are OAuth scopes: a player approves them on the consent screen, and an
 application then acts on the player's linked accounts through tinyburg.app,
@@ -44,7 +45,7 @@ Re-exports all named exports from the "./Scopes.ts" module as `Scopes`.
 export * as Scopes from "./Scopes.ts"
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinyburg-sdk/src/index.ts#L22)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinyburg-sdk/src/index.ts#L23)
 
 Since v1.0.0
 
@@ -60,6 +61,6 @@ Re-exports all named exports from the "./Sdk.ts" module as `Sdk`.
 export * as Sdk from "./Sdk.ts"
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinyburg-sdk/src/index.ts#L51)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinyburg-sdk/src/index.ts#L52)
 
 Since v1.0.0

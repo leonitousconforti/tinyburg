@@ -63,13 +63,13 @@ export const SUPPORTED_SCOPES: ReadonlyArray<string> = ["openid", "profile", ...
 export const FIRST_PARTY_SCOPES: ReadonlySet<string> = new Set([
     "openid",
     "profile",
-    ...SERVED_GAMES.map((area) => area.name),
+    ...SERVED_GAMES.map((game) => game.Game.name),
     TreasuryScopes.Treasury.name,
 ]);
 
 /**
  * What the access tokens `/auth/token` mints for the first-party app carry:
- * the treasury's area, the one api the app calls with a token rather than
+ * the whole treasury scope, the one api the app calls with a token rather than
  * its session cookie, and `openid`, which the flow that mints them needs.
  * The token sits in page memory, where a script could lift it, so it opens
  * none of `/v1`'s towers (`push_save`, `receive_gift`, `send_item`).

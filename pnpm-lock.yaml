@@ -674,9 +674,6 @@ importers:
 
   packages/nimblebit-sdk:
     devDependencies:
-      '@yielded/auth':
-        specifier: 0.1.0-beta.47
-        version: 0.1.0-beta.47(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
       effect:
         specifier: 4.1.2
         version: 4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)

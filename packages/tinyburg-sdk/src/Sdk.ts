@@ -9,8 +9,8 @@
  * player has linked, so an application names which linked account it is
  * acting as (`:playerId`) and tinyburg.app makes the call to Nimblebit on the
  * player's behalf - if, and only if, the token carries a scope the endpoint
- * accepts. The scopes are the tree in `Scopes`, and every endpoint here is
- * annotated with the leaf that guards it.
+ * accepts. The scopes are in `Scopes`, and every endpoint here accepts its
+ * own scope, the game's `:read` or `:write` scope, and the whole game's.
  *
  * Every endpoint is bearer authenticated: an application presents the JWT
  * access token the Tinyburg OAuth server issued it for `<site>/v1`, checked
@@ -30,7 +30,6 @@ import { HttpApi, HttpApiEndpoint, HttpApiError, HttpApiGroup } from "effect/htt
 import * as Schema from "effect/Schema";
 
 import * as NimblebitConfig from "@tinyburg/nimblebit-sdk/NimblebitConfig";
-import * as NimblebitScopes from "@tinyburg/nimblebit-sdk/NimblebitScopes";
 import * as SyncItemType from "@tinyburg/tinytower-sdk/SyncItemType";
 import * as OAuthScope from "@yielded/auth/OAuthScope";
 
@@ -201,18 +200,21 @@ const TowerErrors = [HttpApiError.NotFound, HttpApiError.ServiceUnavailable] as 
  * The two groups of one game: the accounts a player has linked and linking
  * more, and everything a linked account can do in the game acting as that
  * account. Every game gets the same pair, at `/v1/<game>/...`, guarded by
- * that game's own area of the scope tree, so a client written for one game
- * is a client for every game, and a scope granted for one game grants
- * nothing in another.
+ * that game's own scopes, so a client written for one game is a client for
+ * every game, and a scope granted for one game grants nothing in another.
  *
  * The group annotation is the floor for anything added later without its
  * own: an unannotated endpoint accepts only the whole-game scope, so a new
  * endpoint cannot accidentally default to a weaker permission.
  */
-const gameGroups = <const Id extends string, const Path extends string>(id: Id, path: Path, game: Scopes.GameArea) => {
+const gameGroups = <const Id extends string, const Path extends string>(
+    id: Id,
+    path: Path,
+    game: Scopes.GameScopes
+) => {
     const ListAccounts = HttpApiEndpoint.get("ListAccounts", `/v1/${path}/accounts`, {
         success: Schema.Array(LinkedAccount),
-    }).annotate(OAuthScope.Required, game.read.list_accounts.required);
+    }).annotate(OAuthScope.Required, { anyOf: [game.ListAccounts, game.Read, game.Game] });
 
     /**
      * Starts linking: Nimblebit emails a verification code to the address the
@@ -226,7 +228,7 @@ const gameGroups = <const Id extends string, const Path extends string>(id: Id, 
         }),
         error: [HttpApiError.BadRequest, HttpApiError.Conflict, HttpApiError.ServiceUnavailable],
         success: Schema.Void,
-    }).annotate(OAuthScope.Required, game.write.link_account.required);
+    }).annotate(OAuthScope.Required, { anyOf: [game.LinkAccount, game.Write, game.Game] });
 
     /**
      * Finishes linking with the emailed code. `400` for a code that is wrong,
@@ -239,118 +241,118 @@ const gameGroups = <const Id extends string, const Path extends string>(id: Id, 
         }),
         error: [HttpApiError.BadRequest, HttpApiError.Conflict, HttpApiError.ServiceUnavailable],
         success: Schema.Void,
-    }).annotate(OAuthScope.Required, game.write.link_account.required);
+    }).annotate(OAuthScope.Required, { anyOf: [game.LinkAccount, game.Write, game.Game] });
 
     const UnlinkAccount = HttpApiEndpoint.delete("UnlinkAccount", `/v1/${path}/accounts/:playerId`, {
         params: { playerId },
         error: HttpApiError.NotFound,
         success: Schema.Void,
-    }).annotate(OAuthScope.Required, game.write.unlink_account.required);
+    }).annotate(OAuthScope.Required, { anyOf: [game.UnlinkAccount, game.Write, game.Game] });
 
     const PullSave = HttpApiEndpoint.get("PullSave", `/v1/${path}/:playerId/save`, {
         params: { playerId },
         error: TowerErrors,
         success: Save,
-    }).annotate(OAuthScope.Required, game.read.pull_save.required);
+    }).annotate(OAuthScope.Required, { anyOf: [game.PullSave, game.Read, game.Game] });
 
     const PushSave = HttpApiEndpoint.put("PushSave", `/v1/${path}/:playerId/save`, {
         params: { playerId },
         payload: SaveUpload,
         error: [...TowerErrors, HttpApiError.BadRequest],
         success: Schema.Void,
-    }).annotate(OAuthScope.Required, game.write.push_save.required);
+    }).annotate(OAuthScope.Required, { anyOf: [game.PushSave, game.Write, game.Game] });
 
     const CheckVersion = HttpApiEndpoint.get("CheckVersion", `/v1/${path}/:playerId/save/version`, {
         params: { playerId },
         error: TowerErrors,
         success: SaveVersion,
-    }).annotate(OAuthScope.Required, game.read.check_version.required);
+    }).annotate(OAuthScope.Required, { anyOf: [game.CheckVersion, game.Read, game.Game] });
 
     const ListSnapshots = HttpApiEndpoint.get("ListSnapshots", `/v1/${path}/:playerId/snapshots`, {
         params: { playerId },
         error: TowerErrors,
         success: Schema.Array(Snapshot),
-    }).annotate(OAuthScope.Required, game.read.list_snapshots.required);
+    }).annotate(OAuthScope.Required, { anyOf: [game.ListSnapshots, game.Read, game.Game] });
 
     const PushSnapshot = HttpApiEndpoint.post("PushSnapshot", `/v1/${path}/:playerId/snapshots`, {
         params: { playerId },
         payload: SaveUpload,
         error: [...TowerErrors, HttpApiError.BadRequest],
         success: Schema.Void,
-    }).annotate(OAuthScope.Required, game.write.push_snapshot.required);
+    }).annotate(OAuthScope.Required, { anyOf: [game.PushSnapshot, game.Write, game.Game] });
 
     const PullSnapshot = HttpApiEndpoint.get("PullSnapshot", `/v1/${path}/:playerId/snapshots/:snapshotId`, {
         params: { playerId, snapshotId: Schema.Int },
         error: TowerErrors,
         success: SnapshotData,
-    }).annotate(OAuthScope.Required, game.read.pull_snapshot.required);
+    }).annotate(OAuthScope.Required, { anyOf: [game.PullSnapshot, game.Read, game.Game] });
 
     const CheckRaffle = HttpApiEndpoint.get("CheckRaffle", `/v1/${path}/:playerId/raffle`, {
         params: { playerId },
         error: TowerErrors,
         success: RaffleStatus,
-    }).annotate(OAuthScope.Required, game.read.check_raffle.required);
+    }).annotate(OAuthScope.Required, { anyOf: [game.CheckRaffle, game.Read, game.Game] });
 
     const EnterRaffle = HttpApiEndpoint.post("EnterRaffle", `/v1/${path}/:playerId/raffle/enter`, {
         params: { playerId },
         error: TowerErrors,
         success: Schema.Void,
-    }).annotate(OAuthScope.Required, game.write.enter_raffle.required);
+    }).annotate(OAuthScope.Required, { anyOf: [game.EnterRaffle, game.Write, game.Game] });
 
     const EnterMultiRaffle = HttpApiEndpoint.post("EnterMultiRaffle", `/v1/${path}/:playerId/raffle/enter-multi`, {
         params: { playerId },
         error: TowerErrors,
         success: Schema.Void,
-    }).annotate(OAuthScope.Required, game.write.enter_multi_raffle.required);
+    }).annotate(OAuthScope.Required, { anyOf: [game.EnterMultiRaffle, game.Write, game.Game] });
 
     const GetPlayerDetails = HttpApiEndpoint.get("PlayerDetails", `/v1/${path}/:playerId/details`, {
         params: { playerId },
         error: TowerErrors,
         success: PlayerDetails,
-    }).annotate(OAuthScope.Required, game.read.player_details.required);
+    }).annotate(OAuthScope.Required, { anyOf: [game.PlayerDetails, game.Read, game.Game] });
 
     const ListGifts = HttpApiEndpoint.get("ListGifts", `/v1/${path}/:playerId/gifts`, {
         params: { playerId },
         error: TowerErrors,
         success: Gifts,
-    }).annotate(OAuthScope.Required, game.read.list_gifts.required);
+    }).annotate(OAuthScope.Required, { anyOf: [game.ListGifts, game.Read, game.Game] });
 
     const ReceiveGift = HttpApiEndpoint.post("ReceiveGift", `/v1/${path}/:playerId/gifts/:giftId/receive`, {
         params: { playerId, giftId: Schema.Int },
         error: TowerErrors,
         success: Schema.Void,
-    }).annotate(OAuthScope.Required, game.write.receive_gift.required);
+    }).annotate(OAuthScope.Required, { anyOf: [game.ReceiveGift, game.Write, game.Game] });
 
     const ListVisits = HttpApiEndpoint.get("ListVisits", `/v1/${path}/:playerId/visits`, {
         params: { playerId },
         error: TowerErrors,
         success: Gifts,
-    }).annotate(OAuthScope.Required, game.read.list_visits.required);
+    }).annotate(OAuthScope.Required, { anyOf: [game.ListVisits, game.Read, game.Game] });
 
     const SendItem = HttpApiEndpoint.post("SendItem", `/v1/${path}/:playerId/friends/:friendId/items`, {
         params: { playerId, friendId: playerId },
         payload: ItemToSend,
         error: TowerErrors,
         success: Schema.Void,
-    }).annotate(OAuthScope.Required, game.write.send_item.required);
+    }).annotate(OAuthScope.Required, { anyOf: [game.SendItem, game.Write, game.Game] });
 
     const Visit = HttpApiEndpoint.post("Visit", `/v1/${path}/:playerId/friends/:friendId/visit`, {
         params: { playerId, friendId: playerId },
         error: TowerErrors,
         success: Schema.Void,
-    }).annotate(OAuthScope.Required, game.write.visit.required);
+    }).annotate(OAuthScope.Required, { anyOf: [game.Visit, game.Write, game.Game] });
 
     const FriendMeta = HttpApiEndpoint.get("FriendMeta", `/v1/${path}/:playerId/friends/:friendId/meta`, {
         params: { playerId, friendId: playerId },
         error: TowerErrors,
         success: TowerMeta,
-    }).annotate(OAuthScope.Required, game.read.friend_meta.required);
+    }).annotate(OAuthScope.Required, { anyOf: [game.FriendMeta, game.Read, game.Game] });
 
     const FriendSave = HttpApiEndpoint.get("FriendSave", `/v1/${path}/:playerId/friends/:friendId/save`, {
         params: { playerId, friendId: playerId },
         error: TowerErrors,
         success: Save,
-    }).annotate(OAuthScope.Required, game.read.friend_save.required);
+    }).annotate(OAuthScope.Required, { anyOf: [game.FriendSave, game.Read, game.Game] });
 
     const FriendSnapshots = HttpApiEndpoint.get(
         "FriendSnapshots",
@@ -360,14 +362,14 @@ const gameGroups = <const Id extends string, const Path extends string>(id: Id, 
             error: TowerErrors,
             success: Schema.Array(FriendSnapshot),
         }
-    ).annotate(OAuthScope.Required, game.read.friend_snapshots.required);
+    ).annotate(OAuthScope.Required, { anyOf: [game.FriendSnapshots, game.Read, game.Game] });
 
     const accounts = HttpApiGroup.make(`${id}AccountsGroup`)
         .add(ListAccounts)
         .add(LinkAccount)
         .add(VerifyAccount)
         .add(UnlinkAccount)
-        .annotate(OAuthScope.Required, NimblebitScopes.requiredBy(game))
+        .annotate(OAuthScope.Required, { anyOf: [game.Game] })
         .middleware(OAuthScope.RequireAccess);
 
     const tower = HttpApiGroup.make(`${id}Group`)
@@ -389,7 +391,7 @@ const gameGroups = <const Id extends string, const Path extends string>(id: Id, 
         .add(FriendMeta)
         .add(FriendSave)
         .add(FriendSnapshots)
-        .annotate(OAuthScope.Required, NimblebitScopes.requiredBy(game))
+        .annotate(OAuthScope.Required, { anyOf: [game.Game] })
         .middleware(OAuthScope.RequireAccess);
 
     return { accounts, tower };

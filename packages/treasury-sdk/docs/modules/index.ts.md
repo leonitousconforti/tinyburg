@@ -6,7 +6,12 @@ parent: Modules
 
 ## index.ts overview
 
-The scopes the treasury api is guarded by, as one `treasury` area.
+The scopes the treasury api is guarded by: `treasury` for all of it,
+`treasury:read` and `treasury:write` for everything that only looks or that
+changes a trade, and one scope per endpoint, such as
+`treasury:list_trades`. An endpoint accepts its own scope, its side's and
+the whole treasury's, narrowest first:
+`{ anyOf: [ListTrades, Read, Treasury] }`.
 
 These guard the treasury's own api - proposing, accepting and watching
 trades - not the towers the trades move items between. Acting on a tower
@@ -15,10 +20,6 @@ tinyburg api under that game's own scopes, with a grant the player gives the
 treasury separately on the consent screen. Splitting the two means "let the
 treasury manage my trades" and "let the treasury touch my tower" are
 distinct questions with distinct answers.
-
-The area is built with the same `defineArea` every game's scopes are, so
-`Treasury.read.list_trades` is the leaf named `treasury:list_trades`, and
-`Treasury.read.list_trades.required` is what goes on the endpoint.
 
 Since v1.0.0
 
@@ -45,7 +46,7 @@ Re-exports all named exports from the "./Scopes.ts" module as `Scopes`.
 export * as Scopes from "./Scopes.ts"
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/treasury-sdk/src/index.ts#L23)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/treasury-sdk/src/index.ts#L24)
 
 Since v1.0.0
 
@@ -61,6 +62,6 @@ Re-exports all named exports from the "./Sdk.ts" module as `Sdk`.
 export * as Sdk from "./Sdk.ts"
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/treasury-sdk/src/index.ts#L52)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/treasury-sdk/src/index.ts#L54)
 
 Since v1.0.0

@@ -47,10 +47,15 @@ export * as BitCity from "./BitCity.ts"
 export * as Endpoints from "./Endpoints.ts"
 
 /**
- * The scopes the Bit City api is guarded by, as a game-rooted tree, built with
- * `@tinyburg/nimblebit-sdk`'s `defineGame`. Only the endpoints this sdk defines
- * are covered; areas without both a read and a write side are left out until
- * their endpoints exist.
+ * The scopes the Bit City api is guarded by: `bitcity` for the whole game,
+ * `bitcity:read` and `bitcity:write` for every endpoint that only looks or that
+ * changes a player's game, and one scope per endpoint, such as
+ * `bitcity:device:player_details`.
+ *
+ * Each endpoint accepts its own scope, its side's and the game's, narrowest
+ * first: `{ anyOf: [DevicePlayerDetails, Read, BitCity] }`. An endpoint this
+ * module has no scope for is left unscoped, and the authproxy guards it with
+ * `bitcity:read` or `bitcity`.
  *
  * @since 1.0.0
  * @category Scopes

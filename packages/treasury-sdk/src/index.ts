@@ -3,7 +3,12 @@
  */
 
 /**
- * The scopes the treasury api is guarded by, as one `treasury` area.
+ * The scopes the treasury api is guarded by: `treasury` for all of it,
+ * `treasury:read` and `treasury:write` for everything that only looks or that
+ * changes a trade, and one scope per endpoint, such as
+ * `treasury:list_trades`. An endpoint accepts its own scope, its side's and
+ * the whole treasury's, narrowest first:
+ * `{ anyOf: [ListTrades, Read, Treasury] }`.
  *
  * These guard the treasury's own api - proposing, accepting and watching
  * trades - not the towers the trades move items between. Acting on a tower
@@ -12,10 +17,6 @@
  * treasury separately on the consent screen. Splitting the two means "let the
  * treasury manage my trades" and "let the treasury touch my tower" are
  * distinct questions with distinct answers.
- *
- * The area is built with the same `defineArea` every game's scopes are, so
- * `Treasury.read.list_trades` is the leaf named `treasury:list_trades`, and
- * `Treasury.read.list_trades.required` is what goes on the endpoint.
  *
  * @since 1.0.0
  * @category Scopes
@@ -34,12 +35,13 @@ export * as Scopes from "./Scopes.ts"
  *
  * Every endpoint but the public stats and open offers is bearer
  * authenticated with a JWT access token the Tinyburg OAuth server issued for
- * the Tinyburg api (`<site>/v1`), and guarded by a leaf of the `treasury`
- * scope area in `Scopes`. The treasury lives behind tinyburg.app: the paths
- * here are reached at `<site>/v1/treasury/*`, which tinyburg.app forwards
- * verbatim, `Authorization` header included. The first-party app gets its
- * token from tinyburg.app's `/auth/token`; any other application uses the
- * one it was issued.
+ * the Tinyburg api (`<site>/v1`), and guarded by its own scope in `Scopes`,
+ * `treasury:read` or `treasury:write`, or the whole `treasury`. The treasury
+ * lives behind tinyburg.app: the paths here are reached at
+ * `<site>/v1/treasury/*`, which tinyburg.app forwards verbatim,
+ * `Authorization` header included. The first-party app gets its token from
+ * tinyburg.app's `/auth/token`; any other application uses the one it was
+ * issued.
  *
  * A token without the endpoint's scope is refused with `403` and an
  * `insufficient_scope` challenge. Any other `403` from a trade endpoint

@@ -99,7 +99,7 @@ export const DevicePlayerDetailsEndpoint = HttpApiEndpoint.get(
             }),
         ],
     }
-).annotate(OAuthScope.Required, Scopes.Device.read.player_details.required);
+).annotate(OAuthScope.Required, { anyOf: [Scopes.DevicePlayerDetails, Scopes.Read, Scopes.DiscoZoo] });
 
 /** @internal */
 export const DeviceVerifyDeviceEndpoint = HttpApiEndpoint.get(
@@ -120,7 +120,7 @@ export const DeviceVerifyDeviceEndpoint = HttpApiEndpoint.get(
             ),
         ],
     }
-).annotate(OAuthScope.Required, Scopes.Device.write.verify_device.required);
+).annotate(OAuthScope.Required, { anyOf: [Scopes.DeviceVerifyDevice, Scopes.Write, Scopes.DiscoZoo] });
 
 /**
  * Pull the player's cloud save. VERIFIED envelope (NBSyncGameSaveResponse). No-save
@@ -180,7 +180,7 @@ export const SocialGetItemsEndpoint = HttpApiEndpoint.get("SocialGetItems", "/ge
         NotFoundResponse,
         Schema.Struct({ success: Schema.Literal("Found"), gifts: Schema.Array(Gift) }),
     ],
-}).annotate(OAuthScope.Required, Scopes.Social.read.get_items.required);
+}).annotate(OAuthScope.Required, { anyOf: [Scopes.SocialGetItems, Scopes.Read, Scopes.DiscoZoo] });
 
 /**
  * DERIVED from Tiny Tower. Sends an item to a friend. Response VERIFIED
@@ -203,7 +203,7 @@ export const SocialSendItemEndpoint = HttpApiEndpoint.post(
         error: ApiErrors,
         success: [ErrorResponse, SentResponse, NotSentResponse],
     }
-).annotate(OAuthScope.Required, Scopes.Social.write.send_item.required);
+).annotate(OAuthScope.Required, { anyOf: [Scopes.SocialSendItem, Scopes.Write, Scopes.DiscoZoo] });
 
 /**
  * VERIFIED envelope (NBSyncFriendGameSaveResponse); preimage
@@ -234,7 +234,7 @@ export const SocialPullFriendGameEndpoint = HttpApiEndpoint.get(
             }).pipe(Schema.encodeKeys({ checksum: "h", saveId: "id", playerId: "player_id" })),
         ],
     }
-).annotate(OAuthScope.Required, Scopes.Social.read.pull_friend_game.required);
+).annotate(OAuthScope.Required, { anyOf: [Scopes.SocialPullFriendGame, Scopes.Read, Scopes.DiscoZoo] });
 
 /**
  * VERIFIED envelope (NBSyncFriendGameMetaResponse; `meta` is a flat
@@ -258,7 +258,7 @@ export const SocialPullFriendMetaEndpoint = HttpApiEndpoint.post(
             }),
         ],
     }
-).annotate(OAuthScope.Required, Scopes.Social.read.pull_friend_meta.required);
+).annotate(OAuthScope.Required, { anyOf: [Scopes.SocialPullFriendMeta, Scopes.Read, Scopes.DiscoZoo] });
 
 /**
  * VERIFIED path: `/get_visits/dz/:playerId/:salt/:hash`. Same envelope as get_items.
@@ -273,7 +273,7 @@ export const SocialGetVisitsEndpoint = HttpApiEndpoint.get("SocialGetVisits", "/
         NotFoundResponse,
         Schema.Struct({ success: Schema.Literal("Found"), gifts: Schema.Array(Gift) }),
     ],
-}).annotate(OAuthScope.Required, Scopes.Social.read.get_visits.required);
+}).annotate(OAuthScope.Required, { anyOf: [Scopes.SocialGetVisits, Scopes.Read, Scopes.DiscoZoo] });
 
 /**
  * Preimage `dz/<playerId>/<giftId>/<salt><playerAuthKey>`. Response DTO
@@ -293,7 +293,7 @@ export const SocialReceiveItemEndpoint = HttpApiEndpoint.get(
             Schema.Struct({ success: Schema.Literal("NotReceived") }),
         ],
     }
-).annotate(OAuthScope.Required, Scopes.Social.write.receive_item.required);
+).annotate(OAuthScope.Required, { anyOf: [Scopes.SocialReceiveItem, Scopes.Write, Scopes.DiscoZoo] });
 
 /** @internal */
 export const DeviceManagementGroup = HttpApiGroup.make("DeviceManagementGroup")

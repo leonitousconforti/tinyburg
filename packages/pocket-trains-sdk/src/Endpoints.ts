@@ -113,7 +113,7 @@ export const DevicePlayerDetailsEndpoint = HttpApiEndpoint.get(
             }),
         ],
     }
-).annotate(OAuthScope.Required, Scopes.Device.read.player_details.required);
+).annotate(OAuthScope.Required, { anyOf: [Scopes.DevicePlayerDetails, Scopes.Read, Scopes.PocketTrains] });
 
 /** @internal */
 export const DeviceVerifyDeviceEndpoint = HttpApiEndpoint.get(
@@ -134,7 +134,7 @@ export const DeviceVerifyDeviceEndpoint = HttpApiEndpoint.get(
             ),
         ],
     }
-).annotate(OAuthScope.Required, Scopes.Device.write.verify_device.required);
+).annotate(OAuthScope.Required, { anyOf: [Scopes.DeviceVerifyDevice, Scopes.Write, Scopes.PocketTrains] });
 
 /**
  * Pull the player's cloud save. VERIFIED envelope (NBSyncGameSaveResponse). No-save
@@ -194,7 +194,7 @@ export const SocialGetItemsEndpoint = HttpApiEndpoint.get("SocialGetItems", "/ge
         NotFoundResponse,
         Schema.Struct({ success: Schema.Literal("Found"), gifts: Schema.Array(Gift) }),
     ],
-}).annotate(OAuthScope.Required, Scopes.Social.read.get_items.required);
+}).annotate(OAuthScope.Required, { anyOf: [Scopes.SocialGetItems, Scopes.Read, Scopes.PocketTrains] });
 
 /**
  * Pocket Trains gift channel. Response VERIFIED (NBSyncGetPTGiftResponse) but the
@@ -217,7 +217,7 @@ export const SocialGetGiftsPtEndpoint = HttpApiEndpoint.get(
             Schema.Struct({ success: Schema.Literal("Found"), gifts: Schema.Array(PTGift) }),
         ],
     }
-).annotate(OAuthScope.Required, Scopes.Social.read.get_gifts_pt.required);
+).annotate(OAuthScope.Required, { anyOf: [Scopes.SocialGetGiftsPt, Scopes.Read, Scopes.PocketTrains] });
 
 /**
  * DERIVED from Tiny Tower. Sends an item to a friend. Response VERIFIED
@@ -240,7 +240,7 @@ export const SocialSendItemEndpoint = HttpApiEndpoint.post(
         error: ApiErrors,
         success: [ErrorResponse, SentResponse, NotSentResponse],
     }
-).annotate(OAuthScope.Required, Scopes.Social.write.send_item.required);
+).annotate(OAuthScope.Required, { anyOf: [Scopes.SocialSendItem, Scopes.Write, Scopes.PocketTrains] });
 
 /**
  * VERIFIED envelope (NBSyncFriendGameSaveResponse); preimage
@@ -271,7 +271,7 @@ export const SocialPullFriendGameEndpoint = HttpApiEndpoint.get(
             }).pipe(Schema.encodeKeys({ checksum: "h", saveId: "id", playerId: "player_id" })),
         ],
     }
-).annotate(OAuthScope.Required, Scopes.Social.read.pull_friend_game.required);
+).annotate(OAuthScope.Required, { anyOf: [Scopes.SocialPullFriendGame, Scopes.Read, Scopes.PocketTrains] });
 
 /**
  * VERIFIED envelope (NBSyncFriendGameMetaResponse; `meta` is a flat
@@ -295,7 +295,7 @@ export const SocialPullFriendMetaEndpoint = HttpApiEndpoint.post(
             }),
         ],
     }
-).annotate(OAuthScope.Required, Scopes.Social.read.pull_friend_meta.required);
+).annotate(OAuthScope.Required, { anyOf: [Scopes.SocialPullFriendMeta, Scopes.Read, Scopes.PocketTrains] });
 
 /** @internal */
 export const DeviceManagementGroup = HttpApiGroup.make("DeviceManagementGroup")

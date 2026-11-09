@@ -10,12 +10,13 @@
  *
  * Every endpoint but the public stats and open offers is bearer
  * authenticated with a JWT access token the Tinyburg OAuth server issued for
- * the Tinyburg api (`<site>/v1`), and guarded by a leaf of the `treasury`
- * scope area in `Scopes`. The treasury lives behind tinyburg.app: the paths
- * here are reached at `<site>/v1/treasury/*`, which tinyburg.app forwards
- * verbatim, `Authorization` header included. The first-party app gets its
- * token from tinyburg.app's `/auth/token`; any other application uses the
- * one it was issued.
+ * the Tinyburg api (`<site>/v1`), and guarded by its own scope in `Scopes`,
+ * `treasury:read` or `treasury:write`, or the whole `treasury`. The treasury
+ * lives behind tinyburg.app: the paths here are reached at
+ * `<site>/v1/treasury/*`, which tinyburg.app forwards verbatim,
+ * `Authorization` header included. The first-party app gets its token from
+ * tinyburg.app's `/auth/token`; any other application uses the one it was
+ * issued.
  *
  * A token without the endpoint's scope is refused with `403` and an
  * `insufficient_scope` challenge. Any other `403` from a trade endpoint
@@ -30,7 +31,6 @@ import { HttpApi, HttpApiEndpoint, HttpApiError, HttpApiGroup } from "effect/htt
 import * as Schema from "effect/Schema";
 
 import * as NimblebitConfig from "@tinyburg/nimblebit-sdk/NimblebitConfig";
-import * as NimblebitScopes from "@tinyburg/nimblebit-sdk/NimblebitScopes";
 import * as SyncItemType from "@tinyburg/tinytower-sdk/SyncItemType";
 import * as OAuthScope from "@yielded/auth/OAuthScope";
 
@@ -317,48 +317,48 @@ const TradeErrors = [
 
 const GetGrantStatus = HttpApiEndpoint.get("GrantStatus", "/v1/treasury/grant", {
     success: GrantStatus,
-}).annotate(OAuthScope.Required, Scopes.Treasury.read.grant_status.required);
+}).annotate(OAuthScope.Required, { anyOf: [Scopes.GrantStatus, Scopes.Read, Scopes.Treasury] });
 
 const ListTrades = HttpApiEndpoint.get("ListTrades", "/v1/treasury/trades", {
     success: Schema.Array(Trade),
-}).annotate(OAuthScope.Required, Scopes.Treasury.read.list_trades.required);
+}).annotate(OAuthScope.Required, { anyOf: [Scopes.ListTrades, Scopes.Read, Scopes.Treasury] });
 
 const GetTrade = HttpApiEndpoint.get("GetTrade", "/v1/treasury/trades/:tradeId", {
     params: { tradeId },
     error: HttpApiError.NotFound,
     success: TradeDetail,
-}).annotate(OAuthScope.Required, Scopes.Treasury.read.get_trade.required);
+}).annotate(OAuthScope.Required, { anyOf: [Scopes.GetTrade, Scopes.Read, Scopes.Treasury] });
 
 const ProposeTrade = HttpApiEndpoint.post("ProposeTrade", "/v1/treasury/trades", {
     payload: TradeProposal,
     error: [HttpApiError.BadRequest, HttpApiError.Forbidden, HttpApiError.ServiceUnavailable],
     success: Trade,
-}).annotate(OAuthScope.Required, Scopes.Treasury.write.propose.required);
+}).annotate(OAuthScope.Required, { anyOf: [Scopes.Propose, Scopes.Write, Scopes.Treasury] });
 
 const AcceptTrade = HttpApiEndpoint.post("AcceptTrade", "/v1/treasury/trades/:tradeId/accept", {
     params: { tradeId },
     payload: Schema.Struct({ playerId }),
     error: TradeErrors,
     success: Trade,
-}).annotate(OAuthScope.Required, Scopes.Treasury.write.accept.required);
+}).annotate(OAuthScope.Required, { anyOf: [Scopes.Accept, Scopes.Write, Scopes.Treasury] });
 
 const CancelTrade = HttpApiEndpoint.post("CancelTrade", "/v1/treasury/trades/:tradeId/cancel", {
     params: { tradeId },
     error: [HttpApiError.NotFound, HttpApiError.Conflict],
     success: Trade,
-}).annotate(OAuthScope.Required, Scopes.Treasury.write.cancel.required);
+}).annotate(OAuthScope.Required, { anyOf: [Scopes.Cancel, Scopes.Write, Scopes.Treasury] });
 
 const ConfirmSplice = HttpApiEndpoint.post("ConfirmSplice", "/v1/treasury/trades/:tradeId/confirm", {
     params: { tradeId },
     error: [HttpApiError.NotFound, HttpApiError.Conflict],
     success: Trade,
-}).annotate(OAuthScope.Required, Scopes.Treasury.write.confirm_splice.required);
+}).annotate(OAuthScope.Required, { anyOf: [Scopes.ConfirmSplice, Scopes.Write, Scopes.Treasury] });
 
 const ListInventory = HttpApiEndpoint.get("ListInventory", "/v1/treasury/inventory/:playerId", {
     params: { playerId },
     error: [HttpApiError.NotFound, HttpApiError.Forbidden, HttpApiError.ServiceUnavailable],
     success: Inventory,
-}).annotate(OAuthScope.Required, Scopes.Treasury.read.list_inventory.required);
+}).annotate(OAuthScope.Required, { anyOf: [Scopes.ListInventory, Scopes.Read, Scopes.Treasury] });
 
 const GetStats = HttpApiEndpoint.get("Stats", "/v1/treasury/stats", {
     success: TreasuryStats,
@@ -374,7 +374,7 @@ const ListOpenOffers = HttpApiEndpoint.get("OpenOffers", "/v1/treasury/offers", 
 
 /**
  * Everything the treasury serves. The group annotation is the floor: an
- * endpoint added later without its own leaf accepts only the whole
+ * endpoint added later without its own scope accepts only the whole
  * `treasury` scope, so nothing defaults to a weaker permission.
  *
  * @since 1.0.0
@@ -389,7 +389,7 @@ export const TreasuryGroup = HttpApiGroup.make("TreasuryGroup")
     .add(CancelTrade)
     .add(ConfirmSplice)
     .add(ListInventory)
-    .annotate(OAuthScope.Required, NimblebitScopes.requiredBy(Scopes.Treasury))
+    .annotate(OAuthScope.Required, { anyOf: [Scopes.Treasury] })
     .middleware(OAuthScope.RequireAccess);
 
 /**

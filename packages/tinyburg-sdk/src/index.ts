@@ -3,14 +3,15 @@
  */
 
 /**
- * The scopes an application can be granted over a player's games, as a tree.
+ * The scopes an application can be granted over a player's games.
  *
- * One area per game. Each splits into a `:read` and a `:write` branch with a
- * leaf per endpoint beneath, so a player can grant exactly as much as an
- * application asks for: `tinytower:read` for everything that only looks,
- * `tinytower:pull_save` for one thing, `tinytower` for all of it. The tree is
- * built with the same `defineArea` the TinyTower sdk uses for the authproxy's
- * keys, so both catalogs have one shape and one set of rules.
+ * Each game has a scope for all of it, one for everything that only looks and
+ * one for everything that changes something, and one per endpoint, so a
+ * player can grant exactly as much as an application asks for: `tinytower`
+ * for all of it, `tinytower:read` for everything that only looks,
+ * `tinytower:pull_save` for one thing. An endpoint accepts its own scope, its
+ * side's and the game's, narrowest first:
+ * `{ anyOf: [TinyTower.PullSave, TinyTower.Read, TinyTower.Game] }`.
  *
  * These are OAuth scopes: a player approves them on the consent screen, and an
  * application then acts on the player's linked accounts through tinyburg.app,
@@ -32,8 +33,8 @@ export * as Scopes from "./Scopes.ts"
  * player has linked, so an application names which linked account it is
  * acting as (`:playerId`) and tinyburg.app makes the call to Nimblebit on the
  * player's behalf - if, and only if, the token carries a scope the endpoint
- * accepts. The scopes are the tree in `Scopes`, and every endpoint here is
- * annotated with the leaf that guards it.
+ * accepts. The scopes are in `Scopes`, and every endpoint here accepts its
+ * own scope, the game's `:read` or `:write` scope, and the whole game's.
  *
  * Every endpoint is bearer authenticated: an application presents the JWT
  * access token the Tinyburg OAuth server issued it for `<site>/v1`, checked

@@ -27,12 +27,27 @@ import { Context, Effect, Layer, Redacted } from "effect";
 import { HttpEffect, HttpServerResponse } from "effect/http";
 import { HttpApiError } from "effect/http-api";
 
-import * as NimblebitScopes from "@tinyburg/nimblebit-sdk/NimblebitScopes";
 import * as OAuthScope from "@yielded/auth/OAuthScope";
 import * as OAuthServer from "@yielded/auth/OAuthServer";
 import * as Jwks from "@yielded/jose/Jwks";
 
 import { TinyburgProvider } from "../services/provider.ts";
+
+/**
+ * Whether holding `held` satisfies `requirement`, by name, exactly as
+ * `@yielded/auth`'s OAuth server checks a token: every `allOf` scope held
+ * and, when `anyOf` is present, at least one of those. A requirement with
+ * neither, or with an empty `anyOf`, is satisfied by nothing.
+ */
+const isSatisfied = (requirement: OAuthScope.Requirement, held: ReadonlySet<string>): boolean => {
+    const holds = (entry: OAuthScope.OAuthScope | OAuthScope.Described) =>
+        held.has(typeof entry === "string" ? entry : entry.name);
+    return (
+        (requirement.allOf !== undefined || requirement.anyOf !== undefined) &&
+        (requirement.allOf ?? []).every(holds) &&
+        (requirement.anyOf === undefined || requirement.anyOf.some(holds))
+    );
+};
 
 /** Who an api request acts for: the user, and the application acting for them. */
 export interface Trader {
@@ -105,7 +120,7 @@ export const RequireAccessLive = Layer.effect(
                 // `anyOf` one, the narrowest alternative, as the OAuth server's
                 // own challenges do.
                 const advertised = [...(requirement.allOf ?? []), ...(requirement.anyOf ?? []).slice(0, 1)]
-                    .map(NimblebitScopes.entryName)
+                    .map((entry) => (typeof entry === "string" ? entry : entry.name))
                     .join(" ");
 
                 const deny = (
@@ -142,7 +157,7 @@ export const RequireAccessLive = Layer.effect(
                 if (verified._tag === "Unavailable") return yield* new HttpApiError.ServiceUnavailable();
 
                 const held: ReadonlySet<string> = new Set(verified.access.scopes);
-                if (!NimblebitScopes.isSatisfied(requirement, held)) {
+                if (!isSatisfied(requirement, held)) {
                     return yield* deny(new HttpApiError.Forbidden(), "insufficient_scope");
                 }
 

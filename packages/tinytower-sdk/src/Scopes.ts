@@ -1,183 +1,212 @@
 /**
- * The scopes the TinyTower api is guarded by, as a tree.
+ * The scopes the TinyTower api is guarded by: `tinytower` for the whole game,
+ * `tinytower:read` and `tinytower:write` for every endpoint that only looks or
+ * that changes a player's game, and one scope per endpoint, such as
+ * `tinytower:device:player_details`.
  *
- * The machinery that builds the tree - {@link defineGame}, {@link defineArea}
- * and the {@link Leaf}/{@link Branch}/{@link Area}/{@link Game} types - lives in
- * `@tinyburg/nimblebit-sdk/NimblebitScopes`, because every game's sdk builds the
- * same shape and none of them should need TinyTower to do it. It is re-exported
- * here so this module stays the one place a TinyTower consumer has to look.
- *
- * What is TinyTower's own is below: the areas of its api, and the game built
- * from them. `Sync.read.pull_save` is the leaf named `tinytower:sync:pull_save`,
- * and `Sync.read.pull_save.required` is what goes on the endpoint.
+ * Each endpoint accepts its own scope, its side's and the game's, narrowest
+ * first: `{ anyOf: [DevicePlayerDetails, Read, TinyTower] }`.
  *
  * @since 1.0.0
  * @category Scopes
  */
 
-import { type Game, type ScopeDescription, defineGame } from "@tinyburg/nimblebit-sdk/NimblebitScopes";
-
-export {
-    /**
-     * @since 1.0.0
-     * @category Models
-     */
-    type Area,
-    /**
-     * @since 1.0.0
-     * @category Models
-     */
-    type Branch,
-    /**
-     * @since 1.0.0
-     * @category Models
-     */
-    type Game,
-    /**
-     * @since 1.0.0
-     * @category Models
-     */
-    type Leaf,
-    /**
-     * @since 1.0.0
-     * @category Constructors
-     */
-    defineArea,
-    /**
-     * @since 1.0.0
-     * @category Constructors
-     */
-    defineGame,
-} from "@tinyburg/nimblebit-sdk/NimblebitScopes";
-
-/**
- * The areas of the TinyTower api, as {@link defineGame} takes them. Exported
- * on their own because TinyTower Classic is the same api under another game
- * code, and its scope tree is these same areas under another name.
- *
- * @since 1.0.0
- * @category Games
- */
-export const TinyTowerAreas = {
-    device: {
-        description: "Player accounts and their devices",
-        read: {
-            description: "Look up player accounts",
-            leaves: {
-                player_details: "Look up a player's public profile details",
-            },
-        },
-        write: {
-            description: "Change a player's account or devices",
-            leaves: {
-                register_email: "Attach an email address to a player",
-                verify_device: "Complete a device verification code",
-            },
-        },
-    },
-    sync: {
-        description: "Tower saves and cloud snapshots",
-        read: {
-            description: "Download saves and snapshots",
-            leaves: {
-                pull_save: "Download a tower's current save data",
-                check_version: "Check the current version of a tower's save",
-                pull_snapshot: "Download a specific cloud snapshot",
-                list_snapshots: "List the cloud snapshots a tower has",
-            },
-        },
-        write: {
-            description: "Upload saves and snapshots",
-            leaves: {
-                push_save: "Upload save data to a tower",
-                push_snapshot: "Upload a cloud snapshot",
-            },
-        },
-    },
-    raffle: {
-        description: "The daily raffle",
-        read: {
-            description: "Check raffle entries",
-            leaves: {
-                check_entered: "Check whether a player entered the current raffle",
-            },
-        },
-        write: {
-            description: "Enter raffles",
-            leaves: {
-                enter: "Enter a player into the raffle",
-                enter_multi: "Enter a player into multiple raffles",
-            },
-        },
-    },
-    social: {
-        description: "Gifts, visits and friends",
-        read: {
-            description: "See gifts, visits and friends' towers",
-            leaves: {
-                get_gifts: "See the gifts waiting for a player",
-                get_visits: "See who has visited a tower",
-                pull_friend_meta: "Fetch metadata about a player's friends",
-                pull_friend_tower: "Download a friend's tower data",
-                list_friend_snapshots: "List the cloud snapshots a friend's tower has",
-            },
-        },
-        write: {
-            description: "Send and accept gifts and items",
-            leaves: {
-                send_item: "Send bitizens and items to another player",
-                receive_gift: "Accept a gift on a player's behalf",
-            },
-        },
-    },
-} as const;
+import * as OAuthScope from "@yielded/auth/OAuthScope";
 
 /**
  * @since 1.0.0
- * @category Games
+ * @category Game
  */
-export const TinyTower = defineGame({
-    name: "tinytower",
+export const TinyTower: OAuthScope.Described = {
+    name: OAuthScope.make("tinytower"),
     description: "TinyTower",
-    read: { description: "Everything in TinyTower that only looks" },
-    write: { description: "Everything in TinyTower that changes a player's game" },
-    areas: TinyTowerAreas,
-});
+};
 
 /**
- * The game's areas, by name, for annotating endpoints:
- * `Sync.read.pull_save.required`.
- *
  * @since 1.0.0
- * @category Areas
+ * @category Game
  */
-export const { device: Device, raffle: Raffle, social: Social, sync: Sync } = TinyTower.areas;
+export const Read: OAuthScope.Described = {
+    name: OAuthScope.make("tinytower:read"),
+    description: "Everything in TinyTower that only looks",
+};
 
 /**
- * Every game, in the order a dashboard should list them.
- *
  * @since 1.0.0
- * @category Tree
+ * @category Game
  */
-export const Games: ReadonlyArray<Game> = [TinyTower];
+export const Write: OAuthScope.Described = {
+    name: OAuthScope.make("tinytower:write"),
+    description: "Everything in TinyTower that changes a player's game",
+};
 
 /**
- * Every scope in the tree: each game, its two branches, then each of its
- * areas with the area's branches and their leaves, in declaration order.
- *
  * @since 1.0.0
- * @category Tree
+ * @category Endpoints
  */
-export const all = (): ReadonlyArray<ScopeDescription> =>
-    Games.flatMap((game) => [
-        game,
-        game.read,
-        game.write,
-        ...Object.values(game.areas).flatMap((area) => [
-            area,
-            area.read,
-            ...area.read.children,
-            area.write,
-            ...area.write.children,
-        ]),
-    ]);
+export const DevicePlayerDetails: OAuthScope.Described = {
+    name: OAuthScope.make("tinytower:device:player_details"),
+    description: "Look up a player's public profile details",
+};
+
+/**
+ * @since 1.0.0
+ * @category Endpoints
+ */
+export const DeviceRegisterEmail: OAuthScope.Described = {
+    name: OAuthScope.make("tinytower:device:register_email"),
+    description: "Attach an email address to a player",
+};
+
+/**
+ * @since 1.0.0
+ * @category Endpoints
+ */
+export const DeviceVerifyDevice: OAuthScope.Described = {
+    name: OAuthScope.make("tinytower:device:verify_device"),
+    description: "Complete a device verification code",
+};
+
+/**
+ * @since 1.0.0
+ * @category Endpoints
+ */
+export const SyncPullSave: OAuthScope.Described = {
+    name: OAuthScope.make("tinytower:sync:pull_save"),
+    description: "Download a tower's current save data",
+};
+
+/**
+ * @since 1.0.0
+ * @category Endpoints
+ */
+export const SyncCheckVersion: OAuthScope.Described = {
+    name: OAuthScope.make("tinytower:sync:check_version"),
+    description: "Check the current version of a tower's save",
+};
+
+/**
+ * @since 1.0.0
+ * @category Endpoints
+ */
+export const SyncPullSnapshot: OAuthScope.Described = {
+    name: OAuthScope.make("tinytower:sync:pull_snapshot"),
+    description: "Download a specific cloud snapshot",
+};
+
+/**
+ * @since 1.0.0
+ * @category Endpoints
+ */
+export const SyncListSnapshots: OAuthScope.Described = {
+    name: OAuthScope.make("tinytower:sync:list_snapshots"),
+    description: "List the cloud snapshots a tower has",
+};
+
+/**
+ * @since 1.0.0
+ * @category Endpoints
+ */
+export const SyncPushSave: OAuthScope.Described = {
+    name: OAuthScope.make("tinytower:sync:push_save"),
+    description: "Upload save data to a tower",
+};
+
+/**
+ * @since 1.0.0
+ * @category Endpoints
+ */
+export const SyncPushSnapshot: OAuthScope.Described = {
+    name: OAuthScope.make("tinytower:sync:push_snapshot"),
+    description: "Upload a cloud snapshot",
+};
+
+/**
+ * @since 1.0.0
+ * @category Endpoints
+ */
+export const RaffleCheckEntered: OAuthScope.Described = {
+    name: OAuthScope.make("tinytower:raffle:check_entered"),
+    description: "Check whether a player entered the current raffle",
+};
+
+/**
+ * @since 1.0.0
+ * @category Endpoints
+ */
+export const RaffleEnter: OAuthScope.Described = {
+    name: OAuthScope.make("tinytower:raffle:enter"),
+    description: "Enter a player into the raffle",
+};
+
+/**
+ * @since 1.0.0
+ * @category Endpoints
+ */
+export const RaffleEnterMulti: OAuthScope.Described = {
+    name: OAuthScope.make("tinytower:raffle:enter_multi"),
+    description: "Enter a player into multiple raffles",
+};
+
+/**
+ * @since 1.0.0
+ * @category Endpoints
+ */
+export const SocialGetGifts: OAuthScope.Described = {
+    name: OAuthScope.make("tinytower:social:get_gifts"),
+    description: "See the gifts waiting for a player",
+};
+
+/**
+ * @since 1.0.0
+ * @category Endpoints
+ */
+export const SocialGetVisits: OAuthScope.Described = {
+    name: OAuthScope.make("tinytower:social:get_visits"),
+    description: "See who has visited a tower",
+};
+
+/**
+ * @since 1.0.0
+ * @category Endpoints
+ */
+export const SocialPullFriendMeta: OAuthScope.Described = {
+    name: OAuthScope.make("tinytower:social:pull_friend_meta"),
+    description: "Fetch metadata about a player's friends",
+};
+
+/**
+ * @since 1.0.0
+ * @category Endpoints
+ */
+export const SocialPullFriendTower: OAuthScope.Described = {
+    name: OAuthScope.make("tinytower:social:pull_friend_tower"),
+    description: "Download a friend's tower data",
+};
+
+/**
+ * @since 1.0.0
+ * @category Endpoints
+ */
+export const SocialListFriendSnapshots: OAuthScope.Described = {
+    name: OAuthScope.make("tinytower:social:list_friend_snapshots"),
+    description: "List the cloud snapshots a friend's tower has",
+};
+
+/**
+ * @since 1.0.0
+ * @category Endpoints
+ */
+export const SocialSendItem: OAuthScope.Described = {
+    name: OAuthScope.make("tinytower:social:send_item"),
+    description: "Send bitizens and items to another player",
+};
+
+/**
+ * @since 1.0.0
+ * @category Endpoints
+ */
+export const SocialReceiveGift: OAuthScope.Described = {
+    name: OAuthScope.make("tinytower:social:receive_gift"),
+    description: "Accept a gift on a player's behalf",
+};

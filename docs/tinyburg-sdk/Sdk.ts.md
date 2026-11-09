@@ -16,8 +16,8 @@ consent screen. tinyburg.app holds the game credentials for every account a
 player has linked, so an application names which linked account it is
 acting as (`:playerId`) and tinyburg.app makes the call to Nimblebit on the
 player's behalf - if, and only if, the token carries a scope the endpoint
-accepts. The scopes are the tree in `Scopes`, and every endpoint here is
-annotated with the leaf that guards it.
+accepts. The scopes are in `Scopes`, and every endpoint here accepts its
+own scope, the game's `:read` or `:write` scope, and the whole game's.
 
 Every endpoint is bearer authenticated: an application presents the JWT
 access token the Tinyburg OAuth server issued it for `<site>/v1`, checked
@@ -336,6 +336,8 @@ declare const Api: HttpApi.HttpApi<
                     readonly Raffle: "Raffle"
                     readonly Visit: "Visit"
                     readonly Leaderboards: "Leaderboards"
+                    readonly Promo: "Promo"
+                    readonly Referral: "Referral"
                   }>
                   readonly contents: Schema.String
                 }>
@@ -385,6 +387,8 @@ declare const Api: HttpApi.HttpApi<
                     readonly Raffle: "Raffle"
                     readonly Visit: "Visit"
                     readonly Leaderboards: "Leaderboards"
+                    readonly Promo: "Promo"
+                    readonly Referral: "Referral"
                   }>
                   readonly contents: Schema.String
                 }>
@@ -416,6 +420,8 @@ declare const Api: HttpApi.HttpApi<
                 readonly Raffle: "Raffle"
                 readonly Visit: "Visit"
                 readonly Leaderboards: "Leaderboards"
+                readonly Promo: "Promo"
+                readonly Referral: "Referral"
               }>
               readonly item: Schema.String
             }>
@@ -767,6 +773,8 @@ declare const Api: HttpApi.HttpApi<
                     readonly Raffle: "Raffle"
                     readonly Visit: "Visit"
                     readonly Leaderboards: "Leaderboards"
+                    readonly Promo: "Promo"
+                    readonly Referral: "Referral"
                   }>
                   readonly contents: Schema.String
                 }>
@@ -816,6 +824,8 @@ declare const Api: HttpApi.HttpApi<
                     readonly Raffle: "Raffle"
                     readonly Visit: "Visit"
                     readonly Leaderboards: "Leaderboards"
+                    readonly Promo: "Promo"
+                    readonly Referral: "Referral"
                   }>
                   readonly contents: Schema.String
                 }>
@@ -847,6 +857,8 @@ declare const Api: HttpApi.HttpApi<
                 readonly Raffle: "Raffle"
                 readonly Visit: "Visit"
                 readonly Leaderboards: "Leaderboards"
+                readonly Promo: "Promo"
+                readonly Referral: "Referral"
               }>
               readonly item: Schema.String
             }>
@@ -946,7 +958,7 @@ declare const Api: HttpApi.HttpApi<
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinyburg-sdk/src/Sdk.ts#L509)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinyburg-sdk/src/Sdk.ts#L511)
 
 Since v1.0.0
 
@@ -1034,7 +1046,7 @@ declare const BitCityAccountsGroup: HttpApiGroup.HttpApiGroup<
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinyburg-sdk/src/Sdk.ts#L488)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinyburg-sdk/src/Sdk.ts#L490)
 
 Since v1.0.0
 
@@ -1120,7 +1132,7 @@ declare const DiscoZooAccountsGroup: HttpApiGroup.HttpApiGroup<
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinyburg-sdk/src/Sdk.ts#L479)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinyburg-sdk/src/Sdk.ts#L481)
 
 Since v1.0.0
 
@@ -1206,7 +1218,7 @@ declare const LegoTowerAccountsGroup: HttpApiGroup.HttpApiGroup<
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinyburg-sdk/src/Sdk.ts#L470)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinyburg-sdk/src/Sdk.ts#L472)
 
 Since v1.0.0
 
@@ -1292,7 +1304,7 @@ declare const PocketPlanesAccountsGroup: HttpApiGroup.HttpApiGroup<
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinyburg-sdk/src/Sdk.ts#L452)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinyburg-sdk/src/Sdk.ts#L454)
 
 Since v1.0.0
 
@@ -1378,7 +1390,7 @@ declare const PocketTrainsAccountsGroup: HttpApiGroup.HttpApiGroup<
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinyburg-sdk/src/Sdk.ts#L461)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinyburg-sdk/src/Sdk.ts#L463)
 
 Since v1.0.0
 
@@ -1463,7 +1475,7 @@ declare const TinyTowerAccountsGroup: HttpApiGroup.HttpApiGroup<
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinyburg-sdk/src/Sdk.ts#L417)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinyburg-sdk/src/Sdk.ts#L419)
 
 Since v1.0.0
 
@@ -1548,7 +1560,7 @@ declare const TinyTowerClassicAccountsGroup: HttpApiGroup.HttpApiGroup<
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinyburg-sdk/src/Sdk.ts#L434)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinyburg-sdk/src/Sdk.ts#L436)
 
 Since v1.0.0
 
@@ -1743,6 +1755,8 @@ declare const TinyTowerClassicGroup: HttpApiGroup.HttpApiGroup<
                 readonly Raffle: "Raffle"
                 readonly Visit: "Visit"
                 readonly Leaderboards: "Leaderboards"
+                readonly Promo: "Promo"
+                readonly Referral: "Referral"
               }>
               readonly contents: Schema.String
             }>
@@ -1792,6 +1806,8 @@ declare const TinyTowerClassicGroup: HttpApiGroup.HttpApiGroup<
                 readonly Raffle: "Raffle"
                 readonly Visit: "Visit"
                 readonly Leaderboards: "Leaderboards"
+                readonly Promo: "Promo"
+                readonly Referral: "Referral"
               }>
               readonly contents: Schema.String
             }>
@@ -1823,6 +1839,8 @@ declare const TinyTowerClassicGroup: HttpApiGroup.HttpApiGroup<
             readonly Raffle: "Raffle"
             readonly Visit: "Visit"
             readonly Leaderboards: "Leaderboards"
+            readonly Promo: "Promo"
+            readonly Referral: "Referral"
           }>
           readonly item: Schema.String
         }>
@@ -1921,7 +1939,7 @@ declare const TinyTowerClassicGroup: HttpApiGroup.HttpApiGroup<
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinyburg-sdk/src/Sdk.ts#L443)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinyburg-sdk/src/Sdk.ts#L445)
 
 Since v1.0.0
 
@@ -2116,6 +2134,8 @@ declare const TinyTowerGroup: HttpApiGroup.HttpApiGroup<
                 readonly Raffle: "Raffle"
                 readonly Visit: "Visit"
                 readonly Leaderboards: "Leaderboards"
+                readonly Promo: "Promo"
+                readonly Referral: "Referral"
               }>
               readonly contents: Schema.String
             }>
@@ -2165,6 +2185,8 @@ declare const TinyTowerGroup: HttpApiGroup.HttpApiGroup<
                 readonly Raffle: "Raffle"
                 readonly Visit: "Visit"
                 readonly Leaderboards: "Leaderboards"
+                readonly Promo: "Promo"
+                readonly Referral: "Referral"
               }>
               readonly contents: Schema.String
             }>
@@ -2196,6 +2218,8 @@ declare const TinyTowerGroup: HttpApiGroup.HttpApiGroup<
             readonly Raffle: "Raffle"
             readonly Visit: "Visit"
             readonly Leaderboards: "Leaderboards"
+            readonly Promo: "Promo"
+            readonly Referral: "Referral"
           }>
           readonly item: Schema.String
         }>
@@ -2294,7 +2318,7 @@ declare const TinyTowerGroup: HttpApiGroup.HttpApiGroup<
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinyburg-sdk/src/Sdk.ts#L426)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinyburg-sdk/src/Sdk.ts#L428)
 
 Since v1.0.0
 
@@ -2380,7 +2404,7 @@ declare const TinyTowerVegasAccountsGroup: HttpApiGroup.HttpApiGroup<
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinyburg-sdk/src/Sdk.ts#L497)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinyburg-sdk/src/Sdk.ts#L499)
 
 Since v1.0.0
 
@@ -2400,7 +2424,7 @@ declare const FriendSnapshot: Schema.Struct<{
 }>
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinyburg-sdk/src/Sdk.ts#L128)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinyburg-sdk/src/Sdk.ts#L127)
 
 Since v1.0.0
 
@@ -2423,12 +2447,14 @@ declare const Gift: Schema.Struct<{
     readonly Raffle: "Raffle"
     readonly Visit: "Visit"
     readonly Leaderboards: "Leaderboards"
+    readonly Promo: "Promo"
+    readonly Referral: "Referral"
   }>
   readonly contents: Schema.String
 }>
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinyburg-sdk/src/Sdk.ts#L158)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinyburg-sdk/src/Sdk.ts#L157)
 
 Since v1.0.0
 
@@ -2452,6 +2478,8 @@ declare const Gifts: Schema.Struct<{
         readonly Raffle: "Raffle"
         readonly Visit: "Visit"
         readonly Leaderboards: "Leaderboards"
+        readonly Promo: "Promo"
+        readonly Referral: "Referral"
       }>
       readonly contents: Schema.String
     }>
@@ -2459,7 +2487,7 @@ declare const Gifts: Schema.Struct<{
 }>
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinyburg-sdk/src/Sdk.ts#L170)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinyburg-sdk/src/Sdk.ts#L169)
 
 Since v1.0.0
 
@@ -2480,12 +2508,14 @@ declare const ItemToSend: Schema.Struct<{
     readonly Raffle: "Raffle"
     readonly Visit: "Visit"
     readonly Leaderboards: "Leaderboards"
+    readonly Promo: "Promo"
+    readonly Referral: "Referral"
   }>
   readonly item: Schema.String
 }>
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinyburg-sdk/src/Sdk.ts#L182)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinyburg-sdk/src/Sdk.ts#L181)
 
 Since v1.0.0
 
@@ -2502,7 +2532,7 @@ declare const LinkedAccount: Schema.Struct<{
 }>
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinyburg-sdk/src/Sdk.ts#L49)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinyburg-sdk/src/Sdk.ts#L48)
 
 Since v1.0.0
 
@@ -2519,7 +2549,7 @@ declare const PlayerDetails: Schema.Struct<{
 }>
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinyburg-sdk/src/Sdk.ts#L145)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinyburg-sdk/src/Sdk.ts#L144)
 
 Since v1.0.0
 
@@ -2531,7 +2561,7 @@ Since v1.0.0
 declare const RaffleStatus: Schema.Struct<{ readonly entered: Schema.Boolean }>
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinyburg-sdk/src/Sdk.ts#L137)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinyburg-sdk/src/Sdk.ts#L136)
 
 Since v1.0.0
 
@@ -2545,7 +2575,7 @@ A save as Nimblebit stores it: the text, and the version it was stored as.
 declare const Save: Schema.Struct<{ readonly saveId: Schema.Number; readonly data: Schema.String }>
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinyburg-sdk/src/Sdk.ts#L60)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinyburg-sdk/src/Sdk.ts#L59)
 
 Since v1.0.0
 
@@ -2560,7 +2590,7 @@ in, so a save that does not parse is refused with `400` rather than sent on.
 declare const SaveUpload: Schema.Struct<{ readonly data: Schema.String }>
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinyburg-sdk/src/Sdk.ts#L72)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinyburg-sdk/src/Sdk.ts#L71)
 
 Since v1.0.0
 
@@ -2572,7 +2602,7 @@ Since v1.0.0
 declare const SaveVersion: Schema.Struct<{ readonly saveId: Schema.Number }>
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinyburg-sdk/src/Sdk.ts#L80)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinyburg-sdk/src/Sdk.ts#L79)
 
 Since v1.0.0
 
@@ -2597,7 +2627,7 @@ declare const Snapshot: Schema.Struct<{
 }>
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinyburg-sdk/src/Sdk.ts#L106)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinyburg-sdk/src/Sdk.ts#L105)
 
 Since v1.0.0
 
@@ -2609,7 +2639,7 @@ Since v1.0.0
 declare const SnapshotData: Schema.Struct<{ readonly snapshotId: Schema.Number; readonly data: Schema.String }>
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinyburg-sdk/src/Sdk.ts#L116)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinyburg-sdk/src/Sdk.ts#L115)
 
 Since v1.0.0
 
@@ -2630,6 +2660,6 @@ declare const TowerMeta: Schema.Struct<{
 }>
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinyburg-sdk/src/Sdk.ts#L91)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinyburg-sdk/src/Sdk.ts#L90)
 
 Since v1.0.0

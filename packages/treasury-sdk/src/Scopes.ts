@@ -1,5 +1,10 @@
 /**
- * The scopes the treasury api is guarded by, as one `treasury` area.
+ * The scopes the treasury api is guarded by: `treasury` for all of it,
+ * `treasury:read` and `treasury:write` for everything that only looks or that
+ * changes a trade, and one scope per endpoint, such as
+ * `treasury:list_trades`. An endpoint accepts its own scope, its side's and
+ * the whole treasury's, narrowest first:
+ * `{ anyOf: [ListTrades, Read, Treasury] }`.
  *
  * These guard the treasury's own api - proposing, accepting and watching
  * trades - not the towers the trades move items between. Acting on a tower
@@ -9,62 +14,129 @@
  * treasury manage my trades" and "let the treasury touch my tower" are
  * distinct questions with distinct answers.
  *
- * The area is built with the same `defineArea` every game's scopes are, so
- * `Treasury.read.list_trades` is the leaf named `treasury:list_trades`, and
- * `Treasury.read.list_trades.required` is what goes on the endpoint.
- *
  * @since 1.0.0
  * @category Scopes
  */
 
-import { type ScopeDescription, defineArea } from "@tinyburg/nimblebit-sdk/NimblebitScopes";
+import * as OAuthScope from "@yielded/auth/OAuthScope";
 
 /**
  * @since 1.0.0
- * @category Areas
+ * @category Treasury
  */
-export const Treasury = defineArea({
-    name: "treasury",
+export const Treasury: OAuthScope.Described = {
+    name: OAuthScope.make("treasury"),
     description: "Trades escrowed by the Tinyburg treasury",
-    read: {
-        description: "See your trades and what could go into them, without changing anything",
-        leaves: {
-            grant_status: "Check whether the treasury can act on your towers",
-            list_trades: "List your trades and the open offers you could accept",
-            get_trade: "See one trade's full state and history",
-            list_inventory: "See which of a tower's items could be traded",
-        },
-    },
-    write: {
-        description: "Propose, accept, cancel and confirm trades",
-        leaves: {
-            propose: "Propose a trade with another player",
-            accept: "Accept a trade proposed to you",
-            cancel: "Cancel a trade you are part of",
-            confirm_splice: "Confirm a save-splice trade for execution",
-        },
-    },
-});
+};
 
 /**
- * The shape of the treasury's area, for code that takes it as a value.
- *
  * @since 1.0.0
- * @category Areas
+ * @category Treasury
  */
-export type TreasuryArea = typeof Treasury;
+export const Read: OAuthScope.Described = {
+    name: OAuthScope.make("treasury:read"),
+    description: "See your trades and what could go into them, without changing anything",
+};
 
 /**
- * Every scope in the tree, the area first, then each branch, then its
- * leaves. The order a consent screen lists them in.
+ * @since 1.0.0
+ * @category Treasury
+ */
+export const Write: OAuthScope.Described = {
+    name: OAuthScope.make("treasury:write"),
+    description: "Propose, accept, cancel and confirm trades",
+};
+
+/**
+ * @since 1.0.0
+ * @category Endpoints
+ */
+export const GrantStatus: OAuthScope.Described = {
+    name: OAuthScope.make("treasury:grant_status"),
+    description: "Check whether the treasury can act on your towers",
+};
+
+/**
+ * @since 1.0.0
+ * @category Endpoints
+ */
+export const ListTrades: OAuthScope.Described = {
+    name: OAuthScope.make("treasury:list_trades"),
+    description: "List your trades and the open offers you could accept",
+};
+
+/**
+ * @since 1.0.0
+ * @category Endpoints
+ */
+export const GetTrade: OAuthScope.Described = {
+    name: OAuthScope.make("treasury:get_trade"),
+    description: "See one trade's full state and history",
+};
+
+/**
+ * @since 1.0.0
+ * @category Endpoints
+ */
+export const ListInventory: OAuthScope.Described = {
+    name: OAuthScope.make("treasury:list_inventory"),
+    description: "See which of a tower's items could be traded",
+};
+
+/**
+ * @since 1.0.0
+ * @category Endpoints
+ */
+export const Propose: OAuthScope.Described = {
+    name: OAuthScope.make("treasury:propose"),
+    description: "Propose a trade with another player",
+};
+
+/**
+ * @since 1.0.0
+ * @category Endpoints
+ */
+export const Accept: OAuthScope.Described = {
+    name: OAuthScope.make("treasury:accept"),
+    description: "Accept a trade proposed to you",
+};
+
+/**
+ * @since 1.0.0
+ * @category Endpoints
+ */
+export const Cancel: OAuthScope.Described = {
+    name: OAuthScope.make("treasury:cancel"),
+    description: "Cancel a trade you are part of",
+};
+
+/**
+ * @since 1.0.0
+ * @category Endpoints
+ */
+export const ConfirmSplice: OAuthScope.Described = {
+    name: OAuthScope.make("treasury:confirm_splice"),
+    description: "Confirm a save-splice trade for execution",
+};
+
+/**
+ * Every scope, in the order a consent screen lists them: the treasury, its
+ * read scope and the read endpoints' scopes, then its write scope and the
+ * write endpoints'.
  *
  * @since 1.0.0
- * @category Tree
+ * @category Treasury
  */
-export const all = (): ReadonlyArray<ScopeDescription> => [
+export const all = (): ReadonlyArray<OAuthScope.Described> => [
     Treasury,
-    Treasury.read,
-    ...Treasury.read.children,
-    Treasury.write,
-    ...Treasury.write.children,
+    Read,
+    GrantStatus,
+    ListTrades,
+    GetTrade,
+    ListInventory,
+    Write,
+    Propose,
+    Accept,
+    Cancel,
+    ConfirmSplice,
 ];

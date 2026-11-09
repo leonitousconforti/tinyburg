@@ -4,7 +4,6 @@ import { HttpApiError, HttpApiMiddleware, HttpApiSecurity } from "effect/http-ap
 import { RateLimiter } from "effect/persistence";
 import { SqlError } from "effect/sql";
 
-import { NimblebitScopes } from "@tinyburg/nimblebit-sdk";
 import * as OAuthScope from "@yielded/auth/OAuthScope";
 
 import { ApiKey, ApiKeyValue, type CurrentApiKey, Repository } from "../domain/model.ts";
@@ -26,6 +25,22 @@ export class Authorization extends HttpApiMiddleware.Service<
 /** Anything in the bearer slot that is not an API key is no key at all, not a
  * failed lookup. */
 const isApiKey = Schema.is(ApiKeyValue);
+
+/**
+ * Whether holding `held` satisfies `requirement`, by name, exactly as
+ * `@yielded/auth`'s OAuth server checks a token: every `allOf` scope held
+ * and, when `anyOf` is present, at least one of those. A requirement with
+ * neither, or with an empty `anyOf`, is satisfied by nothing.
+ */
+const isSatisfied = (requirement: OAuthScope.Requirement, held: ReadonlySet<string>): boolean => {
+    const holds = (entry: OAuthScope.OAuthScope | OAuthScope.Described) =>
+        held.has(typeof entry === "string" ? entry : entry.name);
+    return (
+        (requirement.allOf !== undefined || requirement.anyOf !== undefined) &&
+        (requirement.allOf ?? []).every(holds) &&
+        (requirement.anyOf === undefined || requirement.anyOf.some(holds))
+    );
+};
 
 /** A 500 says nothing to the caller, so the reason has to land in the log. */
 const internalError = (error: unknown) =>
@@ -132,7 +147,7 @@ const make = (options: { readonly unscoped?: OAuthScope.Requirement }) =>
                         const isAuthorized =
                             isAuthenticated &&
                             requirement !== undefined &&
-                            NimblebitScopes.isSatisfied(requirement, maybeApiKey.value.scopes) &&
+                            isSatisfied(requirement, maybeApiKey.value.scopes) &&
                             !maybeApiKey.value.revoked;
 
                         if (!isAuthenticated) return yield* new HttpApiError.Unauthorized();
@@ -177,17 +192,9 @@ const make = (options: { readonly unscoped?: OAuthScope.Requirement }) =>
 export const AuthorizationLive = make({});
 
 /**
- * For a game whose sdk leaves some reads unscoped: sync (and LEGO Tower's
- * trades) has no write side yet, so it is not in the scope tree. Those take the
- * game's `:read` branch, or the whole game. `DeviceNewPlayer` is unscoped too,
- * but its handler refuses it anyway.
+ * For a game whose sdk leaves some reads unscoped, such as sync (and LEGO
+ * Tower's trades). Those take `unscoped`, which is the game's `:read` scope or
+ * the whole game. `DeviceNewPlayer` is unscoped too, but its handler refuses it
+ * anyway.
  */
-export const authorizationLiveFor = (game: NimblebitScopes.Game) =>
-    make({
-        unscoped: {
-            anyOf: [
-                { name: game.name, description: game.description },
-                { name: game.read.name, description: game.read.description },
-            ],
-        },
-    });
+export const authorizationLiveFor = (unscoped: OAuthScope.Requirement) => make({ unscoped });

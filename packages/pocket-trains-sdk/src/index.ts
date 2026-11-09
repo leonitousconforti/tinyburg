@@ -51,10 +51,15 @@ export * as Endpoints from "./Endpoints.ts"
 export * as PocketTrains from "./PocketTrains.ts"
 
 /**
- * The scopes the Pocket Trains api is guarded by, as a game-rooted tree, built with
- * `@tinyburg/nimblebit-sdk`'s `defineGame`. Only the endpoints this sdk defines
- * are covered; areas without both a read and a write side are left out until
- * their endpoints exist.
+ * The scopes the Pocket Trains api is guarded by: `pockettrains` for the whole
+ * game, `pockettrains:read` and `pockettrains:write` for every endpoint that
+ * only looks or that changes a player's game, and one scope per endpoint, such
+ * as `pockettrains:device:player_details`.
+ *
+ * Each endpoint accepts its own scope, its side's and the game's, narrowest
+ * first: `{ anyOf: [DevicePlayerDetails, Read, PocketTrains] }`. An endpoint
+ * this module has no scope for is left unscoped, and the authproxy guards it
+ * with `pockettrains:read` or `pockettrains`.
  *
  * @since 1.0.0
  * @category Scopes

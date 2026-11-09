@@ -43,11 +43,3 @@ export * as NimblebitGame from "./NimblebitGame.ts"
  * @category Schemas
  */
 export * as NimblebitSchema from "./NimblebitSchema.ts"
-
-/**
- * The scope tree every Nimblebit game's api is guarded by.
- *
- * @since 1.0.0
- * @category Scopes
- */
-export * as NimblebitScopes from "./NimblebitScopes.ts"

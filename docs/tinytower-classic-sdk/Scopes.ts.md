@@ -6,12 +6,15 @@ parent: "@tinyburg/tinytower-classic-sdk"
 
 ## Scopes.ts overview
 
-The scopes the TinyTower Classic api is guarded by: the same areas as
-TinyTower, under the `tinytowerclassic` game, so `tinytowerclassic:read`
-grants every read in Classic and `tinytowerclassic:sync:pull_save` one
-endpoint. The tree is built by `@tinyburg/nimblebit-sdk`'s `defineGame`
-from TinyTower's own area spec, so the two games cannot drift apart in
-shape, only in name.
+The scopes the TinyTower Classic api is guarded by: `tinytowerclassic` for
+the whole game, `tinytowerclassic:read` and `tinytowerclassic:write` for
+every endpoint that only looks or that changes a player's game, and one scope
+per endpoint, such as `tinytowerclassic:device:player_details`.
+
+Each endpoint accepts its own scope, its side's and the game's, narrowest
+first: `{ anyOf: [DevicePlayerDetails, Read, TinyTowerClassic] }`. They are
+TinyTower's scopes under the `tinytowerclassic` game, with the same
+descriptions.
 
 Since v1.0.0
 
@@ -19,86 +22,297 @@ Since v1.0.0
 
 ## Exports Grouped by Category
 
-- [Areas](#areas)
-  - [{ device: Device, raffle: Raffle, social: Social, sync: Sync }](#-device-device-raffle-raffle-social-social-sync-sync-)
-- [Games](#games)
+- [Endpoints](#endpoints)
+  - [DevicePlayerDetails](#deviceplayerdetails)
+  - [DeviceRegisterEmail](#deviceregisteremail)
+  - [DeviceVerifyDevice](#deviceverifydevice)
+  - [RaffleCheckEntered](#rafflecheckentered)
+  - [RaffleEnter](#raffleenter)
+  - [RaffleEnterMulti](#raffleentermulti)
+  - [SocialGetGifts](#socialgetgifts)
+  - [SocialGetVisits](#socialgetvisits)
+  - [SocialListFriendSnapshots](#sociallistfriendsnapshots)
+  - [SocialPullFriendMeta](#socialpullfriendmeta)
+  - [SocialPullFriendTower](#socialpullfriendtower)
+  - [SocialReceiveGift](#socialreceivegift)
+  - [SocialSendItem](#socialsenditem)
+  - [SyncCheckVersion](#synccheckversion)
+  - [SyncListSnapshots](#synclistsnapshots)
+  - [SyncPullSave](#syncpullsave)
+  - [SyncPullSnapshot](#syncpullsnapshot)
+  - [SyncPushSave](#syncpushsave)
+  - [SyncPushSnapshot](#syncpushsnapshot)
+- [Game](#game)
+  - [Read](#read)
   - [TinyTowerClassic](#tinytowerclassic)
-- [Tree](#tree)
-  - [Games](#games-1)
-  - [all](#all)
+  - [Write](#write)
 
 ---
 
-# Areas
+# Endpoints
 
-## { device: Device, raffle: Raffle, social: Social, sync: Sync }
-
-The game's areas, by name, for annotating endpoints:
-`Sync.read.pull_save.required`.
+## DevicePlayerDetails
 
 **Signature**
 
 ```ts
-declare const { device: Device, raffle: Raffle, social: Social, sync: Sync }: any
+declare const DevicePlayerDetails: OAuthScope.Described<OAuthScope.OAuthScope<string>>
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-classic-sdk/src/Scopes.ts#L35)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-classic-sdk/src/Scopes.ts#L49)
 
 Since v1.0.0
 
-# Games
+## DeviceRegisterEmail
+
+**Signature**
+
+```ts
+declare const DeviceRegisterEmail: OAuthScope.Described<OAuthScope.OAuthScope<string>>
+```
+
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-classic-sdk/src/Scopes.ts#L58)
+
+Since v1.0.0
+
+## DeviceVerifyDevice
+
+**Signature**
+
+```ts
+declare const DeviceVerifyDevice: OAuthScope.Described<OAuthScope.OAuthScope<string>>
+```
+
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-classic-sdk/src/Scopes.ts#L67)
+
+Since v1.0.0
+
+## RaffleCheckEntered
+
+**Signature**
+
+```ts
+declare const RaffleCheckEntered: OAuthScope.Described<OAuthScope.OAuthScope<string>>
+```
+
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-classic-sdk/src/Scopes.ts#L130)
+
+Since v1.0.0
+
+## RaffleEnter
+
+**Signature**
+
+```ts
+declare const RaffleEnter: OAuthScope.Described<OAuthScope.OAuthScope<string>>
+```
+
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-classic-sdk/src/Scopes.ts#L139)
+
+Since v1.0.0
+
+## RaffleEnterMulti
+
+**Signature**
+
+```ts
+declare const RaffleEnterMulti: OAuthScope.Described<OAuthScope.OAuthScope<string>>
+```
+
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-classic-sdk/src/Scopes.ts#L148)
+
+Since v1.0.0
+
+## SocialGetGifts
+
+**Signature**
+
+```ts
+declare const SocialGetGifts: OAuthScope.Described<OAuthScope.OAuthScope<string>>
+```
+
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-classic-sdk/src/Scopes.ts#L157)
+
+Since v1.0.0
+
+## SocialGetVisits
+
+**Signature**
+
+```ts
+declare const SocialGetVisits: OAuthScope.Described<OAuthScope.OAuthScope<string>>
+```
+
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-classic-sdk/src/Scopes.ts#L166)
+
+Since v1.0.0
+
+## SocialListFriendSnapshots
+
+**Signature**
+
+```ts
+declare const SocialListFriendSnapshots: OAuthScope.Described<OAuthScope.OAuthScope<string>>
+```
+
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-classic-sdk/src/Scopes.ts#L193)
+
+Since v1.0.0
+
+## SocialPullFriendMeta
+
+**Signature**
+
+```ts
+declare const SocialPullFriendMeta: OAuthScope.Described<OAuthScope.OAuthScope<string>>
+```
+
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-classic-sdk/src/Scopes.ts#L175)
+
+Since v1.0.0
+
+## SocialPullFriendTower
+
+**Signature**
+
+```ts
+declare const SocialPullFriendTower: OAuthScope.Described<OAuthScope.OAuthScope<string>>
+```
+
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-classic-sdk/src/Scopes.ts#L184)
+
+Since v1.0.0
+
+## SocialReceiveGift
+
+**Signature**
+
+```ts
+declare const SocialReceiveGift: OAuthScope.Described<OAuthScope.OAuthScope<string>>
+```
+
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-classic-sdk/src/Scopes.ts#L211)
+
+Since v1.0.0
+
+## SocialSendItem
+
+**Signature**
+
+```ts
+declare const SocialSendItem: OAuthScope.Described<OAuthScope.OAuthScope<string>>
+```
+
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-classic-sdk/src/Scopes.ts#L202)
+
+Since v1.0.0
+
+## SyncCheckVersion
+
+**Signature**
+
+```ts
+declare const SyncCheckVersion: OAuthScope.Described<OAuthScope.OAuthScope<string>>
+```
+
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-classic-sdk/src/Scopes.ts#L85)
+
+Since v1.0.0
+
+## SyncListSnapshots
+
+**Signature**
+
+```ts
+declare const SyncListSnapshots: OAuthScope.Described<OAuthScope.OAuthScope<string>>
+```
+
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-classic-sdk/src/Scopes.ts#L103)
+
+Since v1.0.0
+
+## SyncPullSave
+
+**Signature**
+
+```ts
+declare const SyncPullSave: OAuthScope.Described<OAuthScope.OAuthScope<string>>
+```
+
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-classic-sdk/src/Scopes.ts#L76)
+
+Since v1.0.0
+
+## SyncPullSnapshot
+
+**Signature**
+
+```ts
+declare const SyncPullSnapshot: OAuthScope.Described<OAuthScope.OAuthScope<string>>
+```
+
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-classic-sdk/src/Scopes.ts#L94)
+
+Since v1.0.0
+
+## SyncPushSave
+
+**Signature**
+
+```ts
+declare const SyncPushSave: OAuthScope.Described<OAuthScope.OAuthScope<string>>
+```
+
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-classic-sdk/src/Scopes.ts#L112)
+
+Since v1.0.0
+
+## SyncPushSnapshot
+
+**Signature**
+
+```ts
+declare const SyncPushSnapshot: OAuthScope.Described<OAuthScope.OAuthScope<string>>
+```
+
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-classic-sdk/src/Scopes.ts#L121)
+
+Since v1.0.0
+
+# Game
+
+## Read
+
+**Signature**
+
+```ts
+declare const Read: OAuthScope.Described<OAuthScope.OAuthScope<string>>
+```
+
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-classic-sdk/src/Scopes.ts#L31)
+
+Since v1.0.0
 
 ## TinyTowerClassic
 
 **Signature**
 
 ```ts
-declare const TinyTowerClassic: Game & {
-  readonly areas: {
-    readonly device: KeyedArea<"player_details", "register_email" | "verify_device">
-    readonly sync: KeyedArea<
-      "pull_save" | "check_version" | "pull_snapshot" | "list_snapshots",
-      "push_save" | "push_snapshot"
-    >
-    readonly raffle: KeyedArea<"check_entered", "enter" | "enter_multi">
-    readonly social: KeyedArea<
-      "get_gifts" | "get_visits" | "pull_friend_meta" | "pull_friend_tower" | "list_friend_snapshots",
-      "send_item" | "receive_gift"
-    >
-  }
-}
+declare const TinyTowerClassic: OAuthScope.Described<OAuthScope.OAuthScope<string>>
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-classic-sdk/src/Scopes.ts#L20)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-classic-sdk/src/Scopes.ts#L22)
 
 Since v1.0.0
 
-# Tree
-
-## Games
-
-Every game this package declares.
+## Write
 
 **Signature**
 
 ```ts
-declare const Games: ReadonlyArray<Game>
+declare const Write: OAuthScope.Described<OAuthScope.OAuthScope<string>>
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-classic-sdk/src/Scopes.ts#L43)
-
-Since v1.0.0
-
-## all
-
-Every scope in the tree, in declaration order.
-
-**Signature**
-
-```ts
-declare const all: () => ReadonlyArray<ScopeDescription>
-```
-
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-classic-sdk/src/Scopes.ts#L51)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-classic-sdk/src/Scopes.ts#L40)
 
 Since v1.0.0

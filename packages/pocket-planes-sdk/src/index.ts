@@ -61,10 +61,15 @@ export * as Endpoints from "./Endpoints.ts"
 export * as PocketPlanes from "./PocketPlanes.ts"
 
 /**
- * The scopes the Pocket Planes api is guarded by, as a game-rooted tree, built with
- * `@tinyburg/nimblebit-sdk`'s `defineGame`. Only the endpoints this sdk defines
- * are covered; areas without both a read and a write side are left out until
- * their endpoints exist.
+ * The scopes the Pocket Planes api is guarded by: `pocketplanes` for the whole
+ * game, `pocketplanes:read` and `pocketplanes:write` for every endpoint that
+ * only looks or that changes a player's game, and one scope per endpoint, such
+ * as `pocketplanes:device:player_details`.
+ *
+ * Each endpoint accepts its own scope, its side's and the game's, narrowest
+ * first: `{ anyOf: [DevicePlayerDetails, Read, PocketPlanes] }`. An endpoint
+ * this module has no scope for is left unscoped, and the authproxy guards it
+ * with `pocketplanes:read` or `pocketplanes`.
  *
  * @since 1.0.0
  * @category Scopes

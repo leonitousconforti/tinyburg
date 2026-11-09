@@ -47,10 +47,15 @@ export * as DiscoZoo from "./DiscoZoo.ts"
 export * as Endpoints from "./Endpoints.ts"
 
 /**
- * The scopes the Disco Zoo api is guarded by, as a game-rooted tree, built with
- * `@tinyburg/nimblebit-sdk`'s `defineGame`. Only the endpoints this sdk defines
- * are covered; areas without both a read and a write side are left out until
- * their endpoints exist.
+ * The scopes the Disco Zoo api is guarded by: `discozoo` for the whole game,
+ * `discozoo:read` and `discozoo:write` for every endpoint that only looks or
+ * that changes a player's game, and one scope per endpoint, such as
+ * `discozoo:device:player_details`.
+ *
+ * Each endpoint accepts its own scope, its side's and the game's, narrowest
+ * first: `{ anyOf: [DevicePlayerDetails, Read, DiscoZoo] }`. An endpoint this
+ * module has no scope for is left unscoped, and the authproxy guards it with
+ * `discozoo:read` or `discozoo`.
  *
  * @since 1.0.0
  * @category Scopes

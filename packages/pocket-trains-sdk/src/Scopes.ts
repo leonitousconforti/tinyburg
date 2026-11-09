@@ -1,89 +1,106 @@
 /**
- * The scopes the Pocket Trains api is guarded by, as a game-rooted tree, built with
- * `@tinyburg/nimblebit-sdk`'s `defineGame`. Only the endpoints this sdk defines
- * are covered; areas without both a read and a write side are left out until
- * their endpoints exist.
+ * The scopes the Pocket Trains api is guarded by: `pockettrains` for the whole
+ * game, `pockettrains:read` and `pockettrains:write` for every endpoint that
+ * only looks or that changes a player's game, and one scope per endpoint, such
+ * as `pockettrains:device:player_details`.
+ *
+ * Each endpoint accepts its own scope, its side's and the game's, narrowest
+ * first: `{ anyOf: [DevicePlayerDetails, Read, PocketTrains] }`. An endpoint
+ * this module has no scope for is left unscoped, and the authproxy guards it
+ * with `pockettrains:read` or `pockettrains`.
  *
  * @since 1.0.0
  * @category Scopes
  */
 
-import { type Game, type ScopeDescription, defineGame } from "@tinyburg/nimblebit-sdk/NimblebitScopes";
+import * as OAuthScope from "@yielded/auth/OAuthScope";
 
 /**
  * @since 1.0.0
- * @category Games
+ * @category Game
  */
-export const PocketTrains = defineGame({
-    name: "pockettrains",
+export const PocketTrains: OAuthScope.Described = {
+    name: OAuthScope.make("pockettrains"),
     description: "Pocket Trains",
-    read: { description: "Everything in Pocket Trains that only looks" },
-    write: { description: "Everything in Pocket Trains that changes a player's game" },
-    areas: {
-        device: {
-            description: "Player accounts and their devices",
-            read: {
-                description: "Look up player accounts",
-                leaves: {
-                    player_details: "Look up a player's public profile details",
-                },
-            },
-            write: {
-                description: "Change a player's account or devices",
-                leaves: {
-                    verify_device: "Complete a device verification code",
-                },
-            },
-        },
-        social: {
-            description: "Gifts, visits and friends",
-            read: {
-                description: "See gifts, visits and friends' games",
-                leaves: {
-                    get_items: "See the items waiting for a player",
-                    get_gifts_pt: "See the gifts waiting for a player",
-                    pull_friend_game: "Download a friend's game data",
-                    pull_friend_meta: "Fetch metadata about a player's friends",
-                },
-            },
-            write: {
-                description: "Send and accept gifts and items",
-                leaves: {
-                    send_item: "Send items to another player",
-                },
-            },
-        },
-    },
-});
-
-/**
- * The game's areas, by name, for annotating endpoints.
- *
- * @since 1.0.0
- * @category Areas
- */
-export const { device: Device, social: Social } = PocketTrains.areas;
+};
 
 /**
  * @since 1.0.0
- * @category Tree
+ * @category Game
  */
-export const Games: ReadonlyArray<Game> = [PocketTrains];
+export const Read: OAuthScope.Described = {
+    name: OAuthScope.make("pockettrains:read"),
+    description: "Everything in Pocket Trains that only looks",
+};
 
 /**
  * @since 1.0.0
- * @category Tree
+ * @category Game
  */
-export const all = (): ReadonlyArray<ScopeDescription> =>
-    Games.flatMap((game) => [
-        game,
-        game.read,
-        game.write,
-        ...Object.values(game.areas).flatMap((area) => [
-            area,
-            area.read,
-            ...area.read.children,
-            area.write,
-            ...area.write.children,
-        ]),
-    ]);
+export const Write: OAuthScope.Described = {
+    name: OAuthScope.make("pockettrains:write"),
+    description: "Everything in Pocket Trains that changes a player's game",
+};
+
+/**
+ * @since 1.0.0
+ * @category Endpoints
+ */
+export const DevicePlayerDetails: OAuthScope.Described = {
+    name: OAuthScope.make("pockettrains:device:player_details"),
+    description: "Look up a player's public profile details",
+};
+
+/**
+ * @since 1.0.0
+ * @category Endpoints
+ */
+export const DeviceVerifyDevice: OAuthScope.Described = {
+    name: OAuthScope.make("pockettrains:device:verify_device"),
+    description: "Complete a device verification code",
+};
+
+/**
+ * @since 1.0.0
+ * @category Endpoints
+ */
+export const SocialGetItems: OAuthScope.Described = {
+    name: OAuthScope.make("pockettrains:social:get_items"),
+    description: "See the items waiting for a player",
+};
+
+/**
+ * @since 1.0.0
+ * @category Endpoints
+ */
+export const SocialGetGiftsPt: OAuthScope.Described = {
+    name: OAuthScope.make("pockettrains:social:get_gifts_pt"),
+    description: "See the gifts waiting for a player",
+};
+
+/**
+ * @since 1.0.0
+ * @category Endpoints
+ */
+export const SocialPullFriendGame: OAuthScope.Described = {
+    name: OAuthScope.make("pockettrains:social:pull_friend_game"),
+    description: "Download a friend's game data",
+};
+
+/**
+ * @since 1.0.0
+ * @category Endpoints
+ */
+export const SocialPullFriendMeta: OAuthScope.Described = {
+    name: OAuthScope.make("pockettrains:social:pull_friend_meta"),
+    description: "Fetch metadata about a player's friends",
+};
+
+/**
+ * @since 1.0.0
+ * @category Endpoints
+ */
+export const SocialSendItem: OAuthScope.Described = {
+    name: OAuthScope.make("pockettrains:social:send_item"),
+    description: "Send items to another player",
+};

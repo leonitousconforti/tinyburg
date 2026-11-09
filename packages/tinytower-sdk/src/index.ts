@@ -131,17 +131,13 @@ export * as Roofs from "./Roofs.ts"
 export * as SaveDiffer from "./SaveDiffer.ts"
 
 /**
- * The scopes the TinyTower api is guarded by, as a tree.
+ * The scopes the TinyTower api is guarded by: `tinytower` for the whole game,
+ * `tinytower:read` and `tinytower:write` for every endpoint that only looks or
+ * that changes a player's game, and one scope per endpoint, such as
+ * `tinytower:device:player_details`.
  *
- * The machinery that builds the tree - {@link defineGame}, {@link defineArea}
- * and the {@link Leaf}/{@link Branch}/{@link Area}/{@link Game} types - lives in
- * `@tinyburg/nimblebit-sdk/NimblebitScopes`, because every game's sdk builds the
- * same shape and none of them should need TinyTower to do it. It is re-exported
- * here so this module stays the one place a TinyTower consumer has to look.
- *
- * What is TinyTower's own is below: the areas of its api, and the game built
- * from them. `Sync.read.pull_save` is the leaf named `tinytower:sync:pull_save`,
- * and `Sync.read.pull_save.required` is what goes on the endpoint.
+ * Each endpoint accepts its own scope, its side's and the game's, narrowest
+ * first: `{ anyOf: [DevicePlayerDetails, Read, TinyTower] }`.
  *
  * @since 1.0.0
  * @category Scopes

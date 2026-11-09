@@ -24,8 +24,6 @@ Since v1.0.0
   - [NimblebitGame (namespace export)](#nimblebitgame-namespace-export)
 - [Schemas](#schemas)
   - [NimblebitSchema (namespace export)](#nimblebitschema-namespace-export)
-- [Scopes](#scopes)
-  - [NimblebitScopes (namespace export)](#nimblebitscopes-namespace-export)
 
 ---
 
@@ -106,21 +104,5 @@ export * as NimblebitSchema from "./NimblebitSchema.ts"
 ```
 
 [Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/index.ts#L45)
-
-Since v1.0.0
-
-# Scopes
-
-## NimblebitScopes (namespace export)
-
-Re-exports all named exports from the "./NimblebitScopes.ts" module as `NimblebitScopes`.
-
-**Signature**
-
-```ts
-export * as NimblebitScopes from "./NimblebitScopes.ts"
-```
-
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/index.ts#L53)
 
 Since v1.0.0

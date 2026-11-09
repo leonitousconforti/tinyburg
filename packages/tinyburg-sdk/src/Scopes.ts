@@ -1,12 +1,13 @@
 /**
- * The scopes an application can be granted over a player's games, as a tree.
+ * The scopes an application can be granted over a player's games.
  *
- * One area per game. Each splits into a `:read` and a `:write` branch with a
- * leaf per endpoint beneath, so a player can grant exactly as much as an
- * application asks for: `tinytower:read` for everything that only looks,
- * `tinytower:pull_save` for one thing, `tinytower` for all of it. The tree is
- * built with the same `defineArea` the TinyTower sdk uses for the authproxy's
- * keys, so both catalogs have one shape and one set of rules.
+ * Each game has a scope for all of it, one for everything that only looks and
+ * one for everything that changes something, and one per endpoint, so a
+ * player can grant exactly as much as an application asks for: `tinytower`
+ * for all of it, `tinytower:read` for everything that only looks,
+ * `tinytower:pull_save` for one thing. An endpoint accepts its own scope, its
+ * side's and the game's, narrowest first:
+ * `{ anyOf: [TinyTower.PullSave, TinyTower.Read, TinyTower.Game] }`.
  *
  * These are OAuth scopes: a player approves them on the consent screen, and an
  * application then acts on the player's linked accounts through tinyburg.app,
@@ -16,113 +17,116 @@
  * @category Scopes
  */
 
-import { type ScopeDescription, defineArea } from "@tinyburg/nimblebit-sdk/NimblebitScopes";
+import * as OAuthScope from "@yielded/auth/OAuthScope";
 
 /**
- * The leaves every game's area carries: one per endpoint. The same
- * for every game because the tinyburg api is the same for every game; only
- * the name and the words differ.
+ * Every scope of one game, in the order a consent screen lists them: the
+ * game, its read scope and one per read endpoint, then its write scope and
+ * one per write endpoint. The same for every game because the tinyburg api is
+ * the same for every game; only the name and the words differ.
  */
-const areaFor = (name: string, title: string) =>
-    defineArea({
-        name,
-        description: `The ${title} accounts you have linked`,
-        read: {
-            description: `See your linked ${title} accounts and their towers, without changing anything`,
-            leaves: {
-                list_accounts: `See which ${title} accounts you have linked`,
-                pull_save: "Download a tower's current save",
-                check_version: "Check the current version of a tower's save",
-                list_snapshots: "List the cloud snapshots a tower has",
-                pull_snapshot: "Download a specific cloud snapshot",
-                check_raffle: "Check whether a tower has entered the current raffle",
-                player_details: "See a linked account's registration details",
-                list_gifts: "See the gifts waiting for a tower",
-                list_visits: "See who has visited a tower",
-                friend_meta: "Look up a friend's tower metadata",
-                friend_save: "Download a friend's tower",
-                friend_snapshots: "List the cloud snapshots a friend's tower has",
-            },
-        },
-        write: {
-            description: `Change your linked ${title} accounts and their towers, including uploading saves`,
-            leaves: {
-                link_account: `Link a ${title} account to your Tinyburg account`,
-                unlink_account: `Unlink a ${title} account from your Tinyburg account`,
-                push_save: "Upload a save to a tower",
-                push_snapshot: "Upload a cloud snapshot",
-                enter_raffle: "Enter a tower into the raffle",
-                enter_multi_raffle: "Enter a tower into the next several raffles",
-                receive_gift: "Accept a gift on a tower's behalf",
-                send_item: "Send bitizens and items to another player",
-                visit: "Visit another player's tower",
-            },
-        },
+const make = (game: string, title: string) => {
+    const scope = (name: string, description: string): OAuthScope.Described => ({
+        name: OAuthScope.make(`${game}:${name}`),
+        description,
     });
 
-/**
- * @since 1.0.0
- * @category Areas
- */
-export const TinyTower = areaFor("tinytower", "TinyTower");
+    const whole: OAuthScope.Described = {
+        name: OAuthScope.make(game),
+        description: `The ${title} accounts you have linked`,
+    };
+
+    return {
+        Game: whole,
+        Read: scope("read", `See your linked ${title} accounts and their towers, without changing anything`),
+        ListAccounts: scope("list_accounts", `See which ${title} accounts you have linked`),
+        PullSave: scope("pull_save", "Download a tower's current save"),
+        CheckVersion: scope("check_version", "Check the current version of a tower's save"),
+        ListSnapshots: scope("list_snapshots", "List the cloud snapshots a tower has"),
+        PullSnapshot: scope("pull_snapshot", "Download a specific cloud snapshot"),
+        CheckRaffle: scope("check_raffle", "Check whether a tower has entered the current raffle"),
+        PlayerDetails: scope("player_details", "See a linked account's registration details"),
+        ListGifts: scope("list_gifts", "See the gifts waiting for a tower"),
+        ListVisits: scope("list_visits", "See who has visited a tower"),
+        FriendMeta: scope("friend_meta", "Look up a friend's tower metadata"),
+        FriendSave: scope("friend_save", "Download a friend's tower"),
+        FriendSnapshots: scope("friend_snapshots", "List the cloud snapshots a friend's tower has"),
+        Write: scope("write", `Change your linked ${title} accounts and their towers, including uploading saves`),
+        LinkAccount: scope("link_account", `Link a ${title} account to your Tinyburg account`),
+        UnlinkAccount: scope("unlink_account", `Unlink a ${title} account from your Tinyburg account`),
+        PushSave: scope("push_save", "Upload a save to a tower"),
+        PushSnapshot: scope("push_snapshot", "Upload a cloud snapshot"),
+        EnterRaffle: scope("enter_raffle", "Enter a tower into the raffle"),
+        EnterMultiRaffle: scope("enter_multi_raffle", "Enter a tower into the next several raffles"),
+        ReceiveGift: scope("receive_gift", "Accept a gift on a tower's behalf"),
+        SendItem: scope("send_item", "Send bitizens and items to another player"),
+        Visit: scope("visit", "Visit another player's tower"),
+    };
+};
 
 /**
- * @since 1.0.0
- * @category Areas
- */
-export const TinyTowerClassic = areaFor("tinytowerclassic", "TinyTower Classic");
-
-/**
- * @since 1.0.0
- * @category Areas
- */
-export const PocketPlanes = areaFor("pocketplanes", "Pocket Planes");
-
-/**
- * @since 1.0.0
- * @category Areas
- */
-export const PocketTrains = areaFor("pockettrains", "Pocket Trains");
-
-/**
- * @since 1.0.0
- * @category Areas
- */
-export const LegoTower = areaFor("legotower", "LEGO Tower");
-
-/**
- * @since 1.0.0
- * @category Areas
- */
-export const DiscoZoo = areaFor("discozoo", "Disco Zoo");
-
-/**
- * @since 1.0.0
- * @category Areas
- */
-export const BitCity = areaFor("bitcity", "Bit City");
-
-/**
- * @since 1.0.0
- * @category Areas
- */
-export const TinyTowerVegas = areaFor("tinytowervegas", "Tiny Tower Vegas");
-
-/**
- * The shape every game's area has, for code that serves any of them.
+ * The scopes every game has, for code that serves any of them.
  *
  * @since 1.0.0
- * @category Areas
+ * @category Games
  */
-export type GameArea = typeof TinyTower;
+export type GameScopes = ReturnType<typeof make>;
+
+/**
+ * @since 1.0.0
+ * @category Games
+ */
+export const TinyTower: GameScopes = make("tinytower", "TinyTower");
+
+/**
+ * @since 1.0.0
+ * @category Games
+ */
+export const TinyTowerClassic: GameScopes = make("tinytowerclassic", "TinyTower Classic");
+
+/**
+ * @since 1.0.0
+ * @category Games
+ */
+export const PocketPlanes: GameScopes = make("pocketplanes", "Pocket Planes");
+
+/**
+ * @since 1.0.0
+ * @category Games
+ */
+export const PocketTrains: GameScopes = make("pockettrains", "Pocket Trains");
+
+/**
+ * @since 1.0.0
+ * @category Games
+ */
+export const LegoTower: GameScopes = make("legotower", "LEGO Tower");
+
+/**
+ * @since 1.0.0
+ * @category Games
+ */
+export const DiscoZoo: GameScopes = make("discozoo", "Disco Zoo");
+
+/**
+ * @since 1.0.0
+ * @category Games
+ */
+export const BitCity: GameScopes = make("bitcity", "Bit City");
+
+/**
+ * @since 1.0.0
+ * @category Games
+ */
+export const TinyTowerVegas: GameScopes = make("tinytowervegas", "Tiny Tower Vegas");
 
 /**
  * Every game, in the order a consent screen or a developer page lists them.
  *
  * @since 1.0.0
- * @category Tree
+ * @category Games
  */
-export const Areas: ReadonlyArray<GameArea> = [
+export const Games: ReadonlyArray<GameScopes> = [
     TinyTower,
     TinyTowerClassic,
     PocketPlanes,
@@ -134,11 +138,11 @@ export const Areas: ReadonlyArray<GameArea> = [
 ];
 
 /**
- * Every scope in the tree, areas first, then each area's branches, then
- * their leaves.
+ * Every scope of one game, in the order a consent screen lists them: the
+ * game, its read scope and the read endpoints' scopes, then its write scope
+ * and the write endpoints'.
  *
  * @since 1.0.0
- * @category Tree
+ * @category Games
  */
-export const all = (): ReadonlyArray<ScopeDescription> =>
-    Areas.flatMap((area) => [area, area.read, ...area.read.children, area.write, ...area.write.children]);
+export const all = (game: GameScopes): ReadonlyArray<OAuthScope.Described> => Object.values(game);

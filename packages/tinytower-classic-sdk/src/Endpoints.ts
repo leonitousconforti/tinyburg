@@ -171,7 +171,7 @@ export const DevicePlayerDetailsEndpoint = HttpApiEndpoint.get(
             }),
         ],
     }
-).annotate(OAuthScope.Required, Scopes.Device.read.player_details.required);
+).annotate(OAuthScope.Required, { anyOf: [Scopes.DevicePlayerDetails, Scopes.Read, Scopes.TinyTowerClassic] });
 
 /** @internal */
 export const DeviceVerifyDeviceEndpoint = HttpApiEndpoint.get(
@@ -200,7 +200,7 @@ export const DeviceVerifyDeviceEndpoint = HttpApiEndpoint.get(
             ),
         ],
     }
-).annotate(OAuthScope.Required, Scopes.Device.write.verify_device.required);
+).annotate(OAuthScope.Required, { anyOf: [Scopes.DeviceVerifyDevice, Scopes.Write, Scopes.TinyTowerClassic] });
 
 /** @internal */
 export const DeviceRegisterEmailEndpoint = HttpApiEndpoint.post(
@@ -216,7 +216,7 @@ export const DeviceRegisterEmailEndpoint = HttpApiEndpoint.post(
             Schema.Struct({ success: Schema.Literal("NewDevice") }),
         ],
     }
-).annotate(OAuthScope.Required, Scopes.Device.write.register_email.required);
+).annotate(OAuthScope.Required, { anyOf: [Scopes.DeviceRegisterEmail, Scopes.Write, Scopes.TinyTowerClassic] });
 
 /** @internal */
 export const SyncPullSaveEndpoint = HttpApiEndpoint.get(
@@ -241,7 +241,7 @@ export const SyncPullSaveEndpoint = HttpApiEndpoint.get(
             ),
         ],
     }
-).annotate(OAuthScope.Required, Scopes.Sync.read.pull_save.required);
+).annotate(OAuthScope.Required, { anyOf: [Scopes.SyncPullSave, Scopes.Read, Scopes.TinyTowerClassic] });
 
 /** @internal */
 export const SyncPushSaveEndpoint = HttpApiEndpoint.post(
@@ -268,7 +268,7 @@ export const SyncPushSaveEndpoint = HttpApiEndpoint.post(
         error: ApiErrors,
         success: [ErrorResponse, SavedResponse, NotSavedResponse],
     }
-).annotate(OAuthScope.Required, Scopes.Sync.write.push_save.required);
+).annotate(OAuthScope.Required, { anyOf: [Scopes.SyncPushSave, Scopes.Write, Scopes.TinyTowerClassic] });
 
 /** @internal */
 export const SyncCheckForNewerSaveEndpoint = HttpApiEndpoint.get(
@@ -292,7 +292,7 @@ export const SyncCheckForNewerSaveEndpoint = HttpApiEndpoint.get(
             ),
         ],
     }
-).annotate(OAuthScope.Required, Scopes.Sync.read.check_version.required);
+).annotate(OAuthScope.Required, { anyOf: [Scopes.SyncCheckVersion, Scopes.Read, Scopes.TinyTowerClassic] });
 
 /** @internal */
 export const SyncPullSnapshotEndpoint = HttpApiEndpoint.get(
@@ -317,7 +317,7 @@ export const SyncPullSnapshotEndpoint = HttpApiEndpoint.get(
             ),
         ],
     }
-).annotate(OAuthScope.Required, Scopes.Sync.read.pull_snapshot.required);
+).annotate(OAuthScope.Required, { anyOf: [Scopes.SyncPullSnapshot, Scopes.Read, Scopes.TinyTowerClassic] });
 
 /** @internal */
 export const SyncPushSnapshotEndpoint = HttpApiEndpoint.post(
@@ -344,7 +344,7 @@ export const SyncPushSnapshotEndpoint = HttpApiEndpoint.post(
         error: ApiErrors,
         success: [ErrorResponse, SavedResponse, NotSavedResponse],
     }
-).annotate(OAuthScope.Required, Scopes.Sync.write.push_snapshot.required);
+).annotate(OAuthScope.Required, { anyOf: [Scopes.SyncPushSnapshot, Scopes.Write, Scopes.TinyTowerClassic] });
 
 /** @internal */
 export const SyncRetrieveSnapshotListEndpoint = HttpApiEndpoint.get(
@@ -368,7 +368,7 @@ export const SyncRetrieveSnapshotListEndpoint = HttpApiEndpoint.get(
             }),
         ],
     }
-).annotate(OAuthScope.Required, Scopes.Sync.read.list_snapshots.required);
+).annotate(OAuthScope.Required, { anyOf: [Scopes.SyncListSnapshots, Scopes.Read, Scopes.TinyTowerClassic] });
 
 /** @internal */
 export const RaffleEnterEndpoint = HttpApiEndpoint.get(
@@ -379,7 +379,7 @@ export const RaffleEnterEndpoint = HttpApiEndpoint.get(
         error: ApiErrors,
         success: [ErrorResponse, EnteredResponse, NotEnteredResponse],
     }
-).annotate(OAuthScope.Required, Scopes.Raffle.write.enter.required);
+).annotate(OAuthScope.Required, { anyOf: [Scopes.RaffleEnter, Scopes.Write, Scopes.TinyTowerClassic] });
 
 /** @internal */
 export const RaffleEnterMultiEndpoint = HttpApiEndpoint.get(
@@ -390,7 +390,7 @@ export const RaffleEnterMultiEndpoint = HttpApiEndpoint.get(
         error: ApiErrors,
         success: [ErrorResponse, EnteredResponse, NotEnteredResponse],
     }
-).annotate(OAuthScope.Required, Scopes.Raffle.write.enter_multi.required);
+).annotate(OAuthScope.Required, { anyOf: [Scopes.RaffleEnterMulti, Scopes.Write, Scopes.TinyTowerClassic] });
 
 /** @internal */
 export const RaffleCheckEnteredCurrentEndpoint = HttpApiEndpoint.get(
@@ -401,7 +401,7 @@ export const RaffleCheckEnteredCurrentEndpoint = HttpApiEndpoint.get(
         error: ApiErrors,
         success: [ErrorResponse, EnteredResponse, NotEnteredResponse],
     }
-).annotate(OAuthScope.Required, Scopes.Raffle.read.check_entered.required);
+).annotate(OAuthScope.Required, { anyOf: [Scopes.RaffleCheckEntered, Scopes.Read, Scopes.TinyTowerClassic] });
 
 /** @internal */
 export const SocialSendItemEndpoint = HttpApiEndpoint.post(
@@ -419,7 +419,7 @@ export const SocialSendItemEndpoint = HttpApiEndpoint.post(
         error: ApiErrors,
         success: [ErrorResponse, SentResponse, NotSentResponse],
     }
-).annotate(OAuthScope.Required, Scopes.Social.write.send_item.required);
+).annotate(OAuthScope.Required, { anyOf: [Scopes.SocialSendItem, Scopes.Write, Scopes.TinyTowerClassic] });
 
 /** @internal */
 export const SocialGetGiftsEndpoint = HttpApiEndpoint.get(
@@ -438,7 +438,7 @@ export const SocialGetGiftsEndpoint = HttpApiEndpoint.get(
             }),
         ],
     }
-).annotate(OAuthScope.Required, Scopes.Social.read.get_gifts.required);
+).annotate(OAuthScope.Required, { anyOf: [Scopes.SocialGetGifts, Scopes.Read, Scopes.TinyTowerClassic] });
 
 /** @internal */
 export const SocialReceiveGiftEndpoint = HttpApiEndpoint.get(
@@ -449,7 +449,7 @@ export const SocialReceiveGiftEndpoint = HttpApiEndpoint.get(
         error: ApiErrors,
         success: [ErrorResponse, ReceivedResponse, NotReceivedResponse],
     }
-).annotate(OAuthScope.Required, Scopes.Social.write.receive_gift.required);
+).annotate(OAuthScope.Required, { anyOf: [Scopes.SocialReceiveGift, Scopes.Write, Scopes.TinyTowerClassic] });
 
 /** @internal */
 export const SocialPullFriendMetaEndpoint = HttpApiEndpoint.post(
@@ -468,7 +468,7 @@ export const SocialPullFriendMetaEndpoint = HttpApiEndpoint.post(
             }),
         ],
     }
-).annotate(OAuthScope.Required, Scopes.Social.read.pull_friend_meta.required);
+).annotate(OAuthScope.Required, { anyOf: [Scopes.SocialPullFriendMeta, Scopes.Read, Scopes.TinyTowerClassic] });
 
 /** @internal */
 export const SocialPullFriendTowerEndpoint = HttpApiEndpoint.get(
@@ -500,7 +500,7 @@ export const SocialPullFriendTowerEndpoint = HttpApiEndpoint.get(
             ),
         ],
     }
-).annotate(OAuthScope.Required, Scopes.Social.read.pull_friend_tower.required);
+).annotate(OAuthScope.Required, { anyOf: [Scopes.SocialPullFriendTower, Scopes.Read, Scopes.TinyTowerClassic] });
 
 /** @internal */
 export const SocialRetrieveFriendsSnapshotListEndpoint = HttpApiEndpoint.get(
@@ -547,7 +547,7 @@ export const SocialRetrieveFriendsSnapshotListEndpoint = HttpApiEndpoint.get(
             }),
         ],
     }
-).annotate(OAuthScope.Required, Scopes.Social.read.list_friend_snapshots.required);
+).annotate(OAuthScope.Required, { anyOf: [Scopes.SocialListFriendSnapshots, Scopes.Read, Scopes.TinyTowerClassic] });
 
 /** @internal */
 export const SocialGetVisitsEndpoint = HttpApiEndpoint.get(
@@ -566,7 +566,7 @@ export const SocialGetVisitsEndpoint = HttpApiEndpoint.get(
             }),
         ],
     }
-).annotate(OAuthScope.Required, Scopes.Social.read.get_visits.required);
+).annotate(OAuthScope.Required, { anyOf: [Scopes.SocialGetVisits, Scopes.Read, Scopes.TinyTowerClassic] });
 
 /** @internal */
 export const DeviceManagementGroup = HttpApiGroup.make("DeviceManagementGroup")

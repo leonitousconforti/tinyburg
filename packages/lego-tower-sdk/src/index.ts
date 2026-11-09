@@ -48,10 +48,15 @@ export * as Endpoints from "./Endpoints.ts"
 export * as LegoTower from "./LegoTower.ts"
 
 /**
- * The scopes the LEGO Tower api is guarded by, as a game-rooted tree, built with
- * `@tinyburg/nimblebit-sdk`'s `defineGame`. Only the endpoints this sdk defines
- * are covered; areas without both a read and a write side are left out until
- * their endpoints exist.
+ * The scopes the LEGO Tower api is guarded by: `legotower` for the whole game,
+ * `legotower:read` and `legotower:write` for every endpoint that only looks or
+ * that changes a player's game, and one scope per endpoint, such as
+ * `legotower:device:player_details`.
+ *
+ * Each endpoint accepts its own scope, its side's and the game's, narrowest
+ * first: `{ anyOf: [DevicePlayerDetails, Read, LEGOTower] }`. An endpoint this
+ * module has no scope for is left unscoped, and the authproxy guards it with
+ * `legotower:read` or `legotower`.
  *
  * @since 1.0.0
  * @category Scopes

@@ -36,7 +36,7 @@ const tinyburgConfig = Config.all({
 const LOGIN_SCOPES = ["openid", "profile"];
 // Elevation only needs to know which towers the visitor has linked, and the
 // scope tree is fine enough to ask for exactly that.
-const ELEVATE_SCOPES = ["openid", TinyTowerScopes.read.list_accounts.name];
+const ELEVATE_SCOPES = ["openid", TinyTowerScopes.ListAccounts.name];
 const HOME_AFTER_LOGIN = "/keys";
 
 /**

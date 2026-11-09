@@ -43,12 +43,12 @@ import { register } from "./registration.ts";
 export const USER_GRANT_SCOPES: ReadonlyArray<string> = [
     "openid",
     "offline_access",
-    TinyTowerScopes.read.list_accounts.name,
-    TinyTowerScopes.read.pull_save.name,
-    TinyTowerScopes.read.check_version.name,
-    TinyTowerScopes.write.send_item.name,
-    TinyTowerScopes.write.push_save.name,
-    TinyTowerScopes.write.push_snapshot.name,
+    TinyTowerScopes.ListAccounts.name,
+    TinyTowerScopes.PullSave.name,
+    TinyTowerScopes.CheckVersion.name,
+    TinyTowerScopes.SendItem.name,
+    TinyTowerScopes.PushSave.name,
+    TinyTowerScopes.PushSnapshot.name,
 ];
 
 const SOFTWARE_ID = "tinyburg-treasury";

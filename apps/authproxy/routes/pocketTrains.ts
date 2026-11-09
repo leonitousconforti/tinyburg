@@ -81,7 +81,7 @@ export const PocketTrainsSocialLive = HttpApiBuilder.group(
  */
 export const PocketTrainsApiLive = HttpApiBuilder.layer(Api).pipe(
     Layer.provide([PocketTrainsDeviceManagementLive, PocketTrainsSyncManagementLive, PocketTrainsSocialLive]),
-    Layer.provide([authorizationLiveFor(Scopes.PocketTrains), AuthProxyApiDecodeHashLive]),
+    Layer.provide([authorizationLiveFor({ anyOf: [Scopes.Read, Scopes.PocketTrains] }), AuthProxyApiDecodeHashLive]),
     Layer.provide(
         NimblebitAuth.layerDirectConfig(
             Config.schema(NimblebitConfig.NimblebitAuthKeySchema, "POCKETTRAINS_NIMBLEBIT_AUTH_KEY")

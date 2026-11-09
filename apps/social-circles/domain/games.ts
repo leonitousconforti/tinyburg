@@ -194,13 +194,13 @@ export const REQUIRED_SCOPES: ReadonlyArray<string> = [
  */
 export const REQUIRED_SCOPE: string = REQUIRED_SCOPES.join(" ");
 
-// This catalog and the tinyburg api's scope tree name the same games. A game
+// This catalog and the tinyburg api's scopes name the same games. A game
 // here that the api does not serve would produce scopes no provider grants;
 // a game there that is missing here would be silently unreachable. Neither is
 // visible at the point it goes wrong, so it is checked at boot.
 {
     const declared = new Set<string>(GameIds);
-    const served = new Set<string>(Scopes.Areas.map((area) => area.name));
+    const served = new Set<string>(Scopes.Games.map((game) => game.Game.name));
     const missing = Array.from(served).filter((name) => !declared.has(name));
     const extra = Array.from(declared).filter((name) => !served.has(name));
     if (missing.length > 0 || extra.length > 0) {

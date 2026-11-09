@@ -17,12 +17,13 @@ requires an explicit confirmation from both parties before anything runs.
 
 Every endpoint but the public stats and open offers is bearer
 authenticated with a JWT access token the Tinyburg OAuth server issued for
-the Tinyburg api (`<site>/v1`), and guarded by a leaf of the `treasury`
-scope area in `Scopes`. The treasury lives behind tinyburg.app: the paths
-here are reached at `<site>/v1/treasury/*`, which tinyburg.app forwards
-verbatim, `Authorization` header included. The first-party app gets its
-token from tinyburg.app's `/auth/token`; any other application uses the
-one it was issued.
+the Tinyburg api (`<site>/v1`), and guarded by its own scope in `Scopes`,
+`treasury:read` or `treasury:write`, or the whole `treasury`. The treasury
+lives behind tinyburg.app: the paths here are reached at
+`<site>/v1/treasury/*`, which tinyburg.app forwards verbatim,
+`Authorization` header included. The first-party app gets its token from
+tinyburg.app's `/auth/token`; any other application uses the one it was
+issued.
 
 A token without the endpoint's scope is refused with `403` and an
 `insufficient_scope` challenge. Any other `403` from a trade endpoint
@@ -138,6 +139,8 @@ declare const Api: HttpApi.HttpApi<
                         readonly Raffle: "Raffle"
                         readonly Visit: "Visit"
                         readonly Leaderboards: "Leaderboards"
+                        readonly Promo: "Promo"
+                        readonly Referral: "Referral"
                       }>
                       readonly item: Schema.String
                     }>,
@@ -165,6 +168,8 @@ declare const Api: HttpApi.HttpApi<
                         readonly Raffle: "Raffle"
                         readonly Visit: "Visit"
                         readonly Leaderboards: "Leaderboards"
+                        readonly Promo: "Promo"
+                        readonly Referral: "Referral"
                       }>
                       readonly item: Schema.String
                     }>,
@@ -238,6 +243,8 @@ declare const Api: HttpApi.HttpApi<
                         readonly Raffle: "Raffle"
                         readonly Visit: "Visit"
                         readonly Leaderboards: "Leaderboards"
+                        readonly Promo: "Promo"
+                        readonly Referral: "Referral"
                       }>
                       readonly item: Schema.String
                     }>,
@@ -265,6 +272,8 @@ declare const Api: HttpApi.HttpApi<
                         readonly Raffle: "Raffle"
                         readonly Visit: "Visit"
                         readonly Leaderboards: "Leaderboards"
+                        readonly Promo: "Promo"
+                        readonly Referral: "Referral"
                       }>
                       readonly item: Schema.String
                     }>,
@@ -303,6 +312,8 @@ declare const Api: HttpApi.HttpApi<
                     readonly Raffle: "Raffle"
                     readonly Visit: "Visit"
                     readonly Leaderboards: "Leaderboards"
+                    readonly Promo: "Promo"
+                    readonly Referral: "Referral"
                   }>
                   readonly item: Schema.String
                 }>
@@ -340,6 +351,8 @@ declare const Api: HttpApi.HttpApi<
                       readonly Raffle: "Raffle"
                       readonly Visit: "Visit"
                       readonly Leaderboards: "Leaderboards"
+                      readonly Promo: "Promo"
+                      readonly Referral: "Referral"
                     }>
                     readonly item: Schema.String
                   }>,
@@ -367,6 +380,8 @@ declare const Api: HttpApi.HttpApi<
                       readonly Raffle: "Raffle"
                       readonly Visit: "Visit"
                       readonly Leaderboards: "Leaderboards"
+                      readonly Promo: "Promo"
+                      readonly Referral: "Referral"
                     }>
                     readonly item: Schema.String
                   }>,
@@ -422,6 +437,8 @@ declare const Api: HttpApi.HttpApi<
                       readonly Raffle: "Raffle"
                       readonly Visit: "Visit"
                       readonly Leaderboards: "Leaderboards"
+                      readonly Promo: "Promo"
+                      readonly Referral: "Referral"
                     }>
                     readonly item: Schema.String
                   }>,
@@ -449,6 +466,8 @@ declare const Api: HttpApi.HttpApi<
                       readonly Raffle: "Raffle"
                       readonly Visit: "Visit"
                       readonly Leaderboards: "Leaderboards"
+                      readonly Promo: "Promo"
+                      readonly Referral: "Referral"
                     }>
                     readonly item: Schema.String
                   }>,
@@ -522,6 +541,8 @@ declare const Api: HttpApi.HttpApi<
                       readonly Raffle: "Raffle"
                       readonly Visit: "Visit"
                       readonly Leaderboards: "Leaderboards"
+                      readonly Promo: "Promo"
+                      readonly Referral: "Referral"
                     }>
                     readonly item: Schema.String
                   }>,
@@ -549,6 +570,8 @@ declare const Api: HttpApi.HttpApi<
                       readonly Raffle: "Raffle"
                       readonly Visit: "Visit"
                       readonly Leaderboards: "Leaderboards"
+                      readonly Promo: "Promo"
+                      readonly Referral: "Referral"
                     }>
                     readonly item: Schema.String
                   }>,
@@ -625,6 +648,8 @@ declare const Api: HttpApi.HttpApi<
                       readonly Raffle: "Raffle"
                       readonly Visit: "Visit"
                       readonly Leaderboards: "Leaderboards"
+                      readonly Promo: "Promo"
+                      readonly Referral: "Referral"
                     }>
                     readonly item: Schema.String
                   }>,
@@ -652,6 +677,8 @@ declare const Api: HttpApi.HttpApi<
                       readonly Raffle: "Raffle"
                       readonly Visit: "Visit"
                       readonly Leaderboards: "Leaderboards"
+                      readonly Promo: "Promo"
+                      readonly Referral: "Referral"
                     }>
                     readonly item: Schema.String
                   }>,
@@ -723,6 +750,8 @@ declare const Api: HttpApi.HttpApi<
                       readonly Raffle: "Raffle"
                       readonly Visit: "Visit"
                       readonly Leaderboards: "Leaderboards"
+                      readonly Promo: "Promo"
+                      readonly Referral: "Referral"
                     }>
                     readonly item: Schema.String
                   }>,
@@ -750,6 +779,8 @@ declare const Api: HttpApi.HttpApi<
                       readonly Raffle: "Raffle"
                       readonly Visit: "Visit"
                       readonly Leaderboards: "Leaderboards"
+                      readonly Promo: "Promo"
+                      readonly Referral: "Referral"
                     }>
                     readonly item: Schema.String
                   }>,
@@ -850,6 +881,8 @@ declare const Api: HttpApi.HttpApi<
                         readonly Raffle: "Raffle"
                         readonly Visit: "Visit"
                         readonly Leaderboards: "Leaderboards"
+                        readonly Promo: "Promo"
+                        readonly Referral: "Referral"
                       }>
                       readonly item: Schema.String
                     }>,
@@ -877,6 +910,8 @@ declare const Api: HttpApi.HttpApi<
                         readonly Raffle: "Raffle"
                         readonly Visit: "Visit"
                         readonly Leaderboards: "Leaderboards"
+                        readonly Promo: "Promo"
+                        readonly Referral: "Referral"
                       }>
                       readonly item: Schema.String
                     }>,
@@ -915,7 +950,7 @@ Since v1.0.0
 ## TreasuryGroup
 
 Everything the treasury serves. The group annotation is the floor: an
-endpoint added later without its own leaf accepts only the whole
+endpoint added later without its own scope accepts only the whole
 `treasury` scope, so nothing defaults to a weaker permission.
 
 **Signature**
@@ -987,6 +1022,8 @@ declare const TreasuryGroup: HttpApiGroup.HttpApiGroup<
                     readonly Raffle: "Raffle"
                     readonly Visit: "Visit"
                     readonly Leaderboards: "Leaderboards"
+                    readonly Promo: "Promo"
+                    readonly Referral: "Referral"
                   }>
                   readonly item: Schema.String
                 }>,
@@ -1014,6 +1051,8 @@ declare const TreasuryGroup: HttpApiGroup.HttpApiGroup<
                     readonly Raffle: "Raffle"
                     readonly Visit: "Visit"
                     readonly Leaderboards: "Leaderboards"
+                    readonly Promo: "Promo"
+                    readonly Referral: "Referral"
                   }>
                   readonly item: Schema.String
                 }>,
@@ -1087,6 +1126,8 @@ declare const TreasuryGroup: HttpApiGroup.HttpApiGroup<
                     readonly Raffle: "Raffle"
                     readonly Visit: "Visit"
                     readonly Leaderboards: "Leaderboards"
+                    readonly Promo: "Promo"
+                    readonly Referral: "Referral"
                   }>
                   readonly item: Schema.String
                 }>,
@@ -1114,6 +1155,8 @@ declare const TreasuryGroup: HttpApiGroup.HttpApiGroup<
                     readonly Raffle: "Raffle"
                     readonly Visit: "Visit"
                     readonly Leaderboards: "Leaderboards"
+                    readonly Promo: "Promo"
+                    readonly Referral: "Referral"
                   }>
                   readonly item: Schema.String
                 }>,
@@ -1152,6 +1195,8 @@ declare const TreasuryGroup: HttpApiGroup.HttpApiGroup<
                 readonly Raffle: "Raffle"
                 readonly Visit: "Visit"
                 readonly Leaderboards: "Leaderboards"
+                readonly Promo: "Promo"
+                readonly Referral: "Referral"
               }>
               readonly item: Schema.String
             }>
@@ -1189,6 +1234,8 @@ declare const TreasuryGroup: HttpApiGroup.HttpApiGroup<
                   readonly Raffle: "Raffle"
                   readonly Visit: "Visit"
                   readonly Leaderboards: "Leaderboards"
+                  readonly Promo: "Promo"
+                  readonly Referral: "Referral"
                 }>
                 readonly item: Schema.String
               }>,
@@ -1216,6 +1263,8 @@ declare const TreasuryGroup: HttpApiGroup.HttpApiGroup<
                   readonly Raffle: "Raffle"
                   readonly Visit: "Visit"
                   readonly Leaderboards: "Leaderboards"
+                  readonly Promo: "Promo"
+                  readonly Referral: "Referral"
                 }>
                 readonly item: Schema.String
               }>,
@@ -1271,6 +1320,8 @@ declare const TreasuryGroup: HttpApiGroup.HttpApiGroup<
                   readonly Raffle: "Raffle"
                   readonly Visit: "Visit"
                   readonly Leaderboards: "Leaderboards"
+                  readonly Promo: "Promo"
+                  readonly Referral: "Referral"
                 }>
                 readonly item: Schema.String
               }>,
@@ -1298,6 +1349,8 @@ declare const TreasuryGroup: HttpApiGroup.HttpApiGroup<
                   readonly Raffle: "Raffle"
                   readonly Visit: "Visit"
                   readonly Leaderboards: "Leaderboards"
+                  readonly Promo: "Promo"
+                  readonly Referral: "Referral"
                 }>
                 readonly item: Schema.String
               }>,
@@ -1371,6 +1424,8 @@ declare const TreasuryGroup: HttpApiGroup.HttpApiGroup<
                   readonly Raffle: "Raffle"
                   readonly Visit: "Visit"
                   readonly Leaderboards: "Leaderboards"
+                  readonly Promo: "Promo"
+                  readonly Referral: "Referral"
                 }>
                 readonly item: Schema.String
               }>,
@@ -1398,6 +1453,8 @@ declare const TreasuryGroup: HttpApiGroup.HttpApiGroup<
                   readonly Raffle: "Raffle"
                   readonly Visit: "Visit"
                   readonly Leaderboards: "Leaderboards"
+                  readonly Promo: "Promo"
+                  readonly Referral: "Referral"
                 }>
                 readonly item: Schema.String
               }>,
@@ -1474,6 +1531,8 @@ declare const TreasuryGroup: HttpApiGroup.HttpApiGroup<
                   readonly Raffle: "Raffle"
                   readonly Visit: "Visit"
                   readonly Leaderboards: "Leaderboards"
+                  readonly Promo: "Promo"
+                  readonly Referral: "Referral"
                 }>
                 readonly item: Schema.String
               }>,
@@ -1501,6 +1560,8 @@ declare const TreasuryGroup: HttpApiGroup.HttpApiGroup<
                   readonly Raffle: "Raffle"
                   readonly Visit: "Visit"
                   readonly Leaderboards: "Leaderboards"
+                  readonly Promo: "Promo"
+                  readonly Referral: "Referral"
                 }>
                 readonly item: Schema.String
               }>,
@@ -1572,6 +1633,8 @@ declare const TreasuryGroup: HttpApiGroup.HttpApiGroup<
                   readonly Raffle: "Raffle"
                   readonly Visit: "Visit"
                   readonly Leaderboards: "Leaderboards"
+                  readonly Promo: "Promo"
+                  readonly Referral: "Referral"
                 }>
                 readonly item: Schema.String
               }>,
@@ -1599,6 +1662,8 @@ declare const TreasuryGroup: HttpApiGroup.HttpApiGroup<
                   readonly Raffle: "Raffle"
                   readonly Visit: "Visit"
                   readonly Leaderboards: "Leaderboards"
+                  readonly Promo: "Promo"
+                  readonly Referral: "Referral"
                 }>
                 readonly item: Schema.String
               }>,
@@ -1716,6 +1781,8 @@ declare const TreasuryPublicGroup: HttpApiGroup.HttpApiGroup<
                     readonly Raffle: "Raffle"
                     readonly Visit: "Visit"
                     readonly Leaderboards: "Leaderboards"
+                    readonly Promo: "Promo"
+                    readonly Referral: "Referral"
                   }>
                   readonly item: Schema.String
                 }>,
@@ -1743,6 +1810,8 @@ declare const TreasuryPublicGroup: HttpApiGroup.HttpApiGroup<
                     readonly Raffle: "Raffle"
                     readonly Visit: "Visit"
                     readonly Leaderboards: "Leaderboards"
+                    readonly Promo: "Promo"
+                    readonly Referral: "Referral"
                   }>
                   readonly item: Schema.String
                 }>,
@@ -1795,6 +1864,8 @@ declare const GiftItem: Schema.Struct<{
     readonly Raffle: "Raffle"
     readonly Visit: "Visit"
     readonly Leaderboards: "Leaderboards"
+    readonly Promo: "Promo"
+    readonly Referral: "Referral"
   }>
   readonly item: Schema.String
 }>
@@ -1867,6 +1938,8 @@ declare const ItemSpec: Schema.Union<
         readonly Raffle: "Raffle"
         readonly Visit: "Visit"
         readonly Leaderboards: "Leaderboards"
+        readonly Promo: "Promo"
+        readonly Referral: "Referral"
       }>
       readonly item: Schema.String
     }>,
@@ -1947,6 +2020,8 @@ declare const OpenOffer: Schema.Struct<{
           readonly Raffle: "Raffle"
           readonly Visit: "Visit"
           readonly Leaderboards: "Leaderboards"
+          readonly Promo: "Promo"
+          readonly Referral: "Referral"
         }>
         readonly item: Schema.String
       }>,
@@ -1974,6 +2049,8 @@ declare const OpenOffer: Schema.Struct<{
           readonly Raffle: "Raffle"
           readonly Visit: "Visit"
           readonly Leaderboards: "Leaderboards"
+          readonly Promo: "Promo"
+          readonly Referral: "Referral"
         }>
         readonly item: Schema.String
       }>,
@@ -2082,6 +2159,8 @@ declare const Trade: Schema.Struct<{
           readonly Raffle: "Raffle"
           readonly Visit: "Visit"
           readonly Leaderboards: "Leaderboards"
+          readonly Promo: "Promo"
+          readonly Referral: "Referral"
         }>
         readonly item: Schema.String
       }>,
@@ -2109,6 +2188,8 @@ declare const Trade: Schema.Struct<{
           readonly Raffle: "Raffle"
           readonly Visit: "Visit"
           readonly Leaderboards: "Leaderboards"
+          readonly Promo: "Promo"
+          readonly Referral: "Referral"
         }>
         readonly item: Schema.String
       }>,
@@ -2181,6 +2262,8 @@ declare const TradeDetail: Schema.Struct<{
             readonly Raffle: "Raffle"
             readonly Visit: "Visit"
             readonly Leaderboards: "Leaderboards"
+            readonly Promo: "Promo"
+            readonly Referral: "Referral"
           }>
           readonly item: Schema.String
         }>,
@@ -2208,6 +2291,8 @@ declare const TradeDetail: Schema.Struct<{
             readonly Raffle: "Raffle"
             readonly Visit: "Visit"
             readonly Leaderboards: "Leaderboards"
+            readonly Promo: "Promo"
+            readonly Referral: "Referral"
           }>
           readonly item: Schema.String
         }>,
@@ -2246,6 +2331,8 @@ declare const TradeDetail: Schema.Struct<{
         readonly Raffle: "Raffle"
         readonly Visit: "Visit"
         readonly Leaderboards: "Leaderboards"
+        readonly Promo: "Promo"
+        readonly Referral: "Referral"
       }>
       readonly item: Schema.String
     }>
@@ -2295,6 +2382,8 @@ declare const TradeLeg: Schema.Struct<{
     readonly Raffle: "Raffle"
     readonly Visit: "Visit"
     readonly Leaderboards: "Leaderboards"
+    readonly Promo: "Promo"
+    readonly Referral: "Referral"
   }>
   readonly item: Schema.String
 }>
@@ -2342,6 +2431,8 @@ declare const TradeProposal: Schema.Struct<{
           readonly Raffle: "Raffle"
           readonly Visit: "Visit"
           readonly Leaderboards: "Leaderboards"
+          readonly Promo: "Promo"
+          readonly Referral: "Referral"
         }>
         readonly item: Schema.String
       }>,
@@ -2369,6 +2460,8 @@ declare const TradeProposal: Schema.Struct<{
           readonly Raffle: "Raffle"
           readonly Visit: "Visit"
           readonly Leaderboards: "Leaderboards"
+          readonly Promo: "Promo"
+          readonly Referral: "Referral"
         }>
         readonly item: Schema.String
       }>,

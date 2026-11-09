@@ -8,7 +8,6 @@ import type { NimblebitGame } from "@tinyburg/nimblebit-sdk/NimblebitGame";
 import type { ItemToSend, SaveUpload } from "@tinyburg/tinyburg-sdk/Sdk";
 
 import { NimblebitAuth, NimblebitError } from "@tinyburg/nimblebit-sdk";
-import * as NimblebitScopes from "@tinyburg/nimblebit-sdk/NimblebitScopes";
 import { TinyTowerClassic } from "@tinyburg/tinytower-classic-sdk";
 import { Bitizens, type Endpoints, TinyTower } from "@tinyburg/tinytower-sdk";
 import * as OAuthScope from "@yielded/auth/OAuthScope";
@@ -19,6 +18,22 @@ import { TinyTowerAccountsRepository, TinyTowerClassicAccountsRepository } from 
 import { Api } from "../../shared/api.ts";
 import { CookiePolicy, maybeCurrentUser } from "../cookies.ts";
 import { CurrentCaller, FIRST_PARTY_SCOPES, TinyburgOAuth, requireCaller } from "../oauthServer.ts";
+
+/**
+ * Whether holding `held` satisfies `requirement`, by name, exactly as
+ * `@yielded/auth`'s OAuth server checks a token: every `allOf` scope held
+ * and, when `anyOf` is present, at least one of those. A requirement with
+ * neither, or with an empty `anyOf`, is satisfied by nothing.
+ */
+const isSatisfied = (requirement: OAuthScope.Requirement, held: ReadonlySet<string>): boolean => {
+    const holds = (entry: OAuthScope.OAuthScope | OAuthScope.Described) =>
+        held.has(typeof entry === "string" ? entry : entry.name);
+    return (
+        (requirement.allOf !== undefined || requirement.anyOf !== undefined) &&
+        (requirement.allOf ?? []).every(holds) &&
+        (requirement.anyOf === undefined || requirement.anyOf.some(holds))
+    );
+};
 
 /**
  * Who may call `/v1`, and as whom.
@@ -70,10 +85,7 @@ const RequireAccessLive = Layer.effect(
                             Context.getOrUndefined(options.endpoint.annotations, OAuthScope.Required) ??
                             Context.getOrUndefined(options.group.annotations, OAuthScope.Required);
 
-                        if (
-                            requirement === undefined ||
-                            !NimblebitScopes.isSatisfied(requirement, FIRST_PARTY_SCOPES)
-                        ) {
+                        if (requirement === undefined || !isSatisfied(requirement, FIRST_PARTY_SCOPES)) {
                             return yield* new HttpApiError.Forbidden();
                         }
 

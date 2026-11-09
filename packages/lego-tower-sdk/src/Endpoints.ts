@@ -115,7 +115,7 @@ export const DevicePlayerDetailsEndpoint = HttpApiEndpoint.get(
             }),
         ],
     }
-).annotate(OAuthScope.Required, Scopes.Device.read.player_details.required);
+).annotate(OAuthScope.Required, { anyOf: [Scopes.DevicePlayerDetails, Scopes.Read, Scopes.LEGOTower] });
 
 /** @internal */
 export const DeviceVerifyDeviceEndpoint = HttpApiEndpoint.get(
@@ -136,7 +136,7 @@ export const DeviceVerifyDeviceEndpoint = HttpApiEndpoint.get(
             ),
         ],
     }
-).annotate(OAuthScope.Required, Scopes.Device.write.verify_device.required);
+).annotate(OAuthScope.Required, { anyOf: [Scopes.DeviceVerifyDevice, Scopes.Write, Scopes.LEGOTower] });
 
 /**
  * Pull the player's cloud save. VERIFIED envelope (NBSyncGameSaveResponse). No-save
@@ -196,7 +196,7 @@ export const SocialGetItemsEndpoint = HttpApiEndpoint.get("SocialGetItems", "/ge
         NotFoundResponse,
         Schema.Struct({ success: Schema.Literal("Found"), gifts: Schema.Array(Gift) }),
     ],
-}).annotate(OAuthScope.Required, Scopes.Social.read.get_items.required);
+}).annotate(OAuthScope.Required, { anyOf: [Scopes.SocialGetItems, Scopes.Read, Scopes.LEGOTower] });
 
 /**
  * DERIVED from Tiny Tower. Sends an item to a friend. Response VERIFIED
@@ -219,7 +219,7 @@ export const SocialSendItemEndpoint = HttpApiEndpoint.post(
         error: ApiErrors,
         success: [ErrorResponse, SentResponse, NotSentResponse],
     }
-).annotate(OAuthScope.Required, Scopes.Social.write.send_item.required);
+).annotate(OAuthScope.Required, { anyOf: [Scopes.SocialSendItem, Scopes.Write, Scopes.LEGOTower] });
 
 /**
  * VERIFIED envelope (NBSyncFriendGameSaveResponse); preimage
@@ -250,7 +250,7 @@ export const SocialPullFriendGameEndpoint = HttpApiEndpoint.get(
             }).pipe(Schema.encodeKeys({ checksum: "h", saveId: "id", playerId: "player_id" })),
         ],
     }
-).annotate(OAuthScope.Required, Scopes.Social.read.pull_friend_game.required);
+).annotate(OAuthScope.Required, { anyOf: [Scopes.SocialPullFriendGame, Scopes.Read, Scopes.LEGOTower] });
 
 /**
  * VERIFIED envelope (NBSyncFriendGameMetaResponse; `meta` is a flat
@@ -274,7 +274,7 @@ export const SocialPullFriendMetaEndpoint = HttpApiEndpoint.post(
             }),
         ],
     }
-).annotate(OAuthScope.Required, Scopes.Social.read.pull_friend_meta.required);
+).annotate(OAuthScope.Required, { anyOf: [Scopes.SocialPullFriendMeta, Scopes.Read, Scopes.LEGOTower] });
 
 /**
  * VERIFIED path `/get_visits/lt/:playerId/:salt/:hash`.
@@ -289,7 +289,7 @@ export const SocialGetVisitsEndpoint = HttpApiEndpoint.get("SocialGetVisits", "/
         NotFoundResponse,
         Schema.Struct({ success: Schema.Literal("Found"), gifts: Schema.Array(Gift) }),
     ],
-}).annotate(OAuthScope.Required, Scopes.Social.read.get_visits.required);
+}).annotate(OAuthScope.Required, { anyOf: [Scopes.SocialGetVisits, Scopes.Read, Scopes.LEGOTower] });
 
 /**
  * Snapshot list. VERIFIED DTO NBSyncSnapshotList { success, error, saves:

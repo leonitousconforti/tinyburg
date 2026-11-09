@@ -84,7 +84,7 @@ export const PocketPlanesSocialLive = HttpApiBuilder.group(
  */
 export const PocketPlanesApiLive = HttpApiBuilder.layer(Api).pipe(
     Layer.provide([PocketPlanesDeviceManagementLive, PocketPlanesSyncManagementLive, PocketPlanesSocialLive]),
-    Layer.provide([authorizationLiveFor(Scopes.PocketPlanes), AuthProxyApiDecodeHashLive]),
+    Layer.provide([authorizationLiveFor({ anyOf: [Scopes.Read, Scopes.PocketPlanes] }), AuthProxyApiDecodeHashLive]),
     Layer.provide(
         NimblebitAuth.layerDirectConfig(
             Config.schema(NimblebitConfig.NimblebitAuthKeySchema, "POCKETPLANES_NIMBLEBIT_AUTH_KEY")

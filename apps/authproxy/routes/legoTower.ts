@@ -101,7 +101,7 @@ export const LegoTowerApiLive = HttpApiBuilder.layer(Api).pipe(
         LegoTowerTradeLive,
         LegoTowerSocialLive,
     ]),
-    Layer.provide([authorizationLiveFor(Scopes.LEGOTower), AuthProxyApiDecodeHashLive]),
+    Layer.provide([authorizationLiveFor({ anyOf: [Scopes.Read, Scopes.LEGOTower] }), AuthProxyApiDecodeHashLive]),
     Layer.provide(
         NimblebitAuth.layerDirectConfig(
             Config.schema(NimblebitConfig.NimblebitAuthKeySchema, "LEGOTOWER_NIMBLEBIT_AUTH_KEY")

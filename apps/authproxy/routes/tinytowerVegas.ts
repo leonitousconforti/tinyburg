@@ -83,7 +83,7 @@ export const TinyTowerVegasSocialLive = HttpApiBuilder.group(
  */
 export const TinyTowerVegasApiLive = HttpApiBuilder.layer(Api).pipe(
     Layer.provide([TinyTowerVegasDeviceManagementLive, TinyTowerVegasSyncManagementLive, TinyTowerVegasSocialLive]),
-    Layer.provide([authorizationLiveFor(Scopes.TinyTowerVegas), AuthProxyApiDecodeHashLive]),
+    Layer.provide([authorizationLiveFor({ anyOf: [Scopes.Read, Scopes.TinyTowerVegas] }), AuthProxyApiDecodeHashLive]),
     Layer.provide(
         NimblebitAuth.layerDirectConfig(
             Config.schema(NimblebitConfig.NimblebitAuthKeySchema, "TINYTOWERVEGAS_NIMBLEBIT_AUTH_KEY")

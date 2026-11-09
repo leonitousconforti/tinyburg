@@ -26,12 +26,15 @@ export * as Endpoints from "./Endpoints.ts"
 export * as Game from "./Game.ts"
 
 /**
- * The scopes the TinyTower Classic api is guarded by: the same areas as
- * TinyTower, under the `tinytowerclassic` game, so `tinytowerclassic:read`
- * grants every read in Classic and `tinytowerclassic:sync:pull_save` one
- * endpoint. The tree is built by `@tinyburg/nimblebit-sdk`'s `defineGame`
- * from TinyTower's own area spec, so the two games cannot drift apart in
- * shape, only in name.
+ * The scopes the TinyTower Classic api is guarded by: `tinytowerclassic` for
+ * the whole game, `tinytowerclassic:read` and `tinytowerclassic:write` for
+ * every endpoint that only looks or that changes a player's game, and one scope
+ * per endpoint, such as `tinytowerclassic:device:player_details`.
+ *
+ * Each endpoint accepts its own scope, its side's and the game's, narrowest
+ * first: `{ anyOf: [DevicePlayerDetails, Read, TinyTowerClassic] }`. They are
+ * TinyTower's scopes under the `tinytowerclassic` game, with the same
+ * descriptions.
  *
  * @since 1.0.0
  * @category Scopes

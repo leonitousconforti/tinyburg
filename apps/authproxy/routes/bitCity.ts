@@ -80,7 +80,7 @@ export const BitCitySocialLive = HttpApiBuilder.group(
  */
 export const BitCityApiLive = HttpApiBuilder.layer(Api).pipe(
     Layer.provide([BitCityDeviceManagementLive, BitCitySyncManagementLive, BitCitySocialLive]),
-    Layer.provide([authorizationLiveFor(Scopes.BitCity), AuthProxyApiDecodeHashLive]),
+    Layer.provide([authorizationLiveFor({ anyOf: [Scopes.Read, Scopes.BitCity] }), AuthProxyApiDecodeHashLive]),
     Layer.provide(
         NimblebitAuth.layerDirectConfig(
             Config.schema(NimblebitConfig.NimblebitAuthKeySchema, "BITCITY_NIMBLEBIT_AUTH_KEY")

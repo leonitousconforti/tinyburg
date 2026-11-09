@@ -82,7 +82,7 @@ export const DiscoZooSocialLive = HttpApiBuilder.group(
  */
 export const DiscoZooApiLive = HttpApiBuilder.layer(Api).pipe(
     Layer.provide([DiscoZooDeviceManagementLive, DiscoZooSyncManagementLive, DiscoZooSocialLive]),
-    Layer.provide([authorizationLiveFor(Scopes.DiscoZoo), AuthProxyApiDecodeHashLive]),
+    Layer.provide([authorizationLiveFor({ anyOf: [Scopes.Read, Scopes.DiscoZoo] }), AuthProxyApiDecodeHashLive]),
     Layer.provide(
         NimblebitAuth.layerDirectConfig(
             Config.schema(NimblebitConfig.NimblebitAuthKeySchema, "DISCOZOO_NIMBLEBIT_AUTH_KEY")

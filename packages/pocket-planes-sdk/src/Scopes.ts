@@ -1,92 +1,133 @@
 /**
- * The scopes the Pocket Planes api is guarded by, as a game-rooted tree, built with
- * `@tinyburg/nimblebit-sdk`'s `defineGame`. Only the endpoints this sdk defines
- * are covered; areas without both a read and a write side are left out until
- * their endpoints exist.
+ * The scopes the Pocket Planes api is guarded by: `pocketplanes` for the whole
+ * game, `pocketplanes:read` and `pocketplanes:write` for every endpoint that
+ * only looks or that changes a player's game, and one scope per endpoint, such
+ * as `pocketplanes:device:player_details`.
+ *
+ * Each endpoint accepts its own scope, its side's and the game's, narrowest
+ * first: `{ anyOf: [DevicePlayerDetails, Read, PocketPlanes] }`. An endpoint
+ * this module has no scope for is left unscoped, and the authproxy guards it
+ * with `pocketplanes:read` or `pocketplanes`.
  *
  * @since 1.0.0
  * @category Scopes
  */
 
-import { type Game, type ScopeDescription, defineGame } from "@tinyburg/nimblebit-sdk/NimblebitScopes";
+import * as OAuthScope from "@yielded/auth/OAuthScope";
 
 /**
  * @since 1.0.0
- * @category Games
+ * @category Game
  */
-export const PocketPlanes = defineGame({
-    name: "pocketplanes",
+export const PocketPlanes: OAuthScope.Described = {
+    name: OAuthScope.make("pocketplanes"),
     description: "Pocket Planes",
-    read: { description: "Everything in Pocket Planes that only looks" },
-    write: { description: "Everything in Pocket Planes that changes a player's game" },
-    areas: {
-        device: {
-            description: "Player accounts and their devices",
-            read: {
-                description: "Look up player accounts",
-                leaves: {
-                    player_details: "Look up a player's public profile details",
-                },
-            },
-            write: {
-                description: "Change a player's account or devices",
-                leaves: {
-                    register_email: "Attach an email address to a player",
-                    verify_device: "Complete a device verification code",
-                },
-            },
-        },
-        social: {
-            description: "Gifts, visits and friends",
-            read: {
-                description: "See gifts, visits and friends' games",
-                leaves: {
-                    get_visits: "See who has visited a player",
-                    get_gifts: "See the gifts waiting for a player",
-                    request_items: "See the item requests waiting for a player",
-                    pull_friend_meta: "Fetch metadata about a player's friends",
-                    pull_friend_game: "Download a friend's game data",
-                },
-            },
-            write: {
-                description: "Send and accept gifts and items",
-                leaves: {
-                    send_item: "Send items to another player",
-                    receive_item: "Accept an item on a player's behalf",
-                },
-            },
-        },
-    },
-});
-
-/**
- * The game's areas, by name, for annotating endpoints.
- *
- * @since 1.0.0
- * @category Areas
- */
-export const { device: Device, social: Social } = PocketPlanes.areas;
+};
 
 /**
  * @since 1.0.0
- * @category Tree
+ * @category Game
  */
-export const Games: ReadonlyArray<Game> = [PocketPlanes];
+export const Read: OAuthScope.Described = {
+    name: OAuthScope.make("pocketplanes:read"),
+    description: "Everything in Pocket Planes that only looks",
+};
 
 /**
  * @since 1.0.0
- * @category Tree
+ * @category Game
  */
-export const all = (): ReadonlyArray<ScopeDescription> =>
-    Games.flatMap((game) => [
-        game,
-        game.read,
-        game.write,
-        ...Object.values(game.areas).flatMap((area) => [
-            area,
-            area.read,
-            ...area.read.children,
-            area.write,
-            ...area.write.children,
-        ]),
-    ]);
+export const Write: OAuthScope.Described = {
+    name: OAuthScope.make("pocketplanes:write"),
+    description: "Everything in Pocket Planes that changes a player's game",
+};
+
+/**
+ * @since 1.0.0
+ * @category Endpoints
+ */
+export const DevicePlayerDetails: OAuthScope.Described = {
+    name: OAuthScope.make("pocketplanes:device:player_details"),
+    description: "Look up a player's public profile details",
+};
+
+/**
+ * @since 1.0.0
+ * @category Endpoints
+ */
+export const DeviceRegisterEmail: OAuthScope.Described = {
+    name: OAuthScope.make("pocketplanes:device:register_email"),
+    description: "Attach an email address to a player",
+};
+
+/**
+ * @since 1.0.0
+ * @category Endpoints
+ */
+export const DeviceVerifyDevice: OAuthScope.Described = {
+    name: OAuthScope.make("pocketplanes:device:verify_device"),
+    description: "Complete a device verification code",
+};
+
+/**
+ * @since 1.0.0
+ * @category Endpoints
+ */
+export const SocialGetVisits: OAuthScope.Described = {
+    name: OAuthScope.make("pocketplanes:social:get_visits"),
+    description: "See who has visited a player",
+};
+
+/**
+ * @since 1.0.0
+ * @category Endpoints
+ */
+export const SocialGetGifts: OAuthScope.Described = {
+    name: OAuthScope.make("pocketplanes:social:get_gifts"),
+    description: "See the gifts waiting for a player",
+};
+
+/**
+ * @since 1.0.0
+ * @category Endpoints
+ */
+export const SocialRequestItems: OAuthScope.Described = {
+    name: OAuthScope.make("pocketplanes:social:request_items"),
+    description: "See the item requests waiting for a player",
+};
+
+/**
+ * @since 1.0.0
+ * @category Endpoints
+ */
+export const SocialPullFriendMeta: OAuthScope.Described = {
+    name: OAuthScope.make("pocketplanes:social:pull_friend_meta"),
+    description: "Fetch metadata about a player's friends",
+};
+
+/**
+ * @since 1.0.0
+ * @category Endpoints
+ */
+export const SocialPullFriendGame: OAuthScope.Described = {
+    name: OAuthScope.make("pocketplanes:social:pull_friend_game"),
+    description: "Download a friend's game data",
+};
+
+/**
+ * @since 1.0.0
+ * @category Endpoints
+ */
+export const SocialSendItem: OAuthScope.Described = {
+    name: OAuthScope.make("pocketplanes:social:send_item"),
+    description: "Send items to another player",
+};
+
+/**
+ * @since 1.0.0
+ * @category Endpoints
+ */
+export const SocialReceiveItem: OAuthScope.Described = {
+    name: OAuthScope.make("pocketplanes:social:receive_item"),
+    description: "Accept an item on a player's behalf",
+};

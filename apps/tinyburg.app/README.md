@@ -42,19 +42,19 @@ the ID token already carries the claims.
 | `tinytower`                                      | Everything below                                                                               |
 | `tinytower:read`                                 | Every read: list linked accounts, pull saves and snapshots, gifts, visits, friends' towers     |
 | `tinytower:write`                                | Every write: link and unlink accounts, push saves and snapshots, raffles, gifts, items, visits |
-| `tinytower:<leaf>`                               | One endpoint, e.g. `tinytower:pull_save`, `tinytower:list_accounts`                            |
-| `tinytowerclassic`, `tinytowerclassic:read`, ... | The same tree for TinyTower Classic, at `/v1/tinytowerclassic/...`                             |
-| `treasury`, `treasury:read`, `treasury:write`    | The treasury's escrowed trades, at `/v1/treasury/...`, with a leaf per endpoint                |
+| `tinytower:<endpoint>`                           | One endpoint, e.g. `tinytower:pull_save`, `tinytower:list_accounts`                            |
+| `tinytowerclassic`, `tinytowerclassic:read`, ... | The same scopes for TinyTower Classic, at `/v1/tinytowerclassic/...`                           |
+| `treasury`, `treasury:read`, `treasury:write`    | The treasury's escrowed trades, at `/v1/treasury/...`, with a scope per endpoint               |
 
-The game scopes are a tree declared once in `@tinyburg/tinyburg-sdk`'s `Scopes`
-module, one area per game with a leaf per endpoint of the tinyburg api, and the
-treasury's area is declared the same way in `@tinyburg/treasury-sdk`: each
-endpoint is annotated with `OAuthScope.Required`, accepting its leaf, its
-`:read`/`:write` branch, and the area, and the consent screen, the developers
-page and discovery all read the same trees. Only the games served here are
+The game scopes are declared once in `@tinyburg/tinyburg-sdk`'s `Scopes` module,
+the same for every game with one per endpoint of the tinyburg api, and the
+treasury's are declared the same way in `@tinyburg/treasury-sdk`: each endpoint
+is annotated with `OAuthScope.Required`, accepting its own scope, the `:read` or
+`:write` scope, and the whole game, and the consent screen, the developers page
+and discovery all read the same lists. Only the games served here are
 declared (`shared/scopes.ts`): the access tokens carry the declared scopes,
 and `@yielded/auth` refuses JWT access tokens once they pass 4096 characters
-joined, which every game's tree would. A client may only request scopes
+joined, which every game's scopes would. A client may only request scopes
 it is registered for: anything else is refused with an error page before
 consent, and the token endpoint grants only registered scopes again on every
 refresh.

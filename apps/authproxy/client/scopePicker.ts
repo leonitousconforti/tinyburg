@@ -1,37 +1,27 @@
 /**
- * The scope tree as a picker, shared by the create-key form and the admin
+ * The scopes as a picker, shared by the create-key form and the admin
  * scope editor.
  *
- * One section per game. Its header is the game itself, then the game's
- * `:read` and `:write` branches, which span every area; under those, one
- * card per area with the area, its `:read` branch and the leaves under it,
- * then its `:write` branch and its leaves, each a plain checkbox line
- * indented one step deeper than the one above. Picking a node grants
- * everything beneath it, so the lines under a picked node show as checked and
- * cannot be unpicked on their own - they are implied, not chosen. A node the
- * page does not offer at all (the writes, on the self-serve form) is still
- * listed, muted with its box disabled, so a visitor can see what exists and
- * what they would have to ask for.
+ * One section per game. Its header is the game itself, then one card each for
+ * the game's `:read` and `:write` scopes with the endpoint scopes under them,
+ * each a plain checkbox line indented one step deeper than the one above.
+ * Picking a scope grants everything beneath it, so the lines under a picked
+ * scope show as checked and cannot be unpicked on their own - they are
+ * implied, not chosen. A scope the page does not offer at all (the writes, on
+ * the self-serve form) is still listed, muted with its box disabled, so a
+ * visitor can see what exists and what they would have to ask for.
  *
  * A selection is the nodes that were picked and nothing beneath them: a key
  * that lists both `tinytower:read` and `tinytower:sync:pull_save` says nothing
  * the shorter one does not, so {@link toggleScope} keeps it to the shorter one.
  */
 
-import type { CatalogArea, CatalogGame, CatalogNode } from "./backend.ts";
+import type { CatalogBranch, CatalogGame, CatalogNode } from "./backend.ts";
 import type { Html, HtmlBuilder } from "foldkit/html";
 
-const areaNodes = (area: CatalogArea): ReadonlyArray<CatalogNode> => [
-    area,
-    area.read,
-    ...area.read.children,
-    area.write,
-    ...area.write.children,
-];
-
-/** Every node in the tree, in display order. */
+/** Every scope in the catalog, in display order. */
 export const flatten = (catalog: ReadonlyArray<CatalogGame>): ReadonlyArray<CatalogNode> =>
-    catalog.flatMap((game) => [game, game.read, game.write, ...game.areas.flatMap(areaNodes)]);
+    catalog.flatMap((game) => [game, game.read, ...game.read.children, game.write, ...game.write.children]);
 
 /** The catalog as a lookup, for the chips on a key row. */
 export const descriptionsOf = (catalog: ReadonlyArray<CatalogGame>): ReadonlyMap<string, string> =>
@@ -39,26 +29,21 @@ export const descriptionsOf = (catalog: ReadonlyArray<CatalogGame>): ReadonlyMap
 
 /**
  * Node name to the names of every node above it. What a node is beneath is
- * what grants it: an area's read branch is under the area and under the
- * game's read branch, both of which are under the game.
+ * what grants it: an endpoint scope is under its side's scope and the game,
+ * and each side is under the game.
  */
 const ancestorsOf = (catalog: ReadonlyArray<CatalogGame>): ReadonlyMap<string, ReadonlyArray<string>> =>
     new Map(
         catalog.flatMap((game): Array<[string, ReadonlyArray<string>]> => [
             [game.read.name, [game.name]],
             [game.write.name, [game.name]],
-            ...game.areas.flatMap((area): Array<[string, ReadonlyArray<string>]> => [
-                [area.name, [game.name]],
-                [area.read.name, [area.name, game.read.name, game.name]],
-                [area.write.name, [area.name, game.write.name, game.name]],
-                ...area.read.children.map((leaf): [string, ReadonlyArray<string>] => [
-                    leaf.name,
-                    [area.read.name, area.name, game.read.name, game.name],
-                ]),
-                ...area.write.children.map((leaf): [string, ReadonlyArray<string>] => [
-                    leaf.name,
-                    [area.write.name, area.name, game.write.name, game.name],
-                ]),
+            ...game.read.children.map((leaf): [string, ReadonlyArray<string>] => [
+                leaf.name,
+                [game.read.name, game.name],
+            ]),
+            ...game.write.children.map((leaf): [string, ReadonlyArray<string>] => [
+                leaf.name,
+                [game.write.name, game.name],
             ]),
         ])
     );
@@ -111,7 +96,7 @@ export interface PickerOptions<M> {
     readonly onSelectGame: (name: string) => M;
 }
 
-type Rank = "game" | "area" | "branch" | "leaf";
+type Rank = "game" | "branch" | "leaf";
 
 /**
  * The name as a row shows it. Under a game's heading every name starts with
@@ -137,10 +122,10 @@ const line = <M>(
 
     // Every branch and leaf has a box, disabled where it cannot be picked:
     // because an ancestor already grants it, or because this page does not
-    // offer it. An unoffered game or area gets none, being a heading over
-    // halves of which one may well be on offer.
+    // offer it. An unoffered game gets none, being a heading over halves of
+    // which one may well be on offer.
     const control =
-        !offered && (rank === "game" || rank === "area")
+        !offered && rank === "game"
             ? h.empty
             : h.input([
                   h.Type("checkbox"),
@@ -151,8 +136,7 @@ const line = <M>(
               ]);
 
     const tone = offered ? (implied ? "text-gray-500" : "text-gray-800") : "text-gray-400";
-    const size =
-        rank === "game" ? "text-2xl" : rank === "area" ? "text-xl" : rank === "branch" ? "text-lg" : "text-base";
+    const size = rank === "game" ? "text-2xl" : rank === "branch" ? "text-lg" : "text-base";
 
     return h.label(
         [h.Class(`flex items-start gap-2 ${enabled ? "cursor-pointer" : ""}`.trim())],
@@ -169,15 +153,15 @@ const line = <M>(
     );
 };
 
-const branchBlock = <M>(
+const branchCard = <M>(
     h: HtmlBuilder<M>,
     options: PickerOptions<M>,
     ancestors: ReadonlyMap<string, ReadonlyArray<string>>,
-    branch: CatalogArea["read"],
+    branch: CatalogBranch,
     strip: string
 ): Html =>
     h.div(
-        [h.Class("flex flex-col gap-1")],
+        [h.Class("flex flex-col gap-1 rounded-lg border-2 border-gray-300 bg-white p-3")],
         [
             line(h, options, ancestors, branch, "branch", strip),
             h.div(
@@ -187,33 +171,12 @@ const branchBlock = <M>(
         ]
     );
 
-const areaCard = <M>(
-    h: HtmlBuilder<M>,
-    options: PickerOptions<M>,
-    ancestors: ReadonlyMap<string, ReadonlyArray<string>>,
-    area: CatalogArea,
-    strip: string
-): Html =>
-    h.div(
-        [h.Class("flex flex-col gap-2 rounded-lg border-2 border-gray-300 bg-white p-3")],
-        [
-            line(h, options, ancestors, area, "area", strip),
-            h.div(
-                [h.Class("ml-5 flex flex-col gap-2")],
-                [
-                    branchBlock(h, options, ancestors, area.read, strip),
-                    branchBlock(h, options, ancestors, area.write, strip),
-                ]
-            ),
-        ]
-    );
-
 const tabClass =
     "font-mono -mb-0.5 cursor-pointer rounded-t-lg border-2 border-b-0 px-3 py-2 text-base transition-colors";
 const activeTabTone = "border-gray-300 bg-white text-gray-800";
 const inactiveTabTone = "border-transparent bg-gray-100 text-gray-500 hover:text-gray-800";
 
-/** One game's block: its heading and branches, then a card per area. */
+/** One game's block: its heading, then a card each for its reads and its writes. */
 const gameSection = <M>(
     h: HtmlBuilder<M>,
     options: PickerOptions<M>,
@@ -223,31 +186,22 @@ const gameSection = <M>(
     h.section(
         [h.Class("flex flex-col gap-3")],
         [
-            h.div(
-                [h.Class("flex flex-col gap-1")],
-                [
-                    line(h, options, ancestors, game, "game"),
-                    h.div(
-                        [h.Class("ml-5 flex flex-col gap-1")],
-                        [
-                            line(h, options, ancestors, game.read, "branch"),
-                            line(h, options, ancestors, game.write, "branch"),
-                        ]
-                    ),
-                ]
-            ),
+            line(h, options, ancestors, game, "game"),
             h.div(
                 [h.Class("grid gap-3 sm:grid-cols-2")],
-                game.areas.map((area) => areaCard(h, options, ancestors, area, game.name))
+                [
+                    branchCard(h, options, ancestors, game.read, game.name),
+                    branchCard(h, options, ancestors, game.write, game.name),
+                ]
             ),
         ]
     );
 
 /**
- * The tree as tabs: one tab per game, and only the chosen game's tree below
- * it, its areas two up where there is room. Every game's scopes are still in
- * the one selection, so a key can span games; the tabs only decide what is on
- * screen.
+ * The scopes as tabs: one tab per game, and only the chosen game's scopes
+ * below it, its reads and writes side by side where there is room. Every
+ * game's scopes are still in the one selection, so a key can span games; the
+ * tabs only decide what is on screen.
  */
 export const scopePicker = <M>(h: HtmlBuilder<M>, options: PickerOptions<M>): Html => {
     const ancestors = ancestorsOf(options.catalog);

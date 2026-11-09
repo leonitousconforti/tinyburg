@@ -56,7 +56,7 @@ export const ScopeCatalogNode = Schema.Struct({
 });
 
 /**
- * A `:read` or `:write` branch and the leaves it grants.
+ * A game's `:read` or `:write` scope and the endpoint scopes it covers.
  *
  * @since 1.0.0
  * @category Schemas
@@ -67,35 +67,22 @@ export const ScopeCatalogBranch = Schema.Struct({
 });
 
 /**
- * One area of the api, granting both of its branches.
- *
- * @since 1.0.0
- * @category Schemas
- */
-export const ScopeCatalogArea = Schema.Struct({
-    ...ScopeCatalogNode.fields,
-    read: ScopeCatalogBranch,
-    write: ScopeCatalogBranch,
-});
-
-/**
- * A game: its own `:read` and `:write` branches, which span every area, and
- * the areas beneath it.
+ * A game: the scope for all of it, then its `:read` and `:write` scopes, each
+ * with the endpoint scopes it covers.
  *
  * @since 1.0.0
  * @category Schemas
  */
 export const ScopeCatalogGame = Schema.Struct({
     ...ScopeCatalogNode.fields,
-    read: ScopeCatalogNode,
-    write: ScopeCatalogNode,
-    areas: Schema.Array(ScopeCatalogArea),
+    read: ScopeCatalogBranch,
+    write: ScopeCatalogBranch,
 });
 
 /**
- * The scope catalog, served rather than bundled. It is read off the TinyTower
+ * The scope catalog, served rather than bundled. It is read off every game's
  * endpoint definitions on the server, which the browser has no reason to
- * carry for the sake of a tree of strings. Public: it describes what the proxy
+ * carry for the sake of a list of strings. Public: it describes what the proxy
  * can do, not who may do it.
  */
 const ScopesGroup = HttpApiGroup.make("ScopesGroup").add(
