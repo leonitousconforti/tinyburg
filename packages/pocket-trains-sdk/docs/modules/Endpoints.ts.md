@@ -8,28 +8,35 @@ parent: Modules
 
 Pocket Trains (game code `pt`) NBSync api endpoints.
 
-Signing: a random `salt` (signed int32) goes in the path, and `hash` is
-`md5(<preimage> + <game secret salt>)` with the preimage
-`pt/<playerId>/<salt><playerAuthKey>` (variants noted per endpoint). The
-secret salt is the value extracted from `NBSync._ss`.
+Signing: a random `salt` (uint32 here; no negative game salt has been
+observed) goes in the path, and `hash` is `md5(<preimage> + <game secret
+salt>)` with the preimage `pt/<playerId>/<salt><playerAuthKey>` (variants
+noted per endpoint). The secret salt is the value extracted from `NBSync._ss`.
+The game itself signs every NBSync request it was seen making with SHA-256
+over the same preimage plus a second 64-char secret derived via `NBSync.Q`.
+The server accepts both schemes.
 
-Verification (live server + Frida DTO inspection of the game, 2026-08-26):
+Provenance, per endpoint (2026-11-09):
 
-- Signing is MD5, server-validated (same scheme as Tiny Tower / Pocket
-  Planes; the game computes SHA-256 only for the unauthenticated `register`).
-- Response envelopes VERIFIED by reading the game's DTO classes at runtime:
-  register, player_details, sync/pull (NBSyncGameSaveResponse), current_version,
-  verify_device, friend/pull_game, friend/pull_meta (meta is a flat
-  Dictionary<String,Object> on pt), send_item (NBSyncItemsSendResponse),
-  get_items (NBSyncItemsGetResponse: success/gifts, NO `total` unlike pp).
-  `get_items` was also exercised live with a burnbot.
-- pt-specific gifting: `get_gifts_pt` -> NBSyncGetPTGiftResponse with
-  NBSyncGetPTGift elements, plus a gift-id flow (NBSyncGetGiftIDResponse,
-  `friend/pull_meta_gift_id`). The get_gifts_pt REQUEST params are UNCONFIRMED
-  (the tried `/get_gifts_pt/pt/:playerId/:salt/:hash` form was rejected), so
-  that endpoint is marked accordingly.
+- OBSERVED: the game made this request (Play build 1.10.2).
+- REPLAYED: the SDK's client function succeeded against the live server.
+- DTO: the game's response class has these fields.
+- LITERAL: the path is compiled into the game but was not exercised.
+- DERIVED: inferred from Tiny Tower.
 
-Game-specific save/meta schemas are left as `Schema.Unknown` placeholders.
+POST bodies: the game was seen posting form fields (friend/pull_meta), but a
+`Schema.Struct` payload is sent as JSON. Whether the server accepts JSON is
+unverified.
+
+Not modelled yet (LITERAL only): `friend/pull_meta_gift_id`, `send_pt`,
+`register_pt`, `register_email`, `new_id/verify`. Facebook and Play Games
+login flows: `register_fb`, `swap_fb`, `register_pg`, `swap_pg`, `check_pg`.
+The game also fetches an unsigned iCalendar from
+`s3.amazonaws.com/NBStatic/sync/tt/current.ics` (OBSERVED), which is not an
+NBSync endpoint.
+
+Game-specific save, meta and gift schemas are left as `Schema.Unknown`
+placeholders where their wire format was not observed.
 
 Since v1.0.0
 
@@ -242,7 +249,17 @@ declare const Api: HttpApi.HttpApi<
             | Schema.Struct<{ readonly success: Schema.Literal<"NotFound"> }>
             | Schema.Struct<{
                 readonly success: Schema.Literal<"Found">
-                readonly gifts: Schema.$Array<Schema.Unknown>
+                readonly gifts: Schema.$Array<
+                  Schema.Struct<{
+                    readonly gift_id: Schema.String
+                    readonly gift_to: Schema.String
+                    readonly gift_from: Schema.String
+                    readonly gift_type: Schema.String
+                    readonly gift_str: Schema.String
+                    readonly h: Schema.String
+                    readonly c: Schema.optionalKey<Schema.Finite>
+                  }>
+                >
               }>
           >,
           Schema.toCodecJson<
@@ -381,7 +398,7 @@ declare const Api: HttpApi.HttpApi<
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/pocket-trains-sdk/src/Endpoints.ts#L325)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/pocket-trains-sdk/src/Endpoints.ts#L389)
 
 Since v1.0.0
 
@@ -389,25 +406,34 @@ Since v1.0.0
 
 ## Gift
 
-A gift/item in the general item channel (get_items / send_item). Verified DTO
-NBSyncItemsGift on pt: `{gift_id, gift_to, gift_from, gift_type, item_type,
-gift_str, h}` (no `c`, unlike pp). Left open for the data-schema work.
+A gift in the general item channel (get_items / send_item), as REPLAYED from
+get_items: every field is a string except `c`, a number. DTO NBSyncItemsGift
+has the same string fields plus `item_type` (NBSyncItemType), which the server
+does not send, and no `c`.
 
 **Signature**
 
 ```ts
-declare const Gift: Schema.Unknown
+declare const Gift: Schema.Struct<{
+  readonly gift_id: Schema.String
+  readonly gift_to: Schema.String
+  readonly gift_from: Schema.String
+  readonly gift_type: Schema.String
+  readonly gift_str: Schema.String
+  readonly h: Schema.String
+  readonly c: Schema.optionalKey<Schema.Finite>
+}>
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/pocket-trains-sdk/src/Endpoints.ts#L69)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/pocket-trains-sdk/src/Endpoints.ts#L78)
 
 Since v1.0.0
 
 ## PTGift
 
-A Pocket Trains gift (get_gifts_pt channel). Verified DTO NBSyncGetPTGift:
-`{gift_id, gift_to, gift_from, alt_id, gift_type, gift_str: int, gift_quantity:
-int, h}`. Left open for the data-schema work.
+A Pocket Trains gift (get_gifts_pt channel), not seen on the wire. DTO
+NBSyncGetPTGift: `{gift_id: String, gift_to: String, gift_from: String, alt_id:
+String, gift_type: String, gift_str: Int32, gift_quantity: Int32, h: String}`.
 
 **Signature**
 
@@ -415,6 +441,6 @@ int, h}`. Left open for the data-schema work.
 declare const PTGift: Schema.Unknown
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/pocket-trains-sdk/src/Endpoints.ts#L79)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/pocket-trains-sdk/src/Endpoints.ts#L97)
 
 Since v1.0.0
