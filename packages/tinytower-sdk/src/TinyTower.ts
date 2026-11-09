@@ -58,19 +58,10 @@ const FriendWithoutTimestamp = Schema.TemplateLiteralParser([Schema.String, "|",
 );
 
 /**
- * A comma separated list of names, where an empty string is an empty list.
- * Splitting it as it stands would give a list holding one empty name, so a
- * wardrobe a trade had emptied would read back holding a nameless item.
+ * A comma separated list of names. A wardrobe a trade had emptied is an empty
+ * string, and has to read back as an empty list, not one nameless item.
  */
-const NameList = Schema.String.pipe(
-    Schema.decodeTo(
-        Schema.Array(Schema.String),
-        SchemaTransformation.transform({
-            decode: (list): ReadonlyArray<string> => (list === "" ? [] : list.split(",")),
-            encode: (names: ReadonlyArray<string>) => names.join(","),
-        })
-    )
-);
+const NameList = Schema.String.pipe(NimblebitSchema.split());
 
 const FriendSchema = Schema.Union([FriendWithTimestamp, FriendWithoutTimestamp]);
 const FriendsSchema = Schema.String.pipe(NimblebitSchema.split(), Schema.decodeTo(Schema.Array(FriendSchema)));

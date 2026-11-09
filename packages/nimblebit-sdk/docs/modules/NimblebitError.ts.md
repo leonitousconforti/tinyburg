@@ -15,8 +15,8 @@ Since v1.0.0
 ## Exports Grouped by Category
 
 - [Errors](#errors)
-  - [NimblebitError](#nimblebiterror)
-  - [NimblebitError (type alias)](#nimblebiterror-type-alias)
+  - [NimblebitError (class)](#nimblebiterror-class)
+    - [[TypeId] (property)](#typeid-property)
   - [isNimblebitError](#isnimblebiterror)
 - [Type ids](#type-ids)
   - [TypeId](#typeid)
@@ -26,29 +26,27 @@ Since v1.0.0
 
 # Errors
 
-## NimblebitError
+## NimblebitError (class)
 
 **Signature**
 
 ```ts
-declare const NimblebitError: typeof internal.NimblebitError
+declare class NimblebitError
+```
+
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/NimblebitError.ts#L33)
+
+Since v1.0.0
+
+### [TypeId] (property)
+
+**Signature**
+
+```ts
+readonly [TypeId]: "~@tinyburg/nimblebit-sdk/NimblebitError"
 ```
 
 [Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/NimblebitError.ts#L38)
-
-Since v1.0.0
-
-## NimblebitError (type alias)
-
-**Signature**
-
-```ts
-type NimblebitError = internal.NimblebitError
-```
-
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/NimblebitError.ts#L32)
-
-Since v1.0.0
 
 ## isNimblebitError
 
@@ -58,7 +56,7 @@ Since v1.0.0
 declare const isNimblebitError: (u: unknown) => u is NimblebitError
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/NimblebitError.ts#L26)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/NimblebitError.ts#L27)
 
 Since v1.0.0
 
@@ -72,7 +70,7 @@ Since v1.0.0
 declare const TypeId: "~@tinyburg/nimblebit-sdk/NimblebitError"
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/NimblebitError.ts#L14)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/NimblebitError.ts#L15)
 
 Since v1.0.0
 
@@ -84,6 +82,6 @@ Since v1.0.0
 type TypeId = "~@tinyburg/nimblebit-sdk/NimblebitError"
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/NimblebitError.ts#L20)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/NimblebitError.ts#L21)
 
 Since v1.0.0
