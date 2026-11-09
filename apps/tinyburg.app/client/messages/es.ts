@@ -325,7 +325,7 @@ export const es: Messages = {
         step1: "Paso 1 de 2",
         step2: "Paso 2 de 2",
         friendCodeLabel: "Código de amigo",
-        friendCodeTitle: "Hasta 5 letras o números",
+        friendCodeTitle: "Hasta 6 letras o números",
         friendCodeHint: "Lo encontrarás en la pestaña Amigos de TinyTower",
         emailLabel: "Correo de sincronización en la nube",
         emailHint:

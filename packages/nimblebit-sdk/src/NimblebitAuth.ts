@@ -9,7 +9,7 @@ import type * as PlatformError from "effect/PlatformError";
 
 import * as Config from "effect/Config";
 import * as Context from "effect/Context";
-import { SecureRandom } from "effect/crypto";
+import { Digest, SecureRandom } from "effect/crypto";
 import * as Effect from "effect/Effect";
 import * as Layer from "effect/Layer";
 import * as Random from "effect/Random";
@@ -56,11 +56,136 @@ export class NimblebitAuth extends Context.Service<
         NimblebitGame,
         ReadonlyArray<Schema.Schema.Type<typeof NimblebitConfig.AuthenticatedPlayerSchema>>
     > = {
-        bitcity: [],
-        discozoo: [],
-        legotower: [],
-        pocketplanes: [],
-        pockettrains: [],
+        bitcity: [
+            {
+                playerId: NimblebitConfig.PlayerIdSchema.make("C9N13"),
+                playerAuthKey: NimblebitConfig.PlayerAuthKeySchema.make(
+                    Redacted.make("9c7d1d07-4b0d-4906-b8f9-80796d9aad24")
+                ),
+            },
+            {
+                playerId: NimblebitConfig.PlayerIdSchema.make("C9N14"),
+                playerAuthKey: NimblebitConfig.PlayerAuthKeySchema.make(
+                    Redacted.make("85601533-5cd4-4810-90a1-54fcdbc55ba6")
+                ),
+            },
+            {
+                playerId: NimblebitConfig.PlayerIdSchema.make("C9N15"),
+                playerAuthKey: NimblebitConfig.PlayerAuthKeySchema.make(
+                    Redacted.make("1d647bbc-640d-4b8f-8f7a-8a1e1fa89821")
+                ),
+            },
+            {
+                playerId: NimblebitConfig.PlayerIdSchema.make("C9N16"),
+                playerAuthKey: NimblebitConfig.PlayerAuthKeySchema.make(
+                    Redacted.make("db77c437-b69d-4979-a373-ee73a8ac5e63")
+                ),
+            },
+        ],
+        discozoo: [
+            {
+                playerId: NimblebitConfig.PlayerIdSchema.make("1V9KS"),
+                playerAuthKey: NimblebitConfig.PlayerAuthKeySchema.make(
+                    Redacted.make("720bc327-dc6b-4a1c-b878-3df782432142")
+                ),
+            },
+            {
+                playerId: NimblebitConfig.PlayerIdSchema.make("1V9KT"),
+                playerAuthKey: NimblebitConfig.PlayerAuthKeySchema.make(
+                    Redacted.make("505b39fa-57c3-4222-98b3-aa13f710bf28")
+                ),
+            },
+            {
+                playerId: NimblebitConfig.PlayerIdSchema.make("1V9KV"),
+                playerAuthKey: NimblebitConfig.PlayerAuthKeySchema.make(
+                    Redacted.make("7fbeabd1-0e80-4f72-ab46-1c103c42c6f2")
+                ),
+            },
+            {
+                playerId: NimblebitConfig.PlayerIdSchema.make("1V9KW"),
+                playerAuthKey: NimblebitConfig.PlayerAuthKeySchema.make(
+                    Redacted.make("f9af9f88-3f41-44d4-93d9-ae6499a023ca")
+                ),
+            },
+        ],
+        legotower: [
+            {
+                playerId: NimblebitConfig.PlayerIdSchema.make("1RGQZ5"),
+                playerAuthKey: NimblebitConfig.PlayerAuthKeySchema.make(
+                    Redacted.make("1838c384-3651-44da-98ab-a651b3d17e44")
+                ),
+            },
+            {
+                playerId: NimblebitConfig.PlayerIdSchema.make("1RGQZ6"),
+                playerAuthKey: NimblebitConfig.PlayerAuthKeySchema.make(
+                    Redacted.make("6c35bd69-7508-4dfe-adbd-797a9b1a7b48")
+                ),
+            },
+            {
+                playerId: NimblebitConfig.PlayerIdSchema.make("1RGQZ7"),
+                playerAuthKey: NimblebitConfig.PlayerAuthKeySchema.make(
+                    Redacted.make("cc2c980f-c683-45d8-bf9e-48fdc2d09c4f")
+                ),
+            },
+            {
+                playerId: NimblebitConfig.PlayerIdSchema.make("1RGQZ8"),
+                playerAuthKey: NimblebitConfig.PlayerAuthKeySchema.make(
+                    Redacted.make("d0f53327-f068-492d-8453-843d08e4cdbd")
+                ),
+            },
+        ],
+        pocketplanes: [
+            {
+                playerId: NimblebitConfig.PlayerIdSchema.make("4F1CY"),
+                playerAuthKey: NimblebitConfig.PlayerAuthKeySchema.make(
+                    Redacted.make("cd8c1eff-f195-4743-aa05-15c14946ddf6")
+                ),
+            },
+            {
+                playerId: NimblebitConfig.PlayerIdSchema.make("4F1CZ"),
+                playerAuthKey: NimblebitConfig.PlayerAuthKeySchema.make(
+                    Redacted.make("f16e6c42-e1e6-4a3e-8846-21283b6404b5")
+                ),
+            },
+            {
+                playerId: NimblebitConfig.PlayerIdSchema.make("4F1D0"),
+                playerAuthKey: NimblebitConfig.PlayerAuthKeySchema.make(
+                    Redacted.make("951819df-4a9c-4901-902e-da938df0792e")
+                ),
+            },
+            {
+                playerId: NimblebitConfig.PlayerIdSchema.make("4F1D1"),
+                playerAuthKey: NimblebitConfig.PlayerAuthKeySchema.make(
+                    Redacted.make("41a92541-3f7d-4f04-84ff-96659ed95ca4")
+                ),
+            },
+        ],
+        pockettrains: [
+            {
+                playerId: NimblebitConfig.PlayerIdSchema.make("6TM3M"),
+                playerAuthKey: NimblebitConfig.PlayerAuthKeySchema.make(
+                    Redacted.make("e3f7c9ff-80f3-4842-bc00-954b14a37d4f")
+                ),
+            },
+            {
+                playerId: NimblebitConfig.PlayerIdSchema.make("6TM3N"),
+                playerAuthKey: NimblebitConfig.PlayerAuthKeySchema.make(
+                    Redacted.make("97f5f289-f389-4c67-8b6d-ab48dbe16424")
+                ),
+            },
+            {
+                playerId: NimblebitConfig.PlayerIdSchema.make("6TM3P"),
+                playerAuthKey: NimblebitConfig.PlayerAuthKeySchema.make(
+                    Redacted.make("8e42e443-1e22-4d57-8026-0c22ea7c9191")
+                ),
+            },
+            {
+                playerId: NimblebitConfig.PlayerIdSchema.make("6TM3Q"),
+                playerAuthKey: NimblebitConfig.PlayerAuthKeySchema.make(
+                    Redacted.make("746c8015-f013-4e54-a356-8bde58ba4b3f")
+                ),
+            },
+        ],
         tinytower: [
             {
                 playerId: NimblebitConfig.PlayerIdSchema.make("BPQSY"),
@@ -88,7 +213,32 @@ export class NimblebitAuth extends Context.Service<
             },
         ],
         tinytowerclassic: [],
-        tinytowervegas: [],
+        tinytowervegas: [
+            {
+                playerId: NimblebitConfig.PlayerIdSchema.make("707P8"),
+                playerAuthKey: NimblebitConfig.PlayerAuthKeySchema.make(
+                    Redacted.make("83df5ac8-3d3c-46b0-9623-7c99211ac96e")
+                ),
+            },
+            {
+                playerId: NimblebitConfig.PlayerIdSchema.make("707P9"),
+                playerAuthKey: NimblebitConfig.PlayerAuthKeySchema.make(
+                    Redacted.make("11eec373-3b65-4c5b-97ed-9d33a9c20eca")
+                ),
+            },
+            {
+                playerId: NimblebitConfig.PlayerIdSchema.make("707PB"),
+                playerAuthKey: NimblebitConfig.PlayerAuthKeySchema.make(
+                    Redacted.make("26c9380c-c1e9-4409-b367-d3d2ca982a92")
+                ),
+            },
+            {
+                playerId: NimblebitConfig.PlayerIdSchema.make("707PC"),
+                playerAuthKey: NimblebitConfig.PlayerAuthKeySchema.make(
+                    Redacted.make("fd66fe7d-a6a0-4178-8dea-a2402ecf501a")
+                ),
+            },
+        ],
     };
 
     private static readonly burnbot: (
@@ -103,17 +253,12 @@ export class NimblebitAuth extends Context.Service<
         (bytes) => new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength).getUint32(0, false)
     );
 
-    private static readonly MD5 = (data: string): Effect.Effect<string, never, never> =>
-        Effect.map(
-            Effect.promise(() => import("node:crypto")),
-            (crypto) => crypto.createHash("md5").update(data).digest("hex")
-        );
-
     public static readonly Direct = (
         authKey: Schema.Schema.Type<typeof NimblebitConfig.NimblebitAuthKeySchema>
-    ): Layer.Layer<NimblebitAuth, never, SecureRandom.SecureRandom> =>
-        Effect.map(SecureRandom.SecureRandom, (random) => ({
-            sign: (data: string) => NimblebitAuth.MD5(data + Redacted.value(authKey)),
+    ): Layer.Layer<NimblebitAuth, never, SecureRandom.SecureRandom | Digest.Digest> =>
+        Effect.map(Effect.all([SecureRandom.SecureRandom, Digest.Digest]), ([random, digest]) => ({
+            sign: (data: string) =>
+                digest.digestHex(Digest.md5, new TextEncoder().encode(data + Redacted.value(authKey))),
             salt: NimblebitAuth.Salt.pipe(Effect.provideService(SecureRandom.SecureRandom, random)),
             burnbot: NimblebitAuth.burnbot,
             host: "https://sync.nimblebit.com",
@@ -124,7 +269,7 @@ export class NimblebitAuth extends Context.Service<
         config: Config.Config<
             Schema.Schema.Type<typeof NimblebitConfig.NimblebitAuthKeySchema>
         > = NimblebitConfig.NimblebitAuthKeyConfig
-    ): Layer.Layer<NimblebitAuth, Config.ConfigError, SecureRandom.SecureRandom> =>
+    ): Layer.Layer<NimblebitAuth, Config.ConfigError, SecureRandom.SecureRandom | Digest.Digest> =>
         Effect.map(config, (authKey) => NimblebitAuth.Direct(authKey)).pipe(Layer.unwrap);
 
     public static readonly CustomHost = ({
@@ -171,7 +316,7 @@ export class NimblebitAuth extends Context.Service<
  */
 export const layerDirect: (
     authKey: Schema.Schema.Type<typeof NimblebitConfig.NimblebitAuthKeySchema>
-) => Layer.Layer<NimblebitAuth, never, SecureRandom.SecureRandom> = NimblebitAuth.Direct;
+) => Layer.Layer<NimblebitAuth, never, SecureRandom.SecureRandom | Digest.Digest> = NimblebitAuth.Direct;
 
 /**
  * @since 1.0.0
@@ -179,7 +324,8 @@ export const layerDirect: (
  */
 export const layerDirectConfig: (
     config?: Config.Config<Schema.Schema.Type<typeof NimblebitConfig.NimblebitAuthKeySchema>>
-) => Layer.Layer<NimblebitAuth, Config.ConfigError, SecureRandom.SecureRandom> = NimblebitAuth.DirectConfig;
+) => Layer.Layer<NimblebitAuth, Config.ConfigError, SecureRandom.SecureRandom | Digest.Digest> =
+    NimblebitAuth.DirectConfig;
 
 /**
  * @since 1.0.0

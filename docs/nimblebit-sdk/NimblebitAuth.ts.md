@@ -53,7 +53,7 @@ declare const layerCustomHost: (options: {
 }) => Layer.Layer<NimblebitAuth, never, SecureRandom.SecureRandom>
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/NimblebitAuth.ts#L188)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/NimblebitAuth.ts#L334)
 
 Since v1.0.0
 
@@ -67,7 +67,7 @@ declare const layerCustomHostConfig: (
 ) => Layer.Layer<NimblebitAuth, Config.ConfigError, SecureRandom.SecureRandom>
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/NimblebitAuth.ts#L197)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/NimblebitAuth.ts#L343)
 
 Since v1.0.0
 
@@ -78,10 +78,10 @@ Since v1.0.0
 ```ts
 declare const layerDirect: (
   authKey: Schema.Schema.Type<typeof NimblebitConfig.NimblebitAuthKeySchema>
-) => Layer.Layer<NimblebitAuth, never, SecureRandom.SecureRandom>
+) => Layer.Layer<NimblebitAuth, never, SecureRandom.SecureRandom | Digest.Digest>
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/NimblebitAuth.ts#L172)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/NimblebitAuth.ts#L317)
 
 Since v1.0.0
 
@@ -92,10 +92,10 @@ Since v1.0.0
 ```ts
 declare const layerDirectConfig: (
   config?: Config.Config<Schema.Schema.Type<typeof NimblebitConfig.NimblebitAuthKeySchema>>
-) => Layer.Layer<NimblebitAuth, Config.ConfigError, SecureRandom.SecureRandom>
+) => Layer.Layer<NimblebitAuth, Config.ConfigError, SecureRandom.SecureRandom | Digest.Digest>
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/NimblebitAuth.ts#L180)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/NimblebitAuth.ts#L325)
 
 Since v1.0.0
 
@@ -109,7 +109,7 @@ declare const layerTinyburgAuthProxy: (options: {
 }) => Layer.Layer<NimblebitAuth, never, SecureRandom.SecureRandom>
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/NimblebitAuth.ts#L208)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/NimblebitAuth.ts#L354)
 
 Since v1.0.0
 
@@ -123,6 +123,6 @@ declare const layerTinyburgAuthProxyConfig: (
 ) => Layer.Layer<NimblebitAuth, Config.ConfigError, SecureRandom.SecureRandom>
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/NimblebitAuth.ts#L216)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/nimblebit-sdk/src/NimblebitAuth.ts#L362)
 
 Since v1.0.0

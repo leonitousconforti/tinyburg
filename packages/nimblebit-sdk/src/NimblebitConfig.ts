@@ -18,7 +18,7 @@ import * as SchemaIssue from "effect/SchemaIssue";
  */
 export const PlayerIdSchema = Schema.String.pipe(
     Schema.check(Schema.isMinLength(1)),
-    Schema.check(Schema.isMaxLength(5)),
+    Schema.check(Schema.isMaxLength(6)),
     Schema.check(Schema.isPattern(/^([\dA-Z]*)$/)),
     Schema.brand("PlayerId")
 );
