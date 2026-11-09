@@ -62,11 +62,10 @@ export const parseNimblebitOrderedList = <
     // oxlint-disable-next-line typescript/no-unsafe-type-assertion
     const fields = Object.fromEntries(items.map((item) => [item.property, item.schema])) as Fields;
     const to = Schema.Struct({ $unknown: Schema.Array(Schema.String), ...fields });
-    type Encoded = (typeof to)["Encoded"];
 
     const transformation = SchemaTransformation.transformEffect({
         // { a: "123", b: "456", $unknown: ["789"] } -> "123,456,789"
-        encode: (properties: Encoded): Effect.Effect<string, SchemaIssue.Issue, never> => {
+        encode: (properties: (typeof to)["Encoded"]): Effect.Effect<string, SchemaIssue.Issue, never> => {
             // Bridges an untyped runtime boundary; the shape is guaranteed by construction, not by the compiler.
             // oxlint-disable-next-line typescript/no-unsafe-type-assertion
             const record = properties as unknown as Readonly<Record<PropertyKey, string>> & {
@@ -77,7 +76,7 @@ export const parseNimblebitOrderedList = <
         },
 
         // "123,456,789" -> { a: "123", b: "456", $unknown: ["789"] }
-        decode: (str: string): Effect.Effect<Encoded, SchemaIssue.Issue, never> => {
+        decode: (str: string): Effect.Effect<(typeof to)["Encoded"], SchemaIssue.Issue, never> => {
             const parts = str.split(separator);
             if (parts.length < items.length) {
                 return Effect.fail(
@@ -91,7 +90,10 @@ export const parseNimblebitOrderedList = <
             const known = items.map((item, index) => [item.property, parts[index]] as const);
             // Bridges an untyped runtime boundary; the shape is guaranteed by construction, not by the compiler.
             // oxlint-disable-next-line typescript/no-unsafe-type-assertion
-            const obj = Object.fromEntries([...known, ["$unknown", parts.slice(items.length)]]) as Encoded;
+            const obj = Object.fromEntries([
+                ...known,
+                ["$unknown", parts.slice(items.length)],
+            ]) as (typeof to)["Encoded"];
             return Effect.succeed(obj);
         },
     });
@@ -171,11 +173,10 @@ export const parseNimblebitObject = <
             >;
         }
     >;
-    type Encoded = (typeof to)["Encoded"];
 
     const transformation = SchemaTransformation.transform({
         // { a: "123", b: "456" } -> "[a]123[a][b]456[b]"
-        encode: (properties: Encoded): string => {
+        encode: (properties: (typeof to)["Encoded"]): string => {
             // Bridges an untyped runtime boundary; the shape is guaranteed by construction, not by the compiler.
             // oxlint-disable-next-line typescript/no-unsafe-type-assertion
             const { $unknown, ...known } = properties as unknown as Record<string, string | null | undefined> & {
@@ -220,7 +221,7 @@ export const parseNimblebitObject = <
         },
 
         // "[a]123[a][b]456[b]" -> { a: "123", b: "456" }
-        decode: (str: string): Encoded => {
+        decode: (str: string): (typeof to)["Encoded"] => {
             const known: Array<readonly [string, string]> = [];
             for (const [field, matcher] of matchers) {
                 const match = matcher.exec(str);
@@ -248,7 +249,7 @@ export const parseNimblebitObject = <
 
             // Bridges an untyped runtime boundary; the shape is guaranteed by construction, not by the compiler.
             // oxlint-disable-next-line typescript/no-unsafe-type-assertion
-            return Object.fromEntries([...known, ["$unknown", unknown]]) as Encoded;
+            return Object.fromEntries([...known, ["$unknown", unknown]]) as (typeof to)["Encoded"];
         },
     });
 
