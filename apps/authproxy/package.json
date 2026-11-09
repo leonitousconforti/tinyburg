@@ -12,7 +12,7 @@
         "@effect/platform-node": "4.1.2",
         "@effect/sql-pg": "4.1.2",
         "@foldkit/vite-plugin": "0.29.0",
-        "@tailwindcss/vite": "4.3.3",
+        "@tailwindcss/vite": "4.3.5",
         "@tinyburg/bitcity-sdk": "workspace:*",
         "@tinyburg/disco-zoo-sdk": "workspace:*",
         "@tinyburg/lego-tower-sdk": "workspace:*",
@@ -29,7 +29,7 @@
         "effect": "4.1.2",
         "foldkit": "0.170.0",
         "redis": "6.3.1",
-        "tailwindcss": "4.3.3",
+        "tailwindcss": "4.3.5",
         "typescript": "7.0.2",
         "vite": "8.3.6"
     }
