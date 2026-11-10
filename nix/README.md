@@ -43,6 +43,33 @@ Then open http://localhost:3000 (tinyburg.app), http://localhost:3001
 tinyburg.app at `/v1/treasury`, but its connect flow runs in the browser at
 http://localhost:3004, so forward that port too.
 
+## Staging
+
+`nix run .#staging` is the same stack for https://staging.tinyburg.app and its
+`authproxy.`, `socialcircles.`, `treasury.` and `discord.` siblings. A proxy
+terminates TLS and reaches the apps over the LAN, so they listen on `0.0.0.0`
+with `NODE_ENV=production`: Secure `__Host-` cookies, and dynamic client
+registration only with `TINYBURGAPP_REGISTRATION_TOKEN`, which the authproxy,
+treasury and discord-bot present as their `*_TINYBURG_OAUTH_REGISTRATION_TOKEN`.
+Postgres and SeaweedFS stay on loopback.
+
+Run it from its own checkout with its own `.env` (fresh signing keys, sealing
+keys and admin password), as a systemd user service:
+
+```ini
+[Service]
+WorkingDirectory=%h/tinyburg-staging
+ExecStart=/nix/var/nix/profiles/default/bin/nix run .#staging -- --tui=false
+Restart=on-failure
+```
+
+Social Circles does not register itself, so register it once with the token
+(the same call as in `.env.example`, with the staging redirect uri and an
+`Authorization: Bearer` header) and put its client id and secret in `.env`.
+
+To deploy, pull, run `pnpm install --frozen-lockfile` (the stack does not
+install dependencies) and restart the service.
+
 ## The Android shell
 
 `nix develop .#android` is the default shell plus the Android SDK: platform

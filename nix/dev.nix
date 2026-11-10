@@ -5,10 +5,20 @@
       lib,
       ...
     }:
-    {
-      process-compose."dev" =
+    let
+      # Everything the stacks share, given where each app is reached from a
+      # browser, what NODE_ENV the apps see and the address they listen on.
+      # Postgres and SeaweedFS stay on loopback in every stack.
+      stack =
+        {
+          origins,
+          nodeEnv,
+          host,
+        }:
         { config, ... }:
         let
+          development = nodeEnv == "development";
+
           nodejs = pkgs.nodejs-slim_latest;
           seaweed = config.services.seaweedfs.seaweedfs;
           corepack = pkgs.corepack.override { nodejs-slim = nodejs; };
@@ -129,7 +139,8 @@
                 env = {
                   DATABASE_URL = databaseUrl service;
                   PORT = toString port;
-                  HOST = "127.0.0.1";
+                  HOST = host;
+                  NODE_ENV = nodeEnv;
                 }
                 // env;
               };
@@ -221,11 +232,10 @@
               entry = "apps/tinyburg.app/server/index.ts";
               port = ports.tinyburgApp;
               env = {
-                NODE_ENV = "development";
-                LOG_LEVEL = "Debug";
-                SITE_URL = "http://localhost:${toString ports.tinyburgApp}";
-                GOOGLE_REDIRECT_URI = "http://localhost:${toString ports.tinyburgApp}/auth/google/callback";
-                DISCORD_REDIRECT_URI = "http://localhost:${toString ports.tinyburgApp}/auth/discord/callback";
+                LOG_LEVEL = if development then "Debug" else "Info";
+                SITE_URL = origins.tinyburgApp;
+                GOOGLE_REDIRECT_URI = "${origins.tinyburgApp}/auth/google/callback";
+                DISCORD_REDIRECT_URI = "${origins.tinyburgApp}/auth/discord/callback";
                 TREASURY_URL = "http://localhost:${toString ports.treasury}";
               };
             };
@@ -236,9 +246,8 @@
               entry = "apps/authproxy/index.ts";
               port = ports.authproxy;
               env = {
-                NODE_ENV = "development";
-                TINYBURG_OAUTH_ISSUER = "http://localhost:${toString ports.tinyburgApp}";
-                TINYBURG_OAUTH_REDIRECT_URI = "http://localhost:${toString ports.authproxy}/auth/callback";
+                TINYBURG_OAUTH_ISSUER = origins.tinyburgApp;
+                TINYBURG_OAUTH_REDIRECT_URI = "${origins.authproxy}/auth/callback";
               };
               depends_on = {
                 tinyburg-app-backend.condition = "process_started";
@@ -252,9 +261,8 @@
               entry = "apps/social-circles/index.ts";
               port = ports.socialCircles;
               env = {
-                NODE_ENV = "development";
-                TINYBURG_ISSUER = "http://localhost:${toString ports.tinyburgApp}";
-                TINYBURG_REDIRECT_URI = "http://localhost:${toString ports.socialCircles}/auth/callback";
+                TINYBURG_ISSUER = origins.tinyburgApp;
+                TINYBURG_REDIRECT_URI = "${origins.socialCircles}/auth/callback";
               };
             };
 
@@ -264,9 +272,8 @@
               port = ports.discordBot;
               disabled = true;
               env = {
-                NODE_ENV = "development";
-                TINYBURG_ISSUER = "http://localhost:${toString ports.tinyburgApp}";
-                TINYBURG_REDIRECT_URI = "http://localhost:${toString ports.discordBot}/discord/callback";
+                TINYBURG_ISSUER = origins.tinyburgApp;
+                TINYBURG_REDIRECT_URI = "${origins.discordBot}/discord/callback";
               };
               depends_on = {
                 tinyburg-app-backend.condition = "process_started";
@@ -279,10 +286,9 @@
               entry = "apps/treasury/index.ts";
               port = ports.treasury;
               env = {
-                NODE_ENV = "development";
-                TINYBURG_ISSUER = "http://localhost:${toString ports.tinyburgApp}";
-                TINYBURG_REDIRECT_URI = "http://localhost:${toString ports.treasury}/auth/callback";
-                PUBLIC_URL = "http://localhost:${toString ports.treasury}";
+                TINYBURG_ISSUER = origins.tinyburgApp;
+                TINYBURG_REDIRECT_URI = "${origins.treasury}/auth/callback";
+                PUBLIC_URL = origins.treasury;
               };
               depends_on = {
                 tinyburg-app-backend.condition = "process_started";
@@ -299,5 +305,32 @@
             };
           };
         };
+    in
+    {
+      process-compose."dev" = stack {
+        nodeEnv = "development";
+        host = "127.0.0.1";
+        origins = {
+          tinyburgApp = "http://localhost:3000";
+          authproxy = "http://localhost:3001";
+          socialCircles = "http://localhost:3002";
+          discordBot = "http://localhost:3003";
+          treasury = "http://localhost:3004";
+        };
+      };
+
+      # The same stack behind the TLS-terminating proxy for *.staging.tinyburg.app,
+      # which reaches the apps over the LAN.
+      process-compose."staging" = stack {
+        nodeEnv = "production";
+        host = "0.0.0.0";
+        origins = {
+          tinyburgApp = "https://staging.tinyburg.app";
+          authproxy = "https://authproxy.staging.tinyburg.app";
+          socialCircles = "https://socialcircles.staging.tinyburg.app";
+          discordBot = "https://discord.staging.tinyburg.app";
+          treasury = "https://treasury.staging.tinyburg.app";
+        };
+      };
     };
 }
