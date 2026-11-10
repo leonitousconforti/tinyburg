@@ -46,7 +46,8 @@
         "babel": "babel dist --plugins annotate-pure-calls --out-dir dist --source-maps",
         "check": "tsc -b tsconfig.json",
         "test": "vitest",
-        "generate": "node ./frida/Generate.ts"
+        "generate": "node ./frida/Generate.ts",
+        "conformance": "node ./frida/Conformance.ts"
     },
     "dependencies": {
         "@tinyburg/nimblebit-sdk": "workspace:*",

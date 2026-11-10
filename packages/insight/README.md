@@ -41,6 +41,7 @@ Each game SDK keeps what runs against its game in a `frida` folder:
   from what the agent reads, with `@tinyburg/insight/node/Generate`. It skips
   a game whose files are from its current version on Google Play, unless run
   with `--force`.
+- `Conformance.ts` (`pnpm conformance`): see [Checking an SDK](#checking-an-sdk).
 - `tsconfig.json`: for Frida's compiler only. TypeScript emits nothing for a
   `.ts` file it reached through `node_modules`, so it maps
   `@tinyburg/insight/*` to insight's sources.
@@ -82,6 +83,20 @@ never driven.
 
 `@tinyburg/insight/node/Metadata` reads the URL paths compiled into a game
 from its APK, including the ones a run never exercises.
+
+### Checking an SDK
+
+Each game SDK with an Android build (all but `tinytower-classic-sdk`, which
+Google Play's anonymous accounts cannot download) has `pnpm conformance`,
+which probes its game and checks the SDK's `HttpApi` against it
+(`@tinyburg/insight/node/Conformance`): which endpoints the game called,
+whether the real responses decode with the endpoint's schemas, the exact
+preimage the game signed for each request, and which compiled-in paths the SDK
+lacks. It prints a Markdown report and exits non-zero if the game made a
+request no endpoint matches or got a response the SDK cannot decode. Set the
+game's `AUTHPROXY_<GAME>_NIMBLEBIT_AUTH_KEY` (as in `.env`) to also check that
+the secret the SDK signs with is the game's current one; it is only compared,
+never printed.
 
 Save uploads are not covered: the games hand them to a Java plugin
 (`com.nimblebit.nbsync.SyncPush`) outside the il2cpp code the agent hooks.
