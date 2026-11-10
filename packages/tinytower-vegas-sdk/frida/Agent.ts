@@ -6,7 +6,7 @@
 import "@efffrida/polyfills";
 import "frida-il2cpp-bridge";
 
-import { Array, Cause, Effect, Function, Layer, Record, Schedule, Schema, Tuple, pipe } from "effect";
+import { Array, Effect, Function, Layer, Record, Schedule, Schema, Tuple, pipe } from "effect";
 import { RpcServer } from "effect/rpc";
 
 import { Assembly, Class, Extensions, FridaIl2cppBridge } from "@efffrida/il2cpp-bridge";
@@ -223,27 +223,14 @@ const TinyTowerVegasRpcsLive = TinyTowerVegasRpcs.toLayer(
         // Get all bitizen data implementation
         const getAllBitizenData = Effect.fnUntraced(
             function* () {
-                const VBitizenClass = yield* tryClassCached(CSharpAssembly.image, "VBitizen");
-                const MaleNamesField = yield* tryFieldCached<Il2Cpp.Array<Il2Cpp.String>>(VBitizenClass, "maleNames");
-                const FemaleNamesField = yield* tryFieldCached<Il2Cpp.Array<Il2Cpp.String>>(
-                    VBitizenClass,
-                    "femaleNames"
-                );
-                const LastNamesField = yield* tryFieldCached<Il2Cpp.Array<Il2Cpp.String>>(VBitizenClass, "lastNames");
-                const CitiesField = yield* tryFieldCached<Il2Cpp.Array<Il2Cpp.String>>(VBitizenClass, "cities");
-
                 // VBitizen's static constructor fills its lists, once the game uses the class
-                const [maleNames, femaleNames, lastNames, cities] = yield* Effect.suspend(() => {
-                    const lists = Tuple.make(
-                        MaleNamesField.value,
-                        FemaleNamesField.value,
-                        LastNamesField.value,
-                        CitiesField.value
-                    );
-                    return lists.some((list) => list.isNull())
-                        ? Effect.fail(new Cause.NoSuchElementError("VBitizen's lists are null"))
-                        : Effect.succeed(lists);
-                }).pipe(Effect.retry(untilLoaded));
+                type StringArray = Il2Cpp.Array<Il2Cpp.String>;
+                const [maleNames, femaleNames, lastNames, cities] = yield* Effect.all([
+                    waitForInstance<StringArray>("VBitizen", "maleNames", untilLoaded),
+                    waitForInstance<StringArray>("VBitizen", "femaleNames", untilLoaded),
+                    waitForInstance<StringArray>("VBitizen", "lastNames", untilLoaded),
+                    waitForInstance<StringArray>("VBitizen", "cities", untilLoaded),
+                ]);
 
                 const readStringArray = Function.flow(
                     Array.fromIterable<Il2Cpp.Field.Type>,

@@ -6,19 +6,7 @@
 import "@efffrida/polyfills";
 import "frida-il2cpp-bridge";
 
-import {
-    Array,
-    Cause,
-    Effect,
-    Layer,
-    Option,
-    Record,
-    Schedule,
-    Schema,
-    SchemaTransformation,
-    Tuple,
-    pipe,
-} from "effect";
+import { Array, Effect, Layer, Option, Record, Schedule, Schema, SchemaTransformation, Tuple, pipe } from "effect";
 import { RpcServer } from "effect/rpc";
 
 import { Assembly, Class, Extensions, FridaIl2cppBridge } from "@efffrida/il2cpp-bridge";
@@ -198,17 +186,11 @@ const PocketTrainsRpcsLive = PocketTrainsRpcs.toLayer(
         // Get all engines implementation
         const getAllEngines = Effect.fnUntraced(
             function* () {
-                const TREngineInfoClass = yield* tryClassCached(CSharpAssembly.image, "TREngineInfo");
-                const CachedEnginesField = yield* tryFieldCached<Il2Cpp.Array<Il2Cpp.String>>(
-                    TREngineInfoClass,
-                    "cachedEngines"
+                const engineLines = yield* waitForInstance<Il2Cpp.Array<Il2Cpp.String>>(
+                    "TREngineInfo",
+                    "cachedEngines",
+                    policy
                 );
-
-                const engineLines = yield* Effect.suspend(() =>
-                    CachedEnginesField.value.isNull()
-                        ? Effect.fail(new Cause.NoSuchElementError("TREngineInfo.cachedEngines is null"))
-                        : Effect.succeed(CachedEnginesField.value)
-                ).pipe(Effect.retry(policy));
 
                 return yield* pipe(
                     Array.fromIterable<Il2Cpp.Field.Type>(engineLines),

@@ -6,48 +6,17 @@
 import "@efffrida/polyfills";
 import "frida-il2cpp-bridge";
 
-import { Array, Cause, Effect, Layer, Record, Schedule, Tuple, pipe } from "effect";
+import { Array, Effect, Layer, Record, Schedule, Tuple, pipe } from "effect";
 import { RpcServer } from "effect/rpc";
 
 import { Assembly, Class, FridaIl2cppBridge } from "@efffrida/il2cpp-bridge";
-import { RpcsLive, serve } from "@tinyburg/insight/frida/Agent";
+import { RpcsLive, serve, waitForInstance } from "@tinyburg/insight/frida/Agent";
 
 import { DiscoZooRpcs, Rpcs } from "./Rpcs.ts";
 
-/**
- * A static field's value, failing while it is null or while il2cpp has not
- * initialized its class: il2cpp allocates a class's static fields only then,
- * and reading one before would crash the game.
- */
-const readStatic = <T extends Il2Cpp.Field.Type>(
-    klass: Il2Cpp.Class,
-    name: string
-): Effect.Effect<T, Cause.NoSuchElementError> =>
-    Effect.suspend(() => {
-        if (klass.staticFieldsData.isNull()) {
-            return Effect.fail(new Cause.NoSuchElementError(`${klass.name} is not initialized yet`));
-        }
-
-        const value = klass.field<T>(name).value;
-        const isNull =
-            (value instanceof Il2Cpp.Object || value instanceof Il2Cpp.Array || value instanceof Il2Cpp.String) &&
-            value.isNull();
-
-        return isNull
-            ? Effect.fail(new Cause.NoSuchElementError(`${klass.name}.${name} is null`))
-            : Effect.succeed(value);
-    });
-
-/**
- * Like {@link readStatic}, but waits up to five minutes for the field: Disco
- * Zoo runs slowly under the emulator's ARM translation and sets up its data
- * some time after il2cpp is ready.
- */
-const waitForStatic = <T extends Il2Cpp.Field.Type>(klass: Il2Cpp.Class, name: string) =>
-    Effect.retry(
-        readStatic<T>(klass, name),
-        Schedule.addDelay(Schedule.recurs(60), () => Effect.succeed("5 seconds"))
-    );
+// Disco Zoo runs slowly under the emulator's ARM translation and sets up its
+// data some time after il2cpp is ready: wait up to five minutes for it
+const untilLoaded = Schedule.addDelay(Schedule.recurs(60), () => Effect.succeed("5 seconds"));
 
 /**
  * The fields below are read straight from memory, without calling into the
@@ -125,10 +94,7 @@ const DiscoZooRpcsLive = DiscoZooRpcs.toLayer(
         const CSharpAssembly = yield* assemblyCached("Assembly-CSharp");
 
         // Core keeps the game's data tables in static fields
-        const coreField = Effect.fnUntraced(function* (name: string) {
-            const CoreClass = yield* tryClassCached(CSharpAssembly.image, "Core");
-            return yield* waitForStatic<Il2Cpp.Object>(CoreClass, name);
-        });
+        const coreField = (name: string) => waitForInstance("Core", name, untilLoaded);
 
         // Get all animals implementation
         const getAllAnimals = Effect.fnUntraced(
@@ -137,7 +103,7 @@ const DiscoZooRpcsLive = DiscoZooRpcs.toLayer(
                 const AnimalRarityClass = yield* tryClassCached(CSharpAssembly.image, "AnimalRarity");
                 const rarityObjects = yield* Effect.forEach(
                     Array.filter(AnimalRarityClass.fields, (field) => field.isStatic),
-                    (field) => waitForStatic<Il2Cpp.Object>(AnimalRarityClass, field.name)
+                    (field) => waitForInstance("AnimalRarity", field.name, untilLoaded)
                 );
 
                 const rarities = pipe(
@@ -213,8 +179,7 @@ const DiscoZooRpcsLive = DiscoZooRpcs.toLayer(
         const getAllPets = Effect.fnUntraced(
             function* () {
                 const petPedia = yield* coreField("petPedia");
-                const PetManagerClass = yield* tryClassCached(CSharpAssembly.image, "PetManager");
-                const grades = yield* waitForStatic<Il2Cpp.Array<Il2Cpp.String>>(PetManagerClass, "GRADES");
+                const grades = yield* waitForInstance<Il2Cpp.Array<Il2Cpp.String>>("PetManager", "GRADES", untilLoaded);
 
                 const species = Array.map(list(petPedia, "allSpeciesInfos"), (species) => ({
                     slug: string(species, "slug"),

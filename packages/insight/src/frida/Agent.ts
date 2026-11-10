@@ -80,42 +80,50 @@ export const readEnum = (enumClass: Il2Cpp.Class): Record<string, string> =>
     );
 
 /**
- * Waits for a class in `Assembly-CSharp` to have set its static instance
- * field, retrying 3 times 2 seconds apart by default. A game sets these up
- * some time after il2cpp is ready.
+ * Waits for a static field of a class in `Assembly-CSharp` to hold an object,
+ * an array or a string, and returns it, retrying 3 times 2 seconds apart by
+ * default. A game fills these some time after il2cpp is ready.
+ *
+ * It also waits for il2cpp to initialize the class that declares the field:
+ * il2cpp allocates a class's static fields only then, and reading one before
+ * would dereference NULL inside the game.
  *
  * @since 1.0.0
  * @category Helpers
  */
-export const waitForInstance = <R = never>(
+export const waitForInstance = <A extends Il2Cpp.Object | Il2Cpp.Array | Il2Cpp.String = Il2Cpp.Object, R = never>(
     className: string,
     instanceFieldName: string | undefined = "instance",
     policy: Schedule.Schedule<unknown, unknown, Cause.NoSuchElementError, R> | undefined = Schedule.addDelay(
         Schedule.recurs(3),
         () => Effect.succeed("2 seconds")
     )
-): Effect.Effect<void, Cause.NoSuchElementError, R> =>
+): Effect.Effect<A, Cause.NoSuchElementError, R> =>
     pipe(
         Assembly.assembly("Assembly-CSharp"),
         Effect.map((assembly) => assembly.image),
         Effect.flatMap(Class.tryClass(className)),
-        Effect.flatMap(Class.tryField(instanceFieldName)<Il2Cpp.Object>),
+        Effect.flatMap(Class.tryField(instanceFieldName)<A>),
+        // The field's value lives in the class that declares it, which may be a
+        // base class. The bridge caches a class's staticFieldsData the first
+        // time it is read, so this asks il2cpp on every attempt
         Effect.filterOrFail(
-            (field) =>
-                !field.isNull() &&
-                !field.value.isNull() &&
-                !field.handle.equals(ptr(0x0)) &&
-                !field.value.handle.equals(ptr(0x0)),
+            (field) => !Il2Cpp.exports.classGetStaticFieldData(field.class).isNull(),
+            (field) => new Cause.NoSuchElementError(`${field.class.name} is not initialized yet`)
+        ),
+        Effect.map((field) => field.value),
+        Effect.filterOrFail(
+            (value) => !value.isNull(),
             () => new Cause.NoSuchElementError(`${className}.${instanceFieldName} is null`)
         ),
-        Effect.tap((field) =>
+        // An array or a string keeps its object behind `object`
+        Effect.tap((value) =>
             Effect.try({
-                try: () => field.value.class.name,
-                catch: () => new Cause.NoSuchElementError(`${className} class is not yet available`),
+                try: () => (value instanceof Il2Cpp.Object ? value : value.object).class.name,
+                catch: () => new Cause.NoSuchElementError(`${className}.${instanceFieldName} is not yet available`),
             })
         ),
-        Effect.retry(policy),
-        Effect.asVoid
+        Effect.retry(policy)
     );
 
 /**
