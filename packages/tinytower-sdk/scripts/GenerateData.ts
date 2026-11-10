@@ -117,10 +117,10 @@ const generateData = Effect.gen(function* () {
         export const numberGlasses = ${numberGlasses} as const;
         export const numberHairAccessories = ${numberHairAccessories} as const;
         export const numberMaleHats = ${numberMaleHats} as const;\n
-        export const maleNames = ${JSON.stringify(femaleNames)} as const;\n
-        export const maleLastNames = ${JSON.stringify(femaleLastNames)} as const;\n
-        export const femaleNames = ${JSON.stringify(maleNames)} as const;\n
-        export const femaleLastNames = ${JSON.stringify(maleLastNames)} as const;\n
+        export const maleNames = ${JSON.stringify(maleNames)} as const;\n
+        export const maleLastNames = ${JSON.stringify(maleLastNames)} as const;\n
+        export const femaleNames = ${JSON.stringify(femaleNames)} as const;\n
+        export const femaleLastNames = ${JSON.stringify(femaleLastNames)} as const;\n
         `
     );
 
