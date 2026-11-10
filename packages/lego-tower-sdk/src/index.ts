@@ -30,6 +30,15 @@
 export * as Endpoints from "./Endpoints.ts"
 
 /**
+ * The floors a LEGO Tower can be built with, each with its floor type, in the
+ * order of the game's floor table.
+ *
+ * @since 1.0.0
+ * @category Floors
+ */
+export * as Floors from "./Floors.ts"
+
+/**
  * LEGO Tower SDK: signed calls against Nimblebit's NBSync service.
  *
  * Signing reuses `@tinyburg/nimblebit-sdk` (`NimblebitAuth`): the game secret
@@ -48,6 +57,34 @@ export * as Endpoints from "./Endpoints.ts"
 export * as LegoTower from "./LegoTower.ts"
 
 /**
+ * The names minifigures are given, by language, the hidden characters a tower
+ * can find, and the pieces pedestrians wear.
+ *
+ * @since 1.0.0
+ * @category Minifigures
+ */
+export * as Minifigures from "./Minifigures.ts"
+
+/**
+ * The missions a tower can take on, each with its type, vehicle and holiday,
+ * and the props of the game's mission table.
+ *
+ * @since 1.0.0
+ * @category Missions
+ */
+export * as Missions from "./Missions.ts"
+
+/**
+ * The minifigure pieces a tower can collect, each with its type, short id,
+ * rarity and whether pedestrians wear it, and the game's gold and silver
+ * rarities.
+ *
+ * @since 1.0.0
+ * @category Pieces
+ */
+export * as Pieces from "./Pieces.ts"
+
+/**
  * The scopes the LEGO Tower api is guarded by: `legotower` for the whole game,
  * `legotower:read` and `legotower:write` for every endpoint that only looks or
  * that changes a player's game, a `:read` and a `:write` scope for each area of
@@ -64,3 +101,13 @@ export * as LegoTower from "./LegoTower.ts"
  * @category Scopes
  */
 export * as Scopes from "./Scopes.ts"
+
+/**
+ * The sets a tower is decorated with besides its floors: roofs, elevators,
+ * vehicles, VIP vehicles and skylines, and which sets are club exclusive or
+ * promotional.
+ *
+ * @since 1.0.0
+ * @category Sets
+ */
+export * as Sets from "./Sets.ts"

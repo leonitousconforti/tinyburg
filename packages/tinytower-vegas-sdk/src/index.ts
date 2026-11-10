@@ -3,6 +3,32 @@
  */
 
 /**
+ * The first names, last names and cities Tiny Tower Vegas uses for its
+ * Bitizens.
+ *
+ * @since 1.0.0
+ * @category Bitizens
+ */
+export * as Bitizens from "./Bitizens.ts"
+
+/**
+ * Tiny Tower Vegas's special characters, whose ids the missions and floors
+ * refer to.
+ *
+ * @since 1.0.0
+ * @category Characters
+ */
+export * as Characters from "./Characters.ts"
+
+/**
+ * Tiny Tower Vegas's elevators and their prices, indexed by elevator id.
+ *
+ * @since 1.0.0
+ * @category Elevators
+ */
+export * as Elevators from "./Elevators.ts"
+
+/**
  * Tiny Tower Vegas (game code `vegas`) NBSync api endpoints.
  *
  * Signing: a random `salt` (signed int32) goes in the path, and `hash` is
@@ -27,6 +53,33 @@
  * @category Endpoints
  */
 export * as Endpoints from "./Endpoints.ts"
+
+/**
+ * Tiny Tower Vegas's floors, indexed by floor id, with their types, prices,
+ * products and stocking times. Index 0 is the game's empty placeholder, with
+ * no name and type `None`, so that every other floor sits at its id.
+ *
+ * @since 1.0.0
+ * @category Floors
+ */
+export * as Floors from "./Floors.ts"
+
+/**
+ * Tiny Tower Vegas's missions: the tutorial's, the tips' and the ones its
+ * characters give.
+ *
+ * @since 1.0.0
+ * @category Missions
+ */
+export * as Missions from "./Missions.ts"
+
+/**
+ * Tiny Tower Vegas's roofs and their prices, indexed by roof id.
+ *
+ * @since 1.0.0
+ * @category Roofs
+ */
+export * as Roofs from "./Roofs.ts"
 
 /**
  * The scopes the Tiny Tower Vegas api is guarded by: `tinytowervegas` for the

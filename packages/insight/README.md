@@ -45,4 +45,7 @@ Each game SDK keeps what runs against its game in a `frida` folder:
   `.ts` file it reached through `node_modules`, so it maps
   `@tinyburg/insight/*` to insight's sources.
 
-Only tinytower-sdk has an agent and `pnpm generate` so far.
+Every game SDK with an Android build has one: tinytower-sdk, pocket-planes-sdk,
+pocket-trains-sdk, lego-tower-sdk, disco-zoo-sdk, bitcity-sdk and
+tinytower-vegas-sdk. tinytower-classic-sdk has none, because Google Play's
+anonymous accounts cannot download the paid game.

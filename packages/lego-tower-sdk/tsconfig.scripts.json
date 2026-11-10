@@ -1,0 +1,25 @@
+{
+    "$schema": "https://json.schemastore.org/tsconfig",
+    "extends": "../../tsconfig.base.jsonc",
+    "include": ["frida"],
+    "exclude": ["frida/Agent.ts"],
+    "references": [
+        { "path": "tsconfig.src.json" },
+        { "path": "../insight/tsconfig.src-node.json" },
+        { "path": "../insight/tsconfig.src-shared.json" }
+    ],
+    "compilerOptions": {
+        "tsBuildInfoFile": ".tsbuildinfo/scripts.tsbuildinfo",
+        "outDir": ".tsbuildinfo/scripts",
+        "noEmit": true,
+        "rewriteRelativeImportExtensions": false,
+        "allowImportingTsExtensions": true,
+        "types": ["node"],
+        "plugins": [
+            {
+                "name": "@effect/language-service",
+                "namespaceImportPackages": []
+            }
+        ]
+    }
+}

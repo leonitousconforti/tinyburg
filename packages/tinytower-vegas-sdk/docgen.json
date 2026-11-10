@@ -1,7 +1,16 @@
 {
     "$schema": "../../node_modules/@effect/docgen/schema.json",
     "srcLink": "https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-vegas-sdk/src/",
-    "exclude": ["src/index.ts", "src/internal/**/*.ts"],
+    "exclude": [
+        "src/index.ts",
+        "src/internal/**/*.ts",
+        "src/Bitizens.ts",
+        "src/Characters.ts",
+        "src/Elevators.ts",
+        "src/Floors.ts",
+        "src/Missions.ts",
+        "src/Roofs.ts"
+    ],
     "projectHomepage": "https://github.com/leonitousconforti/tinyburg/tree/main/packages/tinytower-vegas-sdk",
     "examplesCompilerOptions": {
         "noEmit": true,

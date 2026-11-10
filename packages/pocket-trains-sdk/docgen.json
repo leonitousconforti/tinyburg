@@ -1,7 +1,15 @@
 {
     "$schema": "../../node_modules/@effect/docgen/schema.json",
     "srcLink": "https://github.com/leonitousconforti/tinyburg/blob/main/packages/pocket-trains-sdk/src/",
-    "exclude": ["src/index.ts", "src/internal/**/*.ts"],
+    "exclude": [
+        "src/index.ts",
+        "src/internal/**/*.ts",
+        "src/Cars.ts",
+        "src/Cities.ts",
+        "src/Engines.ts",
+        "src/Events.ts",
+        "src/Tracks.ts"
+    ],
     "projectHomepage": "https://github.com/leonitousconforti/tinyburg/tree/main/packages/pocket-trains-sdk",
     "examplesCompilerOptions": {
         "noEmit": true,

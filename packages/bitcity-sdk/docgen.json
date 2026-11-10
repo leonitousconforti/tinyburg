@@ -1,7 +1,15 @@
 {
     "$schema": "../../node_modules/@effect/docgen/schema.json",
     "srcLink": "https://github.com/leonitousconforti/tinyburg/blob/main/packages/bitcity-sdk/src/",
-    "exclude": ["src/index.ts", "src/internal/**/*.ts"],
+    "exclude": [
+        "src/index.ts",
+        "src/internal/**/*.ts",
+        "src/Buildings.ts",
+        "src/Cities.ts",
+        "src/Missions.ts",
+        "src/Upgrades.ts",
+        "src/Vehicles.ts"
+    ],
     "projectHomepage": "https://github.com/leonitousconforti/tinyburg/tree/main/packages/bitcity-sdk",
     "examplesCompilerOptions": {
         "noEmit": true,

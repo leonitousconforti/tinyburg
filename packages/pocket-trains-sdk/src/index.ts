@@ -3,6 +3,23 @@
  */
 
 /**
+ * Every car a Pocket Trains train can haul, by id: freight (type `j`) or
+ * passengers (type `p`), with its value from 1 to 4 and the table's `active` flag.
+ *
+ * @since 1.0.0
+ * @category Cars
+ */
+export * as Cars from "./Cars.ts"
+
+/**
+ * Pocket Trains' cities by id, with the region each is in, and its regions.
+ *
+ * @since 1.0.0
+ * @category Cities
+ */
+export * as Cities from "./Cities.ts"
+
+/**
  * Pocket Trains (game code `pt`) NBSync api endpoints.
  *
  * Signing: a random `salt` (signed int32) goes in the path, and `hash` is
@@ -31,6 +48,25 @@
  * @category Endpoints
  */
 export * as Endpoints from "./Endpoints.ts"
+
+/**
+ * Pocket Trains' engines by id, with each one's level, speed, fuel and how
+ * many cars, engines and tenders its train takes, and whether it is special.
+ *
+ * @since 1.0.0
+ * @category Engines
+ */
+export * as Engines from "./Engines.ts"
+
+/**
+ * The city events Pocket Trains picks from, in the game's order: a story with
+ * `%c` for the city, the car its jobs haul into the city (`inbound`) or out of
+ * it, and the costume of its passengers, if any.
+ *
+ * @since 1.0.0
+ * @category Events
+ */
+export * as Events from "./Events.ts"
 
 /**
  * Pocket Trains SDK: signed calls against Nimblebit's NBSync service.
@@ -67,3 +103,12 @@ export * as PocketTrains from "./PocketTrains.ts"
  * @category Scopes
  */
 export * as Scopes from "./Scopes.ts"
+
+/**
+ * Every track Pocket Trains has, by id, with the two cities it joins and its
+ * length.
+ *
+ * @since 1.0.0
+ * @category Tracks
+ */
+export * as Tracks from "./Tracks.ts"
