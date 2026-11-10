@@ -757,21 +757,27 @@ importers:
       '@effect/vitest':
         specifier: 4.1.2
         version: 4.1.2(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))(vitest@5.1.0(patch_hash=be3ff017c14e2f4543070775e9a5bcc119068cf162f57a4f8235747b05c4e657)(vite@8.3.6))
-      '@efffrida/frida-tools':
-        specifier: 0.0.67
-        version: 0.0.67(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
-      '@efffrida/gplayapi':
-        specifier: 0.0.41
-        version: 0.0.41(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+      '@efffrida/il2cpp-bridge':
+        specifier: 0.0.60
+        version: 0.0.60(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+      '@efffrida/polyfills':
+        specifier: 0.0.23
+        version: 0.0.23
       '@tinyburg/insight':
         specifier: workspace:*
         version: link:../insight
+      '@types/frida-gum':
+        specifier: 19.13.0
+        version: 19.13.0
       '@yielded/auth':
         specifier: 0.1.0-beta.47
         version: 0.1.0-beta.47(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
       effect:
         specifier: 4.1.2
         version: 4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
+      frida-il2cpp-bridge:
+        specifier: 0.14.0
+        version: 0.14.0
       redis:
         specifier: 6.3.1
         version: 6.3.1

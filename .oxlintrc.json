@@ -21,7 +21,11 @@
     },
     "overrides": [
         {
-            "files": ["**/{test,typetest,examples,ai-docs,benchmark,bundle,scripts,scratchpad}/**"],
+            "files": [
+                "**/{test,typetest,examples,ai-docs,benchmark,bundle,scripts,scratchpad}/**",
+                // An SDK's frida folder holds its agent and the scripts that load it.
+                "packages/*/frida/**"
+            ],
             "rules": {
                 "eslint/no-console": "off",
                 // These are application entry points, so composing and providing layers here is correct.

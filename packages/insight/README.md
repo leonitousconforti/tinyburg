@@ -23,7 +23,26 @@ instructions it does not support.
    system image makes the snapshot unusable, and insight falls back to a full
    boot. Rerun it after updating `frida` too, so the server matches.
 
-`DeviceLive` then boots `Small_Phone` read-only, installs TinyTower from
-Google Play and starts `frida-server`, restarting it (at most 5 times) if it
-exits. Sessions on a crashed server detach, and `pnpm generate` in
-tinytower-sdk then retries with a new session.
+`layerDevice(bundleIdentifier)` (from `@tinyburg/insight/node`) then boots
+`Small_Phone` read-only, installs the game from Google Play and starts
+`frida-server`, restarting it (at most 5 times) if it exits. Sessions on a
+crashed server detach, and `pnpm generate` then retries with a new session.
+
+## A game's own agent
+
+Each game SDK keeps what runs against its game in a `frida` folder:
+
+- `Rpcs.ts`: the RPCs its agent serves, insight's own (`Version` and
+  `SetFps`, from `@tinyburg/insight/shared/Rpcs`) merged with the game's.
+- `Agent.ts`: the agent, built from `@tinyburg/insight/frida/Agent`, which
+  has the handlers for insight's own RPCs, helpers for reading a Nimblebit
+  game's il2cpp data, and `serve`.
+- `Generate.ts` (`pnpm generate`): regenerates some of the SDK's source files
+  from what the agent reads, with `@tinyburg/insight/node/Generate`. It skips
+  a game whose files are from its current version on Google Play, unless run
+  with `--force`.
+- `tsconfig.json`: for Frida's compiler only. TypeScript emits nothing for a
+  `.ts` file it reached through `node_modules`, so it maps
+  `@tinyburg/insight/*` to insight's sources.
+
+Only tinytower-sdk has an agent and `pnpm generate` so far.
