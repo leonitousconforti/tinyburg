@@ -21,6 +21,23 @@
 export * as BitCity from "./BitCity.ts"
 
 /**
+ * Bit City's buildings, from the game's `BuildingDefs`, with the zone types
+ * they are built in.
+ *
+ * @since 1.0.0
+ * @category Buildings
+ */
+export * as Buildings from "./Buildings.ts"
+
+/**
+ * The names of Bit City's cities, from the game's `City.cityNames`.
+ *
+ * @since 1.0.0
+ * @category Cities
+ */
+export * as Cities from "./Cities.ts"
+
+/**
  * Bit City (game code `bc`) NBSync api endpoints.
  *
  * Signing: a random `salt` (signed int32) goes in the path, and `hash` is
@@ -47,6 +64,15 @@ export * as BitCity from "./BitCity.ts"
 export * as Endpoints from "./Endpoints.ts"
 
 /**
+ * Bit City's missions, from the game's `MissionDefs`, with the mission types
+ * they count towards.
+ *
+ * @since 1.0.0
+ * @category Missions
+ */
+export * as Missions from "./Missions.ts"
+
+/**
  * The scopes the Bit City api is guarded by: `bitcity` for the whole game,
  * `bitcity:read` and `bitcity:write` for every endpoint that only looks or that
  * changes a player's game, a `:read` and a `:write` scope for each area of the
@@ -63,3 +89,22 @@ export * as Endpoints from "./Endpoints.ts"
  * @category Scopes
  */
 export * as Scopes from "./Scopes.ts"
+
+/**
+ * Bit City's upgrades, from the game's `UpgradeDefs`, with the upgrade
+ * variables they change.
+ *
+ * @since 1.0.0
+ * @category Upgrades
+ */
+export * as Upgrades from "./Upgrades.ts"
+
+/**
+ * Bit City's cars, boats and planes, from the game's `CarDefs`, `BoatDefs`
+ * and `PlaneDefs`: each boat and plane comes in three variants, such as a
+ * rover in place of a boat on the Moon.
+ *
+ * @since 1.0.0
+ * @category Vehicles
+ */
+export * as Vehicles from "./Vehicles.ts"

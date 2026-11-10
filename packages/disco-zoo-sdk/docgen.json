@@ -1,7 +1,16 @@
 {
     "$schema": "../../node_modules/@effect/docgen/schema.json",
     "srcLink": "https://github.com/leonitousconforti/tinyburg/blob/main/packages/disco-zoo-sdk/src/",
-    "exclude": ["src/index.ts", "src/internal/**/*.ts"],
+    "exclude": [
+        "src/index.ts",
+        "src/internal/**/*.ts",
+        "src/Animals.ts",
+        "src/Decorations.ts",
+        "src/Hats.ts",
+        "src/Pets.ts",
+        "src/Regions.ts",
+        "src/Toys.ts"
+    ],
     "projectHomepage": "https://github.com/leonitousconforti/tinyburg/tree/main/packages/disco-zoo-sdk",
     "examplesCompilerOptions": {
         "noEmit": true,

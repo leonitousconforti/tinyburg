@@ -601,12 +601,30 @@ importers:
         specifier: workspace:*
         version: link:../nimblebit-sdk
     devDependencies:
+      '@effect/platform-node':
+        specifier: 4.1.2
+        version: 4.1.2(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+      '@efffrida/il2cpp-bridge':
+        specifier: 0.0.60
+        version: 0.0.60(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+      '@efffrida/polyfills':
+        specifier: 0.0.23
+        version: 0.0.23
+      '@tinyburg/insight':
+        specifier: workspace:*
+        version: link:../insight
+      '@types/frida-gum':
+        specifier: 19.13.0
+        version: 19.13.0
       '@yielded/auth':
         specifier: 0.1.0-beta.47
         version: 0.1.0-beta.47(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
       effect:
         specifier: 4.1.2
         version: 4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
+      frida-il2cpp-bridge:
+        specifier: 0.14.0
+        version: 0.14.0
 
   packages/bitprints: {}
 
@@ -616,12 +634,30 @@ importers:
         specifier: workspace:*
         version: link:../nimblebit-sdk
     devDependencies:
+      '@effect/platform-node':
+        specifier: 4.1.2
+        version: 4.1.2(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+      '@efffrida/il2cpp-bridge':
+        specifier: 0.0.60
+        version: 0.0.60(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+      '@efffrida/polyfills':
+        specifier: 0.0.23
+        version: 0.0.23
+      '@tinyburg/insight':
+        specifier: workspace:*
+        version: link:../insight
+      '@types/frida-gum':
+        specifier: 19.13.0
+        version: 19.13.0
       '@yielded/auth':
         specifier: 0.1.0-beta.47
         version: 0.1.0-beta.47(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
       effect:
         specifier: 4.1.2
         version: 4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
+      frida-il2cpp-bridge:
+        specifier: 0.14.0
+        version: 0.14.0
 
   packages/doorman: {}
 
@@ -665,12 +701,30 @@ importers:
         specifier: workspace:*
         version: link:../nimblebit-sdk
     devDependencies:
+      '@effect/platform-node':
+        specifier: 4.1.2
+        version: 4.1.2(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+      '@efffrida/il2cpp-bridge':
+        specifier: 0.0.60
+        version: 0.0.60(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+      '@efffrida/polyfills':
+        specifier: 0.0.23
+        version: 0.0.23
+      '@tinyburg/insight':
+        specifier: workspace:*
+        version: link:../insight
+      '@types/frida-gum':
+        specifier: 19.13.0
+        version: 19.13.0
       '@yielded/auth':
         specifier: 0.1.0-beta.47
         version: 0.1.0-beta.47(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
       effect:
         specifier: 4.1.2
         version: 4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
+      frida-il2cpp-bridge:
+        specifier: 0.14.0
+        version: 0.14.0
 
   packages/nimblebit-sdk:
     devDependencies:
@@ -684,12 +738,30 @@ importers:
         specifier: workspace:*
         version: link:../nimblebit-sdk
     devDependencies:
+      '@effect/platform-node':
+        specifier: 4.1.2
+        version: 4.1.2(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+      '@efffrida/il2cpp-bridge':
+        specifier: 0.0.60
+        version: 0.0.60(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+      '@efffrida/polyfills':
+        specifier: 0.0.23
+        version: 0.0.23
+      '@tinyburg/insight':
+        specifier: workspace:*
+        version: link:../insight
+      '@types/frida-gum':
+        specifier: 19.13.0
+        version: 19.13.0
       '@yielded/auth':
         specifier: 0.1.0-beta.47
         version: 0.1.0-beta.47(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
       effect:
         specifier: 4.1.2
         version: 4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
+      frida-il2cpp-bridge:
+        specifier: 0.14.0
+        version: 0.14.0
 
   packages/pocket-trains-sdk:
     dependencies:
@@ -697,12 +769,30 @@ importers:
         specifier: workspace:*
         version: link:../nimblebit-sdk
     devDependencies:
+      '@effect/platform-node':
+        specifier: 4.1.2
+        version: 4.1.2(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+      '@efffrida/il2cpp-bridge':
+        specifier: 0.0.60
+        version: 0.0.60(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+      '@efffrida/polyfills':
+        specifier: 0.0.23
+        version: 0.0.23
+      '@tinyburg/insight':
+        specifier: workspace:*
+        version: link:../insight
+      '@types/frida-gum':
+        specifier: 19.13.0
+        version: 19.13.0
       '@yielded/auth':
         specifier: 0.1.0-beta.47
         version: 0.1.0-beta.47(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
       effect:
         specifier: 4.1.2
         version: 4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
+      frida-il2cpp-bridge:
+        specifier: 0.14.0
+        version: 0.14.0
 
   packages/tinyburg-sdk:
     dependencies:
@@ -794,12 +884,30 @@ importers:
         specifier: workspace:*
         version: link:../nimblebit-sdk
     devDependencies:
+      '@effect/platform-node':
+        specifier: 4.1.2
+        version: 4.1.2(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+      '@efffrida/il2cpp-bridge':
+        specifier: 0.0.60
+        version: 0.0.60(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+      '@efffrida/polyfills':
+        specifier: 0.0.23
+        version: 0.0.23
+      '@tinyburg/insight':
+        specifier: workspace:*
+        version: link:../insight
+      '@types/frida-gum':
+        specifier: 19.13.0
+        version: 19.13.0
       '@yielded/auth':
         specifier: 0.1.0-beta.47
         version: 0.1.0-beta.47(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
       effect:
         specifier: 4.1.2
         version: 4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
+      frida-il2cpp-bridge:
+        specifier: 0.14.0
+        version: 0.14.0
 
   packages/treasury-sdk:
     dependencies:
@@ -3849,6 +3957,15 @@ snapshots:
       '@types/ws': 8.18.2
       effect: 4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
       ws: 8.22.1
+    transitivePeerDependencies:
+      - bufferutil
+      - utf-8-validate
+
+  '@effect/platform-node@4.1.2(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))':
+    dependencies:
+      '@effect/platform-node-shared': 4.1.2(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+      effect: 4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
+      undici: 8.12.4
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate

@@ -3,6 +3,25 @@
  */
 
 /**
+ * Disco Zoo's animals, in the game's order, with the region each lives in, its
+ * rarity, its coins per minute, its timings in ticks and its pattern on the
+ * rescue grid, and the rarities themselves.
+ *
+ * @since 1.0.0
+ * @category Animals
+ */
+export * as Animals from "./Animals.ts"
+
+/**
+ * Disco Zoo's pen decorations, each with the character the game looks it up by
+ * and its price.
+ *
+ * @since 1.0.0
+ * @category Decorations
+ */
+export * as Decorations from "./Decorations.ts"
+
+/**
  * Disco Zoo SDK: signed calls against Nimblebit's NBSync service.
  *
  * Signing reuses `@tinyburg/nimblebit-sdk` (`NimblebitAuth`): the game secret
@@ -47,6 +66,32 @@ export * as DiscoZoo from "./DiscoZoo.ts"
 export * as Endpoints from "./Endpoints.ts"
 
 /**
+ * Disco Zoo's hats, each with the character the game looks it up by and its
+ * price.
+ *
+ * @since 1.0.0
+ * @category Hats
+ */
+export * as Hats from "./Hats.ts"
+
+/**
+ * Disco Zoo's pet grades, pet species and the quirks a pet can have.
+ *
+ * @since 1.0.0
+ * @category Pets
+ */
+export * as Pets from "./Pets.ts"
+
+/**
+ * Disco Zoo's regions, in the game's order, with the aircraft that flies to
+ * each and what it costs to unlock and to explore.
+ *
+ * @since 1.0.0
+ * @category Regions
+ */
+export * as Regions from "./Regions.ts"
+
+/**
  * The scopes the Disco Zoo api is guarded by: `discozoo` for the whole game,
  * `discozoo:read` and `discozoo:write` for every endpoint that only looks or
  * that changes a player's game, a `:read` and a `:write` scope for each area of
@@ -63,3 +108,12 @@ export * as Endpoints from "./Endpoints.ts"
  * @category Scopes
  */
 export * as Scopes from "./Scopes.ts"
+
+/**
+ * Disco Zoo's pen toys, each with the character the game looks it up by and
+ * its prices.
+ *
+ * @since 1.0.0
+ * @category Toys
+ */
+export * as Toys from "./Toys.ts"

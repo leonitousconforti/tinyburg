@@ -3,6 +3,38 @@
  */
 
 /**
+ * The first and last names the game gives its Bitizens, in the game's order, so a save's name indexes can be looked up.
+ *
+ * @since 1.0.0
+ * @category Bitizens
+ */
+export * as Bitizens from "./Bitizens.ts"
+
+/**
+ * The names of the cargo packages and VIP packages planes carry between cities, in the game's order.
+ *
+ * @since 1.0.0
+ * @category Cargo
+ */
+export * as Cargo from "./Cargo.ts"
+
+/**
+ * The cities of the world map, each with its id, region, country, position on the map and population.
+ *
+ * @since 1.0.0
+ * @category Cities
+ */
+export * as Cities from "./Cities.ts"
+
+/**
+ * The events that can happen at a city, such as weather that closes its airport, and their effects on traffic.
+ *
+ * @since 1.0.0
+ * @category CityEvents
+ */
+export * as CityEvents from "./CityEvents.ts"
+
+/**
  * Pocket Planes (game code `pp`) NBSync api endpoints.
  *
  * Signing: a random `salt` (signed int32 - the game emits negatives too) goes
@@ -43,6 +75,19 @@
 export * as Endpoints from "./Endpoints.ts"
 
 /**
+ * Every plane in the game, each with its id, the level that unlocks it, the
+ * airport class it needs, its engine, stats and cabin layout. `engine` is the
+ * game's raw number, which does not follow the names of its own
+ * `planeEngineType` enum (jets have 1, the enum's Prop, and the electric
+ * planes have 6, which the enum has no name for). `level` is -1 or -2 for
+ * planes that no level unlocks.
+ *
+ * @since 1.0.0
+ * @category Planes
+ */
+export * as Planes from "./Planes.ts"
+
+/**
  * Pocket Planes SDK: signed calls against Nimblebit's NBSync service.
  *
  * Signing reuses `@tinyburg/nimblebit-sdk` (`NimblebitAuth`): the game secret
@@ -77,3 +122,11 @@ export * as PocketPlanes from "./PocketPlanes.ts"
  * @category Scopes
  */
 export * as Scopes from "./Scopes.ts"
+
+/**
+ * The plane skins, each with the ids of the planes it fits and its home city's id (0 for none).
+ *
+ * @since 1.0.0
+ * @category Skins
+ */
+export * as Skins from "./Skins.ts"
