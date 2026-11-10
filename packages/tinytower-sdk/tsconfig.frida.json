@@ -1,15 +1,16 @@
 {
     "$schema": "https://json.schemastore.org/tsconfig",
     "extends": "../../tsconfig.base.jsonc",
-    "include": ["scripts/**/*.ts"],
+    "include": ["frida"],
+    "exclude": ["frida/Agent.ts"],
     "references": [
         { "path": "tsconfig.src.json" },
         { "path": "../insight/tsconfig.src-node.json" },
         { "path": "../insight/tsconfig.src-shared.json" }
     ],
     "compilerOptions": {
-        "tsBuildInfoFile": ".tsbuildinfo/scripts.tsbuildinfo",
-        "outDir": ".tsbuildinfo/scripts",
+        "tsBuildInfoFile": ".tsbuildinfo/frida.tsbuildinfo",
+        "outDir": ".tsbuildinfo/frida",
         "noEmit": true,
         "rewriteRelativeImportExtensions": false,
         "allowImportingTsExtensions": true,
