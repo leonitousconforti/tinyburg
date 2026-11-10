@@ -5,7 +5,7 @@
     "references": [
         { "path": "tsconfig.src.json" },
         { "path": "tsconfig.test.json" },
-        { "path": "tsconfig.frida.json" },
-        { "path": "tsconfig.frida-agent.json" }
+        { "path": "tsconfig.scripts.json" },
+        { "path": "tsconfig.frida.json" }
     ]
 }

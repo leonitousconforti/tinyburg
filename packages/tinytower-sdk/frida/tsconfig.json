@@ -2,7 +2,7 @@
     // Only for Frida's compiler, which reads the tsconfig.json next to the
     // agent it builds. TypeScript emits nothing for a .ts file it reached
     // through node_modules, so the agent maps insight to its sources. tsc and
-    // editors use ../tsconfig.frida.json and ../tsconfig.frida-agent.json.
+    // editors use ../tsconfig.scripts.json and ../tsconfig.frida.json.
     "include": [],
     "compilerOptions": {
         "paths": { "@tinyburg/insight/*": ["../../insight/src/*.ts"] }
