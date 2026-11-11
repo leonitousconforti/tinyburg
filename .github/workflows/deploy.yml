@@ -39,6 +39,9 @@ jobs:
         )
       )
     uses: ./.github/workflows/deploy-environment.yml
+    # Without this the called workflow sees an empty SOPS_AGE_KEY, even
+    # though it names the environment that holds it.
+    secrets: inherit
     with:
       environment: staging
       url: https://staging.tinyburg.app
@@ -52,6 +55,9 @@ jobs:
         (github.event_name == 'workflow_run' && needs.staging.result == 'success')
       )
     uses: ./.github/workflows/deploy-environment.yml
+    # Without this the called workflow sees an empty SOPS_AGE_KEY, even
+    # though it names the environment that holds it.
+    secrets: inherit
     with:
       environment: production
       url: https://tinyburg.app
