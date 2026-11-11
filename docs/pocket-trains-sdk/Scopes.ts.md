@@ -1,6 +1,6 @@
 ---
 title: Scopes.ts
-nav_order: 3
+nav_order: 4
 parent: "@tinyburg/pocket-trains-sdk"
 ---
 

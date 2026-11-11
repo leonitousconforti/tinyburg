@@ -106,6 +106,68 @@ export * as Planes from "./Planes.ts"
 export * as PocketPlanes from "./PocketPlanes.ts"
 
 /**
+ * Pocket Planes's save (game version 2.17.3).
+ *
+ * The save is the JSON string `PPSave.ToJson` makes with Newtonsoft.Json:
+ * `Player.saveJson()` returns it, `Player._Save` keeps it in PlayerPrefs under
+ * `Player.SaveKey`, and `Player.FromJSON` loads it. Its keys are `PPSave`'s
+ * field names (the coins and bux `Currency` fields are written as the numbers
+ * `c` and `b`), and the item schemas below keep the names of the game's
+ * classes and fields.
+ *
+ * For the sync server, `NBSync.pushToServer` sends `NBSync.encodeSave` of
+ * `Player.saveJson()`, and the `/sync/pull/` and `/friend/pull_game/`
+ * responses go through `NBSync.decodeSave` before `Player.FromJSON`. Those two
+ * call the game's Java `NBSync.compress` and `NBSync.decompress`: UTF-8, zlib
+ * (`java.util.zip.Deflater` at its default level) and base64. So the bytes the
+ * SDK's sync pull returns (`data` after base64) are the zlib-compressed save,
+ * which `SaveDataFromBytes` reads.
+ *
+ * How this was determined: saves taken from the game on an emulator with a
+ * Frida agent (`Player.saveJson()` of a fresh game, of one grown through the
+ * game's own methods, and of crafted content loaded with `Player.FromJSON`),
+ * the field types the game's classes declare, and the game's code
+ * (disassembly of `NBSync`, `Player._Save`, `PaintColor.ToString` and
+ * `BitizenInfo.ToDict`, and the Java `NBSync` class). The test fixtures are
+ * those saves, with the player's id and auth salt replaced by fakes.
+ *
+ * Decoding drops nothing: a key the schemas do not model (one a newer game
+ * version adds, say) is kept on its object as a {@link JsonValue} and written
+ * back. C# `long` and `ulong` fields decode to `bigint`, since some hold
+ * `DateTime` ticks (`nFBT` and `nPCT` are `DateTime.UtcNow.Ticks` plus a
+ * delay), which a JSON number loses digits of.
+ *
+ * Round trips: encoding a decoded save gives back the string it was decoded
+ * from, byte for byte, for a save the game wrote (each fixture does), with two
+ * exceptions:
+ *
+ * - A JavaScript object puts keys that are array indexes (integers from 0 to
+ *   4294967294, written without a sign or leading zeros) before all other
+ *   keys, in ascending order. So a dictionary keyed by them comes back sorted
+ *   if the game wrote it in another order: the integer keys of
+ *   `carrierPorts` (both levels), `cityJobsAdWatched`, `eventCounts` and the
+ *   inner dictionaries of `refresh`, the days that key `dailyStats`, and any
+ *   such key the schemas do not model or that is inside a value they do not
+ *   model.
+ * - A key the schemas do not model comes back after the keys they do model
+ *   on the same object, wherever the game wrote it.
+ *
+ * Numbers are written the way the game writes them, so they come back as
+ * read: a C# `double` with .NET's `ToString("R")` as Unity's runtime does it
+ * (15 significant digits when those read back as the same value, 17
+ * otherwise), a `float` likewise with 7 or 9 digits of its 32-bit value,
+ * exponent notation (`1E-05`, `1E+15`) for an exponent below -4 or at least
+ * the digit count, and `.0` after a whole number (`843.0`). Strings get
+ * Newtonsoft.Json's escaping. Input the game would not write (whitespace,
+ * other escapes or number spellings) decodes, and encodes the way the game
+ * would write it, except that a number with a decimal point or exponent in a
+ * value the schemas do not model is written back as it was spelled.
+ *
+ * @since 1.0.0
+ */
+export * as Save from "./Save.ts"
+
+/**
  * The scopes the Pocket Planes api is guarded by: `pocketplanes` for the whole
  * game, `pocketplanes:read` and `pocketplanes:write` for every endpoint that
  * only looks or that changes a player's game, a `:read` and a `:write` scope
