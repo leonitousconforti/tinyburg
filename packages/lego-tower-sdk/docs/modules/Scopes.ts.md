@@ -35,7 +35,10 @@ Since v1.0.0
   - [Write](#write)
 - [Social](#social)
   - [SocialGetItems](#socialgetitems)
+  - [SocialGetMailbox](#socialgetmailbox)
+  - [SocialGetMailboxCount](#socialgetmailboxcount)
   - [SocialGetVisits](#socialgetvisits)
+  - [SocialListFriendSnapshots](#sociallistfriendsnapshots)
   - [SocialPullFriendGame](#socialpullfriendgame)
   - [SocialPullFriendMeta](#socialpullfriendmeta)
   - [SocialRead](#socialread)
@@ -146,6 +149,30 @@ declare const SocialGetItems: OAuthScope.Described<OAuthScope.OAuthScope<string>
 
 Since v1.0.0
 
+## SocialGetMailbox
+
+**Signature**
+
+```ts
+declare const SocialGetMailbox: OAuthScope.Described<OAuthScope.OAuthScope<string>>
+```
+
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/lego-tower-sdk/src/Scopes.ts#L159)
+
+Since v1.0.0
+
+## SocialGetMailboxCount
+
+**Signature**
+
+```ts
+declare const SocialGetMailboxCount: OAuthScope.Described<OAuthScope.OAuthScope<string>>
+```
+
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/lego-tower-sdk/src/Scopes.ts#L150)
+
+Since v1.0.0
+
 ## SocialGetVisits
 
 **Signature**
@@ -155,6 +182,18 @@ declare const SocialGetVisits: OAuthScope.Described<OAuthScope.OAuthScope<string
 ```
 
 [Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/lego-tower-sdk/src/Scopes.ts#L114)
+
+Since v1.0.0
+
+## SocialListFriendSnapshots
+
+**Signature**
+
+```ts
+declare const SocialListFriendSnapshots: OAuthScope.Described<OAuthScope.OAuthScope<string>>
+```
+
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/lego-tower-sdk/src/Scopes.ts#L168)
 
 Since v1.0.0
 

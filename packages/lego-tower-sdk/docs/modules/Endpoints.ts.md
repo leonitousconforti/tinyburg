@@ -8,23 +8,34 @@ parent: Modules
 
 LEGO Tower (game code `lt`) NBSync api endpoints.
 
-Signing: a random `salt` (signed int32) goes in the path, and `hash` is
+Signing: a random `salt` goes in the path, and `hash` is
 `md5(<preimage> + <game secret salt>)` with the preimage
 `lt/<playerId>/<salt><playerAuthKey>` (variants noted per endpoint). The
-secret salt is the value extracted from `NBSync._ss`.
+secret salt is the value of `NBSync._ss`. Every NBSync request the game
+made, `register` included, was signed this way. Salts are signed int32, as
+the game sends (it sent a negative one).
 
-Verification (live server + Frida DTO inspection of the game, 2026-08-26):
+Each endpoint says how it is known (Play build 1.27.2, 2026-11-09):
 
-- Signing is MD5, server-validated (same scheme as Tiny Tower / Pocket
-  Planes; the game computes SHA-256 only for the unauthenticated `register`).
-- Response envelopes VERIFIED by reading the game's DTO classes at runtime:
-  register, player_details, sync/pull (NBSyncGameSaveResponse), current_version,
-  verify_device, friend/pull_game, friend/pull_meta (meta is a flat
-  Dictionary<String,Object> on pt), send_item (NBSyncItemsSendResponse),
-  get_items (NBSyncItemsGetResponse: success/gifts, NO `total` unlike pp).
-  `get_items` was also exercised live with a burnbot.
-- Rich endpoint set: adds snapshots, trades, mailbox, AG, and LL-friends.
-- LEGO Tower issues player ids longer than 5 chars (relaxed PlayerId schema).
+- OBSERVED: the game made this request.
+- REPLAYED: the sdk's client function succeeded against the live server.
+- DTO: the game's response class has these fields.
+- LITERAL: the path is compiled into the game but was not exercised.
+- DERIVED: inferred from Tiny Tower.
+
+DTO int fields can arrive as numeric strings (the mailbox `total` did), so
+int schemas on replies that were never observed may be too strict. LEGO
+Tower issues player ids longer than 5 chars (relaxed `PlayerId` schema).
+
+Not modelled yet (LITERAL only): `receive_item`, `send_trade`,
+`accept_trade`, `reject_trade`, `remove_trade`, `get_ag`, `send_ag`,
+`sync/push_snapshot`, `friend/editorpull_game`, `register_email`,
+`register_email_lang`, `code/verify` and `af/lt`. The Facebook, Play Games
+and LEGO Life flows (`register_fb`, `swap_fb`, `register_pg`, `check_pg`,
+`swap_pg`, `register_ll`, `check_ll`, `swap_ll`, `friends_ll`) are left out
+too. Saves are uploaded by the game's Java plugin (`com.nimblebit.nbsync.SyncPush`,
+`/sync/push/`), which the il2cpp probe does not see; that is not modelled
+yet either.
 
 Game-specific save/meta schemas are left as `Schema.Unknown` placeholders.
 
@@ -36,7 +47,10 @@ Since v1.0.0
 
 - [Api](#api)
   - [Api](#api-1)
+- [Config](#config)
+  - [AuthenticatedPlayerConfig](#authenticatedplayerconfig)
 - [Schemas](#schemas)
+  - [AuthenticatedPlayer](#authenticatedplayer)
   - [Gift](#gift)
   - [PlayerId](#playerid)
 
@@ -442,6 +456,96 @@ declare const Api: HttpApi.HttpApi<
           >,
           never,
           never
+        >
+      | HttpApiEndpoint.HttpApiEndpoint<
+          "SocialGetMailboxCount",
+          "GET",
+          "/get_mailbox_count/lt/:playerId/:salt/:hash",
+          Schema.toCodecStringTree<
+            Schema.Struct<{ playerId: Schema.brand<Schema.String, "PlayerId">; salt: Schema.Int; hash: Schema.String }>
+          >,
+          never,
+          never,
+          never,
+          Schema.toCodecJson<
+            | Schema.Struct<{ readonly error: Schema.String }>
+            | Schema.Struct<{ readonly success: Schema.Literal<"NotFound"> }>
+            | Schema.Struct<{
+                readonly success: Schema.Literal<"Found">
+                readonly total: Schema.compose<Schema.Int, Schema.FiniteFromString>
+                readonly maxDisplay: Schema.Int
+                readonly from: Schema.$Array<Schema.Unknown>
+              }>
+          >,
+          Schema.toCodecJson<
+            | typeof HttpApiError.Forbidden
+            | typeof HttpApiError.BadRequest
+            | typeof HttpApiError.Unauthorized
+            | typeof HttpApiError.InternalServerError
+          >,
+          never,
+          never
+        >
+      | HttpApiEndpoint.HttpApiEndpoint<
+          "SocialGetMailbox",
+          "GET",
+          "/get_mailbox/lt/:playerId/:salt/:hash",
+          Schema.toCodecStringTree<
+            Schema.Struct<{ playerId: Schema.brand<Schema.String, "PlayerId">; salt: Schema.Int; hash: Schema.String }>
+          >,
+          never,
+          never,
+          never,
+          Schema.toCodecJson<
+            | Schema.Struct<{ readonly error: Schema.String }>
+            | Schema.Struct<{ readonly success: Schema.Literal<"NotFound"> }>
+            | Schema.Struct<{
+                readonly success: Schema.Literal<"Found">
+                readonly total: Schema.compose<Schema.Int, Schema.FiniteFromString>
+                readonly maxDisplay: Schema.Int
+                readonly mail: Schema.optionalKey<Schema.$Array<Schema.Unknown>>
+              }>
+          >,
+          Schema.toCodecJson<
+            | typeof HttpApiError.Forbidden
+            | typeof HttpApiError.BadRequest
+            | typeof HttpApiError.Unauthorized
+            | typeof HttpApiError.InternalServerError
+          >,
+          never,
+          never
+        >
+      | HttpApiEndpoint.HttpApiEndpoint<
+          "SocialRetrieveFriendsSnapshotList",
+          "GET",
+          "/sync/current_player_snapshots/lt/:playerId/:friendId/:salt/:hash",
+          Schema.toCodecStringTree<
+            Schema.Struct<{
+              playerId: Schema.brand<Schema.String, "PlayerId">
+              friendId: Schema.brand<Schema.String, "PlayerId">
+              salt: Schema.Int
+              hash: Schema.String
+            }>
+          >,
+          never,
+          never,
+          never,
+          Schema.toCodecJson<
+            | Schema.Struct<{ readonly error: Schema.String }>
+            | Schema.Struct<{ readonly success: Schema.Literal<"NotFound"> }>
+            | Schema.Struct<{
+                readonly success: Schema.Literal<"Found">
+                readonly saves: Schema.$Array<Schema.Unknown>
+              }>
+          >,
+          Schema.toCodecJson<
+            | typeof HttpApiError.Forbidden
+            | typeof HttpApiError.BadRequest
+            | typeof HttpApiError.Unauthorized
+            | typeof HttpApiError.InternalServerError
+          >,
+          never,
+          never
         >,
       false
     >
@@ -489,17 +593,57 @@ declare const Api: HttpApi.HttpApi<
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/lego-tower-sdk/src/Endpoints.ts#L406)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/lego-tower-sdk/src/Endpoints.ts#L602)
+
+Since v1.0.0
+
+# Config
+
+## AuthenticatedPlayerConfig
+
+Loads an `AuthenticatedPlayer` from `PLAYER_AUTH_KEY` and `PLAYER_ID`.
+
+**Signature**
+
+```ts
+declare const AuthenticatedPlayerConfig: Config.Config<{
+  readonly playerAuthKey: Redacted<string> & Brand<"PlayerAuthKey">
+  readonly playerId: string & Brand<"PlayerId">
+}>
+```
+
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/lego-tower-sdk/src/Endpoints.ts#L81)
 
 Since v1.0.0
 
 # Schemas
 
+## AuthenticatedPlayer
+
+An authenticated LEGO Tower player. The shared
+`NimblebitConfig.AuthenticatedPlayerSchema` limits ids to 5 chars and
+rejects LEGO Tower ids.
+
+**Signature**
+
+```ts
+declare const AuthenticatedPlayer: Schema.Struct<{
+  readonly playerAuthKey: Schema.brand<Schema.RedactedFromValue<Schema.String>, "PlayerAuthKey">
+  readonly playerId: Schema.brand<Schema.String, "PlayerId">
+}>
+```
+
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/lego-tower-sdk/src/Endpoints.ts#L70)
+
+Since v1.0.0
+
 ## Gift
 
-A gift/item in the general item channel (get_items / send_item). Verified DTO
-NBSyncItemsGift on pt: `{gift_id, gift_to, gift_from, gift_type, item_type,
-gift_str, h}` (no `c`, unlike pp). Left open for the data-schema work.
+A gift/item in the general item channel (get_items / send_item). DTO
+NBSyncItemsGift `{gift_id: String, gift_to: String, gift_from: String,
+gift_type: String, item_type: NBSyncItemType (None 0, Play 1, Gift 2, Visit
+3, Promo 4), gift_str: String, h: String}`. Only empty gift lists were
+observed, so the wire type of `item_type` is unknown.
 
 **Signature**
 
@@ -507,7 +651,7 @@ gift_str, h}` (no `c`, unlike pp). Left open for the data-schema work.
 declare const Gift: Schema.Unknown
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/lego-tower-sdk/src/Endpoints.ts#L81)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/lego-tower-sdk/src/Endpoints.ts#L119)
 
 Since v1.0.0
 
@@ -523,6 +667,6 @@ chars (e.g. `1QVVY7`), so the shared `PlayerId`
 declare const PlayerId: Schema.brand<Schema.String, "PlayerId">
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/lego-tower-sdk/src/Endpoints.ts#L43)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/lego-tower-sdk/src/Endpoints.ts#L55)
 
 Since v1.0.0
