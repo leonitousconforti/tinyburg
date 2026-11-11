@@ -67,8 +67,22 @@ Social Circles does not register itself, so register it once with the token
 (the same call as in `.env.example`, with the staging redirect uri and an
 `Authorization: Bearer` header) and put its client id and secret in `.env`.
 
-To deploy, pull, run `pnpm install --frozen-lockfile` (the stack does not
-install dependencies) and restart the service.
+Every push to main that passes CI deploys itself (`.github/workflows/staging.yml`).
+The job runs on a self-hosted runner labelled `staging`, on another VM, and
+does nothing but ssh to the staging box with the commit's sha. There the deploy
+key's forced command, `scripts/deploy-staging.sh`, fast-forwards the checkout to
+that commit if it is on main, runs `pnpm install --frozen-lockfile` (the stack
+does not install dependencies) and restarts the service. To set it up:
+
+- On the staging box, add the deploy key to `~/.ssh/authorized_keys` as
+  `restrict,command="$HOME/tinyburg-staging/scripts/deploy-staging.sh" ssh-ed25519 AAAA...`.
+- In the `staging` environment on GitHub, set the secret `STAGING_SSH_KEY` (the
+  private key) and the variables `STAGING_SSH_TARGET` (`user@host`) and
+  `STAGING_SSH_KNOWN_HOSTS` (`ssh-keyscan -t ed25519 <host>`).
+- Register the runner with the label `staging`. It needs only `ssh`, outbound
+  access to GitHub, and the staging box's ssh port.
+
+To deploy by hand, run the script in the checkout with a sha from main.
 
 ## The Android shell
 

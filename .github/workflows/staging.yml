@@ -1,0 +1,50 @@
+name: Deploy staging
+
+# After CI passes on a push to main. workflow_run always runs this file as it
+# is on main, so a pull request cannot change what the deploy job does.
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+    branches: ["main"]
+
+# One deploy at a time, never cancelled halfway: a newer push waits, and
+# replaces any older deploy still waiting.
+concurrency:
+  group: deploy-staging
+  cancel-in-progress: false
+
+permissions: {}
+
+jobs:
+  deploy:
+    # The branch filter above also matches a fork's pull request from a branch
+    # named main, so check that this was a push to this repository.
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.head_branch == 'main' &&
+      github.event.workflow_run.head_repository.full_name == github.repository
+    runs-on: [self-hosted, staging]
+    timeout-minutes: 15
+    environment:
+      name: staging
+      url: https://staging.tinyburg.app
+    steps:
+      # Nothing from the repository runs here. The deploy key's forced command
+      # on the staging box (scripts/deploy-staging.sh) does the deploy, and
+      # takes only the sha of a commit on main.
+      - name: Deploy
+        env:
+          SSH_KEY: ${{ secrets.STAGING_SSH_KEY }}
+          SSH_KNOWN_HOSTS: ${{ vars.STAGING_SSH_KNOWN_HOSTS }}
+          SSH_TARGET: ${{ vars.STAGING_SSH_TARGET }}
+          SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          dir=$(mktemp -d)
+          trap 'rm -rf "$dir"' EXIT
+          printf '%s\n' "$SSH_KEY" > "$dir/key"
+          chmod 600 "$dir/key"
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > "$dir/known_hosts"
+          ssh -i "$dir/key" -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile="$dir/known_hosts" "$SSH_TARGET" "$SHA"
