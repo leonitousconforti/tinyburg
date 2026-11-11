@@ -1,0 +1,58 @@
+name: Deploy
+
+# After CI passes on a push to main: staging, then the same commit to
+# production once the production environment's reviewer approves. By hand: one
+# environment, at main's head or an older commit on main (a rollback).
+# workflow_run always runs this file as it is on main, so a pull request cannot
+# change what the deploy jobs do.
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+    branches: ["main"]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Environment to deploy
+        type: choice
+        options: [staging, production]
+        default: staging
+      sha:
+        description: Commit on main to deploy, main's head if empty
+        type: string
+        required: false
+
+permissions: {}
+
+jobs:
+  staging:
+    # The branch filter above also matches a fork's pull request from a branch
+    # named main, so check that this was a push to this repository.
+    if: >-
+      github.ref == 'refs/heads/main' && (
+        (github.event_name == 'workflow_dispatch' && inputs.environment == 'staging') || (
+          github.event_name == 'workflow_run' &&
+          github.event.workflow_run.conclusion == 'success' &&
+          github.event.workflow_run.event == 'push' &&
+          github.event.workflow_run.head_branch == 'main' &&
+          github.event.workflow_run.head_repository.full_name == github.repository
+        )
+      )
+    uses: ./.github/workflows/deploy-environment.yml
+    with:
+      environment: staging
+      url: https://staging.tinyburg.app
+      sha: ${{ inputs.sha || github.event.workflow_run.head_sha || github.sha }}
+
+  production:
+    needs: staging
+    if: >-
+      !cancelled() && github.ref == 'refs/heads/main' && (
+        (github.event_name == 'workflow_dispatch' && inputs.environment == 'production') ||
+        (github.event_name == 'workflow_run' && needs.staging.result == 'success')
+      )
+    uses: ./.github/workflows/deploy-environment.yml
+    with:
+      environment: production
+      url: https://tinyburg.app
+      sha: ${{ inputs.sha || github.event.workflow_run.head_sha || github.sha }}
