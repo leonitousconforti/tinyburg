@@ -55,17 +55,17 @@ Postgres and SeaweedFS stay on loopback.
 
 Every push to main that passes CI deploys it (`.github/workflows/staging.yml`),
 on the self-hosted runner labelled `staging`, which is the staging box itself.
-The job keeps a checkout of its own in `~/tinyburg-staging`, outside the
-runner's workspace, so `.env`, `node_modules` and the Postgres data in `.dev`
-survive between deploys. It checks out the commit if it is on main and
-newer than the one deployed, decrypts that commit's `secrets/staging.env` into
-`.env`, runs `pnpm install --frozen-lockfile` (the stack does not
-install dependencies) and restarts the stack, a systemd user service it
-installs as `tinyburg-staging`. Run the workflow by hand to redeploy without a
-new commit. Logs are in `journalctl --user -u tinyburg-staging`.
+The runner runs as root, and Postgres refuses root, so the stack runs as the
+ordinary user `tinyburg` (created on the first deploy), as the system service
+`tinyburg-staging`, from `/var/lib/tinyburg/staging`. That checkout keeps
+`.env`, `node_modules` and the Postgres data in `.dev` between deploys.
 
-The runner's user needs lingering, so its services run without a login:
-`sudo loginctl enable-linger <runner user>`.
+A deploy checks the commit is on main and newer than the one deployed, builds
+the stack and the dev shell at that commit while the old stack still serves,
+then stops the stack, checks the commit out, decrypts its `secrets/staging.env`
+into `.env`, runs `pnpm install --frozen-lockfile` as `tinyburg` (the stack does
+not install dependencies) and starts the stack again. Run the workflow by hand
+to redeploy without a new commit. Logs are in `journalctl -u tinyburg-staging`.
 
 ## Secrets
 

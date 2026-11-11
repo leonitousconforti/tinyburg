@@ -42,18 +42,17 @@ jobs:
       # Decrypts secrets/staging.env (see .sops.yaml).
       SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_KEY }}
     steps:
-      # The stack outlives the job as a systemd user service, run from a
-      # checkout outside the runner's workspace so its .env, node_modules and
-      # Postgres data (.dev) survive between deploys.
+      # The runner is root, and Postgres refuses root, so the stack runs as the
+      # ordinary user tinyburg, as a system service from a checkout that user
+      # owns. Its .env, node_modules and Postgres data (.dev) live there and
+      # survive between deploys. Root only builds, decrypts and restarts.
       - name: Deploy
         run: |
           export PATH="/nix/var/nix/profiles/default/bin:$HOME/.nix-profile/bin:$PATH"
-          XDG_RUNTIME_DIR="/run/user/$(id -u)"
-          export XDG_RUNTIME_DIR
           nix() { command nix --extra-experimental-features 'nix-command flakes' "$@"; }
 
-          if ! loginctl show-user "$(id -un)" --property=Linger | grep -q yes; then
-            echo "::error::the stack runs as a user service, so the runner's user needs lingering: sudo loginctl enable-linger $(id -un)"
+          if [ "$(id -u)" != 0 ]; then
+            echo "::error::the runner must run as root: it installs a system service and the user that service runs as"
             exit 1
           fi
           if [ -z "$SOPS_AGE_KEY" ]; then
@@ -61,52 +60,84 @@ jobs:
             exit 1
           fi
 
-          dir="$HOME/tinyburg-staging"
-          [ -d "$dir/.git" ] || git clone --quiet "https://github.com/$REPOSITORY.git" "$dir"
+          user=tinyburg
+          home=/var/lib/tinyburg
+          dir="$home/staging"
+          id "$user" > /dev/null 2>&1 ||
+            useradd --system --create-home --home-dir "$home" --shell /usr/sbin/nologin "$user"
+          # A clean environment, so neither SOPS_AGE_KEY nor the runner's tokens
+          # reach what tinyburg runs (pnpm's install scripts, say).
+          as() { runuser -u "$user" -- env -i HOME="$home" PATH="${tools:-$PATH}" CI=true "$@"; }
+
+          # The first deploys ran the stack as root's own user service.
+          if [ -e /root/.config/systemd/user/tinyburg-staging.service ]; then
+            XDG_RUNTIME_DIR=/run/user/0 systemctl --user disable --now tinyburg-staging || true
+            rm -rf /root/.config/systemd/user/tinyburg-staging.service /root/tinyburg-staging
+          fi
+
+          [ -d "$dir/.git" ] || as git clone --quiet "https://github.com/$REPOSITORY.git" "$dir"
           cd "$dir"
-          git fetch --quiet origin main
-          if ! git merge-base --is-ancestor "$SHA" origin/main; then
+          as git fetch --quiet origin main
+          if ! as git merge-base --is-ancestor "$SHA" origin/main; then
             echo "::error::$SHA is not on main"
             exit 1
           fi
           deployed=$(cat .git/staging-deployed 2>/dev/null || true)
-          if [ -n "$deployed" ] && [ "$deployed" != "$SHA" ] && git merge-base --is-ancestor "$SHA" "$deployed"; then
+          if [ -n "$deployed" ] && [ "$deployed" != "$SHA" ] && as git merge-base --is-ancestor "$SHA" "$deployed"; then
             echo "$deployed, which is newer, is already deployed"
             exit 0
           fi
 
-          mkdir -p ~/.config/systemd/user
-          cat > ~/.config/systemd/user/tinyburg-staging.service <<EOF
+          # Build everything the new commit needs while the old stack still
+          # serves, so the stack is down only for the restart. Root builds from
+          # the commit on GitHub; the result is world-readable, so tinyburg
+          # needs no nix of its own. The -o link keeps it from garbage collection.
+          echo "::group::build the stack and the dev shell at $SHA"
+          flake="github:$REPOSITORY/$SHA"
+          stack=$(nix build --print-out-paths -o "$home/staging-stack" "$flake#staging")
+          # shellcheck disable=SC2016 # the dev shell's $PATH, expanded inside it
+          tools=$(nix develop "$flake" --command bash -c 'printf %s "$PATH"')
+          echo "::endgroup::"
+
+          cat > /etc/systemd/system/tinyburg-staging.service <<EOF
           [Unit]
           Description=Tinyburg staging stack (staging.tinyburg.app)
           Wants=network-online.target
           After=network-online.target
 
           [Service]
+          User=$user
           WorkingDirectory=$dir
-          ExecStart=$(type -P nix) --extra-experimental-features 'nix-command flakes' run .#staging -- --tui=false
+          ExecStart=$stack/bin/staging --tui=false
           Restart=on-failure
           RestartSec=10
 
           [Install]
-          WantedBy=default.target
+          WantedBy=multi-user.target
           EOF
-          systemctl --user daemon-reload
-          systemctl --user enable --quiet tinyburg-staging
-          systemctl --user stop tinyburg-staging
+          systemctl daemon-reload
+          systemctl enable --quiet tinyburg-staging
+          systemctl stop tinyburg-staging
 
-          git checkout --quiet --force --detach "$SHA"
-          (umask 077 && nix develop --command sops decrypt secrets/staging.env > .env)
-          COREPACK_ENABLE_DOWNLOAD_PROMPT=0 nix develop --command pnpm install --frozen-lockfile
+          as git checkout --quiet --force --detach "$SHA"
+          (umask 077 && PATH="$tools" sops decrypt secrets/staging.env > .env)
+          chown "$user:" .env
+          as env COREPACK_ENABLE_DOWNLOAD_PROMPT=0 pnpm install --frozen-lockfile
           echo "$SHA" > .git/staging-deployed
-          systemctl --user start tinyburg-staging
+          systemctl start tinyburg-staging
 
           # Up means every public app answers http, whatever the status (the
           # treasury has no page at /).
           for port in 3000 3001 3002 3004; do
-            if ! curl --silent --output /dev/null --retry 60 --retry-delay 5 --retry-all-errors --max-time 5 "http://127.0.0.1:$port/"; then
-              echo "::error::port $port did not come up; see journalctl --user -u tinyburg-staging"
-              exit 1
-            fi
+            for attempt in $(seq 60); do
+              curl --silent --output /dev/null --max-time 5 "http://127.0.0.1:$port/" && break
+              if [ "$attempt" = 60 ]; then
+                echo "::error::port $port did not come up in 5 minutes; the stack's log follows"
+                journalctl --unit tinyburg-staging --no-pager --lines 200
+                exit 1
+              fi
+              echo "waiting for port $port ($attempt/60)"
+              sleep 5
+            done
           done
           echo "deployed $SHA"
