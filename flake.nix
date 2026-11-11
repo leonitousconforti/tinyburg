@@ -27,6 +27,9 @@
             corepack
             python3
             process-compose
+            # secrets/*.env: sops edits them, age makes the keys
+            sops
+            age
           ];
 
           # Google's Android SDK is unfree and needs its license accepted. This

@@ -1,7 +1,6 @@
 name: Deploy staging
 
-# After CI passes on a push to main, or by hand (after changing STAGING_ENV,
-# say). workflow_run always runs this file as it is on main, so a pull request
+# After CI passes on a push to main, or by hand. workflow_run always runs this file as it is on main, so a pull request
 # cannot change what the deploy job does.
 on:
   workflow_run:
@@ -40,7 +39,8 @@ jobs:
     env:
       SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
       REPOSITORY: ${{ github.repository }}
-      STAGING_ENV: ${{ secrets.STAGING_ENV }}
+      # Decrypts secrets/staging.env (see .sops.yaml).
+      SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_KEY }}
     steps:
       # The stack outlives the job as a systemd user service, run from a
       # checkout outside the runner's workspace so its .env, node_modules and
@@ -56,8 +56,8 @@ jobs:
             echo "::error::the stack runs as a user service, so the runner's user needs lingering: sudo loginctl enable-linger $(id -un)"
             exit 1
           fi
-          if [ -z "$STAGING_ENV" ]; then
-            echo "::error::set the STAGING_ENV secret in the staging environment"
+          if [ -z "$SOPS_AGE_KEY" ]; then
+            echo "::error::set the SOPS_AGE_KEY secret in the staging environment"
             exit 1
           fi
 
@@ -96,7 +96,7 @@ jobs:
           systemctl --user stop tinyburg-staging
 
           git checkout --quiet --force --detach "$SHA"
-          (umask 077 && printf '%s\n' "$STAGING_ENV" > .env)
+          (umask 077 && nix develop --command sops decrypt secrets/staging.env > .env)
           COREPACK_ENABLE_DOWNLOAD_PROMPT=0 nix develop --command pnpm install --frozen-lockfile
           echo "$SHA" > .git/staging-deployed
           systemctl --user start tinyburg-staging
