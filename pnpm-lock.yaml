@@ -603,7 +603,10 @@ importers:
     devDependencies:
       '@effect/platform-node':
         specifier: 4.1.2
-        version: 4.1.2(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+        version: 4.1.2(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))(redis@6.3.1)
+      '@effect/vitest':
+        specifier: 4.1.2
+        version: 4.1.2(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))(vitest@5.1.0(patch_hash=be3ff017c14e2f4543070775e9a5bcc119068cf162f57a4f8235747b05c4e657)(vite@8.3.6))
       '@efffrida/il2cpp-bridge':
         specifier: 0.0.60
         version: 0.0.60(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
@@ -625,6 +628,15 @@ importers:
       frida-il2cpp-bridge:
         specifier: 0.14.0
         version: 0.14.0
+      redis:
+        specifier: 6.3.1
+        version: 6.3.1
+      vite:
+        specifier: 8.3.6
+        version: 8.3.6
+      vitest:
+        specifier: 5.1.0
+        version: 5.1.0(patch_hash=be3ff017c14e2f4543070775e9a5bcc119068cf162f57a4f8235747b05c4e657)(vite@8.3.6)
 
   packages/bitprints: {}
 
@@ -636,7 +648,10 @@ importers:
     devDependencies:
       '@effect/platform-node':
         specifier: 4.1.2
-        version: 4.1.2(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+        version: 4.1.2(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))(redis@6.3.1)
+      '@effect/vitest':
+        specifier: 4.1.2
+        version: 4.1.2(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))(vitest@5.1.0(patch_hash=be3ff017c14e2f4543070775e9a5bcc119068cf162f57a4f8235747b05c4e657)(vite@8.3.6))
       '@efffrida/il2cpp-bridge':
         specifier: 0.0.60
         version: 0.0.60(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
@@ -658,6 +673,15 @@ importers:
       frida-il2cpp-bridge:
         specifier: 0.14.0
         version: 0.14.0
+      redis:
+        specifier: 6.3.1
+        version: 6.3.1
+      vite:
+        specifier: 8.3.6
+        version: 8.3.6
+      vitest:
+        specifier: 5.1.0
+        version: 5.1.0(patch_hash=be3ff017c14e2f4543070775e9a5bcc119068cf162f57a4f8235747b05c4e657)(vite@8.3.6)
 
   packages/doorman: {}
 
@@ -703,7 +727,10 @@ importers:
     devDependencies:
       '@effect/platform-node':
         specifier: 4.1.2
-        version: 4.1.2(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+        version: 4.1.2(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))(redis@6.3.1)
+      '@effect/vitest':
+        specifier: 4.1.2
+        version: 4.1.2(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))(vitest@5.1.0(patch_hash=be3ff017c14e2f4543070775e9a5bcc119068cf162f57a4f8235747b05c4e657)(vite@8.3.6))
       '@efffrida/il2cpp-bridge':
         specifier: 0.0.60
         version: 0.0.60(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
@@ -725,6 +752,15 @@ importers:
       frida-il2cpp-bridge:
         specifier: 0.14.0
         version: 0.14.0
+      redis:
+        specifier: 6.3.1
+        version: 6.3.1
+      vite:
+        specifier: 8.3.6
+        version: 8.3.6
+      vitest:
+        specifier: 5.1.0
+        version: 5.1.0(patch_hash=be3ff017c14e2f4543070775e9a5bcc119068cf162f57a4f8235747b05c4e657)(vite@8.3.6)
 
   packages/nimblebit-sdk:
     devDependencies:
@@ -740,7 +776,10 @@ importers:
     devDependencies:
       '@effect/platform-node':
         specifier: 4.1.2
-        version: 4.1.2(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+        version: 4.1.2(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))(redis@6.3.1)
+      '@effect/vitest':
+        specifier: 4.1.2
+        version: 4.1.2(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))(vitest@5.1.0(patch_hash=be3ff017c14e2f4543070775e9a5bcc119068cf162f57a4f8235747b05c4e657)(vite@8.3.6))
       '@efffrida/il2cpp-bridge':
         specifier: 0.0.60
         version: 0.0.60(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
@@ -762,6 +801,15 @@ importers:
       frida-il2cpp-bridge:
         specifier: 0.14.0
         version: 0.14.0
+      redis:
+        specifier: 6.3.1
+        version: 6.3.1
+      vite:
+        specifier: 8.3.6
+        version: 8.3.6
+      vitest:
+        specifier: 5.1.0
+        version: 5.1.0(patch_hash=be3ff017c14e2f4543070775e9a5bcc119068cf162f57a4f8235747b05c4e657)(vite@8.3.6)
 
   packages/pocket-trains-sdk:
     dependencies:
@@ -771,7 +819,10 @@ importers:
     devDependencies:
       '@effect/platform-node':
         specifier: 4.1.2
-        version: 4.1.2(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+        version: 4.1.2(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))(redis@6.3.1)
+      '@effect/vitest':
+        specifier: 4.1.2
+        version: 4.1.2(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))(vitest@5.1.0(patch_hash=be3ff017c14e2f4543070775e9a5bcc119068cf162f57a4f8235747b05c4e657)(vite@8.3.6))
       '@efffrida/il2cpp-bridge':
         specifier: 0.0.60
         version: 0.0.60(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
@@ -793,6 +844,15 @@ importers:
       frida-il2cpp-bridge:
         specifier: 0.14.0
         version: 0.14.0
+      redis:
+        specifier: 6.3.1
+        version: 6.3.1
+      vite:
+        specifier: 8.3.6
+        version: 8.3.6
+      vitest:
+        specifier: 5.1.0
+        version: 5.1.0(patch_hash=be3ff017c14e2f4543070775e9a5bcc119068cf162f57a4f8235747b05c4e657)(vite@8.3.6)
 
   packages/tinyburg-sdk:
     dependencies:
@@ -886,7 +946,10 @@ importers:
     devDependencies:
       '@effect/platform-node':
         specifier: 4.1.2
-        version: 4.1.2(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
+        version: 4.1.2(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))(redis@6.3.1)
+      '@effect/vitest':
+        specifier: 4.1.2
+        version: 4.1.2(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))(vitest@5.1.0(patch_hash=be3ff017c14e2f4543070775e9a5bcc119068cf162f57a4f8235747b05c4e657)(vite@8.3.6))
       '@efffrida/il2cpp-bridge':
         specifier: 0.0.60
         version: 0.0.60(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
@@ -908,6 +971,15 @@ importers:
       frida-il2cpp-bridge:
         specifier: 0.14.0
         version: 0.14.0
+      redis:
+        specifier: 6.3.1
+        version: 6.3.1
+      vite:
+        specifier: 8.3.6
+        version: 8.3.6
+      vitest:
+        specifier: 5.1.0
+        version: 5.1.0(patch_hash=be3ff017c14e2f4543070775e9a5bcc119068cf162f57a4f8235747b05c4e657)(vite@8.3.6)
 
   packages/treasury-sdk:
     dependencies:
@@ -3957,15 +4029,6 @@ snapshots:
       '@types/ws': 8.18.2
       effect: 4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
       ws: 8.22.1
-    transitivePeerDependencies:
-      - bufferutil
-      - utf-8-validate
-
-  '@effect/platform-node@4.1.2(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))':
-    dependencies:
-      '@effect/platform-node-shared': 4.1.2(effect@4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132))
-      effect: 4.1.2(patch_hash=bb3b600aca0483b520c5998874e4dac78a1d9494b875234b13cd57877eb45132)
-      undici: 8.12.4
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate

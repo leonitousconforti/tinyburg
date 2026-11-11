@@ -73,6 +73,63 @@ export * as Endpoints from "./Endpoints.ts"
 export * as Missions from "./Missions.ts"
 
 /**
+ * Bit City's save: the game's `GameState` object as JSON, written by
+ * Newtonsoft.Json.
+ *
+ * `Player.Save()` builds a `GameState`, serializes it with
+ * `JsonConvert.SerializeObject` and stores the string under the PlayerPrefs key
+ * `bitcity3` (`Player.SaveKey`). `Player.LoadFromDisk()` reads that key back and
+ * deserializes it into a `GameState`. The game only stores a save whose
+ * `pTaps` is at least 1, so a fresh install still in its tutorial has none.
+ *
+ * The cloud copy (`/sync/pull/bc/...`, see `BitCity.sync_pullSave`) is the
+ * same JSON without the `playerS` and `playerE` keys, zlib-compressed: the
+ * game's `NBSync.decodeSave` turns the pulled base64 `data` into the save
+ * string by base64-decoding and inflating it. {@link SaveDataFromBytes} reads
+ * those bytes.
+ *
+ * Determined against Bit City 1.6.0 on an Android emulator with Frida: by
+ * hooking `JsonConvert.SerializeObject`, `PlayerPrefs.SetString` and
+ * `NBSync.decodeSave` while the game saved and pulled its save from the
+ * server, by reading the calls `Player.Save()` and `Player.LoadFromDisk()`
+ * make, and by growing a city with the game's own methods (buying and building
+ * lots, upgrades, vehicles and missions) to see every key filled in. The test
+ * fixtures are those saves, with the player's id and secret replaced.
+ *
+ * The JSON is decoded losslessly: numbers keep their exact text until a field's
+ * schema reads them, so C# `long` values above 2^53 (`cLastEarnTime`, in
+ * `DateTime` ticks) survive. Keys this module does not model, which a newer
+ * game version could add to the save, its lots or its progressive rewards, are
+ * kept as they were read, as {@link JsonValue}s (numbers as their source text;
+ * typed `unknown` on the decoded side), and written back; encoding checks their
+ * values against {@link JsonValue} again. The player's auth salt (`playerS`)
+ * and email (`playerE`) decode to `Redacted` values, so printing or logging a
+ * decoded save does not show them. This needs `JSON.parse` source text access
+ * and `JSON.rawJSON` (Node.js 21 and later).
+ *
+ * Encoding writes JSON the way the game does: no whitespace, Newtonsoft's
+ * string escapes (`\"`, `\\`, `\b`, `\t`, `\n`, `\f`, `\r`, `\u00XX` for other
+ * control characters, and `\u0085`, `\u2028`, `\u2029`; everything else as
+ * is), and doubles as the game's Mono runtime formats them (`50000.0`,
+ * `1E+15`, 17 digits when 15 do not round-trip). Encoding a decoded save the
+ * game wrote gives back the same string, byte for byte, with these exceptions:
+ *
+ * - Keys that look like array indexes ("0", "1", ...) come first in their
+ *   object, in ascending order, as JavaScript objects order such keys.
+ * - In the save, in each lot and in `progressiveRewards`, the keys this module
+ *   models come back in the order it lists them (the game's order), followed
+ *   by the keys it does not model, in the order they were read. Dictionaries
+ *   (`cLots`, `uCounts`, ...) keep their keys in the order they were read.
+ *
+ * A string the game would not write (whitespace between tokens, other escapes
+ * such as `\/` or `\u0041`, a double in a modeled field written with other
+ * digits) decodes, and is written back the game's way.
+ *
+ * @since 1.0.0
+ */
+export * as Save from "./Save.ts"
+
+/**
  * The scopes the Bit City api is guarded by: `bitcity` for the whole game,
  * `bitcity:read` and `bitcity:write` for every endpoint that only looks or that
  * changes a player's game, a `:read` and a `:write` scope for each area of the
