@@ -139,6 +139,15 @@ export const SocialPullFriendMeta: OAuthScope.Described = {
  * @since 1.0.0
  * @category Social
  */
+export const SocialListFriendSnapshots: OAuthScope.Described = {
+    name: OAuthScope.make("tinytowervegas:social:list_friend_snapshots"),
+    description: "List the cloud snapshots a friend has",
+};
+
+/**
+ * @since 1.0.0
+ * @category Social
+ */
 export const SocialSendItem: OAuthScope.Described = {
     name: OAuthScope.make("tinytowervegas:social:send_item"),
     description: "Send items to another player",
