@@ -1,5 +1,19 @@
 # @tinyburg/lego-tower-sdk
 
+## 0.2.0
+
+### Minor Changes
+
+- 9159310: Declare scopes as flat `@yielded/auth` `OAuthScope.Described` constants instead of a tree, and remove `NimblebitScopes`. Each `Scopes` module now exports the whole game's scope, `Read`, `Write`, one scope per endpoint (`Scopes.SyncPullSave`), and in the game SDKs a `:read` and a `:write` scope per area (`Scopes.SyncRead`). Every endpoint accepts its own scope, its area's side (game SDKs), the game's side and the game. The game SDKs no longer have the bare area scopes such as `tinytower:sync`; every other scope name is unchanged. `@tinyburg/tinyburg-sdk`'s and `@tinyburg/treasury-sdk`'s scope names and requirements are unchanged.
+- dd81dd2: Add `Floors`, `Minifigures`, `Missions`, `Pieces` and `Sets` modules with LEGO Tower's floors, minifigure names and hidden characters, missions, minifigure pieces, and roofs, elevators, vehicles and skylines, read from the game itself by `pnpm generate`.
+
+### Patch Changes
+
+- Updated dependencies [51cfcfc]
+- Updated dependencies [9159310]
+- Updated dependencies [16c9e1c]
+    - @tinyburg/nimblebit-sdk@0.4.0
+
 ## 0.1.2
 
 ### Patch Changes

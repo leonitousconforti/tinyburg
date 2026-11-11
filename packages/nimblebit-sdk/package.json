@@ -1,6 +1,6 @@
 {
     "name": "@tinyburg/nimblebit-sdk",
-    "version": "0.3.0",
+    "version": "0.4.0",
     "description": "general purpose SDK for connecting to Nimblebit's cloud services",
     "keywords": [
         "nimblebit",
