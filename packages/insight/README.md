@@ -49,3 +49,39 @@ Every game SDK with an Android build has one: tinytower-sdk, pocket-planes-sdk,
 pocket-trains-sdk, lego-tower-sdk, disco-zoo-sdk, bitcity-sdk and
 tinytower-vegas-sdk. tinytower-classic-sdk has none, because Google Play's
 anonymous accounts cannot download the paid game.
+
+## Probing any Nimblebit game
+
+`@tinyburg/insight/node/NBSync` runs any of Nimblebit's Unity games (Pocket
+Planes, Pocket Trains, LEGO Tower, Disco Zoo, Bit City, Tiny Tower Vegas and
+TinyTower itself) under a game-agnostic agent and records what the game says
+to Nimblebit's sync server:
+
+- `layerDevice(bundleIdentifier)` (from `@tinyburg/insight/node`) boots
+  `Small_Phone` and installs the game.
+- `NBSync.layerAgent(bundleIdentifier)` spawns it suspended, loads the agent
+  and only then lets it run. The agent hooks UnityWebRequest, WWW, WWWForm,
+  HashAlgorithm.ComputeHash and every method of the game's NBSync classes from
+  inside `il2cpp_init`, so it sees the game's first request.
+- `NBSync.probe(bundleIdentifier)` lets the game start up, then calls each of
+  its read-only NBSync methods once (save checks, friend saves and meta,
+  player details, items, visits, mailbox, snapshots) and returns every
+  request, response and hashed preimage it saw. With `classes: true` it also
+  describes the game's network and sync classes, which is slow on a large game
+  (18 minutes for LEGO Tower).
+
+A run contains the game's signing secrets and the throwaway player's key, so
+keep raw runs to yourself.
+
+Two things about the ARM translation shape the agent. A JS thread left
+attached to il2cpp crashed the probed games at their next garbage collection,
+so every call from the JS thread detaches afterwards. And a managed exception
+thrown into Frida aborts the game, so driven methods get real callbacks and
+third-party login flows (LEGO Life, Facebook, Game Center, Play Games) are
+never driven.
+
+`@tinyburg/insight/node/Metadata` reads the URL paths compiled into a game
+from its APK, including the ones a run never exercises.
+
+Save uploads are not covered: the games hand them to a Java plugin
+(`com.nimblebit.nbsync.SyncPush`) outside the il2cpp code the agent hooks.
