@@ -43,29 +43,39 @@ Then open http://localhost:3000 (tinyburg.app), http://localhost:3001
 tinyburg.app at `/v1/treasury`, but its connect flow runs in the browser at
 http://localhost:3004, so forward that port too.
 
-## Staging
+## Staging and production
 
 `nix run .#staging` is the same stack for https://staging.tinyburg.app and its
-`authproxy.`, `socialcircles.`, `treasury.` and `discord.` siblings. A proxy
-terminates TLS and reaches the apps over the LAN, so they listen on `0.0.0.0`
-with `NODE_ENV=production`: Secure `__Host-` cookies, and dynamic client
-registration only with `TINYBURGAPP_REGISTRATION_TOKEN`, which the authproxy,
-treasury and discord-bot present as their `*_TINYBURG_OAUTH_REGISTRATION_TOKEN`.
-Postgres and SeaweedFS stay on loopback.
+`authproxy.`, `socialcircles.`, `treasury.` and `discord.` siblings, and
+`nix run .#production` for https://tinyburg.app and the same subdomains of it.
+A proxy terminates TLS and reaches the apps over the LAN, so they listen on
+`0.0.0.0` with `NODE_ENV=production`: Secure `__Host-` cookies, and dynamic
+client registration only with `TINYBURGAPP_REGISTRATION_TOKEN`, which the
+authproxy, treasury and discord-bot present as their
+`*_TINYBURG_OAUTH_REGISTRATION_TOKEN`. Postgres and SeaweedFS stay on loopback.
+Postgres is pinned to one major version, since a deployed data directory only
+starts with the major it was made with.
 
-Every push to main that passes CI deploys it (`.github/workflows/staging.yml`),
-on the self-hosted runner labelled `staging`, which is the staging box itself.
-The runner runs as root, and Postgres refuses root, so the stack runs as the
-ordinary user `tinyburg` (created on the first deploy), as the system service
-`tinyburg-staging`, from `/var/lib/tinyburg/staging`. That checkout keeps
-`.env`, `node_modules` and the Postgres data in `.dev` between deploys.
+Every push to main that passes CI deploys to staging
+(`.github/workflows/deploy.yml`), and then waits for the production
+environment's reviewer to deploy the same commit to production. Each
+environment's self-hosted runner, labelled with its name, is that environment's
+box itself. The runner runs as root, and Postgres refuses root, so the stack
+runs as the ordinary user `tinyburg` (created on the first deploy), as the
+system service `tinyburg-<environment>`, from `/var/lib/tinyburg/<environment>`.
+That checkout keeps `.env`, `node_modules` and the Postgres data in `.dev`
+between deploys.
 
 A deploy builds the stack and the dev shell at the commit while the old stack
-still serves,
-then stops the stack, checks the commit out, decrypts its `secrets/staging.env`
-into `.env`, runs `pnpm install --frozen-lockfile` as `tinyburg` (the stack does
-not install dependencies) and starts the stack again. Run the workflow by hand
-to redeploy without a new commit. Logs are in `journalctl -u tinyburg-staging`.
+still serves, dumps every database into
+`/var/lib/tinyburg/backups/<environment>` (the newest ten deploys are kept),
+then stops the stack, checks the commit out, decrypts its
+`secrets/<environment>.env` into `.env`, runs `pnpm install --frozen-lockfile`
+as `tinyburg` (the stack does not install dependencies) and starts the stack
+again. Run the workflow by hand to deploy one environment again, or an older
+commit on main to roll back. The apps migrate their databases when they start,
+so rolling back past a migration also means restoring that deploy's dumps with
+`pg_restore`. Logs are in `journalctl -u tinyburg-<environment>`.
 
 ## Secrets
 

@@ -6,6 +6,10 @@
       ...
     }:
     let
+      # Pinned, so a nixpkgs update cannot move a deployed data directory to a
+      # major version it was not made with. Upgrading is a pg_upgrade.
+      postgresql = pkgs.postgresql_18;
+
       # Everything the stacks share, given where each app is reached from a
       # browser, what NODE_ENV the apps see and the address they listen on.
       # Postgres and SeaweedFS stay on loopback in every stack.
@@ -175,6 +179,7 @@
             service: db:
             lib.nameValuePair (postgresFor service) {
               enable = true;
+              package = postgresql;
               dataDir = "./.dev/postgres/${service}";
               listen_addresses = "127.0.0.1";
               port = db.port;
@@ -307,6 +312,9 @@
         };
     in
     {
+      # The deploy's pg_dump, the same major as the stacks' servers.
+      packages.postgresql = postgresql;
+
       process-compose."dev" = stack {
         nodeEnv = "development";
         host = "127.0.0.1";
@@ -330,6 +338,19 @@
           socialCircles = "https://socialcircles.staging.tinyburg.app";
           discordBot = "https://discord.staging.tinyburg.app";
           treasury = "https://treasury.staging.tinyburg.app";
+        };
+      };
+
+      # tinyburg.app itself, behind the same kind of proxy.
+      process-compose."production" = stack {
+        nodeEnv = "production";
+        host = "0.0.0.0";
+        origins = {
+          tinyburgApp = "https://tinyburg.app";
+          authproxy = "https://authproxy.tinyburg.app";
+          socialCircles = "https://socialcircles.tinyburg.app";
+          discordBot = "https://discord.tinyburg.app";
+          treasury = "https://treasury.tinyburg.app";
         };
       };
     };

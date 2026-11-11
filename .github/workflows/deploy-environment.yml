@@ -1,0 +1,149 @@
+name: Deploy an environment
+
+# Called by deploy.yml, once per environment.
+on:
+  workflow_call:
+    inputs:
+      environment:
+        description: staging or production, which is also the runner label, the process-compose profile and the secrets file
+        type: string
+        required: true
+      url:
+        type: string
+        required: true
+      sha:
+        description: A commit on main, full or abbreviated
+        type: string
+        required: true
+
+permissions: {}
+
+jobs:
+  deploy:
+    # The runner is the environment's box itself.
+    runs-on: [self-hosted, "${{ inputs.environment }}"]
+    timeout-minutes: 30
+    # One deploy per environment at a time, never cancelled halfway: a newer
+    # one waits, and replaces any older one still waiting.
+    concurrency:
+      group: deploy-${{ inputs.environment }}
+      cancel-in-progress: false
+    environment:
+      name: ${{ inputs.environment }}
+      url: ${{ inputs.url }}
+    env:
+      ENVIRONMENT: ${{ inputs.environment }}
+      SHA: ${{ inputs.sha }}
+      URL: ${{ inputs.url }}
+      REPOSITORY: ${{ github.repository }}
+      # The environment's own key, which decrypts only its secrets file (see
+      # .sops.yaml).
+      SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_KEY }}
+    steps:
+      # The runner is root, and Postgres refuses root, so the stack runs as the
+      # ordinary user tinyburg, as a system service from a checkout that user
+      # owns. Its .env, node_modules and Postgres data (.dev) live there and
+      # survive between deploys. Root only builds, backs up, decrypts and
+      # restarts.
+      - name: Deploy
+        run: |
+          export PATH="/nix/var/nix/profiles/default/bin:$HOME/.nix-profile/bin:$PATH"
+          nix() { command nix --extra-experimental-features 'nix-command flakes' "$@"; }
+
+          user=tinyburg
+          home=/var/lib/tinyburg
+          dir="$home/$ENVIRONMENT"
+          unit="tinyburg-$ENVIRONMENT"
+          id "$user" > /dev/null 2>&1 ||
+            useradd --system --create-home --home-dir "$home" --shell /usr/sbin/nologin "$user"
+          # A clean environment, so neither SOPS_AGE_KEY nor the runner's tokens
+          # reach what tinyburg runs (pnpm's install scripts, say).
+          as() { runuser -u "$user" -- env -i HOME="$home" PATH="${tools:-$PATH}" CI=true "$@"; }
+
+          [ -d "$dir/.git" ] || as git clone --quiet "https://github.com/$REPOSITORY.git" "$dir"
+          cd "$dir"
+          as git fetch --quiet origin main
+          # A hand-run deploy names any commit, so make sure it is one on main.
+          if ! SHA=$(as git rev-parse --verify --quiet "$SHA^{commit}") ||
+            ! as git merge-base --is-ancestor "$SHA" origin/main; then
+            echo "::error::$SHA is not a commit on main"
+            exit 1
+          fi
+
+          # Build everything the new commit needs while the old stack still
+          # serves, so the stack is down only for the restart. Root builds from
+          # the commit on GitHub; the result is world-readable, so tinyburg
+          # needs no nix of its own. The -o link keeps it from garbage collection.
+          echo "::group::build the stack and the dev shell at $SHA"
+          flake="github:$REPOSITORY/$SHA"
+          stack=$(nix build --print-out-paths -o "$home/$ENVIRONMENT-stack" "$flake#$ENVIRONMENT")
+          pg_dump=$(nix build --print-out-paths --no-link "$flake#postgresql")/bin/pg_dump
+          # shellcheck disable=SC2016 # the dev shell's $PATH, expanded inside it
+          tools=$(nix develop "$flake" --command bash -c 'printf %s "$PATH"')
+          echo "::endgroup::"
+
+          # The apps migrate their databases when they start, and that cannot
+          # be undone, so dump every database first while the old stack still
+          # runs (the ports and names are the ones in nix/dev.nix). The newest
+          # ten deploys' dumps are kept.
+          if systemctl --quiet is-active "$unit"; then
+            echo "::group::back up the databases"
+            backups="$home/backups/$ENVIRONMENT"
+            backup="$backups/$(date --utc +%Y%m%dT%H%M%SZ)-$(as git rev-parse --short HEAD)"
+            (
+              umask 077
+              mkdir -p "$backup"
+              for db in 54320:tinyburg_app 54321:authproxy 54322:social_circles 54323:discord_bot 54324:treasury; do
+                "$pg_dump" --format=custom --file="$backup/${db#*:}.dump" \
+                  "postgres://postgres@127.0.0.1:${db%%:*}/${db#*:}"
+              done
+            )
+            all=("$backups"/*/)
+            if [ "${#all[@]}" -gt 10 ]; then
+              rm -rf "${all[@]:0:${#all[@]}-10}"
+            fi
+            echo "backed up to $backup"
+            echo "::endgroup::"
+          fi
+
+          cat > "/etc/systemd/system/$unit.service" <<EOF
+          [Unit]
+          Description=Tinyburg $ENVIRONMENT stack ($URL)
+          Wants=network-online.target
+          After=network-online.target
+
+          [Service]
+          User=$user
+          WorkingDirectory=$dir
+          ExecStart=$stack/bin/$ENVIRONMENT --tui=false
+          Restart=on-failure
+          RestartSec=10
+
+          [Install]
+          WantedBy=multi-user.target
+          EOF
+          systemctl daemon-reload
+          systemctl enable --quiet "$unit"
+          systemctl stop "$unit"
+
+          as git checkout --quiet --force --detach "$SHA"
+          (umask 077 && PATH="$tools" sops decrypt "secrets/$ENVIRONMENT.env" > .env)
+          chown "$user:" .env
+          as env COREPACK_ENABLE_DOWNLOAD_PROMPT=0 pnpm install --frozen-lockfile
+          systemctl start "$unit"
+
+          # Up means every public app answers http, whatever the status (the
+          # treasury has no page at /).
+          for port in 3000 3001 3002 3004; do
+            for attempt in $(seq 60); do
+              curl --silent --output /dev/null --max-time 5 "http://127.0.0.1:$port/" && break
+              if [ "$attempt" = 60 ]; then
+                echo "::error::port $port did not come up in 5 minutes; the stack's log follows"
+                journalctl --unit "$unit" --no-pager --lines 200
+                exit 1
+              fi
+              echo "waiting for port $port ($attempt/60)"
+              sleep 5
+            done
+          done
+          echo "deployed $SHA"
