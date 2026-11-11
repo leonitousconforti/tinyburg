@@ -64,8 +64,9 @@ install dependencies) and restarts the stack, a systemd user service it
 installs as `tinyburg-staging`. Run the workflow by hand to redeploy without a
 new commit. Logs are in `journalctl --user -u tinyburg-staging`.
 
-The runner's user needs lingering, so its services run without a login:
-`sudo loginctl enable-linger <runner user>`.
+The runner must run as an ordinary user, since Postgres refuses to run as root
+(`sudo ./svc.sh install <user>` in the runner's directory), and that user needs
+lingering so its services run without a login: `sudo loginctl enable-linger <user>`.
 
 ## Secrets
 

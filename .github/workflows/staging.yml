@@ -52,6 +52,10 @@ jobs:
           export XDG_RUNTIME_DIR
           nix() { command nix --extra-experimental-features 'nix-command flakes' "$@"; }
 
+          if [ "$(id -u)" = 0 ]; then
+            echo "::error::the runner runs as root, and Postgres refuses to: run it as an ordinary user (./svc.sh install <user>) with lingering"
+            exit 1
+          fi
           if ! loginctl show-user "$(id -un)" --property=Linger | grep -q yes; then
             echo "::error::the stack runs as a user service, so the runner's user needs lingering: sudo loginctl enable-linger $(id -un)"
             exit 1
@@ -74,6 +78,13 @@ jobs:
             echo "$deployed, which is newer, is already deployed"
             exit 0
           fi
+
+          # Build everything the new commit needs while the old stack still
+          # serves, so the stack is down only for the restart.
+          echo "::group::build the stack and the dev shell at $SHA"
+          nix build --no-link "git+file://$dir?rev=$SHA#staging"
+          nix develop "git+file://$dir?rev=$SHA" --command true
+          echo "::endgroup::"
 
           mkdir -p ~/.config/systemd/user
           cat > ~/.config/systemd/user/tinyburg-staging.service <<EOF
@@ -104,9 +115,15 @@ jobs:
           # Up means every public app answers http, whatever the status (the
           # treasury has no page at /).
           for port in 3000 3001 3002 3004; do
-            if ! curl --silent --output /dev/null --retry 60 --retry-delay 5 --retry-all-errors --max-time 5 "http://127.0.0.1:$port/"; then
-              echo "::error::port $port did not come up; see journalctl --user -u tinyburg-staging"
-              exit 1
-            fi
+            for attempt in $(seq 60); do
+              curl --silent --output /dev/null --max-time 5 "http://127.0.0.1:$port/" && break
+              if [ "$attempt" = 60 ]; then
+                echo "::error::port $port did not come up in 5 minutes; the stack's log follows"
+                journalctl --user --unit tinyburg-staging --no-pager --lines 200
+                exit 1
+              fi
+              echo "waiting for port $port ($attempt/60)"
+              sleep 5
+            done
           done
           echo "deployed $SHA"
