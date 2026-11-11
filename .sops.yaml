@@ -1,0 +1,13 @@
+# Who can decrypt each secrets/*.env: the maintainer's key, and the key of the
+# GitHub environment that deploys it (its SOPS_AGE_KEY secret).
+keys:
+  - &maintainer age1fwcmx3hgpk7kgem7ec82uhekqhrup6ls6j3xkguhfr48t3v6z9es4m8z7c
+  - &staging age1p4rsjvkh288h92nu0qupfzsuhsywg6ekgg4pc56gpzgppmgkw5rqm3k2dt
+  - &production age1qhrtc6g4czwpw2qfpa0d6k0v99r68rnaw30g8jxdv0jtmhvug9fsmxff75
+creation_rules:
+  - path_regex: (^|/)secrets/staging\.env$
+    key_groups:
+      - age: [*maintainer, *staging]
+  - path_regex: (^|/)secrets/production\.env$
+    key_groups:
+      - age: [*maintainer, *production]

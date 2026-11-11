@@ -53,22 +53,40 @@ registration only with `TINYBURGAPP_REGISTRATION_TOKEN`, which the authproxy,
 treasury and discord-bot present as their `*_TINYBURG_OAUTH_REGISTRATION_TOKEN`.
 Postgres and SeaweedFS stay on loopback.
 
-Run it from its own checkout with its own `.env` (fresh signing keys, sealing
-keys and admin password), as a systemd user service:
+Every push to main that passes CI deploys it (`.github/workflows/staging.yml`),
+on the self-hosted runner labelled `staging`, which is the staging box itself.
+The job keeps a checkout of its own in `~/tinyburg-staging`, outside the
+runner's workspace, so `.env`, `node_modules` and the Postgres data in `.dev`
+survive between deploys. It checks out the commit if it is on main and
+newer than the one deployed, decrypts that commit's `secrets/staging.env` into
+`.env`, runs `pnpm install --frozen-lockfile` (the stack does not
+install dependencies) and restarts the stack, a systemd user service it
+installs as `tinyburg-staging`. Run the workflow by hand to redeploy without a
+new commit. Logs are in `journalctl --user -u tinyburg-staging`.
 
-```ini
-[Service]
-WorkingDirectory=%h/tinyburg-staging
-ExecStart=/nix/var/nix/profiles/default/bin/nix run .#staging -- --tui=false
-Restart=on-failure
-```
+The runner's user needs lingering, so its services run without a login:
+`sudo loginctl enable-linger <runner user>`.
 
-Social Circles does not register itself, so register it once with the token
-(the same call as in `.env.example`, with the staging redirect uri and an
-`Authorization: Bearer` header) and put its client id and secret in `.env`.
+## Secrets
 
-To deploy, pull, run `pnpm install --frozen-lockfile` (the stack does not
-install dependencies) and restart the service.
+`secrets/staging.env` and `secrets/production.env` are the deployed `.env`
+files, encrypted with [sops](https://github.com/getsops/sops): the variable
+names stay readable and every value is encrypted. `.sops.yaml` says who can
+decrypt each one, the maintainer's age key and the key of the GitHub
+environment that deploys it, which is that environment's `SOPS_AGE_KEY` secret.
+Each has its own signing keys, sealing keys, admin password and registration
+token, never the dev ones.
+
+Edit one with `sops secrets/staging.env` from the dev shell; sops finds the
+maintainer key in `~/.config/sops/age/keys.txt`. After adding or replacing a
+key in `.sops.yaml`, run `sops updatekeys secrets/<name>.env`. If a key leaks,
+replace it and also change the values it could read: the old files stay in git
+history.
+
+Social Circles does not register itself, so after a first deploy register it
+once with the registration token (the same call as in `.env.example`, with the
+deployed redirect uri and an `Authorization: Bearer` header), then add its
+client id and secret to the file.
 
 ## The Android shell
 
