@@ -60,8 +60,8 @@ ordinary user `tinyburg` (created on the first deploy), as the system service
 `tinyburg-staging`, from `/var/lib/tinyburg/staging`. That checkout keeps
 `.env`, `node_modules` and the Postgres data in `.dev` between deploys.
 
-A deploy checks the commit is on main and newer than the one deployed, builds
-the stack and the dev shell at that commit while the old stack still serves,
+A deploy builds the stack and the dev shell at the commit while the old stack
+still serves,
 then stops the stack, checks the commit out, decrypts its `secrets/staging.env`
 into `.env`, runs `pnpm install --frozen-lockfile` as `tinyburg` (the stack does
 not install dependencies) and starts the stack again. Run the workflow by hand

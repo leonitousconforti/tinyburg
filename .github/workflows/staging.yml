@@ -51,15 +51,6 @@ jobs:
           export PATH="/nix/var/nix/profiles/default/bin:$HOME/.nix-profile/bin:$PATH"
           nix() { command nix --extra-experimental-features 'nix-command flakes' "$@"; }
 
-          if [ "$(id -u)" != 0 ]; then
-            echo "::error::the runner must run as root: it installs a system service and the user that service runs as"
-            exit 1
-          fi
-          if [ -z "$SOPS_AGE_KEY" ]; then
-            echo "::error::set the SOPS_AGE_KEY secret in the staging environment"
-            exit 1
-          fi
-
           user=tinyburg
           home=/var/lib/tinyburg
           dir="$home/staging"
@@ -69,24 +60,9 @@ jobs:
           # reach what tinyburg runs (pnpm's install scripts, say).
           as() { runuser -u "$user" -- env -i HOME="$home" PATH="${tools:-$PATH}" CI=true "$@"; }
 
-          # The first deploys ran the stack as root's own user service.
-          if [ -e /root/.config/systemd/user/tinyburg-staging.service ]; then
-            XDG_RUNTIME_DIR=/run/user/0 systemctl --user disable --now tinyburg-staging || true
-            rm -rf /root/.config/systemd/user/tinyburg-staging.service /root/tinyburg-staging
-          fi
-
           [ -d "$dir/.git" ] || as git clone --quiet "https://github.com/$REPOSITORY.git" "$dir"
           cd "$dir"
           as git fetch --quiet origin main
-          if ! as git merge-base --is-ancestor "$SHA" origin/main; then
-            echo "::error::$SHA is not on main"
-            exit 1
-          fi
-          deployed=$(cat .git/staging-deployed 2>/dev/null || true)
-          if [ -n "$deployed" ] && [ "$deployed" != "$SHA" ] && as git merge-base --is-ancestor "$SHA" "$deployed"; then
-            echo "$deployed, which is newer, is already deployed"
-            exit 0
-          fi
 
           # Build everything the new commit needs while the old stack still
           # serves, so the stack is down only for the restart. Root builds from
@@ -123,7 +99,6 @@ jobs:
           (umask 077 && PATH="$tools" sops decrypt secrets/staging.env > .env)
           chown "$user:" .env
           as env COREPACK_ENABLE_DOWNLOAD_PROMPT=0 pnpm install --frozen-lockfile
-          echo "$SHA" > .git/staging-deployed
           systemctl start tinyburg-staging
 
           # Up means every public app answers http, whatever the status (the
