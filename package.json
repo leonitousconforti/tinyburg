@@ -18,7 +18,7 @@
     },
     "devDependencies": {
         "@babel/cli": "8.1.0",
-        "@babel/core": "8.1.0",
+        "@babel/core": "8.1.2",
         "@changesets/cli": "3.0.3",
         "@changesets/config": "4.0.1",
         "@effect/build-utils": "0.8.9",
