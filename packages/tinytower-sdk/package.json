@@ -53,21 +53,21 @@
         "pako": "3.0.3"
     },
     "devDependencies": {
-        "@effect/platform-node": "4.1.2",
-        "@effect/vitest": "4.1.2",
-        "@efffrida/il2cpp-bridge": "0.0.60",
-        "@efffrida/polyfills": "0.0.23",
+        "@effect/platform-node": "4.1.4",
+        "@effect/vitest": "4.1.4",
+        "@efffrida/il2cpp-bridge": "0.0.62",
+        "@efffrida/polyfills": "0.0.25",
         "@tinyburg/insight": "workspace:*",
         "@types/frida-gum": "19.13.0",
-        "@yielded/auth": "0.1.0-beta.47",
-        "effect": "4.1.2",
+        "@yielded/auth": "0.1.0-beta.48",
+        "effect": "4.1.4",
         "frida-il2cpp-bridge": "0.14.0",
         "redis": "6.3.1",
         "vite": "8.3.6",
         "vitest": "5.1.0"
     },
     "peerDependencies": {
-        "@yielded/auth": "0.1.0-beta.47",
-        "effect": "4.1.2"
+        "@yielded/auth": "0.1.0-beta.48",
+        "effect": "4.1.4"
     }
 }

@@ -5,9 +5,9 @@
     "type": "module",
     "dependencies": {
         "@effect-aws/client-s3": "2.0.0",
-        "@effect/platform-node": "4.1.2",
-        "@efffrida/gplayapi": "0.0.41",
-        "effect": "4.1.2",
+        "@effect/platform-node": "4.1.4",
+        "@efffrida/gplayapi": "0.0.43",
+        "effect": "4.1.4",
         "redis": "6.3.1"
     }
 }

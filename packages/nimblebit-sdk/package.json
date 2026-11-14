@@ -45,9 +45,9 @@
         "check": "tsc -b tsconfig.json"
     },
     "devDependencies": {
-        "effect": "4.1.2"
+        "effect": "4.1.4"
     },
     "peerDependencies": {
-        "effect": "4.1.2"
+        "effect": "4.1.4"
     }
 }
