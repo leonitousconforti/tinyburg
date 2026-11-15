@@ -86,7 +86,13 @@ export const LegoTowerSocialLive = HttpApiBuilder.group(
             .handle("SocialGetVisits", Function.compose(client.SocialGetVisits, catch500s))
             .handle("SocialSendItem", Function.compose(client.SocialSendItem, catch500s))
             .handle("SocialPullFriendGame", Function.compose(client.SocialPullFriendGame, catch500s))
-            .handle("SocialPullFriendMeta", Function.compose(client.SocialPullFriendMeta, catch500s));
+            .handle("SocialPullFriendMeta", Function.compose(client.SocialPullFriendMeta, catch500s))
+            .handle("SocialGetMailboxCount", Function.compose(client.SocialGetMailboxCount, catch500s))
+            .handle("SocialGetMailbox", Function.compose(client.SocialGetMailbox, catch500s))
+            .handle(
+                "SocialRetrieveFriendsSnapshotList",
+                Function.compose(client.SocialRetrieveFriendsSnapshotList, catch500s)
+            );
     })
 );
 

@@ -86,7 +86,7 @@ export const DeviceVerifyDevice: OAuthScope.Described = {
  */
 export const SocialRead: OAuthScope.Described = {
     name: OAuthScope.make("legotower:social:read"),
-    description: "See items, visits and friends' games",
+    description: "See items, visits, mail and friends' games",
 };
 
 /**
@@ -141,4 +141,31 @@ export const SocialPullFriendMeta: OAuthScope.Described = {
 export const SocialSendItem: OAuthScope.Described = {
     name: OAuthScope.make("legotower:social:send_item"),
     description: "Send items to another player",
+};
+
+/**
+ * @since 1.0.0
+ * @category Social
+ */
+export const SocialGetMailboxCount: OAuthScope.Described = {
+    name: OAuthScope.make("legotower:social:get_mailbox_count"),
+    description: "Count the mail waiting for a player",
+};
+
+/**
+ * @since 1.0.0
+ * @category Social
+ */
+export const SocialGetMailbox: OAuthScope.Described = {
+    name: OAuthScope.make("legotower:social:get_mailbox"),
+    description: "See the gifts and trades in a player's mailbox",
+};
+
+/**
+ * @since 1.0.0
+ * @category Social
+ */
+export const SocialListFriendSnapshots: OAuthScope.Described = {
+    name: OAuthScope.make("legotower:social:list_friend_snapshots"),
+    description: "List the cloud snapshots a player has",
 };

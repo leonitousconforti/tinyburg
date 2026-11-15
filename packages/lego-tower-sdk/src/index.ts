@@ -5,22 +5,33 @@
 /**
  * LEGO Tower (game code `lt`) NBSync api endpoints.
  *
- * Signing: a random `salt` (signed int32) goes in the path, and `hash` is
+ * Signing: a random `salt` goes in the path, and `hash` is
  * `md5(<preimage> + <game secret salt>)` with the preimage
  * `lt/<playerId>/<salt><playerAuthKey>` (variants noted per endpoint). The
- * secret salt is the value extracted from `NBSync._ss`.
+ * secret salt is the value of `NBSync._ss`. Every NBSync request the game
+ * made, `register` included, was signed this way. Salts are signed int32, as
+ * the game sends (it sent a negative one).
  *
- * Verification (live server + Frida DTO inspection of the game, 2026-08-26):
- * - Signing is MD5, server-validated (same scheme as Tiny Tower / Pocket
- *   Planes; the game computes SHA-256 only for the unauthenticated `register`).
- * - Response envelopes VERIFIED by reading the game's DTO classes at runtime:
- *   register, player_details, sync/pull (NBSyncGameSaveResponse), current_version,
- *   verify_device, friend/pull_game, friend/pull_meta (meta is a flat
- *   Dictionary<String,Object> on pt), send_item (NBSyncItemsSendResponse),
- *   get_items (NBSyncItemsGetResponse: success/gifts, NO `total` unlike pp).
- *   `get_items` was also exercised live with a burnbot.
- * - Rich endpoint set: adds snapshots, trades, mailbox, AG, and LL-friends.
- * - LEGO Tower issues player ids longer than 5 chars (relaxed PlayerId schema).
+ * Each endpoint says how it is known (Play build 1.27.2, 2026-11-09):
+ * - OBSERVED: the game made this request.
+ * - REPLAYED: the sdk's client function succeeded against the live server.
+ * - DTO: the game's response class has these fields.
+ * - LITERAL: the path is compiled into the game but was not exercised.
+ * - DERIVED: inferred from Tiny Tower.
+ *
+ * DTO int fields can arrive as numeric strings (the mailbox `total` did), so
+ * int schemas on replies that were never observed may be too strict. LEGO
+ * Tower issues player ids longer than 5 chars (relaxed `PlayerId` schema).
+ *
+ * Not modelled yet (LITERAL only): `receive_item`, `send_trade`,
+ * `accept_trade`, `reject_trade`, `remove_trade`, `get_ag`, `send_ag`,
+ * `sync/push_snapshot`, `friend/editorpull_game`, `register_email`,
+ * `register_email_lang`, `code/verify` and `af/lt`. The Facebook, Play Games
+ * and LEGO Life flows (`register_fb`, `swap_fb`, `register_pg`, `check_pg`,
+ * `swap_pg`, `register_ll`, `check_ll`, `swap_ll`, `friends_ll`) are left out
+ * too. Saves are uploaded by the game's Java plugin (`com.nimblebit.nbsync.SyncPush`,
+ * `/sync/push/`), which the il2cpp probe does not see; that is not modelled
+ * yet either.
  *
  * Game-specific save/meta schemas are left as `Schema.Unknown` placeholders.
  *
@@ -44,12 +55,13 @@ export * as Floors from "./Floors.ts"
  * Signing reuses `@tinyburg/nimblebit-sdk` (`NimblebitAuth`): the game secret
  * salt (from `NBSync._ss`) is provided as the auth key, and each request is
  * `md5(<preimage> + <secret salt>)` with a random signed int32 `salt` in the path.
- * All method preimages below are the Tiny Tower formula with the `lt` game code.
+ * Each method signs the preimage the game was observed signing, except
+ * `sync_pullSave`, whose preimage the live server accepted on replay.
  *
- * The methods that were exercised live against sync.nimblebit.com are marked
- * VERIFIED; save-bearing / write paths follow the same pattern but were not
- * exercised. Save bytes are returned raw (base64-decoded); inflating (pako) and
- * parsing into a save schema is left to the caller.
+ * Methods say how they are known (Play build 1.27.2, 2026-11-09): OBSERVED
+ * means the game made the request, REPLAYED means the method succeeded against
+ * sync.nimblebit.com. Save bytes are returned raw (base64-decoded); inflating
+ * (pako) and parsing into a save schema is left to the caller.
  *
  * @since 1.0.0
  * @category SDK
