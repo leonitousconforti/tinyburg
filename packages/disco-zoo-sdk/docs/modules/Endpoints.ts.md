@@ -8,24 +8,34 @@ parent: Modules
 
 Disco Zoo (game code `dz`) NBSync api endpoints.
 
-Signing: a random `salt` (signed int32) goes in the path, and `hash` is
+Signing: a random `salt` goes in the path, and `hash` is
 `md5(<preimage> + <game secret salt>)` with the preimage
 `dz/<playerId>/<salt><playerAuthKey>` (variants noted per endpoint). The
-secret salt is the value extracted from `NBSync._ss`.
+secret salt is the value of `NBSync._ss`. Every NBSync call, register
+included, uses MD5.
 
-Verification (live server + Frida DTO inspection of the game, 2026-08-26):
+Salts are signed int32, as the game sends (it sent `-867764578` and got
+`Found`).
 
-- Signing is MD5, server-validated (same scheme as Tiny Tower / Pocket
-  Planes; the game computes SHA-256 only for the unauthenticated `register`).
-- Response envelopes VERIFIED by reading the game's DTO classes at runtime:
-  register, player_details, sync/pull (NBSyncGameSaveResponse), current_version,
-  verify_device, friend/pull_game, friend/pull_meta (meta is a flat
-  Dictionary<String,Object> on pt), send_item (NBSyncItemsSendResponse),
-  get_items (NBSyncItemsGetResponse: success/gifts, NO `total` unlike pp).
-  `get_items` was also exercised live with a burnbot.
-- Standard NBSync endpoint set plus get_visits and receive_item.
+Provenance (Play build 1.6.3, 2026-11-09):
 
-Game-specific save/meta schemas are left as `Schema.Unknown` placeholders.
+- OBSERVED, the game made the request: register, player_details, get_items,
+  friend/pull_game, friend/pull_meta.
+- REPLAYED, the SDK's client function was accepted by the live server:
+  register, player_details, get_items, and sync/pull (SaveNotFound for a
+  fresh player).
+- DTO, the game's response class has the fields named per endpoint.
+- LITERAL, the path is compiled into the game but was not exercised:
+  verify_device, sync/current_version, get_visits, receive_item, send_item.
+- DERIVED, inferred from Tiny Tower.
+
+Not modelled yet (LITERAL only): `register_email`, `register_email_lang`,
+`friend/editorpull_game`, and the Facebook and Play Games login flows
+(`register_fb`, `swap_fb`, `register_pg`, `check_pg`, `swap_pg`), and the
+save upload, which the game's Java plugin (`com.nimblebit.nbsync.SyncPush`) sends to
+`/sync/push/` outside the il2cpp code the probe hooks.
+
+Gift and friend meta schemas are left as `Schema.Unknown` placeholders.
 
 Since v1.0.0
 
@@ -408,7 +418,7 @@ declare const Api: HttpApi.HttpApi<
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/disco-zoo-sdk/src/Endpoints.ts#L324)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/disco-zoo-sdk/src/Endpoints.ts#L390)
 
 Since v1.0.0
 
@@ -416,9 +426,11 @@ Since v1.0.0
 
 ## Gift
 
-A gift/item in the general item channel (get_items / send_item). Verified DTO
-NBSyncItemsGift on pt: `{gift_id, gift_to, gift_from, gift_type, item_type,
-gift_str, h}` (no `c`, unlike pp). Left open for the data-schema work.
+A gift/item in the get_items / get_visits channel. Left open because every
+observed `gifts` array was empty. DTO NBSyncItemsGift: `{gift_id: String,
+gift_to: String, gift_from: String, gift_type: String, item_type:
+NBSyncItemType, gift_str: String, h: String}`, with no `c`. NBSyncItemType is
+an Int32 enum: None=0, Play=1, Gift=2, Visit=3, Promo=4.
 
 **Signature**
 
@@ -426,6 +438,6 @@ gift_str, h}` (no `c`, unlike pp). Left open for the data-schema work.
 declare const Gift: Schema.Unknown
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/disco-zoo-sdk/src/Endpoints.ts#L65)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/disco-zoo-sdk/src/Endpoints.ts#L78)
 
 Since v1.0.0
