@@ -8,22 +8,28 @@ parent: Modules
 
 Bit City (game code `bc`) NBSync api endpoints.
 
-Signing: a random `salt` (signed int32) goes in the path, and `hash` is
+Signing: a random `salt` goes in the path, and `hash` is
 `md5(<preimage> + <game secret salt>)` with the preimage
 `bc/<playerId>/<salt><playerAuthKey>` (variants noted per endpoint). The
-secret salt is the value extracted from `NBSync._ss`.
+secret salt is the value extracted from `NBSync._ss`. Every request the game
+made was signed this way, `register` included.
+Salts are signed int32, as the game sends (it sent a negative one).
 
-Verification (live server + Frida DTO inspection of the game, 2026-08-26):
+Provenance in the comments below:
 
-- Signing is MD5, server-validated (same scheme as Tiny Tower / Pocket
-  Planes; the game computes SHA-256 only for the unauthenticated `register`).
-- Response envelopes VERIFIED by reading the game's DTO classes at runtime:
-  register, player_details, sync/pull (NBSyncGameSaveResponse), current_version,
-  verify_device, friend/pull_game, friend/pull_meta (meta is a flat
-  Dictionary<String,Object> on pt), send_item (NBSyncItemsSendResponse),
-  get_items (NBSyncItemsGetResponse: success/gifts, NO `total` unlike pp).
-  `get_items` was also exercised live with a burnbot.
-- Minimal NBSync endpoint set (Bit City is a lightweight city builder).
+- OBSERVED: the game made this request (Play build 1.6.0, 2026-11-09).
+- REPLAYED: the SDK's client function ran against the live server and its
+  signature was accepted (2026-11-09).
+- DTO: the game's response class has these fields.
+- LITERAL: the path is compiled into the game but was not exercised.
+- DERIVED: inferred from Tiny Tower.
+
+The game has no `/receive_item/` path. Saves are uploaded by its Java plugin
+(`com.nimblebit.nbsync.SyncPush`, `/sync/push/`), outside the il2cpp code the probe
+hooks; that is not modelled yet. Not modelled yet (LITERAL only): `register_email`, which
+starts the email and device verification that `verify_device` completes.
+The Facebook (`register_fb`, `swap_fb`) and Google Play Games
+(`register_pg`, `check_pg`, `swap_pg`) login flows are not modelled either.
 
 Game-specific save/meta schemas are left as `Schema.Unknown` placeholders.
 
@@ -349,7 +355,7 @@ declare const Api: HttpApi.HttpApi<
 >
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/bitcity-sdk/src/Endpoints.ts#L287)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/bitcity-sdk/src/Endpoints.ts#L341)
 
 Since v1.0.0
 
@@ -357,9 +363,11 @@ Since v1.0.0
 
 ## Gift
 
-A gift/item in the general item channel (get_items / send_item). Verified DTO
-NBSyncItemsGift on pt: `{gift_id, gift_to, gift_from, gift_type, item_type,
-gift_str, h}` (no `c`, unlike pp). Left open for the data-schema work.
+A gift in the item channel (get_items). Only an empty `gifts` list was
+OBSERVED, so this is left open. DTO NBSyncItemsGift: `gift_id`, `gift_to`,
+`gift_from`, `gift_type`, `gift_str` and `h` (String), and `item_type`
+(NBSyncItemType: None=0, Play=1, Gift=2). Whether `item_type` arrives as a
+number or a name is unobserved.
 
 **Signature**
 
@@ -367,6 +375,6 @@ gift_str, h}` (no `c`, unlike pp). Left open for the data-schema work.
 declare const Gift: Schema.Unknown
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/bitcity-sdk/src/Endpoints.ts#L65)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/bitcity-sdk/src/Endpoints.ts#L73)
 
 Since v1.0.0

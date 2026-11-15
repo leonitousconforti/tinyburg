@@ -4,12 +4,12 @@
  * Signing reuses `@tinyburg/nimblebit-sdk` (`NimblebitAuth`): the game secret
  * salt (from `NBSync._ss`) is provided as the auth key, and each request is
  * `md5(<preimage> + <secret salt>)` with a random signed int32 `salt` in the path.
- * All method preimages below are the Tiny Tower formula with the `bc` game code.
  *
- * The methods that were exercised live against sync.nimblebit.com are marked
- * VERIFIED; save-bearing / write paths follow the same pattern but were not
- * exercised. Save bytes are returned raw (base64-decoded); inflating (pako) and
- * parsing into a save schema is left to the caller.
+ * Each method says where its preimage comes from: OBSERVED (the game made
+ * this request, Play build 1.6.0, 2026-11-09) and/or REPLAYED (this function
+ * ran against sync.nimblebit.com, 2026-11-09). Save bytes are returned raw
+ * (base64-decoded); inflating (pako) and parsing into a save schema is left to
+ * the caller.
  *
  * @since 1.0.0
  * @category SDK
@@ -30,7 +30,8 @@ import { NimblebitAuth, NimblebitError } from "@tinyburg/nimblebit-sdk";
 import * as Endpoints from "./Endpoints.ts";
 
 /**
- * Requests a new player ("burnbot") from the Nimblebit servers. VERIFIED.
+ * Requests a new player ("burnbot") from the Nimblebit servers. OBSERVED and
+ * REPLAYED.
  *
  * @since 1.0.0
  * @category SDK
@@ -67,7 +68,7 @@ export const device_newPlayer = Effect.gen(function* () {
 });
 
 /**
- * Retrieves player details. VERIFIED.
+ * Retrieves player details. OBSERVED and REPLAYED.
  *
  * @since 1.0.0
  * @category SDK
@@ -107,7 +108,9 @@ export const device_playerDetails = Effect.fn("device_playerDetails")(function* 
 
 /**
  * Pulls the player's cloud save. Returns raw base64-decoded bytes (inflate +
- * parse separately). Success envelope DERIVED from Tiny Tower.
+ * parse separately). REPLAYED: the server accepted the signature and answered
+ * `SaveNotFound` for a player with no save. The `Found` fields match the DTO
+ * NBSyncGameSaveResponse, but no save was returned.
  *
  * @since 1.0.0
  * @category SDK
@@ -146,8 +149,8 @@ export const sync_pullSave = Effect.fn("sync_pullSave")(function* ({
 });
 
 /**
- * Lists items (parts/gifts) waiting for the player. VERIFIED
- * (`/get_items/pt/...` -> `{ success:"Found", gifts:[...] }`, no total).
+ * Lists the gifts waiting for the player. OBSERVED and REPLAYED
+ * (`/get_items/bc/...` -> `{ success: "Found", gifts: [] }`).
  *
  * @since 1.0.0
  * @category SDK
@@ -178,6 +181,95 @@ export const social_getItems = Effect.fn("social_getItems")(function* ({
     if ("error" in response) {
         return yield* new NimblebitError.NimblebitError({
             method: "SocialGetItems",
+            module: "SocialGroup",
+            cause: response.error,
+        });
+    }
+    return response;
+});
+
+/**
+ * Pulls a friend's cloud save. Returns raw base64-decoded bytes (inflate +
+ * parse separately). The preimage is OBSERVED, with the player's own id as the
+ * friend; this function was not REPLAYED.
+ *
+ * @since 1.0.0
+ * @category SDK
+ */
+export const social_pullFriendGame = Effect.fn("social_pullFriendGame")(function* ({
+    friendId,
+    playerAuthKey,
+    playerId,
+}: Schema.Schema.Type<typeof NimblebitConfig.AuthenticatedPlayerSchema> & {
+    friendId: Schema.Schema.Type<typeof NimblebitConfig.PlayerIdSchema>;
+}) {
+    const nimblebitAuth = yield* NimblebitAuth.NimblebitAuth;
+    const httpClient = yield* HttpClient.HttpClient;
+
+    const maybeAddBearerToken =
+        nimblebitAuth.host !== "https://sync.nimblebit.com"
+            ? HttpClientRequest.bearerToken(nimblebitAuth.authKey)
+            : Function.identity;
+
+    const endpoint = yield* HttpApiClient.endpoint(Endpoints.Api, {
+        baseUrl: nimblebitAuth.host,
+        group: "SocialGroup",
+        endpoint: "SocialPullFriendGame",
+        httpClient: HttpClient.mapRequest(httpClient, maybeAddBearerToken),
+    });
+
+    const salt = yield* nimblebitAuth.salt;
+    const hash = yield* nimblebitAuth.sign(`bc/${playerId}/${friendId}/${salt}${Redacted.value(playerAuthKey)}`);
+    const response = yield* endpoint({ params: { playerId, friendId, salt, hash } });
+
+    if ("error" in response) {
+        return yield* new NimblebitError.NimblebitError({
+            method: "SocialPullFriendGame",
+            module: "SocialGroup",
+            cause: response.error,
+        });
+    }
+    return response;
+});
+
+/**
+ * Fetches metadata about a friend's game. The preimage is OBSERVED, with the
+ * player's own id as the friend; this function was not REPLAYED. `friends` is
+ * sent as JSON while the game posts a form, and whether the server accepts JSON
+ * is unverified.
+ *
+ * @since 1.0.0
+ * @category SDK
+ */
+export const social_pullFriendMeta = Effect.fn("social_pullFriendMeta")(function* ({
+    friendId,
+    playerAuthKey,
+    playerId,
+}: Schema.Schema.Type<typeof NimblebitConfig.AuthenticatedPlayerSchema> & {
+    friendId: Schema.Schema.Type<typeof NimblebitConfig.PlayerIdSchema>;
+}) {
+    const nimblebitAuth = yield* NimblebitAuth.NimblebitAuth;
+    const httpClient = yield* HttpClient.HttpClient;
+
+    const maybeAddBearerToken =
+        nimblebitAuth.host !== "https://sync.nimblebit.com"
+            ? HttpClientRequest.bearerToken(nimblebitAuth.authKey)
+            : Function.identity;
+
+    const endpoint = yield* HttpApiClient.endpoint(Endpoints.Api, {
+        baseUrl: nimblebitAuth.host,
+        group: "SocialGroup",
+        endpoint: "SocialPullFriendMeta",
+        httpClient: HttpClient.mapRequest(httpClient, maybeAddBearerToken),
+    });
+
+    const salt = yield* nimblebitAuth.salt;
+    const hash = yield* nimblebitAuth.sign(`bc/${playerId}/${salt}${friendId}${Redacted.value(playerAuthKey)}`);
+    const response = yield* endpoint({ params: { playerId, salt, hash }, payload: { friends: friendId } });
+
+    if ("error" in response) {
+        return yield* new NimblebitError.NimblebitError({
+            method: "SocialPullFriendMeta",
             module: "SocialGroup",
             cause: response.error,
         });
