@@ -1,5 +1,19 @@
 # @tinyburg/pocket-planes-sdk
 
+## 0.2.0
+
+### Minor Changes
+
+- 9159310: Declare scopes as flat `@yielded/auth` `OAuthScope.Described` constants instead of a tree, and remove `NimblebitScopes`. Each `Scopes` module now exports the whole game's scope, `Read`, `Write`, one scope per endpoint (`Scopes.SyncPullSave`), and in the game SDKs a `:read` and a `:write` scope per area (`Scopes.SyncRead`). Every endpoint accepts its own scope, its area's side (game SDKs), the game's side and the game. The game SDKs no longer have the bare area scopes such as `tinytower:sync`; every other scope name is unchanged. `@tinyburg/tinyburg-sdk`'s and `@tinyburg/treasury-sdk`'s scope names and requirements are unchanged.
+- dd81dd2: Add the game's data tables as the new `Bitizens`, `Cargo`, `Cities`, `CityEvents`, `Planes` and `Skins` modules, generated from Pocket Planes itself by `pnpm generate`, which loads the SDK's new frida agent into the game on insight's emulator.
+
+### Patch Changes
+
+- Updated dependencies [51cfcfc]
+- Updated dependencies [9159310]
+- Updated dependencies [16c9e1c]
+    - @tinyburg/nimblebit-sdk@0.4.0
+
 ## 0.1.2
 
 ### Patch Changes
