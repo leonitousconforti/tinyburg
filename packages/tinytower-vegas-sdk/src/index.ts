@@ -82,6 +82,70 @@ export * as Missions from "./Missions.ts"
 export * as Roofs from "./Roofs.ts"
 
 /**
+ * Tiny Tower Vegas's save: what the static `VPlayer.ToBlock()` writes, which
+ * `VGame.SaveToDisk` keeps in the `vegas` PlayerPref and `VPlayer.FromBlock`
+ * reads back when the tower loads (and again in `VGame.OnCloudData` for a
+ * cloud save). It is Nimblebit's block format, the one Pocket Trains uses:
+ * each value written by `Block.Val(key, value, num)` or `NBUtils.blockStr` as
+ * `[key]value[key]`, where a numbered block appends its number to the key
+ * (`[story1]...[story1]`), and objects are blocks nested in blocks. Values are
+ * C#'s `ToString()` of the field: `True`/`False` for a `bool` (but `p_preg`
+ * is written as `1`), the enum's name for a `VIPType`, its number for the
+ * other enums. The blocks are read here rather than with
+ * `NimblebitSchema.parseNimblebitObject`, which finds a key anywhere in the
+ * text: the floors and posts are numbered blocks after a count, a floor
+ * writes only its non-zero stock and sale slots and its occupied beds, each
+ * by slot number, and many blocks are only written when they are set.
+ *
+ * The server's copy is the same text: `NBSync.pushToServer` passes the Java
+ * plugin (`com.nimblebit.nbsync.NBSync.NBSyncPushSave`) the name of the
+ * PlayerPref to read (`NBSync._prefName`) rather than the text, and unlike
+ * Pocket Trains nothing is left out: the save pulled back still held the
+ * player's salt and email. {@link SaveDataFromBytes} reads the bytes
+ * `sync/pull` hands back.
+ *
+ * Determined against Tiny Tower Vegas 1.5.2 (Android, arm64) in two ways.
+ * Offline, by disassembling `VPlayer.ToBlock`, `VFloor.ToBlock`,
+ * `VBitizen.ToBlock`, `VBBPost.ToBlock`, `VMission.ToBlock`, `Block.Val`,
+ * `NBUtils.blockStr` and `NBSync.pushToServer` in the APK's `libil2cpp.so`,
+ * with the keys read from the metadata's string literals: that gives the
+ * order of the blocks and the condition each optional block is written under.
+ * Then on an emulator with a Frida probe (November 2026), from text the game
+ * wrote: two fresh installs' saves, one grown by calling the game's own
+ * methods (`VTowerPage.BuildNewFloor`, `TrySpawnVIP`, the `VPlayer` setters),
+ * ones where the probe also set the fields that only some floors, posts and
+ * bitizens have, so that every optional block was written, the save the game
+ * pulled back from the server, and what `Block.Val` writes for a range of
+ * floats. The fixtures under `test/fixtures` are those saves, with the
+ * player's id, auth salt and email replaced. Every key the game writes is
+ * modeled, in the game's order.
+ *
+ * Decoding never drops part of a save: a block this module does not know, such
+ * as one a later version of the game adds, fails to decode, as does a missing
+ * or reordered block, text between blocks, or a value written another way than
+ * the game writes it, in the save and in every object nested in it (a floor,
+ * a bitizen, a post, the mission). In exchange, the round trip is exact: every
+ * text that decodes encodes back to the same text, byte for byte, with no
+ * exceptions.
+ *
+ * The player's auth salt (`p_ps`) and email (`p_em`) decode to `Redacted`
+ * values, with `NimblebitConfig.PlayerAuthKeySchema` (which also requires the
+ * salt to be a UUID) and `NimblebitConfig.PlayerEmailSchema`, so printing or
+ * logging a decoded save does not show them; `Redacted.value` reads them.
+ *
+ * C# `long` and `ulong` values are `bigint`s: the save holds `DateTime` ticks
+ * (`f_od`, `bb_date` and the floor timers) and a `ulong` (`tp`), which are
+ * past what a `number` holds exactly. A C# `float` keeps the seven digits the
+ * game writes, and only reads text written the way C# writes it with `.` for
+ * the decimal point: the game writes `f_sln` and `bb_ft` in the device's
+ * culture, so a save from a device that uses `,` fails to decode.
+ *
+ * @since 1.0.0
+ * @category Save
+ */
+export * as Save from "./Save.ts"
+
+/**
  * The scopes the Tiny Tower Vegas api is guarded by: `tinytowervegas` for the
  * whole game, `tinytowervegas:read` and `tinytowervegas:write` for every
  * endpoint that only looks or that changes a player's game, a `:read` and a

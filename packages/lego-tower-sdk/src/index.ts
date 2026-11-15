@@ -85,6 +85,56 @@ export * as Missions from "./Missions.ts"
 export * as Pieces from "./Pieces.ts"
 
 /**
+ * LEGO Tower's save. The game (version 1.27.2) keeps it as one JSON string:
+ * `LTPlayer._Save` fills an `LTSave` with `LTPlayer.PlayerDict()` and
+ * `LTowerController.ToDSO()`, serializes it with `LTSave.ToJson`
+ * (Newtonsoft.Json, no indentation) and stores it in PlayerPrefs under
+ * `"LGTower"`; `LTPlayer.LoadFromDisk` reads that string back with
+ * `JsonConvert.DeserializeObject<LTSave>`, and a save pulled from the sync
+ * server reaches `LTPlayer.HandleSyncSave` as the same JSON. The game skips
+ * saving while the intro box of a new tower is up.
+ *
+ * Determined on an Android emulator with Frida: the save strings in the test
+ * fixtures are what `LTSave.ToJson` returned when the game's own
+ * `LTPlayer._Save` ran (the PlayerPrefs value read back was identical), on a
+ * tower fresh out of the intro and again after adding pieces, found bux, a
+ * visit, a tip, a blocked code and a friend through the game's `LTPlayer`
+ * methods. Which methods save and load, and the keys of the parts no
+ * captured save held (missions, friend metadata), come from disassembling the
+ * game's IL2CPP binary and its Java code.
+ *
+ * Newtonsoft.Json writes a C# `double` with a decimal point (`1000.0`), and
+ * `long`s such as `DateTime` ticks past 2^53, so the save is read with a JSON
+ * reader that keeps both. Decoding drops nothing: keys this module does not
+ * model (a newer game version may add some to the save or to any object in
+ * it) are kept, and encoding writes them back. Encoding a decoded save string
+ * the game wrote gives back the same bytes, except for key order:
+ *
+ * - integer-like keys (the piece ids some dictionaries are keyed by) come
+ *   first in their object, in ascending order, because JavaScript objects
+ *   order such keys that way;
+ * - in each object, the other keys this module models are written in the
+ *   order it lists them (the order game version 1.27.2 writes them), and
+ *   the keys it does not model after them, in the order they were read.
+ *
+ * Any other JSON that decodes (with whitespace, escapes the game would not
+ * write, or numbers spelled another way, such as `1.50`, or `1000` for a C#
+ * `double`) encodes to the same values written the way the game writes
+ * them, not to the same bytes. The player's sync secret (`playerS`) and email
+ * (`playerE`) decode to `Redacted` values, so printing or logging a decoded
+ * save does not show them; encoding writes them back as they were.
+ *
+ * The sync server holds the save zlib-compressed, without the player's
+ * secret and email ({@link SaveDataFromBytes}): the game's
+ * `com.nimblebit.nbsync.SyncPush` cuts those out and compresses the rest with
+ * `NBSync.compress`, which on the emulator gave the same bytes as zlib's
+ * defaults.
+ *
+ * @since 1.0.0
+ */
+export * as Save from "./Save.ts"
+
+/**
  * The scopes the LEGO Tower api is guarded by: `legotower` for the whole game,
  * `legotower:read` and `legotower:write` for every endpoint that only looks or
  * that changes a player's game, a `:read` and a `:write` scope for each area of

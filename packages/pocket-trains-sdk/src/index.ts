@@ -87,6 +87,55 @@ export * as Events from "./Events.ts"
 export * as PocketTrains from "./PocketTrains.ts"
 
 /**
+ * Pocket Trains' save: what `TRPlayer.ToBlockStr()` writes, which
+ * `TRPlayer.saveGame()` keeps in the `TRBLOCK` PlayerPref and the game reads
+ * back with `TRPlayer.FromBlock`. It is Nimblebit's block format: each value
+ * written as `[key]value[key]`, with blocks nested in blocks. A list is a block
+ * holding its length (`[ccount]5[ccount]`) and one block per item keyed by its
+ * index (`[c0]...[c0]`), a few short lists are comma separated, and the
+ * friends list is item blocks joined with commas. The blocks are read here
+ * rather than with `NimblebitSchema.parseNimblebitObject`, which finds a key
+ * anywhere in the text: these lists are numbered blocks after a count, and
+ * short keys repeat at different depths (`c` is the coins, a crate's count
+ * and a day's cars).
+ *
+ * `NBSync.pushToServer` sends the same text without the `pS` and `pE` blocks
+ * (the player's auth salt and email): `NBSync.encodeSave` deflates it with
+ * zlib and base64 encodes it, `sync/pull` hands that string back unchanged, and
+ * `NBSync.decodeSave` reverses it before `TRGame.HandleCloudChange` loads it.
+ * {@link SaveDataFromBytes} reads those bytes.
+ *
+ * Determined against Pocket Trains 1.10.2 on an emulator with a Frida probe
+ * (November 2026), from saves the game wrote: a fresh install's, and one grown
+ * by calling the game's own methods (coins, crates, parts, yard items,
+ * achievements, tips, friends, jobs, licenses) and setting fields the save
+ * only writes when they are set. The fixtures under `test/fixtures` are those
+ * saves, with the player's id and salt replaced. Every key the game wrote is
+ * modeled, in the game's order.
+ *
+ * Decoding never drops part of a save: it fails on a block the schema does not
+ * model (such as one a newer version of the game adds), and on a missing,
+ * repeated or reordered block, a list whose count disagrees with its items,
+ * text outside the blocks, or a value written other than the way the game
+ * writes it (`1e4` for `10000`, say). So the round trip is exact, with no
+ * exceptions: any text {@link SaveData} decodes encodes back to the same text,
+ * byte for byte.
+ *
+ * The player's auth salt (`pS`) and email (`pE`) decode to `Redacted` values
+ * (`NimblebitConfig.PlayerAuthKeySchema` and `PlayerEmailSchema`), so printing
+ * or logging a decoded save does not show them; `Redacted.value` reads them.
+ *
+ * Not seen: keys a 1.10.2 save would only hold in states the probe did not
+ * reach, a lost and found holding more than one part (`PLFP` is read as a
+ * comma separated list, like the game's other lists), and what `jBE`, `cPC`
+ * and `cPRI` hold beyond being C# `long`s.
+ *
+ * @since 1.0.0
+ * @category Save
+ */
+export * as Save from "./Save.ts"
+
+/**
  * The scopes the Pocket Trains api is guarded by: `pockettrains` for the whole
  * game, `pockettrains:read` and `pockettrains:write` for every endpoint that
  * only looks or that changes a player's game, a `:read` and a `:write` scope

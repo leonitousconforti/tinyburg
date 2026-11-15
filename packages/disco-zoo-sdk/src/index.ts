@@ -92,6 +92,83 @@ export * as Pets from "./Pets.ts"
 export * as Regions from "./Regions.ts"
 
 /**
+ * Disco Zoo's save (game version 1.6.3, save `dataVersion` 14).
+ *
+ * The game keeps its state in two `DataManager`s. The "global" one holds the
+ * `PlayerData`, `ZooData`, `StatsData`, `QuestManager`, `PetManager` and
+ * `LoonManager`, the "local" one the `SceneryData`, `SettingsData` and
+ * `StoreData`. `DataManager.GetSaveDataString` writes each with the game's
+ * MiniJson as a JSON object from the data's name to the JSON string of its
+ * `GetJSON()` (so every item is JSON inside a JSON string), and
+ * `DataManager.LoadDataFromString` reads it back. The game writes those two
+ * strings to `global.data` and `local.data` in its files directory, and
+ * `CloudManager.Save` copies them into a `CloudSave`, whose `ToJson()` it
+ * keeps in PlayerPrefs under `discozoo` (`CloudManager.SaveKey`). That string,
+ * `{"localDataString":...,"globalDataString":...,"dataVersion":14,"xp":...}`,
+ * is {@link SaveData}; {@link GlobalData} and {@link LocalData} are the two
+ * `DataManager` strings.
+ *
+ * For the sync server, `NBSync.savePlayer` hands the PlayerPrefs key
+ * (`NBSync._prefName`, also `discozoo`) to the game's Java `SyncPush`
+ * service, which reads that preference, URL-decodes it, removes the player's
+ * salt and email (`,\"playerSalt\":\"...\"` and `,\"playerEmail\":\"...\"`
+ * inside the nested `SettingsData`), and posts `NBSync.compress` of it: UTF-8,
+ * zlib (`java.util.zip.Deflater` at its default level) and base64. So the
+ * bytes the SDK's sync pull returns (`data` after base64) are the
+ * zlib-compressed save without those two keys, which
+ * {@link SaveDataFromBytes} reads; the salt and email are optional for that
+ * reason. Both decode to `Redacted` values (`""` while the game has none), so
+ * printing or logging a decoded save does not show them.
+ *
+ * How this was determined: saves taken from the game on an emulator with a
+ * Frida agent (`GetSaveDataString` of both managers, `CloudSave.ToJson`, the
+ * PlayerPrefs value and the two files, which matched each other, for a fresh
+ * game and for one grown with the game's own methods: debug unlocks, stats,
+ * hats, decorations, toys, name tags, pets, a generated scenery lot, and pens
+ * loaded through `LoadDataFromString` and written back by the game), the
+ * field types the game's classes declare, the game's `MiniJson.Json.Serialize`
+ * run on a test string, and the game's Java code (disassembly of `NBSync` and
+ * `SyncPush`). The test fixtures are those saves, with the player's id and
+ * salt replaced by fakes.
+ *
+ * Numbers the game writes as strings stay strings in the save, so C# `long`
+ * values (`DateTime` ticks, timers, coin totals) decode to `bigint` without
+ * losing digits.
+ *
+ * Every JSON object in the save (the `CloudSave`, the two `DataManager`
+ * objects, each item and the objects inside items, such as pens, quests, pets
+ * and scenery lots) keeps the keys this module does not model, such as ones a
+ * newer game version adds, as JSON values beside the keys it does, and
+ * encoding writes them back. Decoding never drops a key the game wrote.
+ *
+ * Round trips: decoding a save string the game wrote and encoding it again
+ * gives back the same string, byte for byte, whenever every key in it is one
+ * this module models, as in every save game version 1.6.3 writes. Every
+ * known exception:
+ *
+ * - Encoding writes each object's unknown keys after its known keys (in the
+ *   order they were read), so unknown keys read before or between known ones
+ *   move to the end of their object.
+ * - Unknown keys' values are read with `JSON.parse` and written the way
+ *   MiniJson writes them, so strings, booleans, `null` and integers up to
+ *   2^53 come back as they were, but a number that JavaScript writes
+ *   differently (exponent notation such as `1E-05`, a trailing `.0`, an
+ *   integer past 2^53) changes, and keys that look like array indexes
+ *   (`"5"`) inside an unknown object move to its start.
+ * - A key of an {@link AccountData} that looks like an array index would move
+ *   to the start too (the game's keys are names).
+ * - Text the game does not write (whitespace, other escapes, floats not in
+ *   `float.ToString()` form, a key written twice in a JSON object, which
+ *   keeps the last) decodes, but encodes in the game's form.
+ *
+ * {@link SaveDataFromBytes} gives back the same save string, with the same
+ * exceptions, but not necessarily the same compressed bytes.
+ *
+ * @since 1.0.0
+ */
+export * as Save from "./Save.ts"
+
+/**
  * The scopes the Disco Zoo api is guarded by: `discozoo` for the whole game,
  * `discozoo:read` and `discozoo:write` for every endpoint that only looks or
  * that changes a player's game, a `:read` and a `:write` scope for each area of

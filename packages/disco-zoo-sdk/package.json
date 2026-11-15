@@ -44,6 +44,7 @@
         "build": "tsc -b tsconfig.build.json && pnpm babel",
         "babel": "babel dist --plugins annotate-pure-calls --out-dir dist --source-maps",
         "check": "tsc -b tsconfig.json",
+        "test": "vitest",
         "generate": "node ./frida/Generate.ts"
     },
     "dependencies": {
@@ -51,13 +52,17 @@
     },
     "devDependencies": {
         "@effect/platform-node": "4.1.2",
+        "@effect/vitest": "4.1.2",
         "@efffrida/il2cpp-bridge": "0.0.60",
         "@efffrida/polyfills": "0.0.23",
         "@tinyburg/insight": "workspace:*",
         "@types/frida-gum": "19.13.0",
         "@yielded/auth": "0.1.0-beta.47",
         "effect": "4.1.2",
-        "frida-il2cpp-bridge": "0.14.0"
+        "frida-il2cpp-bridge": "0.14.0",
+        "redis": "6.3.1",
+        "vite": "8.3.6",
+        "vitest": "5.1.0"
     },
     "peerDependencies": {
         "@yielded/auth": "0.1.0-beta.47",
