@@ -67,13 +67,15 @@ export const TinyTowerVegasSocialLive = HttpApiBuilder.group(
     "SocialGroup",
     Effect.fnUntraced(function* (handlers) {
         const client = yield* Effect.map(Client, (client) => client.SocialGroup);
+        const friendsSnapshots = Function.compose(client.SocialRetrieveFriendsSnapshotList, catch500s);
         return handlers
             .handle("SocialGetItems", Function.compose(client.SocialGetItems, catch500s))
             .handle("SocialGetVisits", Function.compose(client.SocialGetVisits, catch500s))
             .handle("SocialReceiveItem", Function.compose(client.SocialReceiveItem, catch500s))
             .handle("SocialSendItem", Function.compose(client.SocialSendItem, catch500s))
             .handle("SocialPullFriendGame", Function.compose(client.SocialPullFriendGame, catch500s))
-            .handle("SocialPullFriendMeta", Function.compose(client.SocialPullFriendMeta, catch500s));
+            .handle("SocialPullFriendMeta", Function.compose(client.SocialPullFriendMeta, catch500s))
+            .handle("SocialRetrieveFriendsSnapshotList", friendsSnapshots);
     })
 );
 

@@ -37,6 +37,7 @@ Since v1.0.0
 - [Social](#social)
   - [SocialGetItems](#socialgetitems)
   - [SocialGetVisits](#socialgetvisits)
+  - [SocialListFriendSnapshots](#sociallistfriendsnapshots)
   - [SocialPullFriendGame](#socialpullfriendgame)
   - [SocialPullFriendMeta](#socialpullfriendmeta)
   - [SocialRead](#socialread)
@@ -160,6 +161,18 @@ declare const SocialGetVisits: OAuthScope.Described<OAuthScope.OAuthScope<string
 
 Since v1.0.0
 
+## SocialListFriendSnapshots
+
+**Signature**
+
+```ts
+declare const SocialListFriendSnapshots: OAuthScope.Described<OAuthScope.OAuthScope<string>>
+```
+
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-vegas-sdk/src/Scopes.ts#L142)
+
+Since v1.0.0
+
 ## SocialPullFriendGame
 
 **Signature**
@@ -204,7 +217,7 @@ Since v1.0.0
 declare const SocialReceiveItem: OAuthScope.Described<OAuthScope.OAuthScope<string>>
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-vegas-sdk/src/Scopes.ts#L151)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-vegas-sdk/src/Scopes.ts#L160)
 
 Since v1.0.0
 
@@ -216,7 +229,7 @@ Since v1.0.0
 declare const SocialSendItem: OAuthScope.Described<OAuthScope.OAuthScope<string>>
 ```
 
-[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-vegas-sdk/src/Scopes.ts#L142)
+[Source](https://github.com/leonitousconforti/tinyburg/blob/main/packages/tinytower-vegas-sdk/src/Scopes.ts#L151)
 
 Since v1.0.0
 
