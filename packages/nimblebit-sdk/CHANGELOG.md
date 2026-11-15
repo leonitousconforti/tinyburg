@@ -1,5 +1,16 @@
 # tinyburg/nimblebit-sdk
 
+## 0.4.0
+
+### Minor Changes
+
+- 51cfcfc: `NimblebitSchema.CSharpDate` decodes to an Effect `DateTime.Utc` instead of a `Date`. TinyTower's floor open, stocking and last sale times, bitbook post dates and friend timestamps change type with it, in tinytower-sdk's `SaveData` and the one tinytower-classic-sdk re-exports.
+- 9159310: Declare scopes as flat `@yielded/auth` `OAuthScope.Described` constants instead of a tree, and remove `NimblebitScopes`. Each `Scopes` module now exports the whole game's scope, `Read`, `Write`, one scope per endpoint (`Scopes.SyncPullSave`), and in the game SDKs a `:read` and a `:write` scope per area (`Scopes.SyncRead`). Every endpoint accepts its own scope, its area's side (game SDKs), the game's side and the game. The game SDKs no longer have the bare area scopes such as `tinytower:sync`; every other scope name is unchanged. `@tinyburg/tinyburg-sdk`'s and `@tinyburg/treasury-sdk`'s scope names and requirements are unchanged.
+
+### Patch Changes
+
+- 16c9e1c: `NimblebitSchema.split` is built on Effect's `SchemaGetter.split` and decodes an empty string as an empty list instead of `[""]`, so an empty bitbook, bitizen, floor or friend list no longer fails to decode. `CSharpDate` now decodes tick counts before 1970 that are not whole milliseconds correctly.
+
 ## 0.3.0
 
 ### Minor Changes
