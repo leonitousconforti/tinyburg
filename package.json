@@ -31,7 +31,7 @@
         "oxfmt": "0.77.0",
         "oxlint": "1.92.0",
         "oxlint-tsgolint": "7.0.2006",
-        "redis": "6.3.1",
+        "redis": "6.4.0",
         "typescript": "7.0.2",
         "vite": "8.3.6",
         "vitest": "5.1.0"
