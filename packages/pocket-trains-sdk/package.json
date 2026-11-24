@@ -1,6 +1,6 @@
 {
     "name": "@tinyburg/pocket-trains-sdk",
-    "version": "0.1.2",
+    "version": "0.2.0",
     "description": "api for the mobile game Pocket Trains by Nimblebit",
     "keywords": [
         "nimblebit",

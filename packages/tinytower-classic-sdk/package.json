@@ -1,6 +1,6 @@
 {
     "name": "@tinyburg/tinytower-classic-sdk",
-    "version": "0.3.0",
+    "version": "0.4.0",
     "description": "api for the mobile game TinyTower Classic by Nimblebit",
     "keywords": [
         "nimblebit",

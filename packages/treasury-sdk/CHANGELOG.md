@@ -1,5 +1,20 @@
 # @tinyburg/treasury-sdk
 
+## 0.4.0
+
+### Minor Changes
+
+- 9159310: Declare scopes as flat `@yielded/auth` `OAuthScope.Described` constants instead of a tree, and remove `NimblebitScopes`. Each `Scopes` module now exports the whole game's scope, `Read`, `Write`, one scope per endpoint (`Scopes.SyncPullSave`), and in the game SDKs a `:read` and a `:write` scope per area (`Scopes.SyncRead`). Every endpoint accepts its own scope, its area's side (game SDKs), the game's side and the game. The game SDKs no longer have the bare area scopes such as `tinytower:sync`; every other scope name is unchanged. `@tinyburg/tinyburg-sdk`'s and `@tinyburg/treasury-sdk`'s scope names and requirements are unchanged.
+
+### Patch Changes
+
+- Updated dependencies [51cfcfc]
+- Updated dependencies [9159310]
+- Updated dependencies [16c9e1c]
+- Updated dependencies [34ac6e5]
+    - @tinyburg/nimblebit-sdk@0.4.0
+    - @tinyburg/tinytower-sdk@0.4.0
+
 ## 0.3.0
 
 ### Minor Changes

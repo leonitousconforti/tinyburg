@@ -1,5 +1,15 @@
 # @tinyburg/insight
 
+## 0.4.0
+
+### Minor Changes
+
+- fd20e33: Each game SDK now keeps its agent and the scripts that load it in a `frida` folder, and insight keeps what they share. `shared/Rpcs` is now only `Version` (read from Unity's `Application.version`) and `SetFps`; `frida/Agent` has their handlers, helpers for reading il2cpp data and `serve`; and the new `node/Generate` has the helpers for an SDK's `pnpm generate`. Tiny Tower's own RPCs and agent move to tinytower-sdk. `DeviceLive`, `SessionLive`, `ScriptLive`, `AgentLive` and `AgentWatched` give way to `layerDevice(bundleIdentifier)`, which installs any game, `layerAgent(bundleIdentifier, agent)` and `watchAgent(bundleIdentifier, agent, effect)`, and `layerPlay` provides Google Play with an anonymous Aurora Store account.
+
+### Patch Changes
+
+- aa8a0e7: `waitForInstance` now waits for a static field that holds an array or a string, not only an object, and waits for il2cpp to initialize the class that declares the field before reading it, which would otherwise crash the game. It also returns the field's value.
+
 ## 0.3.0
 
 ### Minor Changes
