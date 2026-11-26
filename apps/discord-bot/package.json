@@ -14,7 +14,7 @@
         "@tinyburg/tinyburg-sdk": "workspace:*",
         "@yielded/auth": "0.1.0-beta.47",
         "@yielded/oauth": "0.1.0-beta.47",
-        "dfx": "1.1.1",
+        "dfx": "1.1.2",
         "effect": "4.1.2",
         "foldkit": "0.170.0",
         "redis": "6.3.1",
